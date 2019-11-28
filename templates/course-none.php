@@ -1,0 +1,1 @@
+<h3>There is no course</h3>
