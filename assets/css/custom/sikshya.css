@@ -382,6 +382,14 @@ Sikshya ACCOUNT AREA STYLING
     padding: 10px;
     border: 1px solid #ddd;
  }
+ .sikshya-account-content-area .sik-avatar img{
+     border-radius:100%;
+     border:1px solid #ddd;
+
+ }
+ .sikshya-account-content-area .sik-avatar{
+     margin-bottom:20px;
+ }
 /* SIKSHYA SINGLE COURSE FILE /
 
  */

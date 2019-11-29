@@ -53,12 +53,19 @@ class Sikshya_Template_Hooks
         $params = array(
             'user_id'=>$current_user_id,
             'user_display_name'=>$user->display_name,
-            'user_bio'=> $bio
+            'user_nick_name'=>$user->user_nicename,
+            'user_bio'=> $bio,
+            'user_first_name'=>get_user_meta($current_user_id, 'first_name', true),
+            'user_last_name'=>get_user_meta($current_user_id, 'last_name', true),
+            'user_email'=>$user->user_email,
+            'user_website'=>$user->user_url,
+            'user_avatar_url'=>get_avatar_url($current_user_id)
+
         );
 
         switch ($sikshya_current_account_page) {
             case "profile":
-                sikshya_load_template('profile.parts.profile');
+                sikshya_load_template('profile.parts.profile', $params);
                 break;
             case "enrolled-courses":
                 sikshya_load_template('profile.parts.enrolled-courses');
