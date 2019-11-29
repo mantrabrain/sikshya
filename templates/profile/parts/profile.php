@@ -1,3 +1,5 @@
+<h2><?php echo __('Profile') ?></h2>
+
 <div class="sik-row">
     <div class="sik-col-md-12">
         <div class="sik-avatar">
@@ -25,11 +27,11 @@
 
 <div class="sik-row">
     <div class="sik-col-md-3">
-        <label><strong><?php echo esc_html('Nick name', 'sikshya') ?></strong></label>
+        <label><strong><?php echo esc_html('Nice name', 'sikshya') ?></strong></label>
     </div>
 
     <div class="sik-col-md-3">
-    <span><?php echo !empty($user_nick_name) ? esc_html($user_nick_name): 'N/A' ?></span>
+    <span><?php echo !empty($user_nicename) ? esc_html($user_nicename): 'N/A' ?></span>
     </div>
 
     <div class="sik-col-md-3">

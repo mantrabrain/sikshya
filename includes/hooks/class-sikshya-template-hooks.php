@@ -6,6 +6,7 @@ class Sikshya_Template_Hooks
     public function __construct()
     {
         add_action('sikshya_before_registration_form', array($this, 'notices'));
+        add_action('sikshya_before_update_profile_form', array($this, 'notices'));
         add_action('sikshya_before_login_form', array($this, 'notices'));
         add_action('sikshya_account_page_sidebar', array($this, 'account_sidebar'));
         add_action('sikshya_account_page_content', array($this, 'account_page_content'));
@@ -49,17 +50,17 @@ class Sikshya_Template_Hooks
 
         $bio = get_user_meta($current_user_id, 'description', true);
 
-    
+
         $params = array(
-            'user_id'=>$current_user_id,
-            'user_display_name'=>$user->display_name,
-            'user_nick_name'=>$user->user_nicename,
-            'user_bio'=> $bio,
-            'user_first_name'=>get_user_meta($current_user_id, 'first_name', true),
-            'user_last_name'=>get_user_meta($current_user_id, 'last_name', true),
-            'user_email'=>$user->user_email,
-            'user_website'=>$user->user_url,
-            'user_avatar_url'=>get_avatar_url($current_user_id)
+            'user_id' => $current_user_id,
+            'user_display_name' => $user->display_name,
+            'user_nicename' => $user->user_nicename,
+            'user_bio' => $bio,
+            'user_first_name' => get_user_meta($current_user_id, 'first_name', true),
+            'user_last_name' => get_user_meta($current_user_id, 'last_name', true),
+            'user_email' => $user->user_email,
+            'user_website' => $user->user_url,
+            'user_avatar_url' => get_avatar_url($current_user_id)
 
         );
 
@@ -68,16 +69,23 @@ class Sikshya_Template_Hooks
                 sikshya_load_template('profile.parts.profile', $params);
                 break;
             case "enrolled-courses":
-                sikshya_load_template('profile.parts.enrolled-courses');
+
+                $course_list = sikshya()->course->get_enrolled_course($current_user_id);
+
+
+                sikshya_load_template('profile.parts.enrolled-courses', array('courses' => array(
+                    
+                    'list' => $course_list
+                )));
                 break;
             case "update-profile":
-                sikshya_load_template('profile.parts.update-profile');
+                sikshya_load_template('profile.parts.update-profile', $params);
                 break;
             case "logout":
                 //sikshya_load_template('profile.parts.dashboard');
                 break;
             default:
-                sikshya_load_template('profile.parts.dashboard',$params);
+                sikshya_load_template('profile.parts.dashboard', $params);
                 break;
 
         }

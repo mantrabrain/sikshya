@@ -136,5 +136,15 @@
 
 
         });
+        $('input[type="checkbox"][name="sikshya_change_password"]').on('change',function(){
+            var password_change_wrap = $(this).closest('.sikshya-change-password');
+            
+            if(this.checked){
+                password_change_wrap.find('input[type="password"].sikshya-password-field').removeAttr('disabled');
+            }else{
+                password_change_wrap.find('input[type="password"].sikshya-password-field').attr('disabled', 'disabled');
+            }
+
+        });
     });
 })(jQuery);

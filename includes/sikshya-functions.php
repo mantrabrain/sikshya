@@ -471,7 +471,7 @@ function sikshya_get_user_items($select = array(), $where = array())
 
     if (empty($select)) {
 
-        $sql = "SELECT * FROM " . SIKSHYA_DB_PREFIX . 'user_items';
+        $select_text = "SELECT * FROM " . SIKSHYA_DB_PREFIX . 'user_items';
     } else {
         $sanitized_select = array_map('sanitize_text_field', wp_unslash($select));
 

@@ -6,6 +6,7 @@ class Sikshya_Frontend_Form_Handler
     {
         add_action('template_redirect', array($this, 'register_user'));
         add_action('template_redirect', array($this, 'login_user'));
+        add_action('template_redirect', array($this, 'update_profile'));
         add_action('template_redirect', array($this, 'complete_lesson'));
         add_action('template_redirect', array($this, 'start_quiz'));
         add_action('template_redirect', array($this, 'next_quiz_question'));
@@ -290,6 +291,90 @@ class Sikshya_Frontend_Form_Handler
         } else {
             sikshya()->errors->add(sikshya()->notice_key, __('Cannt register user right now', 'sikshya'));
             return;
+        }
+
+    }
+
+    public function update_profile()
+    {
+
+        if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_update_profile') {
+            return;
+        }
+        sikshya()->helper->validate_nonce(true);
+
+        $user_id = isset($_POST['current_user_id']) ? absint($_POST['current_user_id']) : 0;
+
+        if ($user_id != get_current_user_id() || $user_id == 0) {
+            return;
+        }
+
+        $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+
+        $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+
+        $nicename = isset($_POST['nicename']) ? sanitize_text_field($_POST['nicename']) : '';
+
+        $website = isset($_POST['website']) ? sanitize_text_field($_POST['website']) : '';
+
+        $sikshya_change_password = isset($_POST['sikshya_change_password']) ? absint($_POST['sikshya_change_password']) : 0;
+
+        $user = new stdClass();
+
+        $user->ID = $user_id;
+
+        $user->user_nicename = $nicename;
+
+        $user->user_url = $website;
+
+        wp_update_user($user);
+
+        update_user_meta($user_id, 'first_name', $first_name);
+
+        update_user_meta($user_id, 'last_name', $last_name);
+
+        if (!boolval($sikshya_change_password)) {
+
+            sikshya()->messages->add(sikshya()->notice_key, __('Profile successflly updated.', 'sikshya'), 'success');
+
+        } else {
+            $old_password = isset($_POST['old_password']) ? $_POST['old_password'] : '';
+
+            $new_password = isset($_POST['new_password']) ? $_POST['new_password'] : '';
+
+            $confirm_password = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
+
+            $current_user = get_user_by('id', $user_id);
+
+            if ($confirm_password != $new_password || empty($confirm_password)) {
+
+                sikshya()->errors->add(sikshya()->notice_key, __('Confirm password doesnt match.', 'sikshya'));
+            }
+
+            if (!wp_check_password($old_password, $current_user->user_pass, $current_user->ID) || empty($new_password)) {
+
+                sikshya()->errors->add(sikshya()->notice_key, __('Invalid old password or password doesnt match.', 'sikshya'));
+
+                return;
+            }
+
+            if (sikshya()->errors->has_errors()) {
+
+                return;
+            }
+
+            $user = new stdClass();
+
+            $user->ID = $user_id;
+
+            $user->user_pass = $new_password;
+
+            wp_update_user($user);
+
+            sikshya()->messages->add(sikshya()->notice_key, __('Profile successflly updated with password.', 'sikshya'), 'success');
+
+
+
         }
 
     }

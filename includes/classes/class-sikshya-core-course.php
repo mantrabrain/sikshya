@@ -211,7 +211,7 @@ class Sikshya_Core_Course
                     $this->insert_user_table($user_id, $course_id, $id);
 
                     sikshya()->role->add_student($user_id);
-                    
+
                     return true;
                 }
 
@@ -251,5 +251,51 @@ class Sikshya_Core_Course
         );
 
         return $wpdb->query($sql);
+    }
+
+    public function get_enrolled_course($current_user_id)
+    {
+
+        $course_list = array();
+
+        if ($current_user_id != get_current_user_id()) {
+            return;
+        }
+
+        $enrolled_course = sikshya_get_user_items(array(), array(
+            'user_id' => $current_user_id,
+            'item_type' => SIKSHYA_COURSES_CUSTOM_POST_TYPE,
+            'status' => 'enrolled',
+            'reference_type' => SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
+            'parent_id' => 0
+        ));
+
+        foreach ($enrolled_course as $item) {
+            $list_item['enrolled_date'] = date('F j, Y', strtotime($item->start_time_gmt));
+            $list_item['course_title'] = get_the_title($item->item_id);
+            $list_item['permalink'] = get_the_permalink($item->item_id);
+
+            $_completed_lessons = sikshya_get_user_items(array(), array(
+                'user_id' => $current_user_id,
+                'item_type' => SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
+                'status' => 'completed',
+                'reference_type' => SIKSHYA_COURSES_CUSTOM_POST_TYPE,
+                'parent_id' => $item->user_item_id
+            ));
+
+            $query = new WP_Query(
+                array(
+                    'meta_key' => 'course_id',                    //(string) - Custom field key.
+                    'meta_value' => $item->item_id,
+                    'post_type' => SIKSHYA_LESSONS_CUSTOM_POST_TYPE
+                )
+
+            );
+            $list_item['total_lessons'] = $query->found_posts;
+            $list_item['completed_lessons'] = count($_completed_lessons);
+            array_push($course_list, $list_item);
+        }
+        return $course_list;
+
     }
 }
