@@ -1,4 +1,4 @@
-<h2><?php echo __('Profile') ?></h2>
+<h2><?php echo __('Profile','sikshya') ?></h2>
 
 <div class="sik-row">
     <div class="sik-col-md-12">

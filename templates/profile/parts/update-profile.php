@@ -1,4 +1,4 @@
-<h2><?php echo __('Edit Profile') ?></h2>
+<h2><?php echo __('Edit Profile','sikshya') ?></h2>
 <form class="sikshya-update-profile" method="post">
     <?php
     do_action('sikshya_before_update_profile_form');

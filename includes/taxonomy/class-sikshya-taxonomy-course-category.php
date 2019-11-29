@@ -17,17 +17,17 @@ if (!class_exists('Sikshya_Taxonomy_Course_Category')) {
         {
             // Add new taxonomy, make it hierarchical (like categories)
             $labels = array(
-                'name' => __('Category', 'yatra'),
-                'singular_name' => __('Category', 'yatra'),
-                'search_items' => __('Search Category', 'yatra'),
-                'all_items' => __('All Category', 'yatra'),
-                'parent_item' => __('Parent Category', 'yatra'),
-                'parent_item_colon' => __('Parent Category:', 'yatra'),
-                'edit_item' => __('Edit Category', 'yatra'),
-                'update_item' => __('Update Category', 'yatra'),
-                'add_new_item' => __('Add New Category', 'yatra'),
-                'new_item_name' => __('New Category Name', 'yatra'),
-                'menu_name' => __('Category', 'yatra'),
+                'name' => __('Category', 'sikshya'),
+                'singular_name' => __('Category', 'sikshya'),
+                'search_items' => __('Search Category', 'sikshya'),
+                'all_items' => __('All Category', 'sikshya'),
+                'parent_item' => __('Parent Category', 'sikshya'),
+                'parent_item_colon' => __('Parent Category:', 'sikshya'),
+                'edit_item' => __('Edit Category', 'sikshya'),
+                'update_item' => __('Update Category', 'sikshya'),
+                'add_new_item' => __('Add New Category', 'sikshya'),
+                'new_item_name' => __('New Category Name', 'sikshya'),
+                'menu_name' => __('Category', 'sikshya'),
             );
             $args = array(
                 'hierarchical' => true,
@@ -48,20 +48,20 @@ if (!class_exists('Sikshya_Taxonomy_Course_Category')) {
         public function form($taxonomy)
         { ?>
             <div class="form-field term-group">
-                <label for="activity_image_id"><?php _e('Image', 'yatra'); ?></label>
+                <label for="activity_image_id"><?php _e('Image', 'sikshya'); ?></label>
                 <input type="hidden" id="activity_image_id" name="activity_image_id" class="custom_media_url"
                        value="">
                 <div id="activity_image_wrapper"></div>
                 <p>
                     <input type="button" class="button button-secondary mb_taxonomy_media_upload_btn"
                            id="mb_taxonomy_media_upload_btn"
-                           name="mb_taxonomy_media_upload_btn" value="<?php _e('Add Image', 'yatra'); ?>"
-                           data-uploader-title="<?php _e('Choose Image', 'yatra'); ?>"
-                           data-uploader-button-text="<?php _e('Choose Image', 'yatra'); ?>"
+                           name="mb_taxonomy_media_upload_btn" value="<?php _e('Add Image', 'sikshya'); ?>"
+                           data-uploader-title="<?php _e('Choose Image', 'sikshya'); ?>"
+                           data-uploader-button-text="<?php _e('Choose Image', 'sikshya'); ?>"
                     />
                     <input type="button" class="button button-secondary mb_taxonomy_remove_media"
                            id="mb_taxonomy_remove_media"
-                           name="mb_taxonomy_remove_media" value="<?php _e('Remove Image', 'yatra'); ?>"/>
+                           name="mb_taxonomy_remove_media" value="<?php _e('Remove Image', 'sikshya'); ?>"/>
                 </p>
             </div>
             <?php

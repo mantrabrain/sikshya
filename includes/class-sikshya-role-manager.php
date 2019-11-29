@@ -50,7 +50,7 @@ class Sikshya_Role_Manager
     {
         add_role(
             'sikshya_student',
-            __('Sikshya Student'),
+            __('Sikshya Student', 'sikshya'),
 
             array(
                 'edit_posts' => true,
@@ -59,7 +59,7 @@ class Sikshya_Role_Manager
 
         add_role(
             'sikshya_instructor',
-            __('Sikshya Instructor'),
+            __('Sikshya Instructor', 'sikshya'),
 
             array(
                 'edit_posts' => true,
