@@ -10,7 +10,7 @@
 
             foreach (sikshya_account_page_nav_items() as $item_key => $item_array) {
 
-                $icon = isset($item_array['icon']) ? '<span class="' . esc_attr($item_array['icon']) . '"></span>' : '';
+                $icon = isset($item_array['icon']) ? '<span class="' . esc_attr($item_array['icon']) . '"></span> ' : '';
 
                 $class = $sikshya_current_account_page == $item_key ? 'active' : '';
 

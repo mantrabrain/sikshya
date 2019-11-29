@@ -353,7 +353,35 @@ span.tw_get_sikshya {
 /*
 Sikshya ACCOUNT AREA STYLING
  */
+ .sikshya-account-sidebar{
+    padding: 15px;
+    border: 1px solid #f9f9f9;
+    padding-left: 0;
+    background: #f9f9f9;
+ }
+ .sikshya-account-sidebar ul li{
 
+    list-style:none;
+    padding:5px;
+    border:1px solid #fff;
+    margin-bottom:2px;
+ }
+
+ .sikshya-account-sidebar ul li.active,
+ .sikshya-account-sidebar ul li:hover
+ {
+    background: #aaa;
+ }
+ .sikshya-account-sidebar ul li.active a,
+ .sikshya-account-sidebar ul li:hover a{
+     color:#fff;
+ }
+ .sikshya-account-content-area{
+    background: #f9f9f9;
+    min-height: 200px;
+    padding: 10px;
+    border: 1px solid #ddd;
+ }
 /* SIKSHYA SINGLE COURSE FILE /
 
  */

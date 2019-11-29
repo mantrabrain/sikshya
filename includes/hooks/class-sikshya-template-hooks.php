@@ -43,6 +43,19 @@ class Sikshya_Template_Hooks
 
         global $sikshya_current_account_page;
 
+        $current_user_id = get_current_user_id();
+
+        $user = get_userdata($current_user_id);
+
+        $bio = get_user_meta($current_user_id, 'description', true);
+
+    
+        $params = array(
+            'user_id'=>$current_user_id,
+            'user_display_name'=>$user->display_name,
+            'user_bio'=> $bio
+        );
+
         switch ($sikshya_current_account_page) {
             case "profile":
                 sikshya_load_template('profile.parts.profile');
@@ -57,7 +70,7 @@ class Sikshya_Template_Hooks
                 //sikshya_load_template('profile.parts.dashboard');
                 break;
             default:
-                sikshya_load_template('profile.parts.dashboard');
+                sikshya_load_template('profile.parts.dashboard',$params);
                 break;
 
         }
