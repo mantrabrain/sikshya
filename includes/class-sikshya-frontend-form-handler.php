@@ -6,6 +6,7 @@ class Sikshya_Frontend_Form_Handler
     {
         add_action('template_redirect', array($this, 'register_user'));
         add_action('template_redirect', array($this, 'login_user'));
+        add_action('template_redirect', array($this, 'logout'));
         add_action('template_redirect', array($this, 'update_profile'));
         add_action('template_redirect', array($this, 'complete_lesson'));
         add_action('template_redirect', array($this, 'start_quiz'));
@@ -14,6 +15,15 @@ class Sikshya_Frontend_Form_Handler
         add_action('template_redirect', array($this, 'complete_quiz_question'));
         add_action('template_redirect', array($this, 'enroll_in_course'));
 
+    }
+
+    public function logout()
+    {
+        $query_var = get_query_var('sikshya_account_page');
+
+        if ($query_var == 'logout') {
+            wp_redirect(wp_logout_url());
+        }
     }
 
     public function enroll_in_course()
@@ -372,7 +382,6 @@ class Sikshya_Frontend_Form_Handler
             wp_update_user($user);
 
             sikshya()->messages->add(sikshya()->notice_key, __('Profile successflly updated with password.', 'sikshya'), 'success');
-
 
 
         }

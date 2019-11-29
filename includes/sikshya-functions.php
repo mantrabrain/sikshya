@@ -19,22 +19,22 @@ function sikshya_account_page_nav_items()
         'profile' => array(
             'title' => __('Profile', 'sikshya'),
             //'cap' => ''
-            'icon' => 'fa fa-home'
+            'icon' => 'fa fa-user-o'
         ),
         'enrolled-courses' => array(
             'title' => __('Enrolled Courses', 'sikshya'),
             //'cap' => ''
-            'icon' => 'fa fa-home'
+            'icon' => 'fa fa-book'
         ),
         'update-profile' => array(
             'title' => __('Update Profile', 'sikshya'),
             //'cap' => ''
-            'icon' => 'fa fa-home'
+            'icon' => 'fa fa-pencil'
         ),
         'logout' => array(
-            'title' => __('Enrolled Courses', 'sikshya'),
+            'title' => __('Logout', 'sikshya'),
             //'cap' => ''
-            'icon' => 'fa fa-home'
+            'icon' => 'fa fa-sign-out'
         )
 
     );
@@ -87,7 +87,6 @@ function sikshya_get_meta_data($id, $title, $default = '', $format = '%s', $br =
 }
 
 
-
 /**
  * return option value in format
  *
@@ -108,7 +107,6 @@ function sikshya_get_formatted_option($option, $format = '%s', $default = '')
 
     return sprintf($format, $value);
 }
-
 
 
 function sikshya_render_editor($content, $name, $id)
