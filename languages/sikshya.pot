@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Sikshya package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Sikshya 0.0.2\n"
+"Project-Id-Version: Sikshya 0.0.3\n"
 "Report-Msgid-Bugs-To: mantrabrain@gmail.com\n"
-"POT-Creation-Date: 2019-11-29 12:24:38+00:00\n"
+"POT-Creation-Date: 2019-12-01 11:29:27+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,6 +12,49 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
 "X-Generator: grunt-wp-i18n 1.0.3\n"
+
+#: includes/about/class-sikshya-about.php:38
+msgid "Sikshya About"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:39
+msgid "About"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:73
+#: includes/about/class-sikshya-about.php:85
+msgid "Sikshya LMS"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:88
+msgid "About Sikshya LMS"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:144
+msgid "Mantra Brain Community"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:145
+msgid ""
+"Join our facebook community group so that you can post question and help "
+"each other."
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:146
+msgid "Join our facebook community group"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:151
+msgid "Post question"
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:152
+msgid "You can post question about mantrabrain product from here."
+msgstr ""
+
+#: includes/about/class-sikshya-about.php:153
+msgid "Submit your query"
+msgstr ""
 
 #: includes/admin/class-sikshya-admin-assets.php:44
 msgid "This function will be available in Sikshya PRO."

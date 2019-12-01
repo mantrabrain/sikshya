@@ -70,7 +70,7 @@ if (!class_exists('Sikshya_About')) :
 
                     <div class="sik-product-title">
                         <h2><span class="sik-icon dashicons-before dashicons-welcome-learn-more"></span>
-                            <span><?php echo __('Sikshya LMS') ?></span>
+                            <span><?php echo __('Sikshya LMS', 'sikshya') ?></span>
                             <span class="sik-version"><?php echo esc_html(SIKSHYA_VERSION); ?></span>
                         </h2>
                     </div>
@@ -82,10 +82,10 @@ if (!class_exists('Sikshya_About')) :
                         <div id="post-body" class="columns-2">
                             <div id="post-body-content">
                                 <!-- All WordPress Notices below header -->
-                                <h1 class="screen-reader-text"><?php echo __('Sikshya LMS') ?></h1>
+                                <h1 class="screen-reader-text"><?php echo __('Sikshya LMS', 'sikshya') ?></h1>
 
                                 <div class="postbox">
-                                    <h2 class="hndle"><span><?php echo('About Sikshya LMS') ?></span></h2>
+                                    <h2 class="hndle"><span><?php echo __('About Sikshya LMS', 'sikshya') ?></span></h2>
                                     <div class="sik-about-content-item">
 
                                         <p><?php
@@ -142,7 +142,7 @@ if (!class_exists('Sikshya_About')) :
                 array(
                     'icon' => 'dashicons dashicons-facebook-alt',
                     'title' => __('Mantra Brain Community', 'sikshya'),
-                    'description' => __('Join our facebook community group so that you can post question, say hello and help each other.', 'sikshya'),
+                    'description' => __('Join our facebook community group so that you can post question and help each other.', 'sikshya'),
                     'link_title' => __('Join our facebook community group', 'sikshya'),
                     'link' => 'https://www.facebook.com/groups/mantrabraincommunity'
                 ),
