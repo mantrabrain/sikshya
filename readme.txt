@@ -3,7 +3,7 @@ Contributors: Mantrabrain
 Tags: lms, elearning, wpcourse, quizzes, questions
 Requires at least: 4.7
 Tested up to: 5.3
-Stable tag: 0.0.3
+Stable tag: 0.0.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -38,6 +38,10 @@ Feature [request](https://mantrabrain.com/request-new-feature/)
 * Plugin support/bug report: [Click here](https://mantrabrain.com/support-forum/)
 
 == Changelog ==
+
+= 0.0.4 | 2019/12/01 =
+* Added - About Page added
+* Fixed - Minor bug fixes
 
 = 0.0.3 | 2019/11/29 =
 * Added - Profile section
