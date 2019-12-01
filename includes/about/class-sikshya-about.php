@@ -86,11 +86,21 @@ if (!class_exists('Sikshya_About')) :
 
                                 <div class="postbox">
                                     <h2 class="hndle"><span><?php echo('About Sikshya LMS') ?></span></h2>
-                                    <div class="sik-about-product-description">
+                                    <div class="sik-about-content-item">
 
                                         <p><?php
                                             echo($this->get_description()) ?></p>
 
+
+                                    </div>
+                                </div>
+
+                                <div class="postbox">
+                                    <h2 class="hndle"><span><?php echo('Available Shortcodes') ?></span></h2>
+                                    <div class="sik-about-content-item">
+                                        <code>[sikshya_registration]</code><br/><br/>
+                                        <code>[sikshya_account]</code><br/><br/>
+                                        <code>[sikshya_login]</code><br/><br/>
 
                                     </div>
                                 </div>
