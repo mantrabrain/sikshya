@@ -1,0 +1,61 @@
+/*====================================
+  About Page Style
+====================================*/
+.sikshya_page_sikshya-about #wpcontent {
+    padding: 0;
+}
+
+.sik-about-header {
+    background-color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .1);
+}
+
+.sik-container {
+    max-width: 930px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.sik-flex {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-align-content: center;
+    -ms-flex-line-pack: center;
+    align-content: center
+}
+
+.sik-about-header h2 {
+    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sik-version {
+    background-color: #6b6b6b;
+    border-radius: 4px;
+    font-size: 0.7em;
+    font-weight: 400;
+    margin-left: 10px;
+    padding: 2px 7px;
+    color: #fff;
+}
+
+.sik-about-product-description {
+    padding: 8px 12px;
+}

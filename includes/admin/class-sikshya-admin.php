@@ -14,6 +14,7 @@ class Sikshya_Admin
     {
         include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-assets.php';
         include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-menu.php';
+        include_once SIKSHYA_PATH . '/includes/about/class-sikshya-about.php';
     }
 
     public function hooks()
