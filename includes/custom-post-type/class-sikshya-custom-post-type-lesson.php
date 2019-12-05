@@ -42,7 +42,6 @@ if (!class_exists('Sikshya_Custom_Post_Type_Lesson')) {
                 'menu_position' => null,
                 'supports' => array(
                     'title',
-                    'comments',
                     'thumbnail',
                     'excerpt',
                     'editor',

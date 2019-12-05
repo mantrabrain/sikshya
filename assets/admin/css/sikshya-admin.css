@@ -99,7 +99,9 @@
     width: 100%;
     border-radius: 0;
     outline: none;
-    border: 1px solid #007cba
+    border: 1px solid #007cba;
+    min-height: auto;
+    line-height: 1;
 }
 
 .sik-admin-editor .sikshya-quiz-question-item:nth-child(2n+1) {

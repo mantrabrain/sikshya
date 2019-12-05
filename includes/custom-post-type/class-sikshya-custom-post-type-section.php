@@ -24,8 +24,6 @@ if (!class_exists('Sikshya_Custom_Post_Type_Section')) {
                 'menu_position' => null,
                 'supports' => array(
                     'title',
-                    'thumbnail',
-                    'excerpt',
                     'editor',
                 ),
                 'show_in_rest' => true,

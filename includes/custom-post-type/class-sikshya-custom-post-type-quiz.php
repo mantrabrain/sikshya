@@ -41,7 +41,6 @@ if (!class_exists('Sikshya_Custom_Post_Type_Quiz')) {
                 'menu_position' => null,
                 'supports' => array(
                     'title',
-                    'thumbnail',
                     'editor',
                 ),
                 'show_in_rest' => true,
