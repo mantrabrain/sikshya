@@ -94,6 +94,14 @@
     flex: 1;
 }
 
+.sik-admin-editor .question-header h2 input, #poststuff .sik-admin-editor .question-header h2.header-title input {
+
+    width: 100%;
+    border-radius: 0;
+    outline: none;
+    border: 1px solid #007cba
+}
+
 .sik-admin-editor .sikshya-quiz-question-item:nth-child(2n+1) {
     background: rgba(0, 102, 155, 0.1);
 }

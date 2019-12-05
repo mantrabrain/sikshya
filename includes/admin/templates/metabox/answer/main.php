@@ -11,7 +11,7 @@
                            for="quiz_question<?php echo $name; ?>_type"><?php _e('Type of answer', 'sikshya'); ?>
                         :</label>
                     <div class="ms-value">
-                        <select id="quiz_question<?php echo $name; ?>_type" name="<?php echo $name; ?>[type]"
+                        <select id="quiz_question<?php echo $typename; ?>_type" name="<?php echo $typename; ?>[type]"
                                 class="js-sikshya_quiz-question-type">
                             <?php foreach (sikshya_question_answer_type() as $typeValue => $typeTitle) { ?>
                                 <option value="<?php echo esc_attr($typeValue); ?>"<?php if ($type == $typeValue) { ?> selected="selected"<?php } ?>><?php echo esc_html($typeTitle); ?></option>
