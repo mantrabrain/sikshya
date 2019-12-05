@@ -29,6 +29,9 @@ class Sikshya_Admin_Assets
 
         wp_enqueue_style('sweetalert2-style', SIKSHYA_ASSETS_URL . '/vendor/sweetalert2/css/sweetalert2.css', array(), SIKSHYA_VERSION);
 
+        wp_enqueue_script('sikshya-admin-script', SIKSHYA_ASSETS_URL . '/admin/js/sikshya-admin.js', array(), SIKSHYA_VERSION);
+
+
         wp_register_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-common', SIKSHYA_ADMIN_ASSETS_URL . '/js/common.js', array('jquery', 'jquery-ui-tabs', 'media-upload', 'thickbox'), SIKSHYA_VERSION);
 
 
@@ -58,7 +61,8 @@ class Sikshya_Admin_Assets
             );
         wp_localize_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-common', 'sikshya', $data);
         wp_enqueue_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-common');
-        wp_enqueue_style(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-common-style', SIKSHYA_ADMIN_ASSETS_URL . '/css/sikshya-admin.css', false, SIKSHYA_VERSION);
+        wp_enqueue_style('sikshya-common-style', SIKSHYA_ADMIN_ASSETS_URL . '/css/common.css', false, SIKSHYA_VERSION);
+        wp_enqueue_style('sikshya-admin-style', SIKSHYA_ADMIN_ASSETS_URL . '/css/sikshya-admin.css', false, SIKSHYA_VERSION);
 
         /*wp_register_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-sikshya', SIKSHYA_ADMIN_ASSETS_URL . '/js/custom/sikshya.js', array('jquery'), SIKSHYA_VERSION);
         wp_enqueue_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-sikshya');*/

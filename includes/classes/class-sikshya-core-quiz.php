@@ -275,5 +275,25 @@ GROUP BY p.post_type having p.post_type in (%s)",
         return false;
     }
 
+    public function load($quiz_id)
+    {
+
+
+        $questions = sikshya()->question->get_all_by_quiz($quiz_id);
+        //sikshya_load_admin_template('metabox.question.template', $params);
+        $params = array(
+            'quiz_id' => $quiz_id,
+            'question_id' => 0,
+            'questions' => $questions
+        );
+
+        sikshya_load_admin_template('metabox.question.template', array(), true);
+
+        sikshya_load_admin_template('metabox.answer.template', array(), true);
+
+        sikshya_load_admin_template('metabox.question.main', $params);
+
+    }
+
 
 }

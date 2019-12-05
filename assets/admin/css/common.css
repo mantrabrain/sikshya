@@ -1,0 +1,661 @@
+.ms-head a {
+    float: right;
+    text-decoration: none;
+}
+
+.ms-head a .ui-icon {
+    background-image: url(../images/ui-icons_555d66_256x240.png);
+}
+
+.ms-head .ui-icon {
+    display: inline-block !important;
+}
+
+.ms-icon {
+    background-image: url(../images/admin-icons.png);
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: top;
+    background-position: 0 100px;
+}
+
+.ms-icon.ms-icon-question {
+    background-position: -164px -8px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.ms-icon.ms-icon-quiz {
+    background-position: -132px -8px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.ms-icon.ms-icon-search {
+    background-position: -104px -8px;
+}
+
+.ms-icon.ms-icon-faq {
+    background-position: -72px -8px;
+    margin: -4px 4px 0px 4px;
+}
+
+.ms-icon.ms-icon-lesson {
+    background-position: -40px -7px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.ms-icon.ms-icon-section {
+    background-position: -8px -7px;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.disabled .ms-icon {
+    opacity: 0.5;
+}
+
+.ms-label {
+    margin: 5px 0;
+    padding: 4px 0;
+    line-height: normal;
+}
+
+.ms-value {
+    display: block;
+}
+
+.ms-value span.ms-text {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.ms-value span.ms-text.ms-text-light {
+    color: #a7a7a7;
+}
+
+.ms-value input, .ms-value select, .ms-value .button, .ms-value button {
+    vertical-align: middle;
+    margin: 5px 5px 5px 0;
+}
+
+.ms-value select.ms-small,
+.ms-value input.ms-small {
+    width: 70px;
+}
+
+.ms-value select.ms-medium,
+.ms-value input.ms-medium {
+    width: 120px;
+}
+
+.ms-value select.ms-big,
+.ms-value input.ms-big {
+    width: 200px;
+}
+
+.ms-value-list {
+    margin: 10px 0 10px 0;
+}
+
+.ms-field {
+    margin: 0 0 8px 0;
+}
+
+.ms-field:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.ms-field.ms-field-small .ms-label {
+    float: left;
+    width: 100px;
+}
+
+.ms-field.ms-field-small .ms-value {
+    margin-left: 100px;
+}
+
+.ms-field.ms-field-medium .ms-label {
+    float: left;
+    width: 140px;
+}
+
+.ms-field.ms-field-medium .ms-value {
+    margin-left: 140px;
+}
+
+.ms-field.ms-field-large .ms-label {
+    float: left;
+    width: 215px;
+}
+
+.ms-field.ms-field-large .ms-value {
+    margin-left: 215px;
+}
+
+.ms-field.ms-field-wid .ms-label {
+    width: 100%;
+}
+
+.ms-field.ms-field-tiny .ms-label {
+}
+
+.ms-field.ms-field-tiny span.ms-label {
+    margin: 0 5px;
+}
+
+.ms-group {
+    margin: 0;
+}
+
+.ms-group:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.ms-group .ms-group-item {
+    width: 50%;
+    float: left;
+}
+
+.ms-editor {
+    margin: 17px 0 0 0;
+}
+
+.ms-required {
+    color: #e96c6c;
+}
+
+.ms-required:before {
+    content: '*';
+}
+
+.ms-desc {
+    color: #b1b5ba;
+    font-size: .9em;
+}
+
+.ms-desc-medium {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.1em;
+    text-align: center;
+    margin: 0 8px;
+    width: 200px;
+}
+
+.ms-desc-wide {
+    display: block;
+}
+
+.ms-lessons-list {
+    margin: 8px 0 0 0;
+}
+
+.sikshya-actions {
+    margin: 20px 0 0 0;
+}
+
+.sikshya-actions .dashicons {
+    line-height: 1.4em;
+}
+.sikshya-count{
+    font-size: 12px;
+    color: #757474;
+}
+.ms-button-search {
+    display: inline-block;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ms-nowrap {
+    white-space: nowrap;
+}
+
+.ui-accordion .ui-accordion-header {
+    padding: .5em .5em .5em .5em;
+    margin-top: 10px;
+}
+
+.ui-accordion .ui-accordion-content {
+    padding: 1.4em .7em 1.4em .7em;
+}
+
+.ms-metabox-course-ds24 .wp-tab-panel {
+    padding-top: .9em;
+    padding-bottom: .9em;
+}
+
+.ms-metabox-course-ds24 .wp-tab-panel.ms-tab-large {
+    max-height: none;
+    overflow: visible;
+}
+
+.ms-tab .spinner {
+    display: none;
+}
+
+.ms-tab.loading-content .spinner {
+    margin: 40px auto;
+    display: block;
+}
+
+@media screen and (max-width: 782px) {
+    .ms-label {
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+}
+
+@media only screen and (max-width: 700px), only screen and (min-width: 851px) and (max-width: 1000px) {
+    .ms-metabox-course-ds24 .ms-field.ms-field-small .ms-label,
+    .ms-metabox-course-ds24 .ms-field.ms-field-medium .ms-label,
+    .ms-metabox-course-ds24 .ms-field.ms-field-large .ms-label {
+        float: none;
+    }
+
+    .ms-metabox-course-ds24 .ms-field.ms-field-small .ms-value,
+    .ms-metabox-course-ds24 .ms-field.ms-field-medium .ms-value,
+    .ms-metabox-course-ds24 .ms-field.ms-field-large .ms-value {
+        margin-left: 0;
+    }
+}
+
+@media only screen and (max-width: 1130px) {
+    span.ms-desc-medium {
+        display: block;
+        text-align: left;
+        margin: 0;
+        width: auto;
+    }
+}
+
+@media only screen and (min-width: 851px) and (max-width: 1060px), only screen and (max-width: 650px) {
+    .ms-metabox-course-info .ms-group .ms-group-item {
+        width: auto;
+        float: none;
+    }
+
+    .ms-metabox-course-info .ms-field.ms-field-small .ms-label,
+    .ms-metabox-course-info .ms-field.ms-field-medium .ms-label {
+        width: 140px;
+    }
+
+    .ms-metabox-course-info .ms-field.ms-field-small .ms-value,
+    .ms-metabox-course-info .ms-field.ms-field-medium .ms-value {
+        margin-left: 140px;
+    }
+}
+
+/* settings page */
+
+.ms-theme-selector {
+    margin: -15px 0 0 -15px;
+}
+
+.ms-theme-selector:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.ms-theme-selector .ms-theme {
+    float: left;
+    cursor: pointer;
+}
+
+.ms-theme-selector .ms-theme input[type="radio"] {
+    display: none;
+}
+
+.ms-theme-selector .ms-theme input[type="radio"]:checked + .ms-theme-screenshot {
+    background: #0073AA;
+}
+
+.ms-theme-selector .ms-theme .ms-theme-screenshot {
+    padding: 15px;
+    width: 120px;
+    height: 120px;
+    display: block;
+    position: relative;
+}
+
+.ms-theme-selector .ms-theme .ms-theme-screenshot img, .ms-theme-selector .ms-theme .ms-theme-screenshot .img {
+    background: #ccc;
+    width: 120px;
+    height: 120px;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 1;
+}
+
+.ms-theme-selector .ms-theme .ms-theme-screenshot span {
+    width: 120px;
+    height: 120px;
+    position: absolute;
+    top: 65px;
+    left: 15px;
+    text-align: center;
+    z-index: 2;
+}
+
+.ms-social-field .card {
+    margin-top: 0px;
+    margin-bottom: 20px;
+}
+
+.ms-social-field .ms-text {
+    width: 100%;
+}
+
+.ms-social-field .ms-image {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.ms-social-field .form-table th {
+    width: 60px;
+}
+
+.ms-social-field .form-table td {
+    text-align: right;
+}
+
+.ms-social-field .row-actions {
+    position: static;
+}
+
+.sikshya-colorpicker-input {
+    height: 28px;
+    cursor: pointer;
+    box-shadow: 0 0px 1px #939393;
+}
+
+.sikshya-dt-field {
+    vertical-align: top;
+    margin: 0;
+}
+
+.wp-tab-active a {
+    background: #fff;
+}
+
+.hidden-th > th {
+    display: none;
+}
+
+.tooltip-img {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.sikshya-smtp-yellow-box {
+    margin: 10px 0px;
+    padding: 10px;
+    background-color: #FFFFE0;
+    border-color: #E6DB55;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+/* TABS FOR DASHBOARD OPTIONS */
+#sikshya-tabs.ui-widget-content {
+    border: none;
+    background: none;
+    color: #444;
+}
+
+#sikshya-tabs.ui-widget.ui-widget-content {
+    border: none;
+}
+
+#sikshya-tabs .ui-widget-header {
+    background: none;
+    border: none;
+    border-bottom: 1px solid #dddddd;
+}
+
+#sikshya-tabs.ui-tabs .ui-tabs-nav {
+    padding: 0;
+}
+
+#sikshya-tabs.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    padding-bottom: 0;
+}
+
+#sikshya-tabs.ui-tabs .ui-tabs-nav li {
+    margin-right: 0;
+}
+
+#sikshya-tabs .ui-state-default,
+#sikshya-tabs.ui-widget-content .ui-state-default,
+#sikshya-tabs .ui-widget-header .ui-state-default,
+#sikshya-tabs .ui-button,
+html #sikshya-tabs .ui-button.ui-state-disabled:hover,
+html #sikshya-tabs .ui-button.ui-state-disabled:active {
+    border: none;
+    background: none;
+}
+
+#sikshya-tabs .ui-state-hover,
+#sikshya-tabs.ui-widget-content .ui-state-hover,
+#sikshya-tabs .ui-widget-header .ui-state-hover,
+#sikshya-tabs .ui-state-focus,
+#sikshya-tabs.ui-widget-content .ui-state-focus,
+#sikshya-tabs .ui-widget-header .ui-state-focus,
+#sikshya-tabs .ui-button:hover,
+#sikshya-tabs .ui-button:focus {
+    border: none;
+    background: none;
+}
+
+#sikshya-tabs .ui-widget-header li,
+#sikshya-tabs .ui-widget-header li:hover,
+#sikshya-tabs .ui-widget-header a:hover,
+#sikshya-tabs .ui-widget-header a:focus,
+#sikshya-tabs .ui-widget-header a {
+    text-decoration: none;
+    outline: none;
+    box-shadow: none;
+}
+
+#sikshya-tabs .ui-widget-header .ui-state-active a {
+    background: white;
+}
+
+/* END TABS FOR DASHBOARD OPTIONS */
+
+/* CSS EDITOR */
+#custom_css_block {
+    width: 100%;
+    height: 400px;
+    border: 1px solid #BABABA;
+}
+
+/* END CSS EDITOR */
+
+/* THEME & STYLES SELECT */
+#sikshya-tabs .form-table .card {
+    width: 96%;
+    max-width: 100%;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color {
+    border: 1px solid #ccc;
+    display: table;
+    width: 100%;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-content {
+    display: none;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color.sikshya-opened-style-helps .sikshya-custom-theme-color-content {
+    display: table-caption;
+    caption-side: bottom;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-content p {
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-content img {
+    width: 100%;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header {
+    display: table-row;
+    margin: 0;
+    padding: 0;
+    border: none;
+    color: white;
+    cursor: pointer;
+    height: 28px;
+    border-bottom: 1px solid #ccc;
+    background: #e5e5e5;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header .sikshya-colorpicker-input {
+    box-shadow: none;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-content div,
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header .js-sikshya-colorpicker,
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header [data-icon] {
+    display: table-cell;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header [data-icon] {
+    width: 3%;
+    text-align: center;
+    color: black;
+    font-size: 28px;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header [data-icon] {
+    font: 400 20px/1 dashicons;
+    padding: 4px;
+    padding-top: 6px;
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header [data-icon]:before {
+    content: '\f140';
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color.sikshya-opened-style-helps .sikshya-custom-theme-color-header [data-icon]:before {
+    content: '\f142';
+}
+
+#sikshya-tabs .form-table .card .sikshya-custom-theme-color .sikshya-custom-theme-color-header .js-sikshya-colorpicker {
+    width: 96%;
+}
+
+/* END THEME & STYLES SELECT */
+
+/* TABS ON MOBILE DEVICES */
+#sikshya-tabs select.twn-mobile-tabs {
+    display: none;
+}
+
+@media screen and (max-width: 1425px) {
+    #sikshya-tabs ul[role="tablist"] {
+
+    }
+
+    #sikshya-tabs select.twn-mobile-tabs {
+        display: block;
+        width: 100%;
+        font-size: 26px;
+        padding: 10px;
+        height: auto;
+    }
+}
+
+/* END TABS ON MOBILE DEVICES */
+
+/* STYLES FOR FULLLINK WIDGET */
+#sikshya-tabs .twn-tab-content-fulllink {
+    display: table;
+}
+
+#sikshya-tabs .twn-tab-content-fulllink-row {
+    display: table-row;
+}
+
+#sikshya-tabs .twn-tab-content-fulllink-cell {
+    display: table-cell;
+}
+
+#sikshya-tabs .twn-tab-content-fulllink-cell.twn-tab-content-fulllink-value {
+    cursor: pointer;
+}
+
+/* END STYLES FOR FULLLINK WIDGET */
+
+/* PRE Style for Label */
+#sikshya-tabs .form-table label pre {
+    display: inline;
+    font-weight: 100;
+}
+
+/* END PRE Style for Label */
+
+/* TEST MESSAGE FOR SMTP */
+#sikshya-tabs .form-table .sikshya-smtp-test-fail {
+    color: red;
+}
+
+#sikshya-tabs .form-table .sikshya-smtp-test-success {
+    color: green;
+}
+
+/* END TEST MESSAGE FOR SMTP */
+
+/* DASHBOARD COLUMNS ORDER */
+table.wp-list-table.fixed tbody td.column-courses-order,
+table.wp-list-table.fixed tfoot th.column-courses-order,
+table.wp-list-table.fixed thead #courses-order {
+    width: 5%;
+}
+
+table.wp-list-table.fixed tbody td.column-courses-price,
+table.wp-list-table.fixed tfoot th.column-courses-price,
+table.wp-list-table.fixed thead #courses-price {
+    width: 10%;
+}
+
+/* END DASHBOARD COLUMN */
+
+.sikshya-metabox-sections-lessons .ui-accordion-header {
+    margin: 5px;
+    border: 1px solid #a3b1ec;
+    background: #f0f2f7;
+    cursor: pointer;
+}
+
+.sikshya-metabox-sections-lessons .ui-accordion-content {
+    border: 1px solid #ddd;
+    margin: 5px;
+    margin-top: -5px;
+}

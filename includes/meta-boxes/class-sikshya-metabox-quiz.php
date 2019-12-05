@@ -16,15 +16,26 @@ if (!class_exists('Sikshya_Metabox_Quiz')) {
         public function metabox()
         {
 
-            add_meta_box(SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_options', __('Quiz Options', 'sikshya'), array($this, 'quiz_options'), SIKSHYA_QUIZZES_CUSTOM_POST_TYPE, 'normal', 'high');
+            add_action('edit_form_after_editor', array($this, 'question_question_template'));
+
 
         }
 
-        public function quiz_options()
+        public function question_question_template()
         {
             global $post;
 
+            if (SIKSHYA_QUIZZES_CUSTOM_POST_TYPE !== get_post_type()) {
+                return;
+            }
+
+
+
             wp_nonce_field(SIKSHYA_FILE, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_nonce');
+
+            sikshya()->quiz->load($post->ID);
+
+
 
 
         }

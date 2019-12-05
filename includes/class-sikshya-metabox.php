@@ -32,6 +32,10 @@ class Sikshya_Metabox
 
     public $lesson;
 
+    public $quiz;
+
+    public $question;
+
     /**
      * Main Sikshya Instance.
      *
@@ -69,7 +73,9 @@ class Sikshya_Metabox
 
         $this->course = new Sikshya_Metabox_Course();
         $this->section = new Sikshya_Metabox_Section();
-        $this->section = new Sikshya_Metabox_Lesson();
+        $this->lesson = new Sikshya_Metabox_Lesson();
+        $this->quiz = new Sikshya_Metabox_Quiz();
+        $this->question = new Sikshya_Metabox_Question();
 
     }
 
