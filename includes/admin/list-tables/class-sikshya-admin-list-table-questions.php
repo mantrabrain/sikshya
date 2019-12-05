@@ -164,7 +164,17 @@ class Sikshya_Admin_List_Table_Questions extends Sikshya_Admin_List_Table
     {
         $question_id = $this->object->ID;
 
-        echo ucwords(get_post_meta($question_id, 'type', true));
+        $type = (get_post_meta($question_id, 'type', true));
+
+        $answer_types = sikshya_question_answer_type();
+
+        if (isset($answer_types[$type])) {
+
+            echo esc_html($answer_types[$type]);
+
+        } else {
+            echo __('Not defined yet', 'sikshya');
+        }
 
     }
 }
