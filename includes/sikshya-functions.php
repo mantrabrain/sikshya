@@ -836,3 +836,15 @@ if (!function_exists('sikshya_get_login_page')) {
 
     }
 }
+if (!function_exists('sikshya_question_answer_type')) {
+
+    function sikshya_question_answer_type()
+    {
+        return array(
+            'single' => __('One answer', 'sikshya'),
+            'single_image' => __('One answer with image', 'sikshya'),
+            'multi' => __('Multiple answers', 'sikshya'),
+            'multi_image' => __('Multiple answers with image', 'sikshya'),
+        );
+    }
+}

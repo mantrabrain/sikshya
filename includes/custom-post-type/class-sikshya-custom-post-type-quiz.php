@@ -41,12 +41,7 @@ if (!class_exists('Sikshya_Custom_Post_Type_Quiz')) {
                 'menu_position' => null,
                 'supports' => array(
                     'title',
-                    'comments',
-                    'thumbnail',
-                    'excerpt',
-                    'custom-fields',
                     'editor',
-                    'page-attributes'
                 ),
                 'show_in_rest' => true,
             );

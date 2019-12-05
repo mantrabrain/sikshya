@@ -9,22 +9,52 @@ if (!class_exists('Sikshya_Metabox_Quiz')) {
         {
 
             add_action('add_meta_boxes', array($this, 'metabox'), 10);
+            add_action('save_post', array($this, 'save'));
 
 
+        }
+
+        public function save($post_id)
+        {
+
+            if (SIKSHYA_QUIZZES_CUSTOM_POST_TYPE !== get_post_type()) {
+                return;
+            }
+
+            remove_action('save_post', array($this, 'save'));
+
+            $nonce = isset($_POST[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_question_nonce']) ? $_POST[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_question_nonce'] : '';
+            if (!wp_verify_nonce($nonce, SIKSHYA_FILE)) {
+                return;
+            }
+
+            $quiz_questions = isset($_POST['quiz_questions']) ? @$_POST['quiz_questions'] : array();
+
+            $quiz_question_answer = isset($_POST['quiz_question_answer']) ? @$_POST['quiz_question_answer'] : array();
+
+            sikshya()->quiz->update_quiz_question($quiz_questions, $quiz_question_answer, $post_id);
         }
 
         public function metabox()
         {
 
-            add_meta_box(SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_options', __('Quiz Options', 'sikshya'), array($this, 'quiz_options'), SIKSHYA_QUIZZES_CUSTOM_POST_TYPE, 'normal', 'high');
+            add_action('edit_form_after_editor', array($this, 'question_question_template'));
+
 
         }
 
-        public function quiz_options()
+        public function question_question_template()
         {
             global $post;
 
-            wp_nonce_field(SIKSHYA_FILE, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_nonce');
+            if (SIKSHYA_QUIZZES_CUSTOM_POST_TYPE !== get_post_type()) {
+                return;
+            }
+
+
+            wp_nonce_field(SIKSHYA_FILE, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_question_nonce');
+
+            sikshya()->quiz->load($post->ID);
 
 
         }

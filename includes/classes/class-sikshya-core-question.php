@@ -113,7 +113,7 @@ class Sikshya_Core_Question
             'numberposts' => -1,
             'no_found_rows' => true,
             'orderby' => 'menu_order',
-            'order' => 'asc',
+            'order' => 'desc',
             'post_type' => SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE,
             'meta_query' => array(
                 array(
@@ -361,4 +361,134 @@ class Sikshya_Core_Question
     }
 
 
+    public function get_question_metas($question_id = 0)
+    {
+        $metas['type'] = get_post_meta($question_id, 'type', true);
+        $metas['section_id'] = get_post_meta($question_id, 'section_id', true);
+        $metas['lesson_id'] = get_post_meta($question_id, 'lesson_id', true);
+        $metas['quiz_id'] = get_post_meta($question_id, 'quiz_id', true);
+        $metas['answers'] = get_post_meta($question_id, 'answers', true);
+        $metas['correct_answers'] = get_post_meta($question_id, 'correct_answers', true);
+        $metas['question_id'] = $question_id;
+        return $metas;
+    }
+
+    public function get_answer_args($args = array())
+    {
+        $array = array(
+            'id' => '{%question_id%}_{%answer_id%}',
+            'name' => 'quiz_question_answer[{%question_id%}][answers][{%answer_id%}]',
+            'answer_value' => '{%answer_value%}',
+            'answer_image' => '{%answer_image%}',
+            'answer_id' => '{%answer_id%}',
+            'correct_answer_name' => 'quiz_question_answer[{%question_id%}][answers_correct][]',
+            'correct_answers' => array(),
+            'question_type' => 'text'
+        );
+        foreach ($args as $array_key => $array_value) {
+
+            foreach ($array as $key => $val) {
+
+                $array[$key] = str_replace("{%" . $array_key . "%}", $array_value, $val);
+            }
+
+        }
+        return $array;
+    }
+
+    public function load($question_id = 0, $load_template = true)
+    {
+        $metas = absint($question_id) > 0 ? sikshya()->question->get_question_metas($question_id) : array();
+
+        if (!isset($metas['quiz_id'])) {
+
+            $name = "quiz_question_answer[{%question_id%}][answers][{%answer_id%}]";
+            $typename = "quiz_question_answer[{%question_id%}]";
+        } else {
+            $name = "quiz_question_answer[" . $metas['question_id'] . "][answers][{%answer_id%}]";
+            $typename = "quiz_question_answer[" . $metas['question_id'] . "]";
+
+        }
+
+
+        $params = array(
+            'question_id' => $question_id,
+            'type' => isset($metas['type']) ? $metas['type'] : 'single',
+            'metas' => $metas,
+            'name' => $name,
+            'typename' => $typename,
+            'lesson_id' => isset($metas['lesson_id']) ? $metas['lesson_id'] : '',
+            'section_id' => isset($metas['section_id']) ? $metas['section_id'] : '',
+            'quiz_id' => isset($metas['quiz_id']) ? $metas['quiz_id'] : ''
+        );
+
+
+        if ($load_template) {
+            sikshya_load_admin_template('metabox.answer.template', $params, true);
+        }
+
+        sikshya_load_admin_template('metabox.answer.main', $params);
+    }
+
+    public function load_answer_dynamic($question_id = 0)
+    {
+        $arg = absint($question_id) > 0 ? sikshya()->question->get_question_metas($question_id) : array();
+
+        $answers = isset($arg['answers']) && is_array($arg['answers']) ? $arg['answers'] : array();
+
+        foreach ($answers as $answer_id => $answer_array) {
+
+
+            $params = sikshya()->question->get_answer_args(
+
+                array(
+                    'question_id' => $arg['question_id'],
+                    'answer_id' => $answer_id,
+                    'section_id' => $arg['section_id'],
+                    'lesson_id' => $arg['lesson_id'],
+                    'quiz_id' => $arg['quiz_id'],
+                    'answer_value' => isset($answer_array['value']) ? $answer_array['value'] : '',
+                    'answer_image' => isset($answer_array['image']) ? $answer_array['image'] : '',
+                )
+            );
+            $params['correct_answers'] = isset($arg['correct_answers']) ? $arg['correct_answers'] : array();
+            $params['question_type'] = !isset($arg['type']) ? 'single' : $arg['type'];
+
+
+            sikshya_load_admin_template('metabox.answer.template-dynamic', $params);
+        }
+
+
+    }
+
+    public function update_answer_meta($metas = array(), $question_id = 0)
+    {
+        if ($question_id < 0) {
+            return false;
+        }
+        $type = isset($metas['type']) ? sanitize_text_field($metas['type']) : 'single';
+
+        $answers = isset($metas['answers']) ? $metas['answers'] : array();
+
+        foreach ($answers as $answer_key => $answer_content) {
+
+            $valid_answer_content['value'] = isset($answer_content['value']) ? sanitize_text_field($answer_content['value']) : '';
+
+            $valid_answer_content['image'] = isset($answer_content['image']) ? esc_url_raw($answer_content['image']) : '';
+
+            $answers[$answer_key] = $valid_answer_content;
+        }
+
+        $answers_correct = isset($metas['answers_correct']) ? $metas['answers_correct'] : array();
+
+        update_post_meta($question_id, 'type', $type);
+
+        update_post_meta($question_id, 'answers', $answers);
+
+        update_post_meta($question_id, 'correct_answers', $answers_correct);
+
+        return true;
+
+
+    }
 }

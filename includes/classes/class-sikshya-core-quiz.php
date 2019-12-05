@@ -275,5 +275,55 @@ GROUP BY p.post_type having p.post_type in (%s)",
         return false;
     }
 
+    public function load($quiz_id)
+    {
+
+
+        $questions = sikshya()->question->get_all_by_quiz($quiz_id);
+        //sikshya_load_admin_template('metabox.question.template', $params);
+        $params = array(
+            'quiz_id' => $quiz_id,
+            'question_id' => 0,
+            'questions' => $questions
+        );
+
+        sikshya_load_admin_template('metabox.question.template', array(), true);
+
+        sikshya_load_admin_template('metabox.answer.template', array(), true);
+
+        sikshya_load_admin_template('metabox.question.main', $params);
+
+    }
+
+    public function update_quiz_question($quiz_questions = array(), $quiz_question_answer = array(), $quiz_id = 0)
+    {
+
+        foreach ($quiz_questions as $question_id => $question_content) {
+
+            $title = isset($question_content['title']) ? sanitize_text_field($question_content['title']) : '';
+
+            $post_data = array(
+                'ID' => $question_id,
+                'post_title' => $title,
+                'post_type' => SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE,
+                'post_status' => 'publish'
+            );;
+            if (!sikshya_is_new_post($question_id)) {
+
+                $updated_question_id = wp_update_post($post_data);
+
+            } else {
+
+                $updated_question_id = wp_insert_post($post_data);
+            }
+
+            $quiz_question_ans = isset($quiz_question_answer[$question_id]) ? $quiz_question_answer[$question_id] : array();
+
+            sikshya()->question->update_answer_meta($quiz_question_ans, $updated_question_id);
+
+            update_post_meta($updated_question_id, 'quiz_id', $quiz_id);
+        }
+    }
+
 
 }

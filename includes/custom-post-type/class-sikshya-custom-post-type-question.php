@@ -42,12 +42,7 @@ if (!class_exists('Sikshya_Custom_Post_Type_Question')) {
                 'menu_position' => null,
                 'supports' => array(
                     'title',
-                    'comments',
-                    'thumbnail',
-                    'excerpt',
-                    'custom-fields',
                     'editor',
-                    'page-attributes'
                 ),
                 'show_in_rest' => true,
             );
@@ -58,6 +53,51 @@ if (!class_exists('Sikshya_Custom_Post_Type_Question')) {
                 remove_meta_box('commentsdiv', SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE, 'normal'); //removes comments
             }
             do_action('sikshya_after_register_post_type');
+
+        }
+
+        public function update_message($messages)
+        {
+            $post = get_post();
+            $post_type = get_post_type($post);
+            $post_type_object = get_post_type_object($post_type);
+
+            $question_post_type = SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE;
+
+            $messages[$question_post_type] = array(
+                0 => '', // Unused. Messages start at index 1.
+                1 => __('Question updated.', 'sikshya'),
+                2 => __('Custom field updated.', 'sikshya'),
+                3 => __('Custom field deleted.', 'sikshya'),
+                4 => __('Question updated.', 'sikshya'),
+                /* translators: %s: date and time of the revision */
+                5 => isset($_GET['revision']) ? sprintf(__('Question restored to revision from %s', 'sikshya'), wp_post_revision_title((int)$_GET['revision'], false)) : false,
+                6 => __('Question published.', 'sikshya'),
+                7 => __('Question saved.', 'sikshya'),
+                8 => __('Question submitted.', 'sikshya'),
+                9 => sprintf(
+                    __('Question scheduled for: <strong>%1$s</strong>.', 'sikshya'),
+                    // translators: Publish box date format, see http://php.net/date
+                    date_i18n(__('M j, Y @ G:i', 'sikshya'), strtotime($post->post_date))
+                ),
+                10 => __('Question draft updated.', 'sikshya')
+            );
+
+            if ($post_type_object->publicly_queryable && $question_post_type === $post_type) {
+                $permalink = get_permalink($post->ID);
+
+                $view_link = sprintf(' <a href="%s">%s</a>', esc_url($permalink), __('View question', 'sikshya'));
+                $messages[$post_type][1] .= $view_link;
+                $messages[$post_type][6] .= $view_link;
+                $messages[$post_type][9] .= $view_link;
+
+                $preview_permalink = add_query_arg('preview', 'true', $permalink);
+                $preview_link = sprintf(' <a target="_blank" href="%s">%s</a>', esc_url($preview_permalink), __('Preview question', 'sikshya'));
+                $messages[$post_type][8] .= $preview_link;
+                $messages[$post_type][10] .= $preview_link;
+            }
+
+            return $messages;
 
         }
 
@@ -73,6 +113,8 @@ if (!class_exists('Sikshya_Custom_Post_Type_Question')) {
             add_filter('use_block_editor_for_post_type', array($this, 'disable'), 10, 2);
 
             add_action('init', array($this, 'register'));
+            add_filter('post_updated_messages', array($this, 'update_message'));
+
         }
     }
 
