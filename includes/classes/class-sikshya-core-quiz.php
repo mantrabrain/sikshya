@@ -325,5 +325,30 @@ GROUP BY p.post_type having p.post_type in (%s)",
         }
     }
 
+    public function get_all_by_question($question_id)
+    {
+        if ($question_id instanceof \WP_Post) {
+            $question_id = $question_id->ID;
+        }
 
+        $quiz_ids = get_post_meta($question_id, 'quiz_id');
+
+        if (count($quiz_ids) < 1) {
+            return array();
+        }
+
+        $args = array(
+            'numberposts' => -1,
+            'post__in' => $quiz_ids,
+            'no_found_rows' => true,
+            'orderby' => 'menu_order',
+            'order' => 'asc',
+            'post_type' => SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
+        );
+
+        $data = get_posts($args);
+
+        return $data;
+
+    }
 }

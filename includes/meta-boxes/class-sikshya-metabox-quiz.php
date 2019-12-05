@@ -39,6 +39,7 @@ if (!class_exists('Sikshya_Metabox_Quiz')) {
         {
 
             add_action('edit_form_after_editor', array($this, 'question_question_template'));
+            add_meta_box(SIKSHYA_QUIZZES_CUSTOM_POST_TYPE . '_course', __('Assigned', 'sikshya'), array($this, 'assign_options'), SIKSHYA_QUIZZES_CUSTOM_POST_TYPE, 'side', 'high');
 
 
         }
@@ -59,6 +60,10 @@ if (!class_exists('Sikshya_Metabox_Quiz')) {
 
         }
 
+        public function assign_options($post)
+        {
+            sikshya_load_admin_template('metabox.quiz.assigned-course');
 
+        }
     }
 }

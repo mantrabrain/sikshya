@@ -116,3 +116,10 @@
     background: #f9f9f9;
     border-top: 1px solid #ddd;
 }
+
+.sik-label-counter {
+    padding: 3px 12px;
+    background: #007cba;
+    color: #ffff;
+    font-weight: bold;
+}

@@ -491,4 +491,9 @@ class Sikshya_Core_Question
 
 
     }
+
+    public function count_by_quiz($quiz_id)
+    {
+        return count($this->get_all_by_quiz($quiz_id));
+    }
 }

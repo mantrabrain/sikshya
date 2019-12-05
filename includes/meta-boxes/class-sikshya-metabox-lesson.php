@@ -42,7 +42,7 @@ if (!class_exists('Sikshya_Metabox_Lesson')) {
 
         public function assign_options($post)
         {
-            include_once "views/lesson-course-assign.php";
+            sikshya_load_admin_template('metabox.lesson.assigned-course');
 
         }
 

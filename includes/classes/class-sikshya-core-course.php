@@ -136,6 +136,32 @@ class Sikshya_Core_Course
         return $data;
     }
 
+    public function get_all_by_quiz($quiz_id)
+    {
+        if ($quiz_id instanceof \WP_Post) {
+            $quiz_id = $quiz_id->ID;
+        }
+
+        $course_ids = get_post_meta($quiz_id, 'course_id');
+
+        if (count($course_ids) < 1) {
+            return array();
+        }
+
+        $args = array(
+            'numberposts' => -1,
+            'post__in' => $course_ids,
+            'no_found_rows' => true,
+            'orderby' => 'menu_order',
+            'order' => 'asc',
+            'post_type' => SIKSHYA_COURSES_CUSTOM_POST_TYPE,
+        );
+
+        $data = get_posts($args);
+
+        return $data;
+    }
+
     public function has_enrolled($course_id = 0)
     {
 

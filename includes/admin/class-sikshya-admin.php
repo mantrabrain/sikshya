@@ -43,10 +43,19 @@ class Sikshya_Admin
                 include_once 'list-tables/class-sikshya-admin-list-table-lessons.php';
                 new Sikshya_Admin_List_Table_Lessons();
                 break;
+            case 'edit-' . SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
+                include_once 'list-tables/class-sikshya-admin-list-table-quizzes.php';
+                new Sikshya_Admin_List_Table_Quizzes();
+                break;
+            case 'edit-' . SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE:
+                include_once 'list-tables/class-sikshya-admin-list-table-questions.php';
+                new Sikshya_Admin_List_Table_Questions();
+                break;
             case 'edit-' . SIKSHYA_ORDERS_CUSTOM_POST_TYPE:
                 include_once 'list-tables/class-sikshya-admin-list-table-orders.php';
                 new Sikshya_Admin_List_Table_Orders();
                 break;
+
 
         }
 
