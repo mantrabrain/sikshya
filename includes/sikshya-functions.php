@@ -848,3 +848,21 @@ if (!function_exists('sikshya_question_answer_type')) {
         );
     }
 }
+if (!function_exists('sikshya_get_instructors_list')) {
+
+    function sikshya_get_instructors_list()
+    {
+        $users = get_users(array(
+            'role__in' => array('administrator', 'sikshya_instructor'),
+        ));
+        $all_users = array();
+        foreach ($users as $user) {
+
+            $user_obj = new stdClass();
+            $user_obj->ID = $user->ID;
+            $user_obj->name = $user->user_nicename . ' (' . $user->user_login . ')';
+            $all_users[$user->ID] = $user_obj;
+        }
+        return $all_users;
+    }
+}

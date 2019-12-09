@@ -37,6 +37,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
                 $template_vars = sikshya()->course->get_all($post->ID);
             }
 
+
             include_once "views/sections-and-lessons.php";
         }
 
@@ -45,8 +46,11 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             $template_vars = sikshya_get_course_info($post->ID);
 
             $template_vars['show_on_login'] = get_post_meta($post->ID, $this->_meta_prefix . 'info_show_on_login', true);
+            $template_vars['instructor'] = get_post_meta($post->ID, 'instructor', true);
 
-            include_once "views/tmpl/course.php";
+            $params['template_vars'] = $template_vars;
+
+            sikshya_load_admin_template('metabox.course.main', $params);
 
         }
 
@@ -65,6 +69,8 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             if (!current_user_can('edit_post', $post_id)) {
                 return;
             }
+
+            remove_action('save_post', array($this, 'save'));
 
             $course_object = get_post($post_id);
 
@@ -89,6 +95,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             $valid_sikshya_info['payment_period'] = isset($sikshya_info['payment_period']) ? sanitize_text_field($sikshya_info['payment_period']) : '';
             $valid_sikshya_info['price_display_options_bp'] = isset($sikshya_info['price_display_options_bp']) ? sanitize_text_field($sikshya_info['price_display_options_bp']) : '';
             $valid_sikshya_info['tax_display_options'] = isset($sikshya_info['tax_display_options']) ? sanitize_text_field($sikshya_info['tax_display_options']) : '';
+            $instructor = isset($sikshya_info['instructor']) ? absint($sikshya_info['instructor']) : 0;
             $valid_sikshya_info['description'] = isset($sikshya_info['description']) ? wp_kses($sikshya_info['description'], array(
                 'a' => array(
                     'href' => array(),
@@ -110,6 +117,17 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             update_post_meta($post_id, $this->_meta_prefix . 'info_show_on_login', $valid_sikshya_info['show_on_login']);
 
+            if (($instructor) > 0) {
+
+                update_post_meta($post_id, 'sikshya_instructor', $instructor);
+
+                if (!sikshya()->role->has_instructor($instructor)) {
+
+                    sikshya()->role->add_instructor_role($instructor);
+
+                }
+            }
+
             unset($valid_sikshya_info['show_on_login']);
             update_post_meta($post_id, $this->_meta_prefix . 'info', $valid_sikshya_info);
 
@@ -120,6 +138,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
         private function update_other_meta($post_id)
         {
+
             $sections = isset($_POST['sikshya_section']) ? $_POST['sikshya_section'] : array();
 
             $lessons = isset($_POST['sikshya_lesson']) ? $_POST['sikshya_lesson'] : array();
@@ -143,6 +162,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
                 $saved_lesson_ids = sikshya()->lesson->save($lessons, $saved_section_ids, $post_id);
             }
 
+
             $saved_quizzes_ids = array();
 
 
@@ -151,6 +171,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
                 $saved_quizzes_ids = sikshya()->quiz->save(
                     $quizzes, $saved_section_ids, $saved_lesson_ids, $post_id);
             }
+
 
             $saved_question_ids = array();
 

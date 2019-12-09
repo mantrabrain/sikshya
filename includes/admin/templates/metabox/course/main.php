@@ -42,4 +42,33 @@
 
         </div>
     </div>
+    <div class="ms-group">
+        <div class="ms-group-item">
+            <div class="ms-field ms-field-large">
+                <label class="ms-label js-sikshya-tooltip-element"
+                       for="sikshya_info_duration"
+                       data-tooltip="<?php _e('Instructor', 'sikshya'); ?>"
+                ><?php _e('Instructor', 'sikshya'); ?>:</label>
+                <div class="ms-value">
+                    <select class="ms-field-large" type="text" id="sikshya_info_instructor"
+                            name="sikshya_info[instructor]">
+                        <?php
+                        $instructors = sikshya_get_instructors_list();
+                        $instructor_id_val = isset($template_vars['instructor']) ? absint($template_vars['instructor']) : 0;
+
+                        foreach ($instructors as $instructor_id => $instructor) {
+
+                            ?>
+                            <option <?php echo $instructor_id_val == $instructor_id ? 'selected="selected"' : '' ?>
+                                    value="<?php echo absint($instructor_id) ?>"><?php echo $instructor->name; ?></option>
+                            <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
 </div>

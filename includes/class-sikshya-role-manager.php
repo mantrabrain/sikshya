@@ -46,6 +46,19 @@ class Sikshya_Role_Manager
         do_action('sikshya_after_enrolled_student', $student_id);
     }
 
+    public function has_instructor($instructor_id = 0)
+    {
+        $instructor_id = absint($instructor_id);
+
+        $user = get_user_by('id', $instructor_id);
+
+        if (in_array('sikshya_instructor', (array)$user->roles)) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function init_sikshya_roles()
     {
         add_role(
