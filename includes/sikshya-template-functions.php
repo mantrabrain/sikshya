@@ -318,7 +318,16 @@ if (!function_exists('sikshya_course_instructor_tab')) {
      */
     function sikshya_course_instructor_tab()
     {
-        sikshya_load_template('parts.course.tabs.instructor');
+        $course_id = get_the_ID();
+
+        $instructor_id = get_post_meta($course_id, 'sikshya_instructor', true);
+
+
+        $params['user_bio'] = get_user_meta($instructor_id, 'description', true);
+
+        $params['user_avatar_url'] = get_avatar_url($instructor_id);
+
+        sikshya_load_template('parts.course.tabs.instructor', $params);
 
     }
 }
