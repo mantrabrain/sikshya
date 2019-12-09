@@ -123,3 +123,24 @@
     color: #ffff;
     font-weight: bold;
 }
+
+.postbox .sikshya-lesson-course-assigned .sik-course-list-meta-child {
+    border-left: 2px solid #ccd0d4;
+    padding-top: 5px;
+}
+
+.postbox .sikshya-lesson-course-assigned .sik-course-list-meta-child > li {
+    position: relative;
+    padding-left: 15px;
+}
+
+.postbox .sik-course-list-meta-child > li:before {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 2px;
+    background: #ccd0d4;
+    position: absolute;
+    left: 0;
+    top: 50%;
+}

@@ -36,6 +36,13 @@ if (!class_exists('Sikshya_Metabox_Question')) {
         {
 
             add_action('edit_form_after_editor', array($this, 'question_answer_template'));
+            add_meta_box(SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE . '_course', __('Assigned', 'sikshya'), array($this, 'assign_options'), SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE, 'side', 'high');
+
+        }
+
+        public function assign_options($post)
+        {
+            sikshya_load_admin_template('metabox.question.assigned-course');
 
         }
 

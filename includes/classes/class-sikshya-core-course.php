@@ -324,4 +324,45 @@ class Sikshya_Core_Course
         return $course_list;
 
     }
+
+    public function get_all_by_question($question_id)
+    {
+
+
+        if ($question_id instanceof \WP_Post) {
+            $question_id = $question_id->ID;
+        }
+
+        $quiz_ids = get_post_meta($question_id, 'quiz_id');
+
+        if (count($quiz_ids) < 1) {
+            return array();
+        }
+
+        $course_ids = array();
+
+        foreach ($quiz_ids as $quiz_id) {
+
+            $course_id = (int)get_post_meta($question_id, 'course_id', true);
+
+            if ($course_id > 0) {
+                array_push($course_ids, $course_id);
+            }
+        }
+
+
+        $args = array(
+            'numberposts' => -1,
+            'post__in' => $course_ids,
+            'no_found_rows' => true,
+            'orderby' => 'menu_order',
+            'order' => 'asc',
+            'post_type' => SIKSHYA_COURSES_CUSTOM_POST_TYPE,
+        );
+
+        $data = get_posts($args);
+
+        return $data;
+
+    }
 }
