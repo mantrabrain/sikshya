@@ -26,7 +26,7 @@ Feature [request](https://mantrabrain.com/request-new-feature/)
 
 1. Unlimited Course with tag and category
 
-2. Unlimited quizzes and questions
+2. Unlimited lessons, quizzes and questions
 
 3. Translation Ready: The plugin is fully translation ready. So feel free to your website in any language.
 
