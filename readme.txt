@@ -1,4 +1,4 @@
-=== Learning Management System - Sikshya ===
+=== Learning Management System - Sikshya LMS ===
 Contributors: Mantrabrain
 Tags: course builder, quizzes, questions, learning management system, LMS
 Requires at least: 4.7
