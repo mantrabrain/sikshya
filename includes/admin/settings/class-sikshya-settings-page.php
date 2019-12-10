@@ -38,7 +38,7 @@ if (!class_exists('Sikshya_Settings_Page', false)) :
          */
         public function __construct()
         {
-            add_filter('sikshya_settings_tabs_array', array($this, 'add_settings_page'), 20);
+             add_filter('sikshya_settings_tabs_array', array($this, 'add_settings_page'), 20);
             add_action('sikshya_sections_' . $this->id, array($this, 'output_sections'));
             add_action('sikshya_settings_' . $this->id, array($this, 'output'));
             add_action('sikshya_settings_save_' . $this->id, array($this, 'save'));

@@ -372,7 +372,7 @@ if (!function_exists('sikshya_get_user_registration_page')) {
 
     function sikshya_get_user_registration_page($get_permalink = false)
     {
-        $page_id = absint(get_option('sikshya_user_registration_page'));
+        $page_id = absint(get_option('sikshya_registration_page'));
 
         if ($page_id < 1) {
 
@@ -864,5 +864,16 @@ if (!function_exists('sikshya_get_instructors_list')) {
             $all_users[$user->ID] = $user_obj;
         }
         return $all_users;
+    }
+}
+if (!function_exists('sikshya_clean')) {
+
+    function sikshya_clean($var)
+    {
+        if (is_array($var)) {
+            return array_map('sikshya_clean', $var);
+        } else {
+            return is_scalar($var) ? sanitize_text_field($var) : $var;
+        }
     }
 }

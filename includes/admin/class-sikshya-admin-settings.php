@@ -637,13 +637,13 @@ if ( ! class_exists( 'Sikshya_Admin_Settings', false ) ) :
 						break;
 					case 'multiselect':
 					case 'multi_select_countries':
-						$value = array_filter( array_map( 'sik_clean', (array) $raw_value ) );
+						$value = array_filter( array_map( 'sikshya_clean', (array) $raw_value ) );
 						break;
 					case 'image_width':
 						$value = array();
 						if ( isset( $raw_value['width'] ) ) {
-							$value['width']  = sik_clean( $raw_value['width'] );
-							$value['height'] = sik_clean( $raw_value['height'] );
+							$value['width']  = sikshya_clean( $raw_value['width'] );
+							$value['height'] = sikshya_clean( $raw_value['height'] );
 							$value['crop']   = isset( $raw_value['crop'] ) ? 1 : 0;
 						} else {
 							$value['width']  = $option['default']['width'];
@@ -664,7 +664,7 @@ if ( ! class_exists( 'Sikshya_Admin_Settings', false ) ) :
 						$value = sik_parse_relative_date_option( $raw_value );
 						break;
 					default:
-						$value = sik_clean( $raw_value );
+						$value = sikshya_clean( $raw_value );
 						break;
 				}
 

@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the Sikshya package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Sikshya 0.0.3\n"
+"Project-Id-Version: Sikshya 0.0.5\n"
 "Report-Msgid-Bugs-To: mantrabrain@gmail.com\n"
-"POT-Creation-Date: 2019-12-01 11:29:27+00:00\n"
+"POT-Creation-Date: 2019-12-10 10:39:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -56,11 +56,11 @@ msgstr ""
 msgid "Submit your query"
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-assets.php:44
+#: includes/admin/class-sikshya-admin-assets.php:47
 msgid "This function will be available in Sikshya PRO."
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-assets.php:48
+#: includes/admin/class-sikshya-admin-assets.php:51
 msgid "Import courses"
 msgstr ""
 
@@ -68,47 +68,86 @@ msgstr ""
 msgid "Sikshya"
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-menu.php:21
+#: includes/admin/class-sikshya-admin-menu.php:24
 msgid "Categories"
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-menu.php:24
+#: includes/admin/class-sikshya-admin-menu.php:27
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
 msgid "Tags"
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-menu.php:30
-msgid "Sikshya Settings"
+#: includes/admin/class-sikshya-admin-menu.php:40
+msgid "Sikshya settings"
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-menu.php:31
+#: includes/admin/class-sikshya-admin-menu.php:41
 msgid "Settings"
 msgstr ""
 
+#: includes/admin/class-sikshya-admin-settings.php:70
+msgid "Your settings have been saved."
+msgstr ""
+
+#: includes/admin/class-sikshya-admin-settings.php:132
+msgid "The changes you made will be lost if you navigate away from this page."
+msgstr ""
+
+#: includes/admin/class-sikshya-admin-settings.php:133
+msgid "Item moved up"
+msgstr ""
+
+#: includes/admin/class-sikshya-admin-settings.php:134
+msgid "Item moved down"
+msgstr ""
+
+#: includes/admin/class-sikshya-admin-settings.php:135
+msgid ""
+"Selecting no country to sell to prevents from completing the checkout. "
+"Continue anyway?"
+msgstr ""
+
+#: includes/admin/class-sikshya-admin-settings.php:535
+msgid "Select a page&hellip;"
+msgstr ""
+
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:102
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:102
 msgid "Title"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
 #: includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:103
 #: templates/profile/parts/enrolled-courses.php:6
 msgid "Course"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:105
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:105
 msgid "Date"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:150
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:164
 msgid "Edit"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:151
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:165
 msgid "View"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
-#: includes/meta-boxes/views/lesson-course-assign.php:20
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:157
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:171
+#: includes/admin/templates/metabox/lesson/assigned-course.php:20
+#: includes/admin/templates/metabox/question/assigned-course.php:33
+#: includes/admin/templates/metabox/quiz/assigned-course.php:20
 msgid "Not assigned yet"
 msgstr ""
 
@@ -122,6 +161,138 @@ msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
 msgid "Booking Date"
+msgstr ""
+
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:103
+msgid "Quiz"
+msgstr ""
+
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:104
+msgid "Type"
+msgstr ""
+
+#: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:176
+msgid "Not defined yet"
+msgstr ""
+
+#: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:104
+msgid "Number Of Questions"
+msgstr ""
+
+#: includes/admin/settings/class-sikshya-settings-general.php:26
+msgid "General"
+msgstr ""
+
+#: includes/admin/settings/class-sikshya-settings-general.php:45
+msgid "Pages"
+msgstr ""
+
+#: includes/admin/settings/class-sikshya-settings-general.php:51
+msgid "Account page"
+msgstr ""
+
+#: includes/admin/settings/class-sikshya-settings-general.php:57
+msgid "Registration page"
+msgstr ""
+
+#: includes/admin/settings/class-sikshya-settings-general.php:63
+msgid "Login page"
+msgstr ""
+
+#: includes/admin/templates/metabox/answer/add.php:3
+#: includes/meta-boxes/views/tmpl/answer/add-answer.php:4
+#: includes/meta-boxes/views/tmpl/question.php:41
+msgid "Add answer"
+msgstr ""
+
+#: includes/admin/templates/metabox/answer/main.php:4
+msgid "Question Answer"
+msgstr ""
+
+#: includes/admin/templates/metabox/answer/main.php:11
+#: includes/meta-boxes/views/tmpl/answer/answer-form.php:3
+#: includes/meta-boxes/views/tmpl/question.php:25
+msgid "Type of answer"
+msgstr ""
+
+#: includes/admin/templates/metabox/answer/template-dynamic.php:2
+#: includes/admin/templates/metabox/answer/template.php:6
+#: includes/meta-boxes/views/tmpl/answer/answer-item.php:2
+#: includes/meta-boxes/views/tmpl/answer.php:2
+msgid "Answer"
+msgstr ""
+
+#: includes/admin/templates/metabox/answer/template-dynamic.php:18
+#: includes/meta-boxes/views/tmpl/answer/answer-item.php:18
+#: includes/meta-boxes/views/tmpl/answer.php:18
+msgid "Upload image"
+msgstr ""
+
+#: includes/admin/templates/metabox/answer/template-dynamic.php:26
+#: includes/meta-boxes/views/tmpl/answer/answer-item.php:26
+#: includes/meta-boxes/views/tmpl/answer.php:26
+msgid "Correct answer"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:2
+msgid "Here you can change basic information of your courses."
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:7
+msgid "Course subject”."
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:8
+#: templates/single-course.php:54
+msgid "Subject"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:17
+msgid ""
+"Here you can change the difficulty level of your courses, e.g. “beginner, "
+"advanced or expert”"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:18
+#: templates/single-course.php:73
+msgid "Level"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:33
+msgid "Write down the approximate length of your course, e.g. 12 hours"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:34
+#: templates/single-course.php:61
+msgid "Duration"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:38
+msgid "Hours"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/main.php:50
+#: includes/admin/templates/metabox/course/main.php:51
+#: includes/sikshya-template-functions.php:261
+msgid "Instructor"
+msgstr ""
+
+#: includes/admin/templates/metabox/question/add.php:3
+#: includes/meta-boxes/views/tmpl/quiz.php:27
+msgid "Add question"
+msgstr ""
+
+#: includes/admin/templates/metabox/question/main.php:4
+msgid "Quiz Questions"
+msgstr ""
+
+#: includes/admin/templates/metabox/question/template.php:5
+msgid "Question title"
+msgstr ""
+
+#: includes/admin/views/html-admin-settings.php:46
+#: templates/profile/parts/update-profile.php:94
+msgid "Save changes"
 msgstr ""
 
 #: includes/class-sikshya-ajax.php:28
@@ -193,11 +364,11 @@ msgstr ""
 msgid "Password required."
 msgstr ""
 
-#: includes/class-sikshya-role-manager.php:53
+#: includes/class-sikshya-role-manager.php:66
 msgid "Sikshya Student"
 msgstr ""
 
-#: includes/class-sikshya-role-manager.php:62
+#: includes/class-sikshya-role-manager.php:75
 msgid "Sikshya Instructor"
 msgstr ""
 
@@ -214,18 +385,22 @@ msgid "New Question Title"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:139
+#: includes/sikshya-functions.php:844
 msgid "One answer"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:140
+#: includes/sikshya-functions.php:845
 msgid "One answer with image"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:141
+#: includes/sikshya-functions.php:846
 msgid "Multiple answers"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:142
+#: includes/sikshya-functions.php:847
 msgid "Multiple answers with image"
 msgstr ""
 
@@ -288,10 +463,12 @@ msgid "Course updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:70
 msgid "Custom field updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:71
 msgid "Custom field deleted."
 msgstr ""
 
@@ -317,6 +494,7 @@ msgid "Course scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:81
 #. translators: Publish box date format, see http:php.net/date
 msgid "M j, Y @ G:i"
 msgstr ""
@@ -449,6 +627,44 @@ msgstr ""
 msgid "No questions found in Trash."
 msgstr ""
 
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:69
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:72
+msgid "Question updated."
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:74
+#. translators: %s: date and time of the revision
+msgid "Question restored to revision from %s"
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:75
+msgid "Question published."
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:76
+msgid "Question saved."
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:77
+msgid "Question submitted."
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:79
+msgid "Question scheduled for: <strong>%1$s</strong>."
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:83
+msgid "Question draft updated."
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:89
+msgid "View question"
+msgstr ""
+
+#: includes/custom-post-type/class-sikshya-custom-post-type-question.php:95
+msgid "Preview question"
+msgstr ""
+
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
 msgid "Add New Quiz"
 msgstr ""
@@ -494,15 +710,13 @@ msgid "Sections & Lessons"
 msgstr ""
 
 #: includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: includes/meta-boxes/class-sikshya-metabox-question.php:39
+#: includes/meta-boxes/class-sikshya-metabox-quiz.php:42
 msgid "Assigned"
 msgstr ""
 
 #: includes/meta-boxes/class-sikshya-metabox-lesson.php:20
 msgid "Lesson Options"
-msgstr ""
-
-#: includes/meta-boxes/class-sikshya-metabox-quiz.php:19
-msgid "Quiz Options"
 msgstr ""
 
 #: includes/meta-boxes/class-sikshya-metabox-section.php:20
@@ -535,52 +749,6 @@ msgstr ""
 msgid "Add section"
 msgstr ""
 
-#: includes/meta-boxes/views/tmpl/answer.php:2
-msgid "Answer"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/answer.php:18
-msgid "Upload image"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/answer.php:26
-msgid "Correct answer"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:2
-msgid "Here you can change basic information of your courses."
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:7
-msgid "Course subject”."
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:8 templates/single-course.php:54
-msgid "Subject"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:17
-msgid ""
-"Here you can change the difficulty level of your courses, e.g. “beginner, "
-"advanced or expert”"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:18 templates/single-course.php:73
-msgid "Level"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:33
-msgid "Write down the approximate length of your course, e.g. 12 hours"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:34 templates/single-course.php:61
-msgid "Duration"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/course.php:38
-msgid "Hours"
-msgstr ""
-
 #: includes/meta-boxes/views/tmpl/editor.php:6
 msgid "Add Media"
 msgstr ""
@@ -605,20 +773,8 @@ msgstr ""
 msgid "Question text"
 msgstr ""
 
-#: includes/meta-boxes/views/tmpl/question.php:25
-msgid "Type of answer"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/question.php:41
-msgid "Add answer"
-msgstr ""
-
 #: includes/meta-boxes/views/tmpl/quiz.php:12
 msgid "Quiz title"
-msgstr ""
-
-#: includes/meta-boxes/views/tmpl/quiz.php:27
-msgid "Add question"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/section.php:21
@@ -679,10 +835,6 @@ msgstr ""
 
 #: includes/sikshya-template-functions.php:255
 msgid "Curriculum"
-msgstr ""
-
-#: includes/sikshya-template-functions.php:261
-msgid "Instructor"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
@@ -859,10 +1011,6 @@ msgstr ""
 
 #: templates/profile/parts/update-profile.php:1
 msgid "Edit Profile"
-msgstr ""
-
-#: templates/profile/parts/update-profile.php:94
-msgid "Save changes"
 msgstr ""
 
 #: templates/profile/registration.php:15 templates/profile/registration.php:20

@@ -42,19 +42,28 @@ class Sikshya_Settings_General extends Sikshya_Settings_Page
             array(
 
                 array(
-                    'title' => __('Store Address', 'sikshya'),
+                    'title' => __('Pages', 'sikshya'),
                     'type' => 'title',
-                    'desc' => __('This is where your business is located. Tax rates and shipping rates will use this address.', 'sikshya'),
-                    'id' => 'store_address',
+                    'id' => 'general_options',
                 ),
 
                 array(
-                    'title' => __('Address line 1', 'sikshya'),
-                    'desc' => __('The street address for your business location.', 'sikshya'),
-                    'id' => 'sikshya_store_address',
+                    'title' => __('Account page', 'sikshya'),
+                    'id' => 'sikshya_account_page',
                     'default' => '',
-                    'type' => 'text',
-                    'desc_tip' => true,
+                    'type' => 'single_select_page',
+                ),
+                array(
+                    'title' => __('Registration page', 'sikshya'),
+                    'id' => 'sikshya_registration_page',
+                    'default' => '',
+                    'type' => 'single_select_page',
+                ),
+                array(
+                    'title' => __('Login page', 'sikshya'),
+                    'id' => 'sikshya_login_page',
+                    'default' => '',
+                    'type' => 'single_select_page',
                 ),
                 array(
                     'type' => 'sectionend',

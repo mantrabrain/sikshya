@@ -45,7 +45,7 @@ if (!$tab_exists) {
                 <button name="save" class="button-primary sikshya-save-button" type="submit"
                         value="<?php esc_attr_e('Save changes', 'sikshya'); ?>"><?php esc_html_e('Save changes', 'sikshya'); ?></button>
             <?php endif; ?>
-            <?php wp_nonce_field('sikshya-settings'); ?>
+            <?php wp_nonce_field('sik-settings'); ?>
         </p>
     </form>
 </div>
