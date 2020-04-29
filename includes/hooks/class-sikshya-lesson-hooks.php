@@ -35,11 +35,13 @@ class Sikshya_Lesson_ooks
     public function lesson_content_area()
     {
 
+
         $post_type = sikshya_get_current_post_type();
 
         switch ($post_type) {
 
             case SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
+
 
                 if (!sikshya_is_content_available_for_user(get_the_ID(), SIKSHYA_LESSONS_CUSTOM_POST_TYPE)) {
 
@@ -47,8 +49,9 @@ class Sikshya_Lesson_ooks
 
                     return;
                 }
-
+                wp_reset_query();
                 the_content();
+
                 break;
             case SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
 

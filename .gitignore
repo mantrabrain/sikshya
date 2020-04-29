@@ -1,4 +1,22 @@
-.git/
-svn-repository/
-node_modules/
-.vscode
+# Editors
+project.xml
+project.properties
+/nbproject/private/
+.buildpath
+.project
+.settings*
+.idea
+/svn-repository/
+
+# Grunt
+/node_modules/
+
+# Sass
+.sass-cache/
+
+# OS X metadata
+.DS_Store
+
+# Windows junk
+Thumbs.db
+yatra.zip

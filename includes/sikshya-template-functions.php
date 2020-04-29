@@ -3,6 +3,7 @@
 if (!function_exists('sikshya_header')) {
     function sikshya_header()
     {
+        wp_reset_query();
         get_header();
     }
 }
