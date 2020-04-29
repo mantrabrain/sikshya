@@ -476,3 +476,24 @@ if (!function_exists('sikshya_content_item_edit_links')) {
 
     }
 }
+
+
+if (!function_exists('sikshya_image')) {
+
+    function sikshya_image()
+    {
+
+        if (has_post_thumbnail()) {
+
+            $title = get_the_title();
+            $url = get_the_post_thumbnail_url();
+
+            echo '<img alt="' . esc_attr($title) . '" 
+            src="' . esc_url($url) . '"/>';
+
+        } else {
+            echo '<img src="' . esc_url(SIKSHYA_ASSETS_URL . '/images/placeholder.jpg') . '"/>';
+        }
+    }
+}
+

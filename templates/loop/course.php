@@ -2,15 +2,14 @@
     <?php $info = sikshya_get_course_info(get_the_ID());
     $course_level = isset($info['level']) ? $info['level'] : '';
     if (!empty($course_level)) {
-        $course_level =sikshya_get_course_level($course_level);
+        $course_level = sikshya_get_course_level($course_level);
     }
     ?>
     <div class="sikshya-course-loop">
         <div class="sikshya-course-header">
 
             <a href="<?php echo esc_url(get_permalink()) ?>">
-                <img alt="Placeholder" src="<?php echo SIKSHYA_ASSETS_URL . '/images/placeholder.jpg'; ?>"/>
-
+                <?php sikshya_image(); ?>
             </a>
             <div class="sikshya-course-loop-header-meta">
                 <span class="sikshya-course-loop-level"><?php echo esc_html($course_level); ?></span>

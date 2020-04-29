@@ -50,11 +50,13 @@ Sikshya ACCOUNT AREA STYLING
     }
   }
 }
+
 #wpbody-content {
   .sikshya_info_block {
     margin-right: 20px;
   }
 }
+
 #wpwrap {
   .sikshya-notice {
     padding: 0;
@@ -85,7 +87,7 @@ Sikshya ACCOUNT AREA STYLING
         color: red;
       }
     }
-    >div {
+    > div {
       display: table-cell;
       vertical-align: middle;
       cursor: default;
@@ -141,9 +143,11 @@ Sikshya ACCOUNT AREA STYLING
     }
   }
 }
+
 span.tw_get_sikshya {
   color: red;
 }
+
 .top-image-block {
   position: relative;
   padding: 120px 0;
@@ -172,9 +176,11 @@ span.tw_get_sikshya {
     filter: blur(1px);
   }
 }
+
 .sikshya-block-shadow {
   box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.15);
 }
+
 .sikshya-description-table {
   background: #fff;
   padding: 30px;
@@ -185,6 +191,7 @@ span.tw_get_sikshya {
     font-size: 24px;
   }
 }
+
 .sikshya-container {
   padding-left: 15px;
   padding-right: 15px;
@@ -193,6 +200,7 @@ span.tw_get_sikshya {
   margin-left: auto;
   width: 100%;
 }
+
 .sikshya-courses {
   clear: both;
   display: -webkit-box;
@@ -204,6 +212,7 @@ span.tw_get_sikshya {
   margin-right: -15px;
   padding: 0;
 }
+
 .sikshya-course-loop {
   background: #fff;
   color: #29303b;
@@ -230,9 +239,11 @@ span.tw_get_sikshya {
     box-shadow: 0 4px 23px rgba(0, 0, 0, 0.1);
   }
 }
+
 .sikshya-loop-course-container {
   padding: 25px 19px;
 }
+
 .sikshya-course-loop-header-meta {
   position: absolute;
   left: 0;
@@ -242,6 +253,7 @@ span.tw_get_sikshya {
   padding-right: 13px;
   overflow: hidden;
 }
+
 .sikshya-course-loop-level {
   display: inline-block;
   background: #9013FE;
@@ -253,6 +265,7 @@ span.tw_get_sikshya {
   -webkit-box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
   box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 }
+
 .sikshya-loop-course-footer {
   padding: 15px;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
@@ -263,8 +276,9 @@ span.tw_get_sikshya {
   border-bottom-right-radius: 4px;
   font-weight: 400;
 }
+
 .sikshya-course-loop-price {
-  >.price {
+  > .price {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -282,6 +296,7 @@ span.tw_get_sikshya {
     }
   }
 }
+
 .sikshya-loop-author {
   .sikshya-single-course-avatar {
     .sikshya-text-avatar {
@@ -299,6 +314,7 @@ span.tw_get_sikshya {
     }
   }
 }
+
 .sikshya-section-image {
   height: 50px;
   width: 50px;
@@ -309,6 +325,7 @@ span.tw_get_sikshya {
   background-position: center;
   float: left;
 }
+
 .sikshya-section-item {
   padding: 5px;
   background: #f9f9f9;
@@ -320,6 +337,7 @@ span.tw_get_sikshya {
     display: block;
   }
 }
+
 .sikshya-section-info {
   float: left;
   padding-top: 10px;
@@ -330,11 +348,13 @@ span.tw_get_sikshya {
     line-height: 2em;
   }
 }
+
 .sikshya-messages {
   list-style: square;
   margin: 0;
   padding: 0;
 }
+
 .sikshya-info {
   border: 1px solid;
   margin: 10px 0px;
@@ -344,6 +364,7 @@ span.tw_get_sikshya {
   color: #00529B;
   background-color: #BDE5F8;
 }
+
 .sikshya-success {
   border: 1px solid;
   margin: 10px 0px;
@@ -353,6 +374,7 @@ span.tw_get_sikshya {
   color: #4F8A10;
   background-color: #DFF2BF;
 }
+
 .sikshya-warning {
   border: 1px solid;
   margin: 10px 0px;
@@ -362,6 +384,7 @@ span.tw_get_sikshya {
   color: #9F6000;
   background-color: #FEEFB3;
 }
+
 .sikshya-error {
   border: 1px solid;
   margin: 10px 0px;
@@ -371,6 +394,7 @@ span.tw_get_sikshya {
   color: #D8000C;
   background-color: #FFBABA;
 }
+
 .sikshya-validation {
   border: 1px solid;
   margin: 10px 0px;
@@ -380,6 +404,7 @@ span.tw_get_sikshya {
   color: #D63301;
   background-color: #FFCCBA;
 }
+
 .sikshya-account-sidebar {
   padding: 15px;
   border: 1px solid #f9f9f9;
@@ -406,6 +431,7 @@ span.tw_get_sikshya {
     }
   }
 }
+
 .sikshya-account-content-area {
   background: #f9f9f9;
   min-height: 200px;
@@ -419,6 +445,7 @@ span.tw_get_sikshya {
     margin-bottom: 20px;
   }
 }
+
 .sikshya-course-tabs {
   margin-bottom: 40px;
   ul.course-nav-tabs {
@@ -475,6 +502,7 @@ span.tw_get_sikshya {
     }
   }
 }
+
 .course-tab-panel-curriculum {
   ul {
     list-style: none;
@@ -538,8 +566,8 @@ span.tw_get_sikshya {
     }
   }
   ul.sikshya-section-list {
-    >li {
-      >a.item-link {
+    > li {
+      > a.item-link {
         cursor: pointer;
         &:before {
           content: "\f333";
@@ -548,8 +576,8 @@ span.tw_get_sikshya {
     }
   }
   ul.sikshya-lesson-list {
-    >li {
-      >a.item-link {
+    > li {
+      > a.item-link {
         background: #f9f9f9;
         &:before {
           content: "\f491";
@@ -558,8 +586,8 @@ span.tw_get_sikshya {
     }
   }
   ul.sikshya-quiz-list {
-    >li {
-      >a.item-link {
+    > li {
+      > a.item-link {
         &:before {
           content: "\f469";
         }
@@ -567,9 +595,11 @@ span.tw_get_sikshya {
     }
   }
 }
+
 .sikshya-hide {
   display: none;
 }
+
 .sikshya-single-lesson-wrap {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -577,19 +607,23 @@ span.tw_get_sikshya {
   position: relative;
   background: #F4F8FA;
 }
+
 .sikshya-lesson-sidebar {
   -webkit-box-flex: 0;
   -ms-flex: 0 0 400px;
   flex: 0 0 400px;
 }
+
 .sikshya-single-entry-content {
   -webkit-box-flex: 999;
   -ms-flex-positive: 999;
   flex-grow: 999;
 }
+
 .sikshya-sidebar-tabs-wrap {
   border-top: 1px solid #E0E9EC;
 }
+
 .sikshya-tabs-btn-group {
   height: 70px;
   display: -webkit-box;
@@ -610,6 +644,7 @@ span.tw_get_sikshya {
     border: none;
   }
 }
+
 .sikshya-single-page-top-bar {
   background-color: #1b52d8;
   height: 70px;
@@ -672,6 +707,7 @@ span.tw_get_sikshya {
     }
   }
 }
+
 .sikshya-lesson-sidebar-hide-bar {
   background-color: #1b52a9;
   color: #ffffff;
@@ -679,9 +715,11 @@ span.tw_get_sikshya {
   display: inline-block;
   line-height: 68px;
 }
+
 .sikshya-topbar-home-btn {
   margin-left: 20px;
 }
+
 .single_add_to_cart_button {
   color: #fff;
   border: 1px solid #1b52d8;
@@ -702,6 +740,7 @@ span.tw_get_sikshya {
   overflow: hidden;
   vertical-align: top;
 }
+
 a.sikshya-button {
   color: #fff;
   border: 1px solid #1b52d8;
@@ -722,6 +761,7 @@ a.sikshya-button {
   overflow: hidden;
   vertical-align: top;
 }
+
 .sikshya-button {
   color: #fff;
   border: 1px solid #1b52d8;
@@ -742,6 +782,7 @@ a.sikshya-button {
   overflow: hidden;
   vertical-align: top;
 }
+
 a.sikshya-btn {
   color: #fff;
   border: 1px solid #1b52d8;
@@ -762,6 +803,7 @@ a.sikshya-btn {
   overflow: hidden;
   vertical-align: top;
 }
+
 .sikshya-btn {
   color: #fff;
   border: 1px solid #1b52d8;
@@ -782,6 +824,7 @@ a.sikshya-btn {
   overflow: hidden;
   vertical-align: top;
 }
+
 .sikshya-sections-in-single-lesson {
   margin-bottom: 5px;
   background-color: #ffffff;
@@ -811,7 +854,7 @@ a.sikshya-btn {
   }
   .sikshya-single-lesson-items {
     a {
-      >i {
+      > i {
         &:first-child {
           color: #C7C7C7;
           line-height: 22px;
@@ -835,6 +878,7 @@ a.sikshya-btn {
     }
   }
 }
+
 .sikshya-lessons-under-section {
   .sikshya-single-lesson-items.active {
     a {
@@ -866,10 +910,11 @@ a.sikshya-btn {
     }
   }
 }
+
 .sikshya-single-lesson-button-group {
   .sikshya-single-lesson-button {
     a {
-      >i {
+      > i {
         &:first-child {
           color: #C7C7C7;
           line-height: 22px;
@@ -888,6 +933,7 @@ a.sikshya-btn {
     }
   }
 }
+
 .sikshya-lesson-content-area {
   &::after {
     content: '';
@@ -896,6 +942,7 @@ a.sikshya-btn {
   }
   padding: 0 20px 20px 20px;
 }
+
 .sikshya-hide-sidebar-bar {
   a.sikshya-lesson-sidebar-hide-bar {
     i.dashicons {
@@ -908,16 +955,19 @@ a.sikshya-btn {
     }
   }
 }
+
 .sikshya-single-lesson-items.lesson-completed {
   .dashicons {
     color: #4bd863;
   }
 }
+
 .sikshya-content-protected-message {
   margin-bottom: 50px;
   padding: 20px;
   background: #ffe0e0;
 }
+
 .sikshya-question-answer {
   label {
     margin: 0 0 15px 0;
@@ -1068,22 +1118,27 @@ a.sikshya-btn {
     }
   }
 }
+
 .sikshya-next-question-form {
   float: left;
   margin-right: 5px;
 }
+
 .sikshya-prev-question-form {
   float: left;
   margin-right: 5px;
 }
+
 .sikshya-skip-question-form {
   float: left;
   margin-right: 5px;
 }
+
 .sikshya-complete-question-form {
   float: left;
   margin-right: 5px;
 }
+
 .sikshya-lesson-navigation-area {
   display: flex;
   padding: 20px;
@@ -1098,3 +1153,5 @@ a.sikshya-btn {
     display: block;
   }
 }
+
+@import "components/form";

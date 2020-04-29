@@ -1034,4 +1034,10 @@ a.sikshya-btn {
             flex: 1; }
   .sikshya-lesson-navigation-area span {
     display: block; }
+
+.sikshya-button {
+  padding: 10px 30px;
+  background: #1b52d8;
+  color: #fff;
+  font-weight: normal; }
 /*# sourceMappingURL=sikshya.css.map */
