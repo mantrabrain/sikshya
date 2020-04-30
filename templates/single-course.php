@@ -57,7 +57,7 @@ while (have_posts()) {
                             <?php } ?>
                             <?php if ($course_sections_count) { ?>
                                 <tr>
-                                    <td><i class="icon fa fa-clock-o" aria-hidden="true"></i></td>
+                                    <td><i class="icon fa fa-clock" aria-hidden="true"></i></td>
                                     <th><?php esc_html_e('Duration', 'sikshya'); ?>:</th>
                                     <td><?php printf(_n('%s section', '%s sections', $course_sections_count, 'sikshya'), $course_sections_count); ?><?php if ($course_duration) { ?>, <?php printf(_n('%s hr', '%s hrs', $course_duration, 'sikshya'), $course_duration); ?><?php } ?></td>
                                 </tr>
@@ -69,7 +69,7 @@ while (have_posts()) {
                             </tr>
                             <?php if ($course_level) { ?>
                                 <tr>
-                                    <td><i class="icon fa fa-level-up" aria-hidden="true"></i></td>
+                                    <td><i class="icon fa fa-level-up-alt" aria-hidden="true"></i></td>
                                     <th><?php esc_html_e('Level', 'sikshya'); ?>:</th>
                                     <td><?php echo esc_html($course_level); ?></td>
                                 </tr>

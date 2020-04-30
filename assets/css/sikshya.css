@@ -1856,18 +1856,18 @@ a.sikshya-btn {
         -o-transform: translateY(-50%);
            transform: translateY(-50%);
       padding: 0 5px;
-      font-size: 16px;
+      font-size: 20px;
       background: transparent;
       border: none;
       color: #4b5981 !important; }
     #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-sections-title h3 {
       margin: 0;
       padding: 10px 37px 10px 17px;
-      font-size: 16px;
+      font-size: 20px;
       color: #4b5981;
       font-weight: 500; }
   #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-single-lesson-items a, #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-single-lesson-quiz-items a {
-    padding: 14px 100px 14px 17px;
+    padding: 10px 100px 10px 17px;
     display: -webkit-box;
     display: -ms-flexbox;
     display: -webkit-flex;

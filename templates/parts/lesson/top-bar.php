@@ -25,7 +25,7 @@ $course_id = get_post_meta($section_id, 'course_id', true);
             $icon = 'dashicons dashicons-warning';
         }
         ?>
-        <i class="<?php echo esc_attr($icon); ?>"></i><?php echo get_the_title() ?>
+        <i class="<?php echo esc_attr($icon); ?>"></i><?php echo get_the_title() == '' ? '(no-title)' : get_the_title() ?>
     </div>
 
 <?php
