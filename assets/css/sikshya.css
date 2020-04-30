@@ -120,10 +120,10 @@ span.tw_get_sikshya {
     background: center no-repeat;
     background-size: cover;
     position: absolute;
-    top: -5px;
-    bottom: -5px;
-    left: -5px;
-    right: -5px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     opacity: 0.5;
     -webkit-filter: blur(1px);
             filter: blur(1px); }
@@ -133,6 +133,7 @@ span.tw_get_sikshya {
           box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.15); }
 
 .sikshya-description-table {
+  margin-top: -120px;
   background: #fff;
   padding: 30px;
   overflow: hidden; }
@@ -965,6 +966,9 @@ a.sikshya-btn {
   background-size: cover;
   border: 2px solid #aaa;
   float: left; }
+
+.sikshya-single-lesson-wrap {
+  padding: 50px 0; }
 
 #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson {
   margin-bottom: 5px;

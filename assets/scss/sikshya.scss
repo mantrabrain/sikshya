@@ -168,10 +168,10 @@ span.tw_get_sikshya {
     background: center no-repeat;
     background-size: cover;
     position: absolute;
-    top: -5px;
-    bottom: -5px;
-    left: -5px;
-    right: -5px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     opacity: 0.5;
     filter: blur(1px);
   }
@@ -182,6 +182,7 @@ span.tw_get_sikshya {
 }
 
 .sikshya-description-table {
+  margin-top: -120px;
   background: #fff;
   padding: 30px;
   overflow: hidden;
@@ -200,7 +201,6 @@ span.tw_get_sikshya {
   margin-left: auto;
   width: 100%;
 }
-
 
 .sikshya-section-image {
   height: 50px;
@@ -712,7 +712,6 @@ a.sikshya-btn {
   vertical-align: top;
 }
 
-
 .sikshya-single-lesson-button-group {
   .sikshya-single-lesson-button {
     a {
@@ -957,5 +956,5 @@ a.sikshya-btn {
 }
 
 @import "components/courses";
-@import "components/lesson-sidebar";
+@import "components/lesson";
 @import "components/form";
