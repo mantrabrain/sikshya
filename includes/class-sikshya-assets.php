@@ -26,7 +26,7 @@ class Sikshya_Assets
 
 
         // Enqueue styles
-        wp_enqueue_style('sikshya-font-awesome-style', SIKSHYA_ASSETS_URL . '/vendor/font-awesome/font-awesome.css', array(), SIKSHYA_VERSION);
+        wp_enqueue_style('sikshya-font-awesome-style', SIKSHYA_ASSETS_URL . '/vendor/font-awesome/css/font-awesome.css', array(), SIKSHYA_VERSION);
         wp_enqueue_style('sikshya-ionicons-style', SIKSHYA_ASSETS_URL . '/vendor/ionicons//css/ionicons.min.css', array(), SIKSHYA_VERSION);
 
         wp_enqueue_style('sikshya-public-style', SIKSHYA_ASSETS_URL . '/css/sikshya-public.css', array(), SIKSHYA_VERSION);

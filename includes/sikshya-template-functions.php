@@ -480,13 +480,17 @@ if (!function_exists('sikshya_content_item_edit_links')) {
 
 if (!function_exists('sikshya_image')) {
 
-    function sikshya_image()
+    function sikshya_image($image_size = 'full')
     {
 
         if (has_post_thumbnail()) {
 
+
             $title = get_the_title();
-            $url = get_the_post_thumbnail_url();
+
+            global $post;
+
+            $url = get_the_post_thumbnail_url($post, $image_size);
 
             echo '<img alt="' . esc_attr($title) . '" 
             src="' . esc_url($url) . '"/>';

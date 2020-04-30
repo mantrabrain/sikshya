@@ -9,7 +9,7 @@
         <div class="sikshya-course-header">
 
             <a href="<?php echo esc_url(get_permalink()) ?>">
-                <?php sikshya_image(); ?>
+                <?php sikshya_image('sikshya_course_thumbnail'); ?>
             </a>
             <div class="sikshya-course-loop-header-meta">
                 <span class="sikshya-course-loop-level"><?php echo esc_html($course_level); ?></span>
@@ -41,8 +41,11 @@
         <div class="sikshya-loop-course-footer">
 
             <div class="sikshya-course-loop-price">
-                <div class="price"> Free
-                    <div class="sikshya-loop-cart-btn-wrap"><a href="<?php echo esc_url(get_permalink()) ?>">Enroll</a>
+                <div class="price"><?php echo esc_html__('Free', 'sikshya'); ?>
+                    <div class="sikshya-loop-cart-btn-wrap"><a
+                                href="<?php echo esc_url(get_permalink()) ?>"><i
+                                    class="fas fa-shopping-cart"></i> <?php echo esc_html__('Get Enrolled', 'sikshya'); ?>
+                        </a>
                     </div>
                 </div>
             </div>

@@ -46,7 +46,7 @@
                            data-lesson-id="<?php echo absint($lesson->ID); ?>">
 
                             <i class="dashicons dashicons-media-text"></i> <span
-                                    class="lesson_title"><?php echo esc_html($lesson->post_title); ?></span>
+                                    class="lesson_title"><?php echo $lesson->post_title== '' ? '(no title)': esc_html($lesson->post_title); ?></span>
                             <span class="sikshya-lesson-right-icons">
 
                                                 <?php
@@ -81,15 +81,17 @@
                             }
 
                             ?>
-                            <div class="sikshya-single-lesson-items <?php echo esc_attr($quiz_active_class); ?>">
+                            <div class="sikshya-single-lesson-quiz-items <?php echo esc_attr($quiz_active_class); ?>">
                                 <a href="<?php echo esc_url(sikshya()->quiz->get_permalink($quiz->ID)) ?>"
-                                   class="sikshya-single-lesson-a"
+                                   class="sikshya-single-lesson-quiz-a"
                                    data-quiz-id="<?php echo absint($quiz->ID); ?>">
 
                                     <i class="dashicons dashicons-clock"></i> <span
-                                            class="lesson_title"><?php echo esc_html($quiz->post_title); ?></span>
+                                            class="lesson_quiz_title"><?php echo $quiz->post_title== '' ? '(no title)': esc_html($quiz->post_title); ?></span>
                                     <span class="sikshya-lesson-right-icons">
-                                                        <i class="sikshya-play-duration">3 questions</i><i
+                                                        <i class="sikshya-play-duration"><?php
+                                                            sikshya()->quiz->get_child_count_text($quiz->ID);
+                                                            ?></i><i
                                                 class="sikshya-lesson-complete "></i>
                                         <?php
                                         if (!sikshya_is_content_available_for_user($quiz->ID, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE)) {

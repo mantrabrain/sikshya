@@ -1,6 +1,6 @@
 <form name="sikshya-complete-question" class="sikshya-complete-question-form" method="post">
 
-    <button type="submit"><?php echo __('Complete', 'sikshya') ?></button>
+    <button type="submit" class="sikshya-button"><?php echo __('Complete', 'sikshya') ?></button>
     <input type="hidden" name="sikshya_selected_answer"/>
     <input type="hidden" name="sikshya_question_id" value="<?php echo absint($question_id); ?>">
     <input type="hidden" name="sikshya_quiz_id" value="<?php echo absint($quiz_id); ?>">

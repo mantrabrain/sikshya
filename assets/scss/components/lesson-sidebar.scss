@@ -1,0 +1,86 @@
+#sikshya-lesson-sidebar-tab-content {
+  .sikshya-sections-in-single-lesson {
+    margin-bottom: 5px;
+    background-color: #ffffff;
+    padding: 0;
+    .sikshya-sections-title {
+      position: relative;
+      cursor: pointer;
+      button {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        transform: translateY(-50%);
+        padding: 0 5px;
+        font-size: 16px;
+        background: transparent;
+        border: none;
+        color: #4b5981 !important;
+      }
+      h3 {
+        margin: 0;
+        padding: 10px 37px 10px 17px;
+        font-size: 16px;
+        color: #4b5981;
+        font-weight: 500;
+      }
+    }
+    .sikshya-single-lesson-items, .sikshya-single-lesson-quiz-items {
+      a {
+        > i {
+          &:first-child {
+            color: #C7C7C7;
+            line-height: 22px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+          }
+        }
+        span {
+          margin: 0;
+          display: inline;
+          color: #4b5981;
+        }
+        padding: 14px 100px 14px 17px;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        color: #4b5981;
+        position: relative;
+        border-top: 1px solid #E8EFF1;
+      }
+    }
+  }
+
+  .sikshya-single-lesson-items.active {
+    a {
+      background: rgba(233, 235, 238, 0.35);
+    }
+    .sikshya-lesson-right-icons {
+      .sikshya-lesson-complete-status {
+        border-color: #b7d6b7;
+      }
+    }
+  }
+  .sikshya-lesson-right-icons {
+    position: absolute;
+    right: 15px;
+    top: 14px;
+    .sikshya-content-locked {
+      height: 10px;
+      width: 10px;
+      display: inline-block;
+      line-height: 10px;
+      text-align: center;
+      margin: 0;
+      vertical-align: middle;
+      margin-left: 8px;
+      color: #cacaca;
+    }
+    i {
+      font-style: normal;
+    }
+  }
+
+}

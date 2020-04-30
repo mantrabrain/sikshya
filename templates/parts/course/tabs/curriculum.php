@@ -11,7 +11,11 @@ if (count($sections) > 0) {
 
         echo '<a class="item-link">';
 
-        echo '<span class="item-name">' . esc_html($section->post_title) . '</span>';
+        echo '<span class="item-name">';
+        
+        echo $section->post_title == '' ? '(no title)' : esc_html($section->post_title);
+
+        echo '</span>';
 
         echo '<span class="item-meta">';
 
@@ -39,7 +43,7 @@ if (count($sections) > 0) {
 
                 echo '<span class="item-name">';
 
-                echo esc_html($lesson->post_title);
+                echo $lesson->post_title == '' ? '(no title)' : esc_html($lesson->post_title);
 
                 echo '</span>';
 
@@ -67,7 +71,7 @@ if (count($sections) > 0) {
 
                         echo '<span class="item-name">';
 
-                        echo esc_html($quiz->post_title);
+                        echo $quiz->post_title == '' ? '(no title)' : esc_html($quiz->post_title);
 
                         echo '</span>';
 
