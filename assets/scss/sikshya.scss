@@ -939,7 +939,6 @@ a.sikshya-btn {
   float: left;
   margin-right: 5px;
 }
-
 .sikshya-lesson-navigation-area {
   display: flex;
   padding: 20px;
@@ -955,6 +954,7 @@ a.sikshya-btn {
   }
 }
 
+@import "components/grid";
 @import "components/courses";
 @import "components/lesson";
 @import "components/form";
