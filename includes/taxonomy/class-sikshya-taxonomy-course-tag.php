@@ -36,11 +36,11 @@ if (!class_exists('Sikshya_Taxonomy_Course_Tag')) {
                 'show_admin_column' => true,
                 'query_var' => true,
                 'rewrite' => array(
-                    'slug' => 'course-tag',
+                    'slug' => 'sik_course_tag',
                     'with_front' => true
                 )
             );
-            register_taxonomy('course-tag', array('courses'), $args);
+            register_taxonomy('sik_course_tag', array('sik_courses'), $args);
 
 
         }

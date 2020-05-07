@@ -40,7 +40,7 @@ class Sikshya_Taxonomy
      * @var Sikshya_Taxonomy_Course_Tag
      * @since 1.0.0
      */
-    public $course_tag;
+    public $sik_course_tag;
 
 
     /**
@@ -70,7 +70,7 @@ class Sikshya_Taxonomy
     {
 
         $this->course_taxonomy = new Sikshya_Taxonomy_Course_Category();
-        $this->course_tag= new Sikshya_Taxonomy_Course_Tag();
+        $this->sik_course_tag= new Sikshya_Taxonomy_Course_Tag();
 
 
     }
@@ -78,7 +78,7 @@ class Sikshya_Taxonomy
     public function init_taxonomy()
     {
         $this->course_taxonomy->init();
-        $this->course_tag->init();
+        $this->sik_course_tag->init();
     }
 
     public function init()

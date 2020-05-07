@@ -18,11 +18,13 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
         public function metabox()
         {
-            add_meta_box(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_info', __('Course Options', 'sikshya'), array($this, 'course_options_meta'), SIKSHYA_COURSES_CUSTOM_POST_TYPE, 'normal', 'high');
+            add_action('edit_form_after_editor', array($this, 'course_options_meta'));
+
             add_meta_box(SIKSHYA_COURSES_CUSTOM_POST_TYPE . 'sikshya_section_lessons', __('Sections & Lessons', 'sikshya'), array($this, 'section_lesson_meta'), SIKSHYA_COURSES_CUSTOM_POST_TYPE, 'normal', 'high');
 
 
         }
+
 
         public function section_lesson_meta($post)
         {
@@ -43,6 +45,12 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
         public function course_options_meta($post)
         {
+            global $post;
+
+            if (SIKSHYA_COURSES_CUSTOM_POST_TYPE !== get_post_type()) {
+                return;
+            }
+
             $template_vars = sikshya_get_course_info($post->ID);
 
             $template_vars['show_on_login'] = get_post_meta($post->ID, $this->_meta_prefix . 'info_show_on_login', true);

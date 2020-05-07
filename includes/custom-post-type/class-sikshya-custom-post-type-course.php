@@ -33,7 +33,7 @@ if (!class_exists('Sikshya_Custom_Post_Type_Course')) {
                 'capability_type' => 'post',
                 'hierarchical' => false,
                 'menu_position' => null,
-                'taxonomies' => array('course-category', 'course-tag'),
+                'taxonomies' => array('sik_course_category', 'sik_course_tag'),
                 'supports' => array(
                     'excerpt',
                     'title',
