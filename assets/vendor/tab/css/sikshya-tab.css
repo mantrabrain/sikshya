@@ -1,0 +1,45 @@
+.sikshya-tabs ul.tab-nav {
+    background: #F5F5F5;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-bottom: 0;
+}
+
+.sikshya-tabs ul.tab-nav li {
+    float: left;
+    margin: 0;
+    padding: 5px;
+}
+
+.sikshya-tabs ul.tab-nav li.active,
+.sikshya-tabs ul.tab-nav li:hover {
+    background: #ddd;
+}
+
+.sikshya-tabs ul.tab-nav li a {
+    padding: 15px;
+    text-decoration: none;
+    display: block;
+    line-height: initial;
+
+}
+
+.sikshya-tabs ul.tab-nav:after {
+    content: "";
+    clear: both;
+    display: block;
+}
+
+.sikshya-tabs .tab-content section.tab-content-item {
+    display: none;
+}
+
+.sikshya-tabs .tab-content section.tab-content-item.active {
+    display: block;
+}
+
+.sikshya-tabs .tab-content {
+    padding: 10px;
+    border: 1px solid #ddd;
+}

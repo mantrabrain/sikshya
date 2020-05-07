@@ -13,6 +13,39 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             add_action('save_post', array($this, 'save'));
 
+            add_action('sikshya_course_metaboxes', array($this, 'course_meta'));
+
+            add_action('sikshya_course_tab_courses', array($this, 'courses_tab'));
+            add_action('sikshya_course_tab_others', array($this, 'others_tab'));
+
+
+        }
+
+        public function courses_tab()
+        {
+            sikshya_load_admin_template('metabox.course.tabs.courses', array());
+        }
+
+        public function others_tab()
+        {
+            sikshya_load_admin_template('metabox.course.tabs.others', array());
+        }
+
+        public function course_meta()
+        {
+            $tabs = array(
+                'courses' => array(
+                    'is_active' => true,
+                    'title' => esc_html__('Courses', 'sikshya'),
+                ), 'others' => array(
+                    'title' => esc_html__('Other', 'sikshya'),
+                )
+            );
+
+            sikshya_load_admin_template('metabox.course.options', array(
+
+                'tabs' => $tabs
+            ));
 
         }
 

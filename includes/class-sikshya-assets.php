@@ -11,6 +11,7 @@ class Sikshya_Assets
     public function assets()
     {
 
+
         wp_enqueue_style('dashicons');
 
         wp_enqueue_style(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-sikshya', SIKSHYA_ASSETS_URL . '/css/sikshya.css', false, SIKSHYA_VERSION);

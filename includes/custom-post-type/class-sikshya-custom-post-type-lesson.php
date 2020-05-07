@@ -45,6 +45,7 @@ if (!class_exists('Sikshya_Custom_Post_Type_Lesson')) {
                     'thumbnail',
                     'excerpt',
                     'editor',
+                    'post-formats'
                 ),
                 'show_in_rest' => true,
             );

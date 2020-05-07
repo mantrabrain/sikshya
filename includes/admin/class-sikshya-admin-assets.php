@@ -14,6 +14,15 @@ class Sikshya_Admin_Assets
          * @since 1.0.0
          */
 
+
+        // Register Scripts
+        wp_register_script('sikshya-tab-js', SIKSHYA_ASSETS_URL . '/vendor/tab/js/sikshya-tab.js', array('jquery'), SIKSHYA_VERSION);
+
+
+        // Register Styles
+        wp_register_style('sikshya-tab-css', SIKSHYA_ASSETS_URL . '/vendor/tab/css/sikshya-tab.css', array(), SIKSHYA_VERSION);
+
+
         wp_enqueue_script('jquery-ui-core', array('jquery'));
         wp_enqueue_script('jquery-ui-sortable', array('jquery'));
         wp_enqueue_script('jquery-ui-accordion', array('jquery'));
@@ -24,6 +33,10 @@ class Sikshya_Admin_Assets
         wp_enqueue_script('media-upload');
         wp_enqueue_script('thickbox');
         wp_enqueue_script('tiny_mce');
+
+
+        wp_enqueue_script('sikshya-tab-js');
+        wp_enqueue_style('sikshya-tab-css');
 
         wp_enqueue_script('sweetalert2-script', SIKSHYA_ASSETS_URL . '/vendor/sweetalert2/js/sweetalert2.js', array('jquery'), SIKSHYA_VERSION);
 
