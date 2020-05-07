@@ -15,15 +15,29 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             add_action('sikshya_course_metaboxes', array($this, 'course_meta'));
 
-            add_action('sikshya_course_tab_courses', array($this, 'courses_tab'));
+            add_action('sikshya_course_tab_curriculum', array($this, 'curriculum_tab'));
             add_action('sikshya_course_tab_others', array($this, 'others_tab'));
 
 
         }
 
-        public function courses_tab()
+        public function curriculum_tab()
         {
-            sikshya_load_admin_template('metabox.course.tabs.courses', array());
+            global $post;
+
+            wp_nonce_field(SIKSHYA_FILE, SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce');
+
+            $get_all_lessons = sikshya()->course->get_all_lessons($post->ID);
+
+            $template_vars = array();
+
+            if ($post instanceof \WP_Post) {
+
+                $template_vars = sikshya()->course->get_all($post->ID);
+            }
+
+
+            include_once "views/sections-and-lessons.php";
         }
 
         public function others_tab()
@@ -34,9 +48,9 @@ if (!class_exists('Sikshya_Metabox_Course')) {
         public function course_meta()
         {
             $tabs = array(
-                'courses' => array(
+                'curriculum' => array(
                     'is_active' => true,
-                    'title' => esc_html__('Courses', 'sikshya'),
+                    'title' => esc_html__('Curriculum', 'sikshya'),
                 ), 'others' => array(
                     'title' => esc_html__('Other', 'sikshya'),
                 )
@@ -53,28 +67,9 @@ if (!class_exists('Sikshya_Metabox_Course')) {
         {
             add_action('edit_form_after_editor', array($this, 'course_options_meta'));
 
-            add_meta_box(SIKSHYA_COURSES_CUSTOM_POST_TYPE . 'sikshya_section_lessons', __('Sections & Lessons', 'sikshya'), array($this, 'section_lesson_meta'), SIKSHYA_COURSES_CUSTOM_POST_TYPE, 'normal', 'high');
-
 
         }
 
-
-        public function section_lesson_meta($post)
-        {
-            wp_nonce_field(SIKSHYA_FILE, SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce');
-
-            $get_all_lessons = sikshya()->course->get_all_lessons($post->ID);
-
-            $template_vars = array();
-
-            if ($post instanceof \WP_Post) {
-
-                $template_vars = sikshya()->course->get_all($post->ID);
-            }
-
-
-            include_once "views/sections-and-lessons.php";
-        }
 
         public function course_options_meta($post)
         {
