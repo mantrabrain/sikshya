@@ -12,8 +12,11 @@ class Sikshya_Core_Course
         $data = get_post($course_id);
         if (!empty($data)) {
             $sections = sikshya()->section->get_all_by_course($course_id);
+
             if (!empty($sections)) {
+
                 foreach ($sections as $index => $section) {
+                    
                     $lessons = sikshya()->lesson->get_all_by_section($section->ID);
 
                     if (!empty($lessons)) {

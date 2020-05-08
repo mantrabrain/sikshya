@@ -1,9 +1,9 @@
 .sikshya-tabs ul.tab-nav {
-    background: #F5F5F5;
+    background: #e3eaef;
     margin: 0;
-    padding: 0;
     border: 1px solid #ddd;
     border-bottom: 0;
+    padding: 0 10px;
 }
 
 .sikshya-tabs ul.tab-nav li {
@@ -14,14 +14,16 @@
 
 .sikshya-tabs ul.tab-nav li.active,
 .sikshya-tabs ul.tab-nav li:hover {
-    background: #ddd;
+    background: #727cf5;
+    color: #fff;
 }
 
 .sikshya-tabs ul.tab-nav li a {
-    padding: 15px;
+    padding: 10px 15px;
     text-decoration: none;
     display: block;
     line-height: initial;
+    color: inherit;
 
 }
 
@@ -42,4 +44,42 @@
 .sikshya-tabs .tab-content {
     padding: 10px;
     border: 1px solid #ddd;
+}
+
+.sikshya-button {
+    display: inline-block;
+    font-weight: 400;
+    color: #6c757d;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: .45rem .9rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .15rem;
+    -webkit-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out, -webkit-box-shadow .15s ease-in-out;
+}
+
+.sikshya-button.btn-success {
+    color: #fff;
+    background-color: #0acf97;
+    border-color: #0acf97;
+    -webkit-box-shadow: 0 2px 6px 0 rgba(10, 207, 151, .5);
+    box-shadow: 0 2px 6px 0 rgba(10, 207, 151, .5);
+}
+
+.sikshya-button.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+    -webkit-box-shadow: 0 2px 6px 0 rgba(108, 117, 125, .5);
+    box-shadow: 0 2px 6px 0 rgba(108, 117, 125, .5);
 }

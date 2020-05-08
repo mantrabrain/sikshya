@@ -2,47 +2,44 @@
 
 class Sikshya_Core_Section
 {
-    public function save($sections, $course_id = 0)
+    public function add_section($section_title)
     {
-        $section_ids = array();
+        if ('' == $section_title) {
 
-        $menu_order = 100;
+            return null;
+        }
+        $args = array(
+            'post_title' => $section_title,
+            'post_content' => '',
+            'post_status' => 'publish',
+            'post_type' => SIKSHYA_SECTIONS_CUSTOM_POST_TYPE,
+        );
+        $section_id = wp_insert_post($args);
 
-        foreach ($sections as $section_id => $section_content) {
+        return array('section_id' => $section_id, 'section_title' => $section_title);
 
-            $section_title = isset($section_content['section_title']) ? sanitize_text_field($section_content['section_title']) : '';
-            $args = array(
-                'post_title' => $section_title,
-                'post_content' => '',
-                'post_status' => 'publish',
-                'post_type' => SIKSHYA_SECTIONS_CUSTOM_POST_TYPE,
-                'menu_order' => $menu_order,
-            );
-            $updated_section_id = 0;
+    }
 
-            if (!sikshya_is_new_post($section_id)) {
+    public function save($section_ids = array(), $course_id = 0)
+    {
 
-                $args['ID'] = $section_id;
+        $updated_section_ids = array();
 
-                $updated_section_id = wp_update_post($args);
+        foreach ($section_ids as $section_id) {
 
+            $section_id = absint($section_id);
+
+            if (SIKSHYA_SECTIONS_CUSTOM_POST_TYPE === get_post_type($section_id) && $course_id > 0) {
+
+                update_post_meta($section_id, 'course_id', $course_id);
+
+                $updated_section_ids[] = $section_id;
             }
 
-            $updated_section_id = wp_insert_post($args);
 
-            if (!is_wp_error($updated_section_id) && $updated_section_id > 0) {
-                 if ($course_id > 0) {
-                    update_post_meta($updated_section_id, 'course_id', $course_id);
-                }
-                $section_ids[$section_id] = $updated_section_id;
-
-            }
-
-
-            $menu_order++;
         }
 
-        return $section_ids;
+        return $updated_section_ids;
 
     }
 
@@ -75,8 +72,8 @@ class Sikshya_Core_Section
         $args = array(
             'numberposts' => -1,
             'no_found_rows' => true,
-            'orderby' => 'menu_order',
-            'order' => 'asc',
+            'orderby' => 'id',
+            'order' => 'desc',
             'post_type' => SIKSHYA_SECTIONS_CUSTOM_POST_TYPE,
             'meta_query' => array(
                 array(

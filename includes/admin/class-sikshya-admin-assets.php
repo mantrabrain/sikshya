@@ -17,10 +17,12 @@ class Sikshya_Admin_Assets
 
         // Register Scripts
         wp_register_script('sikshya-tab-js', SIKSHYA_ASSETS_URL . '/vendor/tab/js/sikshya-tab.js', array('jquery'), SIKSHYA_VERSION);
+        wp_register_script('jbox-js', SIKSHYA_ASSETS_URL . '/vendor/jbox/dist/jBox.all.min.js', array(), SIKSHYA_VERSION);
 
 
         // Register Styles
         wp_register_style('sikshya-tab-css', SIKSHYA_ASSETS_URL . '/vendor/tab/css/sikshya-tab.css', array(), SIKSHYA_VERSION);
+        wp_register_style('jbox-css', SIKSHYA_ASSETS_URL . '/vendor/jbox/dist/jBox.all.min.css', array(), SIKSHYA_VERSION);
 
 
         wp_enqueue_script('jquery-ui-core', array('jquery'));
@@ -35,12 +37,29 @@ class Sikshya_Admin_Assets
         wp_enqueue_script('tiny_mce');
 
 
+        wp_enqueue_script('jbox-js');
+        wp_enqueue_style('jbox-css');
+
         wp_enqueue_script('sikshya-tab-js');
         wp_enqueue_style('sikshya-tab-css');
 
         wp_enqueue_script('sweetalert2-script', SIKSHYA_ASSETS_URL . '/vendor/sweetalert2/js/sweetalert2.js', array('jquery'), SIKSHYA_VERSION);
 
         wp_enqueue_style('sweetalert2-style', SIKSHYA_ASSETS_URL . '/vendor/sweetalert2/css/sweetalert2.css', array(), SIKSHYA_VERSION);
+
+        wp_enqueue_script('sikshya-admin', SIKSHYA_ASSETS_URL . '/admin/js/sikshya.js', array('jbox-js'), SIKSHYA_VERSION);
+
+        global $post;
+        $post_id = isset($post->ID) ? $post->ID : 0;
+
+        $data =
+            array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'remove_section_from_course_nonce' => wp_create_nonce('wp_sikshya_remove_section_from_course_nonce'),
+                'course_id' => $post_id,
+            );
+        wp_localize_script('sikshya-admin', 'SikshyaAdminData', $data);
+
 
         wp_enqueue_script('sikshya-admin-script', SIKSHYA_ASSETS_URL . '/admin/js/sikshya-admin.js', array(), SIKSHYA_VERSION);
 
@@ -51,8 +70,7 @@ class Sikshya_Admin_Assets
         wp_register_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-custom-ace-editor', SIKSHYA_ASSETS_URL . '/vendor/ace.js', array('jquery'), '1.2.9');
         wp_enqueue_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-custom-ace-editor');
 
-        global $post;
-        $post_id = isset($post->ID) ? $post->ID : 0;
+
         $data =
             array(
                 'general' =>

@@ -16,8 +16,38 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             add_action('sikshya_course_metaboxes', array($this, 'course_meta'));
 
             add_action('sikshya_course_tab_curriculum', array($this, 'curriculum_tab'));
+            add_action('sikshya_course_curriculum_tab_before', array($this, 'curriculum_tab_before'));
             add_action('sikshya_course_tab_others', array($this, 'others_tab'));
 
+
+        }
+
+        public function curriculum_tab_before()
+        {
+            global $post;
+
+            $post_id = isset($post->ID) ? absint($post->ID) : 0;
+
+            if ($post_id > 0) {
+
+                $template_vars = array();
+
+                if ($post instanceof \WP_Post) {
+
+                    $template_vars = sikshya()->course->get_all($post_id);
+                }
+
+                $sections = isset($template_vars->sections) ? $template_vars->sections : array();
+
+                foreach ($sections as $section) {
+                    $section_data = array(
+                        'section_id' => $section->ID,
+                        'section_title' => $section->post_title,
+                    );
+                    sikshya_load_admin_template('metabox.course.tabs.curriculum.section-template', $section_data);
+                }
+
+            }
 
         }
 
@@ -27,17 +57,10 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             wp_nonce_field(SIKSHYA_FILE, SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce');
 
-            $get_all_lessons = sikshya()->course->get_all_lessons($post->ID);
 
-            $template_vars = array();
+            sikshya_load_admin_template('metabox.course.tabs.curriculum', array());
 
-            if ($post instanceof \WP_Post) {
-
-                $template_vars = sikshya()->course->get_all($post->ID);
-            }
-
-
-            include_once "views/sections-and-lessons.php";
+            ///include_once "views/sections-and-lessons.php";
         }
 
         public function others_tab()
@@ -51,8 +74,21 @@ if (!class_exists('Sikshya_Metabox_Course')) {
                 'curriculum' => array(
                     'is_active' => true,
                     'title' => esc_html__('Curriculum', 'sikshya'),
-                ), 'others' => array(
-                    'title' => esc_html__('Other', 'sikshya'),
+                ),
+                'general' => array(
+                    'title' => esc_html__('General', 'sikshya'),
+                ),
+                'requirement' => array(
+                    'title' => esc_html__('Requirement', 'sikshya'),
+                ),
+                'outcomes' => array(
+                    'title' => esc_html__('Outcomes', 'sikshya'),
+                ),
+                'pricing' => array(
+                    'title' => esc_html__('Pricing', 'sikshya'),
+                ),
+                'media' => array(
+                    'title' => esc_html__('Media', 'sikshya'),
                 )
             );
 
@@ -117,6 +153,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             $sikshya_info = isset($_POST['sikshya_info']) ? $_POST['sikshya_info'] : array();
 
+
             $valid_sikshya_info = array();
 
 
@@ -175,48 +212,30 @@ if (!class_exists('Sikshya_Metabox_Course')) {
         private function update_other_meta($post_id)
         {
 
-            $sections = isset($_POST['sikshya_section']) ? $_POST['sikshya_section'] : array();
+            $sikshya_course_content = isset($_POST['sikshya_course_content']) ? $_POST['sikshya_course_content'] : array();
 
-            $lessons = isset($_POST['sikshya_lesson']) ? $_POST['sikshya_lesson'] : array();
+            $section_ids = isset($sikshya_course_content['section_ids']) ? $sikshya_course_content['section_ids'] : array();
 
-            $quizzes = isset($_POST['lessons_quiz']) ? $_POST['lessons_quiz'] : array();
+            $lesson_ids = isset($sikshya_course_content['lesson_ids']) ? $sikshya_course_content['lesson_ids'] : array();
 
-            $lessons_questions = isset($_POST['lessons_questions']) ? $_POST['lessons_questions'] : array();
+            $quiz_ids = isset($sikshya_course_content['quiz_ids']) ? $sikshya_course_content['quiz_ids'] : array();
 
-            $saved_section_ids = array();
+            if (count($section_ids) > 0) {
 
-            if (count($sections) > 0) {
-
-                $saved_section_ids = sikshya()->section->save($sections, $post_id);
+                $saved_section_ids = sikshya()->section->save($section_ids, $post_id);
             }
 
-            $saved_lesson_ids = array();
+            if (count($lesson_ids) > 0) {
 
-
-            if (count($lessons) > 0) {
-
-                $saved_lesson_ids = sikshya()->lesson->save($lessons, $saved_section_ids, $post_id);
+                $saved_lesson_ids = sikshya()->lesson->save($lesson_ids, $post_id);
             }
 
-
-            $saved_quizzes_ids = array();
-
-
-            if (count($quizzes) > 0) {
+            if (count($quiz_ids) > 0) {
 
                 $saved_quizzes_ids = sikshya()->quiz->save(
-                    $quizzes, $saved_section_ids, $saved_lesson_ids, $post_id);
+                    $quiz_ids, $post_id, SIKSHYA_COURSES_CUSTOM_POST_TYPE);
             }
 
-
-            $saved_question_ids = array();
-
-            if (count($lessons_questions) > 0) {
-
-                $saved_question_ids = sikshya()->question->save(
-
-                    $lessons_questions, $saved_section_ids, $saved_lesson_ids, $saved_quizzes_ids, $post_id);
-            }
         }
 
 

@@ -2,60 +2,37 @@
 
 class Sikshya_Core_Lesson
 {
-    public function save($lessons = array(), $saved_section_ids = array(), $course_id = 0)
+    public function save($lesson_ids = array(), $course_id = 0)
     {
-        $lesson_ids = array();
+        $updated_lesson_ids = array();
 
-        $menu_order = 100;
+        foreach ($lesson_ids as $lesson_id) {
 
-        $section_ids_array_keys = array_keys($saved_section_ids);
+            $lesson_id = absint($lesson_id);
 
-        foreach ($lessons as $section_id => $section_content_lesson) {
+            if (SIKSHYA_LESSONS_CUSTOM_POST_TYPE === get_post_type($lesson_id) && $course_id > 0) {
 
-            foreach ($section_content_lesson as $lesson_id => $lesson_content) {
+                $course_ids = get_post_meta($lesson_id, 'course_id', true);
 
-                if (in_array($section_id, $section_ids_array_keys)) {
+                if (is_array($course_ids)) {
 
-                    $valid_section_id = $saved_section_ids[$section_id];
+                    $course_ids[] = $course_id;
 
-                    $lesson_title = isset($lesson_content['lessons_title']) ? sanitize_text_field($lesson_content['lessons_title']) : '';
-
-                    $post_content = isset($lesson_content['lessons_content']) ? sanitize_text_field($lesson_content['lessons_content']) : '';
-
-                    $args = array(
-                        'post_title' => $lesson_title,
-                        'post_content' => $post_content,
-                        'post_status' => 'publish',
-                        'post_type' => SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
-                        'menu_order' => $menu_order,
-                    );
-                    $updated_lesson_id = 0;
-
-                    if (!sikshya_is_new_post($lesson_id)) {
-
-                        $args['ID'] = $lesson_id;
-
-                        $updated_lesson_id = wp_update_post($args);
-
-                    }
-
-                    $updated_lesson_id = wp_insert_post($args);
-
-                    if (!is_wp_error($updated_lesson_id) && $updated_lesson_id > 0) {
-
-                        update_post_meta($updated_lesson_id, 'course_id', $course_id);
-                        update_post_meta($updated_lesson_id, 'section_id', $valid_section_id);
-                        $lesson_ids[$lesson_id] = $updated_lesson_id;
-                    }
-
-
-                    $menu_order++;
+                } else {
+                    $course_ids = array($course_id);
                 }
+                update_post_meta($lesson_id, 'course_id', $course_ids);
+
+                $updated_lesson_ids[] = $lesson_id;
             }
+
+
         }
 
-        return $lesson_ids;
+        return $updated_lesson_ids;
+
     }
+
 
     public function get_all_by_section($section_id)
     {
@@ -281,7 +258,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
             }
         }
         if ($next > 0) {
-            
+
             return array(
                 'next_link' => get_permalink($next),
                 'title' => get_the_title($next)
@@ -320,6 +297,24 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         }
 
         return apply_filters('sikshya_quiz_next_question_id', $next, $id);
+    }
+
+    public function add_lesson($lesson_title)
+    {
+        if ('' == $lesson_title) {
+
+            return null;
+        }
+        $args = array(
+            'post_title' => $lesson_title,
+            'post_content' => '',
+            'post_status' => 'publish',
+            'post_type' => SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
+        );
+        $lesson_id = wp_insert_post($args);
+
+        return array('id' => $lesson_id, 'title' => $lesson_title, 'type' => 'lesson_ids');
+
     }
 
 }

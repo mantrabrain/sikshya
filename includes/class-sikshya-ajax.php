@@ -10,7 +10,13 @@ class Sikshya_Ajax
             'remove_section_from_course',
             'remove_lesson_from_course',
             'remove_quiz_from_course',
-            'remove_question_from_course'
+            'remove_question_from_course',
+            'load_section_settings',
+            'load_lesson_form',
+            'load_quiz_form',
+            'add_section',
+            'add_lesson',
+            'add_quiz',
         );
 
         return $actions;
@@ -189,7 +195,6 @@ class Sikshya_Ajax
         }
 
 
-
         $message = __('Successfully removed from course', 'sikshya');
 
         if (!$status) {
@@ -201,6 +206,128 @@ class Sikshya_Ajax
             );
         }
 
+    }
+
+    public function load_section_settings()
+    {
+
+        $status = sikshya()->helper->validate_nonce();
+
+        if (!$status) {
+            wp_send_json_error($this->ajax_error());
+        }
+
+        $sections = array();
+        sikshya_load_admin_template('metabox.course.tabs.curriculum.section-form', array('sections' => $sections));
+
+        exit;
+
+    }
+
+    public function load_lesson_form()
+    {
+
+        $status = sikshya()->helper->validate_nonce();
+
+        $section_id = isset($_POST['section_id']) ? absint($_POST['section_id']) : 0;
+
+        if (!$status || $section_id < 1) {
+
+            wp_send_json_error($this->ajax_error());
+        }
+
+        sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-form', array('section_id' => $section_id));
+
+        exit;
+
+    }
+
+    public function load_quiz_form()
+    {
+
+        $status = sikshya()->helper->validate_nonce();
+
+        $section_id = isset($_POST['section_id']) ? absint($_POST['section_id']) : 0;
+
+
+        if (!$status || $section_id < 1) {
+            wp_send_json_error($this->ajax_error());
+        }
+
+        sikshya_load_admin_template('metabox.course.tabs.curriculum.quiz-form', array('section_id' => $section_id));
+
+        exit;
+
+    }
+
+    public function add_section()
+    {
+        $status = sikshya()->helper->validate_nonce();
+
+        if (!$status) {
+            wp_send_json_error($this->ajax_error());
+        }
+        $section_title = isset($_POST['section_title']) ? sanitize_text_field($_POST['section_title']) : '';
+
+        $section_data = sikshya()->section->add_section($section_title);
+
+        $section_id = isset($section_data['section_id']) ? $section_data['section_id'] : '';
+
+        if ('' == $section_id) {
+            wp_send_json_error();
+        }
+
+        sikshya_load_admin_template('metabox.course.tabs.curriculum.section-template', $section_data);
+
+        exit;
+    }
+
+    public function add_lesson()
+    {
+        $status = sikshya()->helper->validate_nonce();
+
+        if (!$status) {
+            wp_send_json_error($this->ajax_error());
+        }
+
+        $lesson_title = isset($_POST['lesson_title']) ? sanitize_text_field($_POST['lesson_title']) : '';
+
+        $lesson_data = sikshya()->lesson->add_lesson($lesson_title);
+
+        $lesson_id = isset($lesson_data['id']) ? $lesson_data['id'] : '';
+
+        if ('' == $lesson_id) {
+            wp_send_json_error();
+        }
+        $lesson_data['icon'] = 'dashicons-media-text';
+
+
+        sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $lesson_data);
+
+        exit;
+    }
+
+    public function add_quiz()
+    {
+        $status = sikshya()->helper->validate_nonce();
+
+        if (!$status) {
+            wp_send_json_error($this->ajax_error());
+        }
+        $quiz_title = isset($_POST['quiz_title']) ? sanitize_text_field($_POST['quiz_title']) : '';
+
+        $quiz_data = sikshya()->quiz->add_quiz($quiz_title);
+
+        $quiz_id = isset($quiz_data['id']) ? $quiz_data['id'] : '';
+
+        if ('' == $quiz_id) {
+            wp_send_json_error();
+        }
+
+        $quiz_data['icon'] = 'dashicons-clock';
+        sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $quiz_data);
+
+        exit;
     }
 
 

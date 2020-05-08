@@ -2,68 +2,45 @@
 
 class Sikshya_Core_Quiz
 {
-    public function save($quizzes = array(), $saved_section_ids = array(), $saved_lesson_ids = array(), $course_id = 0)
+    public function save($quiz_ids = array(), $parent_id = 0, $parent_type = SIKSHYA_COURSES_CUSTOM_POST_TYPE)
     {
-        $menu_order = 100;
+        $updated_quiz_ids = array();
 
-        $quiz_ids = array();
+        foreach ($quiz_ids as $quiz_id) {
 
-        $saved_section_ids_keys = array_keys($saved_section_ids);
+            $quiz_id = absint($quiz_id);
 
-        $saved_lesson_ids_keys = array_keys($saved_lesson_ids);
+            if (SIKSHYA_QUIZZES_CUSTOM_POST_TYPE === get_post_type($quiz_id) && $parent_id > 0) {
 
-        foreach ($quizzes as $raw_section_id => $raw_content) {
+                $meta_key = 'course_id';
 
-            if (in_array($raw_section_id, $saved_section_ids_keys)) {
+                if ($parent_type == SIKSHYA_LESSONS_CUSTOM_POST_TYPE) {
 
-                foreach ($raw_content as $raw_lesson_id => $quiz_array) {
-
-                    if (in_array($raw_lesson_id, $saved_lesson_ids_keys)) {
-
-                        foreach ($quiz_array as $raw_quiz_id => $quiz_content) {
-
-
-                            $title = isset($quiz_content['title']) ? sanitize_text_field($quiz_content['title']) : '';
-                            $content = isset($quiz_content['content']) ? ($quiz_content['content']) : '';
-                            $args = array(
-                                'post_title' => $title,
-                                'post_content' => $content,
-                                'post_status' => 'publish',
-                                'post_type' => SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
-                                'menu_order' => $menu_order,
-                            );
-                            $updated_quiz_id = 0;
-
-                            if (!sikshya_is_new_post($raw_quiz_id)) {
-
-                                $args['ID'] = $raw_quiz_id;
-
-                                $updated_quiz_id = wp_update_post($args);
-
-                            }
-
-                            $updated_quiz_id = wp_insert_post($args);
-
-                            if (!is_wp_error($updated_quiz_id) && $updated_quiz_id > 0) {
-
-                                update_post_meta($updated_quiz_id, 'section_id', $saved_section_ids[$raw_section_id]);
-                                update_post_meta($updated_quiz_id, 'lesson_id', $saved_lesson_ids[$raw_lesson_id]);
-
-                                if ($course_id > 0) {
-                                    update_post_meta($updated_quiz_id, 'course_id', $course_id);
-                                }
-                                $quiz_ids[$raw_quiz_id] = $updated_quiz_id;
-
-                            }
-
-                            $menu_order++;
-                        }
-                    }
+                    $meta_key = 'lesson_id';
                 }
+
+
+                $parent_ids = get_post_meta($quiz_id, $meta_key, true);
+
+                if (is_array($parent_ids)) {
+
+                    $parent_ids[] = $parent_id;
+
+                } else {
+                    $parent_ids = array($parent_id);
+                }
+
+
+                update_post_meta($quiz_id, $meta_key, $parent_ids);
+
+                $updated_quiz_ids[] = $quiz_id;
             }
+
+
         }
 
-        return $quiz_ids;
+        return $updated_quiz_ids;
+
     }
 
     function render_tmpl($id, $name, $quiz_obj, $content, $questionsHtml = '')
@@ -349,6 +326,24 @@ GROUP BY p.post_type having p.post_type in (%s)",
         $data = get_posts($args);
 
         return $data;
+
+    }
+
+    public function add_quiz($quiz_title)
+    {
+        if ('' == $quiz_title) {
+
+            return null;
+        }
+        $args = array(
+            'post_title' => $quiz_title,
+            'post_content' => '',
+            'post_status' => 'publish',
+            'post_type' => SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
+        );
+        $quiz_id = wp_insert_post($args);
+
+        return array('id' => $quiz_id, 'title' => $quiz_title, 'type' => 'quiz_ids');
 
     }
 }
