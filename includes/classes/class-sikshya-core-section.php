@@ -167,5 +167,34 @@ GROUP BY p.post_type having p.post_type in (%s,%s,%s) ORDER BY FIELD (p.post_typ
         return $data;
     }
 
+    public function get_lesson_and_quiz($section_id)
+    {
+        if ($section_id instanceof \WP_Post) {
+            $section_id = $section_id->ID;
+        }
+
+        $args = array(
+            'numberposts' => -1,
+            'no_found_rows' => true,
+            'orderby'        => 'meta_value',       // Or post by custom field
+            'meta_key'       => 'sikshya_order_number', // By which custom field
+            'order'          => 'ASC',
+            'post_type' => array(SIKSHYA_LESSONS_CUSTOM_POST_TYPE, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE),
+            'meta_query' => array(
+                array(
+                    'key' => 'section_id',
+                    'value' => absint($section_id),
+                    'compare' => 'LIKE'
+
+                )
+            )
+        );
+
+        $data = get_posts($args);
+
+
+        return $data;
+    }
+
 
 }

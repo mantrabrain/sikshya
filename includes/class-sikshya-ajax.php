@@ -292,6 +292,8 @@ class Sikshya_Ajax
 
         $lesson_title = isset($_POST['lesson_title']) ? sanitize_text_field($_POST['lesson_title']) : '';
 
+        $section_id = isset($_POST['section_id']) ? absint($_POST['section_id']) : '';
+
         $lesson_data = sikshya()->lesson->add_lesson($lesson_title);
 
         $lesson_id = isset($lesson_data['id']) ? $lesson_data['id'] : '';
@@ -300,6 +302,7 @@ class Sikshya_Ajax
             wp_send_json_error();
         }
         $lesson_data['icon'] = 'dashicons-media-text';
+        $lesson_data['section_id'] = $section_id;
 
 
         sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $lesson_data);
@@ -315,6 +318,7 @@ class Sikshya_Ajax
             wp_send_json_error($this->ajax_error());
         }
         $quiz_title = isset($_POST['quiz_title']) ? sanitize_text_field($_POST['quiz_title']) : '';
+        $section_id = isset($_POST['section_id']) ? absint($_POST['section_id']) : '';
 
         $quiz_data = sikshya()->quiz->add_quiz($quiz_title);
 
@@ -325,6 +329,7 @@ class Sikshya_Ajax
         }
 
         $quiz_data['icon'] = 'dashicons-clock';
+        $quiz_data['section_id'] = $section_id;
         sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $quiz_data);
 
         exit;

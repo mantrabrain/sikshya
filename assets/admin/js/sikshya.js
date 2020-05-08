@@ -3,12 +3,10 @@
 jQuery(function ($) {
 
     var Sikshya_Admin_Course = {
-        init: function () {
-            let add_section = $('#sik-add-new-section');
-            let add_lesson = $('.sik-add-new-lesson');
-            let add_quiz = $('.sik-add-new-quiz');
-            var sectionParams = {
-                attach: '#sik-add-new-section',
+        getSectionParams: function (id) {
+            let node = $('#' + id);
+            return {
+                attach: '#' + id,
                 width: 650,
                 height: 450,
                 closeButton: 'title',
@@ -17,8 +15,8 @@ jQuery(function ($) {
                 ajax: {
                     url: SikshyaAdminData.ajax_url,
                     data: {
-                        action: add_section.attr('data-action'),
-                        sikshya_nonce: add_section.attr('data-nonce'),
+                        action: node.attr('data-action'),
+                        sikshya_nonce: node.attr('data-nonce'),
                     },
                     method: 'post',
                     reload: 'strict',
@@ -38,8 +36,11 @@ jQuery(function ($) {
                     }
                 }
             };
-            var lessonParams = {
-                attach: '.sik-add-new-lesson',
+        },
+        getLessonParams: function (id) {
+            let node = $('#' + id);
+            return {
+                attach: '#' + id,
                 width: 650,
                 height: 450,
                 closeButton: 'title',
@@ -48,9 +49,9 @@ jQuery(function ($) {
                 ajax: {
                     url: SikshyaAdminData.ajax_url,
                     data: {
-                        action: add_lesson.attr('data-action'),
-                        sikshya_nonce: add_lesson.attr('data-nonce'),
-                        section_id: add_lesson.attr('data-section-id'),
+                        action: node.attr('data-action'),
+                        sikshya_nonce: node.attr('data-nonce'),
+                        section_id: node.attr('data-section-id'),
                     },
                     method: 'post',
                     reload: 'strict',
@@ -70,8 +71,11 @@ jQuery(function ($) {
                     }
                 }
             };
-            var quizParams = {
-                attach: '.sik-add-new-quiz',
+        },
+        getQuizParams: function (id) {
+            let node = $('#' + id);
+            return {
+                attach: '#' + id,
                 width: 650,
                 height: 450,
                 closeButton: 'title',
@@ -80,9 +84,9 @@ jQuery(function ($) {
                 ajax: {
                     url: SikshyaAdminData.ajax_url,
                     data: {
-                        action: add_quiz.attr('data-action'),
-                        sikshya_nonce: add_quiz.attr('data-nonce'),
-                        section_id: add_quiz.attr('data-section-id'),
+                        action: node.attr('data-action'),
+                        sikshya_nonce: node.attr('data-nonce'),
+                        section_id: node.attr('data-section-id'),
                     },
                     method: 'post',
                     reload: 'strict',
@@ -102,13 +106,37 @@ jQuery(function ($) {
                     }
                 }
             };
-
+        },
+        init: function () {
+            var sectionParams = this.getSectionParams('sik-add-new-section');
             this.initModal(sectionParams);
-            this.initModal(lessonParams);
-            this.initModal(quizParams);
+            this.initSortable();
             this.bind();
 
 
+        },
+        initSortable: function () {
+
+            $(".course-section-template-inner").sortable({
+                connectWith: ".course-section-template-inner",
+                start: function (event, ui) {
+                    //get current element being sorted
+                },
+                stop: function (event, ui) {
+                    var tmpl = ui.item.closest('.course-section-template');
+                    var section_id = tmpl.attr('data-section-id');
+                    var inner = ui.item.closest('.course-section-template-inner');
+                    var card_item = inner.find('.sikshya-card-item');
+                    var loop_start = 0;
+                    $.each(card_item, function () {
+                        loop_start++;
+                        var type = $(this).find('.sikshya-course-content').attr('data-type-text');
+                        $(this).find('.sikshya-course-content').attr('name', 'sikshya_course_content[' + section_id + '][' + type + '][]');
+                        $(this).find('.order-number').val(loop_start);
+                    });
+                    //get current element being sorted
+                }
+            }).disableSelection();
         },
 
         initModal: function (params) {
@@ -126,6 +154,37 @@ jQuery(function ($) {
         bind: function () {
 
             var _that = this;
+            // Load Form Modal
+
+
+            $('body').on('click', '.sik-add-new-lesson', function (e) {
+                e.preventDefault();
+                if ($(this).attr('id') === undefined) {
+                    var section_id = $(this).attr('data-section-id');
+                    var id = 'sik-add-new-lesson-' + section_id;
+                    $(this).attr('id', id);
+                    let lessonParams = _that.getLessonParams(id);
+                    _that.initModal(lessonParams);
+                    $(this).trigger('click');
+                }
+
+            });
+            $('body').on('click', '.sik-add-new-quiz', function (e) {
+                e.preventDefault();
+                if ($(this).attr('id') === undefined) {
+                    var section_id = $(this).attr('data-section-id');
+                    var id = 'sik-add-new-quiz-' + section_id;
+                    $(this).attr('id', id);
+                    let quizParams = _that.getQuizParams(id);
+                    _that.initModal(quizParams);
+                    $(this).trigger('click');
+                }
+
+            });
+
+            // end of form modal
+
+
             $('body').on('submit', 'form.section-form', function (e) {
                 e.preventDefault();
                 _that.bindSectionForm($(this));

@@ -1,4 +1,4 @@
-<div class="course-section-template" id="course-section-template-<?php echo absint($section_id) ?>">
+<div class="course-section-template" id="course-section-template-<?php echo absint($section_id) ?>"  data-section-id="<?php echo absint($section_id) ?>">
     <div class="heading">
         <h4><?php echo esc_attr($section_title); ?></h4>
         <button
@@ -19,9 +19,13 @@
             <span
                     class="dashicons dashicons-clock"></span>Add Quiz
         </button>
-        <input type="text" value="<?php echo $section_id; ?>" name="sikshya_course_content[section_ids][]"/>
+        <input type="text" value="<?php echo $section_id; ?>" name="sikshya_course_content1[section_ids][]"/>
     </div>
     <div class="course-section-template-inner">
 
+        <?php
+        do_action('sikshya_course_curriculum_tab_lesson_quiz_template', $section_id);
+
+        ?>
     </div>
 </div>

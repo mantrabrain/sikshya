@@ -2,7 +2,7 @@
 
 class Sikshya_Core_Quiz
 {
-    public function save($quiz_ids = array(), $parent_id = 0, $parent_type = SIKSHYA_COURSES_CUSTOM_POST_TYPE)
+    public function save($quiz_ids = array(), $parent_id = 0, $parent_type = SIKSHYA_COURSES_CUSTOM_POST_TYPE, $lesson_quiz_order = array())
     {
         $updated_quiz_ids = array();
 
@@ -12,7 +12,7 @@ class Sikshya_Core_Quiz
 
             if (SIKSHYA_QUIZZES_CUSTOM_POST_TYPE === get_post_type($quiz_id) && $parent_id > 0) {
 
-                $meta_key = 'course_id';
+                $meta_key = 'section_id';
 
                 if ($parent_type == SIKSHYA_LESSONS_CUSTOM_POST_TYPE) {
 
@@ -20,16 +20,11 @@ class Sikshya_Core_Quiz
                 }
 
 
-                $parent_ids = get_post_meta($quiz_id, $meta_key, true);
+                $parent_ids = array($parent_id);
 
-                if (is_array($parent_ids)) {
+                $order_number = isset($lesson_quiz_order[$quiz_id]) ? absint($lesson_quiz_order[$quiz_id]) : 0;
 
-                    $parent_ids[] = $parent_id;
-
-                } else {
-                    $parent_ids = array($parent_id);
-                }
-
+                update_post_meta($quiz_id, 'sikshya_order_number', $order_number);
 
                 update_post_meta($quiz_id, $meta_key, $parent_ids);
 

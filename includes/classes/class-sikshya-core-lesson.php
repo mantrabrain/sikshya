@@ -2,26 +2,24 @@
 
 class Sikshya_Core_Lesson
 {
-    public function save($lesson_ids = array(), $course_id = 0)
+    public function save($lesson_ids = array(), $section_id = 0, $lesson_quiz_order = array())
     {
+
         $updated_lesson_ids = array();
 
         foreach ($lesson_ids as $lesson_id) {
 
             $lesson_id = absint($lesson_id);
 
-            if (SIKSHYA_LESSONS_CUSTOM_POST_TYPE === get_post_type($lesson_id) && $course_id > 0) {
+            if (SIKSHYA_LESSONS_CUSTOM_POST_TYPE === get_post_type($lesson_id) && $section_id > 0) {
 
-                $course_ids = get_post_meta($lesson_id, 'course_id', true);
+                $section_ids = array($section_id);
 
-                if (is_array($course_ids)) {
+                update_post_meta($lesson_id, 'section_id', $section_ids);
 
-                    $course_ids[] = $course_id;
+                $order_number = isset($lesson_quiz_order[$lesson_id]) ? absint($lesson_quiz_order[$lesson_id]) : 0;
 
-                } else {
-                    $course_ids = array($course_id);
-                }
-                update_post_meta($lesson_id, 'course_id', $course_ids);
+                update_post_meta($lesson_id, 'sikshya_order_number', $order_number);
 
                 $updated_lesson_ids[] = $lesson_id;
             }
