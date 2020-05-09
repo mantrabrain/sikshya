@@ -185,3 +185,50 @@
     width: 100%;
     min-height: 50px;
 }
+
+.sikshya-field-wrap {
+    padding: 10px 15px;
+}
+
+.sikshya-field-wrap label {
+    width: 100%;
+    margin-right: 20px;
+    vertical-align: baseline;
+    max-width: 100%;
+    float: left;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.sikshya-field-wrap .sikshya-field-content {
+    margin-left: 190px;
+    float: none;
+    width: auto;
+}
+
+.sikshya-field-wrap .sikshya-field-label {
+    display: block;
+    margin-bottom: 5px;
+    float: left;
+    width: 190px;
+    font-size: 14px;
+    text-transform: capitalize;
+}
+
+.sikshya-field-wrap input[type="text"],
+.sikshya-field-wrap input[type="number"],
+.sikshya-field-wrap input[type="url"],
+.sikshya-field-wrap input[type="url"],
+.sikshya-field-wrap select,
+.sikshya-field-wrap textarea,
+.sikshya-field-wrap .select2-container {
+    max-width: 100%;
+    width: auto;
+    box-shadow: none;
+    border: 1px solid #aaa;
+    border-radius: 0;
+    padding: 4px 12px;
+    height: 35px;
+    outline: 0;
+    border-left: 3px solid #aaa;
+}
