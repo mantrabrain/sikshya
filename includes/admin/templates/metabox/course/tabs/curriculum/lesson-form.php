@@ -3,7 +3,7 @@
 >
     <label for="lesson_title">
         <span>Lesson Title</span>
-        <input type="text" name="lesson_title"/>
+        <input type="text" name="lesson_title" required/>
         <input type="hidden" name="sikshya_nonce"
                value="<?php echo wp_create_nonce('wp_sikshya_add_lesson_nonce'); ?>"/>
         <input type="hidden" name="action"

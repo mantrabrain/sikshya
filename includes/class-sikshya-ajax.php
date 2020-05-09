@@ -7,7 +7,6 @@ class Sikshya_Ajax
     private function admin_ajax_actions()
     {
         $actions = array(
-            'remove_section_from_course',
             'remove_lesson_from_course',
             'remove_quiz_from_course',
             'remove_question_from_course',
@@ -18,7 +17,8 @@ class Sikshya_Ajax
             'add_lesson',
             'add_quiz',
             // Remove
-            'remove_lesson_quiz_from_section'
+            'remove_lesson_quiz_from_section',
+            'remove_section_from_course'
         );
 
         return $actions;
@@ -50,37 +50,6 @@ class Sikshya_Ajax
 
         }
 
-
-    }
-
-    public function remove_section_from_course()
-    {
-        $status = sikshya()->helper->validate_nonce();
-
-        if (!$status) {
-            wp_send_json_error($this->ajax_error());
-        }
-
-        $section_id = isset($_POST['id']) ? $_POST['id'] : 0;
-
-        $course_id = isset($_POST['course_id']) ? $_POST['course_id'] : 0;
-
-        if ($section_id < 1 || $course_id < 1) {
-            wp_send_json_error($this->ajax_error());
-        }
-
-        $status = sikshya()->section->remove_from_course($section_id, $course_id);
-
-        $message = __('Successfully removed from course', 'sikshya');
-
-        if (!$status) {
-            wp_send_json_error($this->ajax_error());
-        }
-        if ($status) {
-            wp_send_json_success(
-                array('message' => $message)
-            );
-        }
 
     }
 
@@ -352,6 +321,32 @@ class Sikshya_Ajax
             wp_send_json_error($this->ajax_error());
         }
         sikshya_remove_post_meta($post_id, 'section_id', $section_id);
+
+        $message = __('Successfully removed from course', 'sikshya');
+
+        if ($status) {
+            wp_send_json_success(
+                array('message' => $message)
+            );
+        }
+
+    }
+
+    public function remove_section_from_course()
+    {
+        $status = sikshya()->helper->validate_nonce();
+
+        if (!$status) {
+            wp_send_json_error($this->ajax_error());
+        }
+        $section_id = isset($_POST['section_id']) ? $_POST['section_id'] : 0;
+
+        $course_id = isset($_POST['course_id']) ? $_POST['course_id'] : 0;
+
+        if ($section_id < 1 || $course_id < 1) {
+            wp_send_json_error($this->ajax_error());
+        }
+        sikshya()->section->remove_from_course($section_id, $course_id);
 
         $message = __('Successfully removed from course', 'sikshya');
 

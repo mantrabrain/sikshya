@@ -149,7 +149,18 @@ GROUP BY p.post_type having p.post_type in (%s,%s,%s) ORDER BY FIELD (p.post_typ
         if ($section_id < 1) {
             return false;
         }
-        return delete_post_meta($section_id, 'course_id', $course_id);
+        sikshya_remove_post_meta($section_id, 'course_id');
+
+        $lesson_and_quizes = sikshya()->section->get_lesson_and_quiz($section_id);
+
+        foreach ($lesson_and_quizes as $lesson_and_quize) {
+
+            $id = $lesson_and_quize->ID;
+
+            sikshya_remove_post_meta($id, 'section_id', $section_id);
+        }
+
+
     }
 
     public function get_all_by_lesson_id($lesson_id = 0)
@@ -176,9 +187,9 @@ GROUP BY p.post_type having p.post_type in (%s,%s,%s) ORDER BY FIELD (p.post_typ
         $args = array(
             'numberposts' => -1,
             'no_found_rows' => true,
-            'orderby'        => 'meta_value',       // Or post by custom field
-            'meta_key'       => 'sikshya_order_number', // By which custom field
-            'order'          => 'ASC',
+            'orderby' => 'meta_value',       // Or post by custom field
+            'meta_key' => 'sikshya_order_number', // By which custom field
+            'order' => 'ASC',
             'post_type' => array(SIKSHYA_LESSONS_CUSTOM_POST_TYPE, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE),
             'meta_query' => array(
                 array(

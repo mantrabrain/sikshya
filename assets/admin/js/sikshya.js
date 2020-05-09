@@ -209,7 +209,7 @@ jQuery(function ($) {
                 var _el = $(this);
                 var params = {
                     title: 'Are you sure?',
-                    text: 'It will be removed quiz from section, lesson & course!',
+                    text: 'It will be removed from section & course!',
                     button_text: 'Yes, remove it!',
                     confirm_callback: function (result) {
 
@@ -235,6 +235,55 @@ jQuery(function ($) {
                             }).done(function (response) {
 
                                 _el.closest('.sikshya-card-item').remove();
+                                Swal.fire(
+                                    'Removed',
+                                    response.message,
+                                    'success'
+                                )
+
+                            }).fail(function () {
+                                Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
+                            });
+
+                        }
+                    }
+
+                };
+                _that.swalConfirm(params);
+
+            });
+
+            $('body').on('click', '.remove-section', function (e) {
+                e.preventDefault();
+                var _el = $(this);
+                var params = {
+                    title: 'Are you sure?',
+                    text: 'It will be removed from course!',
+                    button_text: 'Yes, remove it!',
+                    confirm_callback: function (result) {
+
+                        var section_quiz_data = {
+                            section_id: _el.closest('.course-section-template').attr('data-section-id'),
+                            course_id: SikshyaAdminData.course_id,
+                            action: 'sikshya_remove_section_from_course',
+                            sikshya_nonce: SikshyaAdminData.remove_section_from_course_nonce
+                        };
+                        if (result.value) {
+                            $.ajax({
+                                url: SikshyaAdminData.ajax_url,
+                                type: 'POST',
+                                data: section_quiz_data,
+                                dataType: 'json',
+                                beforeSend: function () {
+                                    Swal.fire(
+                                        'Please wait.....',
+                                        'System is processing your request',
+                                        'info'
+                                    )
+                                },
+                            }).done(function (response) {
+
+                                _el.closest('.course-section-template').remove();
                                 Swal.fire(
                                     'Removed',
                                     response.message,

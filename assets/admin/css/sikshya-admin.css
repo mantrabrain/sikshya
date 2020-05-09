@@ -145,6 +145,18 @@
     top: 50%;
 }
 
+.course-section-template .heading {
+    display: flex;
+    padding: 0;
+    justify-content: space-between;
+}
+
+.course-section-template .remove-section {
+    padding: 10px;
+    float: right;
+    text-decoration: none;
+}
+
 .section-form label span,
 .lesson-form label span,
 .quiz-form label span {
