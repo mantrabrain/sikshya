@@ -5,12 +5,12 @@
                         <span class="font-weight-light"><span
                                     class="dashicons <?php echo esc_attr($icon); ?>"></span></span>
                 <?php echo esc_attr($title); ?>
-                <input type="text" value="<?php echo absint($id); ?>"
+                <input type="hidden" value="<?php echo absint($id); ?>"
                        name="sikshya_course_content<?php echo '[' . absint($section_id) . '][' . esc_attr($type) . ']'; ?>[]"
                        class="sikshya-course-content"
                        data-type-text="<?php echo esc_attr($type); ?>"
                 />
-                <input type="text" value="<?php echo absint($order_number); ?>"
+                <input type="hidden" value="<?php echo absint($order_number); ?>"
                        name="sikshya_lesson_quiz_order<?php echo '[' . absint($id) . ']'; ?>" class="order-number"/>
 
             </h3>

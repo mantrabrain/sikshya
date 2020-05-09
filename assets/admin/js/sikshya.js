@@ -7,11 +7,11 @@ jQuery(function ($) {
             let node = $('#' + id);
             return {
                 attach: '#' + id,
-                width: 650,
-                height: 450,
+                width: 350,
+                height: 250,
                 closeButton: 'title',
                 animation: false,
-                title: 'AJAX request',
+                title: 'Course Section',
                 ajax: {
                     url: SikshyaAdminData.ajax_url,
                     data: {
@@ -23,10 +23,10 @@ jQuery(function ($) {
                     setContent: false,
                     beforeSend: function () {
                         this.setContent('');
-                        this.setTitle('<div class="ajax-sending">Sending AJAX request...</div>');
+                        this.setTitle('<div class="ajax-sending">Loading...</div>');
                     },
                     complete: function () {
-                        this.setTitle('<div class="ajax-complete">AJAX request complete</div>');
+                        this.setTitle('<div class="ajax-complete">Course Section</div>');
                     },
                     success: function (response) {
                         this.setContent(response);
@@ -41,11 +41,11 @@ jQuery(function ($) {
             let node = $('#' + id);
             return {
                 attach: '#' + id,
-                width: 650,
-                height: 450,
+                width: 350,
+                height: 250,
                 closeButton: 'title',
                 animation: false,
-                title: 'AJAX request Lesson',
+                title: 'Course Lesson',
                 ajax: {
                     url: SikshyaAdminData.ajax_url,
                     data: {
@@ -58,10 +58,10 @@ jQuery(function ($) {
                     setContent: false,
                     beforeSend: function () {
                         this.setContent('');
-                        this.setTitle('<div class="ajax-sending">Sending AJAX request LESSON...</div>');
+                        this.setTitle('<div class="ajax-sending">Loading...</div>');
                     },
                     complete: function () {
-                        this.setTitle('<div class="ajax-complete">AJAX request complete LESSON</div>');
+                        this.setTitle('<div class="ajax-complete">Course Lesson</div>');
                     },
                     success: function (response) {
                         this.setContent(response);
@@ -76,11 +76,11 @@ jQuery(function ($) {
             let node = $('#' + id);
             return {
                 attach: '#' + id,
-                width: 650,
-                height: 450,
+                width: 350,
+                height: 250,
                 closeButton: 'title',
                 animation: false,
-                title: 'AJAX request QUIZ',
+                title: 'Course Quiz',
                 ajax: {
                     url: SikshyaAdminData.ajax_url,
                     data: {
@@ -93,10 +93,10 @@ jQuery(function ($) {
                     setContent: false,
                     beforeSend: function () {
                         this.setContent('');
-                        this.setTitle('<div class="ajax-sending">Sending AJAX request QUIZ...</div>');
+                        this.setTitle('<div class="ajax-sending">Loading...</div>');
                     },
                     complete: function () {
-                        this.setTitle('<div class="ajax-complete">AJAX request complete QUIZ</div>');
+                        this.setTitle('<div class="ajax-complete">Course Quiz</div>');
                     },
                     success: function (response) {
                         this.setContent(response);
@@ -261,7 +261,15 @@ jQuery(function ($) {
             $.ajax({
                 type: "POST",
                 url: url,
-                data: form.serialize(), // serializes the form's elements.
+                data: form.serialize(), // serializes the form's elements.,
+                beforeSend: function () {
+                    $this.closest('.jBox-container').find('.jBox-content').css('visibility', 'hidden');
+                    $this.closest('.jBox-container').append('<div class="jBox-spinner" style="transform: translateY(24.5px);"></div>');
+                },
+                complete: function () {
+                    $this.closest('.jBox-container').find('.jBox-content').css('visibility', 'visible');
+                    $this.closest('.jBox-container').find('.jBox-spinner').remove();
+                },
                 success: function (data) {
 
                     $('.jBox-closeButton').trigger('click');
@@ -280,6 +288,14 @@ jQuery(function ($) {
                 type: "POST",
                 url: url,
                 data: form.serialize(), // serializes the form's elements.
+                beforeSend: function () {
+                    $this.closest('.jBox-container').find('.jBox-content').css('visibility', 'hidden');
+                    $this.closest('.jBox-container').append('<div class="jBox-spinner" style="transform: translateY(24.5px);"></div>');
+                },
+                complete: function () {
+                    $this.closest('.jBox-container').find('.jBox-content').css('visibility', 'visible');
+                    $this.closest('.jBox-container').find('.jBox-spinner').remove();
+                },
                 success: function (data) {
 
                     $('.jBox-closeButton').trigger('click');
@@ -299,7 +315,15 @@ jQuery(function ($) {
             $.ajax({
                 type: "POST",
                 url: url,
-                data: form.serialize(), // serializes the form's elements.
+                data: form.serialize(), // serializes the form's elements.,
+                beforeSend: function () {
+                    $this.closest('.jBox-container').find('.jBox-content').css('visibility', 'hidden');
+                    $this.closest('.jBox-container').append('<div class="jBox-spinner" style="transform: translateY(24.5px);"></div>');
+                },
+                complete: function () {
+                    $this.closest('.jBox-container').find('.jBox-content').css('visibility', 'visible');
+                    $this.closest('.jBox-container').find('.jBox-spinner').remove();
+                },
                 success: function (data) {
 
                     $('.jBox-closeButton').trigger('click');
