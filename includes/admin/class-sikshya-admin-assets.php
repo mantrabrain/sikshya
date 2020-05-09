@@ -55,7 +55,7 @@ class Sikshya_Admin_Assets
         $data =
             array(
                 'ajax_url' => admin_url('admin-ajax.php'),
-                'remove_section_from_course_nonce' => wp_create_nonce('wp_sikshya_remove_section_from_course_nonce'),
+                'remove_lesson_quiz_from_section_nonce' => wp_create_nonce('wp_sikshya_remove_lesson_quiz_from_section_nonce'),
                 'course_id' => $post_id,
             );
         wp_localize_script('sikshya-admin', 'SikshyaAdminData', $data);

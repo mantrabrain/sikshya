@@ -17,6 +17,8 @@ class Sikshya_Ajax
             'add_section',
             'add_lesson',
             'add_quiz',
+            // Remove
+            'remove_lesson_quiz_from_section'
         );
 
         return $actions;
@@ -333,6 +335,32 @@ class Sikshya_Ajax
         sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $quiz_data);
 
         exit;
+    }
+
+    public function remove_lesson_quiz_from_section()
+    {
+        $status = sikshya()->helper->validate_nonce();
+
+        if (!$status) {
+            wp_send_json_error($this->ajax_error());
+        }
+        $section_id = isset($_POST['section_id']) ? $_POST['section_id'] : 0;
+
+        $post_id = isset($_POST['post_id']) ? $_POST['post_id'] : 0;
+
+        if ($section_id < 1 || $post_id < 1) {
+            wp_send_json_error($this->ajax_error());
+        }
+        sikshya_remove_post_meta($post_id, 'section_id', $section_id);
+
+        $message = __('Successfully removed from course', 'sikshya');
+
+        if ($status) {
+            wp_send_json_success(
+                array('message' => $message)
+            );
+        }
+
     }
 
 

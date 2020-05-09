@@ -877,3 +877,30 @@ if (!function_exists('sikshya_clean')) {
         }
     }
 }
+
+if (!function_exists('sikshya_remove_post_meta')) {
+
+    function sikshya_remove_post_meta($post_id, $meta_key, $meta_value = '')
+    {
+        if ($meta_value === '') {
+
+            delete_post_meta($post_id, $meta_key);
+            
+        } else {
+            $post_meta = get_post_meta($post_id, $meta_key, true);
+
+            if (is_array($post_meta)) {
+
+                $post_meta = array_diff($post_meta, array($meta_value));
+
+                update_post_meta($post_id, $meta_key, $post_meta);
+
+
+            } else {
+
+                delete_post_meta($post_id, $meta_key, $meta_value);
+
+            }
+        }
+    }
+}

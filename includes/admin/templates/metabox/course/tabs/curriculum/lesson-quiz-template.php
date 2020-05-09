@@ -15,8 +15,12 @@
 
             </h3>
             <div class="card-widgets">
-                <a href="#"><span class="dashicons dashicons-edit"></span></i></a>
-                <a href="#"><span class="dashicons dashicons-trash"></span></i></a>
+                <?php
+                $edit_link = get_edit_post_link($id);
+                ?>
+                <a href="<?php echo esc_url($edit_link); ?>" target="_blank"><span
+                            class="dashicons dashicons-edit"></span></i></a>
+                <a href="#" class="remove-lesson-quiz"><span class="dashicons dashicons-trash"></span></i></a>
             </div>
 
         </div>

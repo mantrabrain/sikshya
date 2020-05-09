@@ -202,6 +202,57 @@ jQuery(function ($) {
                 _that.bindQuizForm($(this));
 
             });
+
+
+            $('body').on('click', '.remove-lesson-quiz', function (e) {
+                e.preventDefault();
+                var _el = $(this);
+                var params = {
+                    title: 'Are you sure?',
+                    text: 'It will be removed quiz from section, lesson & course!',
+                    button_text: 'Yes, remove it!',
+                    confirm_callback: function (result) {
+
+                        var lesson_quiz_data = {
+                            section_id: _el.closest('.course-section-template').attr('data-section-id'),
+                            post_id: _el.closest('.sikshya-card-item').find('.sikshya-course-content').val(),
+                            action: 'sikshya_remove_lesson_quiz_from_section',
+                            sikshya_nonce: SikshyaAdminData.remove_lesson_quiz_from_section_nonce
+                        };
+                        if (result.value) {
+                            $.ajax({
+                                url: SikshyaAdminData.ajax_url,
+                                type: 'POST',
+                                data: lesson_quiz_data,
+                                dataType: 'json',
+                                beforeSend: function () {
+                                    Swal.fire(
+                                        'Please wait.....',
+                                        'System is processing your request',
+                                        'info'
+                                    )
+                                },
+                            }).done(function (response) {
+
+                                _el.closest('.sikshya-card-item').remove();
+                                Swal.fire(
+                                    'Removed',
+                                    response.message,
+                                    'success'
+                                )
+
+                            }).fail(function () {
+                                Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
+                            });
+
+                        }
+                    }
+
+                };
+                _that.swalConfirm(params);
+
+            });
+
         },
         bindSectionForm: function ($this) {
             var form = $this;
@@ -258,6 +309,25 @@ jQuery(function ($) {
                 }
             });
         },
+        swalConfirm: function (params) {
+            var ajax_options = params.ajax_options;
+            Swal.fire({
+                title: params.title,//'Are you sure?',
+                text: params.text,//"It will be deleted permanently!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: params.button_text,//'Yes, delete it!',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false
+            }).then((result) => {
+                if (typeof params.confirm_callback === 'function') {
+                    params.confirm_callback(result);
+                }
+
+            });
+        }
 
 
     };

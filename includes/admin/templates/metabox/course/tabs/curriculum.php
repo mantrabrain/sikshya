@@ -6,7 +6,9 @@
     <button id="sik-add-new-section"
             data-action="sikshya_load_section_settings"
             data-nonce="<?php echo wp_create_nonce('wp_sikshya_load_section_settings_nonce') ?>"
-            type="button" class="button button-primary sikshya-button btn-success">Add Section
+            type="button" class="button button-primary sikshya-button btn-success"><span
+                class="dashicons dashicons-menu"></span>
+        <?php echo esc_html__('Add Section', 'sikshya'); ?>
     </button>
 
 </div>

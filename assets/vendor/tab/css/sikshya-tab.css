@@ -74,6 +74,7 @@
     border-color: #0acf97;
     -webkit-box-shadow: 0 2px 6px 0 rgba(10, 207, 151, .5);
     box-shadow: 0 2px 6px 0 rgba(10, 207, 151, .5);
+    line-height: 1.5;
 }
 
 .sikshya-button.btn-secondary {
@@ -82,4 +83,5 @@
     border-color: #6c757d;
     -webkit-box-shadow: 0 2px 6px 0 rgba(108, 117, 125, .5);
     box-shadow: 0 2px 6px 0 rgba(108, 117, 125, .5);
+    line-height: 1.5;
 }
