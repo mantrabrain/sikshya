@@ -16,6 +16,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             add_action('sikshya_course_metaboxes', array($this, 'course_meta'));
 
             add_action('sikshya_course_tab_curriculum', array($this, 'curriculum_tab'));
+            add_action('sikshya_course_tab_general', array($this, 'general_tab'));
             add_action('sikshya_course_curriculum_tab_before', array($this, 'curriculum_tab_before'));
             add_action('sikshya_course_curriculum_tab_lesson_quiz_template', array($this, 'curriculum_tab_lesson_quiz'), 10, 1);
             add_action('sikshya_course_tab_others', array($this, 'others_tab'));
@@ -100,12 +101,11 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             sikshya_load_admin_template('metabox.course.tabs.curriculum', array());
 
-            ///include_once "views/sections-and-lessons.php";
-        }
+         }
 
-        public function others_tab()
+        public function general_tab()
         {
-            sikshya_load_admin_template('metabox.course.tabs.others', array());
+            sikshya_load_admin_template('metabox.course.tabs.general', array());
         }
 
         public function course_meta()
