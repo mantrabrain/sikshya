@@ -302,6 +302,33 @@ jQuery(function ($) {
 
             });
 
+            // Requirement Repeator
+            $('body').on('click', '.sikshya-add-requirements', function () {
+                var parentNode = $(this).closest('.tab-content-item.requirements');
+                var template = parentNode.find('#sikshya_course_requirements_template');
+                parentNode.append(template.html());
+            });
+            $('body').on('click', '.sikshya-remove-requirements', function () {
+                var parentNode = $(this).closest('.tab-content-item.requirements');
+                if (parentNode.find('.sikshya_course_requirements').length > 1) {
+                    $(this).closest('.sikshya-field-wrap').remove();
+                }
+            });
+
+            // Outcomes Repeater
+
+            $('body').on('click', '.sikshya-add-outcomes', function () {
+                var parentNode = $(this).closest('.tab-content-item.outcomes');
+                var template = parentNode.find('#sikshya_course_outcomes_template');
+                parentNode.append(template.html());
+            });
+            $('body').on('click', '.sikshya-remove-outcomes', function () {
+                var parentNode = $(this).closest('.tab-content-item.outcomes');
+                if (parentNode.find('.sikshya_course_outcomes').length > 1) {
+                    $(this).closest('.sikshya-field-wrap').remove();
+                }
+            });
+
         },
         bindSectionForm: function ($this) {
             var form = $this;

@@ -190,6 +190,12 @@
     padding: 10px 15px;
 }
 
+.sikshya-field-wrap:after {
+    content: "";
+    display: block;
+    clear: both;
+}
+
 .sikshya-field-wrap label {
     width: 100%;
     margin-right: 20px;
@@ -201,9 +207,10 @@
 }
 
 .sikshya-field-wrap .sikshya-field-content {
-    margin-left: 190px;
-    float: none;
+    margin-left: 0;
+    float: left;
     width: auto;
+    text-align: left;
 }
 
 .sikshya-field-wrap .sikshya-field-label {
@@ -222,6 +229,8 @@
 .sikshya-field-wrap select,
 .sikshya-field-wrap textarea,
 .sikshya-field-wrap .select2-container {
+    min-width: 200px;
+    float: left;
     max-width: 100%;
     width: auto;
     box-shadow: none;
@@ -231,4 +240,25 @@
     height: 35px;
     outline: 0;
     border-left: 3px solid #aaa;
+    margin-right: 10px;
+}
+
+.tab-content-item.requirements .sikshya-field-wrap input[type="text"],
+.tab-content-item.requirements .sikshya-field-wrap input[type="number"],
+.tab-content-item.requirements .sikshya-field-wrap input[type="url"],
+.tab-content-item.requirements .sikshya-field-wrap input[type="url"],
+.tab-content-item.requirements .sikshya-field-wrap select,
+.tab-content-item.requirements .sikshya-field-wrap textarea,
+.tab-content-item.requirements .sikshya-field-wrap .select2-container ,
+
+.tab-content-item.outcomes .sikshya-field-wrap input[type="text"],
+.tab-content-item.outcomes .sikshya-field-wrap input[type="number"],
+.tab-content-item.outcomes .sikshya-field-wrap input[type="url"],
+.tab-content-item.outcomes .sikshya-field-wrap input[type="url"],
+.tab-content-item.outcomes .sikshya-field-wrap select,
+.tab-content-item.outcomes .sikshya-field-wrap textarea,
+.tab-content-item.outcomes .sikshya-field-wrap .select2-container
+{
+    min-width: 400px;
+
 }

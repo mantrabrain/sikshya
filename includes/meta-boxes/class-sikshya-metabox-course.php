@@ -17,6 +17,10 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             add_action('sikshya_course_tab_curriculum', array($this, 'curriculum_tab'));
             add_action('sikshya_course_tab_general', array($this, 'general_tab'));
+            add_action('sikshya_course_tab_requirements', array($this, 'requirements_tab'));
+            add_action('sikshya_course_tab_outcomes', array($this, 'outcomes_tab'));
+            add_action('sikshya_course_tab_pricing', array($this, 'pricing_tab'));
+            add_action('sikshya_course_tab_media', array($this, 'media_tab'));
             add_action('sikshya_course_curriculum_tab_before', array($this, 'curriculum_tab_before'));
             add_action('sikshya_course_curriculum_tab_lesson_quiz_template', array($this, 'curriculum_tab_lesson_quiz'), 10, 1);
             add_action('sikshya_course_tab_others', array($this, 'others_tab'));
@@ -101,11 +105,31 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             sikshya_load_admin_template('metabox.course.tabs.curriculum', array());
 
-         }
+        }
 
         public function general_tab()
         {
             sikshya_load_admin_template('metabox.course.tabs.general', array());
+        }
+
+        public function requirements_tab()
+        {
+            sikshya_load_admin_template('metabox.course.tabs.requirements', array());
+        }
+
+        public function outcomes_tab()
+        {
+            sikshya_load_admin_template('metabox.course.tabs.outcomes', array());
+        }
+
+        public function pricing_tab()
+        {
+            sikshya_load_admin_template('metabox.course.tabs.pricing', array());
+        }
+
+        public function media_tab()
+        {
+            sikshya_load_admin_template('metabox.course.tabs.media', array());
         }
 
         public function course_meta()
@@ -118,8 +142,8 @@ if (!class_exists('Sikshya_Metabox_Course')) {
                 'general' => array(
                     'title' => esc_html__('General', 'sikshya'),
                 ),
-                'requirement' => array(
-                    'title' => esc_html__('Requirement', 'sikshya'),
+                'requirements' => array(
+                    'title' => esc_html__('Requirements', 'sikshya'),
                 ),
                 'outcomes' => array(
                     'title' => esc_html__('Outcomes', 'sikshya'),
