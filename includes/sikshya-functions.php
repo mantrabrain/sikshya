@@ -916,3 +916,34 @@ if (!function_exists('sikshya_remove_post_meta')) {
         }
     }
 }
+
+if (!function_exists('sikshya_video_sources')) {
+    function sikshya_video_sources()
+    {
+        return array(
+            'youtube' => esc_html__('Youtube', 'sikshya')
+        );
+    }
+}
+if (!function_exists('sikshya_duration_times')) {
+    function sikshya_duration_times()
+    {
+        return array(
+            'minute' => esc_html__('Minute(s)', 'sikshya'),
+            'hour' => esc_html__('Hour(s)', 'sikshya'),
+            'day' => esc_html__('Day(s)', 'sikshya'),
+            'week' => esc_html__('Week(s)', 'sikshya')
+        );
+    }
+}
+if (!function_exists('sikshya_course_levels')) {
+    function sikshya_course_levels()
+    {
+        return array(
+            'all' => esc_html__('All Levels', 'sikshya'),
+            'beginner' => esc_html__('Beginner', 'sikshya'),
+            'intermediate' => esc_html__('Intermediate', 'sikshya'),
+            'expert' => esc_html__('Expert', 'sikshya')
+        );
+    }
+}

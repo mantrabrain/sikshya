@@ -24,7 +24,8 @@ class Sikshya_Core_Course
             'sikshya_instructor' => get_post_meta($course_id, 'sikshya_instructor', true),
             'sikshya_course_requirements' => get_post_meta($course_id, 'sikshya_course_requirements', true),
             'sikshya_course_outcomes' => get_post_meta($course_id, 'sikshya_course_outcomes', true),
-            'sikshya_course_video_url' => get_post_meta($course_id, 'sikshya_course_video_url', true),
+            'sikshya_course_video_source' => get_post_meta($course_id, 'sikshya_course_video_source', true),
+            'sikshya_course_youtube_video_url' => get_post_meta($course_id, 'sikshya_course_youtube_video_url', true),
         );
 
         return $data;

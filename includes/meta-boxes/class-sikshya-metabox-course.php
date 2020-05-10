@@ -4,8 +4,6 @@ if (!class_exists('Sikshya_Metabox_Course')) {
     class Sikshya_Metabox_Course
     {
 
-        private $_meta_prefix = 'sikshya_';
-
         private $course_meta = array();
 
         function __construct()
@@ -98,9 +96,6 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
         public function curriculum_tab()
         {
-            global $post;
-
-            wp_nonce_field(SIKSHYA_FILE, SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce');
 
 
             sikshya_load_admin_template('metabox.course.tabs.curriculum', array());
@@ -134,6 +129,9 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
         public function course_meta()
         {
+            if (SIKSHYA_COURSES_CUSTOM_POST_TYPE !== get_post_type()) {
+                return;
+            }
             $tabs = array(
                 'curriculum' => array(
                     'is_active' => true,
@@ -155,6 +153,8 @@ if (!class_exists('Sikshya_Metabox_Course')) {
                     'title' => esc_html__('Media', 'sikshya'),
                 )
             );
+
+            wp_nonce_field(SIKSHYA_FILE, SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce');
 
             sikshya_load_admin_template('metabox.course.options', array(
 
@@ -179,23 +179,14 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
         }
 
-
         public function course_options_meta($post)
         {
-            global $post;
 
             if (SIKSHYA_COURSES_CUSTOM_POST_TYPE !== get_post_type()) {
                 return;
             }
 
-            $template_vars = sikshya_get_course_info($post->ID);
-
-            $template_vars['show_on_login'] = get_post_meta($post->ID, $this->_meta_prefix . 'info_show_on_login', true);
-            $template_vars['instructor'] = get_post_meta($post->ID, 'instructor', true);
-
-            $params['template_vars'] = $template_vars;
-
-            sikshya_load_admin_template('metabox.course.main', $params);
+            sikshya_load_admin_template('metabox.course.main');
 
         }
 
@@ -253,7 +244,8 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             if (!isset($valid_sikshya_info['sikshya_course_outcomes'])) {
                 $valid_sikshya_info['sikshya_course_outcomes'] = array('');
             }
-            $valid_sikshya_info['sikshya_course_video_url'] = isset($_POST['sikshya_course_video_url']) ? esc_url($_POST['sikshya_course_video_url']) : '';
+            $valid_sikshya_info['sikshya_course_video_source'] = isset($_POST['sikshya_course_video_source']) ? sanitize_text_field($_POST['sikshya_course_video_source']) : 'youtube';
+            $valid_sikshya_info['sikshya_course_youtube_video_url'] = isset($_POST['sikshya_course_youtube_video_url']) ? esc_url($_POST['sikshya_course_youtube_video_url']) : '';
 
             foreach ($valid_sikshya_info as $info_key => $info) {
 

@@ -8,10 +8,13 @@
                placeholder="<?php echo esc_attr__('Course Duration', 'sikshya') ?>">
 
         <select name="sikshya_course_duration_time" id="sikshya_course_duration_time">
-            <option value="minute" <?php echo selected('minute', $sikshya_course_duration_time); ?>><?php echo esc_html__('Minute(s)', 'sikshya') ?></option>
-            <option value="hour" <?php echo selected('hour', $sikshya_course_duration_time); ?>><?php echo esc_html__('Hour(s)', 'sikshya') ?></option>
-            <option value="day" <?php echo selected('day', $sikshya_course_duration_time); ?>><?php echo esc_html__('Day(s)', 'sikshya') ?></option>
-            <option value="week" <?php echo selected('week', $sikshya_course_duration_time); ?>><?php echo esc_html__('Week(s)', 'sikshya') ?></option>
+            <?php
+            $sikshya_duration_times = sikshya_duration_times();
+
+            foreach ($sikshya_duration_times as $time_id => $duration_time) {
+                ?>
+                <option value="<?php echo esc_attr($time_id); ?>" <?php echo selected($time_id, $sikshya_course_duration_time); ?>><?php echo esc_html($duration_time) ?></option>
+            <?php } ?>
         </select>
     </div>
 
@@ -23,10 +26,13 @@
     </div>
     <div class="sikshya-field-content">
         <select name="sikshya_course_level" id="sikshya_course_level">
-            <option value="all" <?php echo selected('all', $sikshya_course_level); ?>><?php echo esc_html__('All Levels', 'sikshya') ?></option>
-            <option value="beginner" <?php echo selected('beginner', $sikshya_course_level); ?>><?php echo esc_html__('Beginner', 'sikshya') ?></option>
-            <option value="intermediate" <?php echo selected('intermediate', $sikshya_course_level); ?>><?php echo esc_html__('Intermediate', 'sikshya') ?></option>
-            <option value="expert" <?php echo selected('expert', $sikshya_course_level); ?>><?php echo esc_html__('Expert', 'sikshya') ?></option>
+            <?php
+            $sikshya_course_levels = sikshya_course_levels();
+
+            foreach ($sikshya_course_levels as $level_id => $course_level) {
+                ?>
+                <option value="<?php echo esc_attr($level_id); ?>" <?php echo selected($level_id, $sikshya_course_level); ?>><?php echo esc_html($course_level) ?></option>
+            <?php } ?>
         </select>
     </div>
 
@@ -44,7 +50,7 @@
             foreach ($instructors as $instructor_id => $instructor) {
 
                 ?>
-                <option <?php echo selected($instructor_id, $sikshya_instructor);?>
+                <option <?php echo selected($instructor_id, $sikshya_instructor); ?>
                         value="<?php echo absint($instructor_id) ?>"><?php echo $instructor->name; ?></option>
                 <?php
             }

@@ -1,5 +1,4 @@
-<div id="admin-editor-sik_course" class="sik-admin-editor sik-box-data admin-editor-sik-course"
-     data-quiz-id="<?php echo esc_attr($quiz_id) ?>" data-question-id="<?php echo esc_attr($question_id) ?>">
+<div id="admin-editor-sik_course" class="sik-admin-editor sik-box-data admin-editor-sik-course">
     <div class="sik-box-data-head sik-row">
         <h3 class="heading"><?php echo __('Course Options', 'sikshya') ?></h3>
     </div>

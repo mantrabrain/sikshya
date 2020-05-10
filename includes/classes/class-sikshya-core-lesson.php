@@ -315,4 +315,27 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
     }
 
+    public function get_lesson_meta($lesson_id = null)
+    {
+
+        if ($lesson_id instanceof \WP_Post && !is_null($lesson_id)) {
+            $lesson_id = $lesson_id->ID;
+        } else {
+            global $post;
+            $lesson_id = isset($post->ID) ? $post->ID : 0;
+        }
+
+        $data = array(
+            'sikshya_lesson_duration' => get_post_meta($lesson_id, 'sikshya_lesson_duration', true),
+            'sikshya_lesson_duration_time' => get_post_meta($lesson_id, 'sikshya_lesson_duration_time', true),
+            'sikshya_is_preview_lesson' => get_post_meta($lesson_id, 'sikshya_is_preview_lesson', true),
+            'sikshya_lesson_video_source' => get_post_meta($lesson_id, 'sikshya_lesson_video_source', true),
+            'sikshya_lesson_youtube_video_url' => get_post_meta($lesson_id, 'sikshya_lesson_youtube_video_url', true),
+        );
+
+        return $data;
+
+    }
+
+
 }
