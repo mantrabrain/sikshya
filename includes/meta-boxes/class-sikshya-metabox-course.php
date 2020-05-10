@@ -11,7 +11,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
 
             add_action('add_meta_boxes', array($this, 'metabox'), 10);
-            add_action('save_post', array($this, 'save'));
+            add_action('save_post_' . SIKSHYA_COURSES_CUSTOM_POST_TYPE, array($this, 'save'));
             add_action('sikshya_course_metaboxes', array($this, 'course_meta'));
             add_action('sikshya_course_tab_curriculum', array($this, 'curriculum_tab'));
             add_action('sikshya_course_tab_general', array($this, 'general_tab'));
@@ -79,13 +79,15 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
                     $post_title = '' == $lesson_and_quize->post_title ? '(no-title)' : $lesson_and_quize->post_title;
 
+                    $order_number = (absint(get_post_meta($lesson_and_quize->ID, 'sikshya_order_number', true)));
+
                     $lesson_quiz_datas = array(
                         'id' => $lesson_and_quize->ID,
                         'title' => $post_title,
                         'type' => $type,
                         'icon' => $icon,
                         'section_id' => $section_id,
-                        'order_number' => (absint(get_post_meta($lesson_and_quize->ID, 'sikshya_order_number', true)))
+                        'order_number' => $order_number
                     );
                     sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $lesson_quiz_datas);
                 }
@@ -193,13 +195,16 @@ if (!class_exists('Sikshya_Metabox_Course')) {
         public function save($post_id)
         {
 
+
             if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
                 return;
             }
 
+
             if (empty($_POST[SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce']) || !wp_verify_nonce($_POST[SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce'], SIKSHYA_FILE)) {
                 return;
             }
+
 
             if (!current_user_can('edit_post', $post_id)) {
                 return;
@@ -208,6 +213,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             remove_action('save_post', array($this, 'save'));
 
             $course_object = get_post($post_id);
+
 
             if ($course_object->post_type != SIKSHYA_COURSES_CUSTOM_POST_TYPE) {
                 return;
@@ -253,7 +259,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
             }
 
-            if (($valid_sikshya_info['sikshya_course_instructor']) > 0) {
+            if (($valid_sikshya_info['sikshya_instructor']) > 0) {
 
                 if (!sikshya()->role->has_instructor($valid_sikshya_info['sikshya_instructor'])) {
 
@@ -281,6 +287,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
             }
 
             foreach ($sikshya_course_content as $section_id => $course_content) {
+
                 $section_id = absint($section_id);
 
                 $lesson_ids = isset($course_content['lesson_ids']) ? $course_content['lesson_ids'] : array();

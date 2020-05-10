@@ -10,7 +10,7 @@ if (!class_exists('Sikshya_Metabox_Lesson')) {
         {
 
             add_action('add_meta_boxes', array($this, 'metabox'), 10);
-            add_action('save_post', array($this, 'save'));
+            add_action('save_post_' . SIKSHYA_LESSONS_CUSTOM_POST_TYPE, array($this, 'save'));
 
 
         }

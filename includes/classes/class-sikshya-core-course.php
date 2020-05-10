@@ -17,13 +17,18 @@ class Sikshya_Core_Course
             $course_id = isset($post->ID) ? $post->ID : 0;
         }
 
+        $requirements = get_post_meta($course_id, 'sikshya_course_requirements', true);
+        $outcomes = get_post_meta($course_id, 'sikshya_course_outcomes', true);
+        $requirements = !is_array($requirements) || (is_array($requirements) && !isset($requirements[0])) ? array('') : $requirements;
+        $outcomes = !is_array($outcomes) || (is_array($outcomes) && !isset($outcomes[0])) ? array('') : $outcomes;
+
         $data = array(
             'sikshya_course_duration' => get_post_meta($course_id, 'sikshya_course_duration', true),
             'sikshya_course_duration_time' => get_post_meta($course_id, 'sikshya_course_duration_time', true),
             'sikshya_course_level' => get_post_meta($course_id, 'sikshya_course_level', true),
             'sikshya_instructor' => get_post_meta($course_id, 'sikshya_instructor', true),
-            'sikshya_course_requirements' => get_post_meta($course_id, 'sikshya_course_requirements', true),
-            'sikshya_course_outcomes' => get_post_meta($course_id, 'sikshya_course_outcomes', true),
+            'sikshya_course_requirements' => $requirements,
+            'sikshya_course_outcomes' => $outcomes,
             'sikshya_course_video_source' => get_post_meta($course_id, 'sikshya_course_video_source', true),
             'sikshya_course_youtube_video_url' => get_post_meta($course_id, 'sikshya_course_youtube_video_url', true),
         );
@@ -144,8 +149,24 @@ class Sikshya_Core_Course
             $lesson_id = $lesson_id->ID;
         }
 
-        $course_ids = get_post_meta($lesson_id, 'course_id');
+        $section_ids = get_post_meta($lesson_id, 'section_id', true);
 
+        if (!is_array($section_ids) && '' != $section_ids && !is_null($section_ids)) {
+
+            $section_ids = array($section_ids);
+        }
+
+        $course_ids = array();
+
+        foreach ($section_ids as $section_id) {
+
+            $course_ids = get_post_meta($section_id, 'course_id', true);
+
+            if (!is_array($course_ids) && '' != $course_ids && !is_null($course_ids)) {
+
+                $course_ids = array($course_ids);
+            }
+        }
         if (count($course_ids) < 1) {
             return array();
         }
@@ -170,7 +191,24 @@ class Sikshya_Core_Course
             $quiz_id = $quiz_id->ID;
         }
 
-        $course_ids = get_post_meta($quiz_id, 'course_id');
+        $section_ids = get_post_meta($quiz_id, 'section_id', true);
+
+        if (!is_array($section_ids) && '' != $section_ids && !is_null($section_ids)) {
+
+            $section_ids = array($section_ids);
+        }
+
+        $course_ids = array();
+
+        foreach ($section_ids as $section_id) {
+
+            $course_ids = get_post_meta($section_id, 'course_id', true);
+
+            if (!is_array($course_ids) && '' != $course_ids && !is_null($course_ids)) {
+
+                $course_ids = array($course_ids);
+            }
+        }
 
         if (count($course_ids) < 1) {
             return array();
@@ -190,7 +228,8 @@ class Sikshya_Core_Course
         return $data;
     }
 
-    public function has_enrolled($course_id = 0)
+    public
+    function has_enrolled($course_id = 0)
     {
 
         $user_id = get_current_user_id();
@@ -220,7 +259,8 @@ class Sikshya_Core_Course
         return false;
     }
 
-    public function enroll($course_id, $user_id)
+    public
+    function enroll($course_id, $user_id)
     {
 
         if (absint($course_id) > 1 && absint($user_id) > 0) {
@@ -275,7 +315,8 @@ class Sikshya_Core_Course
         return false;
     }
 
-    private function insert_user_table($user_id, $course_id, $order_item_id)
+    private
+    function insert_user_table($user_id, $course_id, $order_item_id)
     {
         $user_id = $user_id < 1 ? get_current_user_id() : $user_id;
 
@@ -307,7 +348,8 @@ class Sikshya_Core_Course
         return $wpdb->query($sql);
     }
 
-    public function get_enrolled_course($current_user_id)
+    public
+    function get_enrolled_course($current_user_id)
     {
 
         $course_list = array();
@@ -353,7 +395,8 @@ class Sikshya_Core_Course
 
     }
 
-    public function get_all_by_question($question_id)
+    public
+    function get_all_by_question($question_id)
     {
 
 

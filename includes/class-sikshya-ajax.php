@@ -274,6 +274,7 @@ class Sikshya_Ajax
         }
         $lesson_data['icon'] = 'dashicons-media-text';
         $lesson_data['section_id'] = $section_id;
+        $lesson_data['order_number'] = 0;
 
 
         sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $lesson_data);
@@ -301,6 +302,7 @@ class Sikshya_Ajax
 
         $quiz_data['icon'] = 'dashicons-clock';
         $quiz_data['section_id'] = $section_id;
+        $quiz_data['order_number'] = 0;
         sikshya_load_admin_template('metabox.course.tabs.curriculum.lesson-quiz-template', $quiz_data);
 
         exit;
