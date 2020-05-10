@@ -7,6 +7,30 @@ class Sikshya_Core_Course
 
     }
 
+    public function get_course_meta($course_id = null)
+    {
+
+        if ($course_id instanceof \WP_Post && !is_null($course_id)) {
+            $course_id = $course_id->ID;
+        } else {
+            global $post;
+            $course_id = isset($post->ID) ? $post->ID : 0;
+        }
+
+        $data = array(
+            'sikshya_course_duration' => get_post_meta($course_id, 'sikshya_course_duration', true),
+            'sikshya_course_duration_time' => get_post_meta($course_id, 'sikshya_course_duration_time', true),
+            'sikshya_course_level' => get_post_meta($course_id, 'sikshya_course_level', true),
+            'sikshya_instructor' => get_post_meta($course_id, 'sikshya_instructor', true),
+            'sikshya_course_requirements' => get_post_meta($course_id, 'sikshya_course_requirements', true),
+            'sikshya_course_outcomes' => get_post_meta($course_id, 'sikshya_course_outcomes', true),
+            'sikshya_course_video_url' => get_post_meta($course_id, 'sikshya_course_video_url', true),
+        );
+
+        return $data;
+
+    }
+
     public function get_all($course_id)
     {
         $data = get_post($course_id);
@@ -16,7 +40,7 @@ class Sikshya_Core_Course
             if (!empty($sections)) {
 
                 foreach ($sections as $index => $section) {
-                    
+
                     $lessons = sikshya()->lesson->get_all_by_section($section->ID);
 
                     if (!empty($lessons)) {

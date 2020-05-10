@@ -877,6 +877,18 @@ if (!function_exists('sikshya_clean')) {
         }
     }
 }
+if (!function_exists('sikshya_maybe_absint')) {
+    function sikshya_maybe_absint($val)
+    {
+        if ('' == $val) {
+            return '';
+
+        }
+        return absint($val);
+
+    }
+}
+
 
 if (!function_exists('sikshya_remove_post_meta')) {
 
@@ -885,7 +897,7 @@ if (!function_exists('sikshya_remove_post_meta')) {
         if ($meta_value === '') {
 
             delete_post_meta($post_id, $meta_key);
-            
+
         } else {
             $post_meta = get_post_meta($post_id, $meta_key, true);
 
