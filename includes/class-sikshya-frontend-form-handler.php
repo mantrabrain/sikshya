@@ -421,7 +421,7 @@ class Sikshya_Frontend_Form_Handler
                     $user_data = get_user_by(is_email($creds['user_login']) ? 'email' : 'login', $creds['user_login']);
 
                     if ($user_data && !is_user_member_of_blog($user_data->ID, get_current_blog_id())) {
-                        add_user_to_blog(get_current_blog_id(), $user_data->ID, 'customer');
+                        add_user_to_blog(get_current_blog_id(), $user_data->ID, 'subscriber');
                     }
                 }
 

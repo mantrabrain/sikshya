@@ -80,7 +80,14 @@ class Sikshya_Install
      */
     private static function setup_environment()
     {
-        // Init Custom Post Types
+        $options = array(
+            'sikshya_queue_flush_rewrite_rules' => 'yes'
+        );
+
+        foreach ($options as $option_key => $option_value) {
+
+            update_option($option_key, $option_value);
+        }
 
     }
 
@@ -147,7 +154,7 @@ class Sikshya_Install
 
 
         $options = array(
-            'sikshya_queue_flush_rewrite_rules' => 'yes'
+
         );
 
         foreach ($options as $option_key => $option_value) {
@@ -250,20 +257,20 @@ CREATE TABLE {$table_prefix}user_itemmeta (
             $wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
         }
 
-        // Dummy gettext calls to get strings in the catalog.
-        /* translators: user role */
-        _x('Customer', 'User role', 'sikshya');
-        /* translators: user role */
-        _x('Shop manager', 'User role', 'sikshya');
-
-        // Customer role.
-        add_role(
-            'customer',
-            'Customer',
-            array(
-                'read' => true,
-            )
-        );
+//        // Dummy gettext calls to get strings in the catalog.
+//        /* translators: user role */
+//        _x('Customer', 'User role', 'sikshya');
+//        /* translators: user role */
+//        _x('Shop manager', 'User role', 'sikshya');
+//
+//        // Customer role.
+//        add_role(
+//            'customer',
+//            'Customer',
+//            array(
+//                'read' => true,
+//            )
+//        );
 
         // Shop manager role.
         /*add_role(
