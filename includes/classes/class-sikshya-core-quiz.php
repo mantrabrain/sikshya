@@ -19,14 +19,12 @@ class Sikshya_Core_Quiz
                     $meta_key = 'lesson_id';
                 }
 
-
-                $parent_ids = array($parent_id);
-
+                
                 $order_number = isset($lesson_quiz_order[$quiz_id]) ? absint($lesson_quiz_order[$quiz_id]) : 0;
 
                 update_post_meta($quiz_id, 'sikshya_order_number', $order_number);
 
-                update_post_meta($quiz_id, $meta_key, $parent_ids);
+                update_post_meta($quiz_id, $meta_key, $parent_id);
 
                 $updated_quiz_ids[] = $quiz_id;
             }

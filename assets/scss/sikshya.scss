@@ -430,15 +430,6 @@ span.tw_get_sikshya {
       outline: none;
       width: 100%;
       line-height: 1.5;
-      &:before {
-        font-family: dashicons;
-        font-size: 18px;
-        left: 0;
-        transition: left linear 0.15s;
-        display: table-cell;
-        width: 20px;
-        padding: 10px 0;
-      }
       .item-meta {
         .item-count {
           padding: 5px 15px;
@@ -456,9 +447,6 @@ span.tw_get_sikshya {
     > li {
       > a.item-link {
         cursor: pointer;
-        &:before {
-          content: "\f333";
-        }
       }
     }
   }
@@ -466,18 +454,14 @@ span.tw_get_sikshya {
     > li {
       > a.item-link {
         background: #f9f9f9;
-        &:before {
-          content: "\f491";
-        }
+
       }
     }
   }
   ul.sikshya-quiz-list {
     > li {
       > a.item-link {
-        &:before {
-          content: "\f469";
-        }
+
       }
     }
   }

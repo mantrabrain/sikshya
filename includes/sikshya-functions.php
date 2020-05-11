@@ -899,20 +899,8 @@ if (!function_exists('sikshya_remove_post_meta')) {
             delete_post_meta($post_id, $meta_key);
 
         } else {
-            $post_meta = get_post_meta($post_id, $meta_key, true);
+            delete_post_meta($post_id, $meta_key, $meta_value);
 
-            if (is_array($post_meta)) {
-
-                $post_meta = array_diff($post_meta, array($meta_value));
-
-                update_post_meta($post_id, $meta_key, $post_meta);
-
-
-            } else {
-
-                delete_post_meta($post_id, $meta_key, $meta_value);
-
-            }
         }
     }
 }
@@ -937,13 +925,17 @@ if (!function_exists('sikshya_duration_times')) {
     }
 }
 if (!function_exists('sikshya_course_levels')) {
-    function sikshya_course_levels()
+    function sikshya_course_levels($level_key = '')
     {
-        return array(
+        $data = array(
             'all' => esc_html__('All Levels', 'sikshya'),
             'beginner' => esc_html__('Beginner', 'sikshya'),
             'intermediate' => esc_html__('Intermediate', 'sikshya'),
             'expert' => esc_html__('Expert', 'sikshya')
         );
+        if ('' !== $level_key) {
+            return isset($data[$level_key]) ? $data[$level_key] : $data;
+        }
+        return $data;
     }
 }

@@ -47,28 +47,24 @@ class Sikshya_Core_Course
 
                 foreach ($sections as $index => $section) {
 
-                    $lessons = sikshya()->lesson->get_all_by_section($section->ID);
+                    $lesson_and_quizes = sikshya()->section->get_lesson_and_quiz($section->ID);
 
-                    if (!empty($lessons)) {
+                    if (!empty($lesson_and_quizes)) {
 
-                        foreach ($lessons as $lesson_index => $lesson) {
+                        foreach ($lesson_and_quizes as $lesson_quiz_index => $lesson_and_quize_content) {
 
-                            $quizzes = sikshya()->quiz->get_all_by_lesson($lesson->ID);
+                            $is_quiz = isset($lesson_and_quize_content->post_type) && $lesson_and_quize_content->post_type === SIKSHYA_QUIZZES_CUSTOM_POST_TYPE ? true : false;
 
-                            if (!empty($quizzes)) {
+                            if ($is_quiz) {
 
-                                foreach ($quizzes as $quiz_index => $question) {
+                                $questions = sikshya()->question->get_all_by_quiz($lesson_and_quize_content->ID);
 
-                                    $questions = sikshya()->question->get_all_by_quiz($question->ID);
+                                $lesson_and_quizes[$lesson_quiz_index]->questions = $questions;
 
-                                    $quizzes[$quiz_index]->questions = $questions;
-                                }
                             }
-                            $lessons[$lesson_index]->quizzes = $quizzes;
-
                         }
                     }
-                    $sections[$index]->lessons = $lessons;
+                    $sections[$index]->lesson_and_quizes = $lesson_and_quizes;
                 }
             }
             $data->sections = $sections;
@@ -228,8 +224,7 @@ class Sikshya_Core_Course
         return $data;
     }
 
-    public
-    function has_enrolled($course_id = 0)
+    public function has_enrolled($course_id = 0)
     {
 
         $user_id = get_current_user_id();
@@ -259,8 +254,7 @@ class Sikshya_Core_Course
         return false;
     }
 
-    public
-    function enroll($course_id, $user_id)
+    public function enroll($course_id, $user_id)
     {
 
         if (absint($course_id) > 1 && absint($user_id) > 0) {
@@ -315,8 +309,7 @@ class Sikshya_Core_Course
         return false;
     }
 
-    private
-    function insert_user_table($user_id, $course_id, $order_item_id)
+    private function insert_user_table($user_id, $course_id, $order_item_id)
     {
         $user_id = $user_id < 1 ? get_current_user_id() : $user_id;
 
@@ -348,8 +341,7 @@ class Sikshya_Core_Course
         return $wpdb->query($sql);
     }
 
-    public
-    function get_enrolled_course($current_user_id)
+    public function get_enrolled_course($current_user_id)
     {
 
         $course_list = array();
@@ -395,8 +387,7 @@ class Sikshya_Core_Course
 
     }
 
-    public
-    function get_all_by_question($question_id)
+    public function get_all_by_question($question_id)
     {
 
 
@@ -434,6 +425,71 @@ class Sikshya_Core_Course
         $data = get_posts($args);
 
         return $data;
+
+    }
+
+    public function get_all_child_count($course_id)
+    {
+        $all_total[SIKSHYA_LESSONS_CUSTOM_POST_TYPE] = 0;
+        $all_total[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE] = 0;
+        $all_total[SIKSHYA_SECTIONS_CUSTOM_POST_TYPE] = 0;
+        $all_sections = sikshya()->section->get_all_by_course($course_id);
+        $all_total[SIKSHYA_SECTIONS_CUSTOM_POST_TYPE] = is_array($all_sections) ? count($all_sections) : 0;
+        $all_section_ids = array();
+        if (is_array($all_sections)) {
+            $all_section_ids = wp_list_pluck($all_sections, 'ID');
+        }
+        $in_query = '(';
+
+        foreach ($all_section_ids as $index => $section_id) {
+            $in_query .= '%d';
+            if ($index + 1 != count($all_section_ids)) {
+                $in_query .= ', ';
+            }
+
+        }
+        $in_query .= ')';
+        global $wpdb;
+
+        $query_args = $all_section_ids;
+        $query_args[] = SIKSHYA_LESSONS_CUSTOM_POST_TYPE;
+        $query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
+        $query_args[] = SIKSHYA_LESSONS_CUSTOM_POST_TYPE;
+        $query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
+
+        $sql_query = "SELECT COUNT(*) as total, p.post_type           
+FROM $wpdb->posts p
+INNER JOIN $wpdb->postmeta pm
+ON p.ID=pm.post_id
+WHERE pm.meta_key = 'section_id' 
+AND pm.meta_value in " . $in_query . " and p.post_status='publish'
+GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, %s, %s)";
+        $sql = $wpdb->prepare(
+            $sql_query,
+            $query_args
+        );
+
+        $results = $wpdb->get_results($sql);
+
+
+        foreach ($results as $result) {
+
+            $total = isset($result->total) ? $result->total : 0;
+
+            $post_type = isset($result->post_type) ? $result->post_type : '';
+
+            switch ($post_type) {
+
+                case SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
+                    $all_total[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE] = $total;
+                    break;
+                case SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
+                    $all_total[SIKSHYA_LESSONS_CUSTOM_POST_TYPE] = $total;
+                    break;
+            }
+
+        }
+        return $all_total;
 
     }
 }

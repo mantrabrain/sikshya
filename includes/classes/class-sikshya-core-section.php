@@ -105,14 +105,12 @@ INNER JOIN $wpdb->postmeta pm
 ON p.ID=pm.post_id
 WHERE pm.meta_key = 'section_id' 
 AND pm.meta_value = %d  and p.post_status='publish'
-GROUP BY p.post_type having p.post_type in (%s,%s,%s) ORDER BY FIELD (p.post_type, %s, %s, %s)",
+GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, %s, %s)",
             $section_id,
             SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
             SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
-            SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE,
             SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
-            SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
-            SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE
+            SIKSHYA_QUIZZES_CUSTOM_POST_TYPE
         );
 
         $results = $wpdb->get_results($sql);
@@ -194,8 +192,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s,%s) ORDER BY FIELD (p.post_typ
             'meta_query' => array(
                 array(
                     'key' => 'section_id',
-                    'value' => absint($section_id),
-                    'compare' => 'LIKE'
+                    'value' => absint($section_id)
 
                 )
             )
@@ -205,6 +202,53 @@ GROUP BY p.post_type having p.post_type in (%s,%s,%s) ORDER BY FIELD (p.post_typ
 
 
         return $data;
+    }
+
+    public function get_all_child_count($section_id)
+    {
+        global $wpdb;
+
+        $query_args[] = $section_id;
+        $query_args[] = SIKSHYA_LESSONS_CUSTOM_POST_TYPE;
+        $query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
+        $query_args[] = SIKSHYA_LESSONS_CUSTOM_POST_TYPE;
+        $query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
+
+        $sql_query = "SELECT COUNT(*) as total, p.post_type           
+FROM $wpdb->posts p
+INNER JOIN $wpdb->postmeta pm
+ON p.ID=pm.post_id
+WHERE pm.meta_key = 'section_id' 
+AND pm.meta_value = %d and p.post_status='publish'
+GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, %s, %s)";
+        $sql = $wpdb->prepare(
+            $sql_query,
+            $query_args
+        );
+
+        $results = $wpdb->get_results($sql);
+
+        $all_total[SIKSHYA_LESSONS_CUSTOM_POST_TYPE] = 0;
+        $all_total[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE] = 0;
+        foreach ($results as $result) {
+
+            $total = isset($result->total) ? $result->total : 0;
+
+            $post_type = isset($result->post_type) ? $result->post_type : '';
+
+            switch ($post_type) {
+
+                case SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
+                    $all_total[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE] = $total;
+                    break;
+                case SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
+                    $all_total[SIKSHYA_LESSONS_CUSTOM_POST_TYPE] = $total;
+                    break;
+            }
+
+        }
+        return $all_total;
+
     }
 
 

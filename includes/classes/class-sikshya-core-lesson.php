@@ -13,9 +13,7 @@ class Sikshya_Core_Lesson
 
             if (SIKSHYA_LESSONS_CUSTOM_POST_TYPE === get_post_type($lesson_id) && $section_id > 0) {
 
-                $section_ids = array($section_id);
-
-                update_post_meta($lesson_id, 'section_id', $section_ids);
+                update_post_meta($lesson_id, 'section_id', $section_id);
 
                 $order_number = isset($lesson_quiz_order[$lesson_id]) ? absint($lesson_quiz_order[$lesson_id]) : 0;
 
@@ -335,6 +333,15 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
         return $data;
 
+    }
+
+    public function count_total_from_section_id($section_id)
+    {
+        $all_data = $this->get_all_by_section($section_id);
+        if (is_array($all_data)) {
+            return count($all_data);
+        }
+        return 0;
     }
 
 
