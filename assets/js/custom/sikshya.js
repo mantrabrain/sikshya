@@ -136,15 +136,30 @@
 
 
         });
-        $('input[type="checkbox"][name="sikshya_change_password"]').on('change',function(){
+        $('input[type="checkbox"][name="sikshya_change_password"]').on('change', function () {
             var password_change_wrap = $(this).closest('.sikshya-change-password');
-            
-            if(this.checked){
+
+            if (this.checked) {
                 password_change_wrap.find('input[type="password"].sikshya-password-field').removeAttr('disabled');
-            }else{
+            } else {
                 password_change_wrap.find('input[type="password"].sikshya-password-field').attr('disabled', 'disabled');
             }
 
+        });
+        var video_content = $('.video-content').html();
+        var title = $('#CoursePreviewModal').attr('data-modal-title');
+        new jBox('Modal', {
+            attach: '#CoursePreviewModal',
+            width: 800,
+            height: 500,
+            blockScroll: false,
+            draggable: 'title',
+            closeButton: true,
+            content: video_content,
+            title: title,
+            overlay: false,
+            reposition: false,
+            repositionOnOpen: false
         });
     });
 })(jQuery);

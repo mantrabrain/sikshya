@@ -47,9 +47,10 @@ while (have_posts()) {
                         </div>
                         <div class="created-row">
           <span class="created-by">
-            Created by <a href="https://demo.academy-lms.com/default/home/instructor_page/1">John Doe</a>
+            <?php echo esc_html__('Created by', 'sikshya'); ?><a
+                      href="#"> <?php echo esc_attr(sikshya()->course->instructor('display_name', get_the_ID())) ?></a>
           </span>
-                            <span class="last-updated-date">Last updated Fri, 05-Jul-2019</span>
+                            <span class="last-updated-date"><?php echo esc_html__('Last updated', 'sikshya'); ?><?php echo get_the_modified_date() ?></span>
                         </div>
                     </div>
                 </div>
@@ -146,12 +147,14 @@ while (have_posts()) {
                 <div class="sik-col-lg-4">
                     <div class="course-sidebar natural">
                         <div class="preview-video-box">
-                            <a data-toggle="modal" data-target="#CoursePreviewModal">
+                            <a data-modal-title="<?php echo get_the_title(); ?>" id="CoursePreviewModal">
                                 <img src="<?php echo get_the_post_thumbnail_url() ?>"
                                      alt="" class="img-fluid">
-                                <span class="preview-text">Preview this course</span>
                                 <span class="play-btn"></span>
                             </a>
+                            <div class="video-content" style="display: none;">
+                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/vSpabcwVZtE?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
                         </div>
                         <div class="course-sidebar-text-box">
                             <div class="price">
@@ -159,23 +162,10 @@ while (have_posts()) {
                             </div>
 
                             <div class="buy-btns">
-                             
+
                                 <button class="btn btn-add-cart" type="button" id="15" onclick="handleCartItems(this)">
                                     Enroll Now
                                 </button>
-                            </div>
-
-
-                            <div class="includes">
-                                <div class="title"><b>Includes:</b></div>
-                                <ul>
-                                    <li><i class="far fa-file-video"></i>
-                                        01:22:18 Hours On demand videos
-                                    </li>
-                                    <li><i class="far fa-file"></i>10 Lessons</li>
-                                    <li><i class="far fa-compass"></i>Full lifetime access</li>
-                                    <li><i class="fas fa-mobile-alt"></i>Access on mobile and tv</li>
-                                </ul>
                             </div>
                         </div>
                     </div>
@@ -183,6 +173,7 @@ while (have_posts()) {
             </div>
         </div>
     </section>
+
     <?php
 
 }
