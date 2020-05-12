@@ -347,23 +347,6 @@ course content
       font-size: 15px;
       position: relative;
 
-      &:before {
-        font-family: Font Awesome\ 5 Free;
-        font-weight: 900;
-        -moz-osx-font-smoothing: grayscale;
-        -webkit-font-smoothing: antialiased;
-        display: inline-block;
-        font-style: normal;
-        font-variant: normal;
-        text-rendering: auto;
-        line-height: 1;
-        content: "\f00c";
-        color: #a1a7b3;
-        font-size: 14px;
-        position: absolute;
-        left: 0;
-        top: 4px;
-      }
     }
   }
 }
@@ -801,22 +784,7 @@ course content
 
 .course-curriculum-accordion {
   .lecture-group-title {
-    &:before {
-      -moz-osx-font-smoothing: grayscale;
-      -webkit-font-smoothing: antialiased;
-      display: inline-block;
-      font-style: normal;
-      font-variant: normal;
-      text-rendering: auto;
-      line-height: 1;
-      font-family: Font Awesome\ 5 Free;
-      font-weight: 900;
-      position: absolute;
-      left: 22px;
-      font-size: 10px;
-      top: 16px;
-      color: #007791;
-    }
+
 
     &[aria-expanded="false"]:before {
       content: "\f067";
@@ -861,23 +829,6 @@ course content
         text-align: right;
       }
 
-      &:before {
-        font-family: Font Awesome\ 5 Free;
-        -moz-osx-font-smoothing: grayscale;
-        -webkit-font-smoothing: antialiased;
-        display: inline-block;
-        font-style: normal;
-        font-variant: normal;
-        text-rendering: auto;
-        line-height: 1;
-        content: "\f144";
-        position: absolute;
-        left: 45px;
-        opacity: 0.3;
-        font-weight: 900;
-        font-size: 13px;
-        top: 17px;
-      }
 
       &.has-preview {
         color: #007791;
@@ -1522,7 +1473,6 @@ section {
     label:before {
       margin: 8px;
       font-size: 40px;
-      font-family: "Font Awesome 5 Free";
       display: inline-block;
       content: "\f005";
       font-weight: 900;
@@ -1817,12 +1767,14 @@ section.cart-list-area {
   }
 }
 
-.float-left{
+.float-left {
   float: left;
 }
+
 .float-right {
   float: right;
 }
+
 .sikshya-course-level {
   display: inline-block;
   background: #9013FE;
@@ -1833,4 +1785,9 @@ section.cart-list-area {
   border-radius: 2px;
   -webkit-box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
   box-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+}
+.about-instructor-box:after {
+  content: "";
+  display: block;
+  clear: both;
 }

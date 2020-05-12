@@ -48,6 +48,7 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
                     <div class="lecture-group-title clearfix" data-toggle="collapse"
                          data-target="#collapse22">
                         <div class="title float-left">
+                            <span class="icon dashicons dashicons-minus"></span>
                             <?php
                             echo '' !== ($section->post_title) ? esc_html($section->post_title) : '(no-title)';
 
@@ -82,7 +83,12 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
                                     $class = $lesson_and_quiz->post_type === SIKSHYA_LESSONS_CUSTOM_POST_TYPE ? 'lesson' : 'quiz';
                                     ?>
                                     <li class="lecture has-preview <?php echo esc_attr($class); ?>">
-                                <span class="lecture-title"><?php
+                                <span class="lecture-title">
+                                    <?php if ($lesson_and_quiz->post_type === SIKSHYA_LESSONS_CUSTOM_POST_TYPE) { ?>
+                                        <span class="icon dashicons dashicons-media-text"></span><?php
+                                    } else {
+                                        echo '<span class="icon dashicons dashicons-clock"></span>';
+                                    }
                                     echo '' !== ($lesson_and_quiz->post_title) ? esc_html($lesson_and_quiz->post_title) : '(no-title)';
                                     ?></span>
                                         <?php

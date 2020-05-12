@@ -492,4 +492,56 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         return $all_total;
 
     }
+
+    public function instructor($key, $course_id = '', $is_meta = false)
+    {
+        if ('' == $course_id) {
+            $course_id = get_the_ID();
+        }
+        $instructor_id = get_post_meta($course_id, 'sikshya_instructor', true);
+
+
+        $user = get_user_by('id', $instructor_id);
+
+        $data = isset($user->data) ? $user->data : array();
+
+        if ($is_meta) {
+
+            $meta = get_user_meta($instructor_id, $key, true);
+
+            return $meta;
+        }
+
+
+        if ('' != $key) {
+            if (isset($data->$key)) {
+                return $data->$key;
+            }
+        }
+        return $data;
+    }
+
+    public function get_course_count_by_instructor_id()
+    {
+        $instructor_id = $this->instructor('ID');
+
+        $args = array(
+            'numberposts' => -1,
+            'no_found_rows' => true,
+            'orderby' => 'menu_order',
+            'order' => 'asc',
+            'post_type' => SIKSHYA_COURSES_CUSTOM_POST_TYPE,
+            'meta_query' => array(
+                array(
+                    'key' => 'sikshya_instructor',
+                    'value' => (int)$instructor_id,
+                )
+            )
+        );
+        $data = get_posts($args);
+        if (is_array($data)) {
+            return count($data);
+        }
+        return 0;
+    }
 }
