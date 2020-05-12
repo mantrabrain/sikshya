@@ -37,16 +37,18 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
     <div class="course-curriculum-accordion">
         <?php
 
+        $index = 0;
+
         if (count($sections) > 0) {
 
             foreach ($sections as $section) {
 
+                $index++;
                 $section_child_count = sikshya()->section->get_all_child_count($section->ID);
 
                 ?>
                 <div class="lecture-group-wrapper">
-                    <div class="lecture-group-title clearfix" data-toggle="collapse"
-                         data-target="#collapse22">
+                    <div class="lecture-group-title clearfix ">
                         <div class="title float-left">
                             <span class="icon dashicons dashicons-minus"></span>
                             <?php
@@ -76,7 +78,7 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
                     if (count($lesson_and_quizes) > 0) {
 
                         ?>
-                        <div id="collapse22" class="lecture-list collapse show">
+                        <div class="lecture-list <?php echo $index == 1 ? 'show' : ''; ?>">
                             <ul>
                                 <?php foreach ($lesson_and_quizes as $lesson_and_quiz) {
                                     $total_lesson_count_from_section = sikshya()->lesson->count_total_from_section_id($section->ID);

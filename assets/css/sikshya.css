@@ -2260,6 +2260,10 @@ course content
     .reviews .more-reviews-btn button:hover, .reviews .more-reviews-btn button:focus {
       background-color: #e6f2f5; }
 
+.course-content-area .icon {
+  line-height: 1.4;
+  margin-right: 10px; }
+
 .course-curriculum-box {
   margin-bottom: 40px; }
   .course-curriculum-box .course-curriculum-title .title {
@@ -2273,7 +2277,7 @@ course content
 
 .course-curriculum-accordion .lecture-group-title {
   position: relative;
-  padding: 10px 30px 10px 45px;
+  padding: 10px 30px 10px 25px;
   background: #f9f9f9;
   border: 1px solid #e8e9eb;
   cursor: pointer;
@@ -2287,6 +2291,11 @@ course content
   .course-curriculum-accordion .lecture-group-title .title {
     max-width: 60%;
     font-weight: 600; }
+
+.course-curriculum-accordion .lecture-list {
+  display: none; }
+  .course-curriculum-accordion .lecture-list.show {
+    display: block; }
 
 .course-curriculum-box .course-curriculum-title {
   padding-right: 31px; }
@@ -2306,7 +2315,7 @@ course content
   list-style: none; }
 
 .course-curriculum-accordion .lecture-list .lecture {
-  padding: 12px 30px 12px 73px;
+  padding: 12px 30px 12px 25px;
   position: relative;
   border-bottom: 1px solid #e8e9eb;
   border-left: 1px solid #e8e9eb;

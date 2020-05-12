@@ -146,16 +146,25 @@ while (have_posts()) {
                 </div>
                 <div class="sik-col-lg-4">
                     <div class="course-sidebar natural">
-                        <div class="preview-video-box">
-                            <a data-modal-title="<?php echo get_the_title(); ?>" id="CoursePreviewModal">
-                                <img src="<?php echo get_the_post_thumbnail_url() ?>"
-                                     alt="" class="img-fluid">
-                                <span class="play-btn"></span>
-                            </a>
-                            <div class="video-content" style="display: none;">
-                                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/vSpabcwVZtE?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        <?php $sikshya_course_youtube_video_url = $course_meta['sikshya_course_youtube_video_url'];
+                        if ('' != $sikshya_course_youtube_video_url) {
+                            parse_str(parse_url($sikshya_course_youtube_video_url, PHP_URL_QUERY), $my_array_of_vars);
+                            ?>
+                            <div class="preview-video-box">
+                                <a data-modal-title="<?php echo get_the_title(); ?>" id="CoursePreviewModal">
+                                    <img src="<?php echo get_the_post_thumbnail_url() ?>"
+                                         alt="" class="img-fluid">
+                                    <span class="play-btn"></span>
+                                </a>
+                                <div class="video-content" style="display: none;">
+                                    <iframe width="100%" height="100%"
+                                            src="https://www.youtube.com/embed/<?php echo $my_array_of_vars['v']; ?>?controls=0&showinfo=0"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen style="height:100%"></iframe>
+                                </div>
                             </div>
-                        </div>
+                        <?php } ?>
                         <div class="course-sidebar-text-box">
                             <div class="price">
                                 <span class="current-price"><span class="current-price">Free</span></span>
