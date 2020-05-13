@@ -15,12 +15,12 @@ class Sikshya_Lesson_ooks
 
     public function navigation()
     {
-        $prev_params = sikshya()->lesson->get_prev_params();
-        $next_params = sikshya()->lesson->get_next_params();
-        /*array(
-            'prev_link' => '#',
-            'title' => 'Prev title'
-        );*/
+        $all_lesson_quiz_ids = sikshya()->course->get_lesson_quiz_ids();
+
+        $prev_params = sikshya()->lesson->get_prev_params($all_lesson_quiz_ids);
+
+        $next_params = sikshya()->lesson->get_next_params($all_lesson_quiz_ids);
+
         if (!empty($prev_params)) {
             sikshya_load_template('parts.lesson.lesson-prev-nav', $prev_params);
         }

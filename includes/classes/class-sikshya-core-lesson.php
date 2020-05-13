@@ -2,6 +2,9 @@
 
 class Sikshya_Core_Lesson
 {
+    private $all_lesson_quiz_ids = array();
+
+
     public function save($lesson_ids = array(), $section_id = 0, $lesson_quiz_order = array())
     {
 
@@ -211,20 +214,16 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
     }
 
 
-    public function get_prev_params()
+    public function get_prev_params($all_lesson_quiz_ids = array())
     {
 
         $id = get_the_ID();
 
-        $course_id = get_post_meta($id, 'course_id', true);
-
-        $lessons = $this->get_all_by_course($course_id);
-
         $prev = 0;
-        if ($lessons) {
-            $lesson_ds = wp_list_pluck($lessons, 'ID');
-            if (0 < ($at = array_search($id, $lesson_ds))) {
-                $prev = $lesson_ds[$at - 1];
+
+        if (count($all_lesson_quiz_ids) > 0) {
+            if (0 < ($at = array_search($id, $all_lesson_quiz_ids))) {
+                $prev = $all_lesson_quiz_ids[$at - 1];
             }
         }
 
@@ -237,20 +236,16 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         return array();
     }
 
-    public function get_next_params()
+    public function get_next_params($all_lesson_quiz_ids = array())
     {
         $id = get_the_ID();
 
-        $course_id = get_post_meta($id, 'course_id', true);
-
-        $lessons = $this->get_all_by_course($course_id);
 
         $next = 0;
 
-        if ($lessons) {
-            $lesson_ids = wp_list_pluck($lessons, 'ID');
-            if (sizeof($lesson_ids) - 1 > ($at = array_search($id, $lesson_ids))) {
-                $next = $lesson_ids[$at + 1];
+        if (count($all_lesson_quiz_ids) > 0) {
+            if (sizeof($all_lesson_quiz_ids) - 1 > ($at = array_search($id, $all_lesson_quiz_ids))) {
+                $next = $all_lesson_quiz_ids[$at + 1];
             }
         }
         if ($next > 0) {

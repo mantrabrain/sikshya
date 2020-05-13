@@ -618,5 +618,31 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
     }
 
+    public function get_lesson_quiz_ids($course_id = 0)
+    {
+
+        $course_id = absint($course_id) < 1 ? $this->get_id() : $course_id;
+
+        $sections = sikshya()->section->get_all_by_course($course_id);
+
+        $all_lesson_quizes = array();
+
+        foreach ($sections as $section) {
+
+            $lesson_quizes = sikshya()->section->get_lesson_and_quiz($section->ID);
+            if (is_array($all_lesson_quizes)) {
+
+                $lesson_quiz_ids = wp_list_pluck($lesson_quizes, 'ID');
+
+                if (is_array($lesson_quiz_ids)) {
+                    $all_lesson_quizes = array_merge($all_lesson_quizes, $lesson_quiz_ids);
+                }
+
+            }
+
+        }
+        return $all_lesson_quizes;
+    }
+
 
 }
