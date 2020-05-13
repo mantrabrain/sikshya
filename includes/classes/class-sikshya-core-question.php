@@ -211,10 +211,6 @@ class Sikshya_Core_Question
                 array(
                     'key' => 'quiz_id',
                     'value' => (int)$quiz_id
-                ),
-                array(
-                    'key' => 'course_id',
-                    'value' => (int)$course_id
                 )
             )
         );

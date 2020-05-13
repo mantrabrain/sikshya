@@ -173,11 +173,10 @@ class Sikshya_Frontend_Form_Handler
 
         $quiz_id = isset($_POST['sikshya_quiz_id']) ? absint($_POST['sikshya_quiz_id']) : 0;
         $course_id = isset($_POST['sikshya_course_id']) ? absint($_POST['sikshya_course_id']) : 0;
-        $lesson_id = isset($_POST['sikshya_lesson_id']) ? absint($_POST['sikshya_lesson_id']) : 0;
 
         $user_id = get_current_user_id();
 
-        if ($quiz_id < 1 || $course_id < 1 || $user_id < 1 || $lesson_id < 1) {
+        if ($quiz_id < 1 || $course_id < 1 || $user_id < 1 ) {
             return;
 
         }

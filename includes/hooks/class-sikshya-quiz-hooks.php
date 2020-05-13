@@ -15,8 +15,7 @@ class Sikshya_Quiz_Hooks
 
         $params = array(
             'quiz_id' => get_the_ID(),
-            'course_id' => get_post_meta(get_the_ID(), 'course_id', true),
-            'lesson_id' => get_post_meta(get_the_ID(), 'lesson_id', true)
+            'course_id' => sikshya()->course->get_id(),
         );
         if (!sikshya()->quiz->is_started(get_current_user_id(), $params['quiz_id'])) {
             sikshya_load_template('parts.quiz.start-form', $params);
