@@ -224,10 +224,12 @@ class Sikshya_Core_Course
         return $data;
     }
 
-    public function has_enrolled($course_id = 0)
+    public function has_enrolled($course_id = 0, $user_id = null)
     {
 
-        $user_id = get_current_user_id();
+        $user_id = is_null($user_id) ? get_current_user_id() : $user_id;
+
+
         global $wpdb;
 
         $sql = "SELECT ui.* FROM " . $wpdb->prefix . 'posts p INNER JOIN ' . SIKSHYA_DB_PREFIX . "user_items ui
@@ -247,18 +249,26 @@ class Sikshya_Core_Course
 
         );
         $results = $wpdb->get_results($query);
-
+     
         if (count($results) > 0) {
             return true;
         }
         return false;
     }
 
+    public function user_course_completed($course_id = 0, $user_id = 0)
+    {
+        if (absint($course_id) > 1 && absint($user_id) > 0) {
+            return false;
+        }
+        return false;
+
+    }
+
     public function enroll($course_id, $user_id)
     {
 
         if (absint($course_id) > 1 && absint($user_id) > 0) {
-
 
             $args = array(
                 'post_title' => 'Order on ' . get_the_time('l jS F Y g:i:s A'),
@@ -268,14 +278,11 @@ class Sikshya_Core_Course
             );
             $id = wp_insert_post($args);
 
-
             $item_name = get_the_title($course_id);
-
 
             if ($id > 0) {
 
                 global $wpdb;
-
 
                 $query = $wpdb->prepare("INSERT INTO " . SIKSHYA_DB_PREFIX . 'order_items(item_name, order_id, order_datetime) VALUES(%s, %d, %s)',
                     $item_name,
