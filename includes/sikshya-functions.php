@@ -939,3 +939,28 @@ if (!function_exists('sikshya_course_levels')) {
         return $data;
     }
 }
+
+if (!function_exists('sikshya_lesson_quiz_id')) {
+    function sikshya_lesson_quiz_id()
+    {
+        $id = get_the_ID();
+
+        $post = get_post($id);
+
+        $post_type = isset($post->post_type) ? $post->post_type : '';
+
+        $lesson_quiz_id = 0;
+        switch ($post_type) {
+            case SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
+            case SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
+                $lesson_quiz_id = $id;
+                break;
+            case SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE:
+                $lesson_quiz_id = get_post_meta($id, 'quiz_id', true);
+                break;
+
+        }
+        return $lesson_quiz_id;
+
+    }
+}

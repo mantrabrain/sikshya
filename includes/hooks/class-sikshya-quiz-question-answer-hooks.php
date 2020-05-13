@@ -37,13 +37,15 @@ class Sikshya_Quiz_Question_Asnwer
         }
 
         if (sikshya()->question->get_prev_question(get_the_ID())) {
+
             sikshya_load_template('parts.answer.prev-form', $ids);
+
         }
 
-        if (!sikshya()->quiz->is_completed(get_current_user_id(), $quiz_id, $course_id)) {
+        //if (!sikshya()->quiz->is_completed(get_current_user_id(), $quiz_id, $course_id)) {
 
-            sikshya_load_template('parts.answer.complete-form', $ids);
-        }
+        sikshya_load_template('parts.answer.complete-form', $ids);
+        //}
 
         if (sikshya()->question->get_next_question(get_the_ID())) {
             sikshya_load_template('parts.answer.next-form', $ids);

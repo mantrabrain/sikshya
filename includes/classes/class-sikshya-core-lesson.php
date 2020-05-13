@@ -217,7 +217,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
     public function get_prev_params($all_lesson_quiz_ids = array())
     {
 
-        $id = get_the_ID();
+        $id = sikshya_lesson_quiz_id();
 
         $prev = 0;
 
@@ -238,8 +238,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
     public function get_next_params($all_lesson_quiz_ids = array())
     {
-        $id = get_the_ID();
-
+        $id = sikshya_lesson_quiz_id();
 
         $next = 0;
 
@@ -261,6 +260,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
     public function get_prev_question()
     {
+
         $id = get_the_ID();
 
         $quiz_id = get_post_meta($id, 'quiz_id', true);
