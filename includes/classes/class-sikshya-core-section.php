@@ -257,4 +257,34 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
     }
 
 
+    public function get_id()
+    {
+        $id = get_the_ID();
+
+        $post = get_post($id);
+
+        $post_type = isset($post->post_type) ? $post->post_type : '';
+
+        $section_id = 0;
+
+        switch ($post_type) {
+
+            case SIKSHYA_SECTIONS_CUSTOM_POST_TYPE:
+                $section_id = $id;
+                break;
+            case SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
+            case SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
+                $section_id = get_post_meta($id, 'section_id', true);
+                break;
+            case SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE:
+                $quiz_id = get_post_meta($id, 'quiz_id', true);
+                $section_id = get_post_meta($quiz_id, 'section_id', true);
+                break;
+
+        }
+        return $section_id;
+
+    }
+
+
 }

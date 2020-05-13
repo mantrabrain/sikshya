@@ -344,6 +344,7 @@ if (!function_exists('sikshya_content_item_edit_links')) {
             return;
         }
         if (is_singular(SIKSHYA_LESSONS_CUSTOM_POST_TYPE)) {
+
             // conditional content/code
 
             $lesson_post_type_object = get_post_type_object(SIKSHYA_LESSONS_CUSTOM_POST_TYPE);
@@ -352,13 +353,10 @@ if (!function_exists('sikshya_content_item_edit_links')) {
 
             $course_post_type_object = get_post_type_object(SIKSHYA_COURSES_CUSTOM_POST_TYPE);
 
-            $lesson_id = $post->ID;
-
-            $section_id = get_post_meta($lesson_id, 'section_id', true);
-
-            $course_id = get_post_meta($section_id, 'course_id', true);
+            $course_id = sikshya()->course->get_id();
 
             $edit_course_link = get_edit_post_link($course_id);
+
 
             $wp_admin_bar->remove_menu('edit');
 
@@ -379,20 +377,9 @@ if (!function_exists('sikshya_content_item_edit_links')) {
 
             $edit_quiz_link = get_edit_post_link($post->ID);
 
-            $quiz_id = $post->ID;
-
-            $lesson_id = get_post_meta($quiz_id, 'lesson_id', true);
-
-            $section_id = get_post_meta($lesson_id, 'section_id', true);
-
-            $course_id = get_post_meta($section_id, 'course_id', true);
-
-            $lesson_post_type_object = get_post_type_object(SIKSHYA_LESSONS_CUSTOM_POST_TYPE);
-
-            $edit_lesson_link = get_edit_post_link($lesson_id);
+            $course_id = sikshya()->course->get_id();
 
             $course_post_type_object = get_post_type_object(SIKSHYA_COURSES_CUSTOM_POST_TYPE);
-
 
             $edit_course_link = get_edit_post_link($course_id);
 
@@ -404,11 +391,6 @@ if (!function_exists('sikshya_content_item_edit_links')) {
                 'href' => $edit_course_link
             ));
 
-            $wp_admin_bar->add_menu(array(
-                'id' => 'edit-' . SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
-                'title' => $lesson_post_type_object->labels->edit_item,
-                'href' => $edit_lesson_link
-            ));
 
             $wp_admin_bar->add_menu(array(
                 'id' => 'edit-' . SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
@@ -425,22 +407,11 @@ if (!function_exists('sikshya_content_item_edit_links')) {
 
             $quiz_id = get_post_meta($question_id, 'quiz_id', true);
 
-            $lesson_id = get_post_meta($quiz_id, 'lesson_id', true);
-
-            $section_id = get_post_meta($lesson_id, 'section_id', true);
-
-            $course_id = get_post_meta($section_id, 'course_id', true);
-
+            $course_id = sikshya()->course->get_id();
 
             $quiz_post_type_object = get_post_type_object(SIKSHYA_QUIZZES_CUSTOM_POST_TYPE);
 
             $edit_quiz_link = get_edit_post_link($quiz_id);
-
-
-            $lesson_post_type_object = get_post_type_object(SIKSHYA_LESSONS_CUSTOM_POST_TYPE);
-
-            $edit_lesson_link = get_edit_post_link($lesson_id);
-
 
             $course_post_type_object = get_post_type_object(SIKSHYA_COURSES_CUSTOM_POST_TYPE);
 
@@ -454,11 +425,6 @@ if (!function_exists('sikshya_content_item_edit_links')) {
                 'href' => $edit_course_link
             ));
 
-            $wp_admin_bar->add_menu(array(
-                'id' => 'edit-' . SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
-                'title' => $lesson_post_type_object->labels->edit_item,
-                'href' => $edit_lesson_link
-            ));
 
             $wp_admin_bar->add_menu(array(
                 'id' => 'edit-' . SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,

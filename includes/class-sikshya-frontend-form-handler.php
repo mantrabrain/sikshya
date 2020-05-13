@@ -181,7 +181,10 @@ class Sikshya_Frontend_Form_Handler
 
         }
         if (sikshya()->quiz->is_started($user_id, $quiz_id)) {
-            return;
+
+            $quiz_question_permalink = sikshya()->question->first_question_permalink($course_id, $quiz_id);
+
+            wp_safe_redirect($quiz_question_permalink);
         }
 
         $get_order_item_id = sikshya()->order->course_item_id($course_id, $user_id);

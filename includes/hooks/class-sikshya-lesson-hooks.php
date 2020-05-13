@@ -88,7 +88,7 @@ class Sikshya_Lesson_ooks
 
                 $data['ids'] = array(
                     'quiz_id' => get_post_meta($question_id, 'quiz_id', true),
-                    'course_id' => get_post_meta($question_id, 'course_id', true),
+                    'course_id' => sikshya()->course->get_id(),
                     'question_id' => $question_id
                 );
 

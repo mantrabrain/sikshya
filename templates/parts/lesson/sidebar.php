@@ -4,9 +4,9 @@
 
     $post_id = get_the_ID();
 
-    $section_id = get_post_meta($post_id, 'section_id', true);
+    $section_id = sikshya()->section->get_id();
 
-    $course_id = get_post_meta($section_id, 'course_id', true);
+    $course_id = sikshya()->course->get_id();
 
     $sections = sikshya()->section->get_all_by_course($course_id);
 

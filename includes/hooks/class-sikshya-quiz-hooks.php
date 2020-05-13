@@ -11,15 +11,13 @@ class Sikshya_Quiz_Hooks
 
     public function quiz_button_form()
     {
-
-
         $params = array(
             'quiz_id' => get_the_ID(),
             'course_id' => sikshya()->course->get_id(),
         );
-        if (!sikshya()->quiz->is_started(get_current_user_id(), $params['quiz_id'])) {
+        //if (!sikshya()->quiz->is_started(get_current_user_id(), $params['quiz_id'])) {
             sikshya_load_template('parts.quiz.start-form', $params);
-        }
+        //}
 
     }
 }
