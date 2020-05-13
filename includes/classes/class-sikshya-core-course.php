@@ -103,13 +103,14 @@ class Sikshya_Core_Course
                 $course_id = get_post_meta($id, 'course_id', true);
                 break;
             case SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
-                $course_id = get_post_meta($id, 'course_id', true);
-                break;
             case SIKSHYA_QUIZZES_CUSTOM_POST_TYPE:
-                $course_id = get_post_meta($id, 'course_id', true);
+                $section_id = get_post_meta($id, 'section_id', true);
+                $course_id = get_post_meta($section_id, 'course_id', true);
                 break;
             case SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE:
-                $course_id = get_post_meta($id, 'course_id', true);
+                $quiz_id = get_post_meta($id, 'quiz_id', true);
+                $section_id = get_post_meta($quiz_id, 'section_id', true);
+                $course_id = get_post_meta($section_id, 'course_id', true);
                 break;
 
         }
@@ -249,7 +250,7 @@ class Sikshya_Core_Course
 
         );
         $results = $wpdb->get_results($query);
-     
+
         if (count($results) > 0) {
             return true;
         }
@@ -258,7 +259,32 @@ class Sikshya_Core_Course
 
     public function user_course_completed($course_id = 0, $user_id = 0)
     {
+
+        $user_id = is_null($user_id) || absint($user_id) < 1 ? get_current_user_id() : $user_id;
+
         if (absint($course_id) > 1 && absint($user_id) > 0) {
+            global $wpdb;
+
+            $sql = "SELECT ui.* FROM " . $wpdb->prefix . 'posts p INNER JOIN ' . SIKSHYA_DB_PREFIX . "user_items ui
+        ON ui.reference_id=p.ID 
+        WHERE 
+        p.post_type=%s AND ui.reference_type=%s and ui.user_id=%d and ui.item_id=%d and ui.status = %s and ui.item_type=%s
+        ";
+            $query = $wpdb->prepare($sql,
+                SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
+                SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
+                $user_id,
+                $course_id,
+                'completed',
+                SIKSHYA_COURSES_CUSTOM_POST_TYPE
+
+
+            );
+            $results = $wpdb->get_results($query);
+
+            if (count($results) > 0) {
+                return true;
+            }
             return false;
         }
         return false;
@@ -551,4 +577,46 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         }
         return 0;
     }
+
+    public function has_item_started($item_id = 0, $user_id = 0)
+    {
+        $user_id = is_null($user_id) || absint($user_id) < 1 ? get_current_user_id() : $user_id;
+
+        if (absint($item_id) < 1 || absint($user_id) < 1) {
+            return false;
+        }
+
+
+        global $wpdb;
+
+        $sql = "SELECT ui.* FROM " . $wpdb->prefix . 'posts p INNER JOIN ' . SIKSHYA_DB_PREFIX . "user_items ui
+        ON ui.item_id=p.ID 
+        WHERE 
+        p.post_type=%s AND ui.reference_type=%s and ui.user_id=%d and ui.item_id=%d and ui.status  in (%s, %s) and ui.item_type in (%s, %s)
+        ";
+        $query = $wpdb->prepare($sql,
+            SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
+            SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
+            $user_id,
+            $item_id,
+            'completed',
+            'started',
+            SIKSHYA_LESSONS_CUSTOM_POST_TYPE,
+            SIKSHYA_QUIZZES_CUSTOM_POST_TYPE
+
+
+        );
+
+        $results = $wpdb->get_results($query);
+
+        //echo $wpdb->last_query;
+
+        if (count($results) > 0) {
+            return true;
+        }
+        return false;
+
+    }
+
+
 }

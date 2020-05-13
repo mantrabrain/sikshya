@@ -2,10 +2,11 @@
     <div class="sikshya-lesson-sidebar">
         <div class="sikshya-sidebar-tabs-wrap">
             <div class="sikshya-tabs-btn-group">
+                <a href="#sikshya-lesson-sidebar-qa-tab-content" class=""> <i class="sikshya-icon-question-1"></i>
+                    <span></span></a>
                 <a href="#sikshya-lesson-sidebar-tab-content" class="active"> <i class="sikshya-icon-education"></i>
                     <span><?php echo __('Lesson List', 'sikshya') ?></span></a>
-                <!--<a href="#sikshya-lesson-sidebar-qa-tab-content" class=""> <i class="sikshya-icon-question-1"></i>
-                    <span>Browse Q&amp;A</span></a>-->
+
             </div>
 
             <div class="sikshya-sidebar-tabs-content">

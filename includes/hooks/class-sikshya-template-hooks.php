@@ -11,7 +11,7 @@ class Sikshya_Template_Hooks
         add_action('sikshya_account_page_sidebar', array($this, 'account_sidebar'));
         add_action('sikshya_account_page_content', array($this, 'account_page_content'));
         add_action('sikshya_account_content_item', array($this, 'account_content_item'));
-        add_action('sikshya_course_tab_content', array($this, 'tab_content'));
+        add_action('sikshya_course_single_content', array($this, 'single_content'));
         add_filter('admin_bar_menu', 'sikshya_content_item_edit_links', 90);
         add_filter('template_include', array($this, 'template_include'), 1000, 1);
 
@@ -19,12 +19,12 @@ class Sikshya_Template_Hooks
     }
 
 
-    public function tab_content()
+    public function single_content()
     {
 
         $course_id = get_the_ID();
 
-        sikshya_load_template('parts.course.tabs');
+        sikshya_load_template('parts.course.single-content');
 
     }
 

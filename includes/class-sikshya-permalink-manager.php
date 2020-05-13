@@ -87,15 +87,17 @@ class Sikshya_Permalink_Manager
 
         $post = get_post($post);
 
-
         global $wpdb;
 
         $course_base_slug = 'sample-course';
+
         $quiz_base_slug = 'sample-quiz';
 
         if (is_object($post) && $post->post_type == SIKSHYA_LESSONS_CUSTOM_POST_TYPE) {
             //Lesson Permalink
-            $course_id = get_post_meta($post->ID, 'course_id', true);
+            $section_id = get_post_meta($post->ID, 'section_id', true);
+
+            $course_id = sikshya()->section->get_course_id($section_id);
 
             if ($course_id) {
 
@@ -109,7 +111,9 @@ class Sikshya_Permalink_Manager
         } elseif (is_object($post) && $post->post_type == SIKSHYA_QUIZZES_CUSTOM_POST_TYPE) {
             //Quizzes Permalink
 
-            $course_id = get_post_meta($post->ID, 'course_id', true);
+            $section_id = get_post_meta($post->ID, 'section_id', true);
+
+            $course_id = sikshya()->section->get_course_id($section_id);
 
             if ($course_id) {
 
@@ -124,9 +128,13 @@ class Sikshya_Permalink_Manager
         } elseif (is_object($post) && $post->post_type == SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE) {
             //Questions Permalink
 
-            $course_id = get_post_meta($post->ID, 'course_id', true);
-
             $quiz_id = get_post_meta($post->ID, 'quiz_id', true);
+
+            $section_id = get_post_meta($quiz_id, 'section_id', true);
+
+            $course_id = sikshya()->section->get_course_id($section_id);
+
+
 
             if ($course_id) {
 

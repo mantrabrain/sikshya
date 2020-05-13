@@ -251,5 +251,10 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
     }
 
+    public function get_course_id($section_id)
+    {
+        return get_post_meta($section_id, 'course_id', true);
+    }
+
 
 }

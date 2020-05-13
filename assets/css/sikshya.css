@@ -3163,7 +3163,7 @@ section.cart-list-area {
   float: left; }
 
 .sikshya-single-lesson-wrap {
-  padding: 50px 0; }
+  padding: 0; }
 
 #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson {
   margin-bottom: 5px;
@@ -3171,7 +3171,16 @@ section.cart-list-area {
   padding: 0; }
   #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-sections-title {
     position: relative;
-    cursor: pointer; }
+    cursor: pointer;
+    padding: 0px 10px;
+    background-color: #e0e0e0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125); }
+    #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-sections-title .section-title {
+      font-weight: 500; }
+    #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-sections-title .section-num {
+      color: #959aa2;
+      font-size: 13px;
+      display: block; }
     #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-sections-title button {
       position: absolute;
       right: 15px;

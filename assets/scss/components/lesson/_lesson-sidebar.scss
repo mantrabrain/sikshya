@@ -6,6 +6,17 @@
     .sikshya-sections-title {
       position: relative;
       cursor: pointer;
+      padding: 0px 10px;
+      background-color: #e0e0e0;
+      border-bottom: 1px solid rgba(0, 0, 0, .125);
+      .section-title {
+        font-weight: 500;
+      }
+      .section-num {
+        color: #959aa2;
+        font-size: 13px;
+        display: block;
+      }
       button {
         position: absolute;
         right: 15px;

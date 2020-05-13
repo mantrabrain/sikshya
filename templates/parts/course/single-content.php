@@ -78,31 +78,38 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
                     if (count($lesson_and_quizes) > 0) {
 
                         ?>
-                        <div class="lecture-list <?php echo $index == 1 ? 'show' : ''; ?>">
+                        <div class="lecture-list <?php echo $index == 1 ? 'show' : 'show'; ?>">
                             <ul>
                                 <?php foreach ($lesson_and_quizes as $lesson_and_quiz) {
                                     $total_lesson_count_from_section = sikshya()->lesson->count_total_from_section_id($section->ID);
+
                                     $class = $lesson_and_quiz->post_type === SIKSHYA_LESSONS_CUSTOM_POST_TYPE ? 'lesson' : 'quiz';
+
+                                    $href = !sikshya()->course->has_item_started($lesson_and_quiz->ID) ? get_post_permalink($lesson_and_quiz->ID) : '#';
+
                                     ?>
                                     <li class="lecture has-preview <?php echo esc_attr($class); ?>">
-                                <span class="lecture-title">
-                                    <?php if ($lesson_and_quiz->post_type === SIKSHYA_LESSONS_CUSTOM_POST_TYPE) { ?>
-                                        <span class="icon dashicons dashicons-media-text"></span><?php
-                                    } else {
-                                        echo '<span class="icon dashicons dashicons-clock"></span>';
-                                    }
-                                    echo '' !== ($lesson_and_quiz->post_title) ? esc_html($lesson_and_quiz->post_title) : '(no-title)';
-                                    ?></span>
-                                        <?php
-                                        $total_lesson_time_string = get_post_meta('sikshya_lesson_duration', $lesson_and_quiz->ID);
+                                        <a href="<?php echo esc_attr($href) ?>">
+                                        <span class="lecture-title">
+                                            <?php if ($lesson_and_quiz->post_type === SIKSHYA_LESSONS_CUSTOM_POST_TYPE) { ?>
+                                                <span class="icon dashicons dashicons-media-text"></span><?php
+                                            } else {
+                                                echo '<span class="icon dashicons dashicons-clock"></span>';
+                                            }
+                                            echo '' !== ($lesson_and_quiz->post_title) ? esc_html($lesson_and_quiz->post_title) : '(no-title)';
+                                            ?>
+                                        </span>
+                                            <?php
+                                            $total_lesson_time_string = get_post_meta('sikshya_lesson_duration', $lesson_and_quiz->ID, true);
 
-                                        $total_lesson_time = $total_lesson_time_string;
-                                        $total_lesson_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $duration_times[$sikshya_course_duration_time] : '';
+                                            $total_lesson_time = $total_lesson_time_string;
+                                            $total_lesson_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $duration_times[$sikshya_course_duration_time] : '';
 
-                                        ?>
-                                        <?php if ('' != $total_lesson_time_string) { ?>
-                                            <span class="lecture-time float-right"><?php echo esc_html($total_lesson_time); ?></span>
-                                        <?php } ?>
+                                            ?>
+                                            <?php if ('' != $total_lesson_time_string) { ?>
+                                                <span class="lecture-time float-right"><?php echo esc_html($total_lesson_time); ?></span>
+                                            <?php } ?>
+                                        </a>
                                     </li>
                                 <?php } ?>
                             </ul>

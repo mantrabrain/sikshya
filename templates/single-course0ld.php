@@ -108,7 +108,7 @@ while (have_posts()) {
                             <?php } ?>
                         </table>
                         <?php
-                        do_action('sikshya_course_tab_content');
+                        do_action('sikshya_course_single_content');
                         ?>
                     </div>
                 </div>

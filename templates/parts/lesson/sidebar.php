@@ -8,18 +8,24 @@
 
     $course_id = get_post_meta($section_id, 'course_id', true);
 
-    $sections = sikshya()->course->get_all_sections($course_id);
+    $sections = sikshya()->section->get_all_by_course($course_id);
 
-    foreach ($sections as $section) {
+    $section_num = 0;
+
+    foreach ($sections as $section_index => $section) {
+
+        $section_num++;
 
         $section_active_class = $section->ID == $section_id ? 'sikshya-section-active' : '';
         ?>
 
         <div class="sikshya-sections-in-single-lesson sikshya-sections-<?php echo absint($section->ID) ?> <?php echo esc_attr($section_active_class); ?>">
             <div class="sikshya-sections-title ">
-                <h3>
-                    <span class="dashicons dashicons-menu"></span> <?php echo esc_html($section->post_title); ?>
-                </h3>
+                <span class="section-num">Section <?php echo absint($section_num); ?></span>
+                <h6 class="section-title">
+
+                    <?php echo esc_html($section->post_title); ?>
+                </h6>
                 <button class="sikshya-single-lesson-topic-toggle">
                     <i class="dashicons <?php echo $section->ID == $section_id ? 'dashicons-minus' : 'dashicons-plus'; ?>"></i>
                 </button>
@@ -28,30 +34,35 @@
             <div class="sikshya-lessons-under-section"
                  style="<?php echo $section->ID == $section_id ? '' : 'display:none;'; ?>">
                 <?php
-                $lessons = isset($section->lessons) ? $section->lessons : array();
+                $lesson_and_quizes = sikshya()->section->get_lesson_and_quiz($section->ID);
 
-                foreach ($lessons as $lesson) {
+                foreach ($lesson_and_quizes as $lesson_and_quize) {
 
-                    $sikshya_lesson_class = $lesson->ID == $post_id ? 'active' : '';
+                    $sikshya_lesson_class = $lesson_and_quize->ID == $post_id ? 'active' : '';
 
-                    $is_lesson_completed = sikshya()->lesson->is_completed($lesson->ID);
+                    $is_lesson_completed = sikshya()->lesson->is_completed($lesson_and_quize->ID);
 
                     $sikshya_lesson_class .= $is_lesson_completed ? ' lesson-completed' : '';
 
                     ?>
 
                     <div class="sikshya-single-lesson-items <?php echo esc_attr($sikshya_lesson_class); ?>">
-                        <a href="<?php echo esc_url(get_permalink($lesson->ID)) ?>"
+                        <a href="<?php echo esc_url(get_permalink($lesson_and_quize->ID)) ?>"
                            class="sikshya-single-lesson-a"
-                           data-lesson-id="<?php echo absint($lesson->ID); ?>">
-
-                            <i class="dashicons dashicons-media-text"></i> <span
-                                    class="lesson_title"><?php echo $lesson->post_title== '' ? '(no title)': esc_html($lesson->post_title); ?></span>
+                           data-lesson-id="<?php echo absint($lesson_and_quize->ID); ?>"
+                           data-post-type="<?php echo esc_attr($lesson_and_quize->post_type); ?>">
+                            <?php if ($lesson_and_quize->post_type == SIKSHYA_LESSONS_CUSTOM_POST_TYPE) { ?>
+                                <i class="dashicons dashicons-media-text"></i>
+                            <?php } else { ?>
+                                <i class="dashicons dashicons-clock"></i>
+                            <?php } ?>
+                            <span
+                                    class="lesson_title"><?php echo $lesson_and_quize->post_title == '' ? '(no title)' : esc_html($lesson_and_quize->post_title); ?></span>
                             <span class="sikshya-lesson-right-icons">
 
                                                 <?php
 
-                                                if (!sikshya_is_content_available_for_user($lesson->ID, SIKSHYA_LESSONS_CUSTOM_POST_TYPE)) {
+                                                if (!sikshya_is_content_available_for_user($lesson_and_quize->ID, SIKSHYA_LESSONS_CUSTOM_POST_TYPE)) {
                                                     echo '<i class="sikshya-content-locked dashicons dashicons-admin-network"></i>';
                                                 }
 
@@ -61,49 +72,6 @@
 
                                             </span>
                         </a>
-                    </div>
-                    <div class="sikshya-lessons-quiz-under-section">
-
-                        <?php
-                        $quizzes = isset($lesson->quizzes) ? $lesson->quizzes : array();
-
-                        foreach ($quizzes as $quiz) {
-
-                            if (sikshya_get_current_post_type() == SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE) {
-
-                                $quiz_id = get_post_meta($post_id, 'quiz_id', true);
-
-                                $quiz_active_class = $quiz->ID == $quiz_id ? 'active' : '';
-
-                            } else {
-
-                                $quiz_active_class = $quiz->ID == $post_id ? 'active' : '';
-                            }
-
-                            ?>
-                            <div class="sikshya-single-lesson-quiz-items <?php echo esc_attr($quiz_active_class); ?>">
-                                <a href="<?php echo esc_url(sikshya()->quiz->get_permalink($quiz->ID)) ?>"
-                                   class="sikshya-single-lesson-quiz-a"
-                                   data-quiz-id="<?php echo absint($quiz->ID); ?>">
-
-                                    <i class="dashicons dashicons-clock"></i> <span
-                                            class="lesson_quiz_title"><?php echo $quiz->post_title== '' ? '(no title)': esc_html($quiz->post_title); ?></span>
-                                    <span class="sikshya-lesson-right-icons">
-                                                        <i class="sikshya-play-duration"><?php
-                                                            sikshya()->quiz->get_child_count_text($quiz->ID);
-                                                            ?></i><i
-                                                class="sikshya-lesson-complete "></i>
-                                        <?php
-                                        if (!sikshya_is_content_available_for_user($quiz->ID, SIKSHYA_QUIZZES_CUSTOM_POST_TYPE)) {
-                                            echo '<i class="sikshya-content-locked dashicons dashicons-admin-network"></i>';
-                                        }
-                                        ?>
-                                    </span>
-                                </a>
-                            </div>
-                        <?php }
-                        ?>
-
                     </div>
                 <?php } ?>
 
