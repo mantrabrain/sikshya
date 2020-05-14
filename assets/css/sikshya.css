@@ -2294,7 +2294,7 @@ course content
 
 .course-curriculum-accordion .lecture-list {
   display: none; }
-  .course-curriculum-accordion .lecture-list.show {
+  .course-curriculum-accordion .lecture-list.block {
     display: block; }
 
 .course-curriculum-box .course-curriculum-title {

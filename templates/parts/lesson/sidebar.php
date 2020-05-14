@@ -40,7 +40,7 @@
 
                     $sikshya_lesson_class = $lesson_and_quize->ID == $post_id ? 'active' : '';
 
-                    $is_lesson_completed = sikshya()->lesson->is_completed($lesson_and_quize->ID);
+                    $is_lesson_completed = sikshya()->lesson->is_completed($lesson_and_quize->ID, 0,$lesson_and_quize->post_type);
 
                     $sikshya_lesson_class .= $is_lesson_completed ? ' lesson-completed' : '';
 

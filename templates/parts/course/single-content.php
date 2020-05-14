@@ -45,12 +45,13 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
 
                 $index++;
                 $section_child_count = sikshya()->section->get_all_child_count($section->ID);
+                $toggle_class = $index == 1 ? 'icon dashicons dashicons-minus' : 'icon dashicons dashicons-plus';
 
                 ?>
                 <div class="lecture-group-wrapper">
                     <div class="lecture-group-title clearfix ">
                         <div class="title float-left">
-                            <span class="icon dashicons dashicons-minus"></span>
+                            <span class="<?php echo esc_attr($toggle_class); ?>"></span>
                             <?php
                             echo '' !== ($section->post_title) ? esc_html($section->post_title) : '(no-title)';
 
@@ -77,15 +78,16 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
 
                     if (count($lesson_and_quizes) > 0) {
 
+
                         ?>
-                        <div class="lecture-list <?php echo $index == 1 ? 'show' : 'show'; ?>">
+                        <div class="lecture-list <?php echo $index == 1 ? 'show block' : ''; ?>">
                             <ul>
                                 <?php foreach ($lesson_and_quizes as $lesson_and_quiz) {
                                     $total_lesson_count_from_section = sikshya()->lesson->count_total_from_section_id($section->ID);
 
                                     $class = $lesson_and_quiz->post_type === SIKSHYA_LESSONS_CUSTOM_POST_TYPE ? 'lesson' : 'quiz';
 
-                                    $href = !sikshya()->course->has_item_started($lesson_and_quiz->ID) ? get_post_permalink($lesson_and_quiz->ID) : '#';
+                                    $href = sikshya_is_content_available_for_user($lesson_and_quiz->ID, $lesson_and_quiz->post_type) ? get_post_permalink($lesson_and_quiz->ID) : '#';
 
                                     ?>
                                     <li class="lecture has-preview <?php echo esc_attr($class); ?>">

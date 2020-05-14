@@ -98,6 +98,22 @@
             });
 
         });
+
+        $('.lecture-group-title').on('click', function () {
+
+            var wrap = $(this).closest('.lecture-group-wrapper');
+            if (wrap.find(".lecture-list").hasClass('show')) {
+                wrap.find(".lecture-list").removeClass('show');
+                $(this).find(".icon").removeClass('dashicons-minus').addClass('dashicons-plus');
+            } else {
+                wrap.find(".lecture-list").addClass('show');
+                $(this).find(".icon").removeClass('dashicons-plus').addClass('dashicons-minus');
+            }
+            wrap.find(".lecture-list").slideToggle("slow", function () {
+                // Animation complete.
+            });
+
+        });
         $('.sikshya-topbar-item.sikshya-hide-sidebar-bar a.sikshya-lesson-sidebar-hide-bar').on("click", function (e) {
             e.preventDefault();
             var sidebar = $('body').find('.sikshya-lesson-sidebar');

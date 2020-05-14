@@ -189,7 +189,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         return $wpdb->query($sql);
     }
 
-    public function is_completed($lesson_id = 0, $user_id = 0)
+    public function is_completed($lesson_id = 0, $user_id = 0, $post_type=SIKSHYA_LESSONS_CUSTOM_POST_TYPE)
     {
 
         $user_id = $user_id < 1 ? get_current_user_id() : $user_id;
@@ -205,11 +205,11 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
             $user_id,
             $lesson_id,
             'completed',
-            SIKSHYA_LESSONS_CUSTOM_POST_TYPE
+            $post_type
         );
 
         $results = $wpdb->get_results($sql);
-
+        
         return count($results) > 0 ? true : false;
     }
 

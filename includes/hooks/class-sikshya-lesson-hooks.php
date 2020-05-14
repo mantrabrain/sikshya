@@ -120,7 +120,7 @@ class Sikshya_Lesson_ooks
 
             $params = array(
                 'lesson_id' => $lesson_id,
-                'course_id' => get_post_meta($lesson_id, 'course_id', true)
+                'course_id' => sikshya()->course->get_id()
             );
             $is_lesson_completed = sikshya()->lesson->is_completed($lesson_id);
 
