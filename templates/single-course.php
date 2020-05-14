@@ -191,11 +191,26 @@ while (have_posts()) {
                                            name="sikshya_nonce"/>
 
                                     <div class=" sikshya-course-enroll-wrap">
-
-                                        <button type="submit"
-                                                class="btn btn-add-cart">
-                                            <?php echo esc_html($enroll_now_button_text); ?>
-                                        </button>
+                                        <?php
+                                        if (!is_user_logged_in()) {
+                                            $login_page_id = absint(get_option('sikshya_login_page'));
+                                            $login_page_permalink = '#';
+                                            if ($login_page_id > 0) {
+                                                $login_page_permalink = get_permalink($login_page_id);
+                                            }
+                                            ?>
+                                            <a href="<?php echo esc_attr($login_page_permalink); ?>"
+                                               class="btn btn-add-cart">
+                                                <?php echo esc_html($enroll_now_button_text); ?>
+                                            </a>
+                                            <?php
+                                        } else {
+                                            ?>
+                                            <button type="submit"
+                                                    class="btn btn-add-cart">
+                                                <?php echo esc_html($enroll_now_button_text); ?>
+                                            </button>
+                                        <?php } ?>
                                     </div>
                                 </form>
 

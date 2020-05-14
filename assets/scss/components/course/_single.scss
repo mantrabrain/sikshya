@@ -207,8 +207,9 @@ course sidebar
 
     .btn-add-cart {
       background: transparent;
-      border-color: #505763;
+      border: 2px solid #505763;
       color: #686f7a;
+      text-align: center;
 
       &:hover, &:focus {
         background-color: #f2f3f5;

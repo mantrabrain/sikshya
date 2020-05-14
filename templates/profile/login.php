@@ -44,12 +44,11 @@
             <div class="sik-col-md-6">
                 <div class="form-group">
                     <label>
-                        <?php _e('Remember Me', 'sikshya'); ?>
-                    </label>
-
-                    <input type="checkbox" name="rememberme"
+                        <input type="checkbox" name="rememberme"
                            value="1" <?php echo sikshya()->helper->input('rememberme') == "1" ? 'checked="checked"' : ''; ?>
                            placeholder="<?php _e('Remember Me', 'sikshya'); ?>">
+                        <?php _e('Remember Me', 'sikshya'); ?>
+                    </label>
                 </div>
             </div>
             <div class="sik-col-md-6">

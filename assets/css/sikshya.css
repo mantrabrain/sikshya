@@ -436,7 +436,7 @@ span.tw_get_sikshya {
     vertical-align: middle;
     display: inline-block;
     overflow: hidden;
-    line-heigh: 1.5em; }
+    line-height: 1.5em; }
     .sikshya-single-page-top-bar a:hover {
       color: #fff; }
   .sikshya-single-page-top-bar .sikshya-topbar-content-title-wrap {
@@ -1862,8 +1862,9 @@ course sidebar
       border-color: #992337; }
   .course-sidebar-text-box .buy-btns .btn-add-cart {
     background: transparent;
-    border-color: #505763;
-    color: #686f7a; }
+    border: 2px solid #505763;
+    color: #686f7a;
+    text-align: center; }
     .course-sidebar-text-box .buy-btns .btn-add-cart:hover, .course-sidebar-text-box .buy-btns .btn-add-cart:focus {
       background-color: #f2f3f5; }
   .course-sidebar-text-box .money-back {
