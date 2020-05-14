@@ -21,11 +21,7 @@ class Sikshya_Assets
         wp_enqueue_style(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-sikshya', SIKSHYA_ASSETS_URL . '/css/sikshya.css', false, SIKSHYA_VERSION);
         wp_enqueue_script('jquery-ui-core');
         //wp_enqueue_script('jquery-plugin', SIKSHYA_ASSETS_URL . '/public/js/vendor/jquery.plugin.min.js', array(), SIKSHYA_VERSION);
-        wp_enqueue_script('jquery-countdown', SIKSHYA_ASSETS_URL . '/vendor/jquery.countdown.min.js', array(), SIKSHYA_VERSION);
-        wp_enqueue_script('sikshya-main', SIKSHYA_ASSETS_URL . '/js/custom/sikshya.js', array('jquery', 'jbox-js'), SIKSHYA_VERSION);
-        wp_enqueue_script('sikshya-video', SIKSHYA_ASSETS_URL . '/js/video.js', array(), SIKSHYA_VERSION);
-        wp_enqueue_script('sikshya-countdown-js', SIKSHYA_ASSETS_URL . '/js/countdown.js', array(), SIKSHYA_VERSION);
-        wp_enqueue_script('sikshya-tabs', SIKSHYA_ASSETS_URL . '/js/tabs.js', array(), SIKSHYA_VERSION);
+        wp_enqueue_script('sikshya-main', SIKSHYA_ASSETS_URL . '/js/sikshya.js', array('jquery', 'jbox-js'), SIKSHYA_VERSION);
 
 
         // Enqueue styles

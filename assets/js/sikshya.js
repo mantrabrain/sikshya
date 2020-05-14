@@ -1,21 +1,6 @@
 (function ($, document) {
     $(document).ready(function () {
-        var info_blocks = $('.sikshya_info_block');
-        if (info_blocks.length)
-            info_blocks.each(function () {
-                var block = $(this);
-                $.ajax({
-                    url: block.data('url'),
-                    type: 'GET',
-                    cache: false,
-                    timeout: 0,
-                    processData: false, // Don't process the files
-                    contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-                    success: function (data) {
-                        block.append(data);
-                    },
-                });
-            });
+
 
         var notices = $('.sikshya-notice');
         if (notices.length)
