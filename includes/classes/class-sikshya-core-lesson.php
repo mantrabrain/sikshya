@@ -186,10 +186,18 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 
         );
 
+        update_user_meta($user_id, 'sikshya_last_completed_item_id', $lesson_id);
+
+        $all_lesson_quiz_ids = sikshya()->course->get_lesson_quiz_ids();
+
+        $next_lesson_quiz_id = $this->get_next_params($all_lesson_quiz_ids, true);
+
+        update_user_meta($user_id, 'sikshya_next_item_id', $next_lesson_quiz_id);
+
         return $wpdb->query($sql);
     }
 
-    public function is_completed($lesson_id = 0, $user_id = 0, $post_type=SIKSHYA_LESSONS_CUSTOM_POST_TYPE)
+    public function is_completed($lesson_id = 0, $user_id = 0, $post_type = SIKSHYA_LESSONS_CUSTOM_POST_TYPE)
     {
 
         $user_id = $user_id < 1 ? get_current_user_id() : $user_id;
@@ -209,7 +217,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         );
 
         $results = $wpdb->get_results($sql);
-        
+
         return count($results) > 0 ? true : false;
     }
 
@@ -236,7 +244,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         return array();
     }
 
-    public function get_next_params($all_lesson_quiz_ids = array())
+    public function get_next_params($all_lesson_quiz_ids = array(), $id_only = false)
     {
         $id = sikshya_lesson_quiz_id();
 
@@ -247,7 +255,11 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
                 $next = $all_lesson_quiz_ids[$at + 1];
             }
         }
+        if ($id_only) {
+            return $next;
+        }
         if ($next > 0) {
+
 
             return array(
                 'next_link' => get_permalink($next),
@@ -337,6 +349,10 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
             return count($all_data);
         }
         return 0;
+    }
+
+    public function get_last_started_lesson_quiz_id($current_user_id)
+    {
     }
 
 

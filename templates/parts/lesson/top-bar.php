@@ -2,9 +2,8 @@
 
 $post_id = get_the_ID();
 
-$section_id = get_post_meta($post_id, 'section_id', true);
 
-$course_id = get_post_meta($section_id, 'course_id', true);
+$course_id = sikshya()->course->get_id();
 
 ?>
 

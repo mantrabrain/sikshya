@@ -8,27 +8,12 @@ while (have_posts()) {
 
     the_post();
 
-
-    $info = sikshya_get_course_info(get_the_ID());
-
     $sections = sikshya()->section->get_all_by_course(get_the_ID());
-
-    $course_description = empty($info['description']) ? '' : $info['description'];
-
-    $course_subject = empty($info['subject']) ? '' : $info['subject'];
-
-    $course_level = empty($info['level']) ? '' : $info['level'];
-
-    $course_duration = empty($info['duration']) ? 0 : (int)$info['duration'];
-
-
-    $course_thumbnail_url = sikshya_get_image_url(get_the_post_thumbnail_url(null, 'sikshya_block_small'));
-
-    $course_sections_count = count($sections);
 
     $course_meta = sikshya()->course->get_course_meta(get_the_ID());
 
     $outcomes = isset($course_meta['sikshya_course_outcomes']) ? $course_meta['sikshya_course_outcomes'] : array();
+
     $requirements = isset($course_meta['sikshya_course_requirements']) ? $course_meta['sikshya_course_requirements'] : array();
 
     $course_level = sikshya_course_levels();
@@ -43,7 +28,9 @@ while (have_posts()) {
                         <p class="subtitle"><?php echo get_the_excerpt() ?></p>
                         <div class="rating-row">
                             <span class="sikshya-course-level"><?php echo esc_html($course_level[$course_meta['sikshya_course_level']]); ?></span>
-                            <span class="enrolled-num"> 1 Students enrolled </span>
+                            <span class="enrolled-num"> <?php
+                                echo sikshya()->student->get_enrolled_count();
+                                ?> Students enrolled </span>
                         </div>
                         <div class="created-row">
           <span class="created-by">
@@ -100,7 +87,7 @@ while (have_posts()) {
                         </div>
                     <?php } ?>
                     <div class="description-box view-more-parent">
-                        <div class="description-title">Description</div>
+                        <div class="description-title"><?php echo esc_html__('Description', 'sikshya'); ?></div>
                         <div class="description-content-wrap">
                             <div class="description-content">
                                 <?php the_content(); ?>
@@ -110,22 +97,28 @@ while (have_posts()) {
 
                     <div class="about-instructor-box">
                         <div class="about-instructor-title">
-                            About the instructor
+                            <?php echo esc_html__('About the instructor', 'sikshya'); ?>
                         </div>
                         <div class="row">
                             <div class="sik-col-lg-4">
                                 <div class="about-instructor-image">
-                                    <?php echo get_avatar(sikshya()->course->instructor('ID', get_the_ID())); ?>
+                                    <?php
+
+                                    echo get_avatar(sikshya()->course->instructor('ID', get_the_ID()));
+                                    $all_course_by_instructor = sikshya()->course->get_courses_by_instructor_id();
+                                    $all_course_ids = wp_list_pluck($all_course_by_instructor, 'ID');
+                                    ?>
                                     <ul>
 
                                         <li><i class="fas fa-user"></i><b>
-                                                3 </b> Students
+                                                <?php echo absint(sikshya()->student->get_enrolled_count_from_courses($all_course_ids)); ?> </b>
+                                            <?php echo esc_html__('Students', 'sikshya'); ?>
                                         </li>
                                         <li><i class="fas fa-play-circle"></i><b>
                                                 <?php
 
-                                                echo absint(sikshya()->course->get_course_count_by_instructor_id())
-                                                ?> </b> Courses
+                                                echo count($all_course_by_instructor)
+                                                ?> </b> <?php echo esc_html__('Courses', 'sikshya'); ?>
                                         </li>
                                     </ul>
                                 </div>
@@ -167,7 +160,8 @@ while (have_posts()) {
                         <?php } ?>
                         <div class="course-sidebar-text-box">
                             <div class="price">
-                                <span class="current-price"><span class="current-price">Free</span></span>
+                                <span class="current-price"><span
+                                            class="current-price"><?php echo esc_html__('Free', 'sikshya'); ?></span></span>
                             </div>
 
                             <div class="buy-btns">

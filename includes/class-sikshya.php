@@ -109,6 +109,14 @@ final class Sikshya
      *
      *
      */
+    /**
+     * Sikshya_Core_Student instance.
+     *
+     * @var Sikshya_Core_Student
+     */
+    public $student = null;
+
+
     protected static $_instance = null;
 
     /**
@@ -370,6 +378,7 @@ final class Sikshya
         $this->question = new Sikshya_Core_Question();
         $this->order = new Sikshya_Core_Order();
         $this->role = new Sikshya_Role_Manager();
+        $this->student = new Sikshya_Core_Student();
         // Init action.
         do_action('sikshya_init');
     }

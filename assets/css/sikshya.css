@@ -435,7 +435,10 @@ span.tw_get_sikshya {
     color: #ffffff;
     vertical-align: middle;
     display: inline-block;
-    overflow: hidden; }
+    overflow: hidden;
+    line-heigh: 1.5em; }
+    .sikshya-single-page-top-bar a:hover {
+      color: #fff; }
   .sikshya-single-page-top-bar .sikshya-topbar-content-title-wrap {
     text-align: center;
     white-space: nowrap;

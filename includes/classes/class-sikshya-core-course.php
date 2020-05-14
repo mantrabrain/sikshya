@@ -554,7 +554,7 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         return $data;
     }
 
-    public function get_course_count_by_instructor_id()
+    public function get_courses_by_instructor_id()
     {
         $instructor_id = $this->instructor('ID');
 
@@ -572,10 +572,8 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
             )
         );
         $data = get_posts($args);
-        if (is_array($data)) {
-            return count($data);
-        }
-        return 0;
+
+        return is_array($data) ? $data : array();
     }
 
     public function has_item_started($item_id = 0, $user_id = 0)

@@ -541,6 +541,10 @@ span.tw_get_sikshya {
     vertical-align: middle;
     display: inline-block;
     overflow: hidden;
+    line-height: 1.5em;
+    &:hover {
+      color: #fff;
+    }
   }
   .sikshya-topbar-content-title-wrap {
     text-align: center;
@@ -923,6 +927,7 @@ a.sikshya-btn {
   float: left;
   margin-right: 5px;
 }
+
 .sikshya-lesson-navigation-area {
   display: flex;
   padding: 20px;

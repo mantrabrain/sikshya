@@ -222,6 +222,27 @@ class Sikshya_Core_Question
 
     }
 
+    public function has_question($quiz_id)
+    {
+        $args = array(
+            'numberposts' => 1,
+            'no_found_rows' => true,
+            'orderby' => 'menu_order',
+            'order' => 'asc',
+            'post_type' => SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE,
+            'meta_query' => array(
+                array(
+                    'key' => 'quiz_id',
+                    'value' => (int)$quiz_id
+                )
+            )
+        );
+        $data = get_posts($args);
+
+        return isset($data[0]) ? true : false;
+
+    }
+
     public function get_prev_question($id)
     {
         $quiz_id = get_post_meta($id, 'quiz_id', true);

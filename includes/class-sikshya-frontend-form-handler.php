@@ -39,10 +39,19 @@ class Sikshya_Frontend_Form_Handler
 
         if (sikshya()->course->has_enrolled($course_id) || $user_id < 1) {
 
+            $next_item_id = get_user_meta($user_id, 'sikshya_next_item_id', true);
+            if (absint($next_item_id) > 0) {
+                $permalink = get_permalink($next_item_id);
+                wp_safe_redirect($permalink);
+
+            }
+
             return;
         }
 
         sikshya()->course->enroll($course_id, $user_id);
+
+
     }
 
     public function complete_quiz_question()
@@ -121,9 +130,9 @@ class Sikshya_Frontend_Form_Handler
         }
         $next_question_id = sikshya()->question->get_next_question($question_id);
 
+
         if ($next_question_id) {
             $next_question_permalink = get_permalink($next_question_id);
-
             wp_safe_redirect($next_question_permalink);
             exit;
         }
