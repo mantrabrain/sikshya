@@ -333,6 +333,12 @@ class Sikshya_Core_Course
 
                     sikshya()->role->add_student($user_id);
 
+                    $next_item_ids = sikshya()->course->get_lesson_quiz_ids();
+
+                    $next_item_id = isset($next_item_ids[0]) ? $next_item_ids[0] : $course_id;
+
+                    update_user_meta($user_id, 'sikshya_next_item_id', $next_item_id);
+
                     return true;
                 }
 

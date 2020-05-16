@@ -1,66 +1,122 @@
-# Copyright (C) 2019 mantrabrain
+# Copyright (C) 2020 mantrabrain
 # This file is distributed under the same license as the Sikshya package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Sikshya 0.0.5\n"
+"Project-Id-Version: Sikshya 0.0.7\n"
 "Report-Msgid-Bugs-To: mantrabrain@gmail.com\n"
-"POT-Creation-Date: 2019-12-10 10:39:41+00:00\n"
+"POT-Creation-Date: 2020-05-16 08:51:57+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2019-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2020-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Mantrabrain <mantrabrain@gmail.com>\n"
+"Language-Team: Mantrabrain <mantrabrain@gmail.com>\n"
 "X-Generator: grunt-wp-i18n 1.0.3\n"
 
 #: includes/about/class-sikshya-about.php:38
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:38
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:38
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:38
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:38
 msgid "Sikshya About"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:39
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:39
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:39
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:39
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:39
 msgid "About"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:73
 #: includes/about/class-sikshya-about.php:85
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:73
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:85
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:73
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:85
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:73
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:85
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:73
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:85
 msgid "Sikshya LMS"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:88
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:88
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:88
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:88
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:88
 msgid "About Sikshya LMS"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:144
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:144
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:144
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:144
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:144
 msgid "Mantra Brain Community"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:145
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:145
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:145
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:145
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:145
 msgid ""
 "Join our facebook community group so that you can post question and help "
 "each other."
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:146
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:146
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:146
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:146
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:146
 msgid "Join our facebook community group"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:151
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:151
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:151
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:151
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:151
 msgid "Post question"
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:152
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:152
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:152
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:152
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:152
 msgid "You can post question about mantrabrain product from here."
 msgstr ""
 
 #: includes/about/class-sikshya-about.php:153
+#: svn-repository/tags/0.0.4/includes/about/class-sikshya-about.php:153
+#: svn-repository/tags/0.0.5/includes/about/class-sikshya-about.php:153
+#: svn-repository/tags/0.0.6/includes/about/class-sikshya-about.php:153
+#: svn-repository/trunk/includes/about/class-sikshya-about.php:153
 msgid "Submit your query"
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-assets.php:47
+#: includes/admin/class-sikshya-admin-assets.php:79
+#: svn-repository/tags/0.0.2/includes/admin/class-sikshya-admin-assets.php:44
+#: svn-repository/tags/0.0.3/includes/admin/class-sikshya-admin-assets.php:44
+#: svn-repository/tags/0.0.4/includes/admin/class-sikshya-admin-assets.php:44
+#: svn-repository/tags/0.0.5/includes/admin/class-sikshya-admin-assets.php:47
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-assets.php:47
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-assets.php:47
 msgid "This function will be available in Sikshya PRO."
 msgstr ""
 
-#: includes/admin/class-sikshya-admin-assets.php:51
+#: includes/admin/class-sikshya-admin-assets.php:83
+#: svn-repository/tags/0.0.2/includes/admin/class-sikshya-admin-assets.php:48
+#: svn-repository/tags/0.0.3/includes/admin/class-sikshya-admin-assets.php:48
+#: svn-repository/tags/0.0.4/includes/admin/class-sikshya-admin-assets.php:48
+#: svn-repository/tags/0.0.5/includes/admin/class-sikshya-admin-assets.php:51
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-assets.php:51
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-assets.php:51
 msgid "Import courses"
 msgstr ""
 
@@ -69,57 +125,124 @@ msgid "Sikshya"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-menu.php:24
+#: svn-repository/tags/0.0.2/includes/admin/class-sikshya-admin-menu.php:21
+#: svn-repository/tags/0.0.3/includes/admin/class-sikshya-admin-menu.php:21
+#: svn-repository/tags/0.0.4/includes/admin/class-sikshya-admin-menu.php:21
+#: svn-repository/tags/0.0.5/includes/admin/class-sikshya-admin-menu.php:21
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-menu.php:24
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-menu.php:24
 msgid "Categories"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-menu.php:27
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
+#: svn-repository/tags/0.0.2/includes/admin/class-sikshya-admin-menu.php:24
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
+#: svn-repository/tags/0.0.3/includes/admin/class-sikshya-admin-menu.php:24
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
+#: svn-repository/tags/0.0.4/includes/admin/class-sikshya-admin-menu.php:24
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
+#: svn-repository/tags/0.0.5/includes/admin/class-sikshya-admin-menu.php:24
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-menu.php:27
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-menu.php:27
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:20
 msgid "Tags"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-menu.php:40
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-menu.php:40
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-menu.php:40
 msgid "Sikshya settings"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-menu.php:41
+#: svn-repository/tags/0.0.2/includes/admin/class-sikshya-admin-menu.php:31
+#: svn-repository/tags/0.0.3/includes/admin/class-sikshya-admin-menu.php:31
+#: svn-repository/tags/0.0.4/includes/admin/class-sikshya-admin-menu.php:31
+#: svn-repository/tags/0.0.5/includes/admin/class-sikshya-admin-menu.php:31
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-menu.php:41
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-menu.php:41
 msgid "Settings"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-settings.php:70
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-settings.php:70
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-settings.php:70
 msgid "Your settings have been saved."
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-settings.php:132
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-settings.php:132
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-settings.php:132
 msgid "The changes you made will be lost if you navigate away from this page."
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-settings.php:133
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-settings.php:133
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-settings.php:133
 msgid "Item moved up"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-settings.php:134
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-settings.php:134
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-settings.php:134
 msgid "Item moved down"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-settings.php:135
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-settings.php:135
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-settings.php:135
 msgid ""
 "Selecting no country to sell to prevents from completing the checkout. "
 "Continue anyway?"
 msgstr ""
 
 #: includes/admin/class-sikshya-admin-settings.php:535
+#: svn-repository/tags/0.0.6/includes/admin/class-sikshya-admin-settings.php:535
+#: svn-repository/trunk/includes/admin/class-sikshya-admin-settings.php:535
 msgid "Select a page&hellip;"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:102
 #: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:102
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:102
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:102
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:102
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:102
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:102
 msgid "Title"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
 #: includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
 #: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:103
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: svn-repository/tags/0.0.3/templates/profile/parts/enrolled-courses.php:6
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: svn-repository/tags/0.0.4/templates/profile/parts/enrolled-courses.php:6
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: svn-repository/tags/0.0.5/templates/profile/parts/enrolled-courses.php:6
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:103
+#: svn-repository/tags/0.0.6/templates/profile/parts/enrolled-courses.php:6
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:103
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:104
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:103
+#: svn-repository/trunk/templates/profile/parts/enrolled-courses.php:6
 #: templates/profile/parts/enrolled-courses.php:6
 msgid "Course"
 msgstr ""
@@ -127,18 +250,48 @@ msgstr ""
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:105
 #: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:105
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:105
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:105
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:104
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:105
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:105
 msgid "Date"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:150
 #: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:164
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:150
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:164
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:149
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:150
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:164
 msgid "Edit"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:151
 #: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:165
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:151
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:165
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:150
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:151
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:165
 msgid "View"
 msgstr ""
 
@@ -148,70 +301,154 @@ msgstr ""
 #: includes/admin/templates/metabox/lesson/assigned-course.php:20
 #: includes/admin/templates/metabox/question/assigned-course.php:33
 #: includes/admin/templates/metabox/quiz/assigned-course.php:20
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/lesson-course-assign.php:20
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/lesson-course-assign.php:20
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/lesson-course-assign.php:20
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/lesson-course-assign.php:20
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:157
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:171
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/lesson/assigned-course.php:20
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/question/assigned-course.php:33
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/quiz/assigned-course.php:20
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-lessons.php:156
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:157
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:171
+#: svn-repository/trunk/includes/admin/templates/metabox/lesson/assigned-course.php:20
+#: svn-repository/trunk/includes/admin/templates/metabox/question/assigned-course.php:33
+#: svn-repository/trunk/includes/admin/templates/metabox/quiz/assigned-course.php:20
 msgid "Not assigned yet"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:103
 msgid "Order ID"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:105
 msgid "Student"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
+#: svn-repository/tags/0.0.2/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
+#: svn-repository/tags/0.0.3/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
+#: svn-repository/tags/0.0.4/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
+#: svn-repository/tags/0.0.5/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-orders.php:106
 msgid "Booking Date"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:103
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:103
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:103
 msgid "Quiz"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:104
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:104
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:104
 msgid "Type"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:176
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:176
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-questions.php:176
 msgid "Not defined yet"
 msgstr ""
 
 #: includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:104
+#: svn-repository/tags/0.0.6/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:104
+#: svn-repository/trunk/includes/admin/list-tables/class-sikshya-admin-list-table-quizzes.php:104
 msgid "Number Of Questions"
 msgstr ""
 
 #: includes/admin/settings/class-sikshya-settings-general.php:26
+#: includes/meta-boxes/class-sikshya-metabox-course.php:143
+#: svn-repository/tags/0.0.6/includes/admin/settings/class-sikshya-settings-general.php:26
+#: svn-repository/trunk/includes/admin/settings/class-sikshya-settings-general.php:26
 msgid "General"
 msgstr ""
 
 #: includes/admin/settings/class-sikshya-settings-general.php:45
+#: svn-repository/tags/0.0.6/includes/admin/settings/class-sikshya-settings-general.php:45
+#: svn-repository/trunk/includes/admin/settings/class-sikshya-settings-general.php:45
 msgid "Pages"
 msgstr ""
 
 #: includes/admin/settings/class-sikshya-settings-general.php:51
+#: svn-repository/tags/0.0.6/includes/admin/settings/class-sikshya-settings-general.php:51
+#: svn-repository/trunk/includes/admin/settings/class-sikshya-settings-general.php:51
 msgid "Account page"
 msgstr ""
 
 #: includes/admin/settings/class-sikshya-settings-general.php:57
+#: svn-repository/tags/0.0.6/includes/admin/settings/class-sikshya-settings-general.php:57
+#: svn-repository/trunk/includes/admin/settings/class-sikshya-settings-general.php:57
 msgid "Registration page"
 msgstr ""
 
 #: includes/admin/settings/class-sikshya-settings-general.php:63
+#: svn-repository/tags/0.0.6/includes/admin/settings/class-sikshya-settings-general.php:63
+#: svn-repository/trunk/includes/admin/settings/class-sikshya-settings-general.php:63
 msgid "Login page"
 msgstr ""
 
 #: includes/admin/templates/metabox/answer/add.php:3
 #: includes/meta-boxes/views/tmpl/answer/add-answer.php:4
 #: includes/meta-boxes/views/tmpl/question.php:41
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/question.php:41
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/question.php:41
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/question.php:41
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/add.php:3
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer/add-answer.php:4
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/question.php:41
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/add.php:3
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer/add-answer.php:4
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/question.php:41
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/add.php:3
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer/add-answer.php:4
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/question.php:41
 msgid "Add answer"
 msgstr ""
 
 #: includes/admin/templates/metabox/answer/main.php:4
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/main.php:4
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/main.php:4
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/main.php:4
 msgid "Question Answer"
 msgstr ""
 
 #: includes/admin/templates/metabox/answer/main.php:11
 #: includes/meta-boxes/views/tmpl/answer/answer-form.php:3
 #: includes/meta-boxes/views/tmpl/question.php:25
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/question.php:25
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/question.php:25
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/question.php:25
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/main.php:11
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer/answer-form.php:3
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/question.php:25
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/main.php:11
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer/answer-form.php:3
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/question.php:25
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/main.php:11
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer/answer-form.php:3
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/question.php:25
 msgid "Type of answer"
 msgstr ""
 
@@ -219,669 +456,1836 @@ msgstr ""
 #: includes/admin/templates/metabox/answer/template.php:6
 #: includes/meta-boxes/views/tmpl/answer/answer-item.php:2
 #: includes/meta-boxes/views/tmpl/answer.php:2
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/answer.php:2
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/answer.php:2
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/answer.php:2
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/template-dynamic.php:2
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/template.php:6
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer/answer-item.php:2
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer.php:2
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/template-dynamic.php:2
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/template.php:6
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer/answer-item.php:2
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer.php:2
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/template-dynamic.php:2
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/template.php:6
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer/answer-item.php:2
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer.php:2
 msgid "Answer"
 msgstr ""
 
 #: includes/admin/templates/metabox/answer/template-dynamic.php:18
 #: includes/meta-boxes/views/tmpl/answer/answer-item.php:18
 #: includes/meta-boxes/views/tmpl/answer.php:18
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/answer.php:18
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/answer.php:18
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/answer.php:18
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/template-dynamic.php:18
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer/answer-item.php:18
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer.php:18
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/template-dynamic.php:18
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer/answer-item.php:18
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer.php:18
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/template-dynamic.php:18
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer/answer-item.php:18
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer.php:18
 msgid "Upload image"
 msgstr ""
 
 #: includes/admin/templates/metabox/answer/template-dynamic.php:26
 #: includes/meta-boxes/views/tmpl/answer/answer-item.php:26
 #: includes/meta-boxes/views/tmpl/answer.php:26
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/answer.php:26
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/answer.php:26
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/answer.php:26
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/answer/template-dynamic.php:26
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer/answer-item.php:26
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/answer.php:26
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/answer/template-dynamic.php:26
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer/answer-item.php:26
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/answer.php:26
+#: svn-repository/trunk/includes/admin/templates/metabox/answer/template-dynamic.php:26
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer/answer-item.php:26
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/answer.php:26
 msgid "Correct answer"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:2
+#: includes/admin/templates/metabox/course/main.php:3
+#: svn-repository/tags/0.0.2/includes/meta-boxes/class-sikshya-metabox-course.php:21
+#: svn-repository/tags/0.0.3/includes/meta-boxes/class-sikshya-metabox-course.php:21
+#: svn-repository/tags/0.0.4/includes/meta-boxes/class-sikshya-metabox-course.php:21
+#: svn-repository/tags/0.0.5/includes/meta-boxes/class-sikshya-metabox-course.php:21
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-course.php:21
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-course.php:21
+msgid "Course Options"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/curriculum/section-template.php:12
+msgid "Add Lesson"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/curriculum/section-template.php:21
+msgid "Add Quiz"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/curriculum.php:11
+msgid "Add Section"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/general.php:3
+#: includes/admin/templates/metabox/course/tabs/general.php:8
+msgid "Course Duration"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/general.php:25
+#: includes/admin/templates/metabox/course/tabs/others.php:18
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:18
+#: svn-repository/tags/0.0.2/templates/single-course.php:73
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:18
+#: svn-repository/tags/0.0.3/templates/single-course.php:73
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:18
+#: svn-repository/tags/0.0.4/templates/single-course.php:73
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:18
+#: svn-repository/tags/0.0.5/templates/single-course.php:73
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:18
+#: svn-repository/tags/0.0.6/templates/single-course.php:73
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:18
+#: svn-repository/trunk/templates/single-course.php:73
+msgid "Level"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/general.php:42
+#: includes/admin/templates/metabox/course/tabs/others.php:51
+#: includes/admin/templates/metabox/course/tabs/others.php:52
+#: includes/sikshya-template-functions.php:262
+#: svn-repository/tags/0.0.2/includes/sikshya-template-functions.php:261
+#: svn-repository/tags/0.0.3/includes/sikshya-template-functions.php:261
+#: svn-repository/tags/0.0.4/includes/sikshya-template-functions.php:261
+#: svn-repository/tags/0.0.5/includes/sikshya-template-functions.php:261
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:50
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:51
+#: svn-repository/tags/0.0.6/includes/sikshya-template-functions.php:261
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:50
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:51
+#: svn-repository/trunk/includes/sikshya-template-functions.php:261
+msgid "Instructor"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/media.php:3
+msgid "Course Video Source"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/media.php:18
+msgid "Course Video"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/media.php:23
+msgid "Course Youtube Video URL"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/others.php:2
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:2
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:2
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:2
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:2
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:2
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:2
 msgid "Here you can change basic information of your courses."
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:7
+#: includes/admin/templates/metabox/course/tabs/others.php:7
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:7
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:7
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:7
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:7
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:7
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:7
 msgid "Course subject”."
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:8
-#: templates/single-course.php:54
+#: includes/admin/templates/metabox/course/tabs/others.php:8
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:8
+#: svn-repository/tags/0.0.2/templates/single-course.php:54
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:8
+#: svn-repository/tags/0.0.3/templates/single-course.php:54
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:8
+#: svn-repository/tags/0.0.4/templates/single-course.php:54
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:8
+#: svn-repository/tags/0.0.5/templates/single-course.php:54
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:8
+#: svn-repository/tags/0.0.6/templates/single-course.php:54
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:8
+#: svn-repository/trunk/templates/single-course.php:54
 msgid "Subject"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:17
+#: includes/admin/templates/metabox/course/tabs/others.php:17
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:17
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:17
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:17
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:17
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:17
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:17
 msgid ""
 "Here you can change the difficulty level of your courses, e.g. “beginner, "
 "advanced or expert”"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:18
-#: templates/single-course.php:73
-msgid "Level"
-msgstr ""
-
-#: includes/admin/templates/metabox/course/main.php:33
+#: includes/admin/templates/metabox/course/tabs/others.php:33
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:33
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:33
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:33
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:33
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:33
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:33
 msgid "Write down the approximate length of your course, e.g. 12 hours"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:34
-#: templates/single-course.php:61
+#: includes/admin/templates/metabox/course/tabs/others.php:34
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:34
+#: svn-repository/tags/0.0.2/templates/single-course.php:61
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:34
+#: svn-repository/tags/0.0.3/templates/single-course.php:61
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:34
+#: svn-repository/tags/0.0.4/templates/single-course.php:61
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:34
+#: svn-repository/tags/0.0.5/templates/single-course.php:61
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:34
+#: svn-repository/tags/0.0.6/templates/single-course.php:61
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:34
+#: svn-repository/trunk/templates/single-course.php:61
 msgid "Duration"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:38
+#: includes/admin/templates/metabox/course/tabs/others.php:39
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/course.php:38
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/course.php:38
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/course.php:38
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/course.php:38
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/course/main.php:38
+#: svn-repository/trunk/includes/admin/templates/metabox/course/main.php:38
 msgid "Hours"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/main.php:50
-#: includes/admin/templates/metabox/course/main.php:51
-#: includes/sikshya-template-functions.php:261
-msgid "Instructor"
+#: includes/admin/templates/metabox/course/tabs/outcomes.php:8
+#: includes/admin/templates/metabox/course/tabs/outcomes.php:24
+#: includes/admin/templates/metabox/course/tabs/outcomes.php:30
+#: includes/meta-boxes/class-sikshya-metabox-course.php:149
+msgid "Outcomes"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/requirements.php:8
+#: includes/admin/templates/metabox/course/tabs/requirements.php:24
+#: includes/admin/templates/metabox/course/tabs/requirements.php:30
+#: includes/meta-boxes/class-sikshya-metabox-course.php:146
+msgid "Requirements"
+msgstr ""
+
+#: includes/admin/templates/metabox/lesson/main.php:3
+#: svn-repository/tags/0.0.2/includes/meta-boxes/class-sikshya-metabox-lesson.php:20
+#: svn-repository/tags/0.0.3/includes/meta-boxes/class-sikshya-metabox-lesson.php:20
+#: svn-repository/tags/0.0.4/includes/meta-boxes/class-sikshya-metabox-lesson.php:20
+#: svn-repository/tags/0.0.5/includes/meta-boxes/class-sikshya-metabox-lesson.php:20
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-lesson.php:20
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-lesson.php:20
+msgid "Lesson Options"
+msgstr ""
+
+#: includes/admin/templates/metabox/lesson/main.php:10
+#: includes/admin/templates/metabox/lesson/main.php:15
+msgid "Lesson Duration"
+msgstr ""
+
+#: includes/admin/templates/metabox/lesson/main.php:34
+msgid "Preview Lesson"
+msgstr ""
+
+#: includes/admin/templates/metabox/lesson/main.php:49
+msgid "Lesson Video Source"
+msgstr ""
+
+#: includes/admin/templates/metabox/lesson/main.php:64
+msgid "Lesson Video"
+msgstr ""
+
+#: includes/admin/templates/metabox/lesson/main.php:70
+msgid "Lesson Youtube Video URL"
 msgstr ""
 
 #: includes/admin/templates/metabox/question/add.php:3
 #: includes/meta-boxes/views/tmpl/quiz.php:27
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/quiz.php:27
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/quiz.php:27
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/quiz.php:27
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/question/add.php:3
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/quiz.php:27
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/question/add.php:3
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/quiz.php:27
+#: svn-repository/trunk/includes/admin/templates/metabox/question/add.php:3
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/quiz.php:27
 msgid "Add question"
 msgstr ""
 
 #: includes/admin/templates/metabox/question/main.php:4
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/question/main.php:4
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/question/main.php:4
+#: svn-repository/trunk/includes/admin/templates/metabox/question/main.php:4
 msgid "Quiz Questions"
 msgstr ""
 
 #: includes/admin/templates/metabox/question/template.php:5
+#: svn-repository/tags/0.0.5/includes/admin/templates/metabox/question/template.php:5
+#: svn-repository/tags/0.0.6/includes/admin/templates/metabox/question/template.php:5
+#: svn-repository/trunk/includes/admin/templates/metabox/question/template.php:5
 msgid "Question title"
 msgstr ""
 
 #: includes/admin/views/html-admin-settings.php:46
+#: svn-repository/tags/0.0.3/templates/profile/parts/update-profile.php:94
+#: svn-repository/tags/0.0.4/templates/profile/parts/update-profile.php:94
+#: svn-repository/tags/0.0.5/templates/profile/parts/update-profile.php:94
+#: svn-repository/tags/0.0.6/includes/admin/views/html-admin-settings.php:46
+#: svn-repository/tags/0.0.6/templates/profile/parts/update-profile.php:94
+#: svn-repository/trunk/includes/admin/views/html-admin-settings.php:46
+#: svn-repository/trunk/templates/profile/parts/update-profile.php:94
 #: templates/profile/parts/update-profile.php:94
 msgid "Save changes"
 msgstr ""
 
-#: includes/class-sikshya-ajax.php:28
+#: includes/class-sikshya-ajax.php:36
+#: svn-repository/tags/0.0.2/includes/class-sikshya-ajax.php:28
+#: svn-repository/tags/0.0.3/includes/class-sikshya-ajax.php:28
+#: svn-repository/tags/0.0.4/includes/class-sikshya-ajax.php:28
+#: svn-repository/tags/0.0.5/includes/class-sikshya-ajax.php:28
+#: svn-repository/tags/0.0.6/includes/class-sikshya-ajax.php:28
+#: svn-repository/trunk/includes/class-sikshya-ajax.php:28
 msgid "Something wrong, please try again."
 msgstr ""
 
-#: includes/class-sikshya-ajax.php:66 includes/class-sikshya-ajax.php:101
-#: includes/class-sikshya-ajax.php:140 includes/class-sikshya-ajax.php:193
+#: includes/class-sikshya-ajax.php:78 includes/class-sikshya-ajax.php:117
+#: includes/class-sikshya-ajax.php:169 includes/class-sikshya-ajax.php:327
+#: includes/class-sikshya-ajax.php:353
+#: svn-repository/tags/0.0.2/includes/class-sikshya-ajax.php:66
+#: svn-repository/tags/0.0.2/includes/class-sikshya-ajax.php:101
+#: svn-repository/tags/0.0.2/includes/class-sikshya-ajax.php:140
+#: svn-repository/tags/0.0.2/includes/class-sikshya-ajax.php:193
+#: svn-repository/tags/0.0.3/includes/class-sikshya-ajax.php:66
+#: svn-repository/tags/0.0.3/includes/class-sikshya-ajax.php:101
+#: svn-repository/tags/0.0.3/includes/class-sikshya-ajax.php:140
+#: svn-repository/tags/0.0.3/includes/class-sikshya-ajax.php:193
+#: svn-repository/tags/0.0.4/includes/class-sikshya-ajax.php:66
+#: svn-repository/tags/0.0.4/includes/class-sikshya-ajax.php:101
+#: svn-repository/tags/0.0.4/includes/class-sikshya-ajax.php:140
+#: svn-repository/tags/0.0.4/includes/class-sikshya-ajax.php:193
+#: svn-repository/tags/0.0.5/includes/class-sikshya-ajax.php:66
+#: svn-repository/tags/0.0.5/includes/class-sikshya-ajax.php:101
+#: svn-repository/tags/0.0.5/includes/class-sikshya-ajax.php:140
+#: svn-repository/tags/0.0.5/includes/class-sikshya-ajax.php:193
+#: svn-repository/tags/0.0.6/includes/class-sikshya-ajax.php:66
+#: svn-repository/tags/0.0.6/includes/class-sikshya-ajax.php:101
+#: svn-repository/tags/0.0.6/includes/class-sikshya-ajax.php:140
+#: svn-repository/tags/0.0.6/includes/class-sikshya-ajax.php:193
+#: svn-repository/trunk/includes/class-sikshya-ajax.php:66
+#: svn-repository/trunk/includes/class-sikshya-ajax.php:101
+#: svn-repository/trunk/includes/class-sikshya-ajax.php:140
+#: svn-repository/trunk/includes/class-sikshya-ajax.php:193
 msgid "Successfully removed from course"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:240
+#: includes/class-sikshya-frontend-form-handler.php:256
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:229
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:240
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:240
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:240
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:240
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:240
 msgid "First name field is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:241
+#: includes/class-sikshya-frontend-form-handler.php:257
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:230
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:241
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:241
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:241
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:241
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:241
 msgid "Last name field is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:242
+#: includes/class-sikshya-frontend-form-handler.php:258
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:231
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:242
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:242
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:242
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:242
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:242
 msgid "E-Mail field is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:243
+#: includes/class-sikshya-frontend-form-handler.php:259
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:232
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:243
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:243
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:243
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:243
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:243
 msgid "User Name field is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:244
+#: includes/class-sikshya-frontend-form-handler.php:260
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:233
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:244
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:244
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:244
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:244
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:244
 msgid "Password field is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:245
+#: includes/class-sikshya-frontend-form-handler.php:261
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:234
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:245
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:245
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:245
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:245
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:245
 msgid "Password Confirmation field is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:255
+#: includes/class-sikshya-frontend-form-handler.php:271
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:244
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:255
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:255
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:255
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:255
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:255
 msgid "Valid E-Mail is required"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:259
+#: includes/class-sikshya-frontend-form-handler.php:275
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:248
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:259
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:259
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:259
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:259
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:259
 msgid "Confirm password does not matched with Password field"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:302
+#: includes/class-sikshya-frontend-form-handler.php:318
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:291
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:302
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:302
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:302
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:302
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:302
 msgid "Cannt register user right now"
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:348
+#: includes/class-sikshya-frontend-form-handler.php:364
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:348
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:348
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:348
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:348
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:348
 msgid "Profile successflly updated."
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:361
+#: includes/class-sikshya-frontend-form-handler.php:377
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:361
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:361
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:361
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:361
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:361
 msgid "Confirm password doesnt match."
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:366
+#: includes/class-sikshya-frontend-form-handler.php:382
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:366
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:366
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:366
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:366
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:366
 msgid "Invalid old password or password doesnt match."
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:384
+#: includes/class-sikshya-frontend-form-handler.php:400
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:384
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:384
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:384
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:384
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:384
 msgid "Profile successflly updated with password."
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:402
+#: includes/class-sikshya-frontend-form-handler.php:418
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:308
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:402
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:402
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:402
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:402
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:402
 msgid "Username or email field required."
 msgstr ""
 
-#: includes/class-sikshya-frontend-form-handler.php:403
+#: includes/class-sikshya-frontend-form-handler.php:419
+#: svn-repository/tags/0.0.2/includes/class-sikshya-frontend-form-handler.php:309
+#: svn-repository/tags/0.0.3/includes/class-sikshya-frontend-form-handler.php:403
+#: svn-repository/tags/0.0.4/includes/class-sikshya-frontend-form-handler.php:403
+#: svn-repository/tags/0.0.5/includes/class-sikshya-frontend-form-handler.php:403
+#: svn-repository/tags/0.0.6/includes/class-sikshya-frontend-form-handler.php:403
+#: svn-repository/trunk/includes/class-sikshya-frontend-form-handler.php:403
 msgid "Password required."
 msgstr ""
 
 #: includes/class-sikshya-role-manager.php:66
+#: svn-repository/tags/0.0.2/includes/class-sikshya-role-manager.php:53
+#: svn-repository/tags/0.0.3/includes/class-sikshya-role-manager.php:53
+#: svn-repository/tags/0.0.4/includes/class-sikshya-role-manager.php:53
+#: svn-repository/tags/0.0.5/includes/class-sikshya-role-manager.php:53
+#: svn-repository/tags/0.0.6/includes/class-sikshya-role-manager.php:66
+#: svn-repository/trunk/includes/class-sikshya-role-manager.php:66
 msgid "Sikshya Student"
 msgstr ""
 
 #: includes/class-sikshya-role-manager.php:75
+#: svn-repository/tags/0.0.2/includes/class-sikshya-role-manager.php:62
+#: svn-repository/tags/0.0.3/includes/class-sikshya-role-manager.php:62
+#: svn-repository/tags/0.0.4/includes/class-sikshya-role-manager.php:62
+#: svn-repository/tags/0.0.5/includes/class-sikshya-role-manager.php:62
+#: svn-repository/tags/0.0.6/includes/class-sikshya-role-manager.php:75
+#: svn-repository/trunk/includes/class-sikshya-role-manager.php:75
 msgid "Sikshya Instructor"
 msgstr ""
 
-#: includes/class-sikshya.php:139
+#: includes/class-sikshya.php:147
+#: svn-repository/tags/0.0.2/includes/class-sikshya.php:139
+#: svn-repository/tags/0.0.3/includes/class-sikshya.php:139
+#: svn-repository/tags/0.0.4/includes/class-sikshya.php:139
+#: svn-repository/tags/0.0.5/includes/class-sikshya.php:139
+#: svn-repository/tags/0.0.6/includes/class-sikshya.php:139
+#: svn-repository/trunk/includes/class-sikshya.php:139
 msgid "Cloning is forbidden."
 msgstr ""
 
-#: includes/class-sikshya.php:149
+#: includes/class-sikshya.php:157
+#: svn-repository/tags/0.0.2/includes/class-sikshya.php:149
+#: svn-repository/tags/0.0.3/includes/class-sikshya.php:149
+#: svn-repository/tags/0.0.4/includes/class-sikshya.php:149
+#: svn-repository/tags/0.0.5/includes/class-sikshya.php:149
+#: svn-repository/tags/0.0.6/includes/class-sikshya.php:149
+#: svn-repository/trunk/includes/class-sikshya.php:149
 msgid "Unserializing instances of this class is forbidden."
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:133
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-question.php:133
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-question.php:133
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-question.php:133
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-question.php:133
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-question.php:133
+#: svn-repository/trunk/includes/classes/class-sikshya-core-question.php:133
 msgid "New Question Title"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:139
 #: includes/sikshya-functions.php:844
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-question.php:139
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-question.php:139
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-question.php:139
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-question.php:139
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:844
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-question.php:139
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:844
+#: svn-repository/trunk/includes/classes/class-sikshya-core-question.php:139
+#: svn-repository/trunk/includes/sikshya-functions.php:844
 msgid "One answer"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:140
 #: includes/sikshya-functions.php:845
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-question.php:140
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-question.php:140
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-question.php:140
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-question.php:140
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:845
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-question.php:140
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:845
+#: svn-repository/trunk/includes/classes/class-sikshya-core-question.php:140
+#: svn-repository/trunk/includes/sikshya-functions.php:845
 msgid "One answer with image"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:141
 #: includes/sikshya-functions.php:846
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-question.php:141
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-question.php:141
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-question.php:141
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-question.php:141
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:846
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-question.php:141
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:846
+#: svn-repository/trunk/includes/classes/class-sikshya-core-question.php:141
+#: svn-repository/trunk/includes/sikshya-functions.php:846
 msgid "Multiple answers"
 msgstr ""
 
 #: includes/classes/class-sikshya-core-question.php:142
 #: includes/sikshya-functions.php:847
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-question.php:142
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-question.php:142
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-question.php:142
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-question.php:142
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:847
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-question.php:142
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:847
+#: svn-repository/trunk/includes/classes/class-sikshya-core-question.php:142
+#: svn-repository/trunk/includes/sikshya-functions.php:847
 msgid "Multiple answers with image"
 msgstr ""
 
-#: includes/classes/class-sikshya-core-quiz.php:73
+#: includes/classes/class-sikshya-core-quiz.php:43
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-quiz.php:73
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-quiz.php:73
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-quiz.php:73
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-quiz.php:73
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-quiz.php:73
+#: svn-repository/trunk/includes/classes/class-sikshya-core-quiz.php:73
 msgid "As many times as the user wants"
 msgstr ""
 
-#: includes/classes/class-sikshya-core-quiz.php:74
+#: includes/classes/class-sikshya-core-quiz.php:44
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-quiz.php:74
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-quiz.php:74
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-quiz.php:74
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-quiz.php:74
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-quiz.php:74
+#: svn-repository/trunk/includes/classes/class-sikshya-core-quiz.php:74
 msgid "Once per day"
 msgstr ""
 
-#: includes/classes/class-sikshya-core-quiz.php:75
+#: includes/classes/class-sikshya-core-quiz.php:45
+#: svn-repository/tags/0.0.2/includes/classes/class-sikshya-core-quiz.php:75
+#: svn-repository/tags/0.0.3/includes/classes/class-sikshya-core-quiz.php:75
+#: svn-repository/tags/0.0.4/includes/classes/class-sikshya-core-quiz.php:75
+#: svn-repository/tags/0.0.5/includes/classes/class-sikshya-core-quiz.php:75
+#: svn-repository/tags/0.0.6/includes/classes/class-sikshya-core-quiz.php:75
+#: svn-repository/trunk/includes/classes/class-sikshya-core-quiz.php:75
 msgid "Once per month"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:15
 msgid "Add New Course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:16
 msgid "New Course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:17
 msgid "Edit Course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:18
 msgid "View Course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:19
+#: templates/single-course.php:121
 msgid "Courses"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:20
 msgid "Search Courses"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:21
 msgid "Parent Courses:"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:22
 msgid "No courses found."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:23
 msgid "No courses found in Trash."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:27
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:27
 msgid "Description."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:92
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:95
 msgid "Course updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:70
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:70
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:70
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:93
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:70
 msgid "Custom field updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:71
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:71
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:71
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:94
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:71
 msgid "Custom field deleted."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:97
 #. translators: %s: date and time of the revision
 msgid "Course restored to revision from %s"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:98
 msgid "Course published."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:99
 msgid "Course saved."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:100
 msgid "Course submitted."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:102
 msgid "Course scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:81
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:81
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:81
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:104
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:81
 #. translators: Publish box date format, see http:php.net/date
 msgid "M j, Y @ G:i"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:106
 msgid "Course draft updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:112
 msgid "View course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:118
 msgid "Preview course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:16
 msgid "Add New Lesson"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:17
 msgid "New Lesson"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:18
 msgid "Edit Lesson"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:19
 msgid "View Lesson"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
 #: includes/meta-boxes/views/tmpl/section.php:34
 #: includes/meta-boxes/views/tmpl/single/section/content.php:15
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/section.php:34
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/single/section/content.php:15
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/section.php:34
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/single/section/content.php:15
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/section.php:34
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/single/section/content.php:15
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/section.php:34
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/single/section/content.php:15
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/section.php:34
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/single/section/content.php:15
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:20
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/section.php:34
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/single/section/content.php:15
 msgid "Lessons"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:21
 msgid "Search Lessons"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:22
 msgid "Parent Lessons:"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:23
 msgid "No lessons found."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:24
 msgid "No lessons found in Trash."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:15
 msgid "Add New Order"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:16
 msgid "New Order"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:17
 msgid "Edit Order"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:18
 msgid "View Order"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:19
 msgid "Orders"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:20
 msgid "Search Orders"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:21
 msgid "Parent Orders:"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:22
 msgid "No orders found."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:23
 msgid "No orders found in Trash."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:66
 msgid "Booked <span class=\"count\">(%s)</span>"
 msgid_plural "Booked<span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:15
 msgid "Add New Question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:16
 msgid "New Question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:17
 msgid "Edit Question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:18
 msgid "View Question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:19
 msgid "Questions"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:20
 msgid "Search Questions"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:21
 msgid "Parent Questions:"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:22
 msgid "No questions found."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:23
 msgid "No questions found in Trash."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:69
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:72
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:69
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:72
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:69
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:72
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:69
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:72
 msgid "Question updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:74
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:74
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:74
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:74
 #. translators: %s: date and time of the revision
 msgid "Question restored to revision from %s"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:75
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:75
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:75
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:75
 msgid "Question published."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:76
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:76
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:76
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:76
 msgid "Question saved."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:77
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:77
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:77
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:77
 msgid "Question submitted."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:79
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:79
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:79
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:79
 msgid "Question scheduled for: <strong>%1$s</strong>."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:83
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:83
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:83
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:83
 msgid "Question draft updated."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:89
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:89
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:89
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:89
 msgid "View question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:95
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:95
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:95
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:95
 msgid "Preview question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:15
 msgid "Add New Quiz"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:16
 msgid "New Quiz"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:17
 msgid "Edit Quiz"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:18
 msgid "View Quiz"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:19
 msgid "Quizzes"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:20
 msgid "Search Quizzes"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:21
 msgid "Parent Quizzes:"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:22
 msgid "No quizzes found."
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:23
 msgid "No quizzes found in Trash."
 msgstr ""
 
-#: includes/meta-boxes/class-sikshya-metabox-course.php:21
-msgid "Course Options"
+#: includes/hooks/class-sikshya-quiz-hooks.php:14
+#: svn-repository/tags/0.0.2/templates/parts/quiz/start-form.php:4
+#: svn-repository/tags/0.0.3/templates/parts/quiz/start-form.php:4
+#: svn-repository/tags/0.0.4/templates/parts/quiz/start-form.php:4
+#: svn-repository/tags/0.0.5/templates/parts/quiz/start-form.php:4
+#: svn-repository/tags/0.0.6/templates/parts/quiz/start-form.php:4
+#: svn-repository/trunk/templates/parts/quiz/start-form.php:4
+msgid "Start"
 msgstr ""
 
-#: includes/meta-boxes/class-sikshya-metabox-course.php:22
-msgid "Sections & Lessons"
+#: includes/hooks/class-sikshya-quiz-hooks.php:19
+msgid "Continue to Questions"
 msgstr ""
 
-#: includes/meta-boxes/class-sikshya-metabox-lesson.php:18
-#: includes/meta-boxes/class-sikshya-metabox-question.php:39
-#: includes/meta-boxes/class-sikshya-metabox-quiz.php:42
-msgid "Assigned"
+#: includes/meta-boxes/class-sikshya-metabox-course.php:140
+#: includes/sikshya-template-functions.php:256
+#: svn-repository/tags/0.0.2/includes/sikshya-template-functions.php:255
+#: svn-repository/tags/0.0.3/includes/sikshya-template-functions.php:255
+#: svn-repository/tags/0.0.4/includes/sikshya-template-functions.php:255
+#: svn-repository/tags/0.0.5/includes/sikshya-template-functions.php:255
+#: svn-repository/tags/0.0.6/includes/sikshya-template-functions.php:255
+#: svn-repository/trunk/includes/sikshya-template-functions.php:255
+msgid "Curriculum"
+msgstr ""
+
+#: includes/meta-boxes/class-sikshya-metabox-course.php:152
+msgid "Pricing"
+msgstr ""
+
+#: includes/meta-boxes/class-sikshya-metabox-course.php:155
+msgid "Media"
 msgstr ""
 
 #: includes/meta-boxes/class-sikshya-metabox-lesson.php:20
-msgid "Lesson Options"
+#: includes/meta-boxes/class-sikshya-metabox-question.php:39
+#: includes/meta-boxes/class-sikshya-metabox-quiz.php:42
+#: svn-repository/tags/0.0.2/includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: svn-repository/tags/0.0.3/includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: svn-repository/tags/0.0.4/includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: svn-repository/tags/0.0.5/includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-question.php:39
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-quiz.php:42
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-lesson.php:18
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-question.php:39
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-quiz.php:42
+msgid "Assigned"
 msgstr ""
 
 #: includes/meta-boxes/class-sikshya-metabox-section.php:20
+#: svn-repository/tags/0.0.2/includes/meta-boxes/class-sikshya-metabox-section.php:20
+#: svn-repository/tags/0.0.3/includes/meta-boxes/class-sikshya-metabox-section.php:20
+#: svn-repository/tags/0.0.4/includes/meta-boxes/class-sikshya-metabox-section.php:20
+#: svn-repository/tags/0.0.5/includes/meta-boxes/class-sikshya-metabox-section.php:20
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-section.php:20
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-section.php:20
 msgid "Section Options"
 msgstr ""
 
 #: includes/meta-boxes/views/sections-and-lessons.php:2
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/sections-and-lessons.php:2
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/sections-and-lessons.php:2
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/sections-and-lessons.php:2
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/sections-and-lessons.php:2
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/sections-and-lessons.php:2
+#: svn-repository/trunk/includes/meta-boxes/views/sections-and-lessons.php:2
 msgid ""
 "Here you can fill in the actual content of your courses. If you want to "
 "know how it works, visit https://mantrabrain.com/hilfe"
 msgstr ""
 
 #: includes/meta-boxes/views/sections-and-lessons.php:4
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/sections-and-lessons.php:4
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/sections-and-lessons.php:4
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/sections-and-lessons.php:4
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/sections-and-lessons.php:4
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/sections-and-lessons.php:4
+#: svn-repository/trunk/includes/meta-boxes/views/sections-and-lessons.php:4
 msgid "New section"
 msgstr ""
 
 #: includes/meta-boxes/views/sections-and-lessons.php:7
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/sections-and-lessons.php:7
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/sections-and-lessons.php:7
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/sections-and-lessons.php:7
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/sections-and-lessons.php:7
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/sections-and-lessons.php:7
+#: svn-repository/trunk/includes/meta-boxes/views/sections-and-lessons.php:7
 msgid "New lesson"
 msgstr ""
 
 #: includes/meta-boxes/views/sections-and-lessons.php:10
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/sections-and-lessons.php:10
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/sections-and-lessons.php:10
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/sections-and-lessons.php:10
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/sections-and-lessons.php:10
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/sections-and-lessons.php:10
+#: svn-repository/trunk/includes/meta-boxes/views/sections-and-lessons.php:10
 msgid "New quiz"
 msgstr ""
 
 #: includes/meta-boxes/views/sections-and-lessons.php:13
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/sections-and-lessons.php:13
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/sections-and-lessons.php:13
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/sections-and-lessons.php:13
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/sections-and-lessons.php:13
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/sections-and-lessons.php:13
+#: svn-repository/trunk/includes/meta-boxes/views/sections-and-lessons.php:13
 msgid "New question"
 msgstr ""
 
 #: includes/meta-boxes/views/sections-and-lessons.php:34
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/sections-and-lessons.php:34
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/sections-and-lessons.php:34
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/sections-and-lessons.php:34
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/sections-and-lessons.php:34
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/sections-and-lessons.php:34
+#: svn-repository/trunk/includes/meta-boxes/views/sections-and-lessons.php:34
 msgid "Add section"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/editor.php:6
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/editor.php:6
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/editor.php:6
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/editor.php:6
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/editor.php:6
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/editor.php:6
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/editor.php:6
 msgid "Add Media"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/editor.php:10
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/editor.php:10
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/editor.php:10
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/editor.php:10
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/editor.php:10
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/editor.php:10
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/editor.php:10
 msgid "Visual"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/editor.php:12
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/editor.php:12
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/editor.php:12
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/editor.php:12
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/editor.php:12
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/editor.php:12
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/editor.php:12
 msgid "Text"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/lesson.php:21
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/lesson.php:21
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/lesson.php:21
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/lesson.php:21
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/lesson.php:21
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/lesson.php:21
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/lesson.php:21
 msgid "Lesson title"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/lesson.php:43
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/lesson.php:43
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/lesson.php:43
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/lesson.php:43
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/lesson.php:43
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/lesson.php:43
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/lesson.php:43
 msgid "Add quiz"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/question.php:17
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/question.php:17
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/question.php:17
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/question.php:17
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/question.php:17
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/question.php:17
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/question.php:17
 msgid "Question text"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/quiz.php:12
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/quiz.php:12
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/quiz.php:12
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/quiz.php:12
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/quiz.php:12
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/quiz.php:12
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/quiz.php:12
 msgid "Quiz title"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/section.php:21
 #: includes/meta-boxes/views/tmpl/single/section/content.php:6
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/section.php:21
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/single/section/content.php:6
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/section.php:21
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/single/section/content.php:6
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/section.php:21
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/single/section/content.php:6
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/section.php:21
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/single/section/content.php:6
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/section.php:21
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/single/section/content.php:6
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/section.php:21
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/single/section/content.php:6
 msgid "Section title"
 msgstr ""
 
 #: includes/meta-boxes/views/tmpl/section.php:43
 #: includes/meta-boxes/views/tmpl/single/add-lesson.php:5
 #: includes/meta-boxes/views/tmpl/single/section/content.php:25
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/section.php:43
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/single/add-lesson.php:5
+#: svn-repository/tags/0.0.2/includes/meta-boxes/views/tmpl/single/section/content.php:25
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/section.php:43
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/single/add-lesson.php:5
+#: svn-repository/tags/0.0.3/includes/meta-boxes/views/tmpl/single/section/content.php:25
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/section.php:43
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/single/add-lesson.php:5
+#: svn-repository/tags/0.0.4/includes/meta-boxes/views/tmpl/single/section/content.php:25
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/section.php:43
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/single/add-lesson.php:5
+#: svn-repository/tags/0.0.5/includes/meta-boxes/views/tmpl/single/section/content.php:25
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/section.php:43
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/single/add-lesson.php:5
+#: svn-repository/tags/0.0.6/includes/meta-boxes/views/tmpl/single/section/content.php:25
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/section.php:43
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/single/add-lesson.php:5
+#: svn-repository/trunk/includes/meta-boxes/views/tmpl/single/section/content.php:25
 msgid "Add lesson"
 msgstr ""
 
 #: includes/sikshya-functions.php:15
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:15
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:15
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:15
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:15
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:15
+#: svn-repository/trunk/includes/sikshya-functions.php:15
 msgid "Dashboard"
 msgstr ""
 
-#: includes/sikshya-functions.php:20 templates/profile/parts/profile.php:1
+#: includes/sikshya-functions.php:20
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:20
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:20
+#: svn-repository/tags/0.0.3/templates/profile/parts/profile.php:1
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:20
+#: svn-repository/tags/0.0.4/templates/profile/parts/profile.php:1
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:20
+#: svn-repository/tags/0.0.5/templates/profile/parts/profile.php:1
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:20
+#: svn-repository/tags/0.0.6/templates/profile/parts/profile.php:1
+#: svn-repository/trunk/includes/sikshya-functions.php:20
+#: svn-repository/trunk/templates/profile/parts/profile.php:1
+#: templates/profile/parts/profile.php:1
 msgid "Profile"
 msgstr ""
 
 #: includes/sikshya-functions.php:25
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:25
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:35
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:25
+#: svn-repository/tags/0.0.3/templates/profile/parts/enrolled-courses.php:1
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:25
+#: svn-repository/tags/0.0.4/templates/profile/parts/enrolled-courses.php:1
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:25
+#: svn-repository/tags/0.0.5/templates/profile/parts/enrolled-courses.php:1
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:25
+#: svn-repository/tags/0.0.6/templates/profile/parts/enrolled-courses.php:1
+#: svn-repository/trunk/includes/sikshya-functions.php:25
+#: svn-repository/trunk/templates/profile/parts/enrolled-courses.php:1
 #: templates/profile/parts/enrolled-courses.php:1
 msgid "Enrolled Courses"
 msgstr ""
 
 #: includes/sikshya-functions.php:30
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:30
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:30
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:30
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:30
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:30
+#: svn-repository/trunk/includes/sikshya-functions.php:30
 msgid "Update Profile"
 msgstr ""
 
 #: includes/sikshya-functions.php:35
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:35
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:35
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:35
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:35
+#: svn-repository/trunk/includes/sikshya-functions.php:35
 msgid "Logout"
 msgstr ""
 
-#: includes/sikshya-functions.php:418
+#: includes/sikshya-functions.php:418 includes/sikshya-functions.php:931
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:420
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:418
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:418
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:418
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:418
+#: svn-repository/trunk/includes/sikshya-functions.php:418
 msgid "All Levels"
 msgstr ""
 
-#: includes/sikshya-functions.php:419
+#: includes/sikshya-functions.php:419 includes/sikshya-functions.php:932
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:421
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:419
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:419
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:419
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:419
+#: svn-repository/trunk/includes/sikshya-functions.php:419
 msgid "Beginner"
 msgstr ""
 
-#: includes/sikshya-functions.php:420
+#: includes/sikshya-functions.php:420 includes/sikshya-functions.php:933
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:422
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:420
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:420
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:420
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:420
+#: svn-repository/trunk/includes/sikshya-functions.php:420
 msgid "Intermediate"
 msgstr ""
 
-#: includes/sikshya-functions.php:421
+#: includes/sikshya-functions.php:421 includes/sikshya-functions.php:934
+#: svn-repository/tags/0.0.2/includes/sikshya-functions.php:423
+#: svn-repository/tags/0.0.3/includes/sikshya-functions.php:421
+#: svn-repository/tags/0.0.4/includes/sikshya-functions.php:421
+#: svn-repository/tags/0.0.5/includes/sikshya-functions.php:421
+#: svn-repository/tags/0.0.6/includes/sikshya-functions.php:421
+#: svn-repository/trunk/includes/sikshya-functions.php:421
 msgid "Expert"
 msgstr ""
 
-#: includes/sikshya-template-functions.php:177
+#: includes/sikshya-functions.php:912
+msgid "Youtube"
+msgstr ""
+
+#: includes/sikshya-functions.php:920
+msgid "Minute(s)"
+msgstr ""
+
+#: includes/sikshya-functions.php:921
+msgid "Hour(s)"
+msgstr ""
+
+#: includes/sikshya-functions.php:922
+msgid "Day(s)"
+msgstr ""
+
+#: includes/sikshya-functions.php:923
+msgid "Week(s)"
+msgstr ""
+
+#: includes/sikshya-template-functions.php:178
+#: svn-repository/tags/0.0.2/includes/sikshya-template-functions.php:177
+#: svn-repository/tags/0.0.3/includes/sikshya-template-functions.php:177
+#: svn-repository/tags/0.0.4/includes/sikshya-template-functions.php:177
+#: svn-repository/tags/0.0.5/includes/sikshya-template-functions.php:177
+#: svn-repository/tags/0.0.6/includes/sikshya-template-functions.php:177
+#: svn-repository/trunk/includes/sikshya-template-functions.php:177
 msgid "Placeholder"
 msgstr ""
 
-#: includes/sikshya-template-functions.php:247
+#: includes/sikshya-template-functions.php:248
+#: svn-repository/tags/0.0.2/includes/sikshya-template-functions.php:247
+#: svn-repository/tags/0.0.3/includes/sikshya-template-functions.php:247
+#: svn-repository/tags/0.0.4/includes/sikshya-template-functions.php:247
+#: svn-repository/tags/0.0.5/includes/sikshya-template-functions.php:247
+#: svn-repository/tags/0.0.6/includes/sikshya-template-functions.php:247
+#: svn-repository/trunk/includes/sikshya-template-functions.php:247
 msgid "Overview"
-msgstr ""
-
-#: includes/sikshya-template-functions.php:255
-msgid "Curriculum"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:20
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:21
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:30
 msgid "Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:22
 msgid "Search Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:23
 msgid "All Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:24
 msgid "Parent Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:25
 msgid "Parent Category:"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:26
 msgid "Edit Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:27
 msgid "Update Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:28
 msgid "Add New Category"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:29
 msgid "New Category Name"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:51
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:51
 msgid "Image"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:58
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:58
 msgid "Add Image"
 msgstr ""
 
@@ -889,176 +2293,561 @@ msgstr ""
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:59
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:59
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:59
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:59
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:59
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:59
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:60
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:59
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:60
 msgid "Choose Image"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-category.php:64
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:64
 msgid "Remove Image"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:21
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:30
 msgid "Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:22
 msgid "Search Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:23
 msgid "All Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:24
 msgid "Parent Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:25
 msgid "Parent Tag:"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:26
 msgid "Edit Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:27
 msgid "Update Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:28
 msgid "Add New Tag"
 msgstr ""
 
 #: includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
+#: svn-repository/tags/0.0.2/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
+#: svn-repository/tags/0.0.3/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
+#: svn-repository/tags/0.0.4/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
+#: svn-repository/tags/0.0.5/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
+#: svn-repository/tags/0.0.6/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
+#: svn-repository/trunk/includes/taxonomy/class-sikshya-taxonomy-course-tag.php:29
 msgid "New Tag Name"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/includes/admin/class-sikshya-admin-menu.php:30
+#: svn-repository/tags/0.0.3/includes/admin/class-sikshya-admin-menu.php:30
+#: svn-repository/tags/0.0.4/includes/admin/class-sikshya-admin-menu.php:30
+#: svn-repository/tags/0.0.5/includes/admin/class-sikshya-admin-menu.php:30
+msgid "Sikshya Settings"
+msgstr ""
+
+#: svn-repository/tags/0.0.2/includes/meta-boxes/class-sikshya-metabox-course.php:22
+#: svn-repository/tags/0.0.3/includes/meta-boxes/class-sikshya-metabox-course.php:22
+#: svn-repository/tags/0.0.4/includes/meta-boxes/class-sikshya-metabox-course.php:22
+#: svn-repository/tags/0.0.5/includes/meta-boxes/class-sikshya-metabox-course.php:22
+#: svn-repository/tags/0.0.6/includes/meta-boxes/class-sikshya-metabox-course.php:22
+#: svn-repository/trunk/includes/meta-boxes/class-sikshya-metabox-course.php:22
+msgid "Sections & Lessons"
+msgstr ""
+
+#: svn-repository/tags/0.0.2/includes/meta-boxes/class-sikshya-metabox-quiz.php:19
+#: svn-repository/tags/0.0.3/includes/meta-boxes/class-sikshya-metabox-quiz.php:19
+#: svn-repository/tags/0.0.4/includes/meta-boxes/class-sikshya-metabox-quiz.php:19
+msgid "Quiz Options"
+msgstr ""
+
+#: svn-repository/tags/0.0.2/templates/parts/answer/complete-form.php:3
+#: svn-repository/tags/0.0.3/templates/parts/answer/complete-form.php:3
+#: svn-repository/tags/0.0.4/templates/parts/answer/complete-form.php:3
+#: svn-repository/tags/0.0.5/templates/parts/answer/complete-form.php:3
+#: svn-repository/tags/0.0.6/templates/parts/answer/complete-form.php:3
+#: svn-repository/trunk/templates/parts/answer/complete-form.php:3
 #: templates/parts/answer/complete-form.php:3
 msgid "Complete"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/parts/answer/next-form.php:2
+#: svn-repository/tags/0.0.2/templates/parts/lesson/lesson-next-nav.php:2
+#: svn-repository/tags/0.0.3/templates/parts/answer/next-form.php:2
+#: svn-repository/tags/0.0.3/templates/parts/lesson/lesson-next-nav.php:2
+#: svn-repository/tags/0.0.4/templates/parts/answer/next-form.php:2
+#: svn-repository/tags/0.0.4/templates/parts/lesson/lesson-next-nav.php:2
+#: svn-repository/tags/0.0.5/templates/parts/answer/next-form.php:2
+#: svn-repository/tags/0.0.5/templates/parts/lesson/lesson-next-nav.php:2
+#: svn-repository/tags/0.0.6/templates/parts/answer/next-form.php:2
+#: svn-repository/tags/0.0.6/templates/parts/lesson/lesson-next-nav.php:2
+#: svn-repository/trunk/templates/parts/answer/next-form.php:2
+#: svn-repository/trunk/templates/parts/lesson/lesson-next-nav.php:2
 #: templates/parts/answer/next-form.php:2
 #: templates/parts/lesson/lesson-next-nav.php:2
 msgid "Next"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/parts/answer/prev-form.php:2
+#: svn-repository/tags/0.0.2/templates/parts/lesson/lesson-prev-nav.php:2
+#: svn-repository/tags/0.0.3/templates/parts/answer/prev-form.php:2
+#: svn-repository/tags/0.0.3/templates/parts/lesson/lesson-prev-nav.php:2
+#: svn-repository/tags/0.0.4/templates/parts/answer/prev-form.php:2
+#: svn-repository/tags/0.0.4/templates/parts/lesson/lesson-prev-nav.php:2
+#: svn-repository/tags/0.0.5/templates/parts/answer/prev-form.php:2
+#: svn-repository/tags/0.0.5/templates/parts/lesson/lesson-prev-nav.php:2
+#: svn-repository/tags/0.0.6/templates/parts/answer/prev-form.php:2
+#: svn-repository/tags/0.0.6/templates/parts/lesson/lesson-prev-nav.php:2
+#: svn-repository/trunk/templates/parts/answer/prev-form.php:2
+#: svn-repository/trunk/templates/parts/lesson/lesson-prev-nav.php:2
 #: templates/parts/answer/prev-form.php:2
 #: templates/parts/lesson/lesson-prev-nav.php:2
 msgid "Prev"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/parts/answer/skip-form.php:3
+#: svn-repository/tags/0.0.3/templates/parts/answer/skip-form.php:3
+#: svn-repository/tags/0.0.4/templates/parts/answer/skip-form.php:3
+#: svn-repository/tags/0.0.5/templates/parts/answer/skip-form.php:3
+#: svn-repository/tags/0.0.6/templates/parts/answer/skip-form.php:3
+#: svn-repository/trunk/templates/parts/answer/skip-form.php:3
 #: templates/parts/answer/skip-form.php:3
 msgid "Skip"
 msgstr ""
 
-#: templates/parts/lesson/content.php:6
+#: svn-repository/tags/0.0.2/templates/parts/lesson/content.php:6
+#: svn-repository/tags/0.0.3/templates/parts/lesson/content.php:6
+#: svn-repository/tags/0.0.4/templates/parts/lesson/content.php:6
+#: svn-repository/tags/0.0.5/templates/parts/lesson/content.php:6
+#: svn-repository/tags/0.0.6/templates/parts/lesson/content.php:6
+#: svn-repository/trunk/templates/parts/lesson/content.php:6
+#: templates/parts/lesson/content.php:8
 msgid "Lesson List"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/parts/lesson/lesson-form.php:15
+#: svn-repository/tags/0.0.3/templates/parts/lesson/lesson-form.php:15
+#: svn-repository/tags/0.0.4/templates/parts/lesson/lesson-form.php:15
+#: svn-repository/tags/0.0.5/templates/parts/lesson/lesson-form.php:15
+#: svn-repository/tags/0.0.6/templates/parts/lesson/lesson-form.php:15
+#: svn-repository/trunk/templates/parts/lesson/lesson-form.php:15
 #: templates/parts/lesson/lesson-form.php:15
 msgid "Complete Lesson"
 msgstr ""
 
-#: templates/parts/lesson/top-bar.php:16
+#: svn-repository/tags/0.0.2/templates/parts/lesson/top-bar.php:16
+#: svn-repository/tags/0.0.3/templates/parts/lesson/top-bar.php:16
+#: svn-repository/tags/0.0.4/templates/parts/lesson/top-bar.php:16
+#: svn-repository/tags/0.0.5/templates/parts/lesson/top-bar.php:16
+#: svn-repository/tags/0.0.6/templates/parts/lesson/top-bar.php:16
+#: svn-repository/trunk/templates/parts/lesson/top-bar.php:16
+#: templates/parts/lesson/top-bar.php:15
 msgid "Go to course home"
 msgstr ""
 
-#: templates/parts/quiz/start-form.php:4
-msgid "Start"
-msgstr ""
-
+#: svn-repository/tags/0.0.2/templates/profile/login.php:20
+#: svn-repository/tags/0.0.3/templates/profile/login.php:20
+#: svn-repository/tags/0.0.4/templates/profile/login.php:20
+#: svn-repository/tags/0.0.5/templates/profile/login.php:20
+#: svn-repository/tags/0.0.6/templates/profile/login.php:20
+#: svn-repository/trunk/templates/profile/login.php:20
 #: templates/profile/login.php:20
 msgid "Username"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/login.php:25
+#: svn-repository/tags/0.0.3/templates/profile/login.php:25
+#: svn-repository/tags/0.0.4/templates/profile/login.php:25
+#: svn-repository/tags/0.0.5/templates/profile/login.php:25
+#: svn-repository/tags/0.0.6/templates/profile/login.php:25
+#: svn-repository/trunk/templates/profile/login.php:25
 #: templates/profile/login.php:25
 msgid "Username or Email address"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/login.php:34
+#: svn-repository/tags/0.0.2/templates/profile/login.php:38
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:67
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:72
+#: svn-repository/tags/0.0.3/templates/profile/login.php:34
+#: svn-repository/tags/0.0.3/templates/profile/login.php:38
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:67
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:72
+#: svn-repository/tags/0.0.4/templates/profile/login.php:34
+#: svn-repository/tags/0.0.4/templates/profile/login.php:38
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:67
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:72
+#: svn-repository/tags/0.0.5/templates/profile/login.php:34
+#: svn-repository/tags/0.0.5/templates/profile/login.php:38
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:67
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:72
+#: svn-repository/tags/0.0.6/templates/profile/login.php:34
+#: svn-repository/tags/0.0.6/templates/profile/login.php:38
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:67
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:72
+#: svn-repository/trunk/templates/profile/login.php:34
+#: svn-repository/trunk/templates/profile/login.php:38
+#: svn-repository/trunk/templates/profile/registration.php:67
+#: svn-repository/trunk/templates/profile/registration.php:72
 #: templates/profile/login.php:34 templates/profile/login.php:38
 #: templates/profile/registration.php:67 templates/profile/registration.php:72
 msgid "Password"
 msgstr ""
 
-#: templates/profile/login.php:47 templates/profile/login.php:52
+#: svn-repository/tags/0.0.2/templates/profile/login.php:47
+#: svn-repository/tags/0.0.2/templates/profile/login.php:52
+#: svn-repository/tags/0.0.3/templates/profile/login.php:47
+#: svn-repository/tags/0.0.3/templates/profile/login.php:52
+#: svn-repository/tags/0.0.4/templates/profile/login.php:47
+#: svn-repository/tags/0.0.4/templates/profile/login.php:52
+#: svn-repository/tags/0.0.5/templates/profile/login.php:47
+#: svn-repository/tags/0.0.5/templates/profile/login.php:52
+#: svn-repository/tags/0.0.6/templates/profile/login.php:47
+#: svn-repository/tags/0.0.6/templates/profile/login.php:52
+#: svn-repository/trunk/templates/profile/login.php:47
+#: svn-repository/trunk/templates/profile/login.php:52
+#: templates/profile/login.php:49 templates/profile/login.php:50
 msgid "Remember Me"
 msgstr ""
 
-#: templates/profile/login.php:59
+#: svn-repository/tags/0.0.2/templates/profile/login.php:59
+#: svn-repository/tags/0.0.3/templates/profile/login.php:59
+#: svn-repository/tags/0.0.4/templates/profile/login.php:59
+#: svn-repository/tags/0.0.5/templates/profile/login.php:59
+#: svn-repository/tags/0.0.6/templates/profile/login.php:59
+#: svn-repository/trunk/templates/profile/login.php:59
+#: templates/profile/login.php:58
 msgid "Forgot password"
 msgstr ""
 
-#: templates/profile/login.php:71
+#: svn-repository/tags/0.0.2/templates/profile/login.php:71
+#: svn-repository/tags/0.0.3/templates/profile/login.php:71
+#: svn-repository/tags/0.0.4/templates/profile/login.php:71
+#: svn-repository/tags/0.0.5/templates/profile/login.php:71
+#: svn-repository/tags/0.0.6/templates/profile/login.php:71
+#: svn-repository/trunk/templates/profile/login.php:71
+#: templates/profile/login.php:68
 msgid "Login"
 msgstr ""
 
-#: templates/profile/login.php:81
+#: svn-repository/tags/0.0.2/templates/profile/login.php:81
+#: svn-repository/tags/0.0.3/templates/profile/login.php:81
+#: svn-repository/tags/0.0.4/templates/profile/login.php:81
+#: svn-repository/tags/0.0.5/templates/profile/login.php:81
+#: svn-repository/tags/0.0.6/templates/profile/login.php:81
+#: svn-repository/trunk/templates/profile/login.php:81
+#: templates/profile/login.php:78
 msgid "Create new account"
 msgstr ""
 
-#: templates/profile/parts/enrolled-courses.php:7
-msgid "Enrolled Date"
-msgstr ""
-
-#: templates/profile/parts/enrolled-courses.php:8
-msgid "Total Lessons"
-msgstr ""
-
-#: templates/profile/parts/enrolled-courses.php:9
-msgid "Completed Lessons"
-msgstr ""
-
-#: templates/profile/parts/update-profile.php:1
-msgid "Edit Profile"
-msgstr ""
-
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:15
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:20
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:15
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:20
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:15
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:20
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:15
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:20
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:15
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:20
+#: svn-repository/trunk/templates/profile/registration.php:15
+#: svn-repository/trunk/templates/profile/registration.php:20
 #: templates/profile/registration.php:15 templates/profile/registration.php:20
 msgid "First Name"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:27
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:31
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:27
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:31
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:27
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:31
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:27
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:31
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:27
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:31
+#: svn-repository/trunk/templates/profile/registration.php:27
+#: svn-repository/trunk/templates/profile/registration.php:31
 #: templates/profile/registration.php:27 templates/profile/registration.php:31
 msgid "Last Name"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:41
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:46
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:41
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:46
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:41
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:46
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:41
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:46
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:41
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:46
+#: svn-repository/trunk/templates/profile/registration.php:41
+#: svn-repository/trunk/templates/profile/registration.php:46
 #: templates/profile/registration.php:41 templates/profile/registration.php:46
 msgid "User Name"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:53
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:57
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:53
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:57
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:53
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:57
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:53
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:57
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:53
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:57
+#: svn-repository/trunk/templates/profile/registration.php:53
+#: svn-repository/trunk/templates/profile/registration.php:57
 #: templates/profile/registration.php:53 templates/profile/registration.php:57
 msgid "E-Mail"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:79
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:79
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:79
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:79
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:79
+#: svn-repository/trunk/templates/profile/registration.php:79
 #: templates/profile/registration.php:79
 msgid "Password confirmation"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:84
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:84
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:84
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:84
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:84
+#: svn-repository/trunk/templates/profile/registration.php:84
 #: templates/profile/registration.php:84
 msgid "Password Confirmation"
 msgstr ""
 
+#: svn-repository/tags/0.0.2/templates/profile/registration.php:92
+#: svn-repository/tags/0.0.3/templates/profile/registration.php:92
+#: svn-repository/tags/0.0.4/templates/profile/registration.php:92
+#: svn-repository/tags/0.0.5/templates/profile/registration.php:92
+#: svn-repository/tags/0.0.6/templates/profile/registration.php:92
+#: svn-repository/trunk/templates/profile/registration.php:92
 #: templates/profile/registration.php:92
 msgid "Register"
 msgstr ""
 
-#: templates/single-course.php:62
+#: svn-repository/tags/0.0.2/templates/single-course.php:62
+#: svn-repository/tags/0.0.3/templates/single-course.php:62
+#: svn-repository/tags/0.0.4/templates/single-course.php:62
+#: svn-repository/tags/0.0.5/templates/single-course.php:62
+#: svn-repository/tags/0.0.6/templates/single-course.php:62
+#: svn-repository/trunk/templates/single-course.php:62
 msgid "%s section"
 msgid_plural "%s sections"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/single-course.php:62
+#: svn-repository/tags/0.0.2/templates/single-course.php:62
+#: svn-repository/tags/0.0.3/templates/single-course.php:62
+#: svn-repository/tags/0.0.4/templates/single-course.php:62
+#: svn-repository/tags/0.0.5/templates/single-course.php:62
+#: svn-repository/tags/0.0.6/templates/single-course.php:62
+#: svn-repository/trunk/templates/single-course.php:62
 msgid "%s hr"
 msgid_plural "%s hrs"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/single-course.php:67
+#: svn-repository/tags/0.0.2/templates/single-course.php:67
+#: svn-repository/tags/0.0.3/templates/single-course.php:67
+#: svn-repository/tags/0.0.4/templates/single-course.php:67
+#: svn-repository/tags/0.0.5/templates/single-course.php:67
+#: svn-repository/tags/0.0.6/templates/single-course.php:67
+#: svn-repository/trunk/templates/single-course.php:67
 msgid "Price"
 msgstr ""
 
-#: templates/single-course.php:99
+#: svn-repository/tags/0.0.2/templates/single-course.php:99
+#: svn-repository/tags/0.0.3/templates/single-course.php:99
+#: svn-repository/tags/0.0.4/templates/single-course.php:99
+#: svn-repository/tags/0.0.5/templates/single-course.php:99
+#: svn-repository/tags/0.0.6/templates/single-course.php:99
+#: svn-repository/trunk/templates/single-course.php:99
+#: templates/single-course.php:182 templates/single-course.php:187
 msgid "Enroll Now"
+msgstr ""
+
+#: svn-repository/tags/0.0.3/templates/profile/parts/enrolled-courses.php:7
+#: svn-repository/tags/0.0.4/templates/profile/parts/enrolled-courses.php:7
+#: svn-repository/tags/0.0.5/templates/profile/parts/enrolled-courses.php:7
+#: svn-repository/tags/0.0.6/templates/profile/parts/enrolled-courses.php:7
+#: svn-repository/trunk/templates/profile/parts/enrolled-courses.php:7
+#: templates/profile/parts/enrolled-courses.php:7
+msgid "Enrolled Date"
+msgstr ""
+
+#: svn-repository/tags/0.0.3/templates/profile/parts/enrolled-courses.php:8
+#: svn-repository/tags/0.0.4/templates/profile/parts/enrolled-courses.php:8
+#: svn-repository/tags/0.0.5/templates/profile/parts/enrolled-courses.php:8
+#: svn-repository/tags/0.0.6/templates/profile/parts/enrolled-courses.php:8
+#: svn-repository/trunk/templates/profile/parts/enrolled-courses.php:8
+#: templates/profile/parts/enrolled-courses.php:8
+msgid "Total Lessons"
+msgstr ""
+
+#: svn-repository/tags/0.0.3/templates/profile/parts/enrolled-courses.php:9
+#: svn-repository/tags/0.0.4/templates/profile/parts/enrolled-courses.php:9
+#: svn-repository/tags/0.0.5/templates/profile/parts/enrolled-courses.php:9
+#: svn-repository/tags/0.0.6/templates/profile/parts/enrolled-courses.php:9
+#: svn-repository/trunk/templates/profile/parts/enrolled-courses.php:9
+#: templates/profile/parts/enrolled-courses.php:9
+msgid "Completed Lessons"
+msgstr ""
+
+#: svn-repository/tags/0.0.3/templates/profile/parts/update-profile.php:1
+#: svn-repository/tags/0.0.4/templates/profile/parts/update-profile.php:1
+#: svn-repository/tags/0.0.5/templates/profile/parts/update-profile.php:1
+#: svn-repository/tags/0.0.6/templates/profile/parts/update-profile.php:1
+#: svn-repository/trunk/templates/profile/parts/update-profile.php:1
+#: templates/profile/parts/update-profile.php:1
+msgid "Edit Profile"
+msgstr ""
+
+#: templates/loop/course.php:44 templates/single-course.php:176
+msgid "Free"
+msgstr ""
+
+#: templates/loop/course.php:47
+msgid "Get Enrolled"
+msgstr ""
+
+#: templates/single-course.php:37
+msgid "Created by"
+msgstr ""
+
+#: templates/single-course.php:40
+msgid "Last updated "
+msgstr ""
+
+#: templates/single-course.php:58
+msgid "What will i learn?"
+msgstr ""
+
+#: templates/single-course.php:90
+msgid "Description"
+msgstr ""
+
+#: templates/single-course.php:100
+msgid "About the instructor"
+msgstr ""
+
+#: templates/single-course.php:115
+msgid "Students"
+msgstr ""
+
+#: templates/single-course.php:185
+msgid "Login & Enroll Now"
+msgstr ""
+
+#: templates/single-course.php:189
+msgid "Continue to Course"
+msgstr ""
+
+#: templates/single-course.php:191
+msgid "Restart The Course"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
@@ -1067,7 +2856,7 @@ msgstr ""
 
 #. Description of the plugin/theme
 msgid ""
-"Sikshya is free Learning management system for WordPress. It helps to "
+"Sikshya is free Learning management system (LMS) for WordPress. It helps to "
 "create course, lessons, quizzes, questions and answers for your online "
 "course system."
 msgstr ""
@@ -1080,144 +2869,310 @@ msgstr ""
 msgid "https://mantrabrain.com"
 msgstr ""
 
-#: includes/class-sikshya-install.php:255
-#. translators: user role
-msgctxt "User role"
-msgid "Customer"
-msgstr ""
-
-#: includes/class-sikshya-install.php:257
-#. translators: user role
-msgctxt "User role"
-msgid "Shop manager"
-msgstr ""
-
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:10
 msgctxt "post type general name"
 msgid "Courses"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:11
 msgctxt "post type general name"
 msgid "Lessons"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:10
 msgctxt "post type general name"
 msgid "Orders"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:10
 msgctxt "post type general name"
 msgid "Questions"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:10
 msgctxt "post type general name"
 msgid "Quizzes"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:11
 msgctxt "post type singular name"
 msgid "Course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:12
 msgctxt "post type singular name"
 msgid "Lesson"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:11
 msgctxt "post type singular name"
 msgid "Order"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:11
 msgctxt "post type singular name"
 msgid "Question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:11
 msgctxt "post type singular name"
 msgid "Quiz"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:12
 msgctxt "admin menu"
 msgid "Courses"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:13
 msgctxt "admin menu"
 msgid "Lessons"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:12
 msgctxt "admin menu"
 msgid "Orders"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:12
 msgctxt "admin menu"
 msgid "Questions"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:12
 msgctxt "admin menu"
 msgid "Quizzes"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:13
 msgctxt "add new on admin bar"
 msgid "Course"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:14
 msgctxt "add new on admin bar"
 msgid "Lesson"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:13
 msgctxt "add new on admin bar"
 msgid "Order"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:13
 msgctxt "add new on admin bar"
 msgid "Question"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:13
 msgctxt "add new on admin bar"
 msgid "Quiz"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-course.php:14
 msgctxt "courses"
 msgid "Add New"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-lesson.php:15
 msgctxt "lessons"
 msgid "Add New"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:14
 msgctxt "orders"
 msgid "Add New"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-order.php:64
 msgctxt "post status label"
 msgid "Booked"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-question.php:14
 msgctxt "questions"
 msgid "Add New"
 msgstr ""
 
 #: includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
+#: svn-repository/tags/0.0.2/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
+#: svn-repository/tags/0.0.3/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
+#: svn-repository/tags/0.0.4/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
+#: svn-repository/tags/0.0.5/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
+#: svn-repository/tags/0.0.6/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
+#: svn-repository/trunk/includes/custom-post-type/class-sikshya-custom-post-type-quiz.php:14
 msgctxt "quizzes"
 msgid "Add New"
+msgstr ""
+
+#: svn-repository/tags/0.0.2/includes/class-sikshya-install.php:255
+#: svn-repository/tags/0.0.3/includes/class-sikshya-install.php:255
+#: svn-repository/tags/0.0.4/includes/class-sikshya-install.php:255
+#: svn-repository/tags/0.0.5/includes/class-sikshya-install.php:255
+#: svn-repository/tags/0.0.6/includes/class-sikshya-install.php:255
+#: svn-repository/trunk/includes/class-sikshya-install.php:255
+#. translators: user role
+msgctxt "User role"
+msgid "Customer"
+msgstr ""
+
+#: svn-repository/tags/0.0.2/includes/class-sikshya-install.php:257
+#: svn-repository/tags/0.0.3/includes/class-sikshya-install.php:257
+#: svn-repository/tags/0.0.4/includes/class-sikshya-install.php:257
+#: svn-repository/tags/0.0.5/includes/class-sikshya-install.php:257
+#: svn-repository/tags/0.0.6/includes/class-sikshya-install.php:257
+#: svn-repository/trunk/includes/class-sikshya-install.php:257
+#. translators: user role
+msgctxt "User role"
+msgid "Shop manager"
 msgstr ""

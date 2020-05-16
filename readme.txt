@@ -2,8 +2,8 @@
 Contributors: Mantrabrain
 Tags: course builder, quizzes, questions, learning management system, LMS
 Requires at least: 4.7
-Tested up to: 5.3
-Stable tag: 0.0.6
+Tested up to: 5.4.1
+Stable tag: 0.0.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -38,6 +38,11 @@ Feature [request](https://mantrabrain.com/request-new-feature/)
 * Plugin support/bug report: [Click here](https://mantrabrain.com/support-forum/)
 
 == Changelog ==
+
+= 0.0.7 | 2020/05/16 =
+* Fixed - admin design optimize
+* Added - major update
+
 
 = 0.0.6 | 2019/12/10 =
 * Fixed - Minor bug fixes

@@ -2,7 +2,7 @@
     <?php
     $course_meta = sikshya()->course->get_course_meta(get_the_ID());
     
-    $course_level = sikshya_get_course_level($course_level);
+    $course_level = sikshya_get_course_level();
 
     ?>
     <div class="sikshya-course-loop">

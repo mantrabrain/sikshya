@@ -16,7 +16,7 @@ class Sikshya_Core_Student
 
         global $wpdb;
 
-        $sql = "SELECT COUNT(*) AS total FROM wp_sikshya_user_items WHERE item_type=%s AND item_id = %d AND reference_type=%s AND parent_id=0;";
+        $sql = "SELECT COUNT(*) AS total FROM ".SIKSHYA_DB_PREFIX."user_items WHERE item_type=%s AND item_id = %d AND reference_type=%s AND parent_id=0;";
         $query = $wpdb->prepare($sql,
             SIKSHYA_COURSES_CUSTOM_POST_TYPE,
             $course_id,
@@ -26,7 +26,7 @@ class Sikshya_Core_Student
         );
         $results = $wpdb->get_results($query);
 
-        return is_array($results) ? count($results) : 0;
+        return is_array($results) ? absint($results[0]->total) : 0;
 
     }
 
@@ -44,9 +44,12 @@ class Sikshya_Core_Student
             $item_ids_query_value[] = $course_id;
         }
         $item_ids_query_value[] = SIKSHYA_ORDERS_CUSTOM_POST_TYPE;
+
         global $wpdb;
 
-        $sql = "SELECT COUNT(*) AS total FROM wp_sikshya_user_items WHERE item_type=%s AND item_id in (" . $item_ids_query . ") AND reference_type=%s AND parent_id=0;";
+
+        $sql = "SELECT COUNT(*) AS total FROM ".SIKSHYA_DB_PREFIX."user_items WHERE item_type=%s AND item_id in (" . $item_ids_query . ") AND reference_type=%s AND parent_id=0;";
+
         $query = $wpdb->prepare($sql,
             $item_ids_query_value
 
@@ -54,7 +57,8 @@ class Sikshya_Core_Student
         );
         $results = $wpdb->get_results($query);
 
-        return is_array($results) ? count($results) : 0;
+
+        return is_array($results) ? absint($results[0]->total) : 0;
     }
 
 }

@@ -446,8 +446,12 @@ if (!function_exists('sikshya_content_item_edit_links')) {
 
 if (!function_exists('sikshya_image')) {
 
-    function sikshya_image($image_size = 'full')
+    function sikshya_image($image_size = 'full', $img_attr = array())
     {
+        $attr_string = '';
+        foreach ($img_attr as $attr_key => $attr_value) {
+            $attr_string .= $attr_key . '="' . $attr_value . '" ';
+        }
 
         if (has_post_thumbnail()) {
 
@@ -459,11 +463,11 @@ if (!function_exists('sikshya_image')) {
             $url = get_the_post_thumbnail_url($post, $image_size);
 
             echo '<img alt="' . esc_attr($title) . '" 
-            src="' . esc_url($url) . '"/>';
+            src="' . esc_url($url) . '" '.$attr_string.'/>';
 
         } else {
-            echo '<img src="' . esc_url(SIKSHYA_ASSETS_URL . '/images/placeholder.jpg') . '"/>';
+            $title = get_the_title();
+            echo '<img alt="' . esc_attr($title) . '"  src="' . esc_url(SIKSHYA_ASSETS_URL . '/images/placeholder.jpg') . '" '.$attr_string.'/>';
         }
     }
 }
-

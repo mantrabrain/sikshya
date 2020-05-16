@@ -37,7 +37,7 @@ while (have_posts()) {
             <?php echo esc_html__('Created by', 'sikshya'); ?><a
                       href="#"> <?php echo esc_attr(sikshya()->course->instructor('display_name', get_the_ID())) ?></a>
           </span>
-                            <span class="last-updated-date"><?php echo esc_html__('Last updated', 'sikshya'); ?><?php echo get_the_modified_date() ?></span>
+                            <span class="last-updated-date"><?php echo esc_html__('Last updated ', 'sikshya'); ?><?php echo get_the_modified_date() ?></span>
                         </div>
                     </div>
                 </div>
@@ -143,21 +143,33 @@ while (have_posts()) {
                         if ('' != $sikshya_course_youtube_video_url) {
                             parse_str(parse_url($sikshya_course_youtube_video_url, PHP_URL_QUERY), $my_array_of_vars);
                             ?>
-                            <div class="preview-video-box">
-                                <a data-modal-title="<?php echo get_the_title(); ?>" id="CoursePreviewModal">
-                                    <img src="<?php echo get_the_post_thumbnail_url() ?>"
-                                         alt="" class="img-fluid">
+                        <?php } ?>
+                        <div class="preview-video-box">
+                            <a data-modal-title="<?php echo get_the_title(); ?>" id="CoursePreviewModal">
+                                <?php
+                                sikshya_image('full', array(
+                                    'class' => 'img-fluid'
+                                ));
+                                if ('' != $sikshya_course_youtube_video_url) {
+
+                                    ?>
                                     <span class="play-btn"></span>
-                                </a>
+                                <?php } ?>
+                            </a>
+                            <?php
+                            if ('' != $sikshya_course_youtube_video_url) {
+
+                                ?>
                                 <div class="video-content" style="display: none;">
                                     <iframe width="100%" height="100%"
-                                            src="https://www.youtube.com/embed/<?php echo $my_array_of_vars['v']; ?>?controls=0&showinfo=0"
+                                            src="https://www.youtube.com/embed/<?php echo isset($my_array_of_vars['v']) ?$my_array_of_vars['v']: ''; ?>?controls=0&showinfo=0"
                                             frameborder="0"
                                             allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                                             allowfullscreen style="height:100%"></iframe>
                                 </div>
-                            </div>
-                        <?php } ?>
+                            <?php } ?>
+                        </div>
+
                         <div class="course-sidebar-text-box">
                             <div class="price">
                                 <span class="current-price"><span
