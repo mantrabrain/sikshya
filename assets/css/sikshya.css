@@ -3281,6 +3281,17 @@ table th {
       border-radius: 100%;
       border: 1px solid #ddd; }
 
+.sikshya-pagination-wrap {
+  padding: 10px 0;
+  display: inline-block; }
+  .sikshya-pagination-wrap a.prev, .sikshya-pagination-wrap a.next, .sikshya-pagination-wrap span.current, .sikshya-pagination-wrap a.page-numbers {
+    padding: 10px;
+    float: left;
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid #aaa;
+    margin: 0 5px; }
+
 body.single-sik_quizzes .site-content, body.single-sik_courses .site-content, body.single-sik_lessons .site-content, body.post-type-archive-sik_courses .site-content {
   padding: 0; }
 

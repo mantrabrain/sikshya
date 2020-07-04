@@ -2,39 +2,40 @@
 
 sikshya_header();
 ?>
-    <div class="sikshya-wrap sikshya-courses-wrap sikshya-container">
-        <?php
-        do_action('sikshya_archive_before_loop');
+	<div class="sikshya-wrap sikshya-courses-wrap sikshya-container">
+		<?php
+		do_action('sikshya_archive_before_loop');
 
-        if (have_posts()) :
-            /* Start the Loop */
+		if (have_posts()) :
+			/* Start the Loop */
 
-            sikshya_course_loop_start();
+			sikshya_course_loop_start();
 
-            while (have_posts()) : the_post();
+			while (have_posts()) : the_post();
 
-                do_action('sikshya_course_archive_before_loop_course');
+				do_action('sikshya_course_archive_before_loop_course');
 
-                sikshya_load_template('loop.course');
+				sikshya_load_template('loop.course');
 
-                do_action('sikshya_course_archive_after_loop_course');
-            endwhile;
+				do_action('sikshya_course_archive_after_loop_course');
 
-            sikshya_course_loop_end();
+			endwhile;
 
-        else :
+			sikshya_course_loop_end();
 
-            /**
-             * No course found
-             */
-            sikshya_load_template('course-none');
+			sikshya_course_archive_pagination();
+		else :
 
-        endif;
+			/**
+			 * No course found
+			 */
+			sikshya_load_template('course-none');
 
-        //sikshya_course_archive_pagination();
+		endif;
 
-        do_action('sikshya_archive_before_loop');
-        ?>
-    </div><!-- .wrap -->
+
+		do_action('sikshya_archive_after_loop');
+		?>
+	</div><!-- .wrap -->
 <?php
 sikshya_footer();

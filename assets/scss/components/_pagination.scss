@@ -1,0 +1,13 @@
+.sikshya-pagination-wrap {
+	padding: 10px 0;
+	display: inline-block;
+
+	a.prev, a.next, span.current, a.page-numbers {
+		padding: 10px;
+		float: left;
+		display: inline-block;
+		border-radius: 3px;
+		border: 1px solid #aaa;
+		margin: 0 5px;
+	}
+}
