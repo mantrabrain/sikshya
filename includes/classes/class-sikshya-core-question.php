@@ -356,7 +356,7 @@ class Sikshya_Core_Question
         }
         $_quiz_question_result['skipped_questions'] = count($total_questions) - $total_answered;
 
-        $_quiz_question_result['status'] = $is_completed ? 'compleed' : 'on-progress';
+        $_quiz_question_result['status'] = $is_completed ? 'completed' : 'on-progress';
 
 
         sikshya_update_user_item_meta($user_item_id, '_quiz_question_result', $_quiz_question_result);

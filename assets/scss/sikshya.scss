@@ -13,937 +13,1010 @@ Sikshya ACCOUNT AREA STYLING
  */
 /* Sikshya Lesson single */
 #wpadminbar {
-  #wp-admin-bar-tw-membership {
-    .ab-icon {
-      &:before {
-        content: "\f118";
-        top: 3px;
-      }
-    }
-  }
-  #wp-admin-bar-edit-sik_lessons {
-    .ab-item {
-      &:before {
-        content: "\f491";
-      }
-    }
-  }
-  #wp-admin-bar-edit-sik_courses {
-    .ab-item {
-      &:before {
-        content: "\f464";
-      }
-    }
-  }
-  #wp-admin-bar-edit-sik_quizzes {
-    .ab-item {
-      &:before {
-        content: "\f469";
-      }
-    }
-  }
-  #wp-admin-bar-edit-sik_questions {
-    .ab-item {
-      &:before {
-        content: "\f534";
-      }
-    }
-  }
+	#wp-admin-bar-tw-membership {
+		.ab-icon {
+			&:before {
+				content: "\f118";
+				top: 3px;
+			}
+		}
+	}
+
+	#wp-admin-bar-edit-sik_lessons {
+		.ab-item {
+			&:before {
+				content: "\f491";
+			}
+		}
+	}
+
+	#wp-admin-bar-edit-sik_courses {
+		.ab-item {
+			&:before {
+				content: "\f464";
+			}
+		}
+	}
+
+	#wp-admin-bar-edit-sik_quizzes {
+		.ab-item {
+			&:before {
+				content: "\f469";
+			}
+		}
+	}
+
+	#wp-admin-bar-edit-sik_questions {
+		.ab-item {
+			&:before {
+				content: "\f534";
+			}
+		}
+	}
 }
 
 #wpbody-content {
-  .sikshya_info_block {
-    margin-right: 20px;
-  }
+	.sikshya_info_block {
+		margin-right: 20px;
+	}
 }
 
 #wpwrap {
-  .sikshya-notice {
-    padding: 0;
-    margin: 5px 0 10px;
-    border: 1px solid #E5E5E5;
-    background: white;
-    overflow: hidden;
-    -webkit-border-radius: 6px;
-    border-radius: 6px;
-    -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
-    position: relative;
-    z-index: 1;
-    min-height: 80px;
-    display: table;
-    width: 100%;
-    .sikshya-notice-text {
-      color: black;
-      font-weight: normal;
-      line-height: 20px;
-      padding: 10px 20px;
-      -webkit-font-smoothing: antialiased;
-      width: 100%;
-      p {
-        margin: 0;
-      }
-      .sikshya-notice-text-type-error {
-        color: red;
-      }
-    }
-    > div {
-      display: table-cell;
-      vertical-align: middle;
-      cursor: default;
-      line-height: 1.5;
-    }
-    .sikshya-notice-actions {
-      border-left: 1px solid #E5E5E5;
-      background: #f7f7f7;
-      padding: 0 30px;
-      position: relative;
-      white-space: nowrap;
-      text-align: center;
-      button {
-        border: none;
-        background: none;
-        font-size: 12px;
-        color: #C5C5C5;
-        margin-top: 10px;
-        border: none;
-        -webkit-font-smoothing: antialiased;
-        padding: 0;
-        &:hover {
-          color: black;
-        }
-      }
-      a {
-        &:focus {
-          outline: 0;
-          display: block;
-        }
-        &:visited {
-          outline: 0;
-          display: block;
-        }
-        &:hover {
-          outline: 0;
-          display: block;
-        }
-        outline: 0;
-        display: block;
-      }
-    }
-    .sikshya-notice-logo {
-      background-color: white;
-      background-repeat: no-repeat;
-      background-position: 50% 50%;
-      min-width: 80px;
-    }
-  }
-  .sikshya-notice.sikshya-ajax-go {
-    .sikshya-notice-actions {
-      opacity: 0.5;
-    }
-  }
+	.sikshya-notice {
+		padding: 0;
+		margin: 5px 0 10px;
+		border: 1px solid #E5E5E5;
+		background: white;
+		overflow: hidden;
+		-webkit-border-radius: 6px;
+		border-radius: 6px;
+		-webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
+		box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.05);
+		position: relative;
+		z-index: 1;
+		min-height: 80px;
+		display: table;
+		width: 100%;
+
+		.sikshya-notice-text {
+			color: black;
+			font-weight: normal;
+			line-height: 20px;
+			padding: 10px 20px;
+			-webkit-font-smoothing: antialiased;
+			width: 100%;
+
+			p {
+				margin: 0;
+			}
+
+			.sikshya-notice-text-type-error {
+				color: red;
+			}
+		}
+
+		> div {
+			display: table-cell;
+			vertical-align: middle;
+			cursor: default;
+			line-height: 1.5;
+		}
+
+		.sikshya-notice-actions {
+			border-left: 1px solid #E5E5E5;
+			background: #f7f7f7;
+			padding: 0 30px;
+			position: relative;
+			white-space: nowrap;
+			text-align: center;
+
+			button {
+				border: none;
+				background: none;
+				font-size: 12px;
+				color: #C5C5C5;
+				margin-top: 10px;
+				border: none;
+				-webkit-font-smoothing: antialiased;
+				padding: 0;
+
+				&:hover {
+					color: black;
+				}
+			}
+
+			a {
+				&:focus {
+					outline: 0;
+					display: block;
+				}
+
+				&:visited {
+					outline: 0;
+					display: block;
+				}
+
+				&:hover {
+					outline: 0;
+					display: block;
+				}
+
+				outline: 0;
+				display: block;
+			}
+		}
+
+		.sikshya-notice-logo {
+			background-color: white;
+			background-repeat: no-repeat;
+			background-position: 50% 50%;
+			min-width: 80px;
+		}
+	}
+
+	.sikshya-notice.sikshya-ajax-go {
+		.sikshya-notice-actions {
+			opacity: 0.5;
+		}
+	}
 }
 
 span.tw_get_sikshya {
-  color: red;
+	color: red;
 }
 
 .top-image-block {
-  position: relative;
-  padding: 120px 0;
-  color: #fff;
-  background: rgba(62, 116, 215, 0.5);
-  overflow: hidden;
-  .desc {
-    font-size: 24px;
-  }
-  a {
-    color: inherit;
-  }
-  a.more {
-    text-decoration: underline;
-    font-size: 14px;
-  }
-  .sikshya-blur-background {
-    background: center no-repeat;
-    background-size: cover;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    opacity: 0.5;
-    filter: blur(1px);
-  }
+	position: relative;
+	padding: 120px 0;
+	color: #fff;
+	background: rgba(62, 116, 215, 0.5);
+	overflow: hidden;
+
+	.desc {
+		font-size: 24px;
+	}
+
+	a {
+		color: inherit;
+	}
+
+	a.more {
+		text-decoration: underline;
+		font-size: 14px;
+	}
+
+	.sikshya-blur-background {
+		background: center no-repeat;
+		background-size: cover;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		opacity: 0.5;
+		filter: blur(1px);
+	}
 }
 
 .sikshya-block-shadow {
-  box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.15);
+	box-shadow: 0 0 30px 0 rgba(0, 0, 0, 0.15);
 }
 
 .sikshya-description-table {
-  margin-top: -120px;
-  background: #fff;
-  padding: 30px;
-  overflow: hidden;
-  .icon {
-    color: #c0c0c0;
-    margin-right: 5px;
-    font-size: 24px;
-  }
+	margin-top: -120px;
+	background: #fff;
+	padding: 30px;
+	overflow: hidden;
+
+	.icon {
+		color: #c0c0c0;
+		margin-right: 5px;
+		font-size: 24px;
+	}
 }
 
 .sikshya-container {
-  padding-left: 15px;
-  padding-right: 15px;
-  max-width: 1140px;
-  margin-right: auto;
-  margin-left: auto;
-  width: 100%;
+	padding-left: 15px;
+	padding-right: 15px;
+	max-width: 1140px;
+	margin-right: auto;
+	margin-left: auto;
+	width: 100%;
 }
 
 .sikshya-section-image {
-  height: 50px;
-  width: 50px;
-  background-size: cover;
-  background-repeat: no-repeat;
-  border-radius: 100%;
-  border: 1px solid #ddd;
-  background-position: center;
-  float: left;
+	height: 50px;
+	width: 50px;
+	background-size: cover;
+	background-repeat: no-repeat;
+	border-radius: 100%;
+	border: 1px solid #ddd;
+	background-position: center;
+	float: left;
 }
 
 .sikshya-section-item {
-  padding: 5px;
-  background: #f9f9f9;
-  margin-top: 5px;
-  border: 1px solid #ddd;
-  &:after {
-    clear: both;
-    content: '';
-    display: block;
-  }
+	padding: 5px;
+	background: #f9f9f9;
+	margin-top: 5px;
+	border: 1px solid #ddd;
+
+	&:after {
+		clear: both;
+		content: '';
+		display: block;
+	}
 }
 
 .sikshya-section-info {
-  float: left;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left: 5px;
-  h3.sikshya-sectionmodule-title {
-    font-size: 18px;
-    line-height: 2em;
-  }
+	float: left;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 5px;
+
+	h3.sikshya-sectionmodule-title {
+		font-size: 18px;
+		line-height: 2em;
+	}
 }
 
 .sikshya-messages {
-  list-style: square;
-  margin: 0;
-  padding: 0;
+	list-style: square;
+	margin: 0;
+	padding: 0;
 }
 
 .sikshya-info {
-  border: 1px solid;
-  margin: 10px 0px;
-  padding: 15px 10px 15px 50px;
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  color: #00529B;
-  background-color: #BDE5F8;
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	color: #00529B;
+	background-color: #BDE5F8;
 }
 
 .sikshya-success {
-  border: 1px solid;
-  margin: 10px 0px;
-  padding: 15px 10px 15px 50px;
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  color: #4F8A10;
-  background-color: #DFF2BF;
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	color: #4F8A10;
+	background-color: #DFF2BF;
 }
 
 .sikshya-warning {
-  border: 1px solid;
-  margin: 10px 0px;
-  padding: 15px 10px 15px 50px;
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  color: #9F6000;
-  background-color: #FEEFB3;
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	color: #9F6000;
+	background-color: #FEEFB3;
 }
 
 .sikshya-error {
-  border: 1px solid;
-  margin: 10px 0px;
-  padding: 15px 10px 15px 50px;
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  color: #D8000C;
-  background-color: #FFBABA;
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	color: #D8000C;
+	background-color: #FFBABA;
 }
 
 .sikshya-validation {
-  border: 1px solid;
-  margin: 10px 0px;
-  padding: 15px 10px 15px 50px;
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  color: #D63301;
-  background-color: #FFCCBA;
+	border: 1px solid;
+	margin: 10px 0px;
+	padding: 15px 10px 15px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	color: #D63301;
+	background-color: #FFCCBA;
 }
 
 .sikshya-account-sidebar {
-  padding: 15px;
-  border: 1px solid #f9f9f9;
-  padding-left: 0;
-  background: #f9f9f9;
-  ul {
-    li {
-      list-style: none;
-      padding: 5px;
-      border: 1px solid #fff;
-      margin-bottom: 2px;
-      &:hover {
-        background: #aaa;
-        a {
-          color: #fff;
-        }
-      }
-    }
-    li.active {
-      background: #aaa;
-      a {
-        color: #fff;
-      }
-    }
-  }
+	padding: 15px;
+	border: 1px solid #f9f9f9;
+	padding-left: 0;
+	background: #f9f9f9;
+
+	ul {
+		li {
+			list-style: none;
+			padding: 5px;
+			border: 1px solid #fff;
+			margin-bottom: 2px;
+
+			&:hover {
+				background: #aaa;
+
+				a {
+					color: #fff;
+				}
+			}
+		}
+
+		li.active {
+			background: #aaa;
+
+			a {
+				color: #fff;
+			}
+		}
+	}
 }
 
 .sikshya-account-content-area {
-  background: #f9f9f9;
-  min-height: 200px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  .sik-avatar {
-    img {
-      border-radius: 100%;
-      border: 1px solid #ddd;
-    }
-    margin-bottom: 20px;
-  }
+	background: #f9f9f9;
+	min-height: 200px;
+	padding: 10px;
+	border: 1px solid #ddd;
+
+	.sik-avatar {
+		img {
+			border-radius: 100%;
+			border: 1px solid #ddd;
+		}
+
+		margin-bottom: 20px;
+	}
 }
 
 .sikshya-course-tabs {
-  margin-bottom: 40px;
-  ul.course-nav-tabs {
-    &::after {
-      clear: both;
-      display: block;
-      content: '';
-    }
-    list-style: none;
-    border-bottom: 3px solid #DDD;
-    border-bottom: 3px solid #DDD;
-    margin: 0 0 20px 0;
-    padding: 0;
-  }
-  .course-nav {
-    float: left;
-    position: relative;
-    margin: 0;
-    list-style: none;
-    a {
-      display: inline-block;
-      padding: 10px 20px;
-      border-bottom: none;
-      outline: none;
-      -webkit-box-shadow: none;
-      -moz-box-shadow: none;
-      box-shadow: none;
-    }
-    &:hover {
-      a {
-        &::after {
-          position: absolute;
-          bottom: -3px;
-          background: #00adff;
-          height: 3px;
-          width: 100%;
-          content: '';
-          left: 0;
-        }
-      }
-    }
-  }
-  .course-nav.active {
-    a {
-      &::after {
-        position: absolute;
-        bottom: -3px;
-        background: #00adff;
-        height: 3px;
-        width: 100%;
-        content: '';
-        left: 0;
-      }
-    }
-  }
+	margin-bottom: 40px;
+
+	ul.course-nav-tabs {
+		&::after {
+			clear: both;
+			display: block;
+			content: '';
+		}
+
+		list-style: none;
+		border-bottom: 3px solid #DDD;
+		border-bottom: 3px solid #DDD;
+		margin: 0 0 20px 0;
+		padding: 0;
+	}
+
+	.course-nav {
+		float: left;
+		position: relative;
+		margin: 0;
+		list-style: none;
+
+		a {
+			display: inline-block;
+			padding: 10px 20px;
+			border-bottom: none;
+			outline: none;
+			-webkit-box-shadow: none;
+			-moz-box-shadow: none;
+			box-shadow: none;
+		}
+
+		&:hover {
+			a {
+				&::after {
+					position: absolute;
+					bottom: -3px;
+					background: #00adff;
+					height: 3px;
+					width: 100%;
+					content: '';
+					left: 0;
+				}
+			}
+		}
+	}
+
+	.course-nav.active {
+		a {
+			&::after {
+				position: absolute;
+				bottom: -3px;
+				background: #00adff;
+				height: 3px;
+				width: 100%;
+				content: '';
+				left: 0;
+			}
+		}
+	}
 }
 
 .course-tab-panel-curriculum {
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    li {
-      position: relative;
-      font-size: 14px;
-      border-top: 1px solid #EEE;
-      transition: padding-left linear 0.15s;
-      background: #FFF;
-      margin: 0;
-      padding: 0;
-    }
-    &::after {
-      clear: both;
-      display: block;
-      content: '';
-    }
-  }
-  li {
-    .item-name {
-      display: table-cell;
-      vertical-align: middle;
-      padding: 10px 10px;
-    }
-    .item-meta {
-      display: table-cell;
-      vertical-align: middle;
-      white-space: nowrap;
-      padding: 10px 0;
-      text-align: right;
-    }
-    a.item-link {
-      border-bottom: none;
-      display: table;
-      box-shadow: none;
-      outline: none;
-      width: 100%;
-      line-height: 1.5;
-      .item-meta {
-        .item-count {
-          padding: 5px 15px;
-          background: #f1f1f1;
-          color: #828282;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 300;
-          text-transform: uppercase;
-        }
-      }
-    }
-  }
-  ul.sikshya-section-list {
-    > li {
-      > a.item-link {
-        cursor: pointer;
-      }
-    }
-  }
-  ul.sikshya-lesson-list {
-    > li {
-      > a.item-link {
-        background: #f9f9f9;
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
 
-      }
-    }
-  }
-  ul.sikshya-quiz-list {
-    > li {
-      > a.item-link {
+		li {
+			position: relative;
+			font-size: 14px;
+			border-top: 1px solid #EEE;
+			transition: padding-left linear 0.15s;
+			background: #FFF;
+			margin: 0;
+			padding: 0;
+		}
 
-      }
-    }
-  }
+		&::after {
+			clear: both;
+			display: block;
+			content: '';
+		}
+	}
+
+	li {
+		.item-name {
+			display: table-cell;
+			vertical-align: middle;
+			padding: 10px 10px;
+		}
+
+		.item-meta {
+			display: table-cell;
+			vertical-align: middle;
+			white-space: nowrap;
+			padding: 10px 0;
+			text-align: right;
+		}
+
+		a.item-link {
+			border-bottom: none;
+			display: table;
+			box-shadow: none;
+			outline: none;
+			width: 100%;
+			line-height: 1.5;
+
+			.item-meta {
+				.item-count {
+					padding: 5px 15px;
+					background: #f1f1f1;
+					color: #828282;
+					border-radius: 20px;
+					font-size: 11px;
+					font-weight: 300;
+					text-transform: uppercase;
+				}
+			}
+		}
+	}
+
+	ul.sikshya-section-list {
+		> li {
+			> a.item-link {
+				cursor: pointer;
+			}
+		}
+	}
+
+	ul.sikshya-lesson-list {
+		> li {
+			> a.item-link {
+				background: #f9f9f9;
+
+			}
+		}
+	}
+
+	ul.sikshya-quiz-list {
+		> li {
+			> a.item-link {
+
+			}
+		}
+	}
 }
 
 .sikshya-hide {
-  display: none;
+	display: none;
 }
 
 .sikshya-single-lesson-wrap {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  position: relative;
-  background: #F4F8FA;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	position: relative;
+	background: #F4F8FA;
 }
 
 .sikshya-lesson-sidebar {
-  -webkit-box-flex: 0;
-  -ms-flex: 0 0 400px;
-  flex: 0 0 400px;
+	-webkit-box-flex: 0;
+	-ms-flex: 0 0 400px;
+	flex: 0 0 400px;
 }
 
 .sikshya-single-entry-content {
-  -webkit-box-flex: 999;
-  -ms-flex-positive: 999;
-  flex-grow: 999;
+	-webkit-box-flex: 999;
+	-ms-flex-positive: 999;
+	flex-grow: 999;
 }
 
 .sikshya-sidebar-tabs-wrap {
-  border-top: 1px solid #E0E9EC;
+	border-top: 1px solid #E0E9EC;
 }
 
 .sikshya-tabs-btn-group {
-  height: 70px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  a {
-    background-color: #F1F6F8;
-    color: #4b5981;
-    display: block;
-    line-height: 70px;
-    width: 100%;
-    text-align: center;
-    border: 1px solid #E0E9EC;
-    border-top: none;
-  }
-  a.active {
-    background-color: #ffffff;
-    border: none;
-  }
+	height: 70px;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+
+	a {
+		background-color: #F1F6F8;
+		color: #4b5981;
+		display: block;
+		line-height: 70px;
+		width: 100%;
+		text-align: center;
+		border: 1px solid #E0E9EC;
+		border-top: none;
+	}
+
+	a.active {
+		background-color: #ffffff;
+		border: none;
+	}
 }
 
 .sikshya-single-page-top-bar {
-  background-color: #1b52d8;
-  height: 70px;
-  margin-bottom: 50px;
-  color: #ffffff;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: justify;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  padding-right: 15px;
-  .sikshya-hide-sidebar-bar {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 auto;
-    flex: 0 0 auto;
-  }
-  a {
-    color: #ffffff;
-    vertical-align: middle;
-    display: inline-block;
-    overflow: hidden;
-    line-height: 1.5em;
-    &:hover {
-      color: #fff;
-    }
-  }
-  .sikshya-topbar-content-title-wrap {
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -webkit-box-flex: 999999;
-    -ms-flex-positive: 999999;
-    flex-grow: 999999;
-    i {
-      vertical-align: middle;
-      line-height: 1;
-      margin-right: 3px;
-    }
-  }
-  .sikshya-topbar-mark-to-done {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 auto;
-    flex: 0 0 auto;
-  }
-  .sikshya-single-lesson-segment {
-    form {
-      margin-bottom: 0;
-    }
-    margin-bottom: 0;
-    button.course-complete-button {
-      background: #fff;
-      color: #1b52d8;
-      padding-bottom: 13px;
-      cursor: pointer;
-      background: #fff;
-      color: #1b52d8;
-      padding-bottom: 13px;
-      cursor: pointer;
-    }
-  }
+	background-color: #1b52d8;
+	height: 70px;
+	margin-bottom: 50px;
+	color: #ffffff;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+	padding-right: 15px;
+
+	.sikshya-hide-sidebar-bar {
+		-webkit-box-flex: 0;
+		-ms-flex: 0 0 auto;
+		flex: 0 0 auto;
+	}
+
+	a {
+		color: #ffffff;
+		vertical-align: middle;
+		display: inline-block;
+		overflow: hidden;
+		line-height: 1.5em;
+
+		&:hover {
+			color: #fff;
+		}
+	}
+
+	.sikshya-topbar-content-title-wrap {
+		text-align: center;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		-webkit-box-flex: 999999;
+		-ms-flex-positive: 999999;
+		flex-grow: 999999;
+
+		i {
+			vertical-align: middle;
+			line-height: 1;
+			margin-right: 3px;
+		}
+	}
+
+	.sikshya-topbar-mark-to-done {
+		-webkit-box-flex: 0;
+		-ms-flex: 0 0 auto;
+		flex: 0 0 auto;
+	}
+
+	.sikshya-single-lesson-segment {
+		form {
+			margin-bottom: 0;
+		}
+
+		margin-bottom: 0;
+
+		button.course-complete-button {
+			background: #fff;
+			color: #1b52d8;
+			padding-bottom: 13px;
+			cursor: pointer;
+			background: #fff;
+			color: #1b52d8;
+			padding-bottom: 13px;
+			cursor: pointer;
+		}
+	}
 }
 
 .sikshya-lesson-sidebar-hide-bar {
-  background-color: #1b52a9;
-  color: #ffffff;
-  padding: 0 18px;
-  display: inline-block;
-  line-height: 68px;
+	background-color: #1b52a9;
+	color: #ffffff;
+	padding: 0 18px;
+	display: inline-block;
+	line-height: 68px;
 }
 
 .sikshya-topbar-home-btn {
-  margin-left: 20px;
+	margin-left: 20px;
 }
 
 .single_add_to_cart_button {
-  color: #fff;
-  border: 1px solid #1b52d8;
-  background-color: #1b52d8;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 12px 30px;
-  border-radius: 4px;
-  text-transform: capitalize;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: 300ms;
-  transition: 300ms;
-  overflow: hidden;
-  vertical-align: top;
+	color: #fff;
+	border: 1px solid #1b52d8;
+	background-color: #1b52d8;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 12px 30px;
+	border-radius: 4px;
+	text-transform: capitalize;
+	line-height: 20px;
+	font-weight: 600;
+	cursor: pointer;
+	-webkit-transition: 300ms;
+	transition: 300ms;
+	overflow: hidden;
+	vertical-align: top;
 }
 
 a.sikshya-button {
-  color: #fff;
-  border: 1px solid #1b52d8;
-  background-color: #1b52d8;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 12px 30px;
-  border-radius: 4px;
-  text-transform: capitalize;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: 300ms;
-  transition: 300ms;
-  overflow: hidden;
-  vertical-align: top;
+	color: #fff;
+	border: 1px solid #1b52d8;
+	background-color: #1b52d8;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 12px 30px;
+	border-radius: 4px;
+	text-transform: capitalize;
+	line-height: 20px;
+	font-weight: 600;
+	cursor: pointer;
+	-webkit-transition: 300ms;
+	transition: 300ms;
+	overflow: hidden;
+	vertical-align: top;
 }
 
 .sikshya-button {
-  color: #fff;
-  border: 1px solid #1b52d8;
-  background-color: #1b52d8;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 12px 30px;
-  border-radius: 4px;
-  text-transform: capitalize;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: 300ms;
-  transition: 300ms;
-  overflow: hidden;
-  vertical-align: top;
+	color: #fff;
+	border: 1px solid #1b52d8;
+	background-color: #1b52d8;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 12px 30px;
+	border-radius: 4px;
+	text-transform: capitalize;
+	line-height: 20px;
+	font-weight: 600;
+	cursor: pointer;
+	-webkit-transition: 300ms;
+	transition: 300ms;
+	overflow: hidden;
+	vertical-align: top;
 }
 
 a.sikshya-btn {
-  color: #fff;
-  border: 1px solid #1b52d8;
-  background-color: #1b52d8;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 12px 30px;
-  border-radius: 4px;
-  text-transform: capitalize;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: 300ms;
-  transition: 300ms;
-  overflow: hidden;
-  vertical-align: top;
+	color: #fff;
+	border: 1px solid #1b52d8;
+	background-color: #1b52d8;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 12px 30px;
+	border-radius: 4px;
+	text-transform: capitalize;
+	line-height: 20px;
+	font-weight: 600;
+	cursor: pointer;
+	-webkit-transition: 300ms;
+	transition: 300ms;
+	overflow: hidden;
+	vertical-align: top;
 }
 
 .sikshya-btn {
-  color: #fff;
-  border: 1px solid #1b52d8;
-  background-color: #1b52d8;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  padding: 12px 30px;
-  border-radius: 4px;
-  text-transform: capitalize;
-  line-height: 20px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-transition: 300ms;
-  transition: 300ms;
-  overflow: hidden;
-  vertical-align: top;
+	color: #fff;
+	border: 1px solid #1b52d8;
+	background-color: #1b52d8;
+	display: -ms-inline-flexbox;
+	display: inline-flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	padding: 12px 30px;
+	border-radius: 4px;
+	text-transform: capitalize;
+	line-height: 20px;
+	font-weight: 600;
+	cursor: pointer;
+	-webkit-transition: 300ms;
+	transition: 300ms;
+	overflow: hidden;
+	vertical-align: top;
 }
 
 .sikshya-single-lesson-button-group {
-  .sikshya-single-lesson-button {
-    a {
-      > i {
-        &:first-child {
-          color: #C7C7C7;
-          line-height: 22px;
-          display: inline-block;
-          vertical-align: middle;
-          margin-right: 10px;
-        }
-      }
-      padding: 14px 100px 14px 17px;
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: flex;
-      color: #4b5981;
-      position: relative;
-      border-top: 1px solid #E8EFF1;
-    }
-  }
+	.sikshya-single-lesson-button {
+		a {
+			> i {
+				&:first-child {
+					color: #C7C7C7;
+					line-height: 22px;
+					display: inline-block;
+					vertical-align: middle;
+					margin-right: 10px;
+				}
+			}
+
+			padding: 14px 100px 14px 17px;
+			display: -webkit-box;
+			display: -ms-flexbox;
+			display: flex;
+			color: #4b5981;
+			position: relative;
+			border-top: 1px solid #E8EFF1;
+		}
+	}
 }
 
 .sikshya-lesson-content-area {
-  &::after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-  padding: 0 20px 20px 20px;
+	&::after {
+		content: '';
+		display: block;
+		clear: both;
+	}
+
+	padding: 0 20px 20px 20px;
 }
 
 .sikshya-hide-sidebar-bar {
-  a.sikshya-lesson-sidebar-hide-bar {
-    i.dashicons {
-      font-size: 29px;
-      display: block;
-      height: 68px;
-      line-height: 68px;
-      margin-right: 7px;
-      float: left;
-    }
-  }
+	a.sikshya-lesson-sidebar-hide-bar {
+		i.dashicons {
+			font-size: 29px;
+			display: block;
+			height: 68px;
+			line-height: 68px;
+			margin-right: 7px;
+			float: left;
+		}
+	}
 }
 
 .sikshya-single-lesson-items.lesson-completed {
-  .dashicons {
-    color: #4bd863;
-  }
+	.dashicons {
+		color: #4bd863;
+	}
 }
 
 .sikshya-content-protected-message {
-  margin-bottom: 50px;
-  padding: 20px;
-  background: #ffe0e0;
+	margin-bottom: 50px;
+	padding: 20px;
+	background: #ffe0e0;
 }
 
 .sikshya-question-answer {
-  label {
-    margin: 0 0 15px 0;
-    position: relative;
-    background: #e4e2ec;
-    padding: 10px;
-    display: flex;
-    overflow: hidden;
-    color: #464646;
-    cursor: pointer;
-    font-size: 20px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    -webkit-transition: background linear 0.25s;
-    -moz-transition: background linear 0.25s;
-    transition: background linear 0.25s;
-  }
-  input[type="radio"] {
-    -webkit-appearance: initial;
-    -moz-appearance: initial;
-    margin: 0 10px 0 3px;
-    position: relative;
-    border: 1px solid #eaeaea;
-    z-index: 10;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    background: #FFF;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    outline: none;
-    border-radius: 50%;
-    &::after {
-      outline: none;
-      content: '';
-      border: 2px solid #00adff;
-      display: inline-block;
-      width: 7px;
-      height: 15px;
-      border-top: none;
-      border-left: none;
-      position: absolute;
-      top: 50%;
-      left: 10px;
-      box-sizing: content-box;
-      opacity: 0;
-      margin-top: -10px;
-      -webkit-transform: rotate(36deg) scale(0);
-      -moz-transform: rotate(36deg) scale(0);
-      -ms-transform: rotate(36deg) scale(0);
-      -o-transform: rotate(36deg) scale(0);
-      transform: rotate(36deg) scale(0);
-      -webkit-transition: all 0.25s;
-      -moz-transition: all 0.25s;
-      transition: all 0.25s;
-    }
-    &:checked {
-      &::after {
-        opacity: 1;
-        -webkit-transform: rotate(36deg) scale(1);
-        -moz-transform: rotate(36deg) scale(1);
-        -ms-transform: rotate(36deg) scale(1);
-        -o-transform: rotate(36deg) scale(1);
-        transform: rotate(36deg) scale(1);
-      }
-      ~ {
-        .sikshya-answer-title {
-          &:before {
-            background: #00adff;
-          }
-        }
-      }
-    }
-  }
-  input[type="checkbox"] {
-    -webkit-appearance: initial;
-    -moz-appearance: initial;
-    margin: 0 10px 0 3px;
-    position: relative;
-    border: 1px solid #eaeaea;
-    z-index: 10;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    background: #FFF;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    outline: none;
-    &::after {
-      outline: none;
-      content: '';
-      border: 2px solid #00adff;
-      display: inline-block;
-      width: 7px;
-      height: 15px;
-      border-top: none;
-      border-left: none;
-      position: absolute;
-      top: 50%;
-      left: 10px;
-      box-sizing: content-box;
-      opacity: 0;
-      margin-top: -10px;
-      -webkit-transform: rotate(36deg) scale(0);
-      -moz-transform: rotate(36deg) scale(0);
-      -ms-transform: rotate(36deg) scale(0);
-      -o-transform: rotate(36deg) scale(0);
-      transform: rotate(36deg) scale(0);
-      -webkit-transition: all 0.25s;
-      -moz-transition: all 0.25s;
-      transition: all 0.25s;
-    }
-    &:checked {
-      &::after {
-        opacity: 1;
-        -webkit-transform: rotate(36deg) scale(1);
-        -moz-transform: rotate(36deg) scale(1);
-        -ms-transform: rotate(36deg) scale(1);
-        -o-transform: rotate(36deg) scale(1);
-        transform: rotate(36deg) scale(1);
-      }
-      ~ {
-        .sikshya-answer-title {
-          &:before {
-            background: #00adff;
-          }
-        }
-      }
-    }
-  }
-  .sikshya-answer-title {
-    font-size: smaller;
-    display: table-cell;
-    &:before {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 3px;
-      content: '';
-      background: #DDD;
-      -webkit-transition: background linear 0.25s;
-      -moz-transition: background linear 0.25s;
-      transition: background linear 0.25s;
-    }
-  }
+	label {
+		margin: 0 0 15px 0;
+		position: relative;
+		background: #e4e2ec;
+		padding: 10px;
+		display: flex;
+		overflow: hidden;
+		color: #464646;
+		cursor: pointer;
+		font-size: 20px;
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+		-webkit-transition: background linear 0.25s;
+		-moz-transition: background linear 0.25s;
+		transition: background linear 0.25s;
+	}
+
+	input[type="radio"] {
+		-webkit-appearance: initial;
+		-moz-appearance: initial;
+		margin: 0 10px 0 3px;
+		position: relative;
+		border: 1px solid #eaeaea;
+		z-index: 10;
+		width: 32px;
+		height: 32px;
+		min-width: 32px;
+		background: #FFF;
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+		outline: none;
+		border-radius: 50%;
+
+		&::after {
+			outline: none;
+			content: '';
+			border: 2px solid #00adff;
+			display: inline-block;
+			width: 7px;
+			height: 15px;
+			border-top: none;
+			border-left: none;
+			position: absolute;
+			top: 50%;
+			left: 10px;
+			box-sizing: content-box;
+			opacity: 0;
+			margin-top: -10px;
+			-webkit-transform: rotate(36deg) scale(0);
+			-moz-transform: rotate(36deg) scale(0);
+			-ms-transform: rotate(36deg) scale(0);
+			-o-transform: rotate(36deg) scale(0);
+			transform: rotate(36deg) scale(0);
+			-webkit-transition: all 0.25s;
+			-moz-transition: all 0.25s;
+			transition: all 0.25s;
+		}
+
+		&:checked {
+			&::after {
+				opacity: 1;
+				-webkit-transform: rotate(36deg) scale(1);
+				-moz-transform: rotate(36deg) scale(1);
+				-ms-transform: rotate(36deg) scale(1);
+				-o-transform: rotate(36deg) scale(1);
+				transform: rotate(36deg) scale(1);
+			}
+
+			~ {
+				.sikshya-answer-title {
+					&:before {
+						background: #00adff;
+					}
+				}
+			}
+		}
+	}
+
+	input[type="checkbox"] {
+		-webkit-appearance: initial;
+		-moz-appearance: initial;
+		margin: 0 10px 0 3px;
+		position: relative;
+		border: 1px solid #eaeaea;
+		z-index: 10;
+		width: 32px;
+		height: 32px;
+		min-width: 32px;
+		background: #FFF;
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+		outline: none;
+
+		&::after {
+			outline: none;
+			content: '';
+			border: 2px solid #00adff;
+			display: inline-block;
+			width: 7px;
+			height: 15px;
+			border-top: none;
+			border-left: none;
+			position: absolute;
+			top: 50%;
+			left: 10px;
+			box-sizing: content-box;
+			opacity: 0;
+			margin-top: -10px;
+			-webkit-transform: rotate(36deg) scale(0);
+			-moz-transform: rotate(36deg) scale(0);
+			-ms-transform: rotate(36deg) scale(0);
+			-o-transform: rotate(36deg) scale(0);
+			transform: rotate(36deg) scale(0);
+			-webkit-transition: all 0.25s;
+			-moz-transition: all 0.25s;
+			transition: all 0.25s;
+		}
+
+		&:checked {
+			&::after {
+				opacity: 1;
+				-webkit-transform: rotate(36deg) scale(1);
+				-moz-transform: rotate(36deg) scale(1);
+				-ms-transform: rotate(36deg) scale(1);
+				-o-transform: rotate(36deg) scale(1);
+				transform: rotate(36deg) scale(1);
+			}
+
+			~ {
+				.sikshya-answer-title {
+					&:before {
+						background: #00adff;
+					}
+				}
+			}
+		}
+	}
+
+	.sikshya-answer-title {
+		font-size: smaller;
+		display: table-cell;
+
+		&:before {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			width: 3px;
+			content: '';
+			background: #DDD;
+			-webkit-transition: background linear 0.25s;
+			-moz-transition: background linear 0.25s;
+			transition: background linear 0.25s;
+		}
+	}
 }
 
 .sikshya-next-question-form {
-  float: left;
-  margin-right: 5px;
+	float: left;
+	margin-right: 5px;
 }
 
 .sikshya-prev-question-form {
-  float: left;
-  margin-right: 5px;
+	float: left;
+	margin-right: 5px;
 }
 
 .sikshya-skip-question-form {
-  float: left;
-  margin-right: 5px;
+	float: left;
+	margin-right: 5px;
 }
 
 .sikshya-complete-question-form {
-  float: left;
-  margin-right: 5px;
+	float: left;
+	margin-right: 5px;
 }
 
 .sikshya-lesson-navigation-area {
-  display: flex;
-  padding: 20px;
-  .lesson-next {
-    flex: 1;
-    text-align: right;
-  }
-  .lesson-prev {
-    flex: 1;
-  }
-  span {
-    display: block;
-  }
+	display: flex;
+	padding: 20px;
+
+	.lesson-next {
+		flex: 1;
+		text-align: right;
+	}
+
+	.lesson-prev {
+		flex: 1;
+	}
+
+	span {
+		display: block;
+	}
 }
 
 @import "components/grid";
 @import "components/courses";
 @import "components/lesson";
 @import "components/form";
+@import "components/quiz";

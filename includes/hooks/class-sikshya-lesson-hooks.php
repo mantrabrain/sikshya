@@ -66,7 +66,33 @@ class Sikshya_Lesson_ooks
 
 				if ($quiz_report) {
 
-					sikshya_load_template('parts.quiz.report');
+					$report_data = array();
+
+					$quiz_id = sikshya()->quiz->get_id();
+					$course_id = sikshya()->course->get_id();
+					$user_id = get_current_user_id();
+
+					$results = sikshya_get_user_items(
+						array('user_item_id'),
+						array(
+							'item_id' => absint($quiz_id),
+							'item_type' => SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
+							'status' => 'completed',
+							'reference_id' => absint($course_id),
+							'user_id' => absint($user_id)
+						),
+						array(
+							'order_by' => 'user_item_id',
+							'order' => 'desc',
+							'offset' => 0,
+							'limit' => 1
+						)
+					);
+					$user_item_id = isset($results[0]) ? $results[0]->user_item_id : 0;
+
+					$report_data = sikshya_get_user_item_meta($user_item_id, '_quiz_question_result');
+
+					sikshya_load_template('parts.quiz.report', array('report_data' => $report_data));
 
 				} else {
 					sikshya_load_template('parts.quiz.quiz');

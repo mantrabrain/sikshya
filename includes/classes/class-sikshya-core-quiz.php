@@ -222,7 +222,7 @@ GROUP BY p.post_type having p.post_type in (%s)",
 
 		$results = $wpdb->get_results($sql);
 
-		return count($results) > 0 ? true : false;
+		return count($results) > 0;
 	}
 
 	public function get_permalink($quiz_id)
@@ -239,24 +239,23 @@ GROUP BY p.post_type having p.post_type in (%s)",
 
 	public function is_completed($user_id, $quiz_id, $course_id)
 	{
+
 		$results = sikshya_get_user_items(array(
 			'user_item_id',
 			'status'
 		), array(
 				'item_id' => absint($quiz_id),
 				'item_type' => SIKSHYA_QUIZZES_CUSTOM_POST_TYPE,
-				'status' => 'completed',
+				'status' => 'started',
 				'reference_id' => absint($course_id),
 				'user_id' => absint($user_id)
 			)
 		);
 
-		$user_item_id = isset($results[0]) ? absint($results[0]->user_item_id) : 0;
-		$status = isset($results[0]) ? $results[0]->status : '';
-		if ($user_item_id > 0 && $status == 'completed') {
-			return true;
+		if (count($results) > 0) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	public function load($quiz_id)

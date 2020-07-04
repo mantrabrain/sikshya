@@ -462,10 +462,17 @@ if (!function_exists('sikshya_is_content_available_for_user')) {
 	}
 }
 
-function sikshya_get_user_items($select = array(), $where = array())
+function sikshya_get_user_items($select = array(), $where = array(), $additonal_args = array())
 {
-	global $wpdb;
+	$default_additional_args = array(
+		'order_by' => '',
+		'order' => 'asc',
+		'offset' => '0',
+		'limit' => ''
+	);
+	$additional_parsed_args = wp_parse_args($additonal_args, $default_additional_args);
 
+	global $wpdb;
 
 	if (empty($select)) {
 
@@ -475,13 +482,18 @@ function sikshya_get_user_items($select = array(), $where = array())
 
 		$select_text = "SELECT " . join(', ', $sanitized_select) . " FROM " . SIKSHYA_DB_PREFIX . 'user_items';
 	}
+	$prepare_args = array();
+
 	if (empty($where)) {
 
-		$query = $wpdb->prepare($select_text . " WHERE 1=%d", 1);
+		$select_text = $select_text . " WHERE 1=%d";
+
+		$prepare_args = array(
+			'1'
+		);
 
 	} else {
 		$where_query = ' WHERE ';
-		$prepare_args = array();
 
 		foreach ($where as $wh => $wh_value) {
 
@@ -494,12 +506,29 @@ function sikshya_get_user_items($select = array(), $where = array())
 
 		$select_text .= $where_query;
 
-		$query = $wpdb->prepare($select_text, $prepare_args);
 
 	}
-	$results = $wpdb->get_results($query);
+	if ('' != ($additional_parsed_args['order_by'])) {
 
-	return $results;
+		$select_text .= ' ORDER BY ' . sanitize_text_field($additional_parsed_args['order_by']) . ' ';
+
+		if (!in_array(strtolower($additional_parsed_args['order']), array('asc', 'desc'))) {
+			$additional_parsed_args['order'] = 'asc';
+		}
+		$select_text .= sanitize_text_field($additional_parsed_args['order']);
+
+	}
+
+	if ('' != ($additional_parsed_args['limit'])) {
+
+		$additional_parsed_args['offset'] = absint($additional_parsed_args['offset']);
+
+		$select_text .= ' LIMIT ' . $additional_parsed_args['offset'] . ', ' . absint($additional_parsed_args['limit']);
+
+	}
+	$query = $wpdb->prepare($select_text, $prepare_args);
+
+	return $wpdb->get_results($query);
 
 }
 

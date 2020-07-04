@@ -75,12 +75,35 @@ class Sikshya_Frontend_Form_Handler
 			return;
 		}
 
-
 		if ($quiz_id < 1 || $course_id < 1 || $user_id < 1 || $question_id < 1) {
 			return;
 
 		}
-		if (sikshya()->quiz->is_completed($user_id, $quiz_id, $course_id)) {
+		if (!sikshya()->quiz->is_completed($user_id, $quiz_id, $course_id)) {
+
+			$user_id = get_current_user_id();
+
+			sikshya()->question->update_answer($user_id, $quiz_id, $course_id, $question_id, $answer, true);
+
+			if (sikshya()->quiz->is_completed($user_id, $quiz_id, $course_id)) {
+				$quiz_id = sikshya()->quiz->get_id();
+				$quiz_permalink = get_permalink($quiz_id);
+				$quiz_permalink = add_query_arg(array(
+					'quiz_report' => 1,
+				), $quiz_permalink);
+
+				wp_safe_redirect($quiz_permalink);
+				exit;
+			}
+
+			$next_question_id = sikshya()->question->get_next_question($question_id);
+
+			if ($next_question_id) {
+				$next_question_permalink = get_permalink($next_question_id);
+				wp_safe_redirect($next_question_permalink);
+				exit;
+			}
+		} else {
 			$quiz_id = sikshya()->quiz->get_id();
 			$quiz_permalink = get_permalink($quiz_id);
 			$quiz_permalink = add_query_arg(array(
@@ -88,26 +111,6 @@ class Sikshya_Frontend_Form_Handler
 			), $quiz_permalink);
 
 			wp_safe_redirect($quiz_permalink);
-
-			exit;
-			/*$next_question_id = sikshya()->question->get_next_question($question_id);
-			if ($next_question_id) {
-				$next_question_permalink = get_permalink($next_question_id);
-				wp_safe_redirect($next_question_permalink);
-				exit;
-			}*/
-			//return;
-		}
-		$user_id = get_current_user_id();
-
-		sikshya()->question->update_answer($user_id, $quiz_id, $course_id, $question_id, $answer, true);
-
-		$next_question_id = sikshya()->question->get_next_question($question_id);
-
-		if ($next_question_id) {
-			$next_question_permalink = get_permalink($next_question_id);
-			wp_safe_redirect($next_question_permalink);
-			exit;
 		}
 	}
 
@@ -203,11 +206,14 @@ class Sikshya_Frontend_Form_Handler
 			return;
 
 		}
+
 		if (sikshya()->quiz->is_started($user_id, $quiz_id)) {
 
 			$quiz_question_permalink = sikshya()->question->first_question_permalink($course_id, $quiz_id);
 
 			wp_safe_redirect($quiz_question_permalink);
+
+			exit;
 		}
 
 		$get_order_item_id = sikshya()->order->course_item_id($course_id, $user_id);
@@ -219,6 +225,7 @@ class Sikshya_Frontend_Form_Handler
 		$quiz_question_permalink = sikshya()->question->first_question_permalink($course_id, $quiz_id);
 
 		wp_safe_redirect($quiz_question_permalink);
+		exit;
 
 	}
 

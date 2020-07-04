@@ -1,0 +1,19 @@
+table {
+	&.sikshya-quiz-report-table {
+		width: 100%;
+		margin: 0;
+	}
+
+	td, th {
+		border: 1px solid #ddd;
+		padding: 10px;
+	}
+
+	td {
+		text-align: center;
+	}
+
+	th {
+		background: #f9f9f9;
+	}
+}

@@ -3227,7 +3227,9 @@ section.cart-list-area {
       color: #4b5981; }
 
 #sikshya-lesson-sidebar-tab-content .sikshya-single-lesson-items.active a {
-  background: rgba(233, 235, 238, 0.35); }
+  background: #e9ebee;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd; }
 
 #sikshya-lesson-sidebar-tab-content .sikshya-single-lesson-items.active .sikshya-lesson-right-icons .sikshya-lesson-complete-status {
   border-color: #b7d6b7; }
@@ -3255,4 +3257,18 @@ section.cart-list-area {
   color: #fff;
   font-weight: normal;
   border-radius: 5px; }
+
+table.sikshya-quiz-report-table {
+  width: 100%;
+  margin: 0; }
+
+table td, table th {
+  border: 1px solid #ddd;
+  padding: 10px; }
+
+table td {
+  text-align: center; }
+
+table th {
+  background: #f9f9f9; }
 /*# sourceMappingURL=sikshya.css.map */
