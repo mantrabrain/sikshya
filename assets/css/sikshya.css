@@ -3281,6 +3281,9 @@ table th {
       border-radius: 100%;
       border: 1px solid #ddd; }
 
-body.single-sik_quizzes .site-content, body.single-sik_courses .site-content {
+body.single-sik_quizzes .site-content, body.single-sik_courses .site-content, body.single-sik_lessons .site-content {
   padding: 0; }
+
+.sikshya-course-loop-title h2 {
+  font-size: 20px; }
 /*# sourceMappingURL=sikshya.css.map */

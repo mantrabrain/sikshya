@@ -1,5 +1,11 @@
-body.single-sik_quizzes, body.single-sik_courses {
+body.single-sik_quizzes, body.single-sik_courses, body.single-sik_lessons {
 	.site-content {
 		padding: 0;
+	}
+}
+
+.sikshya-course-loop-title {
+	h2 {
+		font-size: 20px;
 	}
 }
