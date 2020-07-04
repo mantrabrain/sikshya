@@ -1,0 +1,56 @@
+.sikshya-account-sidebar {
+	padding: 15px 0;
+	border: 1px solid #ddd;
+	padding-left: 0;
+	background: #f9f9f9;
+
+	ul {
+		li {
+			list-style: none;
+			border: 1px solid #fff;
+			margin-bottom: 2px;
+			a{
+				padding: 5px;
+				display: inline-block;
+				width: 100%;
+				.fa{
+					margin-right:5px;
+				}
+
+			}
+
+			&:hover {
+				background: #aaa;
+
+				a {
+					color: #fff;
+
+				}
+			}
+		}
+
+		li.active {
+			background: #aaa;
+
+			a {
+				color: #fff;
+			}
+		}
+	}
+}
+
+.sikshya-account-content-area {
+	background: #f9f9f9;
+	min-height: 200px;
+	padding: 10px;
+	border: 1px solid #ddd;
+
+	.sik-avatar {
+		img {
+			border-radius: 100%;
+			border: 1px solid #ddd;
+		}
+
+		margin-bottom: 20px;
+	}
+}

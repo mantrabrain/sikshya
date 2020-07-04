@@ -229,36 +229,6 @@ span.tw_get_sikshya {
   color: #D63301;
   background-color: #FFCCBA; }
 
-.sikshya-account-sidebar {
-  padding: 15px;
-  border: 1px solid #f9f9f9;
-  padding-left: 0;
-  background: #f9f9f9; }
-  .sikshya-account-sidebar ul li {
-    list-style: none;
-    padding: 5px;
-    border: 1px solid #fff;
-    margin-bottom: 2px; }
-    .sikshya-account-sidebar ul li:hover {
-      background: #aaa; }
-      .sikshya-account-sidebar ul li:hover a {
-        color: #fff; }
-  .sikshya-account-sidebar ul li.active {
-    background: #aaa; }
-    .sikshya-account-sidebar ul li.active a {
-      color: #fff; }
-
-.sikshya-account-content-area {
-  background: #f9f9f9;
-  min-height: 200px;
-  padding: 10px;
-  border: 1px solid #ddd; }
-  .sikshya-account-content-area .sik-avatar {
-    margin-bottom: 20px; }
-    .sikshya-account-content-area .sik-avatar img {
-      border-radius: 100%;
-      border: 1px solid #ddd; }
-
 .sikshya-course-tabs {
   margin-bottom: 40px; }
   .sikshya-course-tabs ul.course-nav-tabs {
@@ -3271,4 +3241,39 @@ table td {
 
 table th {
   background: #f9f9f9; }
+
+.sikshya-account-sidebar {
+  padding: 15px 0;
+  border: 1px solid #ddd;
+  padding-left: 0;
+  background: #f9f9f9; }
+  .sikshya-account-sidebar ul li {
+    list-style: none;
+    border: 1px solid #fff;
+    margin-bottom: 2px; }
+    .sikshya-account-sidebar ul li a {
+      padding: 5px;
+      display: inline-block;
+      width: 100%; }
+      .sikshya-account-sidebar ul li a .fa {
+        margin-right: 5px; }
+    .sikshya-account-sidebar ul li:hover {
+      background: #aaa; }
+      .sikshya-account-sidebar ul li:hover a {
+        color: #fff; }
+  .sikshya-account-sidebar ul li.active {
+    background: #aaa; }
+    .sikshya-account-sidebar ul li.active a {
+      color: #fff; }
+
+.sikshya-account-content-area {
+  background: #f9f9f9;
+  min-height: 200px;
+  padding: 10px;
+  border: 1px solid #ddd; }
+  .sikshya-account-content-area .sik-avatar {
+    margin-bottom: 20px; }
+    .sikshya-account-content-area .sik-avatar img {
+      border-radius: 100%;
+      border: 1px solid #ddd; }
 /*# sourceMappingURL=sikshya.css.map */

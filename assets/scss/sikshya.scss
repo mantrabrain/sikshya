@@ -316,53 +316,7 @@ span.tw_get_sikshya {
 	background-color: #FFCCBA;
 }
 
-.sikshya-account-sidebar {
-	padding: 15px;
-	border: 1px solid #f9f9f9;
-	padding-left: 0;
-	background: #f9f9f9;
 
-	ul {
-		li {
-			list-style: none;
-			padding: 5px;
-			border: 1px solid #fff;
-			margin-bottom: 2px;
-
-			&:hover {
-				background: #aaa;
-
-				a {
-					color: #fff;
-				}
-			}
-		}
-
-		li.active {
-			background: #aaa;
-
-			a {
-				color: #fff;
-			}
-		}
-	}
-}
-
-.sikshya-account-content-area {
-	background: #f9f9f9;
-	min-height: 200px;
-	padding: 10px;
-	border: 1px solid #ddd;
-
-	.sik-avatar {
-		img {
-			border-radius: 100%;
-			border: 1px solid #ddd;
-		}
-
-		margin-bottom: 20px;
-	}
-}
 
 .sikshya-course-tabs {
 	margin-bottom: 40px;
@@ -1020,3 +974,4 @@ a.sikshya-btn {
 @import "components/lesson";
 @import "components/form";
 @import "components/quiz";
+@import "components/profile";

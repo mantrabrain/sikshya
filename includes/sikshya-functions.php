@@ -19,7 +19,7 @@ function sikshya_account_page_nav_items()
 		'profile' => array(
 			'title' => __('Profile', 'sikshya'),
 			//'cap' => ''
-			'icon' => 'fa fa-user-o'
+			'icon' => 'fas fa-user'
 		),
 		'enrolled-courses' => array(
 			'title' => __('Enrolled Courses', 'sikshya'),
@@ -29,12 +29,12 @@ function sikshya_account_page_nav_items()
 		'update-profile' => array(
 			'title' => __('Update Profile', 'sikshya'),
 			//'cap' => ''
-			'icon' => 'fa fa-pencil'
+			'icon' => 'fa fa-pencil-alt'
 		),
 		'logout' => array(
 			'title' => __('Logout', 'sikshya'),
 			//'cap' => ''
-			'icon' => 'fa fa-sign-out'
+			'icon' => 'fa fa-sign-out-alt'
 		)
 
 	);

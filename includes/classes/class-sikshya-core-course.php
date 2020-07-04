@@ -126,11 +126,13 @@ class Sikshya_Core_Course
 
         foreach ($course_sections as $section) {
 
-            if (isset($section->lessons) && count($section->lessons) > 0) {
+            if (isset($section->lesson_and_quizes) && count($section->lesson_and_quizes) > 0) {
 
-                foreach ($section->lessons as $lesson) {
+                foreach ($section->lesson_and_quizes as $lesson_and_quize) {
 
-                    $course_lessons[$lesson->ID] = $lesson;
+                	if($lesson_and_quize->post_type == SIKSHYA_LESSONS_CUSTOM_POST_TYPE) {
+						$course_lessons[$lesson_and_quize->ID] = $lesson_and_quize;
+					}
                 }
 
             }
@@ -234,8 +236,8 @@ class Sikshya_Core_Course
         global $wpdb;
 
         $sql = "SELECT ui.* FROM " . $wpdb->prefix . 'posts p INNER JOIN ' . SIKSHYA_DB_PREFIX . "user_items ui
-        ON ui.reference_id=p.ID 
-        WHERE 
+        ON ui.reference_id=p.ID
+        WHERE
         p.post_type=%s AND ui.reference_type=%s and ui.user_id=%d and ui.item_id=%d and ui.status in (%s, %s) and ui.item_type=%s
         ";
         $query = $wpdb->prepare($sql,
@@ -266,8 +268,8 @@ class Sikshya_Core_Course
             global $wpdb;
 
             $sql = "SELECT ui.* FROM " . $wpdb->prefix . 'posts p INNER JOIN ' . SIKSHYA_DB_PREFIX . "user_items ui
-        ON ui.reference_id=p.ID 
-        WHERE 
+        ON ui.reference_id=p.ID
+        WHERE
         p.post_type=%s AND ui.reference_type=%s and ui.user_id=%d and ui.item_id=%d and ui.status = %s and ui.item_type=%s
         ";
             $query = $wpdb->prepare($sql,
@@ -358,8 +360,8 @@ class Sikshya_Core_Course
         }
         global $wpdb;
         $sql = $wpdb->prepare(
-            "INSERT INTO " . SIKSHYA_DB_PREFIX . "user_items 
-            (user_id, item_id, start_time, start_time_gmt, end_time,end_time_gmt, item_type, status,reference_id,reference_type,parent_id) 
+            "INSERT INTO " . SIKSHYA_DB_PREFIX . "user_items
+            (user_id, item_id, start_time, start_time_gmt, end_time,end_time_gmt, item_type, status,reference_id,reference_type,parent_id)
             values
             (%d, %d, %s, %s, %s, %s, %s, %s, %d, %s, %d)",
             $user_id,
@@ -418,7 +420,8 @@ class Sikshya_Core_Course
                 )
 
             );
-            $list_item['total_lessons'] = $query->found_posts;
+            $all_lessons = $this->get_all_lessons($item->item_id);
+            $list_item['total_lessons'] = count($all_lessons);
             $list_item['completed_lessons'] = count($_completed_lessons);
             array_push($course_list, $list_item);
         }
@@ -496,11 +499,11 @@ class Sikshya_Core_Course
         $query_args[] = SIKSHYA_LESSONS_CUSTOM_POST_TYPE;
         $query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
 
-        $sql_query = "SELECT COUNT(*) as total, p.post_type           
+        $sql_query = "SELECT COUNT(*) as total, p.post_type
 FROM $wpdb->posts p
 INNER JOIN $wpdb->postmeta pm
 ON p.ID=pm.post_id
-WHERE pm.meta_key = 'section_id' 
+WHERE pm.meta_key = 'section_id'
 AND pm.meta_value in " . $in_query . " and p.post_status='publish'
 GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, %s, %s)";
         $sql = $wpdb->prepare(
@@ -594,8 +597,8 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
         global $wpdb;
 
         $sql = "SELECT ui.* FROM " . $wpdb->prefix . 'posts p INNER JOIN ' . SIKSHYA_DB_PREFIX . "user_items ui
-        ON ui.item_id=p.ID 
-        WHERE 
+        ON ui.item_id=p.ID
+        WHERE
         p.post_type=%s AND ui.reference_type=%s and ui.user_id=%d and ui.item_id=%d and ui.status  in (%s, %s) and ui.item_type in (%s, %s)
         ";
         $query = $wpdb->prepare($sql,

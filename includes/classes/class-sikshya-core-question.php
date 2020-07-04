@@ -337,15 +337,17 @@ class Sikshya_Core_Question
 
             if ($params['is_answered']) {
                 $total_answered++;
+				if (!$params['is_correct']) {
+					$total_wrong++;
+				}
+				if ($params['is_correct']) {
+					$total_correct++;
+				}
             }
 
-            if (!$params['is_correct']) {
-                $total_wrong++;
-            }
 
-            if ($params['is_correct']) {
-                $total_correct++;
-            }
+
+
 
             $_quiz_question_result['answered_questions'] = $total_answered;
 

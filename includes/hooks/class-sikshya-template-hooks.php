@@ -72,9 +72,8 @@ class Sikshya_Template_Hooks
 
                 $course_list = sikshya()->course->get_enrolled_course($current_user_id);
 
-
                 sikshya_load_template('profile.parts.enrolled-courses', array('courses' => array(
-                    
+
                     'list' => $course_list
                 )));
                 break;
