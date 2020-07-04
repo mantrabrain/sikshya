@@ -86,7 +86,7 @@ class Sikshya_Settings_General extends Sikshya_Settings_Page
      */
     public function color_picker($name, $id, $value, $desc = '')
     {
-        echo '<div class="color_box">' . wc_help_tip($desc) . '
+        echo '<div class="color_box">' . ($desc) . '
 			<input name="' . esc_attr($id) . '" id="' . esc_attr($id) . '" type="text" value="' . esc_attr($value) . '" class="colorpick" /> <div id="colorPickerDiv_' . esc_attr($id) . '" class="colorpickdiv"></div>
 		</div>';
     }
