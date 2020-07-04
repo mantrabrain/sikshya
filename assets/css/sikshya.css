@@ -1896,24 +1896,22 @@ course content
 .view-more-parent.has-hide {
   padding-bottom: 30px; }
 
-.description-box {
-  max-height: 260px;
-  margin-top: 40px;
-  margin-bottom: 40px; }
-  .description-box ul {
-    list-style: disc; }
-  .description-box .description-title {
-    font-size: 22px;
+.description-box ul {
+  list-style: disc; }
+
+.description-box .description-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 10px; }
+
+.description-box .audience {
+  margin-top: 20px; }
+  .description-box .audience .audience-title {
+    font-size: 18px;
     font-weight: 600;
     margin: 0 0 10px; }
-  .description-box .audience {
-    margin-top: 20px; }
-    .description-box .audience .audience-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 10px; }
-    .description-box .audience ul {
-      margin-bottom: 0; }
+  .description-box .audience ul {
+    margin-bottom: 0; }
 
 .what-you-get-box {
   background-color: #f9f9f9;
@@ -2121,7 +2119,10 @@ course content
   max-height: 380px; }
 
 .about-instructor-box {
-  margin-bottom: 40px; }
+  padding: 20px 20px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  margin-bottom: 20px; }
 
 .about-instructor-details .instructor-name {
   font-size: 18px;
@@ -2239,15 +2240,18 @@ course content
   margin-right: 10px; }
 
 .course-curriculum-box {
-  margin-bottom: 40px; }
-  .course-curriculum-box .course-curriculum-title .title {
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0 0 10px; }
-  .course-curriculum-box .course-curriculum-title .total-time {
-    width: 130px;
-    display: inline-block;
-    text-align: right; }
+  padding: 40px 0 20px 0; }
+  .course-curriculum-box .course-curriculum-title {
+    padding: 10px 30px;
+    background: #29303b;
+    color: #fff; }
+    .course-curriculum-box .course-curriculum-title .title {
+      font-size: 22px;
+      font-weight: 600; }
+    .course-curriculum-box .course-curriculum-title .total-time {
+      width: 130px;
+      display: inline-block;
+      text-align: right; }
 
 .course-curriculum-accordion .lecture-group-title {
   position: relative;
@@ -3276,4 +3280,7 @@ table th {
     .sikshya-account-content-area .sik-avatar img {
       border-radius: 100%;
       border: 1px solid #ddd; }
+
+body.single-sik_quizzes .site-content, body.single-sik_courses .site-content {
+  padding: 0; }
 /*# sourceMappingURL=sikshya.css.map */
