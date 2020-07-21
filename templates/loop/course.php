@@ -1,4 +1,7 @@
-<div class="sikshya-course-item sik-col-md-4">
+<?php
+$sikshya_archive_course_column_class = apply_filters('sikshya_archive_course_column_class', 'sikshya-course-item sik-col-md-4');
+?>
+<div class="<?php echo esc_attr($sikshya_archive_course_column_class); ?>">
 	<?php
 	$course_meta = sikshya()->course->get_course_meta(get_the_ID());
 
@@ -30,7 +33,7 @@
 				</div>
 				<div class="sikshya-single-course-author-name">
 					<span>by</span>
-					<?php  the_author_link(); ?>
+					<?php the_author_link(); ?>
 				</div>
 
 				<div class="sikshya-course-lising-category">
