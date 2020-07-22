@@ -1,9 +1,9 @@
 === Learning Management System - Sikshya LMS ===
-Contributors: Mantrabrain
+Contributors: Mantrabrain,ughimire1
 Tags: course builder, quizzes, questions, learning management system, LMS
 Requires at least: 4.7
-Tested up to: 5.4.1
-Stable tag: 0.0.7
+Tested up to: 5.4.2
+Stable tag: 0.0.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,25 +39,8 @@ Feature [request](https://mantrabrain.com/request-new-feature/)
 
 == Changelog ==
 
-= 0.0.7 | 2020/05/16 =
-* Fixed - admin design optimize
-* Added - major update
+= 0.0.8 | 2020/07/22 =
+* Added - One Widget Added
+* Added - Minor issue fixed
+* Fixed - Compatibility 
 
-
-= 0.0.6 | 2019/12/10 =
-* Fixed - Minor bug fixes
-* Added - Quiz and question cpt options
-
-= 0.0.5 | 2019/12/05 =
-* Fixed - Minor bug fixes
-
-= 0.0.4 | 2019/12/01 =
-* Added - About Page added
-* Fixed - Minor bug fixes
-
-= 0.0.3 | 2019/11/29 =
-* Added - Profile section
-* Fixed - Minor bug fixes
-
-= 0.0.2 | 2019/11/28 =
-* Fixed - Bug fixes
