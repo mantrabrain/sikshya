@@ -11,12 +11,12 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-if (!class_exists('Sikshya_Settings_Page', false)) :
+if (!class_exists('Sikshya_Admin_Settings_Base', false)) :
 
     /**
-     * Sikshya_Settings_Page.
+     * Sikshya_Admin_Settings_Base.
      */
-    abstract class Sikshya_Settings_Page
+    abstract class Sikshya_Admin_Settings_Base
     {
 
         /**

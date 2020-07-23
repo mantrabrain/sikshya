@@ -44,9 +44,10 @@ if ( ! class_exists( 'Sikshya_Admin_Settings', false ) ) :
 			if ( empty( self::$settings ) ) {
 				$settings = array();
 
-				include_once dirname( __FILE__ ) . '/settings/class-sikshya-settings-page.php';
+				include_once dirname( __FILE__ ) . '/settings/class-sikshya-settings-base.php';
 
 				$settings[] = include 'settings/class-sikshya-settings-general.php';
+				$settings[] = include 'settings/class-sikshya-settings-payment-gateways.php';
 
 				self::$settings = apply_filters( 'sikshya_get_settings_pages', $settings );
 			}

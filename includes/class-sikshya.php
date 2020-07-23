@@ -293,12 +293,16 @@ final class Sikshya
 		/**
 		 * Class autoloader.
 		 */
+		include_once SIKSHYA_PATH . '/includes/sikshya-functions.php';
+
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-autoloader.php';
 
+
+		// Abstract
+		include_once SIKSHYA_PATH . '/includes/abstracts/abstract-sikshya-payment-gateways.php';
+
 		// LOAD START
-		//include_once SIKSHYA_PATH . '/includes/controller/options/class-sikshya-controller-main-options.php';
-		//include_once SIKSHYA_PATH . '/includes/helpers/class-sikshya-helpers-general.php';
-		//include_once SIKSHYA_PATH . '/includes/helpers/class-sikshya-helpers-view.php';
+		include_once SIKSHYA_PATH . '/includes/payment-gateways/class-sikshya-gateways-core.php';
 
 		// LOAD END
 
@@ -306,7 +310,6 @@ final class Sikshya
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-messages.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-install.php';
 		include_once SIKSHYA_PATH . '/includes/helpers/class-sikshya-helper-main.php';
-		include_once SIKSHYA_PATH . '/includes/sikshya-functions.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-assets.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-custom-post-type.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-shortcodes.php';
