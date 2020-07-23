@@ -20,13 +20,11 @@ class Sikshya_Assets
 
         wp_enqueue_style(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-sikshya', SIKSHYA_ASSETS_URL . '/css/sikshya.css', false, SIKSHYA_VERSION);
         wp_enqueue_script('jquery-ui-core');
-        //wp_enqueue_script('jquery-plugin', SIKSHYA_ASSETS_URL . '/public/js/vendor/jquery.plugin.min.js', array(), SIKSHYA_VERSION);
         wp_enqueue_script('sikshya-main', SIKSHYA_ASSETS_URL . '/js/sikshya.js', array('jquery', 'jbox-js'), SIKSHYA_VERSION);
 
 
         // Enqueue styles
         wp_enqueue_style('sikshya-font-awesome-style', SIKSHYA_ASSETS_URL . '/vendor/font-awesome/css/font-awesome.css', array(), SIKSHYA_VERSION);
-        wp_enqueue_style('sikshya-ionicons-style', SIKSHYA_ASSETS_URL . '/vendor/ionicons//css/ionicons.min.css', array(), SIKSHYA_VERSION);
 
     }
 }

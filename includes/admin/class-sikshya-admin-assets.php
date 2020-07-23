@@ -68,10 +68,6 @@ class Sikshya_Admin_Assets
         wp_register_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-common', SIKSHYA_ADMIN_ASSETS_URL . '/js/common.js', array('jquery', 'jquery-ui-tabs', 'media-upload', 'thickbox'), SIKSHYA_VERSION);
 
 
-        wp_register_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-custom-ace-editor', SIKSHYA_ASSETS_URL . '/vendor/ace.js', array('jquery'), '1.2.9');
-        wp_enqueue_script(SIKSHYA_COURSES_CUSTOM_POST_TYPE . '-custom-ace-editor');
-
-
         $data =
             array(
                 'general' =>
