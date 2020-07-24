@@ -378,3 +378,32 @@ if (!function_exists('sikshya_get_currency_with_symbol')) {
 		return $currency_with_symbol;
 	}
 }
+
+if (!function_exists('sikshya_get_active_currency_symbol')) {
+	function sikshya_get_active_currency_symbol()
+	{
+
+		$currency_key = sikshya_get_active_currency(true);
+
+		$currency_symbol = '' != $currency_key ? sikshya_get_currency_symbols($currency_key) : '';
+
+		return $currency_symbol;
+	}
+}
+if (!function_exists('sikshya_get_active_currency')) {
+
+	function sikshya_get_active_currency($get_currency_key = false)
+	{
+		$currency_key = get_option('sikshya_currency');
+
+		if ($get_currency_key) {
+
+			return $currency_key;
+		}
+
+		$currency = '' != $currency_key ? sikshya_get_currencies($currency_key) : '';
+
+		return $currency;
+
+	}
+}

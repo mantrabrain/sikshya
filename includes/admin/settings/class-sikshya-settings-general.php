@@ -130,7 +130,7 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 						'id' => 'sikshya_general_options',
 					),
 					array(
-						'title' => __('Currency & Symbol', 'sikshya'),
+						'title' => __('Currency', 'sikshya'),
 						'desc' => __('Currency for price of course.', 'sikshya'),
 						'id' => 'sikshya_currency',
 						'default' => 'USD',
