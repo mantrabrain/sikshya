@@ -253,9 +253,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 			$valid_sikshya_info['sikshya_course_video_source'] = isset($_POST['sikshya_course_video_source']) ? sanitize_text_field($_POST['sikshya_course_video_source']) : 'youtube';
 			$valid_sikshya_info['sikshya_course_youtube_video_url'] = isset($_POST['sikshya_course_youtube_video_url']) ? esc_url($_POST['sikshya_course_youtube_video_url']) : '';
 
-			$valid_sikshya_info['sikshya_is_free_course'] = isset($_POST['sikshya_is_free_course']) ? (boolean)($_POST['sikshya_is_free_course']) : false;
 			$valid_sikshya_info['sikshya_course_regular_price'] = isset($_POST['sikshya_course_regular_price']) && !empty($_POST['sikshya_course_regular_price']) ? absint($_POST['sikshya_course_regular_price']) : '';
-			$valid_sikshya_info['sikshya_has_discounted_price'] = isset($_POST['sikshya_has_discounted_price']) ? (boolean)($_POST['sikshya_has_discounted_price']) : false;
 			$valid_sikshya_info['sikshya_course_discounted_price'] = isset($_POST['sikshya_course_discounted_price']) && !empty($_POST['sikshya_course_discounted_price']) ? absint($_POST['sikshya_course_discounted_price']) : '';
 
 			foreach ($valid_sikshya_info as $info_key => $info) {

@@ -31,9 +31,7 @@ class Sikshya_Core_Course
 			'sikshya_course_outcomes' => $outcomes,
 			'sikshya_course_video_source' => get_post_meta($course_id, 'sikshya_course_video_source', true),
 			'sikshya_course_youtube_video_url' => get_post_meta($course_id, 'sikshya_course_youtube_video_url', true),
-			'sikshya_is_free_course' => get_post_meta($course_id, 'sikshya_is_free_course', true),
 			'sikshya_course_regular_price' => get_post_meta($course_id, 'sikshya_course_regular_price', true),
-			'sikshya_has_discounted_price' => get_post_meta($course_id, 'sikshya_has_discounted_price', true),
 			'sikshya_course_discounted_price' => get_post_meta($course_id, 'sikshya_course_discounted_price', true),
 		);
 

@@ -46,7 +46,8 @@ $sikshya_archive_course_column_class = apply_filters('sikshya_archive_course_col
 				<div class="price"><?php echo esc_html__('Free', 'sikshya'); ?>
 					<div class="sikshya-loop-cart-btn-wrap"><a
 							href="<?php echo esc_url(get_permalink()) ?>"><i
-								class="fas fa-shopping-cart"></i> <?php echo esc_html__('Get Enrolled', 'sikshya'); ?>
+								class="fas fa-shopping-cart"></i>
+							<?php echo esc_html__('Get Enrolled', 'sikshya'); ?>
 						</a>
 					</div>
 				</div>
