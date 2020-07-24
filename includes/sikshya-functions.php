@@ -7,6 +7,7 @@
  * @since 1.0.0
  *
  */
+include_once SIKSHYA_PATH . '/includes/helpers/sikshya-pricing-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-currency-helper.php';
 
 function sikshya_account_page_nav_items()

@@ -186,9 +186,14 @@ while (have_posts()) {
 						</div>
 
 						<div class="course-sidebar-text-box">
-							<div class="price">
-                                <span class="current-price"><span
-										class="current-price"><?php echo esc_html__('Free', 'sikshya'); ?></span></span>
+							<div class="price ">
+
+								<!--   <span class="current-price"><span
+										class="current-price"><?php /*echo esc_html__('Free', 'sikshya'); */ ?></span></span>
+							-->
+								<?php
+								sikshya_get_course_price(get_the_ID());
+								?>
 							</div>
 
 							<div class="buy-btns">

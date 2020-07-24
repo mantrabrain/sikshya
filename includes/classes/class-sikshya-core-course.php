@@ -653,5 +653,35 @@ GROUP BY p.post_type having p.post_type in (%s,%s) ORDER BY FIELD (p.post_type, 
 		return $all_lesson_quizes;
 	}
 
+	public function get_prices($course_id = null)
+	{
+		if (is_null($course_id)) {
+			$course_id = $this->get_id();
+		}
+		$course_id = absint($course_id);
+
+		$pricing['regular'] = absint(get_post_meta($course_id, 'sikshya_course_regular_price', true));
+		$pricing['discounted'] = absint(get_post_meta($course_id, 'sikshya_course_discounted_price', true));
+
+		return $pricing;
+
+	}
+
+	public function is_premium($course_id = null)
+	{
+		if (is_null($course_id)) {
+			$course_id = $this->get_id();
+		}
+		$course_id = absint($course_id);
+
+		$prices = $this->get_prices($course_id);
+
+		if (absint($prices['regular']) > 0) {
+			return true;
+		}
+		return false;
+
+
+	}
 
 }
