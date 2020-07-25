@@ -103,6 +103,8 @@ class Sikshya_Autoloader
             $path = $this->include_path . 'libraries/';
         } elseif (0 === strpos($class, 'sikshya_core_')) {
             $path = $this->include_path . 'classes/';
+        } elseif (0 === strpos($class, 'sikshya_model_')) {
+            $path = $this->include_path . 'models/';
         }
         if (empty($path) || !$this->load_file($path . $file)) {
             $this->load_file($this->include_path . $file);

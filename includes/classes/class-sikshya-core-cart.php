@@ -7,6 +7,7 @@ class Sikshya_Core_Cart
 	{
 		$cart_items = sikshya()->session->get_all();
 
+
 		if (isset($cart_items['cart_items'])) {
 			return $cart_items['cart_items'];
 		}
@@ -20,35 +21,36 @@ class Sikshya_Core_Cart
 	 * @param WP_Post $item .
 	 * @return boolean
 	 */
-	public function add_to_cart($item)
+	public function add_to_cart($course_id, $quantity = 1)
 	{
-		if (isset($item->ID)) {
+		if ('publish' == get_post_status($course_id)) {
 
-			if ('publish' == get_post_status($item->ID)) {
+			$course_model = new Sikshya_Model_Course($course_id, $quantity);
 
-				$cart_items = sikshya()->session->get_all();
+			$cart_items = sikshya()->session->get_all();
 
-				if (isset($cart_items['cart_items'])) {
-					if (isset($cart_items['cart_items'][$item->ID])) {
-						$cart_items['cart_items'][$item->ID] = $item;
-					} else {
-						$cart_items['cart_items'][$item->ID] = $item;
-
-					}
+			if (isset($cart_items['cart_items'])) {
+				if (isset($cart_items['cart_items'][$course_id])) {
+					$cart_items['cart_items'][$course_id] = $course_model;
 				} else {
-
-					$cart_items['cart_items'][$item->ID] = $item;
+					$cart_items['cart_items'][$course_id] = $course_model;
 
 				}
+			} else {
+
+				$cart_items['cart_items'][$course_id] = $course_model;
+
 			}
 			$final_cart_items = $cart_items['cart_items'];
 
 			sikshya()->session->set('cart_items', $final_cart_items);
 
 			return true;
-
 		}
+
+
 		return false;
+
 	}
 
 	public function remove($item_id)

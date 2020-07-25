@@ -40,8 +40,7 @@ class Sikshya_Frontend_Form_Handler
 
 		if (!sikshya()->course->has_enrolled($course_id)) {
 
-			$course_post = get_post($course_id);
-			sikshya()->cart->add_to_cart($course_post);
+			sikshya()->cart->add_to_cart($course_id);
 
 			$cart_page_permalink = sikshya()->cart->get_cart_page(true);
 

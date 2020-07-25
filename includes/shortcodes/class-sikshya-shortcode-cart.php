@@ -38,10 +38,8 @@ class Sikshya_Shortcode_Cart
 
 		$cart_items = sikshya()->cart->get_cart_items();
 
+		sikshya_load_template('global.cart', array('sikshya_cart_items' => $cart_items));
 
-		echo '<pre>';
-		print_r($cart_items);
-		echo '</pre>';
 
 	}
 
