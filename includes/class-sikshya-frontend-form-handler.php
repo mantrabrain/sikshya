@@ -35,10 +35,6 @@ class Sikshya_Frontend_Form_Handler
 
 		$course_id = isset($_POST['sikshya_course_id']) ? absint($_POST['sikshya_course_id']) : 0;
 
-		/*$course_post = get_post($course_id);
-		sikshya()->cart->add_to_cart($course_post);
-		return;*/
-
 		$user_id = get_current_user_id();
 
 		if (sikshya()->course->has_enrolled($course_id) || $user_id < 1) {

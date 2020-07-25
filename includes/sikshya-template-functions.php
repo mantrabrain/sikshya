@@ -471,3 +471,10 @@ if (!function_exists('sikshya_image')) {
 		}
 	}
 }
+if (!function_exists('sikshya_course_buy_buttons')) {
+	function sikshya_course_buy_buttons()
+	{
+		sikshya_load_template('parts.course.buy-buttons');
+
+	}
+}
