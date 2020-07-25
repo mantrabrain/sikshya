@@ -19,7 +19,6 @@ class Sikshya_Model_Course
 	public function __construct($course_id, $quantity = 1)
 	{
 		$course = get_post($course_id);
-
 		if ($course instanceof WP_Post) {
 			$this->ID = $course_id;
 			$this->title = $course->post_title;

@@ -31,6 +31,9 @@ class Sikshya_Core_Cart
 
 			if (isset($cart_items['cart_items'])) {
 				if (isset($cart_items['cart_items'][$course_id])) {
+					$quantity = $course_model->quantity + 1;
+					$course_model = new Sikshya_Model_Course($course_id, $quantity);
+
 					$cart_items['cart_items'][$course_id] = $course_model;
 				} else {
 					$cart_items['cart_items'][$course_id] = $course_model;
