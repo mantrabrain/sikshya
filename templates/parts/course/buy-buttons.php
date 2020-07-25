@@ -2,16 +2,28 @@
 
 	<?php
 
-	$enroll_now_button_text = __('Enroll Now', 'sikshya');
+	if (sikshya()->course->is_premium(get_the_ID())) {
 
-	if (!is_user_logged_in()) {
-		$enroll_now_button_text = __('Login & Enroll Now', 'sikshya');
-	} else if (!sikshya()->course->has_enrolled(get_the_ID())) {
-		$enroll_now_button_text = __('Enroll Now', 'sikshya');
-	} else if (!sikshya()->course->user_course_completed(get_the_ID())) {
-		$enroll_now_button_text = __('Continue to Course', 'sikshya');
+		if (!sikshya()->course->has_enrolled(get_the_ID())) {
+			$enroll_now_button_text = __('Add To Cart', 'sikshya');
+		} else if (!sikshya()->course->user_course_completed(get_the_ID())) {
+			$enroll_now_button_text = __('Continue to Course', 'sikshya');
+		} else {
+			$enroll_now_button_text = __('Restart The Course', 'sikshya');
+
+		}
 	} else {
-		$enroll_now_button_text = __('Restart The Course', 'sikshya');
+		$enroll_now_button_text = __('Enroll Now', 'sikshya');
+
+		if (!is_user_logged_in()) {
+			$enroll_now_button_text = __('Login & Enroll Now', 'sikshya');
+		} else if (!sikshya()->course->has_enrolled(get_the_ID())) {
+			$enroll_now_button_text = __('Enroll Now', 'sikshya');
+		} else if (!sikshya()->course->user_course_completed(get_the_ID())) {
+			$enroll_now_button_text = __('Continue to Course', 'sikshya');
+		} else {
+			$enroll_now_button_text = __('Restart The Course', 'sikshya');
+		}
 	}
 	?>
 	<form class="sikshya-enroll-form" method="post">

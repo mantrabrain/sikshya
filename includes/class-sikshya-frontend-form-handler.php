@@ -37,6 +37,24 @@ class Sikshya_Frontend_Form_Handler
 
 		$user_id = get_current_user_id();
 
+
+		if (!sikshya()->course->has_enrolled($course_id)) {
+
+			$course_post = get_post($course_id);
+			sikshya()->cart->add_to_cart($course_post);
+
+			$cart_page_permalink = sikshya()->cart->get_cart_page(true);
+
+			if ($cart_page_permalink != '') {
+				sikshya()->messages->add(sikshya()->notice_key, sprintf(__('Course successfully added to cart. <a href="%s">View Cart</a>', 'sikshya'), $cart_page_permalink), 'success');
+
+			} else {
+				sikshya()->messages->add(sikshya()->notice_key, __('Course successfully added to cart', 'sikshya'), 'success');
+			}
+
+			return;
+		}
+
 		if (sikshya()->course->has_enrolled($course_id) || $user_id < 1) {
 
 			$next_item_id = get_user_meta($user_id, 'sikshya_next_item_id', true);

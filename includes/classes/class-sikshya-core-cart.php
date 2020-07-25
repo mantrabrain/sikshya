@@ -73,5 +73,31 @@ class Sikshya_Core_Cart
 		}
 	}
 
+	public function get_cart_page($permalink = false)
+	{
+		$page_id = absint(get_option('sikshya_cart_page', 0));
+
+
+		if ($page_id < 1) {
+
+			global $wpdb;
+
+			$page_id = $wpdb->get_var('SELECT ID FROM ' . $wpdb->prefix . 'posts WHERE post_content LIKE "%[sikshya_cart]%" AND post_parent = 0');
+		}
+
+		$page_id = absint($page_id);
+
+		$page_permalink = get_permalink($page_id);
+
+		if ($permalink) {
+
+			return $page_permalink;
+		}
+
+		return $page_id;
+
+
+	}
+
 
 }

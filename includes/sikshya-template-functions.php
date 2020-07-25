@@ -201,7 +201,15 @@ if (!function_exists('sikshya_notices')) {
 
 				foreach ($error_messages as $message_key => $message) {
 
-					echo '<li>' . esc_html($message) . '</li>';
+					echo '<li>' . wp_kses($message, array(
+							'a' => array(
+								'href' => array(),
+								'title' => array()
+							),
+							'br' => array(),
+							'em' => array(),
+							'strong' => array(),
+						)) . '</li>';
 				}
 
 				echo '</ul>';
@@ -221,7 +229,15 @@ if (!function_exists('sikshya_notices')) {
 
 					foreach ($message_list as $message_text) {
 
-						echo '<li>' . esc_html($message_text) . '</li>';
+						echo '<li>' . wp_kses($message_text, array(
+								'a' => array(
+									'href' => array(),
+									'title' => array()
+								),
+								'br' => array(),
+								'em' => array(),
+								'strong' => array(),
+							)) . '</li>';
 					}
 
 					echo '</ul>';

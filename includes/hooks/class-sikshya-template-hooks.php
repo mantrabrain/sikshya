@@ -8,6 +8,7 @@ class Sikshya_Template_Hooks
         add_action('sikshya_before_registration_form', array($this, 'notices'));
         add_action('sikshya_before_update_profile_form', array($this, 'notices'));
         add_action('sikshya_before_login_form', array($this, 'notices'));
+        add_action('sikshya_before_single_course_curriculum_box', array($this, 'notices'));
         add_action('sikshya_account_page_sidebar', array($this, 'account_sidebar'));
         add_action('sikshya_account_page_content', array($this, 'account_page_content'));
         add_action('sikshya_account_content_item', array($this, 'account_content_item'));
