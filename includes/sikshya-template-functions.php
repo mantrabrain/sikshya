@@ -160,6 +160,7 @@ if (!function_exists('get_sikshya_course_thumbnail')) {
 	function get_sikshya_course_thumbnail($size = 'post-thumbnail', $url = false)
 	{
 		$post_id = get_the_ID();
+
 		$post_thumbnail_id = (int)get_post_thumbnail_id($post_id);
 
 		if ($post_thumbnail_id) {

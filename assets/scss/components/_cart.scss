@@ -1,0 +1,72 @@
+.sikshya-cart-form {
+
+	table {
+		td.actions {
+			padding: 25px;
+
+			input {
+				padding: 10px 15px;
+			}
+		}
+	}
+
+	input.course-qty {
+		display: inline-block;
+		line-height: 32px;
+		min-height: 36px;
+		width: 82px;
+		padding: 0;
+		color: rgba(51, 51, 51, 0.8);
+		font-size: 14px;
+		border: 1px solid #E2E2E2;
+		border-radius: 4px;
+		background: #fff;
+		font-weight: 400;
+		text-align: center;
+	}
+
+	.coupon {
+		float: left;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		input.input-text {
+			margin-right: 10px;
+		}
+
+	}
+
+	input.update-cart {
+		float: right;
+	}
+}
+
+.sikshya-cart-collaterals {
+	.cart_totals {
+		float: right;
+		width: 48%;
+	}
+
+	.sikshya-proceed-to-checkout  a{
+		background-color: #1b52a9;
+		border: 0;
+		border-radius: 3px;
+		-webkit-box-shadow: none;
+		box-shadow: none;
+		color: #fff;
+		cursor: pointer;
+		display: inline-block;
+		font-size: 15px;
+		text-transform: capitalize;
+		font-weight: 600;
+		padding: 1em 2em;
+		text-shadow: none;
+		-webkit-transition: all 0.5s ease;
+		transition: all 0.5s ease;
+		width:100%;
+		max-width:100%;
+		text-align: center;
+
+	}
+}

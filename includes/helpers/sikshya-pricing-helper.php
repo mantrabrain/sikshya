@@ -60,3 +60,33 @@ if (!function_exists('sikshya_get_course_total_price')) {
 		return ($final_price_per_course * absint($quantity));
 	}
 }
+
+if (!function_exists('sikshya_get_cart_price_subtotal')) {
+	function sikshya_get_cart_price_subtotal()
+	{
+		$all_cart_items = sikshya()->cart->get_cart_items();
+
+		$subtotal_price = 0;
+
+		foreach ($all_cart_items as $item) {
+			$subtotal_price += absint($item->total_price);
+		}
+		echo sikshya_get_price_with_symbol($subtotal_price);
+
+	}
+}
+
+
+if (!function_exists('sikshya_get_cart_price_total')) {
+	function sikshya_get_cart_price_total()
+	{
+		$all_cart_items = sikshya()->cart->get_cart_items();
+
+		$total_price = 0;
+
+		foreach ($all_cart_items as $item) {
+			$total_price += absint($item->total_price);
+		}
+		echo sikshya_get_price_with_symbol($total_price);
+	}
+}

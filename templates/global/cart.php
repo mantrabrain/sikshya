@@ -15,7 +15,7 @@
 
 		<?php
 
- 		foreach ($sikshya_cart_items as $course_id => $sk_cart_item) {
+		foreach ($sikshya_cart_items as $course_id => $sk_cart_item) {
 			/**
 			 * Sikshya_Core_Course instance.
 			 *
@@ -30,12 +30,10 @@
 					   class="remove" aria-label="Remove this item" data-product_id="143" data-product_sku="">×</a></td>
 
 				<td class="product-thumbnail">
-					<a href="https://demo.themeum.com/plugins/tutor/courses/java-beginner-programming-tutorials/"><img
-							width="300" height="300"
-							src="https://demo.themeum.com/plugins/tutor/wp-content/uploads/sikshya-placeholder.png"
-							class="sikshya-placeholder wp-post-image" alt="Placeholder"
-							srcset="https://demo.themeum.com/plugins/tutor/wp-content/uploads/sikshya-placeholder.png 1200w, https://demo.themeum.com/plugins/tutor/wp-content/uploads/sikshya-placeholder-150x150.png 150w, https://demo.themeum.com/plugins/tutor/wp-content/uploads/sikshya-placeholder-300x300.png 300w, https://demo.themeum.com/plugins/tutor/wp-content/uploads/sikshya-placeholder-768x768.png 768w, https://demo.themeum.com/plugins/tutor/wp-content/uploads/sikshya-placeholder-1024x1024.png 1024w"
-							sizes="(max-width: 300px) 100vw, 300px"></a></td>
+					<?php
+
+					?>
+				</td>
 
 				<td class="product-name">
 					<a href="<?php echo esc_attr(get_permalink($sk_cart_item->ID)); ?>"><?php
@@ -53,9 +51,10 @@
 						<label class="screen-reader-text" for="quantity_5f1bfc52ca393">Java (Beginner) Programming
 							Tutorials
 							quantity</label>
-						<input type="number" id="quantity_5f1bfc52ca393" class="input-text qty text" step="1" min="0"
+						<input type="number" id="quantity_5f1bfc52ca393" class="course-qty" step="1" min="0"
 							   max=""
-							   name="cart[903ce9225fca3e988c2af215d4e544d3][qty]" value="<?php echo esc_attr($sk_cart_item->quantity) ?>" title="Qty" size="4"
+							   name="cart[903ce9225fca3e988c2af215d4e544d3][qty]"
+							   value="<?php echo esc_attr($sk_cart_item->quantity) ?>" title="Qty" size="4"
 							   inputmode="numeric">
 					</div>
 				</td>
@@ -71,12 +70,12 @@
 			<td colspan="6" class="actions">
 
 				<div class="coupon">
-					<label for="coupon_code">Coupon:</label> <input type="text" name="coupon_code" class="input-text"
-																	id="coupon_code" value="" placeholder="Coupon code">
+					<input type="text" name="coupon_code" class="input-text"
+						   id="coupon_code" value="" placeholder="Coupon code">
 					<input type="submit" class="button" name="apply_coupon" value="Apply coupon">
 				</div>
 
-				<input type="submit" class="button" name="update_cart" value="Update cart" disabled="">
+				<input type="submit" class="button update-cart" name="update_cart" value="Update cart" disabled="">
 
 
 				<input type="hidden" id="_wpnonce" name="_wpnonce" value="55ddc6f461"><input type="hidden"
@@ -88,3 +87,41 @@
 		</tbody>
 	</table>
 </form>
+<div class="sikshya-cart-collaterals">
+	<div class="cart_totals">
+
+		<h2>Cart totals</h2>
+
+		<table cellspacing="0" class="shop_table shop_table_responsive">
+
+			<tbody>
+			<tr class="cart-subtotal">
+				<th>Subtotal</th>
+				<td data-title="subtotal"><span class="sikshya-Price-amount amount">
+						<?php sikshya_get_cart_price_subtotal(); ?>
+
+					</span></td>
+			</tr>
+
+
+			<tr class="order-total">
+				<th>Total</th>
+				<td data-title="Total"><strong><span class="sikshya-Price-amount amount">
+													<?php sikshya_get_cart_price_total(); ?>
+
+						</span></strong></td>
+			</tr>
+
+
+			</tbody>
+		</table>
+
+		<div class="sikshya-proceed-to-checkout">
+
+			<a href="https://demo.themeum.com/plugins/tutor/checkout/" class="checkout-button button alt wc-forward">
+				Proceed to checkout</a>
+		</div>
+
+
+	</div>
+</div>

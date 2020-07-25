@@ -3304,6 +3304,74 @@ table th {
     border: 1px solid #aaa;
     margin: 0 5px; }
 
+.sikshya-cart-form table td.actions {
+  padding: 25px; }
+  .sikshya-cart-form table td.actions input {
+    padding: 10px 15px; }
+
+.sikshya-cart-form input.course-qty {
+  display: inline-block;
+  line-height: 32px;
+  min-height: 36px;
+  width: 82px;
+  padding: 0;
+  color: rgba(51, 51, 51, 0.8);
+  font-size: 14px;
+  border: 1px solid #E2E2E2;
+  border-radius: 4px;
+  background: #fff;
+  font-weight: 400;
+  text-align: center; }
+
+.sikshya-cart-form .coupon {
+  float: left;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+     -moz-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+     -moz-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
+  .sikshya-cart-form .coupon input.input-text {
+    margin-right: 10px; }
+
+.sikshya-cart-form input.update-cart {
+  float: right; }
+
+.sikshya-cart-collaterals .cart_totals {
+  float: right;
+  width: 48%; }
+
+.sikshya-cart-collaterals .sikshya-proceed-to-checkout a {
+  background-color: #1b52a9;
+  border: 0;
+  border-radius: 3px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 15px;
+  text-transform: capitalize;
+  font-weight: 600;
+  padding: 1em 2em;
+  text-shadow: none;
+  -webkit-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+  width: 100%;
+  max-width: 100%;
+  text-align: center; }
+
 body.single-sik_quizzes .site-content, body.single-sik_courses .site-content, body.single-sik_lessons .site-content, body.post-type-archive-sik_courses .site-content {
   padding: 0; }
 
