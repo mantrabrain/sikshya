@@ -14,7 +14,7 @@ if (!function_exists('sikshya_get_course_price')) {
 				echo '<span class="current-price discounted-price">' . esc_html(sikshya_get_price_with_symbol($prices['discounted'])) . '</span>';
 
 			} else {
-				echo '<span class="regular-price">' . esc_html(sikshya_get_price_with_symbol($prices['regular'])) . '</span>';
+				echo '<span class="current-price regular-price">' . esc_html(sikshya_get_price_with_symbol($prices['regular'])) . '</span>';
 
 			}
 
@@ -29,7 +29,7 @@ if (!function_exists('sikshya_get_price_with_symbol')) {
 
 	function sikshya_get_price_with_symbol($price)
 	{
-		$currency_symbol_position = 'left';
+		$currency_symbol_position = get_option('sikshya_currency_position', 'left');
 
 		$currency_symbol = sikshya_get_active_currency_symbol();
 
@@ -37,7 +37,7 @@ if (!function_exists('sikshya_get_price_with_symbol')) {
 
 			return $currency_symbol . $price;
 		} else {
-			return $price . $currency_symbol_position;
+			return $price . $currency_symbol;
 
 		}
 

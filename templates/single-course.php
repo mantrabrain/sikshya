@@ -186,7 +186,7 @@ while (have_posts()) {
 						</div>
 
 						<div class="course-sidebar-text-box">
-							<div class="price ">
+							<div class="price sikshya-pricing">
 
 								<!--   <span class="current-price"><span
 										class="current-price"><?php /*echo esc_html__('Free', 'sikshya'); */ ?></span></span>

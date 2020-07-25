@@ -3104,6 +3104,15 @@ section.cart-list-area {
   border-bottom-right-radius: 4px;
   font-weight: 400; }
 
+.sikshya-pricing .regular-price, .sikshya-pricing .discounted-price {
+  color: #a1a7b3;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 40px;
+  margin-right: 10px; }
+  .sikshya-pricing .regular-price.current-price, .sikshya-pricing .discounted-price.current-price {
+    color: #505763; }
+
 .sikshya-course-loop-price > .price {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -3126,6 +3135,9 @@ section.cart-list-area {
           flex-wrap: wrap; }
   .sikshya-course-loop-price > .price .sikshya-loop-cart-btn-wrap {
     margin-left: auto; }
+
+.sikshya-course-loop-price .sikshya-pricing .regular-price, .sikshya-course-loop-price .sikshya-pricing .discounted-price {
+  font-size: 20px; }
 
 .sikshya-loop-author .sikshya-single-course-avatar .sikshya-text-avatar {
   height: 25px;

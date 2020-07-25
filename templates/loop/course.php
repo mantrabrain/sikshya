@@ -43,7 +43,7 @@ $sikshya_archive_course_column_class = apply_filters('sikshya_archive_course_col
 		<div class="sikshya-loop-course-footer">
 
 			<div class="sikshya-course-loop-price">
-				<div class="price">
+				<div class="price sikshya-pricing">
 					<?php sikshya_get_course_price(get_the_ID()); ?>
 					<div class="sikshya-loop-cart-btn-wrap"><a
 							href="<?php echo esc_url(get_permalink()) ?>"><i

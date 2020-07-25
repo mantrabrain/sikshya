@@ -116,6 +116,20 @@ final class Sikshya
 	 */
 	public $student = null;
 
+	/**
+	 * Sikshya_Core_Cart instance.
+	 *
+	 * @var Sikshya_Core_Cart
+	 */
+	public $cart = null;
+
+	/**
+	 * Sikshya_Core_Session instance.
+	 *
+	 * @var Sikshya_Core_Session
+	 */
+	public $session = null;
+
 
 	protected static $_instance = null;
 
@@ -375,6 +389,7 @@ final class Sikshya
 
 		// Init Core Classes
 
+		$this->session = new Sikshya_Core_Session();
 		$this->course = new Sikshya_Core_Course();
 		$this->lesson = new Sikshya_Core_Lesson();
 		$this->section = new Sikshya_Core_Section();
@@ -383,6 +398,7 @@ final class Sikshya
 		$this->order = new Sikshya_Core_Order();
 		$this->role = new Sikshya_Role_Manager();
 		$this->student = new Sikshya_Core_Student();
+		$this->cart = new Sikshya_Core_Cart();
 		// Init action.
 		do_action('sikshya_init');
 	}

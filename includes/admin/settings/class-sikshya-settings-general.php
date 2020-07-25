@@ -138,6 +138,17 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 						'options' => sikshya_get_currency_with_symbol()
 					),
 					array(
+						'title' => __('Currency Position', 'sikshya'),
+						'desc' => __('Currency position.', 'sikshya'),
+						'id' => 'sikshya_currency_position',
+						'default' => 'left',
+						'type' => 'select',
+						'options' => array(
+							'left' => __('Left', 'sikshya'),
+							'right' => __('Right', 'sikshya'),
+						)
+					),
+					array(
 						'type' => 'sectionend',
 						'id' => 'sikshya_general_options',
 					),
