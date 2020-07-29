@@ -7,6 +7,10 @@
 
 
 				<div class="sikshya-billing-fields__field-wrapper">
+					<?php
+
+					sikshya()->checkout->get_billing_fields();
+					?>
 					<p class="form-row form-row-first validate-required" id="billing_first_name_field"
 					   data-priority="10"><label for="billing_first_name" class="">First name&nbsp;<abbr
 								class="required" title="required">*</abbr></label><span
@@ -299,7 +303,7 @@
 
 				<label for="payment_method_bacs">
 					Direct bank transfer </label>
-				<div class="payment_box payment_method_bacs" >
+				<div class="payment_box payment_method_bacs">
 					<p>Make your payment directly into our bank account. Please use your Order ID as the payment
 						reference. Your order will not be shipped until the funds have cleared in our account.</p>
 				</div>

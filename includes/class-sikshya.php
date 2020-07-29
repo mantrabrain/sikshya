@@ -123,6 +123,14 @@ final class Sikshya
 	 */
 	public $cart = null;
 
+
+	/**
+	 * Sikshya_Core_Checkout instance.
+	 *
+	 * @var Sikshya_Core_Checkout
+	 */
+	public $checkout = null;
+
 	/**
 	 * Sikshya_Core_Session instance.
 	 *
@@ -399,6 +407,7 @@ final class Sikshya
 		$this->role = new Sikshya_Role_Manager();
 		$this->student = new Sikshya_Core_Student();
 		$this->cart = new Sikshya_Core_Cart();
+		$this->checkout = new Sikshya_Core_Checkout();
 		// Init action.
 		do_action('sikshya_init');
 	}
