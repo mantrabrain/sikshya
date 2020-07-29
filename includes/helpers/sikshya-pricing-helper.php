@@ -10,7 +10,7 @@ if (!function_exists('sikshya_get_course_price')) {
 			if (absint($prices['discounted']) > 0) {
 
 				echo '<span class="regular-price"><del>' . esc_html(sikshya_get_price_with_symbol($prices['regular'])) . '</del></span>';
-				echo '<span class="current-price discounted-price">' . esc_html(sikshya_get_price_with_symbol($prices['discounted'])) . '</span>';
+				echo '&nbsp;<span class="current-price discounted-price">' . esc_html(sikshya_get_price_with_symbol($prices['discounted'])) . '</span>';
 
 			} else {
 				echo '<span class="current-price regular-price">' . esc_html(sikshya_get_price_with_symbol($prices['regular'])) . '</span>';

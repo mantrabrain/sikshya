@@ -118,7 +118,7 @@ do_action('sikshya_before_cart_table');
 
 		<div class="sikshya-proceed-to-checkout">
 
-			<a href="https://demo.themeum.com/plugins/tutor/checkout/"
+			<a href="<?php echo esc_attr(sikshya()->cart->get_cart_page(true)) ?>"
 			   class="checkout-button button alt sikshya-forward">
 				Proceed to checkout</a>
 		</div>

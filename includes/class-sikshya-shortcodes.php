@@ -25,6 +25,7 @@ class Sikshya_Shortcodes
 			'sikshya_account' => __CLASS__ . '::account',
 			'sikshya_login' => __CLASS__ . '::login',
 			'sikshya_cart' => __CLASS__ . '::cart',
+			'sikshya_checkout' => __CLASS__ . '::checkout',
 
 		);
 
@@ -107,6 +108,17 @@ class Sikshya_Shortcodes
 	public static function cart($atts)
 	{
 		return self::shortcode_wrapper(array('Sikshya_Shortcode_Cart', 'output'), $atts);
+	}
+
+	/**
+	 * checkout page shortcode.
+	 *
+	 * @param array $atts Attributes.
+	 * @return string
+	 */
+	public static function checkout($atts)
+	{
+		return self::shortcode_wrapper(array('Sikshya_Shortcode_Checkout', 'output'), $atts);
 	}
 
 }
