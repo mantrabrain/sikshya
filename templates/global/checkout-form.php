@@ -321,7 +321,7 @@
 
 				<label for="payment_method_cod">
 					Cash on delivery </label>
-				<div class="payment_box payment_method_cod" style="display: none;">
+				<div class="payment_box payment_method_cod">
 					<p>Pay with cash upon delivery.</p>
 				</div>
 			</li>
@@ -335,7 +335,7 @@
 						href="https://www.paypal.com/gb/webapps/mpp/paypal-popup" class="about_paypal"
 						onclick="javascript:window.open('https://www.paypal.com/gb/webapps/mpp/paypal-popup','WIPaypal','toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700'); return false;">What
 						is PayPal?</a> </label>
-				<div class="payment_box payment_method_paypal" style="display: none;">
+				<div class="payment_box payment_method_paypal">
 					<p>Pay via PayPal; you can pay with your credit card if you don’t have a PayPal account.</p>
 				</div>
 			</li>
