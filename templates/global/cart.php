@@ -75,7 +75,7 @@
 					<input type="submit" class="button" name="apply_coupon" value="Apply coupon">
 				</div>
 
-				<input type="submit" class="button update-cart" name="update_cart" value="Update cart" disabled="">
+				<input type="submit" class="button sikshya-update-cart" name="update_cart" value="Update cart" disabled="">
 
 
 				<input type="hidden" id="_wpnonce" name="_wpnonce" value="55ddc6f461"><input type="hidden"
@@ -118,7 +118,8 @@
 
 		<div class="sikshya-proceed-to-checkout">
 
-			<a href="https://demo.themeum.com/plugins/tutor/checkout/" class="checkout-button button alt wc-forward">
+			<a href="https://demo.themeum.com/plugins/tutor/checkout/"
+			   class="checkout-button button alt sikshya-forward">
 				Proceed to checkout</a>
 		</div>
 
