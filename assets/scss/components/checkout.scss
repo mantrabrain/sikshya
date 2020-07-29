@@ -1,0 +1,68 @@
+.sikshya-checkout-wrap {
+
+	#payment {
+		background: #fff;
+		border-radius: 4px;
+		margin-bottom: 100px;
+		box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
+		padding: 22px;
+
+		ul.payment_methods {
+			padding: 0;
+			border: none;
+
+			li {
+				line-height: 2;
+				text-align: left;
+				margin: 0;
+				font-weight: 400;
+				list-style: none;
+
+				.payment_box {
+					position: relative;
+					box-sizing: border-box;
+					width: 100%;
+					padding: 1em;
+					margin: 1em 0;
+					font-size: .92em;
+					border-radius: 2px;
+					line-height: 1.5;
+					background-color: #dfdcde;
+					color: #515151;
+
+					&:before {
+						content: "";
+						display: block;
+						border: 1em solid #dfdcde;
+						border-right-color: transparent;
+						border-left-color: transparent;
+						border-top-color: transparent;
+						position: absolute;
+						top: -.75em;
+						left: 0;
+						margin: -1em 0 0 2em;
+					}
+				}
+
+				&:before {
+					content: '';
+					display: table;
+
+				}
+
+				label {
+					display: inline-block;
+				}
+
+				img {
+					margin: -2px .5em 0 .5em;
+					padding: 0;
+					position: relative;
+					box-shadow: none;
+					max-height: 52px;
+					display: inline-block;
+				}
+			}
+		}
+	}
+}
