@@ -299,7 +299,7 @@
 
 				<label for="payment_method_bacs">
 					Direct bank transfer </label>
-				<div class="payment_box payment_method_bacs" style="display: block;">
+				<div class="payment_box payment_method_bacs" >
 					<p>Make your payment directly into our bank account. Please use your Order ID as the payment
 						reference. Your order will not be shipped until the funds have cleared in our account.</p>
 				</div>
@@ -310,7 +310,7 @@
 
 				<label for="payment_method_cheque">
 					Check payments </label>
-				<div class="payment_box payment_method_cheque" style="display: none;">
+				<div class="payment_box payment_method_cheque">
 					<p>Please send a check to Store Name, Store Street, Store Town, Store State / County, Store
 						Postcode.</p>
 				</div>

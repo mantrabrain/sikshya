@@ -29,6 +29,11 @@
 					line-height: 1.5;
 					background-color: #dfdcde;
 					color: #515151;
+					display: none;
+
+					p {
+						margin: 0;
+					}
 
 					&:before {
 						content: "";
@@ -61,6 +66,10 @@
 					box-shadow: none;
 					max-height: 52px;
 					display: inline-block;
+				}
+
+				input[type="radio"]:checked + label + .payment_box {
+					display: block;
 				}
 			}
 		}

@@ -3427,7 +3427,10 @@ table th {
         border-radius: 2px;
         line-height: 1.5;
         background-color: #dfdcde;
-        color: #515151; }
+        color: #515151;
+        display: none; }
+        .sikshya-checkout-wrap #payment ul.payment_methods li .payment_box p {
+          margin: 0; }
         .sikshya-checkout-wrap #payment ul.payment_methods li .payment_box:before {
           content: "";
           display: block;
@@ -3452,6 +3455,8 @@ table th {
                 box-shadow: none;
         max-height: 52px;
         display: inline-block; }
+      .sikshya-checkout-wrap #payment ul.payment_methods li input[type="radio"]:checked + label + .payment_box {
+        display: block; }
 
 body.single-sik_quizzes .site-content, body.single-sik_courses .site-content, body.single-sik_lessons .site-content, body.post-type-archive-sik_courses .site-content {
   padding: 0; }
