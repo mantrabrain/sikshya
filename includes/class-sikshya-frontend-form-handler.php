@@ -14,7 +14,7 @@ class Sikshya_Frontend_Form_Handler
 		add_action('template_redirect', array($this, 'prev_quiz_question'));
 		add_action('template_redirect', array($this, 'complete_quiz_question'));
 		add_action('template_redirect', array($this, 'enroll_in_course'));
-
+ 
 	}
 
 	public function logout()

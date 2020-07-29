@@ -1,4 +1,29 @@
+.sikshya-overlay {
+	z-index: 1000;
+	border: none;
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background: rgba(0, 0, 0, 0.25);
+	opacity: 0.6;
+	cursor: wait;
+	position: absolute;
+}
+
 .sikshya-cart-form {
+
+	display: block;
+	width: 100%;
+
+	&:after {
+		display: block;
+		content: '';
+		clear: both;
+		width: 100%;
+	}
 
 	table {
 		td.actions {
@@ -6,6 +31,7 @@
 
 			input {
 				padding: 10px 15px;
+				float: right;
 			}
 		}
 	}
@@ -30,6 +56,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		visibility: hidden;
 
 		input.input-text {
 			margin-right: 10px;
@@ -40,6 +67,16 @@
 	input.update-cart {
 		float: right;
 	}
+
+	input[disabled] {
+		background: #ddd;
+		color: #aaa;
+
+		&:hover {
+			background: #ddd;
+			color: #aaa;
+		}
+	}
 }
 
 .sikshya-cart-collaterals {
@@ -48,7 +85,7 @@
 		width: 48%;
 	}
 
-	.sikshya-proceed-to-checkout  a{
+	.sikshya-proceed-to-checkout a {
 		background-color: #1b52a9;
 		border: 0;
 		border-radius: 3px;
@@ -64,8 +101,8 @@
 		text-shadow: none;
 		-webkit-transition: all 0.5s ease;
 		transition: all 0.5s ease;
-		width:100%;
-		max-width:100%;
+		width: 100%;
+		max-width: 100%;
 		text-align: center;
 
 	}

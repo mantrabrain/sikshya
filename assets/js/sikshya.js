@@ -3,7 +3,7 @@
 
 		var SikshyaFrontend = {
 			init: function () {
- 				this.initEvents();
+				this.initEvents();
 			},
 			initEvents: function () {
 
@@ -98,6 +98,11 @@
 					repositionOnOpen: false
 				});
 
+				$('body').on('change', '.quantity .course-qty', function (e) {
+
+					$(this).closest('form').find('.sikshya-update-cart').removeAttr('disabled');
+				});
+
 				$('body').on('click', '.sikshya-update-cart', function (e) {
 
 					e.preventDefault();
@@ -110,7 +115,31 @@
 			},
 			update_cart: function (form_data, update_cart_button) {
 
-				debugger;
+				var _this = this;
+				var form = update_cart_button.closest('form');
+				$.ajax({
+					type: "POST",
+					url: SikshyaJS.admin_ajax,
+					data: form_data,
+					beforeSend: function () {
+						_this.addOverlay(form);
+					},
+					success: function (data) {
+						form.html(data);
+					},
+					complete: function () {
+						_this.removeOverlay(form);
+					}
+				});
+			},
+			addOverlay: function ($node) {
+				if ($node.find('.sikshya-overlay').length < 1) {
+					$node.append('<div class="sikshya-overlay"></div>');
+				}
+
+			},
+			removeOverlay: function ($node) {
+				$node.find('.sikshya-overlay').remove();
 			}
 		};
 

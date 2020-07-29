@@ -28,22 +28,9 @@ class Sikshya_Core_Cart
 			$course_model = new Sikshya_Model_Course($course_id, $quantity);
 
 			$cart_items = sikshya()->session->get_all();
+			
+			$cart_items['cart_items'][$course_id] = $course_model;
 
-			if (isset($cart_items['cart_items'])) {
-				if (isset($cart_items['cart_items'][$course_id])) {
-					$quantity = $cart_items['cart_items'][$course_id]->quantity + 1;
-					$course_model = new Sikshya_Model_Course($course_id, $quantity);
-
-					$cart_items['cart_items'][$course_id] = $course_model;
-				} else {
-					$cart_items['cart_items'][$course_id] = $course_model;
-
-				}
-			} else {
-
-				$cart_items['cart_items'][$course_id] = $course_model;
-
-			}
 			$final_cart_items = $cart_items['cart_items'];
 
 			sikshya()->session->set('cart_items', $final_cart_items);
