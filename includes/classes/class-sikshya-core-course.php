@@ -485,12 +485,19 @@ class Sikshya_Core_Course
 		}
 		$in_query = '(';
 
+		$all_section_ids_status = false;
 		foreach ($all_section_ids as $index => $section_id) {
 			$in_query .= '%d';
 			if ($index + 1 != count($all_section_ids)) {
 				$in_query .= ', ';
 			}
+			if (!$all_section_ids_status) {
+				$all_section_ids_status = true;
+			}
 
+		}
+		if (!$all_section_ids_status) {
+			return 0;
 		}
 		$in_query .= ')';
 		global $wpdb;
@@ -500,6 +507,7 @@ class Sikshya_Core_Course
 		$query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
 		$query_args[] = SIKSHYA_LESSONS_CUSTOM_POST_TYPE;
 		$query_args[] = SIKSHYA_QUIZZES_CUSTOM_POST_TYPE;
+
 
 		$sql_query = "SELECT COUNT(*) as total, p.post_type
 FROM $wpdb->posts p

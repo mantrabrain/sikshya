@@ -23,12 +23,12 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
 		<div class="title float-left"><?php echo esc_html__('Curriculum for this course', 'sikshya'); ?></div>
 		<div class="float-right">
             <span class="total-lectures"><?php
-				echo $child_counts[SIKSHYA_LESSONS_CUSTOM_POST_TYPE];
+				echo isset($child_counts[SIKSHYA_LESSONS_CUSTOM_POST_TYPE]) ? absint($child_counts[SIKSHYA_LESSONS_CUSTOM_POST_TYPE]) : 0;
 				echo ' Lessons'
 				?>
             </span>
 			<span class="total-lectures"><?php
-				echo $child_counts[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE];
+				echo isset($child_counts[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE]) ? absint($child_counts[SIKSHYA_QUIZZES_CUSTOM_POST_TYPE]) : 0;
 				echo ' Quizzes'
 				?>
             </span>
