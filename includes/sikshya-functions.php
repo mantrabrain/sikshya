@@ -9,6 +9,8 @@
  */
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-pricing-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-currency-helper.php';
+include_once SIKSHYA_PATH . '/includes/helpers/sikshya-country-helper.php';
+include_once SIKSHYA_PATH . '/includes/helpers/sikshya-state-helper.php';
 
 function sikshya_account_page_nav_items()
 {
