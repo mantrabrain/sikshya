@@ -1,4 +1,12 @@
 .sikshya-checkout-wrap {
+	.sikshya-billing-fields {
+		input[type="text"],
+		input[type="email"],
+		input[type="tel"],
+		select {
+			width: 100%;
+		}
+	}
 
 	#payment {
 		background: #fff;

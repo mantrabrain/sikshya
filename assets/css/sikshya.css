@@ -3399,6 +3399,12 @@ table th {
   max-width: 100%;
   text-align: center; }
 
+.sikshya-checkout-wrap .sikshya-billing-fields input[type="text"],
+.sikshya-checkout-wrap .sikshya-billing-fields input[type="email"],
+.sikshya-checkout-wrap .sikshya-billing-fields input[type="tel"],
+.sikshya-checkout-wrap .sikshya-billing-fields select {
+  width: 100%; }
+
 .sikshya-checkout-wrap #payment {
   background: #fff;
   border-radius: 4px;
