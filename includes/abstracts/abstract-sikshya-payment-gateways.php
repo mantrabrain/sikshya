@@ -62,6 +62,7 @@ abstract class Sikshya_Payment_Gateways
 
 		if ($current_section == $this->id) {
 
+
 			return apply_filters('sikshya_settings_payment_gateways_' . $this->id, $this->admin_setting_tab());
 		}
 		return $settings;

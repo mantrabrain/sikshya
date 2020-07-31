@@ -2,16 +2,16 @@
 if (!function_exists('sikshya_get_payment_gateways')) {
 	function sikshya_get_payment_gateways()
 	{
-		$gateways = array(/* array(
-                'title' => __('Another Gateway', 'sikshya'),
-                'default' => 'no',
-                'id' => 'manual'
-            ),*/
 
-
-		);
-
-		return apply_filters('sikshya_payment_gateways', $gateways);
+		$all_gateways = apply_filters('sikshya_payment_gateways', array());
+		foreach ($all_gateways as $gateway_index => $gateway) {
+			$gateway_id = isset($gateway['id']) ? $gateway['id'] : null;
+			$all_gateways[$gateway_index]['description'] = get_option("sikshya_payment_gateway_{$gateway_id}_description");
+			$all_gateways[$gateway_index]['image_url'] = get_option("sikshya_payment_gateway_{$gateway_id}_image_url");
+			$all_gateways[$gateway_index]['help_text'] = get_option("sikshya_payment_gateway_{$gateway_id}_help_text");
+			$all_gateways[$gateway_index]['help_url'] = get_option("sikshya_payment_gateway_{$gateway_id}_help_url");
+		}
+		return $all_gateways;
 	}
 }
 
