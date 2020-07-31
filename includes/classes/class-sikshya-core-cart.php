@@ -2,11 +2,17 @@
 
 class Sikshya_Core_Cart
 {
+	public function __construct()
+	{
+		$this->all_cart_items = $this->get_cart_items();
+	}
+
+	private $all_cart_items = array();
+
 
 	public function get_cart_items()
 	{
 		$cart_items = sikshya()->session->get_all();
-
 
 		if (isset($cart_items['cart_items'])) {
 			return $cart_items['cart_items'];
@@ -38,6 +44,8 @@ class Sikshya_Core_Cart
 
 			sikshya()->session->set('cart_items', $final_cart_items);
 
+			$this->all_cart_items = $final_cart_items;
+
 			return true;
 		}
 
@@ -63,6 +71,9 @@ class Sikshya_Core_Cart
 				$final_cart_items = $cart_items['cart_items'];
 
 				sikshya()->session->set('cart_items', $final_cart_items);
+
+				$this->all_cart_items = $final_cart_items;
+
 
 			}
 		}

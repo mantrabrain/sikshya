@@ -38,7 +38,7 @@
 		</div>
 	</div>
 	<div class="sik-md-12">
-		<h3 id="order_review_heading">Your order</h3>
+		<h3 id="order_review_heading"><?php echo esc_html__('Your order', 'sikshya'); ?></h3>
 
 		<table class="shop_table sikshya-checkout-review-order-table">
 			<thead>
@@ -48,27 +48,47 @@
 			</tr>
 			</thead>
 			<tbody>
-			<tr class="cart_item">
-				<td class="product-name">
-					JavaScript ES6 / ES2015 Tutorials&nbsp; <strong class="product-quantity">× 2</strong></td>
-				<td class="product-total">
-					<span class="sikshya-Price-amount amount"><span
-							class="sikshya-Price-currencySymbol">$</span>198.00</span></td>
-			</tr>
+			<?php
+			$sikshya_cart_items = sikshya()->cart->get_cart_items();
+
+			foreach ($sikshya_cart_items as $course_id => $sk_cart_item) {
+				/**
+				 * Sikshya_Core_Course instance.
+				 *
+				 * @var $sk_cart_item Sikshya_Model_Course
+				 */
+				?>
+				<tr class="cart_item">
+					<td class="product-name"><?php echo esc_html($sk_cart_item->title) ?>&nbsp;
+						<strong class="product-quantity">× <?php echo esc_html($sk_cart_item->quantity) ?></strong>
+					</td>
+					<td class="product-total">
+					<span class="sikshya-Price-amount amount"><?php
+						echo $sk_cart_item->total_price_string;
+						?></span></td>
+				</tr>
+			<?php } ?>
 			</tbody>
 			<tfoot>
 
 			<tr class="cart-subtotal">
 				<th>Subtotal</th>
-				<td><span class="sikshya-Price-amount amount"><span
-							class="sikshya-Price-currencySymbol">$</span>198.00</span></td>
+				<td><span class="sikshya-Price-amount amount">
+							<?php
+							sikshya_get_cart_price_subtotal();
+							?>
+						</span></td>
 			</tr>
-
-
 			<tr class="order-total">
 				<th>Total</th>
-				<td><strong><span class="sikshya-Price-amount amount"><span
-								class="sikshya-Price-currencySymbol">$</span>198.00</span></strong></td>
+				<td>
+					<strong><span class="sikshya-Price-amount amount">
+							<?php
+							sikshya_get_cart_price_total();
+							?>
+						</span>
+					</strong>
+				</td>
 			</tr>
 
 
