@@ -57,6 +57,7 @@ class Sikshya_Install
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient('sikshya_installing', 'yes', MINUTE_IN_SECONDS * 10);
 		$sikshya_version = get_option('sikshya_version');
+
 		if (empty($sikshya_version)) {
 			self::create_tables();
 			self::create_options();
@@ -177,7 +178,11 @@ class Sikshya_Install
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 
-		dbDelta(self::get_schema());
+		$all_schemes = self::get_schema();
+
+		foreach ($all_schemes as $scheme) {
+			dbDelta($scheme);
+		}
 
 
 	}
@@ -194,65 +199,72 @@ class Sikshya_Install
 			$collate = $wpdb->get_charset_collate();
 		}
 
-
-		$tables = "
-CREATE TABLE IF NOT EXISTS {$table_prefix}order_items (
-  order_item_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  item_name LONGTEXT  NOT NULL,
-  order_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-  order_datetime DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  PRIMARY KEY  (order_item_id)
-) $collate;
-CREATE TABLE IF NOT EXISTS {$table_prefix}order_itemmeta (
-  meta_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  order_item_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-  meta_key VARCHAR(255)  NOT NULL DEFAULT '',
-  meta_value LONGTEXT  NOT NULL,
-  PRIMARY KEY  (meta_id),
-  KEY sikshya_order_item_id (order_item_id)
-) $collate;
-CREATE TABLE IF NOT EXISTS {$table_prefix}user_items (
-  user_item_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_id BIGINT(20) NOT NULL DEFAULT '-1',
-  item_id BIGINT(20) NOT NULL DEFAULT '-1',
-  start_time DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  start_time_gmt DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  end_time DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  end_time_gmt DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-  item_type VARCHAR(45) NOT NULL DEFAULT '',
-  status VARCHAR(45) NOT NULL DEFAULT '',
-  reference_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-  reference_type VARCHAR(45) DEFAULT '0',
-  parent_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY  (user_item_id)
-  ) $collate;
-CREATE TABLE IF NOT EXISTS {$table_prefix}user_itemmeta (
-  meta_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_item_id BIGINT(20) UNSIGNED NOT NULL,
-  meta_key VARCHAR(255)  NOT NULL DEFAULT '',
-  meta_value LONGTEXT  NOT NULL,
-  PRIMARY KEY  (meta_id),
-  KEY sikshya_user_item_id(user_item_id),
-  KEY meta_key(meta_key(191))
-  ) $collate;
-  CREATE TABLE IF NOT EXISTS {$table_prefix}students (
-  customer_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_id BIGINT(20) UNSIGNED DEFAULT NULL,
-  username VARCHAR(255)  NOT NULL DEFAULT '',
-  first_name VARCHAR(255)  NOT NULL,
-  last_name VARCHAR(255)  NOT NULL,
-  email VARCHAR(100)  DEFAULT NULL,
-  date_last_active TIMESTAMP NULL DEFAULT NULL,
-  date_registered TIMESTAMP NULL DEFAULT NULL,
-  country CHAR(3)  NOT NULL DEFAULT '',
-  postcode VARCHAR(20)  NOT NULL DEFAULT '',
-  city VARCHAR(20)  NOT NULL DEFAULT '',
-  state VARCHAR(20)  NOT NULL DEFAULT '',
-  PRIMARY KEY  (customer_id),
-  UNIQUE KEY (user_id),
-  KEY email
-  ) $collate;
-";
+		// Order Items Table
+		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}order_items (
+		  order_item_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		  item_name LONGTEXT  NOT NULL,
+		  order_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+		  order_datetime DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+		  PRIMARY KEY  (order_item_id)
+		) $collate;
+		";
+		// Order Item Data Table
+		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}order_itemmeta (
+		  meta_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		  order_item_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+		  meta_key VARCHAR(255)  NOT NULL DEFAULT '',
+		  meta_value LONGTEXT  NOT NULL,
+		  PRIMARY KEY  (meta_id),
+		  KEY sikshya_order_item_id (order_item_id)
+		) $collate;
+		";
+		//  User Items Table
+		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}user_items (
+		  user_item_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		  user_id BIGINT(20) NOT NULL DEFAULT '-1',
+		  item_id BIGINT(20) NOT NULL DEFAULT '-1',
+		  start_time DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+		  start_time_gmt DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+		  end_time DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+		  end_time_gmt DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+		  item_type VARCHAR(45) NOT NULL DEFAULT '',
+		  status VARCHAR(45) NOT NULL DEFAULT '',
+		  reference_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+		  reference_type VARCHAR(45) DEFAULT '0',
+		  parent_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
+		  PRIMARY KEY  (user_item_id)
+		  ) $collate;
+		";
+		// User Item Meta Table
+		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}user_itemmeta (
+		  meta_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		  user_item_id BIGINT(20) UNSIGNED NOT NULL,
+		  meta_key VARCHAR(255)  NOT NULL DEFAULT '',
+		  meta_value LONGTEXT  NOT NULL,
+		  PRIMARY KEY  (meta_id),
+		  KEY sikshya_user_item_id(user_item_id),
+		  KEY meta_key(meta_key(191))
+		  ) $collate;
+		  ";
+		// Students Table
+		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}students (
+		  student_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+		  user_id BIGINT(20) UNSIGNED DEFAULT NULL,
+		  username VARCHAR(60)  NOT NULL DEFAULT '',
+		  first_name VARCHAR(255)  NOT NULL,
+		  last_name VARCHAR(255)  NOT NULL,
+		  email VARCHAR(100)  DEFAULT NULL,
+		  date_last_active TIMESTAMP NULL DEFAULT NULL,
+		  date_registered TIMESTAMP NULL DEFAULT NULL,
+		  country CHAR(3)  NOT NULL DEFAULT '',
+		  postcode VARCHAR(20)  NOT NULL DEFAULT '',
+		  city VARCHAR(100)  NOT NULL DEFAULT '',
+		  state VARCHAR(100)  NOT NULL DEFAULT '',
+		  PRIMARY KEY  (student_id),
+		  UNIQUE KEY user_id(user_id),
+		  KEY email(email)
+		  ) $collate;
+		";
 
 		return $tables;
 	}
