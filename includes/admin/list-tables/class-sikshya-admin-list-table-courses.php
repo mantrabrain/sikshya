@@ -116,8 +116,8 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 		$show_columns = array();
 		$show_columns['cb'] = $columns['cb'];
 		$show_columns['title'] = __('Title', 'sikshya');
-		$show_columns['quiz'] = __('Quiz', 'sikshya');
-		$show_columns['type'] = __('Type', 'sikshya');
+		$show_columns['category'] = __('Category', 'sikshya');
+		$show_columns['type'] = __('Tags', 'sikshya');
 		$show_columns['date'] = __('Date', 'sikshya');
 
 		return $show_columns;
