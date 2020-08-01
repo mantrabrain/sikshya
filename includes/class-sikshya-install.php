@@ -196,14 +196,14 @@ class Sikshya_Install
 
 
 		$tables = "
-CREATE TABLE {$table_prefix}order_items (
+CREATE TABLE IF NOT EXISTS {$table_prefix}order_items (
   order_item_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   item_name LONGTEXT  NOT NULL,
   order_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
   order_datetime DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY  (order_item_id)
 ) $collate;
-CREATE TABLE {$table_prefix}order_itemmeta (
+CREATE TABLE IF NOT EXISTS {$table_prefix}order_itemmeta (
   meta_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   order_item_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
   meta_key VARCHAR(255)  NOT NULL DEFAULT '',
@@ -211,7 +211,7 @@ CREATE TABLE {$table_prefix}order_itemmeta (
   PRIMARY KEY  (meta_id),
   KEY sikshya_order_item_id (order_item_id)
 ) $collate;
-CREATE TABLE {$table_prefix}user_items (
+CREATE TABLE IF NOT EXISTS {$table_prefix}user_items (
   user_item_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT(20) NOT NULL DEFAULT '-1',
   item_id BIGINT(20) NOT NULL DEFAULT '-1',
@@ -226,7 +226,7 @@ CREATE TABLE {$table_prefix}user_items (
   parent_id BIGINT(20) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (user_item_id)
   ) $collate;
-CREATE TABLE {$table_prefix}user_itemmeta (
+CREATE TABLE IF NOT EXISTS {$table_prefix}user_itemmeta (
   meta_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   user_item_id BIGINT(20) UNSIGNED NOT NULL,
   meta_key VARCHAR(255)  NOT NULL DEFAULT '',
@@ -235,7 +235,7 @@ CREATE TABLE {$table_prefix}user_itemmeta (
   KEY sikshya_user_item_id(user_item_id),
   KEY meta_key(meta_key(191))
   ) $collate;
-  CREATE TABLE {$table_prefix}students (
+  CREATE TABLE IF NOT EXISTS {$table_prefix}students (
   customer_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id BIGINT(20) UNSIGNED DEFAULT NULL,
   username VARCHAR(255)  NOT NULL DEFAULT '',
@@ -253,6 +253,32 @@ CREATE TABLE {$table_prefix}user_itemmeta (
   KEY email
   ) $collate;
 ";
+
+		return $tables;
+	}
+
+
+	public static function get_tables()
+	{
+		global $wpdb;
+
+		$table_prefix = $wpdb->prefix . 'sikshya_';
+		$tables = array(
+			"{$table_prefix}students",
+			"{$table_prefix}user_itemmeta",
+			"{$table_prefix}user_items",
+			"{$table_prefix}order_itemmeta",
+			"{$table_prefix}order_items"
+		);
+
+		/**
+		 * Filter the list of known Sikshya tables.
+		 *
+		 * If Sikshya plugins need to add new tables, they can inject them here.
+		 *
+		 * @param array $tables An array of Sikshya-specific database table names.
+		 */
+		$tables = apply_filters('sikshya_install_get_tables', $tables);
 
 		return $tables;
 	}
@@ -338,11 +364,11 @@ CREATE TABLE {$table_prefix}user_itemmeta (
 
 		foreach ($capabilities as $cap_group) {
 			foreach ($cap_group as $cap) {
-				$wp_roles->add_cap('shop_manager', $cap);
-				$wp_roles->add_cap('administrator', $cap);
+
 			}
 		}
 	}
+
 
 	/**
 	 * Get capabilities for Sikshya - these are assigned to admin/shop manager during installation or reset.
@@ -410,13 +436,24 @@ CREATE TABLE {$table_prefix}user_itemmeta (
 
 		foreach ($capabilities as $cap_group) {
 			foreach ($cap_group as $cap) {
-				$wp_roles->remove_cap('shop_manager', $cap);
-				$wp_roles->remove_cap('administrator', $cap);
+				$wp_roles->remove_cap('sikshya_instructor', $cap);
+				$wp_roles->remove_cap('sikshya_student', $cap);
 			}
 		}
 
-		/* remove_role('customer');
-		 remove_role('shop_manager');*/
+		remove_role('sikshya_instructor');
+		remove_role('sikshya_student');
+	}
+
+	public static function drop_tables()
+	{
+		global $wpdb;
+
+		$tables = self::get_tables();
+
+		foreach ($tables as $table) {
+			$wpdb->query("DROP TABLE IF EXISTS {$table}"); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
 	}
 
 }

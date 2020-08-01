@@ -118,7 +118,7 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 					),
 					array(
 						'title' => __('Checkout page', 'sikshya'),
-						'id' => 'sikshya_checkoutg_page',
+						'id' => 'sikshya_checkout_page',
 						'default' => '',
 						'type' => 'single_select_page',
 					),
