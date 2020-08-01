@@ -263,7 +263,7 @@ final class Sikshya
 		$this->define('SIKSHYA_LESSONS_CUSTOM_POST_TYPE', 'sik_lessons');
 		$this->define('SIKSHYA_QUIZZES_CUSTOM_POST_TYPE', 'sik_quizzes');
 		$this->define('SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE', 'sik_questions');
-		$this->define('SIKSHYA_CUSTOMERS_CUSTOM_POST_TYPE', 'sik_customers');
+		$this->define('SIKSHYA_STUDENTS_CUSTOM_POST_TYPE', 'sik_customers');
 		$this->define('SIKSHYA_REST_API_URL', 'https://license.mantrabrain.com/sikshya/');
 		$this->define('SIKSHYA_HOOK_PREFIX', 'sikshya');
 		$this->define('SIKSHYA_PATH', dirname(SIKSHYA_FILE));

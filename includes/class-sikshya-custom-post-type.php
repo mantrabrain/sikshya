@@ -77,10 +77,10 @@ class Sikshya_Custom_Post_Type
 	/**
 	 * The single instance of the class.
 	 *
-	 * @var Sikshya_Custom_Post_Type_Customers
+	 * @var Sikshya_Custom_Post_Type_Students
 	 * @since 1.0.0
 	 */
-	public $customer;
+	public $student;
 
 
 	/**
@@ -123,7 +123,7 @@ class Sikshya_Custom_Post_Type
 		$this->quiz = new Sikshya_Custom_Post_Type_Quiz();
 		$this->question = new Sikshya_Custom_Post_Type_Question();
 		$this->order = new Sikshya_Custom_Post_Type_Order();
-		$this->customer = new Sikshya_Custom_Post_Type_Customers();
+		$this->student = new Sikshya_Custom_Post_Type_Students();
 
 	}
 
@@ -151,7 +151,7 @@ class Sikshya_Custom_Post_Type
 		$this->quiz->init();
 		$this->question->init();
 		$this->order->init();
-		$this->customer->init();
+		$this->student->init();
 
 
 	}
