@@ -134,6 +134,21 @@ class Sikshya_Install
 				'post_type' => 'page',
 				'comment_status' => 'closed'
 
+			), array(
+				'post_content' => '[sikshya_cart]',
+				'post_title' => 'Sikshya Cart',
+				'post_status' => 'publish',
+				'post_type' => 'page',
+				'comment_status' => 'closed'
+
+			),
+			array(
+				'post_content' => '[sikshya_checkout]',
+				'post_title' => 'Sikshya Checkout',
+				'post_status' => 'publish',
+				'post_type' => 'page',
+				'comment_status' => 'closed'
+
 			)
 		);
 
@@ -149,6 +164,12 @@ class Sikshya_Install
 			}
 			if ($page['post_title'] == 'Sikshya Login') {
 				update_option('sikshya_login_page', $page_id);
+			}
+			if ($page['post_title'] == 'Sikshya Cart') {
+				update_option('sikshya_cart_page', $page_id);
+			}
+			if ($page['post_title'] == 'Sikshya Checkout') {
+				update_option('sikshya_checkout_page', $page_id);
 			}
 
 		}

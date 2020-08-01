@@ -64,8 +64,6 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 			'first_name' => __('First Name', 'sikshya'),
 			'last_name' => __('Last Name', 'sikshya'),
 			'email' => __('Email', 'sikshya'),
-			'date_last_active' => __('Last Active', 'sikshya'),
-			'date_register' => __('Register Date', 'sikshya'),
 			'country' => __('Country', 'sikshya'),
 			'city' => __('City', 'sikshya'),
 			'state' => __('State', 'sikshya'),
@@ -78,9 +76,9 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 	function get_sortable_columns()
 	{
 		$sortable_columns = array(
-			'name' => array('name', true),
+			'student_id' => array('student_id', true),
 			'email' => array('email', false),
-			'age' => array('age', false),
+			'user_id' => array('user_id', false),
 		);
 		return $sortable_columns;
 	}
@@ -88,6 +86,7 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 
 	function get_bulk_actions()
 	{
+		return array();
 		$actions = array(
 			'delete' => 'Delete'
 		);
@@ -100,6 +99,7 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 
 		global $wpdb;
 
+		return;
 
 		if ('delete' === $this->current_action()) {
 			$ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
@@ -133,17 +133,16 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 		$this->process_bulk_action();
 
 // will be used in pagination settings
-		$total_items = $wpdb->get_var("SELECT COUNT(id) FROM {$this->table_name}");
+		$total_items = $wpdb->get_var("SELECT COUNT(student_id) FROM {$this->table_name}");
 
 // prepare query params, as usual current page, order by and order direction
 		$paged = isset($_REQUEST['paged']) ? max(0, intval($_REQUEST['paged'] - 1) * $per_page) : 0;
-		$orderby = (isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : 'name';
+		$orderby = (isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : 'student_id';
 		$order = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc'))) ? $_REQUEST['order'] : 'asc';
 
 // [REQUIRED] define $items array
 // notice that last argument is ARRAY_A, so we will retrieve array
 		$this->items = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} ORDER BY $orderby $order LIMIT %d OFFSET %d", $per_page, $paged), ARRAY_A);
-
 // [REQUIRED] configure pagination
 		$this->set_pagination_args(array(
 			'total_items' => $total_items, // total items defined above
