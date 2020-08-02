@@ -95,25 +95,21 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 					array(
 						'title' => __('Account page', 'sikshya'),
 						'id' => 'sikshya_account_page',
-						'default' => '',
 						'type' => 'single_select_page',
 					),
 					array(
 						'title' => __('Registration page', 'sikshya'),
 						'id' => 'sikshya_registration_page',
-						'default' => '',
 						'type' => 'single_select_page',
 					),
 					array(
 						'title' => __('Login page', 'sikshya'),
 						'id' => 'sikshya_login_page',
-						'default' => '',
 						'type' => 'single_select_page',
 					),
 					array(
 						'title' => __('Cart page', 'sikshya'),
 						'id' => 'sikshya_cart_page',
-						'default' => '',
 						'type' => 'single_select_page',
 					),
 					array(

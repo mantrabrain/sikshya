@@ -117,7 +117,7 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 		$show_columns['cb'] = $columns['cb'];
 		$show_columns['title'] = __('Title', 'sikshya');
 		$show_columns['category'] = __('Category', 'sikshya');
-		$show_columns['type'] = __('Tags', 'sikshya');
+		$show_columns['tag'] = __('Tags', 'sikshya');
 		$show_columns['date'] = __('Date', 'sikshya');
 
 		return $show_columns;
@@ -146,35 +146,40 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 
 	}
 
+	protected function render_category_column()
+	{
+		$terms = get_the_terms($this->object->ID, 'sik_course_category');
+		if (!$terms) {
+			echo '<span class="na">&ndash;</span>';
+		} else {
+			$termlist = array();
+			foreach ($terms as $term) {
+				$termlist[] = '<a href="' . esc_url(admin_url('edit.php?sik_course_category=' . $term->slug . '&post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE)) . ' ">' . esc_html($term->name) . '</a>';
+			}
+
+			echo apply_filters('sikshya_admin_course_term_list', implode(', ', $termlist), 'sik_course_category', $this->object->ID, $termlist, $terms); // WPCS: XSS ok.
+		}
+	}
 
 	/**
-	 * Render columm: order_status.
+	 * Render columm: product_tag.
 	 */
-	protected function render_quiz_column()
+	protected function render_tag_column()
 	{
-		$question_id = $this->object->ID;
-
-		$quizzes = sikshya()->quiz->get_all_by_question($question_id);
-
-		if (count($quizzes)) {
-
-			echo '<div>';
-			foreach ($quizzes as $quiz) {
-				?>
-				<a href="<?php echo get_edit_post_link($quiz->ID); ?>"><?php echo get_the_title($quiz->ID); ?></a>
-				<div class="sik-row-actions">
-					<a href="<?php echo get_edit_post_link($quiz->ID); ?>"><?php echo __('Edit', 'sikshya') ?></a>&nbsp;|&nbsp;
-					<a href="<?php echo get_post_permalink($quiz->ID) ?>"><?php echo __('View', 'sikshya') ?></a>
-				</div>
-				<?php
-			}
-			echo '</div>';
+		$terms = get_the_terms($this->object->ID, 'sik_course_tag');
+		echo '<pre>';
+		if (!$terms) {
+			echo '<span class="na">&ndash;</span>';
 		} else {
-			echo __('Not assigned yet', 'sikshya');
+			$termlist = array();
+			foreach ($terms as $term) {
+				$termlist[] = '<a href="' . esc_url(admin_url('edit.php?sik_course_tag=' . $term->slug . '&post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE)) . ' ">' . esc_html($term->name) . '</a>';
+			}
+
+			echo apply_filters('sikshya_admin_course_term_list', implode(', ', $termlist), 'sik_course_tag', $this->object->ID, $termlist, $terms); // WPCS: XSS ok.
 		}
-
-
 	}
+
 
 	protected function render_type_column()
 	{

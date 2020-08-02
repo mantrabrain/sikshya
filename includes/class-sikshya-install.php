@@ -111,6 +111,29 @@ class Sikshya_Install
 	private static function create_options()
 	{
 
+
+		// Include settings so that we can run through defaults.
+		include_once dirname(__FILE__) . '/admin/class-sikshya-admin-settings.php';
+
+		$settings = Sikshya_Admin_Settings::get_settings_pages();
+
+		foreach ($settings as $section) {
+			if (!method_exists($section, 'get_settings')) {
+				continue;
+			}
+			$subsections = array_unique(array_merge(array(''), array_keys($section->get_sections())));
+
+			foreach ($subsections as $subsection) {
+				foreach ($section->get_settings($subsection) as $value) {
+					if (isset($value['default']) && isset($value['id'])) {
+						$autoload = isset($value['autoload']) ? (bool)$value['autoload'] : true;
+						add_option($value['id'], $value['default'], '', ($autoload ? 'yes' : 'no'));
+					}
+				}
+			}
+		}
+
+
 		$pages = array(
 
 			array(
@@ -173,15 +196,8 @@ class Sikshya_Install
 			}
 
 		}
-
-
-		$options = array();
-
-		foreach ($options as $option_key => $option_value) {
-
-			update_option($option_key, $option_value);
-		}
 	}
+
 
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
