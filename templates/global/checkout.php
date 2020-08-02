@@ -1,9 +1,12 @@
-<form name="sikshya-checkout" method="post" class="sikshya-checkout woocommerce-sikshya-checkout"
-	  action="https://demo.themeum.com/plugins/tutor/sikshya-checkout/"
-	  enctype="multipart/form-data" novalidate="novalidate">
+<form class="sikshya-cart-form" method="post"
+	  enctype="multipart/form-data">
 	<?php
+
 	sikshya_load_template('global.checkout-form', array('sikshya_checkout_items' => array()));
 
 	?>
-
+	<input type="hidden" value="sikshya_checkout_action" name="sikshya_action"/>
+	<input type="hidden" value="sikshya_checkout" name="sikshya_checkout_notice"/>
+	<input type="hidden" value="<?php echo wp_create_nonce('wp_sikshya_checkout_action_nonce') ?>"
+		   name="sikshya_nonce"/>
 </form>
