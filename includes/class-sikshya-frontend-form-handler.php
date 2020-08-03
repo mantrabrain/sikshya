@@ -14,7 +14,20 @@ class Sikshya_Frontend_Form_Handler
 		add_action('template_redirect', array($this, 'prev_quiz_question'));
 		add_action('template_redirect', array($this, 'complete_quiz_question'));
 		add_action('template_redirect', array($this, 'enroll_in_course'));
- 
+		add_action('template_redirect', array($this, 'place_order'));
+
+	}
+
+	public function place_order()
+	{
+		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_place_order') {
+			return;
+		}
+		sikshya()->helper->validate_nonce(true);
+
+		$sikshya_billing_fields = sikshya()->checkout->validate_billing_data($_POST);
+
+
 	}
 
 	public function logout()

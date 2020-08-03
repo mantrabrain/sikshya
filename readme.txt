@@ -2,7 +2,7 @@
 Contributors: Mantrabrain,ughimire1
 Tags: course builder, quizzes, questions, learning management system, LMS
 Requires at least: 4.7
-Tested up to: 5.4.2
+Tested up to: 5.5
 Stable tag: 0.0.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html

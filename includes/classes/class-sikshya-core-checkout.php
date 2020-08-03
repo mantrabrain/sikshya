@@ -144,19 +144,24 @@ class Sikshya_Core_Checkout
 								<input type="<?php echo esc_attr($type); ?>" class="input-text "
 									   name="<?php echo esc_attr($id); ?>" id="<?php echo esc_attr($id); ?>"
 									   autocomplete="off" <?php echo $attributes_string; ?>
+									value="<?php echo esc_attr(sikshya()->helper->input($id)); ?>"
 								/>
 						</span>
 						<?php
 						break;
 					case "select":
 						$options = isset($field['options']) ? $field['options'] : array();
+						$selected_option = sikshya()->helper->input($id);
 						?>
 						<span class="sikshya-input-wrapper">
 								<select class="input-select "
 										name="<?php echo esc_attr($id); ?>"
-										id="<?php echo esc_attr($id); ?>" <?php echo $attributes_string; ?>>
+										id="<?php echo esc_attr($id); ?>" <?php echo $attributes_string; ?>
+								>
 									<?php foreach ($options as $option_key => $option) {
-										echo '<option value="' . esc_attr($option_key) . '">';
+										echo '<option value="' . esc_attr($option_key) . '"';
+										selected($selected_option, $option_key);
+										echo '>';
 
 										echo esc_html($option);
 
@@ -173,6 +178,92 @@ class Sikshya_Core_Checkout
 			</p>
 			<?php
 		}
+	}
+
+	public function validate_billing_data($data)
+	{
+		$valid_data = array();
+
+		$validation_status = true;
+
+		$billing_fields = $this->billing_fields();
+
+		foreach ($data as $data_key => $data_value) {
+
+			foreach ($billing_fields as $field) {
+
+				$id = isset($field['id']) ? $field['id'] : '';
+				$type = isset($field['type']) ? $field['type'] : 'text';
+
+				if ($data_key === $id) {
+
+					$valid_single_data = $this->validate_single_field($field, $data_value);
+					if ((boolean)$valid_single_data['status']) {
+						$valid_data[$id] = $valid_single_data['data'];
+					} else {
+						$validation_status = false;
+					}
+				}
+			}
+		}
+		return ['status' => $validation_status, 'data' => $valid_data];
+	}
+
+	private function validate_single_field($field, $data)
+	{
+		$type = isset($field['type']) ? $field['type'] : 'text';
+
+		$label = isset($field['label']) ? $field['label'] : '';
+
+		$validation = isset($field['validation']) ? $field['validation'] : array();
+
+		$validation_pass = true;
+
+		$valid_data = '';
+
+		foreach ($validation as $validation_key => $validation_value) {
+
+			switch ($validation_key) {
+
+				case "required":
+
+					if ((boolean)$validation_value) {
+
+						if ('' == $data) {
+
+							$validation_pass = false;
+
+							sikshya()->errors->add(sikshya()->notice_key, sprintf(__('%s is required', 'sikshya'), $label));
+						}
+					}
+					break;
+			}
+
+		}
+
+		switch ($type) {
+			case "text":
+				$valid_data = sanitize_text_field($data);
+				break;
+			case "email":
+				if (filter_var($data, FILTER_VALIDATE_EMAIL)) {
+					$valid_data = sanitize_email($data);
+				} else {
+					$validation_pass = false;
+					sikshya()->errors->add(sikshya()->notice_key, __('Invalid email field.', 'sikshya'));
+
+				}
+				break;
+			case "select":
+				$options = isset($field['options']) ? $field['options'] : array();
+				if (in_array($data, $options)) {
+					$valid_data = $data;
+				}
+
+				break;
+		}
+		return ['status' => $validation_pass, 'data' => $valid_data];
+
 	}
 
 }
