@@ -668,7 +668,6 @@ VALUES (%d, %s, %s);
 	return false;
 }
 
-
 function sikshya_get_order_items($select = array(), $where = array())
 {
 	global $wpdb;

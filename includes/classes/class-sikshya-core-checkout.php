@@ -25,15 +25,6 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-last'
 			),
 			array(
-				'id' => 'company_name',
-				'label' => __('Company Name (Optional)', 'Sikshya'),
-				'type' => 'text',
-				'validation' => array(
-					'required' => false
-				),
-				'class' => 'form-row-first'
-			),
-			array(
 				'id' => 'country',
 				'label' => __('Country', 'Sikshya'),
 				'type' => 'select',
@@ -75,13 +66,25 @@ class Sikshya_Core_Checkout
 			),
 			array(
 				'id' => 'city',
-				'label' => __('Town/City', 'Sikshya'),
+				'label' => __('Town/City', 'sikshya'),
+				'type' => 'text',
+				'validation' => array(
+					'required' => true
+				),
+				'class' => 'form-row-last'
+			),
+			array(
+				'id' => 'state',
+				'label' => __('State/Zone', 'sikshya'),
 				'type' => 'select',
 				'validation' => array(
 					'required' => true
 				),
-				'options' => array(),
-				'class' => 'form-row-last'
+				'options' => array(
+					'' => __('Select State', 'sikshya'),
+					'state_1' => __('State 1', 'sikshya')
+				),
+				'class' => 'form-row-first'
 			),
 			array(
 				'id' => 'phone',
@@ -90,7 +93,7 @@ class Sikshya_Core_Checkout
 				'validation' => array(
 					'required' => true
 				),
-				'class' => 'form-row-first'
+				'class' => 'form-row-last'
 			),
 			array(
 				'id' => 'email',
@@ -99,7 +102,7 @@ class Sikshya_Core_Checkout
 				'validation' => array(
 					'required' => true
 				),
-				'class' => 'form-row-first'
+				'class' => 'form-row-last'
 			),
 		);
 
@@ -193,6 +196,7 @@ class Sikshya_Core_Checkout
 			foreach ($billing_fields as $field) {
 
 				$id = isset($field['id']) ? $field['id'] : '';
+
 				$type = isset($field['type']) ? $field['type'] : 'text';
 
 				if ($data_key === $id) {
@@ -211,6 +215,7 @@ class Sikshya_Core_Checkout
 
 	private function validate_single_field($field, $data)
 	{
+
 		$type = isset($field['type']) ? $field['type'] : 'text';
 
 		$label = isset($field['label']) ? $field['label'] : '';

@@ -27,6 +27,14 @@ class Sikshya_Frontend_Form_Handler
 
 		$sikshya_billing_fields = sikshya()->checkout->validate_billing_data($_POST);
 
+		if ($sikshya_billing_fields['status']) {
+
+			$data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
+			
+			sikshya()->student->add($data);
+
+		}
+
 
 	}
 
