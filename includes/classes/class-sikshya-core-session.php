@@ -52,4 +52,28 @@ class Sikshya_Core_Session
 		return array();
 
 	}
+
+	function clear_all($key = '')
+	{
+		if (!empty($key)) {
+
+			if (isset($_SESSION[$this->session_key][$key])) {
+
+				unset($_SESSION[$this->session_key][$key]);
+
+				return true;
+			}
+
+		}
+		if (isset($_SESSION[$this->session_key])) {
+
+			unset($_SESSION[$this->session_key]);
+
+			return true;
+		}
+
+		return false;
+
+	}
+
 }

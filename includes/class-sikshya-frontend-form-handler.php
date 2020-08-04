@@ -30,8 +30,43 @@ class Sikshya_Frontend_Form_Handler
 		if ($sikshya_billing_fields['status']) {
 
 			$data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
-			
-			sikshya()->student->add($data);
+
+			//sikshya()->student->add($data);
+
+
+			$payment_gateway_id = isset($_POST['sikshya_payment_gateway']) ? sanitize_text_field($_POST['sikshya_payment_gateway']) : 'yatra-not-gateway';
+
+			$sikshya_get_active_payment_gateways = sikshya_get_active_payment_gateways();
+
+			if (!in_array($payment_gateway_id, $sikshya_get_active_payment_gateways) && count($sikshya_get_active_payment_gateways) > 0) {
+
+				sikshya()->errors->add(sikshya()->notice_key, __('Please select at least one payment gateway', 'sikshya'));
+
+				return;
+
+			}
+
+
+			$booking_id = 1;
+
+			if ($booking_id > 0) {
+
+				sikshya()->session->clear_all();
+
+				if (in_array($payment_gateway_id, $sikshya_get_active_payment_gateways)) {
+
+					do_action('sikshya_payment_checkout_payment_gateway_' . $payment_gateway_id, $booking_id);
+
+				}
+
+				$success_redirect_page_id = get_option('sikshya_thankyou_page');
+
+				$page_permalink = get_permalink($success_redirect_page_id);
+
+				wp_safe_redirect($page_permalink);
+
+				exit;
+			}
 
 		}
 

@@ -65,19 +65,51 @@ class Sikshya_Core_Student
 	{
 		global $wpdb;
 
-		$insert_sql_query = "INSERT INTO " . SIKSHYA_DB_PREFIX . "students (
-		user_id,username, first_name, last_name, email, country, postcode, city, state, phone, street_address_1, street_address_2,  date_last_active, date_registered)
-VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-";
+		$prepare_args = array(
+			$data['user_id'],
+			$data['username'],
+			$data['first_name'],
+			$data['last_name'],
+			$data['email'],
+			$data['country'],
+			$data['postcode'],
+			$data['city'],
+			$data['state'],
+			$data['phone'],
+			$data['street_address_1'],
+			$data['street_address_2'],
+			$data['date_last_active'],
+			$data['date_registered']
+		);
 
-		$query = $wpdb->prepare($insert_sql_query, $data['user_id'], $data['username'], $data['first_name'],
-			$data['last_name'], $data['email'], $data['country'],
-			$data['postcode'], $data['city'], $data['state'], $data['phone'], $data['street_address_1'], $data['street_address_2'], $data['date_last_active'], $data['date_registered']);
+		$sql = "(
+		user_id, username, first_name, last_name, email, country, postcode, city, state, phone, street_address_1, street_address_2,  date_last_active, date_registered)
+VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
 
+		if (absint($data['user_id']) < 1) {
+			$sql = "(
+		first_name, last_name, email, country, postcode, city, state, phone, street_address_1, street_address_2,  date_last_active, date_registered)
+VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
+			$prepare_args = array(
+				$data['first_name'],
+				$data['last_name'],
+				$data['email'],
+				$data['country'],
+				$data['postcode'],
+				$data['city'],
+				$data['state'],
+				$data['phone'],
+				$data['street_address_1'],
+				$data['street_address_2'],
+				$data['date_last_active'],
+				$data['date_registered']
+			);
+		}
+		$insert_sql_query = "INSERT INTO " . SIKSHYA_DB_PREFIX . "students {$sql}";
 
-		$wpdb->query($query);
+		$query = $wpdb->prepare($insert_sql_query, $prepare_args);
 
-		echo $wpdb->last_query;
+		return $wpdb->query($query);
 	}
 
 

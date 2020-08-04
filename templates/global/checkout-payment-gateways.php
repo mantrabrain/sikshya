@@ -13,7 +13,7 @@ if (count($sikshya_payment_gateways) > 0) {
 				?>
 				<li class="sikshya_payment_method payment_method_<?php echo esc_attr($gateway_id); ?>">
 					<input id="payment_method_<?php echo esc_attr($gateway_id); ?>" type="radio"
-						   class="input-radio" name="payment_method"
+						   class="input-radio" name="sikshya_payment_gateway"
 						   value="<?php echo esc_attr($gateway_id); ?>"
 						   checked="checked" data-order_button_text="">
 
