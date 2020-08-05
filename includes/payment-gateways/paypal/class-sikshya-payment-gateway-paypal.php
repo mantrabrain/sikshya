@@ -89,36 +89,43 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 		return $settings;
 	}
 
-	public function process_payment($booking_id)
+	public function process_payment($sikshya_order_id)
 	{
 
-		/*if (!isset($_GET['do_payment'])) {
+		if (!isset($_GET['do_payment'])) {
 			return;
 		}
 
-		$booking_id = 70;*/
 
-		$txn_id = get_post_meta($booking_id, 'txn_id', true);
 
-		$payment_id = get_post_meta($booking_id, 'sikshya_payment_id', true);
+		$sikshya_order_id = 33;
 
-		$booking = get_post($booking_id);
+		$txn_id = get_post_meta($sikshya_order_id, 'txn_id', true);
 
-		$booking_status = isset($booking->post_status) ? $booking->post_status : '';
+		$payment_id = get_post_meta($sikshya_order_id, 'sikshya_payment_id', true);
 
-		if ($booking_status == 'sikshya-completed' || empty($booking_status) || !empty($txn_id) || !empty($payment_id)) {
+		$order = get_post($sikshya_order_id);
+
+		$order_meta = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
+
+		$order_status = isset($order->post_status) ? $order->post_status : '';
+
+
+		if ($order_status == 'sikshya-completed' || empty($booking_status) || !empty($txn_id) || !empty($payment_id)) {
 
 			return;
 		}
+		var_dump($order_meta);
+		exit;
 
 		include_once dirname(__FILE__) . '/class-sikshya-gateway-paypal-request.php';
 
 
-		do_action('sikshya_before_payment_process', $booking_id);
+		do_action('sikshya_before_payment_process', $sikshya_order_id);
 
 		$paypal_request = new Sikshya_Gateway_Paypal_Request();
 
-		$redirect_url = $paypal_request->get_request_url($booking_id);
+		$redirect_url = $paypal_request->get_request_url($sikshya_order_id);
 
 		wp_redirect($redirect_url);
 
@@ -162,10 +169,10 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 
 		$listener = new IPNListener();
 
-		$booking_id = isset($_POST['custom']) ? absint($_POST['custom']) : 0;
+		$sikshya_order_id = isset($_POST['custom']) ? absint($_POST['custom']) : 0;
 
 
-		if ($booking_id < 1) {
+		if ($sikshya_order_id < 1) {
 
 			return;
 		}
@@ -218,9 +225,9 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 			 * PayPal transaction id (txn_id) is stored in the database, we check
 			 * that against the txn_id returned.
 			 */
-			$txn_id = get_post_meta($booking_id, 'txn_id', true);
+			$txn_id = get_post_meta($sikshya_order_id, 'txn_id', true);
 			if (empty($txn_id)) {
-				update_post_meta($booking_id, 'txn_id', $_POST['txn_id']);
+				update_post_meta($sikshya_order_id, 'txn_id', $_POST['txn_id']);
 			} else {
 				$message .= "\nThis payment was already processed\n";
 			}
@@ -234,11 +241,11 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 			if (!empty($_POST['payment_status']) && $_POST['payment_status'] == 'Completed') {
 				// Update booking status and Payment args.
 
-				sikshya_update_booking_status($booking_id, 'sikshya-completed');
+				yatra_update_booking_status($sikshya_order_id, 'sikshya-completed');
 
-				sikshya_update_payment_status($booking_id);
+				sikshya_update_payment_status($sikshya_order_id);
 
-				$payment_id = get_post_meta($booking_id, 'sikshya_payment_id', true);
+				$payment_id = get_post_meta($sikshya_order_id, 'sikshya_payment_id', true);
 
 				update_post_meta($payment_id, '_paypal_args', $_POST);
 
@@ -246,7 +253,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 
 				update_post_meta($payment_id, 'sikshya_total_paid_currency', $_POST['mc_currency']);
 
-				do_action('sikshya_after_successful_payment', $booking_id, $message);
+				do_action('sikshya_after_successful_payment', $sikshya_order_id, $message);
 
 			} else {
 
@@ -263,13 +270,13 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 
 			file_put_contents('sikshya-ipn_errors.log', print_r($errors, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
 
-			do_action('sikshya_after_failed_payment', $booking_id, $message);
+			do_action('sikshya_after_failed_payment', $sikshya_order_id, $message);
 
 		}
 		file_put_contents('sikshya-ipn_message.log', print_r($message, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
 
 
-		update_post_meta($booking_id, 'sikshya_payment_message', $message);
+		update_post_meta($sikshya_order_id, 'sikshya_payment_message', $message);
 	}
 
 }

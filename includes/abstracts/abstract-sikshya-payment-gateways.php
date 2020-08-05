@@ -24,12 +24,14 @@ abstract class Sikshya_Payment_Gateways
 
 	public function __construct($configuration)
 	{
+
 		$this->settings = isset($configuration['settings']) ? $configuration['settings'] : array();
 
 		add_filter('sikshya_payment_gateways', array($this, 'register_setting'), 10, 1);
 		add_filter('sikshya_get_sections_payment-gateways', array($this, 'subtab'), 10, 1);
 		add_filter('sikshya_get_settings_payment-gateways', array($this, 'payment_settings'), 10, 2);
-		add_action('sikshya_payment_checkout_payment_gateway_' . $this->id, array($this, 'process_payment'), 10, 1);
+		add_action('init', array($this, 'process_payment'), 10);
+		//add_action('sikshya_payment_checkout_payment_gateway_' . $this->id, array($this, 'process_payment'), 10, 1);
 	}
 
 	function register_setting($gateways)

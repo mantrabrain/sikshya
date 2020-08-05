@@ -295,61 +295,82 @@ class Sikshya_Core_Course
 
 	}
 
-	public function enroll($course_id, $user_id)
+	private function order()
 	{
 
-		if (absint($course_id) > 1 && absint($user_id) > 0) {
+		$args = array(
+			'post_title' => 'Order on ' . get_the_time('l jS F Y g:i:s A'),
+			'post_content' => 'sikshya-pending',
+			'post_status' => 'sikshya-pending',
+			'post_type' => SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
+		);
+		$sikshya_order_id = wp_insert_post($args);
 
-			$args = array(
-				'post_title' => 'Order on ' . get_the_time('l jS F Y g:i:s A'),
-				'post_content' => 'sikshya-booked',
-				'post_status' => 'sikshya-booked',
-				'post_type' => SIKSHYA_ORDERS_CUSTOM_POST_TYPE,
-			);
-			$id = wp_insert_post($args);
+		$cart_items = sikshya()->cart->get_cart_items();
 
-			$item_name = get_the_title($course_id);
+		update_post_meta($sikshya_order_id, 'sikshya_order_meta', $cart_items);
 
-			if ($id > 0) {
+		return $sikshya_order_id;
+	}
 
-				global $wpdb;
+	public function enroll()
+	{
+		$sikshya_order_id = $this->order();
 
-				$query = $wpdb->prepare("INSERT INTO " . SIKSHYA_DB_PREFIX . 'order_items(item_name, order_id, order_datetime) VALUES(%s, %d, %s)',
-					$item_name,
-					$id,
-					current_time('mysql'));
+		$sikshya_order_meta = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
+
+		$sikshya_order_meta = is_array($sikshya_order_meta) ? $sikshya_order_meta : array();
+
+		$user_id = get_current_user_id();
+
+		foreach ($sikshya_order_meta as $course_id => $item) {
+
+			if (absint($course_id) > 1 && absint($user_id) > 0) {
+
+				$item_name = get_the_title($course_id);
+
+				if ($sikshya_order_id > 0) {
+
+					global $wpdb;
+
+					$query = $wpdb->prepare("INSERT INTO " . SIKSHYA_DB_PREFIX . 'order_items(item_name, order_id, order_datetime) VALUES(%s, %d, %s)',
+						$item_name,
+						$sikshya_order_id,
+						current_time('mysql'));
 
 
-				$wpdb->query($query);
+					$wpdb->query($query);
 
-				$order_item_id = $wpdb->insert_id;
+					$order_item_id = $wpdb->insert_id;
 
 
-				if ($order_item_id > 0) {
+					if ($order_item_id > 0) {
 
-					sikshya_update_order_item_meta(
-						$order_item_id, '_course_id', $course_id
-					);
-					sikshya_update_order_item_meta(
-						$order_item_id, '_user_id', $user_id
-					);
-					$this->insert_user_table($user_id, $course_id, $id);
+						sikshya_update_order_item_meta(
+							$order_item_id, '_course_id', $course_id
+						);
+						sikshya_update_order_item_meta(
+							$order_item_id, '_user_id', $user_id
+						);
+						$this->insert_user_table($user_id, $course_id, $sikshya_order_id);
 
-					sikshya()->role->add_student($user_id);
+						sikshya()->role->add_student($user_id);
 
-					$next_item_ids = sikshya()->course->get_lesson_quiz_ids();
+						$next_item_ids = sikshya()->course->get_lesson_quiz_ids();
 
-					$next_item_id = isset($next_item_ids[0]) ? $next_item_ids[0] : $course_id;
+						$next_item_id = isset($next_item_ids[0]) ? $next_item_ids[0] : $course_id;
 
-					update_user_meta($user_id, 'sikshya_next_item_id', $next_item_id);
+						update_user_meta($user_id, 'sikshya_next_item_id', $next_item_id);
 
-					return true;
+					}
+
 				}
 
 			}
 
 		}
-		return false;
+
+		return $sikshya_order_id;
 	}
 
 	private function insert_user_table($user_id, $course_id, $order_item_id)

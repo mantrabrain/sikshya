@@ -47,15 +47,15 @@ class Sikshya_Frontend_Form_Handler
 			}
 
 
-			$booking_id = 1;
+			$sikshya_order_id = sikshya()->course->enroll();
 
-			if ($booking_id > 0) {
+			if ($sikshya_order_id > 0) {
 
-				sikshya()->session->clear_all();
+				//sikshya()->session->clear_all();
 
 				if (in_array($payment_gateway_id, $sikshya_get_active_payment_gateways)) {
 
-					do_action('sikshya_payment_checkout_payment_gateway_' . $payment_gateway_id, $booking_id);
+					do_action('sikshya_payment_checkout_payment_gateway_' . $payment_gateway_id, $sikshya_order_id);
 
 				}
 

@@ -36,10 +36,10 @@ class Sikshya_Gateway_Paypal_Request
      * @param  bool $sandbox Whether to use sandbox mode or not.
      * @return string
      */
-    public function get_request_url($booking_id)
+    public function get_request_url($order_id)
     {
 
-        $args = $this->get_paypal_args($booking_id);
+        $args = $this->get_paypal_args($order_id);
 
 
         $redirect_uri = esc_url(home_url('/'));
@@ -55,13 +55,13 @@ class Sikshya_Gateway_Paypal_Request
         return $redirect_uri;
     }
 
-    private function get_paypal_args($booking_id)
+    private function get_paypal_args($order_id)
     {
         $paypal_email = get_option('sikshya_payment_gateway_paypal_email');
 
-        $booking = new Sikshya_Tour_Booking($booking_id);
+        $booking = get_post_meta($order_id);
 
-        $booking_details = $booking->get_all_booking_details($booking_id);
+        $booking_details = $booking->get_all_booking_details($order_id);
 
         $sikshya_booking_meta_params = isset($booking_details->sikshya_booking_meta_params) ? $booking_details->sikshya_booking_meta_params : array();
 
@@ -97,7 +97,7 @@ class Sikshya_Gateway_Paypal_Request
             $args['cbt'] = get_bloginfo('name');
             $args['return'] = add_query_arg(
                 array(
-                    'booking_id' => $booking_id,
+                    'booking_id' => $order_id,
                     'booked' => true,
                     'status' => 'success',
                 ),
@@ -105,7 +105,7 @@ class Sikshya_Gateway_Paypal_Request
             );
             $args['cancel'] = add_query_arg(
                 array(
-                    'booking_id' => $booking_id,
+                    'booking_id' => $order_id,
                     'booked' => true,
                     'status' => 'cancel',
                 ),
@@ -160,7 +160,7 @@ class Sikshya_Gateway_Paypal_Request
 
         $args['option_index_0'] = $agrs_index;
 
-        $args['custom'] = $booking_id;
+        $args['custom'] = $order_id;
 
         return apply_filters('sikshya_paypal_args', $args);
     }

@@ -1023,3 +1023,61 @@ if (!function_exists('sikahy_is_active_lesson_quizes')) {
 
 	}
 }
+
+if (!function_exists('sikshya_get_booking_statuses')) {
+
+	function sikshya_get_booking_statuses($status_key = '')
+	{
+		$statuses = apply_filters(
+			'sikshya_booking_statuses', array(
+				'sikshya-pending' => __('Pending', 'sikshya'),
+				'sikshya-processing' => __('Processing', 'sikshya'),
+				'sikshya-on-hold' => __('On Hold', 'sikshya'),
+				'sikshya-completed' => __('Completed', 'sikshya'),
+				'sikshya-cancelled' => __('Cancelled', 'sikshya')
+			)
+		);
+
+		if (empty($status_key)) {
+
+			return $statuses;
+		}
+		if (isset($statuses[$status_key])) {
+			return $statuses[$status_key];
+		}
+		return $statuses;
+
+	}
+}
+
+if (!function_exists('sikshya_update_booking_status')) {
+
+	function sikshya_update_booking_status($sikshya_order_id = 0, $status = 'sikshya-pending')
+	{
+		$sikshya_booking_statuses = sikshya_get_booking_statuses();
+
+		if ($sikshya_order_id < 1 || !isset($sikshya_booking_statuses[$status])) {
+
+			return false;
+		}
+
+		do_action('sikshya_before_booking_status_change', array(
+			'booking_id' => $sikshya_order_id,
+			'status' => $status
+		));
+
+		$booking_array = array();
+		$booking_array['ID'] = $sikshya_order_id;
+		$booking_array['post_status'] = $status;
+
+		// Update the post into the database
+		wp_update_post($booking_array);
+
+		do_action('sikshya_after_booking_status_change', array(
+			'booking_id' => $sikshya_order_id,
+			'status' => $status
+		));
+
+		return true;
+	}
+}
