@@ -30,7 +30,6 @@ abstract class Sikshya_Payment_Gateways
 		add_filter('sikshya_payment_gateways', array($this, 'register_setting'), 10, 1);
 		add_filter('sikshya_get_sections_payment-gateways', array($this, 'subtab'), 10, 1);
 		add_filter('sikshya_get_settings_payment-gateways', array($this, 'payment_settings'), 10, 2);
-		add_action('init', array($this, 'process_payment'), 10);
 		add_action('sikshya_payment_checkout_payment_gateway_' . $this->id, array($this, 'process_payment'), 10, 1);
 	}
 

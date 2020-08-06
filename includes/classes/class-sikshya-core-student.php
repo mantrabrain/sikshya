@@ -109,7 +109,9 @@ VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
 
 		$query = $wpdb->prepare($insert_sql_query, $prepare_args);
 
-		return $wpdb->query($query);
+		$wpdb->query($query);
+
+		return $wpdb->insert_id;
 	}
 
 

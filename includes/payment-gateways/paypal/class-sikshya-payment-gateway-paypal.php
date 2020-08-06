@@ -22,7 +22,6 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 
 
 		add_action('init', array($this, 'sikshya_listen_paypal_ipn'));
-		//add_action('sikshya_payment_checkout_payment_gateway_paypal', array($this, 'process_payment'));
 		add_action('sikshya_verify_paypal_ipn', array($this, 'sikshya_paypal_ipn_process'));
 
 
@@ -92,22 +91,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 	public function process_payment($sikshya_order_id)
 	{
 
-		if (!isset($_GET['do_payment'])) {
-			return;
-		}
-
-
-		$sikshya_order_id = 33;
-
-		$txn_id = get_post_meta($sikshya_order_id, 'txn_id', true);
-
-		$payment_id = get_post_meta($sikshya_order_id, 'sikshya_payment_id', true);
-
 		$order = get_post($sikshya_order_id);
-
-		$order_meta_all = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
-
-		$order_meta = isset($order_meta_all['cart']) ? $order_meta_all['cart'] : array();
 
 		$order_status = isset($order->post_status) ? $order->post_status : '';
 
@@ -117,9 +101,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 			return;
 		}
 
-
 		include_once dirname(__FILE__) . '/class-sikshya-gateway-paypal-request.php';
-
 
 		do_action('sikshya_before_payment_process', $sikshya_order_id);
 

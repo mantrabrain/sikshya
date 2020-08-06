@@ -43,6 +43,7 @@ class Sikshya_Gateway_Paypal_Request
 
 		$redirect_uri = esc_url(home_url('/'));
 
+
 		if ($args) {
 
 			$paypal_args = http_build_query($args, '', '&');
