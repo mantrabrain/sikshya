@@ -308,7 +308,11 @@ class Sikshya_Core_Course
 
 		$cart_items = sikshya()->cart->get_cart_items();
 
-		update_post_meta($sikshya_order_id, 'sikshya_order_meta', $cart_items);
+		$sikshya_order_meta['cart'] = $cart_items;
+
+		$sikshya_order_meta['currency'] = sikshya_get_active_currency();
+
+		update_post_meta($sikshya_order_id, 'sikshya_order_meta', $sikshya_order_meta);
 
 		return $sikshya_order_id;
 	}
@@ -317,7 +321,9 @@ class Sikshya_Core_Course
 	{
 		$sikshya_order_id = $this->order();
 
-		$sikshya_order_meta = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
+		$sikshya_order_meta_all = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
+
+		$sikshya_order_meta = isset($sikshya_order_meta_all['cart']) ? $sikshya_order_meta_all['cart'] : array();
 
 		$sikshya_order_meta = is_array($sikshya_order_meta) ? $sikshya_order_meta : array();
 

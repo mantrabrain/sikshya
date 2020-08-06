@@ -47,7 +47,7 @@ class Sikshya_Frontend_Form_Handler
 			}
 
 
-			$sikshya_order_id = sikshya()->course->enroll();
+			$sikshya_order_id = 1;//sikshya()->course->enroll();
 
 			if ($sikshya_order_id > 0) {
 
