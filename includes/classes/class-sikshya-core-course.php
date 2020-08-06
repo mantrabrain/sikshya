@@ -310,7 +310,7 @@ class Sikshya_Core_Course
 
 		$sikshya_order_meta['cart'] = $cart_items;
 
-		$sikshya_order_meta['currency'] = sikshya_get_active_currency();
+		$sikshya_order_meta['currency'] = sikshya_get_active_currency(true);
 
 		update_post_meta($sikshya_order_id, 'sikshya_order_meta', $sikshya_order_meta);
 

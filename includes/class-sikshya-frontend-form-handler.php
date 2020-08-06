@@ -20,16 +20,21 @@ class Sikshya_Frontend_Form_Handler
 
 	public function place_order()
 	{
-		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_place_order') {
+		/*if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_place_order') {
 			return;
 		}
-		sikshya()->helper->validate_nonce(true);
+		sikshya()->helper->validate_nonce(true);*/
 
 		$sikshya_billing_fields = sikshya()->checkout->validate_billing_data($_POST);
 
+		$sikshya_billing_fields['status'] = true;
 		if ($sikshya_billing_fields['status']) {
 
-			$data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
+			$payment_gateway_id = 'paypal';
+			$sikshya_get_active_payment_gateways = sikshya_get_active_payment_gateways();
+
+
+			/*$data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
 
 			//sikshya()->student->add($data);
 
@@ -44,10 +49,10 @@ class Sikshya_Frontend_Form_Handler
 
 				return;
 
-			}
+			}*/
 
 
-			$sikshya_order_id = 1;//sikshya()->course->enroll();
+			$sikshya_order_id = 33;//sikshya()->course->enroll();
 
 			if ($sikshya_order_id > 0) {
 
@@ -59,13 +64,13 @@ class Sikshya_Frontend_Form_Handler
 
 				}
 
-				$success_redirect_page_id = get_option('sikshya_thankyou_page');
+				/*$success_redirect_page_id = get_option('sikshya_thankyou_page');
 
 				$page_permalink = get_permalink($success_redirect_page_id);
 
 				wp_safe_redirect($page_permalink);
 
-				exit;
+				exit;*/
 			}
 
 		}

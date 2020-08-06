@@ -41,7 +41,6 @@ class Sikshya_Gateway_Paypal_Request
 
 		$args = $this->get_paypal_args($order_id);
 
-
 		$redirect_uri = esc_url(home_url('/'));
 
 		if ($args) {
@@ -52,6 +51,7 @@ class Sikshya_Gateway_Paypal_Request
 		}
 
 
+
 		return $redirect_uri;
 	}
 
@@ -59,20 +59,16 @@ class Sikshya_Gateway_Paypal_Request
 	{
 		$paypal_email = get_option('sikshya_payment_gateway_paypal_email');
 
-		var_dump($paypal_email);exit;
 
 		$order = get_post($order_id);
 
-		$order_details = get_post_meta($order_id, 'sikshya_order_meta');
+		$order_details = get_post_meta($order_id, 'sikshya_order_meta', true);
 
-		$sikshya_booking_meta_params = isset($booking_details->sikshya_booking_meta_params) ? $booking_details->sikshya_booking_meta_params : array();
+		$order_details_cart = isset($order_details['cart']) ? $order_details['cart'] : array();
 
-		$sikshya_booking_metas = isset($booking_details->sikshya_booking_meta) ? $booking_details->sikshya_booking_meta : array();
+		$currency_code = isset($order_details['currency']) ? $order_details['currency'] : sikshya_get_active_currency(true);
 
-		$currency_code = isset($sikshya_booking_meta_params['currency']) ? $sikshya_booking_meta_params['currency'] : sikshya_get_current_currency_symbol();
-
-
-		if (count($sikshya_booking_metas) > 0) {  // Normal Payment.
+		if (count($order_details_cart) > 0) {  // Normal Payment.
 
 
 			$thank_you_page_id = get_option('sikshya_thankyou_page');
@@ -99,16 +95,16 @@ class Sikshya_Gateway_Paypal_Request
 			$args['cbt'] = get_bloginfo('name');
 			$args['return'] = add_query_arg(
 				array(
-					'booking_id' => $order_id,
-					'booked' => true,
+					'order_id' => $order_id,
+					'ordered' => true,
 					'status' => 'success',
 				),
 				$thank_you_page
 			);
 			$args['cancel'] = add_query_arg(
 				array(
-					'booking_id' => $order_id,
-					'booked' => true,
+					'order_id' => $order_id,
+					'ordered' => true,
 					'status' => 'cancel',
 				),
 				$cancel_page_url
@@ -126,15 +122,15 @@ class Sikshya_Gateway_Paypal_Request
 			// Cart Item.
 			$agrs_index = 1;
 
-			foreach ($sikshya_booking_metas as $tour_id => $item) {
+			foreach ($order_details_cart as $course_id => $item) {
 
-				$tour_id = $item['sikshya_tour_id'];
+				$course_id = absint($course_id);
 
-				$item_name = isset($item['sikshya_tour_name']) ? $item['sikshya_tour_name'] : '';
+				$item_name = isset($item->title) ? $item->title : '';
 
-				$trip_code = isset($sikshya_booking_meta_params['booking_code']) ? $sikshya_booking_meta_params['booking_code'] : '';
+				//$trip_code = isset($sikshya_booking_meta_params['booking_code']) ? $sikshya_booking_meta_params['booking_code'] : '';
 
-				$payment_amount = isset($item['total_tour_price']) ? $item['total_tour_price'] : 0;
+				$payment_amount = isset($item->total_price) ? $item->total_price : 0;
 
 				$args['item_name_' . $agrs_index] = $item_name;
 
@@ -142,17 +138,17 @@ class Sikshya_Gateway_Paypal_Request
 
 				$args['amount_' . $agrs_index] = $payment_amount;
 
-				$args['item_number_' . $agrs_index] = $tour_id;
+				$args['item_number_' . $agrs_index] = $course_id;
 
-				$args['on0_' . $agrs_index] = __('Trip Code', 'sikshya');
+				$args['on0_' . $agrs_index] = __('Code', 'sikshya');
 				// $args['on1_' . $agrs_index ] = __( 'Payment Mode', 'sikshya' );
-				$args['on2_' . $agrs_index] = __('Trip Price', 'sikshya');
+				$args['on2_' . $agrs_index] = __('Price', 'sikshya');
 
-				$args['os0_' . $agrs_index] = $trip_code;
+				//$args['os0_' . $agrs_index] = $trip_code;
 				// $args['os1_' . $agrs_index ] = $payment_mode;
-				$args['os2_' . $agrs_index] = $item['total_tour_price'];
+				$args['os2_' . $agrs_index] = $payment_amount;
 
-				$args = apply_filters('sikshya_extra_paypal_args', $args, $item, $tour_id, $agrs_index);
+				$args = apply_filters('sikshya_extra_paypal_args', $args, $item, $course_id, $agrs_index);
 
 				$agrs_index++;
 			}

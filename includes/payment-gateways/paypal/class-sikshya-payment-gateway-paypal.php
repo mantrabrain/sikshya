@@ -116,8 +116,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 
 			return;
 		}
-		var_dump($order_meta);
-		exit;
+
 
 		include_once dirname(__FILE__) . '/class-sikshya-gateway-paypal-request.php';
 
