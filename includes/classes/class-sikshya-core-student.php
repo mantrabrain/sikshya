@@ -114,5 +114,23 @@ VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
 		return $wpdb->insert_id;
 	}
 
+	public function email_exists($email)
+	{
+
+		global $wpdb;
+
+		$insert_sql_query = "SELECT * FROM " . SIKSHYA_DB_PREFIX . "students WHERE email=%s";
+
+		$query = $wpdb->prepare($insert_sql_query, sanitize_text_field($email));
+
+		$data = $wpdb->get_results($query);
+
+		if (is_array($data) && count($data) > 1) {
+			
+			return true;
+		}
+		return false;
+	}
+
 
 }

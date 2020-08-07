@@ -18,6 +18,16 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 		));
 	}
 
+	/**
+	 * Define primary column.
+	 *
+	 * @return string
+	 */
+	public function get_primary_column()
+	{
+		return 'student_id';
+	}
+
 	function column_default($item, $column_name)
 	{
 		return $item[$column_name];
@@ -51,7 +61,7 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 	{
 		return sprintf(
 			'<input type="checkbox" name="id[]" value="%s" />',
-			$item['id']
+			$item['student_id']
 		);
 	}
 
@@ -68,10 +78,22 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 			'city' => __('City', 'sikshya'),
 			'state' => __('State', 'sikshya'),
 			'postcode' => __('Postcode', 'sikshya'),
+			'status' => __('Status', 'sikshya'),
 		);
 		return $columns;
 	}
 
+
+	protected function column_status($item)
+	{
+		$student_id = isset($item['user_id']) ? absint($item['user_id']) : 0;
+
+		if ($student_id > 0) {
+			echo '<span>Approved</span>';
+		} else {
+			echo '<span>Pending</span>';
+		}
+	}
 
 	function get_sortable_columns()
 	{

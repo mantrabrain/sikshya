@@ -43,6 +43,15 @@ class Sikshya_Frontend_Form_Handler
 
 			}
 
+			$email = isset($data['email']) ? $data['email'] : '';
+
+			if (sikshya()->student->email_exists($email)) {
+
+				sikshya()->errors->add(sikshya()->notice_key, __('Email already exists, please change the email.', 'sikshya'));
+
+				return;
+			}
+
 
 			$sikshya_order_id = sikshya()->course->enroll();
 
@@ -53,6 +62,8 @@ class Sikshya_Frontend_Form_Handler
 				$student_id = sikshya()->student->add($data);
 
 				$order_meta['student_id'] = $student_id;
+
+				$order_meta['order_comments'] = isset($_POST['order_comments']) ? sanitize_text_field($_POST['order_comments']) : '';
 
 				update_post_meta($sikshya_order_id, 'sikshya_order_meta', $order_meta);
 

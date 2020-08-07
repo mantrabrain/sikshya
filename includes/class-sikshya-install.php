@@ -302,7 +302,7 @@ class Sikshya_Install
 		  date_registered TIMESTAMP NULL DEFAULT NULL,
 		  PRIMARY KEY  (student_id),
 		  UNIQUE KEY user_id(user_id),
-		  KEY email(email)
+		  UNIQUE KEY email(email)
 		  ) $collate;
 		";
 
