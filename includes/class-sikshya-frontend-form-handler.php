@@ -45,21 +45,21 @@ class Sikshya_Frontend_Form_Handler
 
 			$email = isset($data['email']) ? $data['email'] : '';
 
-			if (sikshya()->student->email_exists($email)) {
+			if (email_exists($email)) {
 
 				sikshya()->errors->add(sikshya()->notice_key, __('Email already exists, please change the email.', 'sikshya'));
 
 				return;
 			}
 
+			$student_id = sikshya()->student->add($data);
 
-			$sikshya_order_id = sikshya()->course->enroll();
+			$sikshya_order_id = sikshya()->course->order();
 
 			if ($sikshya_order_id > 0) {
 
 				$order_meta = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
 
-				$student_id = sikshya()->student->add($data);
 
 				$order_meta['student_id'] = $student_id;
 

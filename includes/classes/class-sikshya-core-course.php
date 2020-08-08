@@ -295,7 +295,7 @@ class Sikshya_Core_Course
 
 	}
 
-	private function order()
+	public function order()
 	{
 
 		$args = array(
@@ -317,17 +317,15 @@ class Sikshya_Core_Course
 		return $sikshya_order_id;
 	}
 
-	public function enroll()
+	public function enroll($sikshya_order_id, $user_id = null)
 	{
-		$sikshya_order_id = $this->order();
-
 		$sikshya_order_meta_all = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
 
 		$sikshya_order_meta = isset($sikshya_order_meta_all['cart']) ? $sikshya_order_meta_all['cart'] : array();
 
 		$sikshya_order_meta = is_array($sikshya_order_meta) ? $sikshya_order_meta : array();
 
-		$user_id = get_current_user_id();
+		$user_id = is_null($user_id) ? get_current_user_id() : $user_id;
 
 		foreach ($sikshya_order_meta as $course_id => $item) {
 
@@ -379,6 +377,54 @@ class Sikshya_Core_Course
 		return $sikshya_order_id;
 	}
 
+	public function disenroll($sikshya_order_id, $user_id = null)
+	{
+		$sikshya_order_meta_all = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
+
+		$sikshya_order_meta = isset($sikshya_order_meta_all['cart']) ? $sikshya_order_meta_all['cart'] : array();
+
+		$sikshya_order_meta = is_array($sikshya_order_meta) ? $sikshya_order_meta : array();
+
+		$user_id = is_null($user_id) ? get_current_user_id() : $user_id;
+
+		foreach ($sikshya_order_meta as $course_id => $item) {
+
+			if (absint($course_id) > 1 && absint($user_id) > 0) {
+
+				$item_name = get_the_title($course_id);
+
+				if ($sikshya_order_id > 0) {
+
+					global $wpdb;
+
+					$query = $wpdb->prepare("SELECT * FROM " . SIKSHYA_DB_PREFIX . 'order_items WHERE order_id=%d',
+						$sikshya_order_id
+					);
+
+					$results = $wpdb->get_results($query);
+
+					foreach ($results as $result) {
+
+						$order_item_id = isset($result['order_item_id']) ? $result['order_item_id'] : 0;
+
+						$delete_order_item_meta = $wpdb->prepare("DELETE FROM  " . SIKSHYA_DB_PREFIX . 'order_items WHERE order_item_id=%d',
+							$order_item_id
+						);
+						$wpdb->query($delete_order_item_meta);
+					}
+
+
+					delete_user_meta($user_id, 'sikshya_next_item_id');
+				}
+
+			}
+
+		}
+
+		return $sikshya_order_id;
+	}
+
+
 	private function insert_user_table($user_id, $course_id, $order_item_id)
 	{
 		$user_id = $user_id < 1 ? get_current_user_id() : $user_id;
@@ -388,6 +434,7 @@ class Sikshya_Core_Course
 			return false;
 		}
 		global $wpdb;
+
 		$sql = $wpdb->prepare(
 			"INSERT INTO " . SIKSHYA_DB_PREFIX . "user_items
             (user_id, item_id, start_time, start_time_gmt, end_time,end_time_gmt, item_type, status,reference_id,reference_type,parent_id)

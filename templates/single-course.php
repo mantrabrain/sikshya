@@ -198,11 +198,18 @@ while (have_posts()) {
 							<?php
 
 							sikshya_course_buy_buttons();
-							
+
 							?>
 						</div>
 					</div>
 				</div>
+			</div>
+		</div>
+		<div class="sikshya-login-register-popup" style="display:none">
+			<div class="sikshya-single-login">
+				<?php
+				sikshya_load_template('profile.login');
+				?>
 			</div>
 		</div>
 	</section>

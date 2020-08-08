@@ -112,6 +112,24 @@
 
 					_this.update_cart(form_data, $(this));
 				});
+
+
+				var login_register_popup_content = $('.sikshya-login-register-popup').html();
+				var login_register_title = 'Please login to order the course';
+				new jBox('Modal', {
+					attach: '#login_register_popup_anchor',
+					width: 800,
+					height: 400,
+					blockScroll: false,
+					draggable: 'title',
+					closeButton: true,
+					content: login_register_popup_content,
+					title: login_register_title,
+					overlay: false,
+					reposition: false,
+					repositionOnOpen: false
+				});
+
 			},
 			update_cart: function (form_data, update_cart_button) {
 

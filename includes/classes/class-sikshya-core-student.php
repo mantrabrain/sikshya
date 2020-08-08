@@ -63,6 +63,23 @@ class Sikshya_Core_Student
 
 	public function add($data)
 	{
+		if (get_current_user_id() > 0) {
+
+			return get_current_user_id();
+
+		}
+
+		/*$userdata = array(
+			'user_login'    =>  $user_login,
+			'user_email'    =>  $email,
+			'first_name'    =>  $first_name,
+			'last_name'     =>  $last_name,
+			//'role'          =>  tutor()->instructor_role,
+			'user_pass'     =>  $password,
+		);*/
+
+		$user_id = wp_insert_user( $userdata ) ;
+
 		global $wpdb;
 
 		$prepare_args = array(
@@ -126,7 +143,7 @@ VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
 		$data = $wpdb->get_results($query);
 
 		if (is_array($data) && count($data) > 1) {
-			
+
 			return true;
 		}
 		return false;
