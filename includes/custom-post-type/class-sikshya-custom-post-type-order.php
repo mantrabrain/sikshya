@@ -60,8 +60,8 @@ if (!class_exists('Sikshya_Custom_Post_Type_Order')) {
 
 		public function register_post_status()
 		{
-			$sikshya_get_booking_statuses = sikshya_get_booking_statuses();
-			foreach ($sikshya_get_booking_statuses as $status_id => $status_title) {
+			$sikshya_get_order_statuses = sikshya_get_order_statuses();
+			foreach ($sikshya_get_order_statuses as $status_id => $status_title) {
 				register_post_status($status_id, array(
 					'label' => _x('Pending', 'post status label', 'sikshya'),
 					'public' => true,
