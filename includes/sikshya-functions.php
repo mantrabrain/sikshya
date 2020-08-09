@@ -1038,7 +1038,7 @@ if (!function_exists('sikshya_get_order_statuses')) {
 			)
 		);
 
-		if (empty($status_key)) {
+		if (empty($status_key) || '' == $status_key) {
 
 			return $statuses;
 		}
@@ -1066,12 +1066,12 @@ if (!function_exists('sikshya_update_order_status')) {
 			'status' => $status
 		));
 
-		$booking_array = array();
-		$booking_array['ID'] = $sikshya_order_id;
-		$booking_array['post_status'] = $status;
+		$order_array = array();
+		$order_array['ID'] = $sikshya_order_id;
+		$order_array['post_status'] = $status;
 
 		// Update the post into the database
-		wp_update_post($booking_array);
+		wp_update_post($order_array);
 
 		do_action('sikshya_after_order_status_change', array(
 			'order_id' => $sikshya_order_id,

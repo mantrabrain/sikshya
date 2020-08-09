@@ -199,7 +199,6 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 
 		$this->items = $user_query->get_results();
 
-		//$this->items = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} ORDER BY $orderby $order LIMIT %d OFFSET %d", $per_page, $paged), ARRAY_A);
 // [REQUIRED] configure pagination
 		$this->set_pagination_args(array(
 			'total_items' => $total_items, // total items defined above

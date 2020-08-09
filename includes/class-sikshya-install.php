@@ -283,28 +283,6 @@ class Sikshya_Install
 		  KEY meta_key(meta_key(191))
 		  ) $collate;
 		  ";
-		// Students Table
-		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}students (
-		  student_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-		  user_id BIGINT(20) UNSIGNED DEFAULT NULL,
-		  username VARCHAR(60)  NOT NULL DEFAULT '',
-		  first_name VARCHAR(255)  NOT NULL,
-		  last_name VARCHAR(255)  NOT NULL,
-		  email VARCHAR(100)  DEFAULT NULL,
-		  country CHAR(3)  NOT NULL DEFAULT '',
-		  postcode VARCHAR(20)  NOT NULL DEFAULT '',
-		  city VARCHAR(100)  NOT NULL DEFAULT '',
-		  state VARCHAR(100)  NOT NULL DEFAULT '',
-		  phone VARCHAR(100)  NOT NULL DEFAULT '',
-		  street_address_1 VARCHAR(255)  DEFAULT '',
-		  street_address_2 VARCHAR(255)  DEFAULT '',
-		  date_last_active TIMESTAMP NULL DEFAULT NULL,
-		  date_registered TIMESTAMP NULL DEFAULT NULL,
-		  PRIMARY KEY  (student_id),
-		  UNIQUE KEY user_id(user_id),
-		  UNIQUE KEY email(email)
-		  ) $collate;
-		";
 
 		return $tables;
 	}

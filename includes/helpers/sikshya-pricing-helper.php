@@ -26,11 +26,11 @@ if (!function_exists('sikshya_get_course_price')) {
 
 if (!function_exists('sikshya_get_price_with_symbol')) {
 
-	function sikshya_get_price_with_symbol($price)
+	function sikshya_get_price_with_symbol($price, $symbol = null)
 	{
 		$currency_symbol_position = get_option('sikshya_currency_position', 'left');
 
-		$currency_symbol = sikshya_get_active_currency_symbol();
+		$currency_symbol = is_null($symbol) ? sikshya_get_active_currency_symbol() : $symbol;
 
 		if ($currency_symbol_position == 'left') {
 

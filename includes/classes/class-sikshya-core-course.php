@@ -327,9 +327,9 @@ class Sikshya_Core_Course
 
 		$sikshya_order_meta = isset($sikshya_order_meta_all['cart']) ? $sikshya_order_meta_all['cart'] : array();
 
-		$sikshya_order_meta = is_array($sikshya_order_meta) ? $sikshya_order_meta : array();
+		$sikshya_order_meta = is_array($sikshya_order_meta) || is_object($sikshya_order_meta) ? $sikshya_order_meta : array();
 
-		$student_id = isset($sikshya_order_meta['student_id']) ? $sikshya_order_meta['student_id'] : 0;
+		$student_id = isset($sikshya_order_meta_all['student_id']) ? $sikshya_order_meta_all['student_id'] : 0;
 
 		foreach ($sikshya_order_meta as $course_id => $item) {
 
