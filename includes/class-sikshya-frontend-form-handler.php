@@ -100,7 +100,7 @@ class Sikshya_Frontend_Form_Handler
 
 	public function add_to_cart()
 	{
-		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_enroll_in_course') {
+		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_add_to_cart') {
 			return;
 		}
 		sikshya()->helper->validate_nonce(true);

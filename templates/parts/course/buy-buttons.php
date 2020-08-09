@@ -24,7 +24,7 @@
 		<input type="hidden" value="sikshya_notice"
 			   name="sikshya_enroll_in_course"/>
 		<input type="hidden"
-			   value="<?php echo wp_create_nonce('wp_sikshya_enroll_in_course_nonce') ?>"
+			   value="<?php echo wp_create_nonce('wp_sikshya_add_to_cart_nonce') ?>"
 			   name="sikshya_nonce"/>
 
 		<div class=" sikshya-course-enroll-wrap">
