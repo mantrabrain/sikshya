@@ -61,93 +61,23 @@ class Sikshya_Core_Student
 		return is_array($results) ? absint($results[0]->total) : 0;
 	}
 
-	public function add($data)
+	public function update_billing_info($billing_data, $user_id = null)
 	{
-		if (get_current_user_id() > 0) {
+		$user_id = is_null($user_id) ? get_current_user_id() : $user_id;
 
-			return get_current_user_id();
+		$billing_fields = sikshya()->checkout->billing_fields();
 
+		foreach ($billing_fields as $field) {
+
+			$id = isset($field['id']) ? $field['id'] : '';
+
+			if (isset($billing_data[$id])) {
+
+				update_user_meta($user_id, $id, sanitize_text_field($billing_data[$id]));
+			}
 		}
 
-		/*$userdata = array(
-			'user_login'    =>  $user_login,
-			'user_email'    =>  $email,
-			'first_name'    =>  $first_name,
-			'last_name'     =>  $last_name,
-			//'role'          =>  tutor()->instructor_role,
-			'user_pass'     =>  $password,
-		);*/
-
-		$user_id = wp_insert_user( $userdata ) ;
-
-		global $wpdb;
-
-		$prepare_args = array(
-			$data['user_id'],
-			$data['username'],
-			$data['first_name'],
-			$data['last_name'],
-			$data['email'],
-			$data['country'],
-			$data['postcode'],
-			$data['city'],
-			$data['state'],
-			$data['phone'],
-			$data['street_address_1'],
-			$data['street_address_2'],
-			$data['date_last_active'],
-			$data['date_registered']
-		);
-
-		$sql = "(
-		user_id, username, first_name, last_name, email, country, postcode, city, state, phone, street_address_1, street_address_2,  date_last_active, date_registered)
-VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
-
-		if (absint($data['user_id']) < 1) {
-			$sql = "(
-		first_name, last_name, email, country, postcode, city, state, phone, street_address_1, street_address_2,  date_last_active, date_registered)
-VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)";
-			$prepare_args = array(
-				$data['first_name'],
-				$data['last_name'],
-				$data['email'],
-				$data['country'],
-				$data['postcode'],
-				$data['city'],
-				$data['state'],
-				$data['phone'],
-				$data['street_address_1'],
-				$data['street_address_2'],
-				$data['date_last_active'],
-				$data['date_registered']
-			);
-		}
-		$insert_sql_query = "INSERT INTO " . SIKSHYA_DB_PREFIX . "students {$sql}";
-
-		$query = $wpdb->prepare($insert_sql_query, $prepare_args);
-
-		$wpdb->query($query);
-
-		return $wpdb->insert_id;
+		return $user_id;
 	}
-
-	public function email_exists($email)
-	{
-
-		global $wpdb;
-
-		$insert_sql_query = "SELECT * FROM " . SIKSHYA_DB_PREFIX . "students WHERE email=%s";
-
-		$query = $wpdb->prepare($insert_sql_query, sanitize_text_field($email));
-
-		$data = $wpdb->get_results($query);
-
-		if (is_array($data) && count($data) > 1) {
-
-			return true;
-		}
-		return false;
-	}
-
 
 }

@@ -295,7 +295,7 @@ class Sikshya_Core_Course
 
 	}
 
-	public function order()
+	public function order($student_id)
 	{
 
 		$args = array(
@@ -312,8 +312,12 @@ class Sikshya_Core_Course
 
 		$sikshya_order_meta['currency'] = sikshya_get_active_currency(true);
 
-		update_post_meta($sikshya_order_id, 'sikshya_order_meta', $sikshya_order_meta);
+		$sikshya_order_meta['student_id'] = $student_id;
 
+		$sikshya_order_meta['total_order_amount'] = sikshya_get_cart_price_total(false);
+
+		update_post_meta($sikshya_order_id, 'sikshya_order_meta', $sikshya_order_meta);
+		
 		return $sikshya_order_id;
 	}
 

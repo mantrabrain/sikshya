@@ -98,7 +98,7 @@ do_action('sikshya_before_cart_table');
 			<tr class="cart-subtotal">
 				<th>Subtotal</th>
 				<td data-title="subtotal"><span class="sikshya-Price-amount amount">
-						<?php sikshya_get_cart_price_subtotal(); ?>
+						<?php echo sikshya_get_cart_price_subtotal(); ?>
 
 					</span></td>
 			</tr>
@@ -107,7 +107,7 @@ do_action('sikshya_before_cart_table');
 			<tr class="order-total">
 				<th>Total</th>
 				<td data-title="Total"><strong><span class="sikshya-Price-amount amount">
-													<?php sikshya_get_cart_price_total(); ?>
+													<?php echo sikshya_get_cart_price_total(); ?>
 
 						</span></strong></td>
 			</tr>

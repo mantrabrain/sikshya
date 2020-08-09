@@ -25,11 +25,16 @@ class Sikshya_Frontend_Form_Handler
 		}
 		sikshya()->helper->validate_nonce(true);
 
+		$user_id = get_current_user_id();
+		if (absint($user_id) < 1) {
+
+			return;
+		}
 		$sikshya_billing_fields = sikshya()->checkout->validate_billing_data($_POST);
 
 		if ($sikshya_billing_fields['status']) {
 
-			$data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
+			$billing_data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
 
 			$payment_gateway_id = isset($_POST['sikshya_payment_gateway']) ? sanitize_text_field($_POST['sikshya_payment_gateway']) : 'yatra-not-gateway';
 
@@ -43,18 +48,9 @@ class Sikshya_Frontend_Form_Handler
 
 			}
 
-			$email = isset($data['email']) ? $data['email'] : '';
+			$student_id = sikshya()->student->update_billing_info($billing_data, $user_id);
 
-			if (email_exists($email)) {
-
-				sikshya()->errors->add(sikshya()->notice_key, __('Email already exists, please change the email.', 'sikshya'));
-
-				return;
-			}
-
-			$student_id = sikshya()->student->add($data);
-
-			$sikshya_order_id = sikshya()->course->order();
+			$sikshya_order_id = sikshya()->course->order($student_id);
 
 			if ($sikshya_order_id > 0) {
 

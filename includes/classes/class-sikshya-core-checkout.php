@@ -7,7 +7,7 @@ class Sikshya_Core_Checkout
 
 		$fields = array(
 			array(
-				'id' => 'first_name',
+				'id' => 'billing_first_name',
 				'label' => __('First Name', 'Sikshya'),
 				'type' => 'text',
 				'validation' => array(
@@ -16,7 +16,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-first'
 			),
 			array(
-				'id' => 'last_name',
+				'id' => 'billing_last_name',
 				'label' => __('Last Name', 'Sikshya'),
 				'type' => 'text',
 				'validation' => array(
@@ -25,7 +25,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-last'
 			),
 			array(
-				'id' => 'country',
+				'id' => 'billing_country',
 				'label' => __('Country', 'Sikshya'),
 				'type' => 'select',
 				'validation' => array(
@@ -35,7 +35,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-last'
 			),
 			array(
-				'id' => 'street_address_1',
+				'id' => 'billing_street_address_1',
 				'label' => __('Street Address', 'Sikshya'),
 				'type' => 'text',
 				'validation' => array(
@@ -47,7 +47,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-first'
 			),
 			array(
-				'id' => 'street_address_2',
+				'id' => 'billing_street_address_2',
 				'label' => '',
 				'type' => 'text',
 				'attributes' => array(
@@ -56,7 +56,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-last'
 			),
 			array(
-				'id' => 'postcode',
+				'id' => 'billing_postcode',
 				'label' => __('Postcode / ZIP', 'sikshya'),
 				'type' => 'text',
 				'validation' => array(
@@ -65,7 +65,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-first'
 			),
 			array(
-				'id' => 'city',
+				'id' => 'billing_city',
 				'label' => __('Town/City', 'sikshya'),
 				'type' => 'text',
 				'validation' => array(
@@ -74,7 +74,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-last'
 			),
 			array(
-				'id' => 'state',
+				'id' => 'billing_state',
 				'label' => __('State/Zone', 'sikshya'),
 				'type' => 'select',
 				'validation' => array(
@@ -87,7 +87,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-first'
 			),
 			array(
-				'id' => 'phone',
+				'id' => 'billing_phone',
 				'label' => __('Phone', 'sikshya'),
 				'type' => 'text',
 				'validation' => array(
@@ -96,7 +96,7 @@ class Sikshya_Core_Checkout
 				'class' => 'form-row-last'
 			),
 			array(
-				'id' => 'email',
+				'id' => 'billing_email',
 				'label' => __('Email', 'sikshya'),
 				'type' => 'email',
 				'validation' => array(

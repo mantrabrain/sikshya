@@ -78,7 +78,7 @@
 				<th>Subtotal</th>
 				<td><span class="sikshya-Price-amount amount">
 							<?php
-							sikshya_get_cart_price_subtotal();
+							echo sikshya_get_cart_price_subtotal();
 							?>
 						</span></td>
 			</tr>
@@ -87,7 +87,7 @@
 				<td>
 					<strong><span class="sikshya-Price-amount amount">
 							<?php
-							sikshya_get_cart_price_total();
+							echo sikshya_get_cart_price_total();
 							?>
 						</span>
 					</strong>

@@ -62,7 +62,7 @@ if (!function_exists('sikshya_get_course_total_price')) {
 }
 
 if (!function_exists('sikshya_get_cart_price_subtotal')) {
-	function sikshya_get_cart_price_subtotal()
+	function sikshya_get_cart_price_subtotal($with_currency_symbol = true)
 	{
 		$all_cart_items = sikshya()->cart->get_cart_items();
 
@@ -71,14 +71,15 @@ if (!function_exists('sikshya_get_cart_price_subtotal')) {
 		foreach ($all_cart_items as $item) {
 			$subtotal_price += absint($item->total_price);
 		}
-		echo sikshya_get_price_with_symbol($subtotal_price);
+		return $with_currency_symbol ? sikshya_get_price_with_symbol($subtotal_price) : $subtotal_price;
 
 	}
 }
 
 
 if (!function_exists('sikshya_get_cart_price_total')) {
-	function sikshya_get_cart_price_total()
+
+	function sikshya_get_cart_price_total($with_currency_symbol = true)
 	{
 		$all_cart_items = sikshya()->cart->get_cart_items();
 
@@ -87,6 +88,6 @@ if (!function_exists('sikshya_get_cart_price_total')) {
 		foreach ($all_cart_items as $item) {
 			$total_price += absint($item->total_price);
 		}
-		echo sikshya_get_price_with_symbol($total_price);
+		return $with_currency_symbol ? sikshya_get_price_with_symbol($total_price) : $total_price;
 	}
 }
