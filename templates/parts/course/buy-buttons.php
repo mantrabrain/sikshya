@@ -19,7 +19,7 @@
 	<form class="sikshya-enroll-form" method="post">
 		<input type="hidden" name="sikshya_course_id"
 			   value="<?php echo absint(get_the_ID()); ?>">
-		<input type="hidden" value="sikshya_enroll_in_course"
+		<input type="hidden" value="sikshya_add_to_cart"
 			   name="sikshya_action"/>
 		<input type="hidden" value="sikshya_notice"
 			   name="sikshya_enroll_in_course"/>

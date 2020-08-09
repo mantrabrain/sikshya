@@ -13,7 +13,7 @@ class Sikshya_Frontend_Form_Handler
 		add_action('template_redirect', array($this, 'next_quiz_question'));
 		add_action('template_redirect', array($this, 'prev_quiz_question'));
 		add_action('template_redirect', array($this, 'complete_quiz_question'));
-		add_action('template_redirect', array($this, 'enroll_in_course'));
+		add_action('template_redirect', array($this, 'add_to_cart'));
 		add_action('template_redirect', array($this, 'place_order'));
 
 	}
@@ -98,7 +98,7 @@ class Sikshya_Frontend_Form_Handler
 		}
 	}
 
-	public function enroll_in_course()
+	public function add_to_cart()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_enroll_in_course') {
 			return;
@@ -108,6 +108,11 @@ class Sikshya_Frontend_Form_Handler
 		$course_id = isset($_POST['sikshya_course_id']) ? absint($_POST['sikshya_course_id']) : 0;
 
 		$user_id = get_current_user_id();
+
+		if (absint($user_id) < 1) {
+			sikshya()->errors->add(sikshya()->notice_key, __('Please login to continue', 'sikshya'));
+			return;
+		}
 
 
 		if (!sikshya()->course->has_enrolled($course_id)) {

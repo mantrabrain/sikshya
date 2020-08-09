@@ -208,7 +208,9 @@ while (have_posts()) {
 		<div class="sikshya-login-register-popup" style="display:none">
 			<div class="sikshya-single-login">
 				<?php
-				sikshya_load_template('profile.login');
+				sikshya_load_template('profile.login', array(
+					'redirect_to' => get_permalink(get_the_ID())
+				));
 				?>
 			</div>
 		</div>
