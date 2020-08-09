@@ -118,8 +118,8 @@
 				var login_register_title = 'Please login to order the course';
 				new jBox('Modal', {
 					attach: '#login_register_popup_anchor',
-					width: 800,
-					height: 400,
+					width: 400,
+					height: 350,
 					blockScroll: false,
 					draggable: 'title',
 					closeButton: true,
