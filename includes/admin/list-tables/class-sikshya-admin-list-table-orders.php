@@ -173,27 +173,44 @@ class Sikshya_Admin_List_Table_Orders extends Sikshya_Admin_List_Table
 
 	protected function render_course_column()
 	{
-		foreach ($this->order_items as $order_item) {
 
-			$order_item_id = isset($order_item->order_item_id) ? $order_item->order_item_id : 0;
+		if ($this->object->post_status == 'sikshya-completed') {
+			foreach ($this->order_items as $order_item) {
 
-			$course_id = sikshya_get_order_item_meta($order_item_id, '_course_id');
+				$order_item_id = isset($order_item->order_item_id) ? $order_item->order_item_id : 0;
 
-			$course_title = isset($order_item->item_name) ? $order_item->item_name : '';
+				$course_id = sikshya_get_order_item_meta($order_item_id, '_course_id');
 
-			if (get_post_status($course_id)) {
+				$course_title = isset($order_item->item_name) ? $order_item->item_name : '';
 
-				$course_title = get_the_title($course_id);
+				if (get_post_status($course_id)) {
+
+					$course_title = get_the_title($course_id);
+				}
+
+
+				if (absint($course_id) > 0) {
+
+					echo '<a href="' . get_edit_post_link($course_id) . '">' . esc_html($course_title) . '</a>';
+				}
 			}
 
+		} else {
 
-			if (absint($course_id) > 0) {
+			$cart_items = isset($this->order_meta['cart']) ? $this->order_meta['cart'] : array();
 
-				echo '<a href="' . get_edit_post_link($course_id) . '">' . esc_html($course_title) . '</a>';
+			foreach ($cart_items as $course_id => $order_item) {
+
+
+				if (absint($course_id) > 0 && get_post_status($course_id)) {
+
+					$course_title = get_the_title($course_id);
+
+
+					echo '<a href="' . get_edit_post_link($course_id) . '">' . esc_html($course_title) . '</a>';
+				}
 			}
 		}
-
-
 	}
 
 	protected function render_student_column()
@@ -201,7 +218,9 @@ class Sikshya_Admin_List_Table_Orders extends Sikshya_Admin_List_Table
 		$order_item_id = isset($this->order_items[0]) ? $this->order_items[0]->order_item_id : 0;
 
 		$user_id = sikshya_get_order_item_meta($order_item_id, '_user_id');
-
+		if (!$user_id) {
+			$user_id = isset($this->order_meta['student_id']) ? $this->order_meta['student_id'] : 0;
+		}
 		$user_data = get_userdata($user_id);
 
 		$data = isset($user_data->data) ? $user_data->data : array();

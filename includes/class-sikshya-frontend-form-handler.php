@@ -50,12 +50,35 @@ class Sikshya_Frontend_Form_Handler
 
 			if ($total_cart_amount > 0) {
 
-				if (!in_array($payment_gateway_id, $sikshya_get_active_payment_gateways) && count($sikshya_get_active_payment_gateways) > 0) {
+				if (count($sikshya_get_active_payment_gateways) < 1) {
+
+					sikshya()->errors->add(sikshya()->notice_key, __('Payment gateway properly not setup. Please contact site administrator.', 'sikshya'));
+
+					return;
+				}
+
+				if (!in_array($payment_gateway_id, $sikshya_get_active_payment_gateways)) {
 
 					sikshya()->errors->add(sikshya()->notice_key, __('Please select at least one payment gateway', 'sikshya'));
 
 					return;
 
+				}
+				if (function_exists('sikshya_payment_gateway_' . $payment_gateway_id . '_validate_settings')) {
+
+					$validation = call_user_func('sikshya_payment_gateway_' . $payment_gateway_id . '_validate_settings');
+
+					$status = isset($validation['status']) ? (boolean)$validation['status'] : false;
+
+					$message = isset($validation['message']) ? sanitize_text_field($validation['message']) : __('Something wrong on payment gateway setup. Please contact your site administrator', 'sikshya');
+
+					if (!$status) {
+
+						sikshya()->errors->add(sikshya()->notice_key, $message);
+
+						return;
+
+					}
 				}
 			}
 
