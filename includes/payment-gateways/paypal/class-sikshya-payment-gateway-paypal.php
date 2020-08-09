@@ -223,7 +223,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 			if (!empty($_POST['payment_status']) && $_POST['payment_status'] == 'Completed') {
 				// Update booking status and Payment args.
 
-				yatra_update_order_status($sikshya_order_id, 'sikshya-completed');
+				sikshya_update_order_status($sikshya_order_id, 'sikshya-completed');
 
 				sikshya_update_payment_status($sikshya_order_id);
 
