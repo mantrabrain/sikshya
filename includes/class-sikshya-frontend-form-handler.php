@@ -26,6 +26,12 @@ class Sikshya_Frontend_Form_Handler
 		sikshya()->helper->validate_nonce(true);
 
 		$user_id = get_current_user_id();
+
+		$cart_items = sikshya()->cart->get_cart_items();
+
+		if (count($cart_items) < 1) {
+			return;
+		}
 		if (absint($user_id) < 1) {
 
 			return;
@@ -40,13 +46,24 @@ class Sikshya_Frontend_Form_Handler
 
 			$sikshya_get_active_payment_gateways = sikshya_get_active_payment_gateways();
 
-			if (!in_array($payment_gateway_id, $sikshya_get_active_payment_gateways) && count($sikshya_get_active_payment_gateways) > 0) {
+			$total_cart_amount = absint(sikshya_get_cart_price_total(false));
 
-				sikshya()->errors->add(sikshya()->notice_key, __('Please select at least one payment gateway', 'sikshya'));
+			if ($total_cart_amount > 0) {
 
-				return;
+				if (!in_array($payment_gateway_id, $sikshya_get_active_payment_gateways) && count($sikshya_get_active_payment_gateways) > 0) {
 
+					sikshya()->errors->add(sikshya()->notice_key, __('Please select at least one payment gateway', 'sikshya'));
+
+					return;
+
+				}
 			}
+
+			do_action('sikshya_before_place_order', [
+				'payment_gateway' => $payment_gateway_id,
+				'total_order_amount' => $total_cart_amount,
+				'billing_data' => $billing_data
+			]);
 
 			$student_id = sikshya()->student->update_billing_info($billing_data, $user_id);
 
@@ -56,20 +73,19 @@ class Sikshya_Frontend_Form_Handler
 
 				$order_meta = get_post_meta($sikshya_order_id, 'sikshya_order_meta', true);
 
-
-				$order_meta['student_id'] = $student_id;
-
 				$order_meta['order_comments'] = isset($_POST['order_comments']) ? sanitize_text_field($_POST['order_comments']) : '';
 
 				update_post_meta($sikshya_order_id, 'sikshya_order_meta', $order_meta);
 
 				sikshya()->session->clear_all();
 
-				if (in_array($payment_gateway_id, $sikshya_get_active_payment_gateways)) {
+				do_action('sikshya_after_place_order', [
+					'order_id' => $sikshya_order_id,
+					'payment_gateway' => $payment_gateway_id,
+					'total_order_amount' => $total_cart_amount,
+					'billing_data' => $billing_data
+				]);
 
-					do_action('sikshya_payment_checkout_payment_gateway_' . $payment_gateway_id, $sikshya_order_id);
-
-				}
 
 				$success_redirect_page_id = get_option('sikshya_thankyou_page');
 
@@ -85,7 +101,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function logout()
+	public
+	function logout()
 	{
 		$query_var = get_query_var('sikshya_account_page');
 
@@ -94,7 +111,8 @@ class Sikshya_Frontend_Form_Handler
 		}
 	}
 
-	public function add_to_cart()
+	public
+	function add_to_cart()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_add_to_cart') {
 			return;
@@ -145,7 +163,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function complete_quiz_question()
+	public
+	function complete_quiz_question()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_complete_quiz_question') {
 			return;
@@ -204,7 +223,8 @@ class Sikshya_Frontend_Form_Handler
 		}
 	}
 
-	public function next_quiz_question()
+	public
+	function next_quiz_question()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_next_quiz_question') {
 			return;
@@ -242,7 +262,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function prev_quiz_question()
+	public
+	function prev_quiz_question()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_prev_quiz_question') {
 			return;
@@ -277,7 +298,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function start_quiz()
+	public
+	function start_quiz()
 	{
 
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_start_quiz') {
@@ -319,7 +341,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function complete_lesson()
+	public
+	function complete_lesson()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_complete_lesson') {
 			return;
@@ -348,7 +371,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function register_user()
+	public
+	function register_user()
 	{
 
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_register_user') {
@@ -427,7 +451,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function update_profile()
+	public
+	function update_profile()
 	{
 
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_update_profile') {
@@ -510,7 +535,8 @@ class Sikshya_Frontend_Form_Handler
 
 	}
 
-	public function login_user()
+	public
+	function login_user()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_login_user') {
 			return;

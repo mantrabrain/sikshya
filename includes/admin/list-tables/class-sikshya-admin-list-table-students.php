@@ -8,8 +8,6 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 	{
 		global $wpdb;
 
-		$this->table_name = $wpdb->prefix . 'sikshya_students';
-
 		global $status, $page;
 
 		parent::__construct(array(
@@ -30,7 +28,7 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 
 	function column_default($item, $column_name)
 	{
-		return $item[$column_name];
+		return isset($item->$column_name) ? $item->$column_name : '';
 	}
 
 	function column_age($item)
@@ -61,7 +59,7 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 	{
 		return sprintf(
 			'<input type="checkbox" name="id[]" value="%s" />',
-			$item['student_id']
+			$item->ID
 		);
 	}
 
@@ -69,38 +67,85 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 	{
 		$columns = array(
 			'cb' => '<input type="checkbox" />', //Render a checkbox instead of text
-			'student_id' => __('ID', 'sikshya'),
+			'ID' => __('ID', 'sikshya'),
 			'username' => __('Username', 'sikshya'),
 			'first_name' => __('First Name', 'sikshya'),
 			'last_name' => __('Last Name', 'sikshya'),
 			'email' => __('Email', 'sikshya'),
+			'phone' => __('Phone', 'sikshya'),
 			'country' => __('Country', 'sikshya'),
 			'city' => __('City', 'sikshya'),
 			'state' => __('State', 'sikshya'),
 			'postcode' => __('Postcode', 'sikshya'),
-			'status' => __('Status', 'sikshya'),
 		);
 		return $columns;
 	}
 
 
-	protected function column_status($item)
+	protected function column_username($item)
 	{
-		$student_id = isset($item['user_id']) ? absint($item['user_id']) : 0;
+		echo $item->data->user_login;
+	}
 
-		if ($student_id > 0) {
-			echo '<span>Approved</span>';
-		} else {
-			echo '<span>Pending</span>';
-		}
+	protected function column_email($item)
+	{
+		echo $item->data->user_email;
+	}
+
+	protected function column_phone($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_phone', true);
+	}
+
+	protected function column_country($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_country', true);
+
+	}
+
+	protected function column_first_name($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_first_name', true);
+
+	}
+
+	protected function column_last_name($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_last_name', true);
+
+	}
+
+	protected function column_city($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_city', true);
+
+	}
+
+	protected function column_state($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_state', true);
+
+	}
+
+	protected function column_postcode($item)
+	{
+		$user_id = $item->ID;
+		echo get_user_meta($user_id, 'billing_postcode', true);
+
+
 	}
 
 	function get_sortable_columns()
 	{
 		$sortable_columns = array(
-			'student_id' => array('student_id', true),
+			'ID' => array('ID', true),
 			'email' => array('email', false),
-			'user_id' => array('user_id', false),
 		);
 		return $sortable_columns;
 	}
@@ -109,29 +154,9 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 	function get_bulk_actions()
 	{
 		return array();
-		$actions = array(
-			'delete' => 'Delete'
-		);
-		return $actions;
+
 	}
 
-
-	function process_bulk_action()
-	{
-
-		global $wpdb;
-
-		return;
-
-		if ('delete' === $this->current_action()) {
-			$ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
-			if (is_array($ids)) $ids = implode(',', $ids);
-
-			if (!empty($ids)) {
-				$wpdb->query("DELETE FROM {$this->table_name} WHERE id IN($ids)");
-			}
-		}
-	}
 
 	/**
 	 * [REQUIRED] This is the most important method
@@ -151,12 +176,10 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 // here we configure table headers, defined in our methods
 		$this->_column_headers = array($columns, $hidden, $sortable);
 
-// [OPTIONAL] process bulk action if any
-		$this->process_bulk_action();
 
-// will be used in pagination settings
-		$total_items = $wpdb->get_var("SELECT COUNT(student_id) FROM {$this->table_name}");
-
+		$count_user_query = new WP_User_Query(array('role' => 'sikshya_student'));
+// Get the total number of users for the current query. I use (int) only for sanitize.
+		$total_items = (int)$count_user_query->get_total();
 // prepare query params, as usual current page, order by and order direction
 		$paged = isset($_REQUEST['paged']) ? max(0, intval($_REQUEST['paged'] - 1) * $per_page) : 0;
 		$orderby = (isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : 'student_id';
@@ -164,7 +187,19 @@ class Sikshya_Admin_List_Table_Students extends WP_List_Table
 
 // [REQUIRED] define $items array
 // notice that last argument is ARRAY_A, so we will retrieve array
-		$this->items = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} ORDER BY $orderby $order LIMIT %d OFFSET %d", $per_page, $paged), ARRAY_A);
+		$user_query = new WP_User_Query(array(
+				'role' => 'sikshya_student',
+				'query_orderby' => $orderby,
+				'order' => $order,
+				'paged' => $per_page,
+				'offset' => $paged,
+
+			)
+		);
+
+		$this->items = $user_query->get_results();
+
+		//$this->items = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} ORDER BY $orderby $order LIMIT %d OFFSET %d", $per_page, $paged), ARRAY_A);
 // [REQUIRED] configure pagination
 		$this->set_pagination_args(array(
 			'total_items' => $total_items, // total items defined above
