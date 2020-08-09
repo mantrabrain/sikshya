@@ -19,6 +19,14 @@ if (!class_exists('Sikshya_Payment_Gateways_Core')) {
 			$this->includes();
 
 			$this->register();
+
+		}
+
+		public function test()
+		{
+
+			include_once SIKSHYA_PATH . '/includes/payment-gateways/paypal/class-sikshya-gateway-paypal-sample.php';
+
 		}
 
 		public function includes()

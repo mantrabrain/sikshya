@@ -375,7 +375,7 @@ class Sikshya_Ajax
 
 		foreach ($sikshya_cart as $content_id => $update_cart_items) {
 
-			$quantity = isset($update_cart_items['quantity']) ? absint($update_cart_items['quantity']) : 0;
+			$quantity = isset($update_cart_items['quantity']) ? absint($update_cart_items['quantity']) : 1;
 
 			$content_id = absint($content_id);
 

@@ -8,7 +8,6 @@ do_action('sikshya_before_cart_table');
 		<th class="product-thumbnail">&nbsp;</th>
 		<th class="product-name">Course</th>
 		<th class="product-price">Price</th>
-		<th class="product-quantity">Quantity</th>
 		<th class="product-subtotal">Total</th>
 	</tr>
 	</thead>
@@ -47,21 +46,6 @@ do_action('sikshya_before_cart_table');
 				?>
 			</td>
 
-			<td class="product-quantity">
-				<div class="quantity">
-					<label class="screen-reader-text" for="course_quantity_<?php echo absint($sk_cart_item->ID) ?>">Java
-						(Beginner) Programming
-						Tutorials
-						quantity</label>
-					<input type="number" id="course_quantity_<?php echo absint($sk_cart_item->ID) ?>"
-						   class="course-qty" step="1" min="0"
-						   max=""
-						   name="sikshya_cart[<?php echo absint($sk_cart_item->ID) ?>][quantity]"
-						   value="<?php echo esc_attr($sk_cart_item->quantity) ?>" title="Qty" size="4"
-						   inputmode="numeric">
-				</div>
-			</td>
-
 			<td class="product-subtotal" data-title="Total">
 					<span
 						class="sikshya-Price-amount amount"><?php echo esc_html($sk_cart_item->total_price_string) ?></span>
@@ -69,7 +53,7 @@ do_action('sikshya_before_cart_table');
 		</tr>
 	<?php } ?>
 
-	<tr>
+	<tr style="height:0;width:0;display:none;">
 		<td colspan="6" class="actions">
 
 			<div class="coupon">

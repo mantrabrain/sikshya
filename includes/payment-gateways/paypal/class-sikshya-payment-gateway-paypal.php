@@ -123,8 +123,15 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 	{
 
 		if (isset($_GET['sikshya_listener']) && $_GET['sikshya_listener'] == 'IPN' && isset($_POST['custom'])) {
+			file_put_contents('sikshya-ipn_response-post.log', print_r($_POST, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
+			file_put_contents('sikshya-ipn_response-get.log', print_r($_GET, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
+			file_put_contents('sikshya-ipn_response-request.log', print_r($_REQUEST, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
 
-			do_action('sikshya_verify_paypal_ipn');
+			$order_id = isset($_GET['order_id']) ? $_GET['order_id'] : 0;
+			$nonce = isset($_GET['nonce']) ? $_GET['nonce'] : '';
+			//if (wp_verify_nonce($nonce, 'sikshiya_paypal_payment_ipn_nonce_' . substr(md5($order_id), 5, 5))) {
+				do_action('sikshya_verify_paypal_ipn');
+			//}
 		}
 		// echo WP_CONTENT_DIR;die;
 	}
