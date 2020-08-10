@@ -6,6 +6,8 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
 		private $course_meta = array();
 
+		private $active_tab = 'curriculum';
+
 		function __construct()
 		{
 
@@ -98,9 +100,11 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
 		public function curriculum_tab()
 		{
+			$active_tab = $this->active_tab;
 
-
-			sikshya_load_admin_template('metabox.course.tabs.curriculum', array());
+			sikshya_load_admin_template('metabox.course.tabs.curriculum', array(
+				'active_tab' => $active_tab
+			));
 
 		}
 
@@ -136,7 +140,6 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 			}
 			$tabs = array(
 				'curriculum' => array(
-					'is_active' => true,
 					'title' => esc_html__('Curriculum', 'sikshya'),
 				),
 				'general' => array(
@@ -159,7 +162,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 			wp_nonce_field(SIKSHYA_FILE, SIKSHYA_COURSES_CUSTOM_POST_TYPE . '_nonce');
 
 			sikshya_load_admin_template('metabox.course.options', array(
-
+				'active_tab' => $this->active_tab,
 				'tabs' => $tabs
 			));
 
@@ -168,12 +171,17 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 		public function init_meta_data()
 		{
 
+			global $post;
+			$course_id = isset($post->ID) ? $post->ID : 0;
+			$active_tab = get_post_meta($course_id, 'sikshya_course_active_tab', true);
+			$this->active_tab = $active_tab != '' ? $active_tab : $this->active_tab;
 			$this->course_meta = sikshya()->course->get_course_meta();
 
 		}
 
-		public function metabox()
+		public function metabox($course_id)
 		{
+
 			$this->init_meta_data();
 
 			add_action('edit_form_after_editor', array($this, 'course_options_meta'));
@@ -261,6 +269,9 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 				update_post_meta($post_id, $info_key, $info);
 
 			}
+
+			$sikshya_course_active_tab = isset($_POST['sikshya_course_active_tab']) ? sanitize_text_field($_POST['sikshya_course_active_tab']) : $this->active_tab;
+			update_post_meta($post_id, 'sikshya_course_active_tab', $sikshya_course_active_tab);
 
 			if (($valid_sikshya_info['sikshya_instructor']) > 0) {
 

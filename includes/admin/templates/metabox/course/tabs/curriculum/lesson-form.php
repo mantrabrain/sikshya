@@ -1,6 +1,5 @@
 <form method="post" class="lesson-form" action="<?php echo esc_url(admin_url('admin-ajax.php')) ?>"
-      data-section-id="<?php echo absint($section_id); ?>"
->
+      data-section-id="<?php echo absint($section_id); ?>">
     <label for="lesson_title">
         <span>Lesson Title</span>
         <input type="text" name="lesson_title" required/>
