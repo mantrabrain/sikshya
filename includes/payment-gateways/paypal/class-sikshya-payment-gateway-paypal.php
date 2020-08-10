@@ -227,7 +227,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 			 * Create a new payment, send customer an email and empty the cart
 			 */
 
-			update_post_meta($sikshya_order_id, '_paypal_args', $_POST);
+			update_post_meta($sikshya_order_id, '_gateway_response', $_POST);
 
 			if (!empty($_POST['payment_status']) && $_POST['payment_status'] == 'Completed') {
 				// Update booking status and Payment args.
@@ -238,9 +238,9 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 
 				$payment_id = get_post_meta($sikshya_order_id, 'sikshya_payment_id', true);
 
-				update_post_meta($payment_id, '_paypal_args', $_POST);
+				update_post_meta($payment_id, '_gateway_response', $_POST);
 
-				delete_post_meta($sikshya_order_id, '_paypal_args');
+				delete_post_meta($sikshya_order_id, '_gateway_response');
 
 				update_post_meta($payment_id, 'sikshya_total_paid_amount', $_POST['mc_gross']);
 
