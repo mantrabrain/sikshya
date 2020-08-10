@@ -14,6 +14,7 @@ class Sikshya_Frontend_Form_Handler
 		add_action('template_redirect', array($this, 'prev_quiz_question'));
 		add_action('template_redirect', array($this, 'complete_quiz_question'));
 		add_action('template_redirect', array($this, 'add_to_cart'));
+		add_action('template_redirect', array($this, 'remove_cart_item'));
 		add_action('template_redirect', array($this, 'place_order'));
 
 	}
@@ -134,8 +135,7 @@ class Sikshya_Frontend_Form_Handler
 		}
 	}
 
-	public
-	function add_to_cart()
+	public function add_to_cart()
 	{
 		if (sikshya()->helper->array_get('sikshya_action', $_POST) !== 'sikshya_add_to_cart') {
 			return;
@@ -184,6 +184,21 @@ class Sikshya_Frontend_Form_Handler
 		sikshya()->course->enroll($course_id, $user_id);
 
 
+	}
+
+	public function remove_cart_item()
+	{
+		if (sikshya()->helper->array_get('sikshya_action', $_GET) !== 'sikshya_remove_cart_item') {
+
+			return;
+		}
+		sikshya()->helper->validate_nonce(true);
+
+		$hash_course_id = isset($_GET['remove_item']) ? sanitize_text_field($_GET['remove_item']) : '';
+		if ($hash_course_id == '') {
+			return;
+		}
+		sikshya()->cart->remove($hash_course_id, true);
 	}
 
 	public

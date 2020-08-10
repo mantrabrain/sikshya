@@ -54,27 +54,43 @@ class Sikshya_Core_Cart
 
 	}
 
-	public function remove($item_id)
+	public function remove($item_id, $is_hash = false)
 	{
 
-		if (absint($item_id) < 1) {
-			return;
+		if (!$is_hash) {
+			if (absint($item_id) < 1) {
+				return;
+			}
 		}
 		$cart_items = sikshya()->session->get_all();
 
 		if (isset($cart_items['cart_items'])) {
 
-			if (isset($cart_items['cart_items'][$item_id])) {
+			$removed_item_id = 0;
 
-				unset($cart_items['cart_items'][$item_id]);
+			foreach ($cart_items['cart_items'] as $cart_item_id => $single_item) {
+
+				if ($cart_item_id == $item_id && !$is_hash) {
+					$removed_item_id = $cart_item_id;
+				}
+				if ($is_hash && md5($cart_item_id) == $item_id) {
+					$removed_item_id = $cart_item_id;
+				}
+				if ($removed_item_id > 0) {
+					break;
+				}
+
+			}
+			if (isset($cart_items['cart_items'][$removed_item_id])) {
+
+				unset($cart_items['cart_items'][$removed_item_id]);
 
 				$final_cart_items = $cart_items['cart_items'];
 
 				sikshya()->session->set('cart_items', $final_cart_items);
 
 				$this->all_cart_items = $final_cart_items;
-
-
+				
 			}
 		}
 	}

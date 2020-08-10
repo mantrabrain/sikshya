@@ -1,5 +1,9 @@
 <?php
 do_action('sikshya_before_cart_table');
+if (count($sikshya_cart_items) < 1) {
+	echo '<h2>Cart is empty</h2>';
+	return;
+}
 ?>
 <table class="shop_table shop_table_responsive cart sikshya-cart-form__contents" cellspacing="0">
 	<thead>
@@ -26,8 +30,8 @@ do_action('sikshya_before_cart_table');
 		<tr class="sikshya-cart-form__cart-item cart_item">
 
 			<td class="product-remove">
-				<a href="https://demo.themeum.com/plugins/tutor/cart/?remove_item=903ce9225fca3e988c2af215d4e544d3&amp;_wpnonce=55ddc6f461"
-				   class="remove" aria-label="Remove this item" data-product_id="143" data-product_sku="">×</a></td>
+				<a href="<?php esc_url(get_permalink()) ?>?sikshya_action=sikshya_remove_cart_item&remove_item=<?php echo esc_attr(md5($course_id)) ?>&sikshya_nonce=<?php echo esc_attr(wp_create_nonce('wp_sikshya_remove_cart_item_nonce')) ?>"
+				   class="remove">×</a></td>
 
 			<td class="product-thumbnail">
 				<?php

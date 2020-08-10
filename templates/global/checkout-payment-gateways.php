@@ -50,31 +50,12 @@ if (count($sikshya_payment_gateways) > 0) {
 
 		</ul>
 		<div class="form-row place-order">
-			<noscript>
-				Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update
-					Totals</em> button before placing your order. You may be charged more than the amount stated
-				above if you fail to do so. <br/>
-				<button type="submit" class="button alt" name="sikshya_checkout_update_totals"
-						value="Update totals">Update totals
-				</button>
-			</noscript>
-
-			<div class="sikshya-terms-and-conditions-wrapper">
-				<div class="sikshya-privacy-policy-text"><p>Your personal data will be used to process your
-						order, support your experience throughout this website, and for other purposes described in
-						our <a href="https://demo.themeum.com/plugins/tutor/?page_id=3"
-							   class="sikshya-privacy-policy-link" target="_blank">privacy policy</a>.</p>
-				</div>
-			</div>
-
 
 			<button type="submit" class="button alt" name="sikshya_checkout_place_order" id="place_order"
 					value="Place order" data-value="Place order">Place order
 			</button>
-
-			<input type="hidden" id="sikshya-process-checkout-nonce" name="sikshya-process-checkout-nonce"
-				   value="656461d28c"><input type="hidden" name="_wp_http_referer"
-											 value="/plugins/tutor/?sikshya-ajax=update_order_review"></div>
+			
+		</div>
 	</div>
 
 <?php } ?>
