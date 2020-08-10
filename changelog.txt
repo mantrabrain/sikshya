@@ -1,4 +1,9 @@
 
+= 0.0.8 | 2020/07/22 =
+* Added - One Widget Added
+* Added - Minor issue fixed
+* Fixed - Compatibility 
+
 = 0.0.7 | 2020/05/16 =
 * Fixed - admin design optimize
 * Added - major update
