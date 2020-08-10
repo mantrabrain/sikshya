@@ -234,7 +234,7 @@ if (!class_exists('Sikshya_Widget_Base')) {
 						'selected' => is_array($value) ? implode(",", $value) : $value,
 						'name' => esc_attr($this->get_field_name($field_key)),
 						'id' => esc_attr($this->get_field_id($field_key)),
-						'show_option_all' => esc_html__('All Categories', 'psikshya'),
+						'show_option_all' => esc_html__('All Categories', 'sikshya'),
 						'echo' => false,
 						'multiple' => false
 
@@ -254,7 +254,7 @@ if (!class_exists('Sikshya_Widget_Base')) {
 						} else {
 							/* translators: 1: taxonomy */
 
-							echo '<h4>' . sprintf(esc_html__('Taxonomy (%s) not found', 'psikshya'), $taxonomy) . '</h4>';
+							echo '<h4>' . sprintf(esc_html__('Taxonomy (%s) not found', 'sikshya'), $taxonomy) . '</h4>';
 						}
 						$this->description($field) ?>
 					</p>
@@ -283,9 +283,9 @@ if (!class_exists('Sikshya_Widget_Base')) {
 							   type="text" value="<?php echo esc_html($value); ?>"/>
 						<button class="media_upload button"
 								id="<?php echo $this->get_field_id('background_image'); ?>"
-								data-choose="<?php esc_attr_e('Choose an image', 'psikshya'); ?>"
+								data-choose="<?php esc_attr_e('Choose an image', 'sikshya'); ?>"
 								data-update="<?php esc_attr_e('Use image', 'sikshya'); ?>"
-								style="width:100%;margin-top:6px;margin-right:30px;"><?php esc_html_e('Select an Image', 'psikshya'); ?></button>
+								style="width:100%;margin-top:6px;margin-right:30px;"><?php esc_html_e('Select an Image', 'sikshya'); ?></button>
 					</div>
 
 					</div><?php $this->description($field) ?>
@@ -311,7 +311,7 @@ if (!class_exists('Sikshya_Widget_Base')) {
 							<?php $this->description($field) ?>
 						<div class="ae-icon-list">
 							<?php
-							$font_awesome_icon_lists = apply_filters('psikshya_fontawesome_icon_list', array());
+							$font_awesome_icon_lists = apply_filters('sikshya_fontawesome_icon_list', array());
 							?>
 							<ul>
 								<?php

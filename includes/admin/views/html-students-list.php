@@ -7,7 +7,7 @@ $students->prepare_items();
 $message = '';
 
 if ('delete' === $students->current_action()) {
-	$message = '<div class="updated below-h2" id="message"><p>' . sprintf(__('Items deleted: %d', 'cltd_example'), count($_REQUEST['id'])) . '</p></div>';
+	$message = '<div class="updated below-h2" id="message"><p>' . sprintf(__('Items deleted: %d', 'sikshya'), count($_REQUEST['id'])) . '</p></div>';
 }
 ?>
 <div class="wrap">

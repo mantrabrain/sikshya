@@ -8,7 +8,7 @@ class Sikshya_Core_Checkout
 		$fields = array(
 			array(
 				'id' => 'billing_first_name',
-				'label' => __('First Name', 'Sikshya'),
+				'label' => __('First Name', 'sikshya'),
 				'type' => 'text',
 				'validation' => array(
 					'required' => true
@@ -17,7 +17,7 @@ class Sikshya_Core_Checkout
 			),
 			array(
 				'id' => 'billing_last_name',
-				'label' => __('Last Name', 'Sikshya'),
+				'label' => __('Last Name', 'sikshya'),
 				'type' => 'text',
 				'validation' => array(
 					'required' => true
@@ -26,7 +26,7 @@ class Sikshya_Core_Checkout
 			),
 			array(
 				'id' => 'billing_country',
-				'label' => __('Country', 'Sikshya'),
+				'label' => __('Country', 'sikshya'),
 				'type' => 'select',
 				'validation' => array(
 					'required' => true
@@ -36,7 +36,7 @@ class Sikshya_Core_Checkout
 			),
 			array(
 				'id' => 'billing_street_address_1',
-				'label' => __('Street Address', 'Sikshya'),
+				'label' => __('Street Address', 'sikshya'),
 				'type' => 'text',
 				'validation' => array(
 					'required' => true
