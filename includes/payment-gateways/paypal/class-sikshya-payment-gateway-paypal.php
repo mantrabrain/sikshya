@@ -123,9 +123,9 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 	{
 
 		if (isset($_GET['sikshya_listener']) && $_GET['sikshya_listener'] == 'IPN' && isset($_POST['custom'])) {
-			file_put_contents('sikshya-ipn_response-post.log', print_r($_POST, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
+/*			file_put_contents('sikshya-ipn_response-post.log', print_r($_POST, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
 			file_put_contents('sikshya-ipn_response-get.log', print_r($_GET, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
-			file_put_contents('sikshya-ipn_response-request.log', print_r($_REQUEST, true) . PHP_EOL, LOCK_EX | FILE_APPEND);
+			file_put_contents('sikshya-ipn_response-request.log', print_r($_REQUEST, true) . PHP_EOL, LOCK_EX | FILE_APPEND);*/
 
 			$order_id = isset($_GET['order_id']) ? $_GET['order_id'] : 0;
 			$nonce = isset($_GET['nonce']) ? $_GET['nonce'] : '';
