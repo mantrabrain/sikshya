@@ -48,7 +48,7 @@ class Sikshya_Frontend_Form_Handler
 			$sikshya_get_active_payment_gateways = sikshya_get_active_payment_gateways();
 
 			$total_cart_amount = absint(sikshya_get_cart_price_total(false));
-			
+
 
 			if ($total_cart_amount > 0) {
 
