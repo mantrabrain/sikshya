@@ -118,6 +118,7 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 		$show_columns['title'] = __('Title', 'sikshya');
 		$show_columns['category'] = __('Category', 'sikshya');
 		$show_columns['tag'] = __('Tags', 'sikshya');
+		$show_columns['price'] = __('Price', 'sikshya');
 		$show_columns['date'] = __('Date', 'sikshya');
 
 		return $show_columns;
@@ -181,21 +182,11 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 	}
 
 
-	protected function render_type_column()
+	protected function render_price_column()
 	{
-		$question_id = $this->object->ID;
+		$course_id = $this->object->ID;
 
-		$type = (get_post_meta($question_id, 'type', true));
-
-		$answer_types = sikshya_question_answer_type();
-
-		if (isset($answer_types[$type])) {
-
-			echo esc_html($answer_types[$type]);
-
-		} else {
-			echo __('Not defined yet', 'sikshya');
-		}
+		sikshya_get_course_price($course_id);
 
 	}
 }
