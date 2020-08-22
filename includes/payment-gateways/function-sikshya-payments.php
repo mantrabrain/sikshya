@@ -25,16 +25,6 @@ if (!function_exists('sikshya_get_active_payment_gateways')) {
 	}
 }
 
-function sikshya_payment_gateway_test_mode()
-{
-
-	$is_test_mode = get_option('sikshya_payment_gateway_test_mode');
-
-	if ($is_test_mode == 'yes') {
-		return true;
-	}
-	return false;
-}
 
 function sikshya_update_payment_status($order_id)
 {

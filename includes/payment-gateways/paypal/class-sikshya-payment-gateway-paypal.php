@@ -42,6 +42,12 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 					'id' => 'sikshya_payment_gateways_paypal_options',
 				),
 				array(
+					'title' => __('Test Mode', 'sikshya'),
+					'desc' => __(' While in test mode no live transactions are processed. To fully use test mode, you must have a sandbox (test) account for the payment gateway you are testing.', 'sikshya'),
+					'id' => 'sikshya_payment_gateway_paypal_test_mode',
+					'type' => 'checkbox',
+				),
+				array(
 					'title' => __('PayPal Email Address', 'sikshya'),
 					'desc' => __(' Enter your PayPal account\'s email', 'sikshya'),
 					'id' => 'sikshya_payment_gateway_paypal_email',
@@ -172,7 +178,7 @@ class Sikshya_Payment_Gateway_PayPal extends Sikshya_Payment_Gateways
 		/**
 		 * Set to PayPal sandbox or live mode
 		 */
-		$listener->use_sandbox = sikshya_payment_gateway_test_mode();
+		$listener->use_sandbox = sikshya_payment_gateway_paypal_test_mode();
 
 		/**
 		 * Check if IPN was successfully processed

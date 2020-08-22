@@ -94,12 +94,6 @@ class Sikshya_Settings_Payment_Gateways extends Sikshya_Admin_Settings_Base
 						'id' => 'sikshya_payment_gateways_general_options',
 					),
 					array(
-						'title' => __('Test Mode', 'sikshya'),
-						'desc' => __(' While in test mode no live transactions are processed. To fully use test mode, you must have a sandbox (test) account for the payment gateway you are testing.', 'sikshya'),
-						'id' => 'sikshya_payment_gateway_test_mode',
-						'type' => 'checkbox',
-					),
-					array(
 						'title' => __('Payment Gateways', 'sikshya'),
 						'id' => 'sikshya_payment_gateways',
 						'type' => 'multicheckbox',
