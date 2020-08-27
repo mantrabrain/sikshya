@@ -456,6 +456,12 @@ if (!function_exists('sikshya_is_content_available_for_user')) {
 	function sikshya_is_content_available_for_user($content_id = 0, $content_type = '')
 	{
 
+		if ($content_type == SIKSHYA_LESSONS_CUSTOM_POST_TYPE) {
+			$sikshya_is_preview_lesson = (boolean)get_post_meta($content_id, 'sikshya_is_preview_lesson', true);
+			if ($sikshya_is_preview_lesson) {
+				return true;
+			}
+		}
 		$course_id = sikshya()->course->get_id();
 
 
