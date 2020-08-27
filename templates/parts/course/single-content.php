@@ -105,10 +105,11 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
 											?>
                                         </span>
 											<?php
-											$total_lesson_time_string = get_post_meta('sikshya_lesson_duration', $lesson_and_quiz->ID, true);
+											$total_lesson_time_string = get_post_meta($lesson_and_quiz->ID, 'sikshya_lesson_duration', true);
+											$sikshya_lesson_duration_time = get_post_meta($lesson_and_quiz->ID, 'sikshya_lesson_duration_time', true);
 
 											$total_lesson_time = $total_lesson_time_string;
-											$total_lesson_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $duration_times[$sikshya_course_duration_time] : '';
+											$total_lesson_time .= isset($duration_times[$sikshya_lesson_duration_time]) ? ' ' . $duration_times[$sikshya_lesson_duration_time] : '';
 
 											?>
 											<?php if ('' != $total_lesson_time_string) { ?>
