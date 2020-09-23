@@ -168,8 +168,7 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 	protected function render_tag_column()
 	{
 		$terms = get_the_terms($this->object->ID, 'sik_course_tag');
-		echo '<pre>';
-		if (!$terms) {
+ 		if (!$terms) {
 			echo '<span class="na">&ndash;</span>';
 		} else {
 			$termlist = array();

@@ -48,6 +48,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 					$section_data = array(
 						'section_id' => $section->ID,
 						'section_title' => $section->post_title,
+						'section_order' => get_post_meta($section->ID, 'section_order', true)
 					);
 					sikshya_load_admin_template('metabox.course.tabs.curriculum.section-template', $section_data);
 				}
@@ -293,11 +294,17 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 
 			$lesson_quiz_order = isset($_POST['sikshya_lesson_quiz_order']) ? $_POST['sikshya_lesson_quiz_order'] : array();
 
+			$sikshya_section_order = isset($_POST['sikshya_section_order']) ? $_POST['sikshya_section_order'] : array();
+
+			$section_id_from_order = array_unique(array_keys($sikshya_section_order));
+
 			$section_ids = array_unique(array_keys($sikshya_course_content));
+			
+			$section_ids = array_unique(array_merge(array_diff($section_id_from_order, $section_ids), array_diff($section_ids, $section_id_from_order)));
 
 			if (count($section_ids) > 0) {
 
-				$saved_section_ids = sikshya()->section->save($section_ids, $post_id);
+				$saved_section_ids = sikshya()->section->save($section_ids, $post_id, $sikshya_section_order);
 			}
 
 			foreach ($sikshya_course_content as $section_id => $course_content) {

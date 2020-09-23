@@ -242,7 +242,11 @@ class Sikshya_Ajax
 		}
 		$section_title = isset($_POST['section_title']) ? sanitize_text_field($_POST['section_title']) : '';
 
+		$section_order = isset($_POST['section_order']) ? absint($_POST['section_order']) : 0;
+
 		$section_data = sikshya()->section->add_section($section_title);
+
+		$section_data['section_order'] = $section_order;
 
 		$section_id = isset($section_data['section_id']) ? $section_data['section_id'] : '';
 

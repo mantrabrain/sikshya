@@ -137,6 +137,19 @@ jQuery(function ($) {
 					//get current element being sorted
 				}
 			}).disableSelection();
+
+			$(".sikshya-course-meta-curriculum-tab").sortable({
+
+				stop: function (event, ui) {
+					var tmpl = ui.item.closest('.sikshya-course-meta-curriculum-tab');
+					var course_section_tmpl = tmpl.find('.course-section-template');
+					var loop_start = 0;
+					$.each(course_section_tmpl, function () {
+						loop_start++;
+						$(this).find('input.sikshya_section_order').val(loop_start);
+					});
+				}
+			}).disableSelection();
 		},
 
 		initModal: function (params) {
@@ -334,6 +347,8 @@ jQuery(function ($) {
 			var form = $this;
 			var url = $this.attr('action');
 
+			var order_num = $('.sikshya-course-meta-curriculum-tab').find('.course-section-template').length + 1;
+			form.append('<input type="hidden" name="section_order" value="' + order_num + '"/>');
 			$.ajax({
 				type: "POST",
 				url: url,
@@ -350,6 +365,7 @@ jQuery(function ($) {
 
 					$('.jBox-closeButton').trigger('click');
 					if (typeof data.success == "undefined") {
+
 						$('.sikshya-course-meta-curriculum-tab').append(data);
 					}
 				}
