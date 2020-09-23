@@ -299,9 +299,9 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 			$section_id_from_order = array_unique(array_keys($sikshya_section_order));
 
 			$section_ids = array_unique(array_keys($sikshya_course_content));
-			
-			$section_ids = array_unique(array_merge(array_diff($section_id_from_order, $section_ids), array_diff($section_ids, $section_id_from_order)));
 
+			$section_ids = array_unique(array_merge($section_ids, $section_id_from_order));
+			
 			if (count($section_ids) > 0) {
 
 				$saved_section_ids = sikshya()->section->save($section_ids, $post_id, $sikshya_section_order);

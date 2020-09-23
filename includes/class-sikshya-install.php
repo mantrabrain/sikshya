@@ -13,13 +13,10 @@ defined('ABSPATH') || exit;
 class Sikshya_Install
 {
 
-	/**
-	 * DB updates and callbacks that need to be run per version.
-	 *
-	 * @var array
-	 */
-	private static $db_updates = array(
-		'2.0.0' => array()
+	private static $update_callbacks = array(
+		'0.0.11' => array(
+			'sikshya_update_0011_section_meta',
+		)
 	);
 
 	/**
@@ -28,6 +25,8 @@ class Sikshya_Install
 	public static function init()
 	{
 		add_action('init', array(__CLASS__, 'check_version'), 5);
+
+
 	}
 
 	/**
@@ -50,6 +49,7 @@ class Sikshya_Install
 	public static function install()
 	{
 
+
 		// Check if we are not already running this routine.
 		if ('yes' === get_transient('sikshya_installing')) {
 			return;
@@ -63,22 +63,16 @@ class Sikshya_Install
 			self::create_options();
 		}
 		self::create_roles();
-
 		self::setup_environment();
-		self::update_sikshya_version();
+		self::versionwise_update();
 
+		self::update_sikshya_version();
 		delete_transient('sikshya_installing');
 
 		do_action('sikshya_flush_rewrite_rules');
 		do_action('sikshya_installed');
 	}
 
-
-	/**
-	 * Setup WC environment - post types, taxonomies, endpoints.
-	 *
-	 * @since 3.2.0
-	 */
 	private static function setup_environment()
 	{
 		$options = array(
@@ -92,6 +86,36 @@ class Sikshya_Install
 
 	}
 
+	private static function versionwise_update()
+	{
+		$sikshya_version = get_option('sikshya_version', null);
+
+		if ($sikshya_version == '' || $sikshya_version == null) {
+			return;
+		}
+
+		if (version_compare($sikshya_version, sikshya()->version, '<')) {
+
+			foreach (self::$update_callbacks as $version => $callbacks) {
+
+				if (version_compare($sikshya_version, $version, '<')) {
+
+					self::exe_update_callback($callbacks);
+				}
+			}
+		}
+	}
+
+	private static function exe_update_callback($callbacks)
+	{
+		include_once SIKSHYA_PATH . '/includes/sikshya-update-functions.php';
+
+		foreach ($callbacks as $callback) {
+
+			call_user_func($callback);
+
+		}
+	}
 
 	/**
 	 * Update Sikshya version to current.
