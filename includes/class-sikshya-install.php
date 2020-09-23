@@ -93,7 +93,6 @@ class Sikshya_Install
 		if ($sikshya_version == '' || $sikshya_version == null || empty($sikshya_version)) {
 			return;
 		}
-
 		if (version_compare($sikshya_version, sikshya()->version, '<')) {
 
 			foreach (self::$update_callbacks as $version => $callbacks) {

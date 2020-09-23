@@ -2,8 +2,8 @@
 Contributors: Mantrabrain,ughimire1
 Tags: course builder, quizzes, questions, learning management system, LMS
 Requires at least: 4.7
-Tested up to: 5.5
-Stable tag: 0.0.10
+Tested up to: 5.5.1
+Stable tag: 0.0.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,12 +39,5 @@ Feature [request](https://mantrabrain.com/request-new-feature/)
 
 == Changelog ==
 
-= 0.0.10 | 2020/08/15 =
-* Fixed - Minor issue fixed
-
-= 0.0.9 | 2020/08/10 =
-* Added - PayPal Payment Gateway
-* Added - Student Section
-* Fixed - Compatibility 
-* Fixed - Minor design & other issue
-
+= 0.0.11 | 2020/09/23 =
+* Fixed - Ordering issue fixed
