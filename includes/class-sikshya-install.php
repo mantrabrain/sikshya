@@ -90,7 +90,7 @@ class Sikshya_Install
 	{
 		$sikshya_version = get_option('sikshya_version', null);
 
-		if ($sikshya_version == '' || $sikshya_version == null) {
+		if ($sikshya_version == '' || $sikshya_version == null || empty($sikshya_version)) {
 			return;
 		}
 
