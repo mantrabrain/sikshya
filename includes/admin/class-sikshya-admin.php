@@ -22,6 +22,7 @@ class Sikshya_Admin
 	{
 		add_action('current_screen', array($this, 'setup_screen'));
 		add_action('check_ajax_referer', array($this, 'setup_screen'));
+		add_filter('display_post_states', array($this, 'add_display_post_states'), 10, 2);
 	}
 
 	public function setup_screen()
@@ -68,6 +69,47 @@ class Sikshya_Admin
 		remove_action('check_ajax_referer', array($this, 'setup_screen'));
 	}
 
+
+	public function add_display_post_states($post_states, $post)
+	{
+		$sikshya_cart_page = get_option('sikshya_cart_page');
+
+		$sikshya_checkout_page = get_option('sikshya_checkout_page');
+
+		$sikshya_thankyou_page = get_option('sikshya_thankyou_page');
+
+		$sikshya_account_page = get_option('sikshya_account_page');
+
+		$sikshya_registration_page = get_option('sikshya_registration_page');
+
+		$sikshya_login_page = get_option('sikshya_login_page');
+
+		if ($sikshya_cart_page == $post->ID) {
+			$post_states['sikshya_page_for_cart'] = __('Sikshya Cart Page', 'sikshya');
+		}
+
+		if ($sikshya_checkout_page == $post->ID) {
+			$post_states['sikshya_page_for_checkout'] = __('Sikshya Checkout Page', 'sikshya');
+		}
+
+		if ($sikshya_thankyou_page == $post->ID) {
+			$post_states['sikshya_page_for_thankyou'] = __('Sikshya Thank You Page', 'sikshya');
+		}
+
+		if ($sikshya_account_page == $post->ID) {
+			$post_states['sikshya_page_for_my_account'] = __('Sikshya My Account Page', 'sikshya');
+		}
+
+		if ($sikshya_registration_page == $post->ID) {
+			$post_states['sikshya_page_for_my_account'] = __('Sikshya Registration Page', 'sikshya');
+		}
+
+		if ($sikshya_login_page == $post->ID) {
+			$post_states['sikshya_page_for_my_account'] = __('Sikshya Login Page', 'sikshya');
+		}
+		
+		return $post_states;
+	}
 }
 
 new Sikshya_Admin();
