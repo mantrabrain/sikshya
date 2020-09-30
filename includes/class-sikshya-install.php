@@ -195,6 +195,14 @@ class Sikshya_Install
 				'post_type' => 'page',
 				'comment_status' => 'closed'
 
+			),
+			array(
+				'post_content' => '<p>Your order has been successfully placed. You can check your order from myaccount page</p>',
+				'post_title' => 'Sikshya Thank You',
+				'post_status' => 'publish',
+				'post_type' => 'page',
+				'comment_status' => 'closed'
+
 			)
 		);
 
@@ -216,6 +224,9 @@ class Sikshya_Install
 			}
 			if ($page['post_title'] == 'Sikshya Checkout') {
 				update_option('sikshya_checkout_page', $page_id);
+			}
+			if ($page['post_title'] == 'Sikshya Thank You') {
+				update_option('sikshya_thankyou_page', $page_id);
 			}
 
 		}

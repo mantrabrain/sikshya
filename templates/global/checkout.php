@@ -1,7 +1,7 @@
 <?php
 do_action('sikshya_before_checkout_form');
 ?>
-<form class="sikshya-cart-form" method="post"
+<form class="sikshya-checkout-form" method="post"
 	  enctype="multipart/form-data">
 	<?php
 
