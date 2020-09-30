@@ -42,6 +42,7 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 
 	protected function render_blank_state()
 	{
+
 		echo '<div class="sikshya-blankstate">';
 
 		echo '<h2 class="sikshya-blankstate-message">' . esc_html__('Ready to start your own online course?', 'sikshya') . '</h2>';
@@ -50,11 +51,12 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 
 		echo '<a class="sikshya-blankstate-cta button-primary button" href="' . esc_url(admin_url('post-new.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE)) . '">' . esc_html__('Create New Course', 'sikshya') . '</a>';
 
-		echo '<a class="sikshya-blankstate-cta button" href="#" data-href="' . esc_url(admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE . '&page=course_importer')) . '">' . esc_html__('Start Import', 'sikshya') . '</a>';
+		echo '<a class="sikshya-blankstate-cta button" href="' . esc_url(admin_url('admin.php?page=sikshya_course_importer')) . '" data-href="' . esc_url(admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE . '&page=course_importer')) . '">' . esc_html__('Import Sample Courses', 'sikshya') . '</a>';
 
 		echo '</div>';
 
 		echo '</div>';
+
 	}
 
 	/**
@@ -168,7 +170,7 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 	protected function render_tag_column()
 	{
 		$terms = get_the_terms($this->object->ID, 'sik_course_tag');
- 		if (!$terms) {
+		if (!$terms) {
 			echo '<span class="na">&ndash;</span>';
 		} else {
 			$termlist = array();

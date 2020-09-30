@@ -15,6 +15,7 @@ class Sikshya_Admin
 		include_once SIKSHYA_PATH . '/includes/admin/sikshya-admin-functions.php';
 		include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-assets.php';
 		include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-menu.php';
+		include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-importer.php';
 		include_once SIKSHYA_PATH . '/includes/about/class-sikshya-about.php';
 	}
 
@@ -107,7 +108,7 @@ class Sikshya_Admin
 		if ($sikshya_login_page == $post->ID) {
 			$post_states['sikshya_page_for_my_account'] = __('Sikshya Login Page', 'sikshya');
 		}
-		
+
 		return $post_states;
 	}
 }

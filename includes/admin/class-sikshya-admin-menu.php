@@ -102,7 +102,7 @@ class Sikshya_Admin_Menu
 	public function students_page_handler()
 	{
 		include_once 'list-tables/class-sikshya-admin-list-table-students.php';
-		
+
 		include_once 'views/html-students-list.php';
 	}
 }
