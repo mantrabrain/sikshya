@@ -19,6 +19,7 @@ class Sikshya_Ajax
 			// Remove
 			'remove_lesson_quiz_from_section',
 			'remove_section_from_course',
+			'import_course'
 		);
 
 		return $actions;
@@ -396,6 +397,40 @@ class Sikshya_Ajax
 		exit;
 
 
+	}
+
+	public function import_course()
+	{
+		$status = sikshya()->helper->validate_nonce();
+
+		if (!$status) {
+			wp_send_json_error($this->ajax_error());
+		}
+
+		if (!isset($_FILES['sikshya_import_file'])) {
+			wp_send_json_error();
+		}
+
+		$target_dir = sikshya()->get_upload_dir(true);
+
+		$target_file = $target_dir . basename($_FILES["sikshya_import_file"]["name"]);
+
+		$temp_name = $_FILES["sikshya_import_file"]["tmp_name"];
+
+		$file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+		if (!move_uploaded_file($temp_name, $target_file)) {
+
+			wp_send_json_error();
+		}
+
+		$status = false;// sikshya()->importer->import($target_file);
+
+		unlink($target_file);
+
+		if (!$status) {
+			wp_send_json_error();
+		}
 	}
 
 

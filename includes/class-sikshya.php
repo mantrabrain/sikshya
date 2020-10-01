@@ -493,4 +493,81 @@ final class Sikshya
 	}
 
 
+	public function get_upload_dir($create_if_not_exists = false)
+	{
+		$upload_dir = wp_upload_dir();
+
+		if ($create_if_not_exists) {
+
+			$this->create_files();
+		}
+
+		return $upload_dir['basedir'] . '/sikshya/';
+
+	}
+
+	public function get_upload_file($file)
+	{
+		$upload_dir = wp_upload_dir();
+
+		return $upload_dir['basedir'] . '/sikshya/' . $file;
+
+	}
+
+
+	private function create_files()
+	{
+		// Bypass if filesystem is read-only and/or non-standard upload system is used.
+		if (apply_filters('sikshya_install_skip_create_files', false)) {
+			return;
+		}
+
+		if (file_exists(trailingslashit($this->get_upload_dir()) . 'index.html')) {
+			return true;
+		}
+		$files = array(
+			array(
+				'base' => $this->get_upload_dir(),
+				'file' => 'index.html',
+				'content' => '',
+			),
+			array(
+				'base' => $this->get_upload_dir(),
+				'file' => '.htaccess',
+				'content' => '<FilesMatch ".*\.(css|js)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>',
+			),
+			array(
+				'base' => $this->get_upload_dir(),
+				'file' => '.htaccess',
+				'content' => '<FilesMatch ".*\.(css|js)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>',
+			)
+		);
+
+		$has_created_dir = false;
+
+		foreach ($files as $file) {
+			if (wp_mkdir_p($file['base']) && !file_exists(trailingslashit($file['base']) . $file['file'])) {
+				$file_handle = @fopen(trailingslashit($file['base']) . $file['file'], 'w'); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+				if ($file_handle) {
+					fwrite($file_handle, $file['content']); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+					fclose($file_handle); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fclose
+					if (!$has_created_dir) {
+						$has_created_dir = true;
+					}
+				}
+			}
+		}
+		if ($has_created_dir) {
+			return true;
+		}
+
+
+	}
+
 }

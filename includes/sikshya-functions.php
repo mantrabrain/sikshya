@@ -12,6 +12,49 @@ include_once SIKSHYA_PATH . '/includes/helpers/sikshya-currency-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-country-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-state-helper.php';
 
+
+function sikshya_export($args = array())
+{
+	$defaults = array(
+
+		'content' => array(),
+
+	);
+
+	$args = wp_parse_args($args, $defaults);
+
+	do_action('export_sikshya', $args);
+
+	$sitename = strtolower(sanitize_key(get_bloginfo('name')));
+
+	if (!empty($sitename)) {
+
+		$sitename .= '.';
+	}
+
+	$content = $args['content'];
+
+	$content = is_string($content) ? $content : json_encode($content);
+
+	$date = gmdate('Y-m-d');
+
+	$wp_filename = $sitename . 'sikshya.' . $date . '.json';
+
+	$filename = apply_filters('export_wp_filename', $wp_filename, $sitename, $date);
+
+	header('Content-Description: File Transfer');
+
+	header('Content-Disposition: attachment; filename=' . $filename);
+
+	header('Content-Type: text/json; charset=' . get_option('blog_charset'), true);
+
+	echo $content;
+
+	exit;
+
+}
+
+
 function sikshya_account_page_nav_items()
 {
 	$items_array = array(
@@ -58,22 +101,6 @@ function sikshya_account_page_nav_items()
 	return apply_filters('sikshya_account_page_nav_items', $items_array);
 }
 
-/**
- * get CPT meta data
- *
- * @param integer||NULL  $id
- * @param string $title
- * @param string $default
- * @param string $format
- * @param boolean $br
- * @param boolean $page
- * @param boolean $mail
- *
- * @return string
- *
- * @since 1.0.0
- *
- */
 function sikshya_get_meta_data($id, $title, $default = '', $format = '%s', $br = false, $page = false, $mail = false)
 {
 	$data = get_post_meta($id, $title, true);
