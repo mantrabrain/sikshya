@@ -139,6 +139,22 @@ final class Sikshya
 	public $session = null;
 
 
+	/**
+	 * Sikshya_Core_Exporter instance.
+	 *
+	 * @var Sikshya_Core_Exporter
+	 */
+	public $exporter = null;
+
+
+	/**
+	 * Sikshya_Core_Importer instance.
+	 *
+	 * @var Sikshya_Core_Importer
+	 */
+	public $importer = null;
+
+
 	protected static $_instance = null;
 
 	/**
@@ -409,6 +425,8 @@ final class Sikshya
 		$this->student = new Sikshya_Core_Student();
 		$this->cart = new Sikshya_Core_Cart();
 		$this->checkout = new Sikshya_Core_Checkout();
+		$this->exporter = new Sikshya_Core_Exporter();
+		$this->importer = new Sikshya_Core_Importer();
 		// Init action.
 		do_action('sikshya_init');
 	}

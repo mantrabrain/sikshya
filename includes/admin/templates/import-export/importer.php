@@ -8,7 +8,7 @@
 		  action="<?php echo esc_attr('admin-ajax.php'); ?>">
 		<label class="screen-reader-text"
 			   for="coursesfile"><?php echo esc_html__('Course exported file', 'sikshya'); ?></label>
-		<input type="file" id="sikshya_import_file" name="sikshya_import_file" accept=".zip">
+		<input type="file" id="sikshya_import_file" name="sikshya_import_file" accept=".json">
 		<input type="submit" name="install-theme-submit" id="install-theme-submit" class="button"
 			   value="<?php echo __('Import Now') ?>"
 			   disabled="">

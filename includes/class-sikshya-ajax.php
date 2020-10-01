@@ -424,9 +424,8 @@ class Sikshya_Ajax
 			wp_send_json_error();
 		}
 
-		$status = false;// sikshya()->importer->import($target_file);
+		$status = sikshya()->importer->import($target_file);
 
-		unlink($target_file);
 
 		if (!$status) {
 			wp_send_json_error();
