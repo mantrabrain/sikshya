@@ -36,8 +36,8 @@ jQuery(function ($) {
 
 
 				Swal.fire(
-					'Removed',
-					response.message,
+					'Congratulations!',
+					'Import process successfully completed.',
 					'success'
 				);
 
