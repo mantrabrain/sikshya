@@ -13,10 +13,10 @@ class Sikshya_Admin_Importer
 	{
 		add_submenu_page(
 			'sikshya',
-			__('Course Importer', 'sikshya'),
-			__('Course Importer', 'sikshya'),
+			__('Import/Export', 'sikshya'),
+			__('Import/Export', 'sikshya'),
 			'administrator',
-			'sikshya_course_importer', array($this, 'settings_page'));
+			'sikshya_course_import_export', array($this, 'settings_page'));
 
 
 	}
@@ -43,7 +43,7 @@ class Sikshya_Admin_Importer
 
 	public function importer_scripts($hook)
 	{
-		if ('sikshya_page_sikshya_course_importer' != $hook) {
+		if ('sikshya_page_sikshya_course_import_export' != $hook) {
 			return;
 		}
 		wp_enqueue_style('sikshya_importer_style', SIKSHYA_ASSETS_URL . '/admin/css/importer.css', array(), SIKSHYA_VERSION);
