@@ -37,6 +37,8 @@ class Sikshya_Core_Importer
 
 				$term_taxonomies = isset($sikshya_custom_posts['term_taxonomy']) ? $sikshya_custom_posts['term_taxonomy'] : array();
 
+
+				$sik_post_taxonomy_datas = array();
 				foreach ($term_taxonomies as $sik_term_taxonomy) {
 
 					$sik_term_id = wp_insert_term(
@@ -51,19 +53,24 @@ class Sikshya_Core_Importer
 					if (is_wp_error($sik_term_id)) {
 						$error_data = isset($sik_term_id->error_data) ? $sik_term_id->error_data : array();
 						$sik_term_id = isset($error_data['term_exists']) ? absint($error_data['term_exists']) : 0;
-					}
-
-					if ($sik_term_id > 0) {
-						wp_set_object_terms($sik_post_id, $sik_term_id, $sik_term_taxonomy['taxonomy']);
+					} else {
+						$sik_term_id = isset($sik_term_id['term_id']) ? absint($sik_term_id['term_id']) : 0;
 
 					}
+					if (absint($sik_term_id) > 0) {
+						$sik_post_taxonomy_datas[$sik_term_taxonomy['taxonomy']][] = $sik_term_id;
+					}
+				}
+
+
+				foreach ($sik_post_taxonomy_datas as $sik_term_tax => $sik_term_ids) {
+					$sik_uniq_term_ids = array_unique($sik_term_ids);
+					wp_set_object_terms($sik_post_id, $sik_uniq_term_ids, $sik_term_tax);
 
 				}
 
+
 				$updated_post_ids_mapping[$sikshya_custom_posts['ID']] = $sik_post_id;
-
-
-				//die('die after one post insert - ' . $id);
 
 			}
 

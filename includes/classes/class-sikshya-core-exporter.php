@@ -28,8 +28,8 @@ class Sikshya_Core_Exporter
 			$sik_image_attributes = wp_get_attachment_image_src($sik_thub_id, 'full');
 
 
-			$sik_term_taxonomy = $wpdb->get_results($wpdb->prepare("SELECT t.*, tt.taxonomy, tt.description, tt.parent, tt.count FROM wp_terms t INNER JOIN wp_term_taxonomy tt ON tt.term_id = t.term_id
-INNER JOIN wp_term_relationships tr ON tr.term_taxonomy_id = tt.term_taxonomy_id INNER JOIN wp_posts p ON p.ID = tr.object_id WHERE p.post_type=%s AND p.ID=%d", $sik_post_type, $sik_post_id));
+			$sik_term_taxonomy = $wpdb->get_results($wpdb->prepare("SELECT t.*, tt.taxonomy, tt.description, tt.parent, tt.count FROM {$wpdb->terms} t INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id
+INNER JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxonomy_id INNER JOIN {$wpdb->posts} p ON p.ID = tr.object_id WHERE p.post_type=%s AND p.ID=%d", $sik_post_type, $sik_post_id));
 
 			$export_content[$result_index]->term_taxonomy = $sik_term_taxonomy;
 
