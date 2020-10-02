@@ -29,7 +29,36 @@ class Sikshya_Core_Importer
 				unset($sikshya_custom_post_arr['image_attributes']);
 				unset($sikshya_custom_post_arr['guid']);
 
+
+				//wp_insert_term()
+
 				$sik_post_id = wp_insert_post($sikshya_custom_post_arr);
+
+
+				$term_taxonomies = isset($sikshya_custom_posts['term_taxonomy']) ? $sikshya_custom_posts['term_taxonomy'] : array();
+
+				foreach ($term_taxonomies as $sik_term_taxonomy) {
+
+					$sik_term_id = wp_insert_term(
+						sanitize_text_field($sik_term_taxonomy['name']),   // the term
+						sanitize_text_field($sik_term_taxonomy['taxonomy']),   // the term
+						array(
+							'description' => sanitize_text_field($sik_term_taxonomy['description']),
+							'slug' => $sik_term_taxonomy['slug'],
+							'parent' => $sik_term_taxonomy['parent'],
+						)
+					);
+					if (is_wp_error($sik_term_id)) {
+						$error_data = isset($sik_term_id->error_data) ? $sik_term_id->error_data : array();
+						$sik_term_id = isset($error_data['term_exists']) ? absint($error_data['term_exists']) : 0;
+					}
+
+					if ($sik_term_id > 0) {
+						wp_set_object_terms($sik_post_id, $sik_term_id, $sik_term_taxonomy['taxonomy']);
+
+					}
+
+				}
 
 				$updated_post_ids_mapping[$sikshya_custom_posts['ID']] = $sik_post_id;
 
@@ -37,6 +66,7 @@ class Sikshya_Core_Importer
 				//die('die after one post insert - ' . $id);
 
 			}
+
 
 			foreach ($sikshya_content_array as $sikshya_custom_posts1) {
 
