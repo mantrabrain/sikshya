@@ -36,13 +36,20 @@ jQuery(function ($) {
 					});
 				},
 			}).done(function (response) {
+				if (typeof response.success != "undefined" && response.success) {
+					Swal.fire(
+						'Congratulations!',
+						'Import process successfully completed.',
+						'success'
+					);
+				} else {
+					var error_message = 'Something went wrong with ajax !';
+					if (typeof response.data != "undefined") {
+						error_message = response.data;
+					}
+					Swal.fire('Oops...', error_message, 'error');
 
-
-				Swal.fire(
-					'Congratulations!',
-					'Import process successfully completed.',
-					'success'
-				);
+				}
 
 			}).fail(function () {
 				Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');

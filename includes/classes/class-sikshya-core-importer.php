@@ -11,9 +11,15 @@ class Sikshya_Core_Importer
 
 			$json_content = file_get_contents($target_file);
 
-			$sikshya_content_array = json_decode($json_content, true);
+			$sikshya_all_content_array = json_decode($json_content, true);
 
-			$sikshya_content_array = is_array($sikshya_content_array) ? $sikshya_content_array : array();
+			$sikshya_all_content_array = is_array($sikshya_all_content_array) ? $sikshya_all_content_array : array();
+
+			if (!isset($sikshya_all_content_array['sikshya_all_content'])) {
+				return false;
+			}
+
+			$sikshya_content_array = is_array($sikshya_all_content_array['sikshya_all_content']) ? $sikshya_all_content_array['sikshya_all_content'] : array();
 
 			$updated_post_ids_mapping = array();
 
@@ -102,6 +108,7 @@ class Sikshya_Core_Importer
 					}
 				}
 			}
+			return true;
 
 		} catch (Exception $e) {
 			return false;

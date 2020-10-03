@@ -408,7 +408,7 @@ class Sikshya_Ajax
 		}
 
 		if (!isset($_FILES['sikshya_import_file'])) {
-			wp_send_json_error();
+			wp_send_json_error(__('Invalid file type. Please use vaild json file.', 'sikshya'));
 		}
 
 		$target_dir = sikshya()->get_upload_dir(true);
@@ -419,17 +419,25 @@ class Sikshya_Ajax
 
 		$file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
+		$sik_file_type = $_FILES['sikshya_import_file']["type"];
+
+		if ($file_type != "json" || $sik_file_type != "application/json") {
+			wp_send_json_error(__('Invalid file type. Please use vaild json file.', 'sikshya'));
+
+		}
+
 		if (!move_uploaded_file($temp_name, $target_file)) {
 
-			wp_send_json_error();
+			wp_send_json_error(__('File upload failed. Please try again.', 'sikshya'));
 		}
 
 		$status = sikshya()->importer->import($target_file);
 
 
 		if (!$status) {
-			wp_send_json_error();
+			wp_send_json_error(__('Sorry! Our system could not import your file.', 'sikshya'));
 		}
+		wp_send_json_success();
 	}
 
 

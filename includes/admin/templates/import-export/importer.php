@@ -2,7 +2,7 @@
 <div class="upload-theme sikshya-upload-file">
 	<p class="install-help">
 		<?php
-		echo __('If you have a exported courses file, you can upload it from here and import the courses Or You can upload sample course file.', 'sikshya')
+		echo __('If you have a exported courses file, you can upload it from here and import the courses Or You can upload sample course file. (file format .json)', 'sikshya')
 		?></p>
 	<form method="post" enctype="multipart/form-data" class="wp-upload-form sikshya-import-course-form"
 		  action="<?php echo esc_attr('admin-ajax.php'); ?>">

@@ -45,8 +45,9 @@ INNER JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxon
 
 		}
 
+		$all_export_content['sikshya_all_content'] = $export_content;
 		$args = array(
-			'content' => $export_content
+			'content' => $all_export_content
 		);
 
 		sikshya_export($args);

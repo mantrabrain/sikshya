@@ -51,7 +51,7 @@ class Sikshya_Admin_List_Table_Courses extends Sikshya_Admin_List_Table
 
 		echo '<a class="sikshya-blankstate-cta button-primary button" href="' . esc_url(admin_url('post-new.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE)) . '">' . esc_html__('Create New Course', 'sikshya') . '</a>';
 
-		echo '<a class="sikshya-blankstate-cta button" href="' . esc_url(admin_url('admin.php?page=sikshya_course_import_export')) . '" data-href="' . esc_url(admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE . '&page=course_importer')) . '">' . esc_html__('Import Sample Courses', 'sikshya') . '</a>';
+		echo '<a class="sikshya-blankstate-cta button" href="' . esc_url(admin_url('admin.php?page=sikshya_course_import_export')) . '" data-href="' . esc_url(admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE . '&page=course_importer')) . '">' . esc_html__('Import Course', 'sikshya') . '</a>';
 
 		echo '</div>';
 
