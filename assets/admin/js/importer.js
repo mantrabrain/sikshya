@@ -16,6 +16,7 @@ jQuery(function ($) {
 
 		},
 		import_course: function (formData, form) {
+
 			$.ajax({
 				url: sikshyaImporterData.ajax_url,
 				type: 'POST',
@@ -25,12 +26,14 @@ jQuery(function ($) {
 				processData: false,
 				beforeSend: function () {
 					form.trigger("reset");
-
-					Swal.fire(
-						'Please wait.....',
-						'System is processing your request',
-						'info'
-					);
+					Swal.fire({
+						title: 'Please wait.....',
+						text: 'System is processing your request',
+						showCancelButton: false, // There won't be any cancel button
+						showConfirmButton: false, // There won't be any confirm button
+						imageUrl: sikshyaImporterData.loading_image,
+						imageWidth: 300
+					});
 				},
 			}).done(function (response) {
 

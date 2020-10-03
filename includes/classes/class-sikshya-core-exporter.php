@@ -37,11 +37,10 @@ INNER JOIN {$wpdb->term_relationships} tr ON tr.term_taxonomy_id = tt.term_taxon
 
 			$export_content[$result_index]->image_attributes = $sik_image_attributes;
 
-			unset($export_content[$result_index]['ID']);
-			unset($export_content[$result_index]['post_author']);
-			unset($export_content[$result_index]['guid']);
-			unset($export_content[$result_index]['comment_count']);
-			unset($export_content[$result_index]['pinged']);
+			unset($export_content[$result_index]->post_author);
+			unset($export_content[$result_index]->guid);
+			unset($export_content[$result_index]->comment_count);
+			unset($export_content[$result_index]->pinged);
 
 
 		}

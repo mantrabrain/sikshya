@@ -22,10 +22,11 @@ class Sikshya_Core_Importer
 
 				$sikshya_custom_post_arr = $sikshya_custom_posts;
 
+				unset($sikshya_custom_post_arr['ID']);
 				unset($sikshya_custom_post_arr['term_taxonomy']);
 				unset($sikshya_custom_post_arr['meta']);
 				unset($sikshya_custom_post_arr['image_attributes']);
-				
+
 				$sik_post_id = wp_insert_post($sikshya_custom_post_arr);
 
 
@@ -120,7 +121,7 @@ class Sikshya_Core_Importer
 		$uploaddir = wp_upload_dir();
 		$uploadfile = $uploaddir['path'] . '/' . $filename;
 
-		$contents = file_get_contents($url);
+		$contents = @file_get_contents($url);
 		$savefile = fopen($uploadfile, 'w');
 		fwrite($savefile, $contents);
 		fclose($savefile);

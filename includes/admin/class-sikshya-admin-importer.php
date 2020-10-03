@@ -52,6 +52,7 @@ class Sikshya_Admin_Importer
 		$data =
 			array(
 				'ajax_url' => admin_url('admin-ajax.php'),
+				'loading_image' => SIKSHYA_ASSETS_URL . '/images/loading.gif',
 			);
 		wp_localize_script('sikshya_importer_script', 'sikshyaImporterData', $data);
 
