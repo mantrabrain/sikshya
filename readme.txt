@@ -1,5 +1,5 @@
 === Learning Management System - Sikshya LMS ===
-Contributors: mantrabrain,ughimire1
+Contributors: mantrabrain, ughimire1
 Donate link: https://mantrabrain.com
 Tags: lms, , elearning, education, learning management system, course, quizzes
 Requires at least: 4.7
