@@ -22,16 +22,10 @@ class Sikshya_Core_Importer
 
 				$sikshya_custom_post_arr = $sikshya_custom_posts;
 
-				unset($sikshya_custom_post_arr['ID']);
-				unset($sikshya_custom_post_arr['post_author']);
 				unset($sikshya_custom_post_arr['term_taxonomy']);
 				unset($sikshya_custom_post_arr['meta']);
 				unset($sikshya_custom_post_arr['image_attributes']);
-				unset($sikshya_custom_post_arr['guid']);
-
-
-				//wp_insert_term()
-
+				
 				$sik_post_id = wp_insert_post($sikshya_custom_post_arr);
 
 
