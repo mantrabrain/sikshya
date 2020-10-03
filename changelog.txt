@@ -1,3 +1,8 @@
+= 0.0.12 | 2020/10/13 =
+* Fixed - Minor issue fixed
+* Added - Course Import/Export feature
+* Fixed - Minor issue fixed
+
 = 0.0.10 | 2020/08/15 =
 * Fixed - Minor issue fixed
 
