@@ -1,11 +1,11 @@
 === Learning Management System - Sikshya LMS ===
 Contributors: mantrabrain, ughimire1
 Donate link: https://mantrabrain.com
-Tags: lms, , elearning, education, learning management system, course, quizzes
+Tags: lms, elearning, education, learning management system, course, quizzes
 Requires at least: 4.7
-Tested up to: 5.5.1
+Tested up to: 5.8.1
 Requires PHP: 5.6
-Stable tag: 0.0.12
+Stable tag: 0.0.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

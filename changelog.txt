@@ -1,3 +1,7 @@
+= 0.0.13 | 2021/09/23 =
+* Fixed - Minor issue fixed
+* Tested - New WordPress Version tested
+
 = 0.0.12 | 2020/10/13 =
 * Fixed - Minor issue fixed
 * Added - Course Import/Export feature
