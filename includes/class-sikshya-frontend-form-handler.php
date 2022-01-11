@@ -102,7 +102,7 @@ class Sikshya_Frontend_Form_Handler
 
 				update_post_meta($sikshya_order_id, 'sikshya_order_meta', $order_meta);
 
-				sikshya()->session->clear_all();
+				//sikshya()->session->clear_all();
 
 				do_action('sikshya_after_place_order', [
 					'order_id' => $sikshya_order_id,

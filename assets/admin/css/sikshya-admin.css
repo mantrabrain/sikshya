@@ -377,5 +377,8 @@
 .sikshya-blankstate .sikshya-blankstate-cta {
 	padding: 15px 50px;
 	border-radius: 0;
-	margin:5px;
+	margin: 5px;
+}
+
+body.sikshya_page_sik-settings .form-table th {
 }

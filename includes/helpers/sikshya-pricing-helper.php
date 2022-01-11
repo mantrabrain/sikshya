@@ -28,17 +28,8 @@ if (!function_exists('sikshya_get_price_with_symbol')) {
 
 	function sikshya_get_price_with_symbol($price, $symbol = null)
 	{
-		$currency_symbol_position = get_option('sikshya_currency_position', 'left');
 
-		$currency_symbol = is_null($symbol) ? sikshya_get_active_currency_symbol() : $symbol;
-
-		if ($currency_symbol_position == 'left') {
-
-			return $currency_symbol . $price;
-		} else {
-			return $price . $currency_symbol;
-
-		}
+		return sikshya_get_price($price, $symbol);
 
 	}
 }
@@ -89,5 +80,96 @@ if (!function_exists('sikshya_get_cart_price_total')) {
 			$total_price += absint($item->total_price);
 		}
 		return $with_currency_symbol ? sikshya_get_price_with_symbol($total_price) : $total_price;
+	}
+}
+if (!function_exists('sikshya_get_currency_symbol')) {
+
+	function sikshya_get_currency_symbol($currency = '')
+	{
+		$currency = $currency === '' ? sikshya_get_currency() : $currency;
+
+		$symbol_type = get_option('sikshya_currency_symbol_type', 'symbol');
+
+		if ($symbol_type === 'code') {
+
+			return $currency;
+
+		}
+		return sikshya_get_currency_symbols($currency);
+	}
+}
+
+if (!function_exists('sikshya_get_currency')) {
+
+	function sikshya_get_currency()
+	{
+		return get_option('sikshya_currency', 'USD');
+	}
+}
+
+if (!function_exists('sikshya_get_price')) {
+
+	function sikshya_get_price($price, $currency_symbol = null, $echo = false)
+	{
+		$currency_symbol = $currency_symbol === '' || is_null($currency_symbol) ? sikshya_get_currency_symbol() : $currency_symbol;
+
+		$args = array(
+
+			'decimals' => get_option('sikshya_price_number_decimals', 2),
+
+			'decimal_separator' => get_option('sikshya_decimal_separator', '.'),
+
+			'thousand_separator' => get_option('sikshya_thousand_separator', ',')
+
+		);
+
+		if (floatval($price) < 1) {
+
+			$price = 0;
+		}
+
+		$price = apply_filters('sikshya_get_formatted_price',
+			number_format($price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator']), $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'], $price);
+
+		$currency_position = get_option('sikshya_currency_position');
+
+		if ($currency_position === "left_space") {
+
+			$price_string = ($currency_symbol . ' ' . $price);
+
+		} else if ($currency_position === "right_space") {
+			$price_string = ($price . ' ' . $currency_symbol);
+
+		} else if ($currency_position === "right") {
+
+			$price_string = ($price . $currency_symbol);
+
+		} else {
+			$price_string = ($currency_symbol . $price);
+
+		}
+
+
+		if (!$echo) {
+			return $price_string;
+		}
+		if ($echo) {
+			echo esc_html($price_string);
+		}
+	}
+}
+
+if (!function_exists('sikshya_get_currency_positions')) {
+
+	function sikshya_get_currency_positions()
+	{
+
+		return [
+			'left' => __('Left', 'sikshya'),
+			'right' => __('Right', 'sikshya'),
+			'left_space' => __('Left with space', 'sikshya'),
+			'right_space' => __('Right with space', 'sikshya')
+
+		];
 	}
 }

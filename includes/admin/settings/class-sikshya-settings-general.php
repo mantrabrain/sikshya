@@ -143,6 +143,14 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 						'desc' => '',
 						'id' => 'sikshya_general_options',
 					),
+
+					array(
+						'title' => __('Currency Options', 'yatra'),
+						'type' => 'title',
+						'desc' => '',
+						'id' => 'sikshya_general_currency_options',
+					),
+
 					array(
 						'title' => __('Currency', 'sikshya'),
 						'desc' => __('Currency for price of course.', 'sikshya'),
@@ -152,15 +160,53 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 						'options' => sikshya_get_currency_with_symbol()
 					),
 					array(
-						'title' => __('Currency Position', 'sikshya'),
-						'desc' => __('Currency position.', 'sikshya'),
+						'title' => __('Currency Symbol Type', 'yatra'),
+						//'desc' => __('Currency Symbol type', 'yatra'),
+						'desc_tip' => true,
+						'id' => 'sikshya_currency_symbol_type',
+						'default' => 'symbol',
+						'type' => 'select',
+						'options' => array(
+							'code' => __('Currency Code', 'yatra'),
+							'symbol' => __('Currency Symbol', 'yatra')
+						),
+					),
+					array(
+						'title' => __('Currency position', 'yatra'),
+						//'desc' => __('Currency symbol position.', 'yatra'),
+						'desc_tip' => true,
 						'id' => 'sikshya_currency_position',
 						'default' => 'left',
 						'type' => 'select',
-						'options' => array(
-							'left' => __('Left', 'sikshya'),
-							'right' => __('Right', 'sikshya'),
-						)
+						'options' => sikshya_get_currency_positions()
+					),
+					array(
+						'title' => __('Thousand Separator', 'yatra'),
+						//'desc' => __('Thousand separator for price.', 'yatra'),
+						'desc_tip' => true,
+						'id' => 'sikshya_thousand_separator',
+						'default' => ',',
+						'type' => 'text',
+					),
+					array(
+						'title' => __('Number of Decimals', 'yatra'),
+						//'desc' => __('Number of decimals shown in price.', 'yatra'),
+						'desc_tip' => true,
+						'id' => 'sikshya_price_number_decimals',
+						'default' => 2,
+						'type' => 'number',
+					),
+					array(
+						'title' => __('Decimal Separator', 'yatra'),
+						//'desc' => __('Decimal separator for price.', 'yatra'),
+						'desc_tip' => true,
+						'id' => 'sikshya_decimal_separator',
+						'default' => '.',
+						'type' => 'text',
+					),
+					array(
+						'type' => 'sectionend',
+						'id' => 'sikshya_general_currency_options',
 					),
 					array(
 						'type' => 'sectionend',
