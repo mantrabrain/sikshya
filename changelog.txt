@@ -1,3 +1,7 @@
+= 0.0.14 | 2022/01/11 =
+* Fixed - Minor issue fixed
+* Added - Currency option added
+
 = 0.0.13 | 2021/09/23 =
 * Fixed - Minor issue fixed
 * Tested - New WordPress Version tested
