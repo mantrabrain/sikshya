@@ -53,7 +53,6 @@ class Sikshya_Admin_Menu
 		// Include settings pages.
 		Sikshya_Admin_Settings::get_settings_pages();
 		/*
-
 		// Add any posted messages.
 		if (!empty($_GET['sik_error'])) { // WPCS: input var okay, CSRF ok.
 			Sikshya_Admin_Settings::add_error(wp_kses_post(wp_unslash($_GET['sik_error']))); // WPCS: input var okay, CSRF ok.
