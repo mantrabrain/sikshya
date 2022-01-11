@@ -32,14 +32,10 @@ if (!class_exists('Sikshya_Custom_Post_Type_Order')) {
 				'query_var' => true,
 				'capability_type' => 'post',
 				'hierarchical' => false,
-				'menu_position' => null,
+				'menu_position' => 10,
 				'show_in_rest' => true,
 				'menu_icon' => 'dashicons-book-alt',
-				'has_archive' => true,
-				'rewrite' => array(
-					'slug' => 'orders',
-					'with_front' => false
-				),
+				'has_archive' => false,
 				'capabilities' => array(
 					'create_posts' => false,
 					'delete_posts' => true,
