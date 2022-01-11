@@ -48,7 +48,6 @@ if ( ! class_exists( 'Sikshya_Admin_Settings', false ) ) :
 
 				$settings[] = include 'settings/class-sikshya-settings-general.php';
 				$settings[] = include 'settings/class-sikshya-settings-payment-gateways.php';
-				$settings[] = include 'settings/class-sikshya-settings-uninstallation.php';
 
 				self::$settings = apply_filters( 'sikshya_get_settings_pages', $settings );
 			}

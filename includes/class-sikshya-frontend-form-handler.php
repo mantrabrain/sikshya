@@ -169,12 +169,21 @@ class Sikshya_Frontend_Form_Handler
 			return;
 		}
 
+
 		if (sikshya()->course->has_enrolled($course_id) || $user_id < 1) {
 
 			$next_item_id = get_user_meta($user_id, 'sikshya_next_item_id', true);
+			if (absint($next_item_id) === absint(get_the_ID())) {
+				$next_item_ids = sikshya()->course->get_lesson_quiz_ids();
+				$next_item_id = isset($next_item_ids[0]) ? $next_item_ids[0] : $next_item_id;
+
+				update_user_meta($user_id, 'sikshya_next_item_id', $next_item_id);
+			}
 			if (absint($next_item_id) > 0) {
 
+
 				$permalink = get_permalink($next_item_id);
+
 				wp_safe_redirect($permalink);
 
 			}

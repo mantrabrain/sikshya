@@ -9,10 +9,6 @@
 
 defined('WP_UNINSTALL_PLUGIN') || exit;
 
-if (!defined('SIKSHYA_REMOVE_ALL_DATA')) {
-
-	define('SIKSHYA_REMOVE_ALL_DATA', true);
-}
 global $wpdb, $wp_version;
 
 /*
@@ -20,7 +16,7 @@ global $wpdb, $wp_version;
  * wp-config.php. This is to prevent data loss when deleting the plugin from the backend
  * and to ensure only the site owner can perform this action.
  */
-if (defined('SIKSHYA_REMOVE_ALL_DATA') && true === SIKSHYA_REMOVE_ALL_DATA && (boolean)get_option('sikshya_remove_all_data_on_uninstallation')) {
+if (defined('SIKSHYA_REMOVE_ALL_DATA') && true === SIKSHYA_REMOVE_ALL_DATA) {
 
 	include_once dirname(__FILE__) . '/includes/class-sikshya-install.php';
 
