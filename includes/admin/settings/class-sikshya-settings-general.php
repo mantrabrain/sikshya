@@ -137,12 +137,12 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 			$settings = apply_filters(
 				'sikshya_settings_general_general',
 				array(
-					array(
+					/*array(
 						'title' => __('General Settings', 'sikshya'),
 						'type' => 'title',
 						'desc' => '',
 						'id' => 'sikshya_general_options',
-					),
+					),*/
 
 					array(
 						'title' => __('Currency Options', 'yatra'),
@@ -208,10 +208,10 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 						'type' => 'sectionend',
 						'id' => 'sikshya_general_currency_options',
 					),
-					array(
+					/*array(
 						'type' => 'sectionend',
 						'id' => 'sikshya_general_options',
-					),
+					),*/
 
 				)
 
