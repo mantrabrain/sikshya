@@ -16,7 +16,7 @@ class Sikshya_Admin_Menu
 	{
 
 
-		add_submenu_page('edit.php?post_type=sik_courses', __('Students', 'sikshya'), __('Students', 'sikshya'), 'administrator', 'students', array($this, 'students_page_handler'), 11);
+		add_submenu_page('edit.php?post_type=sik_courses', __('Students', 'sikshya'), __('Students', 'sikshya'), 'administrator', 'students', array($this, 'students_page_handler'), 9);
 
 
 		$settings_page = add_submenu_page(
