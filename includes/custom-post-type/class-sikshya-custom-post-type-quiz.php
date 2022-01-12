@@ -31,14 +31,14 @@ if (!class_exists('Sikshya_Custom_Post_Type_Quiz')) {
                 'show_in_nav_menus' => false,
                 'show_ui' => true,
                 'query_var' => true,
-                'show_in_menu' => 'sikshya',
+                'show_in_menu' => 'edit.php?post_type=sik_courses',
                 'rewrite' => array(
                     'slug' => 'quizzes',
                     'with_front' => false
                 ),
                 'capability_type' => 'post',
                 'hierarchical' => false,
-                'menu_position' => null,
+                'menu_position' => 30,
                 'supports' => array(
                     'title',
                     'editor',

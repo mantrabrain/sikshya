@@ -34,7 +34,8 @@ if (!class_exists('Sikshya_Taxonomy_Course_Tag')) {
                 'labels' => $labels,
                 'show_ui' => true,
                 'show_admin_column' => true,
-                'query_var' => true,
+				'show_in_menu' => 'edit.php?post_type=sik_courses',
+				'query_var' => true,
                 'rewrite' => array(
                     'slug' => 'sik_course_tag',
                     'with_front' => true

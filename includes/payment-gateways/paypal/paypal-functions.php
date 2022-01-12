@@ -11,7 +11,8 @@ if (!function_exists('sikshya_get_paypal_api_endpoint')) {
 			$protocol = 'http://';
 		}
 
-		if (sikshya_payment_gateway_paypal_test_mode()) {
+		if (sikshya_payment_gateway_test_mode()) {
+			
 			$paypal_uri = 'https://www.sandbox.paypal.com/cgi-bin/webscr/';
 		} else {
 
@@ -39,14 +40,3 @@ if (!function_exists('sikshya_payment_gateway_paypal_validate_settings')) {
 	}
 }
 
-
-function sikshya_payment_gateway_paypal_test_mode()
-{
-
-	$is_test_mode = get_option('sikshya_payment_gateway_paypal_test_mode');
-
-	if ($is_test_mode == 'yes') {
-		return true;
-	}
-	return false;
-}

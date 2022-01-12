@@ -53,4 +53,36 @@ function sikshya_update_payment_status($order_id)
 
 }
 
+function sikshya_payment_gateway_test_mode()
+{
+
+	$is_test_mode = get_option('sikshya_payment_gateway_test_mode');
+
+	if ($is_test_mode == 'yes') {
+		return true;
+	}
+	return false;
+}
+
+function sikshya_payment_gateway_logging_enabled()
+{
+	if ('yes' === get_option('sikshya_payment_gateway_enable_logging', 'no')) {
+		return true;
+	}
+	return false;
+}
+
+function sikshya_save_payment_gateway_log($source, $log_message)
+{
+	if (sikshya_payment_gateway_logging_enabled()) {
+
+		$logger = sikshya_get_logger();
+
+		$log_message = is_array($log_message) || is_object($log_message) ? json_encode($log_message) : $log_message;
+
+
+		$logger->info($log_message, array('source' => $source));
+	}
+
+}
 

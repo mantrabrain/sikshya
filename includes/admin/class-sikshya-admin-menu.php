@@ -7,7 +7,6 @@ class Sikshya_Admin_Menu
 	public function __construct()
 	{
 		add_action('admin_menu', array($this, 'admin_menu'));
-		add_action('admin_menu', array($this, 'settings_menu'), 50);
 		add_action('wp_loaded', array($this, 'save_settings'));
 
 
@@ -15,30 +14,13 @@ class Sikshya_Admin_Menu
 
 	public function admin_menu()
 	{
-		add_menu_page(
-			__('Sikshya', 'sikshya')
-			, __('Sikshya', 'sikshya'),
-			'administrator',
-			'sikshya', null,
-			'dashicons-welcome-learn-more', 2);
-		add_submenu_page('sikshya', __('Categories', 'sikshya'), __('Categories', 'sikshya'),
-			'administrator', 'edit-tags.php?taxonomy=sik_course_category&post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE, null);
-
-		add_submenu_page('sikshya', __('Tags', 'sikshya'), __('Tags', 'sikshya'),
-			'administrator', 'edit-tags.php?taxonomy=sik_course_tag&post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE, null);
 
 
-		add_submenu_page('sikshya', __('Students', 'sikshya'), __('Students', 'sikshya'), 'activate_plugins', 'students', array($this, 'students_page_handler'));
+		add_submenu_page('edit.php?post_type=sik_courses', __('Students', 'sikshya'), __('Students', 'sikshya'), 'administrator', 'students', array($this, 'students_page_handler'), 11);
 
-	}
 
-	/**
-	 * Add menu item.
-	 */
-	public function settings_menu()
-	{
 		$settings_page = add_submenu_page(
-			'sikshya',
+			'edit.php?post_type=sik_courses',
 			__('Sikshya settings', 'sikshya'),
 			__('Settings', 'sikshya'),
 			'administrator',
@@ -46,6 +28,7 @@ class Sikshya_Admin_Menu
 
 		add_action('load-' . $settings_page, array($this, 'settings_page_init'));
 	}
+
 
 	public function settings_page_init()
 	{

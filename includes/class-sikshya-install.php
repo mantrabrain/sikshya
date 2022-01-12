@@ -16,6 +16,9 @@ class Sikshya_Install
 	private static $update_callbacks = array(
 		'0.0.11' => array(
 			'sikshya_update_0011_section_meta',
+		),
+		'0.0.15' => array(
+			'sikshya_update_0015_logs_update',
 		)
 	);
 
@@ -103,6 +106,8 @@ class Sikshya_Install
 				}
 			}
 		}
+
+
 	}
 
 	private static function exe_update_callback($callbacks)
@@ -318,6 +323,20 @@ class Sikshya_Install
 		  ) $collate;
 		  ";
 
+		$tables[] = "CREATE TABLE IF NOT EXISTS {$table_prefix}logs (
+          log_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          timestamp datetime NOT NULL,
+          level smallint(4) NOT NULL,
+          source varchar(200) NOT NULL,
+          message longtext NOT NULL,
+          context longtext NULL,
+          PRIMARY KEY (log_id),
+          KEY level (level)
+        ) $collate;
+		  ";
+
+		return $tables;
+
 		return $tables;
 	}
 
@@ -445,6 +464,15 @@ class Sikshya_Install
 
 		remove_role('sikshya_instructor');
 		remove_role('sikshya_student');
+	}
+
+	public static function verify_base_tables($execute = false)
+	{
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		if ($execute) {
+			self::create_tables();
+		}
 	}
 
 	public static function drop_tables()

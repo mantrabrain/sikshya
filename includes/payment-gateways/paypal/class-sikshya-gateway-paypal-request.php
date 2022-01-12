@@ -129,6 +129,7 @@ class Sikshya_Gateway_Paypal_Request
 				'no_shipping' => '1'
 			);
 
+			sikshya_save_payment_gateway_log('paypal_request', $query);
 
 			return apply_filters('sikshya_paypal_args', $query);
 		}

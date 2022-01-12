@@ -12,11 +12,11 @@ class Sikshya_Admin_Importer
 	public function importer_menu()
 	{
 		add_submenu_page(
-			'sikshya',
+			'edit.php?post_type=sik_courses',
 			__('Import/Export', 'sikshya'),
 			__('Import/Export', 'sikshya'),
 			'administrator',
-			'sikshya_course_import_export', array($this, 'settings_page'));
+			'sikshya_course_import_export', array($this, 'settings_page'), 130);
 
 
 	}

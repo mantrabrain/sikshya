@@ -48,6 +48,7 @@ if ( ! class_exists( 'Sikshya_Admin_Settings', false ) ) :
 
 				$settings[] = include 'settings/class-sikshya-settings-general.php';
 				$settings[] = include 'settings/class-sikshya-settings-payment-gateways.php';
+				$settings[] = include 'settings/class-sikshya-settings-miscellaneous.php';
 
 				self::$settings = apply_filters( 'sikshya_get_settings_pages', $settings );
 			}
@@ -650,13 +651,13 @@ if ( ! class_exists( 'Sikshya_Admin_Settings', false ) ) :
 			} elseif ( $description && in_array( $value['type'], array( 'checkbox' ), true ) ) {
 				$description = wp_kses_post( $description );
 			} elseif ( $description ) {
-				$description = '<p class="description">' . wp_kses_post( $description ) . '</p>';
+				$description = '<span class="description">' . wp_kses_post( $description ) . '</span>';
 			}
 
 			if ( $tooltip_html && in_array( $value['type'], array( 'checkbox' ), true ) ) {
-				$tooltip_html = '<p class="description">' . $tooltip_html . '</p>';
-			} elseif ( $tooltip_html ) {
-				$tooltip_html = ( $tooltip_html );
+				$tooltip_html = sikshya_tippy_tooltip($tooltip_html, false);
+			} elseif ( ''!==$tooltip_html ) {
+				$tooltip_html = sikshya_tippy_tooltip($tooltip_html, false);
 			}
 
 			return array(

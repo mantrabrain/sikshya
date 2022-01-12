@@ -12,7 +12,7 @@ if (!class_exists('Sikshya_Custom_Post_Type_Section')) {
                 'public' => true,
                 'publicly_queryable' => true,
                 'has_archive' => true,
-                'show_in_menu' => 'sikshya',
+                'show_in_menu' => 'edit.php?post_type=sik_courses',
                 'exclude_from_search' => true,
                 'show_in_nav_menus' => false,
                 'show_ui' => true,

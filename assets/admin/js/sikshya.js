@@ -1,6 +1,6 @@
 // @var SikshyaAdminData
 
-jQuery(function ($) {
+(function ($) {
 
 	var Sikshya_Admin_Course = {
 		getSectionParams: function (id) {
@@ -108,12 +108,22 @@ jQuery(function ($) {
 			};
 		},
 		init: function () {
+			this.loadLib();
 			var sectionParams = this.getSectionParams('sik-add-new-section');
 			this.initModal(sectionParams);
 			this.initSortable();
 			this.bind();
 
 
+		},
+		loadLib: function () {
+
+
+			tippy('.sikshya-tippy-tooltip', {
+				//content: "Hello World",
+
+				allowHTML: true,
+			});
 		},
 		initSortable: function () {
 
@@ -447,6 +457,9 @@ jQuery(function ($) {
 
 
 	};
-	Sikshya_Admin_Course.init();
 
-});
+	$(document).ready(function () {
+		Sikshya_Admin_Course.init();
+	});
+
+}(jQuery));

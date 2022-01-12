@@ -81,6 +81,7 @@ class Sikshya_Settings_Payment_Gateways extends Sikshya_Admin_Settings_Base
 	public function get_settings($current_section = '')
 	{
 		$settings = array();
+		$status_page_url = admin_url('admin.php?page=sikshya-status&tab=logs');
 
 
 		if ('' === $current_section) {
@@ -92,6 +93,19 @@ class Sikshya_Settings_Payment_Gateways extends Sikshya_Admin_Settings_Base
 						'type' => 'title',
 						'desc' => '',
 						'id' => 'sikshya_payment_gateways_general_options',
+					),
+					array(
+						'title' => __('Test Mode', 'sikshya'),
+						'desc' => __(' While in test mode no live transactions are processed. To fully use test mode, you must have a sandbox (test) account for the payment gateway you are testing.', 'sikshya'),
+						'id' => 'sikshya_payment_gateway_test_mode',
+						'type' => 'checkbox',
+					),
+					array(
+						'title' => __('Log Gateway information', 'sikshya'),
+						'desc' => sprintf(__('When you enable this option all payment gateway response and other payment information will be stored into <a href="%s" target="_blank">Sikshya logging system.</a> <strong style="color:red;">Please enable this option only for debugging purpose.</strong>', 'sikshya'), $status_page_url),
+						'id' => 'sikshya_payment_gateway_enable_logging',
+						'type' => 'checkbox',
+						'default' => 'no',
 					),
 					array(
 						'title' => __('Payment Gateways', 'sikshya'),

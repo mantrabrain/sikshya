@@ -13,3 +13,12 @@ function sikshya_update_0011_section_meta()
 	}
 }
 
+if (!function_exists('sikshya_update_0015_logs_update')) {
+
+	function sikshya_update_0015_logs_update()
+	{
+		Sikshya_Install::verify_base_tables(true);
+
+		sikshya()->get_log_dir();
+	}
+}

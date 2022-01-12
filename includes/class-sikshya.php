@@ -240,7 +240,7 @@ final class Sikshya
 	private function init_hooks()
 	{
 		register_activation_hook(SIKSHYA_FILE, array('Sikshya_Install', 'install'));
-		//register_shutdown_function(array($this, 'log_errors'));
+		register_shutdown_function(array($this, 'log_errors'));
 
 		add_action('plugins_loaded', array($this, 'on_plugins_loaded'), -1);
 		add_action('after_setup_theme', array($this, 'setup_environment'));
@@ -253,15 +253,6 @@ final class Sikshya
 //        add_action('deactivated_plugin', array($this, 'deactivated_plugin'));
 	}
 
-	/**
-	 * Ensures fatal errors are logged so they can be picked up in the status report.
-	 *
-	 * @since 1.0.0
-	 */
-	public function log_errors()
-	{
-
-	}
 
 	/**
 	 * Define WC Constants.
@@ -280,13 +271,13 @@ final class Sikshya
 		$this->define('SIKSHYA_QUIZZES_CUSTOM_POST_TYPE', 'sik_quizzes');
 		$this->define('SIKSHYA_QUESTIONS_CUSTOM_POST_TYPE', 'sik_questions');
 		$this->define('SIKSHYA_STUDENTS_CUSTOM_POST_TYPE', 'sik_students');
-		$this->define('SIKSHYA_REST_API_URL', 'https://license.mantrabrain.com/sikshya/');
-		$this->define('SIKSHYA_HOOK_PREFIX', 'sikshya');
+		$this->define('SIKSHYA_ROUNDING_PRECISION', 6);
 		$this->define('SIKSHYA_PATH', dirname(SIKSHYA_FILE));
 		$this->define('SIKSHYA_BASENAME', plugin_basename(SIKSHYA_FILE));
 		$this->define('SIKSHYA_ASSETS_URL', plugins_url('/assets', SIKSHYA_FILE));
 		$this->define('SIKSHYA_ADMIN_ASSETS_URL', plugins_url('/assets/admin', SIKSHYA_FILE));
 		$this->define('SIKSHYA_TEMPLATES_URL', plugins_url('/templates', SIKSHYA_FILE));
+		$this->define('SIKSHYA_MODULES_URL', plugins_url('/includes/modules', SIKSHYA_FILE));
 	}
 
 
@@ -340,12 +331,17 @@ final class Sikshya
 		// Abstract
 		include_once SIKSHYA_PATH . '/includes/abstracts/abstract-sikshya-payment-gateways.php';
 
+		include_once SIKSHYA_PATH . '/includes/abstracts/abstract-sikshya-log-levels.php';
+		include_once SIKSHYA_PATH . '/includes/abstracts/abstract-sikshya-log-handler.php';
+
+
 		// LOAD START
 		include_once SIKSHYA_PATH . '/includes/payment-gateways/class-sikshya-gateways-core.php';
 
 		// LOAD END
 
 
+		include_once SIKSHYA_PATH . '/includes/static/class-sikshya-tables.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-messages.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-install.php';
 		include_once SIKSHYA_PATH . '/includes/helpers/class-sikshya-helper-main.php';
@@ -361,6 +357,7 @@ final class Sikshya
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-ajax.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-permalink-manager.php';
 		include_once SIKSHYA_PATH . '/includes/class-sikshya-role-manager.php';
+		include_once SIKSHYA_PATH . '/includes/class-sikshya-modules.php';
 
 
 		if ($this->is_request('admin')) {
@@ -510,63 +507,88 @@ final class Sikshya
 		return admin_url('admin-ajax.php', 'relative');
 	}
 
-
-	public function get_upload_dir($create_if_not_exists = false)
+	public function log_errors()
 	{
-		$upload_dir = wp_upload_dir();
-
-		if ($create_if_not_exists) {
-
-			$this->create_files();
+		$error = error_get_last();
+		if ($error && in_array($error['type'], array(E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR), true)) {
+			$logger = sikshya_get_logger();
+			$logger->critical(
+			/* translators: 1: error message 2: file name and path 3: line number */
+				sprintf(__('%1$s in %2$s on line %3$s', 'sikshya'), $error['message'], $error['file'], $error['line']) . PHP_EOL,
+				array(
+					'source' => 'fatal-errors',
+				)
+			);
+			do_action('sikshya_shutdown_error', $error);
 		}
-
-		return $upload_dir['basedir'] . '/sikshya/';
-
 	}
 
-	public function get_upload_file($file)
+	public function get_log_dir($create_if_not_exists = true)
 	{
-		$upload_dir = wp_upload_dir();
+		$wp_upload_dir = wp_upload_dir();
 
-		return $upload_dir['basedir'] . '/sikshya/' . $file;
+		$log_dir = $wp_upload_dir['basedir'] . '/sikshya-logs/';
 
+		if (!file_exists(trailingslashit($log_dir) . 'index.html') && $create_if_not_exists) {
+
+			$files = array(
+				array(
+					'base' => $log_dir,
+					'file' => 'index.html',
+					'content' => '',
+				),
+				array(
+					'base' => $log_dir,
+					'file' => '.htaccess',
+					'content' => 'deny from all',
+				)
+			);
+
+			$this->create_files($files, $log_dir);
+
+
+		}
+		return $log_dir;
 	}
 
+	public function get_upload_dir($create_if_not_exists = true)
+	{
+		$wp_upload_dir = wp_upload_dir();
 
-	private function create_files()
+		$upload_dir = $wp_upload_dir['basedir'] . '/sikshya/';
+
+		if (!file_exists(trailingslashit($upload_dir) . 'index.html') && $create_if_not_exists) {
+
+			$files = array(
+				array(
+					'base' => $upload_dir,
+					'file' => 'index.html',
+					'content' => '',
+				),
+				array(
+					'base' => $upload_dir,
+					'file' => '.htaccess',
+					'content' => 'deny from all',
+				)
+			);
+
+			$this->create_files($files, $upload_dir);
+
+
+		}
+		return $upload_dir;
+	}
+
+	private function create_files($files, $base_dir)
 	{
 		// Bypass if filesystem is read-only and/or non-standard upload system is used.
 		if (apply_filters('sikshya_install_skip_create_files', false)) {
 			return;
 		}
 
-		if (file_exists(trailingslashit($this->get_upload_dir()) . 'index.html')) {
+		if (file_exists(trailingslashit($base_dir) . 'index.html')) {
 			return true;
 		}
-		$files = array(
-			array(
-				'base' => $this->get_upload_dir(),
-				'file' => 'index.html',
-				'content' => '',
-			),
-			array(
-				'base' => $this->get_upload_dir(),
-				'file' => '.htaccess',
-				'content' => '<FilesMatch ".*\.(css|js)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>',
-			),
-			array(
-				'base' => $this->get_upload_dir(),
-				'file' => '.htaccess',
-				'content' => '<FilesMatch ".*\.(css|js)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>',
-			)
-		);
-
 		$has_created_dir = false;
 
 		foreach ($files as $file) {
@@ -587,5 +609,6 @@ final class Sikshya
 
 
 	}
+
 
 }

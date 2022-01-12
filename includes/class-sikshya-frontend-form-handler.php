@@ -43,7 +43,7 @@ class Sikshya_Frontend_Form_Handler
 
 			$billing_data = isset($sikshya_billing_fields['data']) ? $sikshya_billing_fields['data'] : array();
 
-			$payment_gateway_id = isset($_POST['sikshya_payment_gateway']) ? sanitize_text_field($_POST['sikshya_payment_gateway']) : 'yatra-not-gateway';
+			$payment_gateway_id = isset($_POST['sikshya_payment_gateway']) ? sanitize_text_field($_POST['sikshya_payment_gateway']) : 'sikshya-not-gateway';
 
 			$sikshya_get_active_payment_gateways = sikshya_get_active_payment_gateways();
 

@@ -1,0 +1,44 @@
+table.sikshya_status_table {
+    margin: 1em 0;
+}
+
+table.sikshya_status_table h2 {
+    font-size: 14px;
+    margin: 0;
+}
+
+table.sikshya_status_table td, table.sikshya_status_table th {
+    font-size: 1.1em;
+    font-weight: 400;
+}
+
+table.sikshya_status_table td mark, table.sikshya_status_table th mark {
+    background: transparent none;
+}
+
+table.sikshya_status_table td .red, table.sikshya_status_table td mark.error, table.sikshya_status_table th .red, table.sikshya_status_table th mark.error {
+    color: #a00;
+}
+
+table.sikshya_status_table td mark.yes, table.sikshya_status_table th mark.yes {
+    color: #7ad03a;
+}
+
+table.sikshya_status_table td mark.no, table.sikshya_status_table th mark.no {
+    color: #999;
+
+
+}
+
+#sikshya-log-viewer {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 1px 1px rgb(0 0 0 / 4%);
+    padding: 5px 20px;
+    overflow-x: auto;
+}
+
+#sikshya-log-viewer-select {
+    padding: 10px 0 8px;
+    line-height: 28px;
+}

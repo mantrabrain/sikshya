@@ -11,6 +11,8 @@ include_once SIKSHYA_PATH . '/includes/helpers/sikshya-pricing-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-currency-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-country-helper.php';
 include_once SIKSHYA_PATH . '/includes/helpers/sikshya-state-helper.php';
+include_once SIKSHYA_PATH . '/includes/helpers/sikshya-formatting-helper.php';
+include_once SIKSHYA_PATH . '/includes/helpers/sikshya-html-helper.php';
 
 
 function sikshya_export($args = array())
@@ -1112,5 +1114,41 @@ if (!function_exists('sikshya_update_order_status')) {
 		));
 
 		return true;
+	}
+}
+
+if (!function_exists('sikshya_get_logger')) {
+
+	function sikshya_get_logger()
+	{
+		static $logger = null;
+
+		$class = apply_filters('sikshya_logging_class', 'Sikshya_Logger');
+
+		if (null !== $logger && is_string($class) && is_a($logger, $class)) {
+			return $logger;
+		}
+
+		$implements = class_implements($class);
+
+		if (is_array($implements) && in_array('Sikshya_Interface_Logger', $implements, true)) {
+			$logger = is_object($class) ? $class : new $class();
+		} else {
+			_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+				/* translators: 1: class name 2: sikshya_logging_class 3: Sikshya_Interface_Logger */
+					__('The class %1$s provided by %2$s filter must implement %3$s.', 'sikshya'),
+					'<code>' . esc_html(is_object($class) ? get_class($class) : $class) . '</code>',
+					'<code>sikshya_logging_class</code>',
+					'<code>Sikshya_Interface_Logger</code>'
+				),
+				'3.0'
+			);
+
+			$logger = is_a($logger, 'Sikshya_Logger') ? $logger : new Sikshya_Logger();
+		}
+
+		return $logger;
 	}
 }
