@@ -194,10 +194,13 @@ class Sikshya_Core_Course
 
 		$section_ids = get_post_meta($quiz_id, 'section_id', true);
 
+		$section_ids = $section_ids == '' ? array() : $section_ids;
+
 		if (!is_array($section_ids) && '' != $section_ids && !is_null($section_ids)) {
 
 			$section_ids = array($section_ids);
 		}
+
 
 		$course_ids = array();
 
