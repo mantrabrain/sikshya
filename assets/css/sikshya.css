@@ -331,7 +331,6 @@ span.tw_get_sikshya {
 .sikshya-single-lesson-wrap {
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   position: relative;
@@ -340,16 +339,14 @@ span.tw_get_sikshya {
 .sikshya-lesson-sidebar {
   -webkit-box-flex: 0;
   -ms-flex: 0 0 400px;
-  -webkit-flex: 0 0 400px;
-     -moz-box-flex: 0;
-          flex: 0 0 400px; }
+  -moz-box-flex: 0;
+       flex: 0 0 400px; }
 
 .sikshya-single-entry-content {
   -webkit-box-flex: 999;
   -ms-flex-positive: 999;
-  -webkit-flex-grow: 999;
-     -moz-box-flex: 999;
-          flex-grow: 999; }
+  -moz-box-flex: 999;
+       flex-grow: 999; }
 
 .sikshya-sidebar-tabs-wrap {
   border-top: 1px solid #E0E9EC; }
@@ -358,7 +355,6 @@ span.tw_get_sikshya {
   height: 70px;
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex; }
   .sikshya-tabs-btn-group a {
@@ -381,26 +377,22 @@ span.tw_get_sikshya {
   color: #ffffff;
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
-  -webkit-justify-content: space-between;
-     -moz-box-pack: justify;
-          justify-content: space-between;
+  -moz-box-pack: justify;
+       justify-content: space-between;
   padding-right: 15px; }
   .sikshya-single-page-top-bar .sikshya-hide-sidebar-bar {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 auto;
-    -webkit-flex: 0 0 auto;
-       -moz-box-flex: 0;
-            flex: 0 0 auto; }
+    -moz-box-flex: 0;
+         flex: 0 0 auto; }
   .sikshya-single-page-top-bar a {
     color: #ffffff;
     vertical-align: middle;
@@ -417,9 +409,8 @@ span.tw_get_sikshya {
        text-overflow: ellipsis;
     -webkit-box-flex: 999999;
     -ms-flex-positive: 999999;
-    -webkit-flex-grow: 999999;
-       -moz-box-flex: 999999;
-            flex-grow: 999999; }
+    -moz-box-flex: 999999;
+         flex-grow: 999999; }
     .sikshya-single-page-top-bar .sikshya-topbar-content-title-wrap i {
       vertical-align: middle;
       line-height: 1;
@@ -427,9 +418,8 @@ span.tw_get_sikshya {
   .sikshya-single-page-top-bar .sikshya-topbar-mark-to-done {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 auto;
-    -webkit-flex: 0 0 auto;
-       -moz-box-flex: 0;
-            flex: 0 0 auto; }
+    -moz-box-flex: 0;
+         flex: 0 0 auto; }
   .sikshya-single-page-top-bar .sikshya-single-lesson-segment {
     margin-bottom: 0; }
     .sikshya-single-page-top-bar .sikshya-single-lesson-segment form {
@@ -460,14 +450,12 @@ span.tw_get_sikshya {
   background-color: #1b52d8;
   display: -ms-inline-flexbox;
   display: -webkit-inline-box;
-  display: -webkit-inline-flex;
   display: -moz-inline-box;
   display: inline-flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   padding: 12px 30px;
   border-radius: 4px;
   text-transform: capitalize;
@@ -487,14 +475,12 @@ a.sikshya-button {
   background-color: #1b52d8;
   display: -ms-inline-flexbox;
   display: -webkit-inline-box;
-  display: -webkit-inline-flex;
   display: -moz-inline-box;
   display: inline-flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   padding: 12px 30px;
   border-radius: 4px;
   text-transform: capitalize;
@@ -514,14 +500,12 @@ a.sikshya-button {
   background-color: #1b52d8;
   display: -ms-inline-flexbox;
   display: -webkit-inline-box;
-  display: -webkit-inline-flex;
   display: -moz-inline-box;
   display: inline-flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   padding: 12px 30px;
   border-radius: 4px;
   text-transform: capitalize;
@@ -541,14 +525,12 @@ a.sikshya-btn {
   background-color: #1b52d8;
   display: -ms-inline-flexbox;
   display: -webkit-inline-box;
-  display: -webkit-inline-flex;
   display: -moz-inline-box;
   display: inline-flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   padding: 12px 30px;
   border-radius: 4px;
   text-transform: capitalize;
@@ -568,14 +550,12 @@ a.sikshya-btn {
   background-color: #1b52d8;
   display: -ms-inline-flexbox;
   display: -webkit-inline-box;
-  display: -webkit-inline-flex;
   display: -moz-inline-box;
   display: inline-flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   padding: 12px 30px;
   border-radius: 4px;
   text-transform: capitalize;
@@ -593,7 +573,6 @@ a.sikshya-btn {
   padding: 14px 100px 14px 17px;
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   color: #4b5981;
@@ -635,7 +614,6 @@ a.sikshya-btn {
   background: #e4e2ec;
   padding: 10px;
   display: -webkit-box;
-  display: -webkit-flex;
   display: -moz-box;
   display: -ms-flexbox;
   display: flex;
@@ -782,21 +760,18 @@ a.sikshya-btn {
 
 .sikshya-lesson-navigation-area {
   display: -webkit-box;
-  display: -webkit-flex;
   display: -moz-box;
   display: -ms-flexbox;
   display: flex;
   padding: 20px; }
   .sikshya-lesson-navigation-area .lesson-next {
     -webkit-box-flex: 1;
-    -webkit-flex: 1;
        -moz-box-flex: 1;
         -ms-flex: 1;
             flex: 1;
     text-align: right; }
   .sikshya-lesson-navigation-area .lesson-prev {
     -webkit-box-flex: 1;
-    -webkit-flex: 1;
        -moz-box-flex: 1;
         -ms-flex: 1;
             flex: 1; }
@@ -1927,26 +1902,21 @@ course content
     margin: 0;
     padding: 0;
     display: -webkit-box;
-    display: -webkit-flex;
     display: -moz-box;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-align: start;
-    -webkit-align-items: flex-start;
        -moz-box-align: start;
         -ms-flex-align: start;
             align-items: flex-start;
     -webkit-box-pack: justify;
-    -webkit-justify-content: space-between;
        -moz-box-pack: justify;
         -ms-flex-pack: justify;
             justify-content: space-between;
-    -webkit-flex-wrap: wrap;
-        -ms-flex-wrap: wrap;
-            flex-wrap: wrap; }
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap; }
     .what-you-get-box ul li {
       display: -webkit-box;
-      display: -webkit-flex;
       display: -moz-box;
       display: -ms-flexbox;
       display: flex;
@@ -2053,13 +2023,11 @@ course content
     top: 0;
     right: 38px;
     display: -webkit-box;
-    display: -webkit-flex;
     display: -moz-box;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-orient: vertical;
     -webkit-box-direction: reverse;
-    -webkit-flex-direction: column-reverse;
        -moz-box-orient: vertical;
        -moz-box-direction: reverse;
         -ms-flex-direction: column-reverse;
@@ -2161,14 +2129,12 @@ course content
     .student-feedback-box .individual-rating ul li {
       display: -webkit-box;
       display: -ms-flexbox;
-      display: -webkit-flex;
       display: -moz-box;
       display: flex;
       -webkit-box-align: center;
       -ms-flex-align: center;
-      -webkit-align-items: center;
-         -moz-box-align: center;
-              align-items: center;
+      -moz-box-align: center;
+           align-items: center;
       margin-bottom: 10px; }
       .student-feedback-box .individual-rating ul li .progress {
         width: 70%;
@@ -2409,7 +2375,6 @@ section.category-course-list-area {
 .course-box-2 {
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   border: 1px solid #dedfe0;
@@ -2425,8 +2390,7 @@ section.category-course-list-area {
     width: 24%;
     text-align: right;
     -ms-flex-item-align: end;
-    -webkit-align-self: flex-end;
-            align-self: flex-end;
+    align-self: flex-end;
     padding: 10px 25px 15px; }
 
 .category-course-list ul li {
@@ -2831,12 +2795,10 @@ section.cart-list-area {
 .cart-course-wrapper {
   padding: 10px;
   display: -webkit-box;
-  display: -webkit-flex;
   display: -moz-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
      -moz-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
@@ -2844,16 +2806,14 @@ section.cart-list-area {
   .cart-course-wrapper .image {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 17%;
-    -webkit-flex: 0 0 17%;
-       -moz-box-flex: 0;
-            flex: 0 0 17%;
+    -moz-box-flex: 0;
+         flex: 0 0 17%;
     max-width: 17%; }
   .cart-course-wrapper .details {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 53%;
-    -webkit-flex: 0 0 53%;
-       -moz-box-flex: 0;
-            flex: 0 0 53%;
+    -moz-box-flex: 0;
+         flex: 0 0 53%;
     max-width: 53%;
     padding-left: 10px; }
     .cart-course-wrapper .details .name {
@@ -2903,16 +2863,14 @@ section.cart-list-area {
     padding-left: 10px;
     -webkit-box-flex: 0;
     -ms-flex: 0 0 15%;
-    -webkit-flex: 0 0 15%;
-       -moz-box-flex: 0;
-            flex: 0 0 15%;
+    -moz-box-flex: 0;
+         flex: 0 0 15%;
     max-width: 15%; }
   .cart-course-wrapper .price {
     -webkit-box-flex: 0;
     -ms-flex: 0 0 15%;
-    -webkit-flex: 0 0 15%;
-       -moz-box-flex: 0;
-            flex: 0 0 15%;
+    -moz-box-flex: 0;
+         flex: 0 0 15%;
     max-width: 15%;
     text-align: right;
     padding-right: 25px;
@@ -3025,12 +2983,10 @@ section.cart-list-area {
   clear: both;
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   -ms-flex-wrap: wrap;
-  -webkit-flex-wrap: wrap;
-          flex-wrap: wrap;
+  flex-wrap: wrap;
   margin-left: -15px;
   margin-right: -15px;
   padding: 50px 0; }
@@ -3052,21 +3008,18 @@ section.cart-list-area {
   height: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   -ms-flex-direction: column;
-  -webkit-flex-direction: column;
-     -moz-box-orient: vertical;
-     -moz-box-direction: normal;
-          flex-direction: column;
+  -moz-box-orient: vertical;
+  -moz-box-direction: normal;
+       flex-direction: column;
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
-  -webkit-justify-content: space-between;
-     -moz-box-pack: justify;
-          justify-content: space-between; }
+  -moz-box-pack: justify;
+       justify-content: space-between; }
   .sikshya-course-loop:hover {
     -webkit-box-shadow: 0 4px 23px rgba(0, 0, 0, 0.1);
     box-shadow: 0 4px 23px rgba(0, 0, 0, 0.1); }
@@ -3116,23 +3069,19 @@ section.cart-list-area {
 .sikshya-course-loop-price > .price {
   display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: -moz-box;
   display: flex;
   -webkit-box-align: center;
   -ms-flex-align: center;
-  -webkit-align-items: center;
-     -moz-box-align: center;
-          align-items: center;
+  -moz-box-align: center;
+       align-items: center;
   -webkit-box-pack: start;
   -ms-flex-pack: start;
-  -webkit-justify-content: flex-start;
-     -moz-box-pack: start;
-          justify-content: flex-start;
+  -moz-box-pack: start;
+       justify-content: flex-start;
   font-weight: 600;
   -ms-flex-wrap: wrap;
-  -webkit-flex-wrap: wrap;
-          flex-wrap: wrap; }
+  flex-wrap: wrap; }
   .sikshya-course-loop-price > .price .sikshya-loop-cart-btn-wrap {
     margin-left: auto; }
 
@@ -3195,10 +3144,9 @@ section.cart-list-area {
     padding: 10px 100px 10px 17px;
     display: -webkit-box;
     display: -ms-flexbox;
-    display: -webkit-flex;
     display: -moz-box;
     display: flex;
-    color: #4b5981;
+    color: #ccdef8;
     position: relative;
     border-top: 1px solid #E8EFF1; }
     #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-single-lesson-items a > i:first-child, #sikshya-lesson-sidebar-tab-content .sikshya-sections-in-single-lesson .sikshya-single-lesson-quiz-items a > i:first-child {
@@ -3347,17 +3295,14 @@ table th {
   .sikshya-cart-form .coupon {
     float: left;
     display: -webkit-box;
-    display: -webkit-flex;
     display: -moz-box;
     display: -ms-flexbox;
     display: flex;
     -webkit-box-align: center;
-    -webkit-align-items: center;
        -moz-box-align: center;
         -ms-flex-align: center;
             align-items: center;
     -webkit-box-pack: center;
-    -webkit-justify-content: center;
        -moz-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center;
