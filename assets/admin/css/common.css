@@ -1,7 +1,7 @@
 .course-section-template {
 	padding: 0;
 	margin: 0 0 20px 0;
-	border: 1px solid;
+	border: 1px solid #aaa;
 }
 
 .course-section-template .section-actions {
@@ -17,6 +17,10 @@
 
 .sikshya-card-item:hover .sikshya-card-inner {
 	border-color: #0acf97;
+}
+
+.sikshya-card-item:hover .sikshya-card-inner .card-widgets {
+	display: block;
 }
 
 .sikshya-card-item {
@@ -54,6 +58,7 @@
 	width: 20%;
 	margin-left: auto;
 	text-align: right;
+	display: none;
 }
 
 .sikshya-card-body .title {

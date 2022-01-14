@@ -152,7 +152,12 @@
 	border: none;
 	margin-left: 0px;
 	background: #f1f1f1;
-	border-bottom: 1px solid;
+	border-bottom: 1px solid #aaa;
+	align-items: center;
+}
+
+.course-section-template .heading h4 {
+	font-size: 15px;
 }
 
 .course-section-template .remove-section {
