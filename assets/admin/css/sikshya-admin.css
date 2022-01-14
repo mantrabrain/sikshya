@@ -147,8 +147,12 @@
 
 .course-section-template .heading {
 	display: flex;
-	padding: 0;
+	padding: 0 20px;
 	justify-content: space-between;
+	border: none;
+	margin-left: 0px;
+	background: #f1f1f1;
+	border-bottom: 1px solid;
 }
 
 .course-section-template .remove-section {

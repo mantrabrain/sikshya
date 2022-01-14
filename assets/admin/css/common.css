@@ -1,59 +1,69 @@
 .course-section-template {
-    padding: 10px;
-    background: #ddd;
-    margin: 0 0 20px 0;
-    border: 1px solid #aaa;
+	padding: 0;
+	margin: 0 0 20px 0;
+	border: 1px solid;
+}
+
+.course-section-template .section-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 20px;
 }
 
 .course-section-template-inner {
-    padding: 20px 30px;
+	padding: 20px 30px;
+}
+
+.sikshya-card-item:hover .sikshya-card-inner {
+	border-color: #0acf97;
 }
 
 .sikshya-card-item {
-    position: relative;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-    flex-direction: column;
-    min-width: 0;
-    word-wrap: break-word;
-    background-color: #fff;
-    background-clip: border-box;
-    border-radius: .25rem;
-    border: none;
-    -webkit-box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15);
-    box-shadow: 0 0 35px 0 rgba(154, 161, 171, .15);
-    margin-bottom: .75rem;
+	position: relative;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-ms-flex-direction: column;
+	flex-direction: column;
+	min-width: 0;
+	word-wrap: break-word;
+	background-clip: border-box;
+	border-radius: .25rem;
+	border: none;
+	background: #f9f9f9;
+	margin-bottom: .75rem;
 }
 
 .sikshya-card-inner {
-    padding: 1.0rem;
+	padding: 1.0rem;
+	cursor: pointer;
+	border: 1px solid #ccc;
 }
 
 .sikshya-card-body {
-    display: flex;
-    padding: 0;
-    justify-content: space-between;
+	display: flex;
+	padding: 0;
+	justify-content: space-between;
 
 }
 
 .sikshya-card-body .card-widgets {
-    width: 20%;
-    margin-left: auto;
-    text-align: right;
+	width: 20%;
+	margin-left: auto;
+	text-align: right;
 }
 
 .sikshya-card-body .title {
-    margin: 0;
-    padding: 0;
-    font-size: 13px;
-    font-weight: normal;
+	margin: 0;
+	padding: 0;
+	font-size: 13px;
+	font-weight: normal;
 }
 
 .sikshya-card-body a {
-    text-decoration: none;
-    margin-left: 10px;
+	text-decoration: none;
+	margin-left: 10px;
 }
