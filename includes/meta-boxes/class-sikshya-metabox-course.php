@@ -238,6 +238,7 @@ if (!class_exists('Sikshya_Metabox_Course')) {
 			$valid_sikshya_info['sikshya_course_duration_time'] = isset($_POST['sikshya_course_duration_time']) ? sanitize_text_field($_POST['sikshya_course_duration_time']) : '';
 			$valid_sikshya_info['sikshya_course_level'] = isset($_POST['sikshya_course_level']) ? sanitize_text_field($_POST['sikshya_course_level']) : '';
 			$valid_sikshya_info['sikshya_instructor'] = isset($_POST['sikshya_instructor']) ? absint($_POST['sikshya_instructor']) : 0;
+			$valid_sikshya_info['sikshya_course_maximum_students'] = isset($_POST['sikshya_course_maximum_students']) ? absint($_POST['sikshya_course_maximum_students']) : '';
 			$requirements = isset($_POST['sikshya_course_requirements']) ? ($_POST['sikshya_course_requirements']) : array();
 
 			foreach ($requirements as $requirement) {
