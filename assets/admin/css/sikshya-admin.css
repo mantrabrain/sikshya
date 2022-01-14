@@ -154,6 +154,7 @@
 	background: #f1f1f1;
 	border-bottom: 1px solid #aaa;
 	align-items: center;
+	cursor: pointer;
 }
 
 .course-section-template .heading h4 {
