@@ -153,9 +153,9 @@ class Sikshya_Core_Course
 
 		$section_ids = get_post_meta($lesson_id, 'section_id', true);
 
-		if (!is_array($section_ids) && '' != $section_ids && !is_null($section_ids)) {
+		if (!is_array($section_ids)) {
 
-			$section_ids = array($section_ids);
+			$section_ids = $section_ids !== '' ? array($section_ids) : array();
 		}
 
 		$course_ids = array();
