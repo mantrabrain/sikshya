@@ -44,9 +44,6 @@ while (have_posts()) {
 							</div>
 						</div>
 					</div>
-					<div class="sik-col-lg-4">
-
-					</div>
 				</div>
 			</div>
 		</section>
