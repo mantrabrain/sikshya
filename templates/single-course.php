@@ -52,7 +52,7 @@ while (have_posts()) {
 		</section>
 		<section class="course-content-area">
 			<div class="sik-container">
-				<div class="row">
+				<div class="sik-row">
 					<div class="sik-col-lg-8">
 						<?php
 						if (isset($outcomes[0]) && '' !== $outcomes[0]) {
@@ -104,7 +104,7 @@ while (have_posts()) {
 							<div class="about-instructor-title">
 								<?php echo esc_html__('About the instructor', 'sikshya'); ?>
 							</div>
-							<div class="row">
+							<div class="sik-row">
 								<div class="sik-col-lg-4">
 									<div class="about-instructor-image">
 										<?php
