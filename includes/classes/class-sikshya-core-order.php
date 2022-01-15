@@ -25,7 +25,7 @@ class Sikshya_Core_Order
 		$results = $wpdb->get_col($sql);
 
 
-		if ($results[0]) {
+		if (isset($results[0])) {
 			return $results[0];
 		}
 		return 0;

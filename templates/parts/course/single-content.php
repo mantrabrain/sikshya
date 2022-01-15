@@ -19,7 +19,7 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
 	<?php
 	do_action('sikshya_before_single_course_curriculum_box');
 	?>
-	<div class="course-curriculum-title clearfix">
+	<div class="course-curriculum-title">
 		<div class="title float-left"><?php echo esc_html__('Curriculum for this course', 'sikshya'); ?></div>
 		<div class="float-right">
             <span class="total-lectures"><?php
@@ -52,7 +52,7 @@ $total_time .= isset($duration_times[$sikshya_course_duration_time]) ? ' ' . $du
 
 				?>
 				<div class="lecture-group-wrapper">
-					<div class="lecture-group-title clearfix ">
+					<div class="lecture-group-title ">
 						<div class="title float-left">
 							<span class="<?php echo esc_attr($toggle_class); ?>"></span>
 							<?php

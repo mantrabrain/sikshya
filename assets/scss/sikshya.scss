@@ -476,6 +476,7 @@ span.tw_get_sikshya {
 	display: flex;
 	position: relative;
 	background: #F4F8FA;
+	width: 100%;
 }
 
 .sikshya-lesson-sidebar {
@@ -958,9 +959,11 @@ a.sikshya-btn {
 		flex: 1;
 		text-align: right;
 	}
+
 	.lesson-prev {
 		flex: 1;
 	}
+
 	span {
 		display: block;
 	}

@@ -334,7 +334,8 @@ span.tw_get_sikshya {
   display: -moz-box;
   display: flex;
   position: relative;
-  background: #F4F8FA; }
+  background: #F4F8FA;
+  width: 100%; }
 
 .sikshya-lesson-sidebar {
   -webkit-box-flex: 0;
