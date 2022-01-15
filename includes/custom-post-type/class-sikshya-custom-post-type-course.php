@@ -6,6 +6,9 @@ if (!class_exists('Sikshya_Custom_Post_Type_Course')) {
 
 		public function register()
 		{
+
+			$permalinks = sikshya_get_permalink_structure();
+
 			$labels = array(
 				'name' => _x('Courses', 'post type general name', 'sikshya'),
 				'singular_name' => _x('Course', 'post type singular name', 'sikshya'),
@@ -43,20 +46,9 @@ if (!class_exists('Sikshya_Custom_Post_Type_Course')) {
 				'menu_icon' => 'dashicons-welcome-learn-more',
 				'has_archive' => true,
 				'rewrite' => array(
-					'slug' => 'courses',
-					'with_front' => false
+					'slug' => trim($permalinks['sikshya_course_base']),
+					'with_front' => true
 				)
-				/* 'capabilities' => array(
-					 'edit_post' => 'edit_sikshya_course',
-					 'read_post' => 'read_sikshya_course',
-					 'delete_post' => 'delete_sikshya_course',
-					 'delete_posts' => 'delete_sikshya_courses',
-					 'edit_posts' => 'edit_sikshya_courses',
-					 'edit_others_posts' => 'edit_others_sikshya_courses',
-					 'publish_posts' => 'publish_sikshya_courses',
-					 'read_private_posts' => 'read_private_sikshya_courses',
-					 'create_posts' => 'edit_sikshya_courses',
-				 ),*/
 			);
 
 			register_post_type(SIKSHYA_COURSES_CUSTOM_POST_TYPE, $args);

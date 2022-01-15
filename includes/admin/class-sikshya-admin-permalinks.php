@@ -4,7 +4,7 @@
  *
  * @class       Sikshya_Admin_Permalinks
  * @category    Admin
- * @package     yatra/inc/admin
+ * @package     sikshya/inc/admin
  * @version     1.0.0
  */
 
@@ -65,37 +65,39 @@ if (!class_exists('Sikshya_Admin_Permalinks', false)) :
 			// Add our settings
 			add_settings_field(
 				'sikshya_course_base',            // id
-				__('Course Base', 'yatra'),   // setting title
-				array($this, 'course_slug_input'),  // display callback
-				'permalink',                        // settings page
-				'optional'                          // settings section
-			);
-			add_settings_field(
-				'sikshya_course_category_slug',            // id
-				__('Course Category base', 'yatra'),   // setting title
-				array($this, 'course_category_slug_input'),  // display callback
-				'permalink',                        // settings page
-				'optional'                          // settings section
-			);
-			add_settings_field(
-				'sikshya_course_tag_slug',            // id
-				__('Course Tag base', 'yatra'),   // setting title
-				array($this, 'course_tag_slug_input'),  // display callback
-				'permalink',                        // settings page
-				'optional'                          // settings section
-			);
-			add_settings_field(
-				'yatra_activity_slug',            // id
-				__('Activity base', 'yatra'),   // setting title
-				array($this, 'activity_slug_input'),  // display callback
+				__('Course Base', 'sikshya'),   // setting title
+				array($this, 'sikshya_course_base_input'),  // display callback
 				'permalink',                        // settings page
 				'optional'                          // settings section
 			);
 
 			add_settings_field(
-				'yatra_attribute_slug',            // id
-				__('Attribute base', 'yatra'),   // setting title
-				array($this, 'attribute_slug_input'),  // display callback
+				'sikshya_course_category_base',            // id
+				__('Course Category Base', 'sikshya'),   // setting title
+				array($this, 'sikshya_course_category_base_input'),  // display callback
+				'permalink',                        // settings page
+				'optional'                          // settings section
+			);
+
+			add_settings_field(
+				'sikshya_course_tag_base',            // id
+				__('Course Tag Base', 'sikshya'),   // setting title
+				array($this, 'sikshya_course_tag_base_input'),  // display callback
+				'permalink',                        // settings page
+				'optional'                          // settings section
+			);
+
+			add_settings_field(
+				'sikshya_lesson_base',            // id
+				__('Lesson Base', 'sikshya'),   // setting title
+				array($this, 'sikshya_lesson_base_input'),  // display callback
+				'permalink',                        // settings page
+				'optional'                          // settings section
+			);
+			add_settings_field(
+				'sikshya_quiz_base',            // id
+				__('Quiz Base', 'sikshya'),   // setting title
+				array($this, 'sikshya_quiz_base_input'),  // display callback
 				'permalink',                        // settings page
 				'optional'                          // settings section
 			);
@@ -105,7 +107,7 @@ if (!class_exists('Sikshya_Admin_Permalinks', false)) :
 		/**
 		 * Show a slug input box.
 		 */
-		public function course_base_input()
+		public function sikshya_course_base_input()
 		{
 
 			?>
@@ -118,49 +120,52 @@ if (!class_exists('Sikshya_Admin_Permalinks', false)) :
 		/**
 		 * Show a slug input box.
 		 */
-		public function course_category_slug_input()
+		public function sikshya_course_category_base_input()
 		{
 
 			?>
-			<input name="sikshya_course_category_slug" type="text" class="regular-text code"
-				   value="<?php echo esc_attr($this->permalinks['sikshya_course_category_slug']); ?>"
-				   placeholder="<?php echo esc_attr_x('course-category', 'slug', 'yatra') ?>"/>
-			<?php
-		}
-
-		public function course_tag_slug_input()
-		{
-			?>
-			<input name="sikshya_course_tag_slug" type="text" class="regular-text code"
-				   value="<?php echo esc_attr($this->permalinks['sikshya_course_tag_slug']); ?>"
-				   placeholder="<?php echo esc_attr_x('course-tag', 'slug', 'yatra') ?>"/>
+			<input name="sikshya_course_category_base" type="text" class="regular-text code"
+				   value="<?php echo esc_attr($this->permalinks['sikshya_course_category_base']); ?>"
+				   placeholder="<?php echo esc_attr_x('course-category', 'slug', 'sikshya') ?>"/>
 			<?php
 		}
 
 		/**
 		 * Show a slug input box.
 		 */
-		public function activity_slug_input()
+		public function sikshya_course_tag_base_input()
 		{
 
 			?>
-			<input name="yatra_activity_base" type="text" class="regular-text code"
-				   value="<?php echo esc_attr($this->permalinks['yatra_activity_base']); ?>"
-				   placeholder="<?php echo esc_attr_x('travel-locations', 'slug', 'yatra') ?>"/>
+			<input name="sikshya_course_tag_base" type="text" class="regular-text code"
+				   value="<?php echo esc_attr($this->permalinks['sikshya_course_tag_base']); ?>"
+				   placeholder="<?php echo esc_attr_x('course-tag', 'slug', 'sikshya') ?>"/>
 			<?php
 		}
-
 
 		/**
 		 * Show a slug input box.
 		 */
-		public function attribute_slug_input()
+		public function sikshya_lesson_base_input()
 		{
 
 			?>
-			<input name="yatra_attributes_base" type="text" class="regular-text code"
-				   value="<?php echo esc_attr($this->permalinks['yatra_attributes_base']); ?>"
-				   placeholder="<?php echo esc_attr_x('attributes', 'slug', 'yatra') ?>"/>
+			<input name="sikshya_lesson_base" type="text" class="regular-text code"
+				   value="<?php echo esc_attr($this->permalinks['sikshya_lesson_base']); ?>"
+				   placeholder="<?php echo esc_attr_x('lessons', 'slug', 'sikshya') ?>"/>
+			<?php
+		}
+
+		/**
+		 * Show a slug input box.
+		 */
+		public function sikshya_quiz_base_input()
+		{
+
+			?>
+			<input name="sikshya_quiz_base" type="text" class="regular-text code"
+				   value="<?php echo esc_attr($this->permalinks['sikshya_quiz_base']); ?>"
+				   placeholder="<?php echo esc_attr_x('quizzes', 'slug', 'sikshya') ?>"/>
 			<?php
 		}
 
@@ -177,11 +182,12 @@ if (!class_exists('Sikshya_Admin_Permalinks', false)) :
 
 				$permalinks = (array)get_option('sikshya_permalinks', array());
 				$permalinks['sikshya_course_base'] = trim(sanitize_text_field($_POST['sikshya_course_base']));
-				$permalinks['yatra_destination_base'] = trim(sanitize_text_field($_POST['yatra_destination_base']));
-				$permalinks['yatra_activity_base'] = trim(sanitize_text_field($_POST['yatra_activity_base']));
-				$permalinks['yatra_attributes_base'] = trim(sanitize_text_field($_POST['yatra_attributes_base']));
+				$permalinks['sikshya_course_category_base'] = trim(sanitize_text_field($_POST['sikshya_course_category_base']));
+				$permalinks['sikshya_course_tag_base'] = trim(sanitize_text_field($_POST['sikshya_course_tag_base']));
+				$permalinks['sikshya_lesson_base'] = trim(sanitize_text_field($_POST['sikshya_lesson_base']));
+				$permalinks['sikshya_quiz_base'] = trim(sanitize_text_field($_POST['sikshya_quiz_base']));
 
-				update_option('yatra_permalinks', $permalinks);
+				update_option('sikshya_permalinks', $permalinks);
 			}
 		}
 	}
