@@ -1152,3 +1152,28 @@ if (!function_exists('sikshya_get_logger')) {
 		return $logger;
 	}
 }
+
+function sikshya_get_permalink_structure()
+{
+
+	$defaults = array(
+		'sikshya_course_base' => 'courses',
+		'sikshya_course_category_base' => 'course-category',
+		'sikshya_course_tag_base' => 'course-tag',
+		'sikshya_lesson_base' => 'lessons',
+		'sikshya_quiz_base' => 'quizes',
+	);
+	$permalinks = wp_parse_args(
+		(array)get_option('sikshya_permalinks', array()),
+		$defaults
+	);
+
+	// Ensure rewrite slugs are set.
+
+	foreach ($defaults as $default_id => $default_permalink) {
+
+		$permalinks[$default_id] = untrailingslashit(empty($permalinks[$default_id]) ? $default_permalink : $permalinks[$default_id]);
+
+	}
+	return $permalinks;
+}

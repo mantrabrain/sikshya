@@ -19,6 +19,7 @@ class Sikshya_Admin
 
 		include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-importer.php';
 		include_once SIKSHYA_PATH . '/includes/about/class-sikshya-about.php';
+		include_once SIKSHYA_PATH . '/includes/admin/class-sikshya-admin-permalinks.php';;
 	}
 
 	public function hooks()
