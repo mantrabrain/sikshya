@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sikshya 0.0.15\n"
 "Report-Msgid-Bugs-To: mantrabrain@gmail.com\n"
-"POT-Creation-Date: 2022-01-12 11:45:35+00:00\n"
+"POT-Creation-Date: 2022-01-15 04:43:25+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -554,17 +554,22 @@ msgstr ""
 msgid "Course Duration"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/tabs/general.php:25
+#: includes/admin/templates/metabox/course/tabs/general.php:26
 #: includes/admin/templates/metabox/course/tabs/others.php:18
 #: includes/modules/status/list-tables/class-sikshya-admin-log-list-table.php:108
 msgid "Level"
 msgstr ""
 
-#: includes/admin/templates/metabox/course/tabs/general.php:42
+#: includes/admin/templates/metabox/course/tabs/general.php:44
 #: includes/admin/templates/metabox/course/tabs/others.php:51
 #: includes/admin/templates/metabox/course/tabs/others.php:52
 #: includes/sikshya-template-functions.php:279
 msgid "Instructor"
+msgstr ""
+
+#: includes/admin/templates/metabox/course/tabs/general.php:67
+#: includes/admin/templates/metabox/course/tabs/general.php:72
+msgid "Maximum Students"
 msgstr ""
 
 #: includes/admin/templates/metabox/course/tabs/media.php:3

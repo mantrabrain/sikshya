@@ -1,4 +1,6 @@
 /* jshint node:true */
+const sass = require('node-sass');
+
 module.exports = function (grunt) {
     'use strict';
     grunt.initConfig({
@@ -65,7 +67,9 @@ module.exports = function (grunt) {
         // Compile all .scss files.
         sass: {
             options: {
-                sourceMap: true,
+				implementation: sass,
+
+				sourceMap: true,
                 // check:false,
                 // unix_newlines: true,
                 // sourceMapFileInline: true,
@@ -98,7 +102,7 @@ module.exports = function (grunt) {
 
         // Minify all .css files.
         cssmin: {
-            options:{
+            options: {
                 sourceMap: true,
             },
             minify: {
@@ -259,9 +263,15 @@ module.exports = function (grunt) {
                     '!mantrabrain-theme/.git',
                     '!*.gitignore',
                     '!*.editorconfig',
+                    '!tsconfig.json',
+                    '!entryPoints.js',
+                    '!webpack.config.js',
                     '!*.jshintrc',
                     '!.git',
                     '!requirement.txt',
+                    '!assets/admin/src/**',
+                    '!assets/src/**',
+                    '!sikshya.tar'
                 ],
                 dest: 'sikshya',
                 expand: true
