@@ -34,7 +34,7 @@ class Sikshya_Admin
 
 	public function admin_redirects()
 	{
-		set_transient('_sikshya_activation_redirect', 1, 30);
+		//set_transient('_sikshya_activation_redirect', 1, 30);
 
 		if (!get_transient('_sikshya_activation_redirect')) {
 			return;

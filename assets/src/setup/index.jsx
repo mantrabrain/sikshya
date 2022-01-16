@@ -1,18 +1,24 @@
 import React, {useEffect, useState, useRef} from "react";
 import {render} from 'react-dom';
 import './style.scss';
+import Body from "./components/body";
+import Header from "./components/header";
+import Footer from "./components/footer";
 
 
-const SikshyaSetupElement = () => {
-
+const SikshyaSetupWizard = () => {
 
 	return (
-		<h1>Hello World Guys</h1>
+		<>
+			<Header/>
+			<Body/>
+			<Footer/>
+		</>
 	)
 };
 window.addEventListener("load", function () {
 	render(
-		<SikshyaSetupElement/>,
+		<SikshyaSetupWizard/>,
 		document.getElementById("sikshya-setup-element")
 	);
 
