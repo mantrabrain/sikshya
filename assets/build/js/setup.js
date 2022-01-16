@@ -58234,9 +58234,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var StepContent = function (props) {
-    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "40vh", marginTop: 20, marginBottom: 20, borderRadius: 5, p: 4, color: "gray.700", boxShadow: "lg" },
-        "This is the Box ",
-        props.index));
+    // @ts-ignore
+    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: "200px", marginTop: 20, marginBottom: 20, borderRadius: 5, p: 4, color: "gray.700", boxShadow: "2xl" },
+        React.createElement("div", null,
+            React.createElement("h1", null,
+                "This is the Box ",
+                props.index))));
 };
 exports["default"] = StepContent;
 
