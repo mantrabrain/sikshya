@@ -1,14 +1,10 @@
 import * as React from 'react';
 import {Box} from "@chakra-ui/react";
-import SocialProfile from "./test";
 
-type StepContentProps = {
-	index: number
-}
-
-const StepContent = (props: StepContentProps) => {
-
-	// @ts-ignore
+type SetupBoxProps = {
+	children: React.ReactNode;
+};
+const StepBox = ({children}: SetupBoxProps) => {
 	return (
 		<Box
 			bg="white"
@@ -22,11 +18,9 @@ const StepContent = (props: StepContentProps) => {
 			color="gray.700"
 			boxShadow="2xl"
 		>
-			<div>
-				<h1>This is the Box {props.index}</h1>
+			{children}
 
-			</div>
 		</Box>
 	);
 };
-export default StepContent
+export default StepBox

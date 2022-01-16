@@ -2,21 +2,44 @@ import {Heading, Box, Flex, Button, Center} from "@chakra-ui/react";
 import {Step, Steps, useSteps} from "chakra-ui-steps";
 import {ArrowBackIcon, ArrowForwardIcon} from "@chakra-ui/icons";
 import * as React from 'react';
-import StepContent from "./step-content";
+import Welcome from "./../step/welcome";
+import Course from "./../step/course";
+import Pages from "./../step/pages";
+import Finish from "./../step/finish";
 
-const steps = [{label: "Welcome"}, {label: "Course"}, {label: "Pages"}, {label: "Finish"}]
+const steps = [
+	{label: "Welcome", "id": "welcome"},
+	{label: "Course", id: "course"},
+	{label: "Pages", id: "pages"},
+	{label: "Finish", id: "finish"}
+]
 
 export const ClickableSteps = () => {
 	const {nextStep, prevStep, reset, activeStep, setStep} = useSteps({
 		initialStep: 0,
 	})
+	const renderStepView = (id: string) => {
+
+		switch (id) {
+			case 'welcome':
+				return <Welcome index={1}/>;
+			case 'course':
+				return <Course index={1}/>;
+			case 'pages':
+				return <Pages index={1}/>;
+			case 'finish':
+				return <Finish index={1}/>;
+			default:
+				return "<h2>Component {id} not found</h2>";
+		}
+	}
 
 	return (
 		<Flex flexDir="column" width="100%">
 			<Steps onClickStep={(step) => setStep(step)} activeStep={activeStep}>
-				{steps.map(({label}, index) => (
+				{steps.map(({label, id}, index) => (
 					<Step label={label} key={label}>
-						<StepContent index={index}/>
+						{renderStepView(id)}
 					</Step>
 				))}
 			</Steps>

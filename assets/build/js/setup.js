@@ -39236,12 +39236,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-dom */ "react-dom");
-/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./style.scss */ "./assets/src/setup/style.scss");
-/* harmony import */ var _components_body__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/body */ "./assets/src/setup/components/body.tsx");
-/* harmony import */ var _components_header__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/header */ "./assets/src/setup/components/header.tsx");
-/* harmony import */ var _components_footer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/footer */ "./assets/src/setup/components/footer.tsx");
+/* harmony import */ var _chakra_ui_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+/* harmony import */ var _chakra_ui_react__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/layout/dist/chakra-ui-layout.esm.js");
+/* harmony import */ var chakra_ui_steps__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-dom */ "react-dom");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./style.scss */ "./assets/src/setup/style.scss");
+/* harmony import */ var _components_body__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/body */ "./assets/src/setup/components/body.tsx");
+/* harmony import */ var _components_header__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/header */ "./assets/src/setup/components/header.tsx");
+/* harmony import */ var _components_footer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/footer */ "./assets/src/setup/components/footer.tsx");
+/* harmony import */ var _global_theme_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./global/theme.js */ "./assets/src/setup/global/theme.js");
+
+
+
 
 
 
@@ -39251,12 +39258,24 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const SikshyaSetupWizard = () => {
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_header__WEBPACK_IMPORTED_MODULE_5__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_body__WEBPACK_IMPORTED_MODULE_4__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_footer__WEBPACK_IMPORTED_MODULE_6__["default"], null));
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_chakra_ui_react__WEBPACK_IMPORTED_MODULE_9__.ChakraProvider, {
+    theme: _global_theme_js__WEBPACK_IMPORTED_MODULE_8__.Theme
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_chakra_ui_react__WEBPACK_IMPORTED_MODULE_10__.Container, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_header__WEBPACK_IMPORTED_MODULE_6__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_body__WEBPACK_IMPORTED_MODULE_5__["default"], null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, "Hello Guys")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_footer__WEBPACK_IMPORTED_MODULE_7__["default"], null)));
 };
 
 window.addEventListener("load", function () {
-  (0,react_dom__WEBPACK_IMPORTED_MODULE_2__.render)((0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(SikshyaSetupWizard, null), document.getElementById("sikshya-setup-element"));
+  (0,react_dom__WEBPACK_IMPORTED_MODULE_3__.render)((0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(SikshyaSetupWizard, null), document.getElementById("sikshya-setup-element"));
 });
+
+/***/ }),
+
+/***/ "./assets/src/setup/global/theme.js":
+/*!******************************************!*\
+  !*** ./assets/src/setup/global/theme.js ***!
+  \******************************************/
+/***/ (function() {
+
+throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\assets\\src\\setup\\global\\theme.js: Unexpected token, expected \"{\" (31:7)\n\n\u001b[0m \u001b[90m 29 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 30 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 31 |\u001b[39m \u001b[36mexport\u001b[39m theme\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 32 |\u001b[39m\u001b[0m\n    at Object._raise (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:569:17)\n    at Object.raiseWithData (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:562:17)\n    at Object.raise (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:523:17)\n    at Object.unexpected (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:3601:16)\n    at Object.parseExport (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:14664:16)\n    at Object.parseStatementContent (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:13633:27)\n    at Object.parseStatement (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:13525:17)\n    at Object.parseBlockOrModuleBlockBody (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:14114:25)\n    at Object.parseBlockBody (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:14105:10)\n    at Object.parseProgram (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:13445:10)");
 
 /***/ }),
 
@@ -58156,18 +58175,10 @@ module.exports = function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var React = __webpack_require__(/*! react */ "react");
-var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
 var step_1 = __webpack_require__(/*! ./parts/step */ "./assets/src/setup/components/parts/step.tsx");
-var theme = (0, react_1.extendTheme)({
-    components: {
-        Steps: chakra_ui_steps_1.StepsStyleConfig,
-    },
-    initialColorMode: 'dark',
-});
 var Body = function () {
-    return (React.createElement(react_1.ChakraProvider, { theme: theme },
-        React.createElement(react_1.Container, null,
-            React.createElement(step_1.default, null))));
+    return (React.createElement(react_1.Container, null,
+        React.createElement(step_1.default, null)));
 };
 exports["default"] = Body;
 
@@ -58222,30 +58233,6 @@ exports["default"] = Header;
 
 /***/ }),
 
-/***/ "./assets/src/setup/components/parts/step-content.tsx":
-/*!************************************************************!*\
-  !*** ./assets/src/setup/components/parts/step-content.tsx ***!
-  \************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var React = __webpack_require__(/*! react */ "react");
-var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
-var StepContent = function (props) {
-    // @ts-ignore
-    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: "200px", marginTop: 20, marginBottom: 20, borderRadius: 5, p: 4, color: "gray.700", boxShadow: "2xl" },
-        React.createElement("div", null,
-            React.createElement("h1", null,
-                "This is the Box ",
-                props.index))));
-};
-exports["default"] = StepContent;
-
-
-/***/ }),
-
 /***/ "./assets/src/setup/components/parts/step.tsx":
 /*!****************************************************!*\
   !*** ./assets/src/setup/components/parts/step.tsx ***!
@@ -58259,17 +58246,38 @@ exports.ClickableSteps = void 0;
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
 var React = __webpack_require__(/*! react */ "react");
-var step_content_1 = __webpack_require__(/*! ./step-content */ "./assets/src/setup/components/parts/step-content.tsx");
-var steps = [{ label: "Welcome" }, { label: "Course" }, { label: "Pages" }, { label: "Finish" }];
+var welcome_1 = __webpack_require__(/*! ./../step/welcome */ "./assets/src/setup/components/step/welcome.tsx");
+var course_1 = __webpack_require__(/*! ./../step/course */ "./assets/src/setup/components/step/course.tsx");
+var pages_1 = __webpack_require__(/*! ./../step/pages */ "./assets/src/setup/components/step/pages.tsx");
+var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/components/step/finish.tsx");
+var steps = [
+    { label: "Welcome", "id": "welcome" },
+    { label: "Course", id: "course" },
+    { label: "Pages", id: "pages" },
+    { label: "Finish", id: "finish" }
+];
 var ClickableSteps = function () {
     var _a = (0, chakra_ui_steps_1.useSteps)({
         initialStep: 0,
     }), nextStep = _a.nextStep, prevStep = _a.prevStep, reset = _a.reset, activeStep = _a.activeStep, setStep = _a.setStep;
+    var renderStepView = function (id) {
+        switch (id) {
+            case 'welcome':
+                return React.createElement(welcome_1.default, { index: 1 });
+            case 'course':
+                return React.createElement(course_1.default, { index: 1 });
+            case 'pages':
+                return React.createElement(pages_1.default, { index: 1 });
+            case 'finish':
+                return React.createElement(finish_1.default, { index: 1 });
+            default:
+                return "<h2>Component {id} not found</h2>";
+        }
+    };
     return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%" },
         React.createElement(chakra_ui_steps_1.Steps, { onClickStep: function (step) { return setStep(step); }, activeStep: activeStep }, steps.map(function (_a, index) {
-            var label = _a.label;
-            return (React.createElement(chakra_ui_steps_1.Step, { label: label, key: label },
-                React.createElement(step_content_1.default, { index: index })));
+            var label = _a.label, id = _a.id;
+            return (React.createElement(chakra_ui_steps_1.Step, { label: label, key: label }, renderStepView(id)));
         })),
         activeStep === 3 ? (React.createElement(react_1.Center, { p: 4, flexDir: "column" },
             React.createElement(react_1.Heading, { fontSize: "xl" }, "Woohoo! All steps completed!"),
@@ -58279,6 +58287,117 @@ var ClickableSteps = function () {
 };
 exports.ClickableSteps = ClickableSteps;
 exports["default"] = exports.ClickableSteps;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/parts/stepbox.tsx":
+/*!*******************************************************!*\
+  !*** ./assets/src/setup/components/parts/stepbox.tsx ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var StepBox = function (_a) {
+    var children = _a.children;
+    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: "200px", marginTop: 20, marginBottom: 20, borderRadius: 5, p: 4, color: "gray.700", boxShadow: "2xl" }, children));
+};
+exports["default"] = StepBox;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/course.tsx":
+/*!*****************************************************!*\
+  !*** ./assets/src/setup/components/step/course.tsx ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
+var Course = function (props) {
+    return (React.createElement(stepbox_1.default, null,
+        React.createElement("div", null,
+            React.createElement("h1", null,
+                "This is Course Step",
+                props.index))));
+};
+exports["default"] = Course;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/finish.tsx":
+/*!*****************************************************!*\
+  !*** ./assets/src/setup/components/step/finish.tsx ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
+var Finish = function (props) {
+    return (React.createElement(stepbox_1.default, null,
+        React.createElement("div", null,
+            React.createElement("h1", null,
+                "Finish Step ",
+                props.index))));
+};
+exports["default"] = Finish;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/pages.tsx":
+/*!****************************************************!*\
+  !*** ./assets/src/setup/components/step/pages.tsx ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
+var Pages = function (props) {
+    return (React.createElement(stepbox_1.default, null,
+        React.createElement("div", null,
+            React.createElement("h1", null,
+                "Pages Step ",
+                props.index))));
+};
+exports["default"] = Pages;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/welcome.tsx":
+/*!******************************************************!*\
+  !*** ./assets/src/setup/components/step/welcome.tsx ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
+var Welcome = function (props) {
+    return (React.createElement(stepbox_1.default, null,
+        React.createElement("h1", null, "Welcome to Sikshya LMS!"),
+        React.createElement("p", null, "Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It\u2019s completely optional and shouldn\u2019t take longer than one minutes."),
+        React.createElement("p", null, "No time right now? If you don\u2019t want to go through the wizard, you can skip and return to the WordPress dashboard.")));
+};
+exports["default"] = Welcome;
 
 
 /***/ }),
