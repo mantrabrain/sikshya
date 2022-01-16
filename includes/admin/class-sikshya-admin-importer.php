@@ -43,7 +43,8 @@ class Sikshya_Admin_Importer
 
 	public function importer_scripts($hook)
 	{
-		if ('sikshya_page_sikshya_course_import_export' != $hook) {
+
+		if ('sik_courses_page_sikshya_course_import_export' != $hook) {
 			return;
 		}
 		wp_enqueue_style('sikshya_importer_style', SIKSHYA_ASSETS_URL . '/admin/css/importer.css', array(), SIKSHYA_VERSION);

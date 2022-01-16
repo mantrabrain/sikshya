@@ -64,6 +64,9 @@ class Sikshya_Install
 		if (empty($sikshya_version)) {
 			self::create_tables();
 			self::create_options();
+			if (empty($sikshya_version) && apply_filters('sikshya_enable_setup_wizard', true)) {
+				set_transient('_sikshya_activation_redirect', 1, 30);
+			}
 		}
 		self::create_roles();
 		self::setup_environment();

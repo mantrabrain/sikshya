@@ -8,6 +8,7 @@ jQuery(function ($) {
 
 			var _this = this;
 			form.on('submit', function (e) {
+
 				e.preventDefault();
 				var formData = new FormData(this);
 				_this.import_course(formData, $(this));

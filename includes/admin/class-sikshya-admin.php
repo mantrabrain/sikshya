@@ -24,9 +24,52 @@ class Sikshya_Admin
 
 	public function hooks()
 	{
+
+		add_action('init', array($this, 'setup_wizard'));
+		add_action('admin_init', array($this, 'admin_redirects'));
 		add_action('current_screen', array($this, 'setup_screen'));
 		add_action('check_ajax_referer', array($this, 'setup_screen'));
 		add_filter('display_post_states', array($this, 'add_display_post_states'), 10, 2);
+	}
+
+	public function admin_redirects()
+	{
+		set_transient('_sikshya_activation_redirect', 1, 30);
+
+		if (!get_transient('_sikshya_activation_redirect')) {
+			return;
+		}
+
+		delete_transient('_sikshya_activation_redirect');
+
+
+		if ((!empty($_GET['page']) && in_array($_GET['page'], array('sikshya-setup'))) || is_network_admin() || isset($_GET['activate-multi']) || !current_user_can('manage_options')) {
+			return;
+		}
+
+
+		// If it's the first time
+		if (get_option('sikshya_setup_wizard_ran') != '1') {
+			wp_safe_redirect(admin_url('index.php?page=sikshya-setup'));
+			exit;
+
+			// Otherwise, the welcome page
+		} else {
+			wp_safe_redirect(admin_url('edit.php?post_type=sik_courses'));
+			exit;
+		}
+	}
+
+	public function setup_wizard()
+	{
+		// Setup/welcome
+		if (!empty($_GET['page'])) {
+
+			if ('sikshya-setup' == $_GET['page']) {
+
+				include_once SIKSHYA_PATH . '/includes/admin/setup/class-sikshya-setup-wizard.php';
+			}
+		}
 	}
 
 	public function setup_screen()
