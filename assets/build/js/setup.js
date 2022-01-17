@@ -39245,7 +39245,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_body__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/body */ "./assets/src/setup/components/body.tsx");
 /* harmony import */ var _components_header__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/header */ "./assets/src/setup/components/header.tsx");
 /* harmony import */ var _components_footer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/footer */ "./assets/src/setup/components/footer.tsx");
-/* harmony import */ var _global_theme__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./global/theme */ "./assets/src/setup/global/theme.tsx");
+/* harmony import */ var _global_theme__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./global/theme */ "./assets/src/setup/global/theme.ts");
 
 
 
@@ -58190,15 +58190,10 @@ exports["default"] = Body;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var React = __webpack_require__(/*! react */ "react");
-var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
-var theme = (0, react_1.extendTheme)({
-    components: {
-        Steps: chakra_ui_steps_1.StepsStyleConfig,
-    },
-});
+var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var Footer = function () {
     return (React.createElement(react_1.Center, { p: 50, w: "full" },
-        React.createElement("h1", null, "Sikshya WordPress LMS Plugin Footer")));
+        React.createElement("h1", null, (0, i18n_1.__)("Sikshya WordPress LMS Plugin", "sikshya"))));
 };
 exports["default"] = Footer;
 
@@ -58216,9 +58211,10 @@ exports["default"] = Footer;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var React = __webpack_require__(/*! react */ "react");
+var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var Header = function () {
     return (React.createElement(react_1.Center, { p: 50, w: "full" },
-        React.createElement("h1", null, "Sikshya WordPress LMS Plugin Header")));
+        React.createElement("h1", null, (0, i18n_1.__)("Sikshya WordPress LMS Plugin", "sikshya"))));
 };
 exports["default"] = Header;
 
@@ -58394,10 +58390,10 @@ exports["default"] = Welcome;
 
 /***/ }),
 
-/***/ "./assets/src/setup/global/theme.tsx":
-/*!*******************************************!*\
-  !*** ./assets/src/setup/global/theme.tsx ***!
-  \*******************************************/
+/***/ "./assets/src/setup/global/theme.ts":
+/*!******************************************!*\
+  !*** ./assets/src/setup/global/theme.ts ***!
+  \******************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -58405,8 +58401,8 @@ exports["default"] = Welcome;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
-var styles_1 = __webpack_require__(/*! ./theme/styles */ "./assets/src/setup/global/theme/styles.tsx");
-var Button_1 = __webpack_require__(/*! ./theme/components/Button */ "./assets/src/setup/global/theme/components/Button.tsx");
+var styles_1 = __webpack_require__(/*! ./theme/styles */ "./assets/src/setup/global/theme/styles.ts");
+var Button_1 = __webpack_require__(/*! ./theme/components/Button */ "./assets/src/setup/global/theme/components/Button.ts");
 var Theme = (0, react_1.extendTheme)({
     components: {
         Steps: chakra_ui_steps_1.StepsStyleConfig,
@@ -58423,10 +58419,10 @@ exports["default"] = Theme;
 
 /***/ }),
 
-/***/ "./assets/src/setup/global/theme/components/Button.tsx":
-/*!*************************************************************!*\
-  !*** ./assets/src/setup/global/theme/components/Button.tsx ***!
-  \*************************************************************/
+/***/ "./assets/src/setup/global/theme/components/Button.ts":
+/*!************************************************************!*\
+  !*** ./assets/src/setup/global/theme/components/Button.ts ***!
+  \************************************************************/
 /***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
@@ -58458,10 +58454,10 @@ exports["default"] = Button;
 
 /***/ }),
 
-/***/ "./assets/src/setup/global/theme/styles.tsx":
-/*!**************************************************!*\
-  !*** ./assets/src/setup/global/theme/styles.tsx ***!
-  \**************************************************/
+/***/ "./assets/src/setup/global/theme/styles.ts":
+/*!*************************************************!*\
+  !*** ./assets/src/setup/global/theme/styles.ts ***!
+  \*************************************************/
 /***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
@@ -59389,6 +59385,17 @@ module.exports = window["ReactDOM"];
 
 "use strict";
 module.exports = window["wp"]["element"];
+
+/***/ }),
+
+/***/ "@wordpress/i18n":
+/*!******************************!*\
+  !*** external ["wp","i18n"] ***!
+  \******************************/
+/***/ (function(module) {
+
+"use strict";
+module.exports = window["wp"]["i18n"];
 
 /***/ }),
 

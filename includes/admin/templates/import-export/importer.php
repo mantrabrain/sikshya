@@ -10,7 +10,7 @@
 			   for="coursesfile"><?php echo esc_html__('Course exported file', 'sikshya'); ?></label>
 		<input type="file" id="sikshya_import_file" name="sikshya_import_file" accept=".json">
 		<input type="submit" name="install-theme-submit" id="install-theme-submit" class="button"
-			   value="<?php echo __('Import Now') ?>"
+			   value="<?php echo __('Import Now', 'sikshya') ?>"
 			   disabled="">
 
 		<input type="hidden" value="sikshya_import_course" name="action"/>
