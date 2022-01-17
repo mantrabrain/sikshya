@@ -46,7 +46,7 @@ export const ClickableSteps = () => {
 			{activeStep === 3 ? (
 				<Center p={4} flexDir="column">
 					<Heading fontSize="xl">Woohoo! All steps completed!</Heading>
-					<Button mt={6} size="sm" onClick={reset}>
+					<Button mt={6} size="sm" onClick={reset} varient="with-shadow">
 						Reset
 					</Button>
 				</Center>

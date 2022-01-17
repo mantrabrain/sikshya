@@ -6,9 +6,7 @@ import ClickableSteps from "./parts/step";
 
 const Body = () => {
 	return (
-		<Container>
-			<ClickableSteps/>
-		</Container>
+		<ClickableSteps/>
 	);
 };
 export default Body

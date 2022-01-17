@@ -39224,10 +39224,10 @@ var hideOthers = function (originalTarget, parentNode, markerName) {
 
 /***/ }),
 
-/***/ "./assets/src/setup/index.jsx":
-/*!************************************!*\
-  !*** ./assets/src/setup/index.jsx ***!
-  \************************************/
+/***/ "./assets/src/setup/index.js":
+/*!***********************************!*\
+  !*** ./assets/src/setup/index.js ***!
+  \***********************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -39245,7 +39245,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_body__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/body */ "./assets/src/setup/components/body.tsx");
 /* harmony import */ var _components_header__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/header */ "./assets/src/setup/components/header.tsx");
 /* harmony import */ var _components_footer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/footer */ "./assets/src/setup/components/footer.tsx");
-/* harmony import */ var _global_theme_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./global/theme.js */ "./assets/src/setup/global/theme.js");
+/* harmony import */ var _global_theme__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./global/theme */ "./assets/src/setup/global/theme.tsx");
 
 
 
@@ -39259,23 +39259,19 @@ __webpack_require__.r(__webpack_exports__);
 
 const SikshyaSetupWizard = () => {
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_chakra_ui_react__WEBPACK_IMPORTED_MODULE_9__.ChakraProvider, {
-    theme: _global_theme_js__WEBPACK_IMPORTED_MODULE_8__.Theme
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_chakra_ui_react__WEBPACK_IMPORTED_MODULE_10__.Container, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_header__WEBPACK_IMPORTED_MODULE_6__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_body__WEBPACK_IMPORTED_MODULE_5__["default"], null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, "Hello Guys")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_footer__WEBPACK_IMPORTED_MODULE_7__["default"], null)));
+    theme: _global_theme__WEBPACK_IMPORTED_MODULE_8__["default"]
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_chakra_ui_react__WEBPACK_IMPORTED_MODULE_10__.Container, {
+    maxW: "container.md"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_chakra_ui_react__WEBPACK_IMPORTED_MODULE_10__.VStack, {
+    h: "100vh",
+    alignItems: "center",
+    justifyContent: "space-between"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_header__WEBPACK_IMPORTED_MODULE_6__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_body__WEBPACK_IMPORTED_MODULE_5__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_footer__WEBPACK_IMPORTED_MODULE_7__["default"], null))));
 };
 
 window.addEventListener("load", function () {
   (0,react_dom__WEBPACK_IMPORTED_MODULE_3__.render)((0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(SikshyaSetupWizard, null), document.getElementById("sikshya-setup-element"));
 });
-
-/***/ }),
-
-/***/ "./assets/src/setup/global/theme.js":
-/*!******************************************!*\
-  !*** ./assets/src/setup/global/theme.js ***!
-  \******************************************/
-/***/ (function() {
-
-throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\assets\\src\\setup\\global\\theme.js: Unexpected token, expected \"{\" (31:7)\n\n\u001b[0m \u001b[90m 29 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 30 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 31 |\u001b[39m \u001b[36mexport\u001b[39m theme\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 32 |\u001b[39m\u001b[0m\n    at Object._raise (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:569:17)\n    at Object.raiseWithData (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:562:17)\n    at Object.raise (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:523:17)\n    at Object.unexpected (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:3601:16)\n    at Object.parseExport (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:14664:16)\n    at Object.parseStatementContent (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:13633:27)\n    at Object.parseStatement (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:13525:17)\n    at Object.parseBlockOrModuleBlockBody (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:14114:25)\n    at Object.parseBlockBody (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:14105:10)\n    at Object.parseProgram (D:\\xampp\\htdocs\\WordPressPlugins\\wp-content\\plugins\\sikshya\\node_modules\\@babel\\parser\\lib\\index.js:13445:10)");
 
 /***/ }),
 
@@ -58173,12 +58169,10 @@ module.exports = function () {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var React = __webpack_require__(/*! react */ "react");
 var step_1 = __webpack_require__(/*! ./parts/step */ "./assets/src/setup/components/parts/step.tsx");
 var Body = function () {
-    return (React.createElement(react_1.Container, null,
-        React.createElement(step_1.default, null)));
+    return (React.createElement(step_1.default, null));
 };
 exports["default"] = Body;
 
@@ -58203,9 +58197,8 @@ var theme = (0, react_1.extendTheme)({
     },
 });
 var Footer = function () {
-    return (React.createElement(react_1.Container, { p: 50 },
-        React.createElement(react_1.Center, null,
-            React.createElement("h1", null, "Sikshya WordPress LMS Plugin Footer"))));
+    return (React.createElement(react_1.Center, { p: 50, w: "full" },
+        React.createElement("h1", null, "Sikshya WordPress LMS Plugin Footer")));
 };
 exports["default"] = Footer;
 
@@ -58224,9 +58217,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var React = __webpack_require__(/*! react */ "react");
 var Header = function () {
-    return (React.createElement(react_1.Container, { p: 50 },
-        React.createElement(react_1.Center, null,
-            React.createElement("h1", null, "Sikshya WordPress LMS Plugin Header"))));
+    return (React.createElement(react_1.Center, { p: 50, w: "full" },
+        React.createElement("h1", null, "Sikshya WordPress LMS Plugin Header")));
 };
 exports["default"] = Header;
 
@@ -58281,7 +58273,7 @@ var ClickableSteps = function () {
         })),
         activeStep === 3 ? (React.createElement(react_1.Center, { p: 4, flexDir: "column" },
             React.createElement(react_1.Heading, { fontSize: "xl" }, "Woohoo! All steps completed!"),
-            React.createElement(react_1.Button, { mt: 6, size: "sm", onClick: reset }, "Reset"))) : (React.createElement(react_1.Flex, { width: "100%", justify: "flex-end" },
+            React.createElement(react_1.Button, { mt: 6, size: "sm", onClick: reset, varient: "with-shadow" }, "Reset"))) : (React.createElement(react_1.Flex, { width: "100%", justify: "flex-end" },
             React.createElement(react_1.Button, { mr: 4, size: "sm", variant: "ghost", onClick: prevStep, isDisabled: activeStep === 0 }, "Prev"),
             React.createElement(react_1.Button, { size: "sm", onClick: nextStep }, activeStep === steps.length - 1 ? "Finish" : "Next")))));
 };
@@ -58304,7 +58296,7 @@ var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var StepBox = function (_a) {
     var children = _a.children;
-    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: "200px", marginTop: 20, marginBottom: 20, borderRadius: 5, p: 4, color: "gray.700", boxShadow: "2xl" }, children));
+    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: 350, marginTop: 20, marginBottom: 20, borderRadius: 5, p: 25, color: "gray.700", boxShadow: "xl" }, children));
 };
 exports["default"] = StepBox;
 
@@ -58398,6 +58390,105 @@ var Welcome = function (props) {
         React.createElement("p", null, "No time right now? If you don\u2019t want to go through the wizard, you can skip and return to the WordPress dashboard.")));
 };
 exports["default"] = Welcome;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/global/theme.tsx":
+/*!*******************************************!*\
+  !*** ./assets/src/setup/global/theme.tsx ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
+var styles_1 = __webpack_require__(/*! ./theme/styles */ "./assets/src/setup/global/theme/styles.tsx");
+var Button_1 = __webpack_require__(/*! ./theme/components/Button */ "./assets/src/setup/global/theme/components/Button.tsx");
+var Theme = (0, react_1.extendTheme)({
+    components: {
+        Steps: chakra_ui_steps_1.StepsStyleConfig,
+        Button: Button_1.default
+    },
+    initialColorMode: 'light',
+    size: {
+        container: "900px"
+    },
+    styles: styles_1.default
+});
+exports["default"] = Theme;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/global/theme/components/Button.tsx":
+/*!*************************************************************!*\
+  !*** ./assets/src/setup/global/theme/components/Button.tsx ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var Button = {
+    // 1. We can update the base styles
+    baseStyle: {
+        fontWeight: 'normal', // Normally, it is "semibold"
+    },
+    // 2. We can add a new button size or extend existing
+    sizes: {
+        xl: {
+            h: '56px',
+            fontSize: 'lg',
+            px: '32px',
+        },
+    },
+    // 3. We can add a new visual variant
+    variants: {
+        'with-shadow': {
+            bg: 'red.400',
+            boxShadow: '0 0 2px 2px #efdfde',
+        },
+    },
+};
+exports["default"] = Button;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/global/theme/styles.tsx":
+/*!**************************************************!*\
+  !*** ./assets/src/setup/global/theme/styles.tsx ***!
+  \**************************************************/
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var Styles = {
+    global: {
+        // styles for the `body`
+        body: {
+            bg: '#f5f7ff',
+            color: '#000',
+        },
+        // styles for the `a`
+        a: {
+            color: 'teal.500',
+            _hover: {
+                textDecoration: 'underline',
+            },
+        },
+    },
+    size: {
+        container: {
+            maxW: "1200px"
+        }
+    },
+};
+exports["default"] = Styles;
 
 
 /***/ }),
@@ -60634,7 +60725,7 @@ function combine (array, callback) {
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["style-setup"], function() { return __webpack_require__("./assets/src/setup/index.jsx"); })
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["style-setup"], function() { return __webpack_require__("./assets/src/setup/index.js"); })
 /******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 	
 /******/ })()

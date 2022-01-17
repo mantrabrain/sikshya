@@ -11,11 +11,9 @@ const Footer = () => {
 
 	return (
 
-		<Container p={50}>
-			<Center>
-				<h1>Sikshya WordPress LMS Plugin Footer</h1>
-			</Center>
-		</Container>
+		<Center p={50} w="full">
+			<h1>Sikshya WordPress LMS Plugin Footer</h1>
+		</Center>
 	);
 };
 export default Footer

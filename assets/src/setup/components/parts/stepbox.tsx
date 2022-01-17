@@ -10,13 +10,13 @@ const StepBox = ({children}: SetupBoxProps) => {
 			bg="white"
 			w="100%"
 			h="auto"
-			minHeight="200px"
+			minHeight={350}
 			marginTop={20}
 			marginBottom={20}
 			borderRadius={5}
-			p={4}
+			p={25}
 			color="gray.700"
-			boxShadow="2xl"
+			boxShadow="xl"
 		>
 			{children}
 

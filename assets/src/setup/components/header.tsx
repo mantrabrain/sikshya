@@ -5,11 +5,11 @@ const Header = () => {
 
 	return (
 
-		<Container p={50}>
-			<Center>
-				<h1>Sikshya WordPress LMS Plugin Header</h1>
-			</Center>
-		</Container>
+
+		<Center p={50} w="full">
+			<h1>Sikshya WordPress LMS Plugin Header</h1>
+		</Center>
+
 	);
 };
 export default Header
