@@ -81,8 +81,8 @@ class Sikshya_Setup_Wizard
 		wp_localize_script('sikshya-setup', 'sikshyaSetup',
 			array(
 				'ajax_url' => admin_url('admin-ajax.php'),
-				'import_action' => 'sikshya_import_sample_data_on_setup',
-				'import_nonce' => wp_create_nonce('wp_sikshya_import_sample_data_on_setup_nonce'),
+				'admin_url' => admin_url('index.php'),
+				'course_page_url' => admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE)
 
 
 			)

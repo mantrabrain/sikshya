@@ -3,16 +3,18 @@ import {Step, Steps, useSteps} from "chakra-ui-steps";
 import {ArrowBackIcon, ArrowForwardIcon} from "@chakra-ui/icons";
 import * as React from 'react';
 import Welcome from "./../step/welcome";
-import Course from "./../step/course";
+import General from "./../step/general";
 import Pages from "./../step/pages";
 import Finish from "./../step/finish";
 import StepFooter from "../step/step-footer";
 import StepBox from "./stepbox";
+import Themes from "../step/themes";
 
 const steps = [
 	{label: "Welcome", "id": "welcome"},
-	{label: "Course", id: "course"},
+	{label: "General", id: "general"},
 	{label: "Pages", id: "pages"},
+	{label: "Themes", id: "themes"},
 	{label: "Finish", id: "finish"}
 ]
 
@@ -25,12 +27,14 @@ export const ClickableSteps = () => {
 		switch (id) {
 			case 'welcome':
 				return <Welcome index={1}/>;
-			case 'course':
-				return <Course index={1}/>;
+			case 'general':
+				return <General index={1}/>;
 			case 'pages':
 				return <Pages index={1}/>;
 			case 'finish':
-				return <Finish index={1}/>;
+				return <Finish index={activeStep}/>;
+			case 'themes':
+				return <Themes index={1}/>;
 			default:
 				return "<h2>Component {id} not found</h2>";
 		}
@@ -43,36 +47,14 @@ export const ClickableSteps = () => {
 					<Step label={label} key={label}>
 						<StepBox>
 							{renderStepView(id)}
-							<StepFooter activeStep={activeStep} prevStep={prevStep} nextStep={nextStep}/>
+							<StepFooter activeStep={activeStep} prevStep={prevStep} nextStep={nextStep}
+										steps={steps}/>
 						</StepBox>
 
 					</Step>
 				))}
 
 			</Steps>
-			{activeStep === 3 ? (
-				<Center p={4} flexDir="column">
-					<Heading fontSize="xl">Woohoo! All steps completed!</Heading>
-					<Button mt={6} size="sm" onClick={reset} varient="with-shadow">
-						Reset
-					</Button>
-				</Center>
-			) : (
-				<Flex width="100%" justify="flex-end">
-					<Button
-						mr={4}
-						size="sm"
-						variant="ghost"
-						onClick={prevStep}
-						isDisabled={activeStep === 0}
-					>
-						Prev
-					</Button>
-					<Button size="sm" onClick={nextStep}>
-						{activeStep === steps.length - 1 ? "Finish" : "Next"}
-					</Button>
-				</Flex>
-			)}
 		</Flex>
 	)
 }

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Heading, Center} from "@chakra-ui/react";
 
 type FinishProps = {
 	index: number
@@ -7,12 +8,11 @@ type FinishProps = {
 const Finish = (props: FinishProps) => {
 
 	return (
-		<div>
-			<div>
-				<h1>Finish Step {props.index}</h1>
+		<Center>
 
-			</div>
-		</div>
+			<Heading fontSize="xl">Woohoo! All steps completed!</Heading>
+
+		</Center>
 	);
 };
 export default Finish

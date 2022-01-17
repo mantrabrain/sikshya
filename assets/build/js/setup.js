@@ -39224,6 +39224,19 @@ var hideOthers = function (originalTarget, parentNode, markerName) {
 
 /***/ }),
 
+/***/ "./assets/src/setup/global/globals.js":
+/*!********************************************!*\
+  !*** ./assets/src/setup/global/globals.js ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+const Global = window.sikshyaSetup;
+/* harmony default export */ __webpack_exports__["default"] = (Global);
+
+/***/ }),
+
 /***/ "./assets/src/setup/index.js":
 /*!***********************************!*\
   !*** ./assets/src/setup/index.js ***!
@@ -58235,15 +58248,17 @@ var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakr
 var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
 var React = __webpack_require__(/*! react */ "react");
 var welcome_1 = __webpack_require__(/*! ./../step/welcome */ "./assets/src/setup/components/step/welcome.tsx");
-var course_1 = __webpack_require__(/*! ./../step/course */ "./assets/src/setup/components/step/course.tsx");
+var general_1 = __webpack_require__(/*! ./../step/general */ "./assets/src/setup/components/step/general.tsx");
 var pages_1 = __webpack_require__(/*! ./../step/pages */ "./assets/src/setup/components/step/pages.tsx");
 var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/components/step/finish.tsx");
 var step_footer_1 = __webpack_require__(/*! ../step/step-footer */ "./assets/src/setup/components/step/step-footer.tsx");
 var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
+var themes_1 = __webpack_require__(/*! ../step/themes */ "./assets/src/setup/components/step/themes.tsx");
 var steps = [
     { label: "Welcome", "id": "welcome" },
-    { label: "Course", id: "course" },
+    { label: "General", id: "general" },
     { label: "Pages", id: "pages" },
+    { label: "Themes", id: "themes" },
     { label: "Finish", id: "finish" }
 ];
 var ClickableSteps = function () {
@@ -58254,12 +58269,14 @@ var ClickableSteps = function () {
         switch (id) {
             case 'welcome':
                 return React.createElement(welcome_1.default, { index: 1 });
-            case 'course':
-                return React.createElement(course_1.default, { index: 1 });
+            case 'general':
+                return React.createElement(general_1.default, { index: 1 });
             case 'pages':
                 return React.createElement(pages_1.default, { index: 1 });
             case 'finish':
-                return React.createElement(finish_1.default, { index: 1 });
+                return React.createElement(finish_1.default, { index: activeStep });
+            case 'themes':
+                return React.createElement(themes_1.default, { index: 1 });
             default:
                 return "<h2>Component {id} not found</h2>";
         }
@@ -58270,13 +58287,8 @@ var ClickableSteps = function () {
             return (React.createElement(chakra_ui_steps_1.Step, { label: label, key: label },
                 React.createElement(stepbox_1.default, null,
                     renderStepView(id),
-                    React.createElement(step_footer_1.default, { activeStep: activeStep, prevStep: prevStep, nextStep: nextStep }))));
-        })),
-        activeStep === 3 ? (React.createElement(react_1.Center, { p: 4, flexDir: "column" },
-            React.createElement(react_1.Heading, { fontSize: "xl" }, "Woohoo! All steps completed!"),
-            React.createElement(react_1.Button, { mt: 6, size: "sm", onClick: reset, varient: "with-shadow" }, "Reset"))) : (React.createElement(react_1.Flex, { width: "100%", justify: "flex-end" },
-            React.createElement(react_1.Button, { mr: 4, size: "sm", variant: "ghost", onClick: prevStep, isDisabled: activeStep === 0 }, "Prev"),
-            React.createElement(react_1.Button, { size: "sm", onClick: nextStep }, activeStep === steps.length - 1 ? "Finish" : "Next")))));
+                    React.createElement(step_footer_1.default, { activeStep: activeStep, prevStep: prevStep, nextStep: nextStep, steps: steps }))));
+        }))));
 };
 exports.ClickableSteps = ClickableSteps;
 exports["default"] = exports.ClickableSteps;
@@ -58304,28 +58316,6 @@ exports["default"] = StepBox;
 
 /***/ }),
 
-/***/ "./assets/src/setup/components/step/course.tsx":
-/*!*****************************************************!*\
-  !*** ./assets/src/setup/components/step/course.tsx ***!
-  \*****************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var React = __webpack_require__(/*! react */ "react");
-var Course = function (props) {
-    return (React.createElement("div", null,
-        React.createElement("div", null,
-            React.createElement("h1", null,
-                "This is Course Step",
-                props.index))));
-};
-exports["default"] = Course;
-
-
-/***/ }),
-
 /***/ "./assets/src/setup/components/step/finish.tsx":
 /*!*****************************************************!*\
   !*** ./assets/src/setup/components/step/finish.tsx ***!
@@ -58336,14 +58326,65 @@ exports["default"] = Course;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var Finish = function (props) {
-    return (React.createElement("div", null,
-        React.createElement("div", null,
-            React.createElement("h1", null,
-                "Finish Step ",
-                props.index))));
+    return (React.createElement(react_1.Center, null,
+        React.createElement(react_1.Heading, { fontSize: "xl" }, "Woohoo! All steps completed!")));
 };
 exports["default"] = Finish;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/general.tsx":
+/*!******************************************************!*\
+  !*** ./assets/src/setup/components/step/general.tsx ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var General = function (props) {
+    return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%", gap: 5 },
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'currency' }, "Currency"),
+                React.createElement(react_1.Select, { id: 'currency', placeholder: 'Select currency', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'currency-symbol-type' }, "Currency Symbol Type"),
+                React.createElement(react_1.Select, { id: 'currency-symbol-type', placeholder: 'Currency Symbol Type', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'currency-position' }, "Currency Position"),
+                React.createElement(react_1.Select, { id: 'currency-position', placeholder: 'Currency Position', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'thousand-separator' }, "Thousand Separator"),
+                React.createElement(react_1.Input, { id: 'thousand-separator', placeholder: 'Thousand Separator', w: "md" }))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'number-of-decimals' }, "Number Of Decimals"),
+                React.createElement(react_1.NumberInput, { id: 'number-of-decimals', defaultValue: 15, max: 30, clampValueOnBlur: false, w: "md" },
+                    React.createElement(react_1.NumberInputField, null),
+                    React.createElement(react_1.NumberInputStepper, null,
+                        React.createElement(react_1.NumberIncrementStepper, null),
+                        React.createElement(react_1.NumberDecrementStepper, null))))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'decimal-separator' }, "Currency Position"),
+                React.createElement(react_1.Input, { id: 'decimal-separator', placeholder: 'Decimal Separator', w: "md" })))));
+};
+exports["default"] = General;
 
 
 /***/ }),
@@ -58358,12 +58399,39 @@ exports["default"] = Finish;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var Pages = function (props) {
-    return (React.createElement("div", null,
-        React.createElement("div", null,
-            React.createElement("h1", null,
-                "Pages Step ",
-                props.index))));
+    return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%", gap: 5 },
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'account-page' }, "Account Page"),
+                React.createElement(react_1.Select, { id: 'account-page', placeholder: 'Select Account Page', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'registration-page' }, "Registration Page"),
+                React.createElement(react_1.Select, { id: 'registration-page', placeholder: 'Select Registration Page', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'login-page' }, "Login Page"),
+                React.createElement(react_1.Select, { id: 'login-page', placeholder: 'Select Login Page', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'cart-page' }, "Cart Page"),
+                React.createElement(react_1.Select, { id: 'cart-page', placeholder: 'Select Cart Page', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria")))),
+        React.createElement(react_1.FormControl, null,
+            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_1.FormLabel, { htmlFor: 'checkout-page' }, "Checkout Page"),
+                React.createElement(react_1.Select, { id: 'checkout-page', placeholder: 'Select Checkout Page', w: "md" },
+                    React.createElement("option", null, "United Arab Emirates"),
+                    React.createElement("option", null, "Nigeria"))))));
 };
 exports["default"] = Pages;
 
@@ -58379,16 +58447,42 @@ exports["default"] = Pages;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+/** @var sikshyaSetup */
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+var globals_1 = __webpack_require__(/*! ./../../global/globals */ "./assets/src/setup/global/globals.js");
 var StepFooter = function (props) {
-    return (React.createElement(react_1.Flex, { width: "100%", justify: "center", align: "center", gap: 10 },
-        React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "link" },
-            "Not right now ",
-            props.activeStep),
-        React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, "Next")));
+    return (React.createElement(react_1.Flex, { width: "100%", justify: "space-between", align: "center", gap: 10, marginTop: 10 },
+        props.activeStep > 0 ?
+            React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.prevStep }, (0, i18n_1.__)('Back', 'sikshya'))
+            : "",
+        React.createElement(react_1.Link, { href: globals_1.default.course_page_url },
+            React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "outline" }, (0, i18n_1.__)('Go back to Dashboard', "sikshya"))),
+        props.steps.length > (props.activeStep + 1) ?
+            React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, (0, i18n_1.__)('Next', 'sikshya'))
+            : ""));
 };
 exports["default"] = StepFooter;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/themes.tsx":
+/*!*****************************************************!*\
+  !*** ./assets/src/setup/components/step/themes.tsx ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var Themes = function (props) {
+    return (React.createElement("div", null,
+        React.createElement("div", null, "This is Themes Page")));
+};
+exports["default"] = Themes;
 
 
 /***/ }),
