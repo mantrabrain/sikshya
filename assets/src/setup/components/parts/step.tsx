@@ -9,6 +9,7 @@ import Finish from "./../step/finish";
 import StepFooter from "../step/step-footer";
 import StepBox from "./stepbox";
 import Themes from "../step/themes";
+import Paragraph from "../../skeleton/paragraph";
 
 const steps = [
 	{label: "Welcome", "id": "welcome"},
@@ -26,6 +27,7 @@ export const ClickableSteps = () => {
 
 		switch (id) {
 			case 'welcome':
+				return <Paragraph/>;
 				return <Welcome index={1}/>;
 			case 'general':
 				return <General index={1}/>;

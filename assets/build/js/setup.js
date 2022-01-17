@@ -58254,6 +58254,7 @@ var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/c
 var step_footer_1 = __webpack_require__(/*! ../step/step-footer */ "./assets/src/setup/components/step/step-footer.tsx");
 var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var themes_1 = __webpack_require__(/*! ../step/themes */ "./assets/src/setup/components/step/themes.tsx");
+var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
 var steps = [
     { label: "Welcome", "id": "welcome" },
     { label: "General", id: "general" },
@@ -58268,6 +58269,7 @@ var ClickableSteps = function () {
     var renderStepView = function (id) {
         switch (id) {
             case 'welcome':
+                return React.createElement(paragraph_1.default, null);
                 return React.createElement(welcome_1.default, { index: 1 });
             case 'general':
                 return React.createElement(general_1.default, { index: 1 });
@@ -58605,6 +58607,36 @@ var Styles = {
     },
 };
 exports["default"] = Styles;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/skeleton/paragraph.tsx":
+/*!*************************************************!*\
+  !*** ./assets/src/setup/skeleton/paragraph.tsx ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var React = __webpack_require__(/*! react */ "react");
+var Paragraph = function () {
+    return (React.createElement(react_1.Stack, null,
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' })));
+};
+exports["default"] = Paragraph;
 
 
 /***/ }),
