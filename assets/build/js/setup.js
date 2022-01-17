@@ -58226,7 +58226,7 @@ var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakr
 var React = __webpack_require__(/*! react */ "react");
 var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var Header = function () {
-    return (React.createElement(react_1.Center, { p: 50, w: "full" },
+    return (React.createElement(react_1.Center, { p: 5, w: "full" },
         React.createElement(react_1.Heading, null, (0, i18n_1.__)("Sikshya WordPress LMS Plugin", "sikshya"))));
 };
 exports["default"] = Header;
@@ -58247,14 +58247,12 @@ exports.ClickableSteps = void 0;
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
 var React = __webpack_require__(/*! react */ "react");
-var welcome_1 = __webpack_require__(/*! ./../step/welcome */ "./assets/src/setup/components/step/welcome.tsx");
 var general_1 = __webpack_require__(/*! ./../step/general */ "./assets/src/setup/components/step/general.tsx");
 var pages_1 = __webpack_require__(/*! ./../step/pages */ "./assets/src/setup/components/step/pages.tsx");
 var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/components/step/finish.tsx");
 var step_footer_1 = __webpack_require__(/*! ../step/step-footer */ "./assets/src/setup/components/step/step-footer.tsx");
 var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var themes_1 = __webpack_require__(/*! ../step/themes */ "./assets/src/setup/components/step/themes.tsx");
-var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
 var steps = [
     { label: "Welcome", "id": "welcome" },
     { label: "General", id: "general" },
@@ -58269,8 +58267,7 @@ var ClickableSteps = function () {
     var renderStepView = function (id) {
         switch (id) {
             case 'welcome':
-                return React.createElement(paragraph_1.default, null);
-                return React.createElement(welcome_1.default, { index: 1 });
+                return React.createElement(themes_1.default, { index: 1 });
             case 'general':
                 return React.createElement(general_1.default, { index: 1 });
             case 'pages':
@@ -58311,7 +58308,7 @@ var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var StepBox = function (_a) {
     var children = _a.children;
-    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: 350, marginTop: 20, marginBottom: 20, borderRadius: 5, p: 25, color: "gray.700", boxShadow: "xl" }, children));
+    return (React.createElement(react_1.Box, { bg: "white", w: "100%", h: "auto", minHeight: 300, marginTop: 10, marginBottom: 10, borderRadius: 5, p: 25, color: "gray.700", boxShadow: "xl" }, children));
 };
 exports["default"] = StepBox;
 
@@ -58480,34 +58477,24 @@ exports["default"] = StepFooter;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var Themes = function (props) {
-    return (React.createElement("div", null,
-        React.createElement("div", null, "This is Themes Page")));
-};
-exports["default"] = Themes;
-
-
-/***/ }),
-
-/***/ "./assets/src/setup/components/step/welcome.tsx":
-/*!******************************************************!*\
-  !*** ./assets/src/setup/components/step/welcome.tsx ***!
-  \******************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var Welcome = function (props) {
-    return (React.createElement("div", null,
-        React.createElement(react_1.Heading, { size: 'lg', fontSize: '30px', marginBottom: 10 }, (0, i18n_1.__)("Welcome to Sikshya LMS", "sikshya")),
-        React.createElement(react_1.Text, null, (0, i18n_1.__)("Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")),
-        React.createElement(react_1.Text, { marginTop: 10 }, (0, i18n_1.__)("No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard."))));
+var Themes = function (props) {
+    var property = {
+        theme_image_url: 'https://i0.wp.com/themes.svn.wordpress.org/pragyan/0.0.8/screenshot.png',
+        theme_url: 'https://wordpress.org/themes/pragyan/'
+    };
+    return (React.createElement(react_1.Box, { maxW: 'full', borderWidth: '1px', borderRadius: 'lg', overflow: 'hidden', margin: "0 auto" },
+        React.createElement(react_1.Link, { href: property.theme_url, target: "_blank" },
+            React.createElement(react_1.Image, { src: property.theme_image_url, alt: "Pragyan WordPress Theme" })),
+        React.createElement(react_1.Flex, { width: "100%", justify: "space-between", align: "center", gap: 10, p: 10 },
+            React.createElement(react_1.Link, { href: property.theme_url, target: "_blank" },
+                React.createElement(react_1.Heading, { as: "h2", size: "lg" }, "Pragyan")),
+            React.createElement("div", { className: "theme-actions" },
+                React.createElement(react_1.Button, { size: "md", colorScheme: "blue" }, (0, i18n_1.__)('Install', 'sikshya')),
+                React.createElement(react_1.Button, { size: "md", marginLeft: "5", className: "button activate" }, (0, i18n_1.__)('Activate', 'sikshya'))))));
 };
-exports["default"] = Welcome;
+exports["default"] = Themes;
 
 
 /***/ }),
@@ -58607,36 +58594,6 @@ var Styles = {
     },
 };
 exports["default"] = Styles;
-
-
-/***/ }),
-
-/***/ "./assets/src/setup/skeleton/paragraph.tsx":
-/*!*************************************************!*\
-  !*** ./assets/src/setup/skeleton/paragraph.tsx ***!
-  \*************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
-var React = __webpack_require__(/*! react */ "react");
-var Paragraph = function () {
-    return (React.createElement(react_1.Stack, null,
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' }),
-        React.createElement(react_1.Skeleton, { height: '20px' })));
-};
-exports["default"] = Paragraph;
 
 
 /***/ }),

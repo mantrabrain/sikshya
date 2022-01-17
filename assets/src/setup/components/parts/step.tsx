@@ -27,8 +27,7 @@ export const ClickableSteps = () => {
 
 		switch (id) {
 			case 'welcome':
-				return <Paragraph/>;
-				return <Welcome index={1}/>;
+				return <Themes index={1}/>;
 			case 'general':
 				return <General index={1}/>;
 			case 'pages':

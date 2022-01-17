@@ -247,10 +247,8 @@ final class Sikshya
 		add_action('after_setup_theme', array($this, 'include_template_functions'), 11);
 		add_action('init', array($this, 'init'), 0);
 		add_action('init', array('Sikshya_Shortcodes', 'init'));
+		add_action('init', array($this, 'load_rest_api'));
 
-		//add_action('init', array('WC_Emails', 'init_transactional_emails'));
-//         add_action('activated_plugin', array($this, 'activated_plugin'));
-//        add_action('deactivated_plugin', array($this, 'deactivated_plugin'));
 	}
 
 
@@ -466,6 +464,10 @@ final class Sikshya
 
 	}
 
+	public function load_rest_api()
+	{
+		Sikshya_Rest_Server::instance()->init();
+	}
 
 	/**
 	 * Get the plugin url.

@@ -108,6 +108,8 @@ class Sikshya_Autoloader
 			$path = $this->include_path . 'models/';
 		} elseif (0 === strpos($class, 'sikshya_interface')) {
 			$path = $this->include_path . 'interfaces/';
+		} elseif (0 === strpos($class, 'sikshya_rest_api')) {
+			$path = $this->include_path . 'rest-api/';
 		}
 		if (empty($path) || !$this->load_file($path . $file)) {
 			$this->load_file($this->include_path . $file);
