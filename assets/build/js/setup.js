@@ -58214,7 +58214,7 @@ var React = __webpack_require__(/*! react */ "react");
 var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var Header = function () {
     return (React.createElement(react_1.Center, { p: 50, w: "full" },
-        React.createElement("h1", null, (0, i18n_1.__)("Sikshya WordPress LMS Plugin", "sikshya"))));
+        React.createElement(react_1.Heading, null, (0, i18n_1.__)("Sikshya WordPress LMS Plugin", "sikshya"))));
 };
 exports["default"] = Header;
 
@@ -58238,6 +58238,8 @@ var welcome_1 = __webpack_require__(/*! ./../step/welcome */ "./assets/src/setup
 var course_1 = __webpack_require__(/*! ./../step/course */ "./assets/src/setup/components/step/course.tsx");
 var pages_1 = __webpack_require__(/*! ./../step/pages */ "./assets/src/setup/components/step/pages.tsx");
 var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/components/step/finish.tsx");
+var step_footer_1 = __webpack_require__(/*! ../step/step-footer */ "./assets/src/setup/components/step/step-footer.tsx");
+var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var steps = [
     { label: "Welcome", "id": "welcome" },
     { label: "Course", id: "course" },
@@ -58265,7 +58267,10 @@ var ClickableSteps = function () {
     return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%" },
         React.createElement(chakra_ui_steps_1.Steps, { onClickStep: function (step) { return setStep(step); }, activeStep: activeStep }, steps.map(function (_a, index) {
             var label = _a.label, id = _a.id;
-            return (React.createElement(chakra_ui_steps_1.Step, { label: label, key: label }, renderStepView(id)));
+            return (React.createElement(chakra_ui_steps_1.Step, { label: label, key: label },
+                React.createElement(stepbox_1.default, null,
+                    renderStepView(id),
+                    React.createElement(step_footer_1.default, { activeStep: activeStep, prevStep: prevStep, nextStep: nextStep }))));
         })),
         activeStep === 3 ? (React.createElement(react_1.Center, { p: 4, flexDir: "column" },
             React.createElement(react_1.Heading, { fontSize: "xl" }, "Woohoo! All steps completed!"),
@@ -58309,9 +58314,8 @@ exports["default"] = StepBox;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var Course = function (props) {
-    return (React.createElement(stepbox_1.default, null,
+    return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h1", null,
                 "This is Course Step",
@@ -58332,9 +58336,8 @@ exports["default"] = Course;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var Finish = function (props) {
-    return (React.createElement(stepbox_1.default, null,
+    return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h1", null,
                 "Finish Step ",
@@ -58355,15 +58358,37 @@ exports["default"] = Finish;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var Pages = function (props) {
-    return (React.createElement(stepbox_1.default, null,
+    return (React.createElement("div", null,
         React.createElement("div", null,
             React.createElement("h1", null,
                 "Pages Step ",
                 props.index))));
 };
 exports["default"] = Pages;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/step-footer.tsx":
+/*!**********************************************************!*\
+  !*** ./assets/src/setup/components/step/step-footer.tsx ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var StepFooter = function (props) {
+    return (React.createElement(react_1.Flex, { width: "100%", justify: "center", align: "center", gap: 10 },
+        React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "link" },
+            "Not right now ",
+            props.activeStep),
+        React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, "Next")));
+};
+exports["default"] = StepFooter;
 
 
 /***/ }),
@@ -58378,12 +58403,13 @@ exports["default"] = Pages;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var stepbox_1 = __webpack_require__(/*! ./../parts/stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var Welcome = function (props) {
-    return (React.createElement(stepbox_1.default, null,
-        React.createElement("h1", null, "Welcome to Sikshya LMS!"),
-        React.createElement("p", null, "Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It\u2019s completely optional and shouldn\u2019t take longer than one minutes."),
-        React.createElement("p", null, "No time right now? If you don\u2019t want to go through the wizard, you can skip and return to the WordPress dashboard.")));
+    return (React.createElement("div", null,
+        React.createElement(react_1.Heading, { size: 'lg', fontSize: '30px', marginBottom: 10 }, (0, i18n_1.__)("Welcome to Sikshya LMS", "sikshya")),
+        React.createElement(react_1.Text, null, (0, i18n_1.__)("Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")),
+        React.createElement(react_1.Text, { marginTop: 10 }, (0, i18n_1.__)("No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard."))));
 };
 exports["default"] = Welcome;
 

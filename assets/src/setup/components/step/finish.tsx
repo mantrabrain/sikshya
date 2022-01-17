@@ -1,5 +1,4 @@
 import * as React from 'react';
-import StepBox from "./../parts/stepbox";
 
 type FinishProps = {
 	index: number
@@ -8,12 +7,12 @@ type FinishProps = {
 const Finish = (props: FinishProps) => {
 
 	return (
-		<StepBox>
+		<div>
 			<div>
 				<h1>Finish Step {props.index}</h1>
 
 			</div>
-		</StepBox>
+		</div>
 	);
 };
 export default Finish

@@ -6,6 +6,8 @@ import Welcome from "./../step/welcome";
 import Course from "./../step/course";
 import Pages from "./../step/pages";
 import Finish from "./../step/finish";
+import StepFooter from "../step/step-footer";
+import StepBox from "./stepbox";
 
 const steps = [
 	{label: "Welcome", "id": "welcome"},
@@ -39,9 +41,14 @@ export const ClickableSteps = () => {
 			<Steps onClickStep={(step) => setStep(step)} activeStep={activeStep}>
 				{steps.map(({label, id}, index) => (
 					<Step label={label} key={label}>
-						{renderStepView(id)}
+						<StepBox>
+							{renderStepView(id)}
+							<StepFooter activeStep={activeStep} prevStep={prevStep} nextStep={nextStep}/>
+						</StepBox>
+
 					</Step>
 				))}
+
 			</Steps>
 			{activeStep === 3 ? (
 				<Center p={4} flexDir="column">

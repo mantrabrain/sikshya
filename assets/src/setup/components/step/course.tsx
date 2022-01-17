@@ -1,5 +1,4 @@
 import * as React from 'react';
-import StepBox from "./../parts/stepbox";
 
 type CourseProps = {
 	index: number
@@ -8,12 +7,12 @@ type CourseProps = {
 const Course = (props: CourseProps) => {
 
 	return (
-		<StepBox>
+		<div>
 			<div>
 				<h1>This is Course Step{props.index}</h1>
 
 			</div>
-		</StepBox>
+		</div>
 	);
 };
 export default Course
