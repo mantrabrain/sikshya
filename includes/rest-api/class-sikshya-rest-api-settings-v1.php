@@ -48,9 +48,8 @@ class Sikshya_REST_API_Settings_V1
 
 	public function get_settings(\WP_REST_Request $request)
 	{
-
 		try {
-			return new \WP_REST_Response('Success', 200);
+			return new \WP_REST_Response('Wow finally success', 200);
 		} catch (\Exception $e) {
 
 			$response_code = $e->getCode() > 0 ? $e->getCode() : 500;
@@ -61,8 +60,8 @@ class Sikshya_REST_API_Settings_V1
 
 	public function get_settings_permission_check()
 	{
-		
-		if (current_user_can('manage_options')) {
+
+		if (current_user_can('manage_options') && is_user_logged_in()) {
 			return true;
 		}
 		return false;

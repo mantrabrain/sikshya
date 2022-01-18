@@ -39249,16 +39249,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__);
 
 
-const sikshyaAPIFetch = () => {
-  _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()({
-    path: '/wp/v2/posts/1',
-    method: 'POST',
-    data: {
-      title: 'New Post Title'
-    }
-  }).then(res => {
-    console.log(res);
-  });
+const sikshyaAPIFetch = apiOptions => {
+  return _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()(apiOptions);
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (sikshyaAPIFetch);
@@ -58365,7 +58357,12 @@ var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakr
 var api_1 = __webpack_require__(/*! ../../global/api */ "./assets/src/setup/global/api.js");
 var callAPI = function () {
     return new Promise(function (resolve, reject) {
-        (0, api_1.default)();
+        (0, api_1.default)({
+            path: '/sikshya/v1/settings',
+            method: 'GET',
+        }).then(function (response) {
+            console.log(response);
+        });
     });
 };
 var General = function (props) {

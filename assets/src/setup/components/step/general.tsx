@@ -14,7 +14,12 @@ type GeneralProps = {
 const callAPI = () => {
 
 	return new Promise<void>((resolve, reject) => {
-		sikshyaAPIFetch();
+		sikshyaAPIFetch({
+			path: '/sikshya/v1/settings',
+			method: 'GET',
+		}).then((response) => {
+			console.log(response);
+		});
 	});
 };
 const General = (props: GeneralProps) => {
