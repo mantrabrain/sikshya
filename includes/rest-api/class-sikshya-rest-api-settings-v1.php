@@ -83,14 +83,23 @@ class Sikshya_REST_API_Settings_V1
 		$decimal_separator = sanitize_text_field($request->get_param('decimal_separator'));
 		$price_number_decimals = absint($request->get_param('number_of_decimals'));
 		$thousand_separator = sanitize_text_field($request->get_param('thousand_separator'));
+		$account_page = absint($request->get_param('account_page'));
+		$cart_page = absint($request->get_param('cart_page'));
+		$checkout_page = absint($request->get_param('checkout_page'));
+		$login_page = absint($request->get_param('login_page'));
+		$registration_page = absint($request->get_param('registration_page'));
 		try {
-
 			update_option('sikshya_currency', $currency);
 			update_option('sikshya_currency_symbol_type', $currency_symbol_type);
 			update_option('sikshya_currency_position', $currency_position);
 			update_option('sikshya_thousand_separator', $thousand_separator);
 			update_option('sikshya_price_number_decimals', $price_number_decimals);
 			update_option('sikshya_decimal_separator', $decimal_separator);
+			update_option('sikshya_account_page', $account_page);
+			update_option('sikshya_registration_page', $registration_page);
+			update_option('sikshya_login_page', $login_page);
+			update_option('sikshya_cart_page', $cart_page);
+			update_option('sikshya_checkout_page', $checkout_page);
 
 			return new \WP_REST_Response('Success', 200);
 		} catch (\Exception $e) {

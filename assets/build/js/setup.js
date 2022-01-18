@@ -58309,12 +58309,13 @@ var ClickableSteps = function () {
         // @ts-ignore
         if (all_settings.hasOwnProperty(id)) {
             // @ts-ignore
-            all_settings[id] = value; //Settings[id] === "number" ? value.parseInt() : value;
+            all_settings[id] = value;
         }
         setSettings(all_settings);
         console.log(settings);
     };
     if (activeStep === 2 || activeStep === 3) {
+        console.log(settings);
         new Promise(function (resolve, reject) {
             // @ts-ignore
             (0, api_1.default)({
