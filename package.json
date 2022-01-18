@@ -24,6 +24,7 @@
     "@types/node": "^16.11.10",
     "@types/react": "^17.0.36",
     "@types/react-dom": "^17.0.11",
+    "@wordpress/api-fetch": "^5.2.6",
     "@wordpress/components": "^19.0.5",
     "@wordpress/element": "^4.0.4",
     "@wordpress/scripts": "^19.2.2",

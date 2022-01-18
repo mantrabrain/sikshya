@@ -61,7 +61,7 @@ class Sikshya_REST_API_Settings_V1
 
 	public function get_settings_permission_check()
 	{
-
+		
 		if (current_user_can('manage_options')) {
 			return true;
 		}

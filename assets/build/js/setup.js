@@ -39124,6 +39124,19 @@ if (true) {
 
 /***/ }),
 
+/***/ "./assets/src/setup/style.scss":
+/*!*************************************!*\
+  !*** ./assets/src/setup/style.scss ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
 /***/ "./node_modules/aria-hidden/dist/es2015/index.js":
 /*!*******************************************************!*\
   !*** ./node_modules/aria-hidden/dist/es2015/index.js ***!
@@ -39224,16 +39237,31 @@ var hideOthers = function (originalTarget, parentNode, markerName) {
 
 /***/ }),
 
-/***/ "./assets/src/setup/global/globals.js":
-/*!********************************************!*\
-  !*** ./assets/src/setup/global/globals.js ***!
-  \********************************************/
+/***/ "./assets/src/setup/global/api.js":
+/*!****************************************!*\
+  !*** ./assets/src/setup/global/api.js ***!
+  \****************************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-const Global = window.sikshyaSetup;
-/* harmony default export */ __webpack_exports__["default"] = (Global);
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/api-fetch */ "@wordpress/api-fetch");
+/* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const sikshyaAPIFetch = () => {
+  _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()({
+    path: '/wp/v2/posts/1',
+    method: 'POST',
+    data: {
+      title: 'New Post Title'
+    }
+  }).then(res => {
+    console.log(res);
+  });
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (sikshyaAPIFetch);
 
 /***/ }),
 
@@ -53176,19 +53204,6 @@ module.exports = mergeWith;
 
 /***/ }),
 
-/***/ "./assets/src/setup/style.scss":
-/*!*************************************!*\
-  !*** ./assets/src/setup/style.scss ***!
-  \*************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
 /***/ "./node_modules/object-assign/index.js":
 /*!*********************************************!*\
   !*** ./node_modules/object-assign/index.js ***!
@@ -58247,6 +58262,7 @@ exports.ClickableSteps = void 0;
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var chakra_ui_steps_1 = __webpack_require__(/*! chakra-ui-steps */ "./node_modules/chakra-ui-steps/dist/chakra-ui-steps.esm.js");
 var React = __webpack_require__(/*! react */ "react");
+var welcome_1 = __webpack_require__(/*! ./../step/welcome */ "./assets/src/setup/components/step/welcome.tsx");
 var general_1 = __webpack_require__(/*! ./../step/general */ "./assets/src/setup/components/step/general.tsx");
 var pages_1 = __webpack_require__(/*! ./../step/pages */ "./assets/src/setup/components/step/pages.tsx");
 var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/components/step/finish.tsx");
@@ -58267,7 +58283,7 @@ var ClickableSteps = function () {
     var renderStepView = function (id) {
         switch (id) {
             case 'welcome':
-                return React.createElement(themes_1.default, { index: 1 });
+                return React.createElement(welcome_1.default, { index: 1 });
             case 'general':
                 return React.createElement(general_1.default, { index: 1 });
             case 'pages':
@@ -58346,7 +58362,26 @@ exports["default"] = Finish;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var api_1 = __webpack_require__(/*! ../../global/api */ "./assets/src/setup/global/api.js");
+var callAPI = function () {
+    return new Promise(function (resolve, reject) {
+        (0, api_1.default)();
+    });
+};
 var General = function (props) {
+    /*async function api() {
+        await apiFetch({
+            path: sikshyaSetup.rest_namespace + sikshyaSetup.rest_version + '/settings',
+            method: 'GET'
+        });
+
+
+    }
+
+    api().then(r => function () {
+        console.log(r);
+    });*/
+    callAPI();
     return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%", gap: 5 },
         React.createElement(react_1.FormControl, null,
             React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
@@ -58450,13 +58485,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var globals_1 = __webpack_require__(/*! ./../../global/globals */ "./assets/src/setup/global/globals.js");
 var StepFooter = function (props) {
     return (React.createElement(react_1.Flex, { width: "100%", justify: "space-between", align: "center", gap: 10, marginTop: 10 },
         props.activeStep > 0 ?
             React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.prevStep }, (0, i18n_1.__)('Back', 'sikshya'))
             : "",
-        React.createElement(react_1.Link, { href: globals_1.default.course_page_url },
+        React.createElement(react_1.Link, { href: sikshyaSetup.course_page_url },
             React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "outline" }, (0, i18n_1.__)('Go back to Dashboard', "sikshya"))),
         props.steps.length > (props.activeStep + 1) ?
             React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, (0, i18n_1.__)('Next', 'sikshya'))
@@ -58495,6 +58529,29 @@ var Themes = function (props) {
                 React.createElement(react_1.Button, { size: "md", marginLeft: "5", className: "button activate" }, (0, i18n_1.__)('Activate', 'sikshya'))))));
 };
 exports["default"] = Themes;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/components/step/welcome.tsx":
+/*!******************************************************!*\
+  !*** ./assets/src/setup/components/step/welcome.tsx ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+var Welcome = function (props) {
+    return (React.createElement("div", null,
+        React.createElement(react_1.Heading, { size: 'lg', fontSize: '30px', marginBottom: 10 }, (0, i18n_1.__)("Welcome to Sikshya LMS", "sikshya")),
+        React.createElement(react_1.Text, null, (0, i18n_1.__)("Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")),
+        React.createElement(react_1.Text, { marginTop: 10 }, (0, i18n_1.__)("No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard."))));
+};
+exports["default"] = Welcome;
 
 
 /***/ }),
@@ -59483,6 +59540,17 @@ module.exports = window["React"];
 
 "use strict";
 module.exports = window["ReactDOM"];
+
+/***/ }),
+
+/***/ "@wordpress/api-fetch":
+/*!**********************************!*\
+  !*** external ["wp","apiFetch"] ***!
+  \**********************************/
+/***/ (function(module) {
+
+"use strict";
+module.exports = window["wp"]["apiFetch"];
 
 /***/ }),
 

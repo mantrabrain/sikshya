@@ -82,7 +82,9 @@ class Sikshya_Setup_Wizard
 			array(
 				'ajax_url' => admin_url('admin-ajax.php'),
 				'admin_url' => admin_url('index.php'),
-				'course_page_url' => admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE)
+				'course_page_url' => admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE),
+				'rest_namespace' => 'sikshya',
+				'rest_version' => 'v1'
 
 
 			)

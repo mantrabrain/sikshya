@@ -6,12 +6,32 @@ import {
 	NumberIncrementStepper,
 	NumberDecrementStepper
 } from "@chakra-ui/react";
+import sikshyaAPIFetch from "../../global/api";
 
 type GeneralProps = {
 	index: number
 }
+const callAPI = () => {
 
+	return new Promise<void>((resolve, reject) => {
+		sikshyaAPIFetch();
+	});
+};
 const General = (props: GeneralProps) => {
+
+	/*async function api() {
+		await apiFetch({
+			path: sikshyaSetup.rest_namespace + sikshyaSetup.rest_version + '/settings',
+			method: 'GET'
+		});
+
+
+	}
+
+	api().then(r => function () {
+		console.log(r);
+	});*/
+	callAPI();
 
 	return (
 		<Flex flexDir="column" width="100%" gap={5}>
