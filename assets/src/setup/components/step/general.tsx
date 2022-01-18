@@ -9,18 +9,23 @@ import {
 } from "@chakra-ui/react";
 import SikshyaAPIFetch from "../../global/api";
 import Paragraph_Skeleton from "../../skeleton/paragraph";
-import {GeneralSettings} from "../../types/general-settings";
+import {Settings} from "../../types/settings";
 
 const General = (props: any) => {
-	const [apiResponse, setApiResponse] = useState<GeneralSettings>();
+	const [apiResponse, setApiResponse] = useState<Settings>();
 	const apiCall = () => {
 		new Promise<void>((resolve, reject) => {
 			SikshyaAPIFetch({
 				path: '/sikshya/v1/settings',
 				method: 'GET',
-			}).then((response) => {
+			}).then((response: Settings) => {
 				setApiResponse(response);
-				props.updateGeneralSetting(response);
+				response.account_page = sikshyaSetup.account_page;
+				response.registration_page = sikshyaSetup.registration_page;
+				response.login_page = sikshyaSetup.login_page;
+				response.cart_page = sikshyaSetup.cart_page;
+				response.checkout_page = sikshyaSetup.checkout_page;
+				props.updateSettings(response);
 			});
 		});
 	}
@@ -36,9 +41,8 @@ const General = (props: any) => {
 	const update = (event: any) => {
 		const value = event.target.value;
 		const id = event.target.id;
-		props.updateGeneralSettingItem(id, value);
+		props.updateSettingItem(id, value);
 	}
-
 	let size = !apiResponse ? 0 : Object.keys(apiResponse).length;
 	if (size < 1) {
 
@@ -100,7 +104,7 @@ const General = (props: any) => {
 
 					<NumberInput id='number_of_decimals' defaultValue={apiResponse.number_of_decimals} max={10}
 								 clampValueOnBlur={false} w="md">
-						<NumberInputField onChange={update}/>
+						<NumberInputField onChange={update} defaultValue={apiResponse.number_of_decimals}/>
 						<NumberInputStepper>
 							<NumberIncrementStepper/>
 							<NumberDecrementStepper/>

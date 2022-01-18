@@ -39124,19 +39124,6 @@ if (true) {
 
 /***/ }),
 
-/***/ "./assets/src/setup/style.scss":
-/*!*************************************!*\
-  !*** ./assets/src/setup/style.scss ***!
-  \*************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
 /***/ "./node_modules/aria-hidden/dist/es2015/index.js":
 /*!*******************************************************!*\
   !*** ./node_modules/aria-hidden/dist/es2015/index.js ***!
@@ -53196,6 +53183,19 @@ module.exports = mergeWith;
 
 /***/ }),
 
+/***/ "./assets/src/setup/style.scss":
+/*!*************************************!*\
+  !*** ./assets/src/setup/style.scss ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
 /***/ "./node_modules/object-assign/index.js":
 /*!*********************************************!*\
   !*** ./node_modules/object-assign/index.js ***!
@@ -58303,22 +58303,24 @@ var ClickableSteps = function () {
     var _a = (0, chakra_ui_steps_1.useSteps)({
         initialStep: 0,
     }), nextStep = _a.nextStep, prevStep = _a.prevStep, reset = _a.reset, activeStep = _a.activeStep, setStep = _a.setStep;
-    var _b = (0, react_2.useState)(), generalSettings = _b[0], setGeneralSettings = _b[1];
-    var updateGeneralSettingItem = function (id, value) {
-        var general_settings = generalSettings;
+    var _b = (0, react_2.useState)(), settings = _b[0], setSettings = _b[1];
+    var updateSettingItem = function (id, value) {
+        var all_settings = settings;
         // @ts-ignore
-        if (general_settings.hasOwnProperty(id)) {
+        if (all_settings.hasOwnProperty(id)) {
             // @ts-ignore
-            general_settings[id] = value;
+            all_settings[id] = value; //Settings[id] === "number" ? value.parseInt() : value;
         }
-        setGeneralSettings(general_settings);
+        setSettings(all_settings);
+        console.log(settings);
     };
-    if (activeStep === 2) {
+    if (activeStep === 2 || activeStep === 3) {
         new Promise(function (resolve, reject) {
+            // @ts-ignore
             (0, api_1.default)({
                 path: '/sikshya/v1/settings/update',
                 method: 'POST',
-                data: generalSettings
+                data: settings
             }).then(function (response) {
                 console.log(response);
             });
@@ -58329,9 +58331,9 @@ var ClickableSteps = function () {
             case 'welcome':
                 return React.createElement(welcome_1.default, { index: 1 });
             case 'general':
-                return React.createElement(general_1.default, { updateGeneralSetting: setGeneralSettings, updateGeneralSettingItem: updateGeneralSettingItem });
+                return React.createElement(general_1.default, { updateSettings: setSettings, updateSettingItem: updateSettingItem });
             case 'pages':
-                return React.createElement(pages_1.default, { index: 1 });
+                return React.createElement(pages_1.default, { updateSettings: setSettings, updateSettingItem: updateSettingItem });
             case 'finish':
                 return React.createElement(finish_1.default, { index: activeStep });
             case 'themes':
@@ -58418,7 +58420,12 @@ var General = function (props) {
                 method: 'GET',
             }).then(function (response) {
                 setApiResponse(response);
-                props.updateGeneralSetting(response);
+                response.account_page = sikshyaSetup.account_page;
+                response.registration_page = sikshyaSetup.registration_page;
+                response.login_page = sikshyaSetup.login_page;
+                response.cart_page = sikshyaSetup.cart_page;
+                response.checkout_page = sikshyaSetup.checkout_page;
+                props.updateSettings(response);
             });
         });
     };
@@ -58431,7 +58438,7 @@ var General = function (props) {
     var update = function (event) {
         var value = event.target.value;
         var id = event.target.id;
-        props.updateGeneralSettingItem(id, value);
+        props.updateSettingItem(id, value);
     };
     var size = !apiResponse ? 0 : Object.keys(apiResponse).length;
     if (size < 1) {
@@ -58459,7 +58466,7 @@ var General = function (props) {
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'number_of_decimals' }, "Number Of Decimals"),
                 React.createElement(react_2.NumberInput, { id: 'number_of_decimals', defaultValue: apiResponse.number_of_decimals, max: 10, clampValueOnBlur: false, w: "md" },
-                    React.createElement(react_2.NumberInputField, { onChange: update }),
+                    React.createElement(react_2.NumberInputField, { onChange: update, defaultValue: apiResponse.number_of_decimals }),
                     React.createElement(react_2.NumberInputStepper, null,
                         React.createElement(react_2.NumberIncrementStepper, null),
                         React.createElement(react_2.NumberDecrementStepper, null))))),
@@ -58485,37 +58492,35 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var Pages = function (props) {
+    var update = function (event) {
+        var value = event.target.value;
+        var id = event.target.id;
+        props.updateSettingItem(id, value);
+    };
+    var RenderPages = function (selected_page_id) {
+        return (Object.keys(sikshyaSetup.all_pages).map(function (page_id, index) { return (React.createElement("option", { selected: page_id === selected_page_id, value: page_id }, sikshyaSetup.all_pages[page_id])); }));
+    };
     return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%", gap: 5 },
         React.createElement(react_1.FormControl, null,
             React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'account-page' }, "Account Page"),
-                React.createElement(react_1.Select, { id: 'account-page', placeholder: 'Select Account Page', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
+                React.createElement(react_1.FormLabel, { htmlFor: 'account_page' }, "Account Page"),
+                React.createElement(react_1.Select, { id: 'account_page', placeholder: 'Select Account Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.account_page)))),
         React.createElement(react_1.FormControl, null,
             React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'registration-page' }, "Registration Page"),
-                React.createElement(react_1.Select, { id: 'registration-page', placeholder: 'Select Registration Page', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
+                React.createElement(react_1.FormLabel, { htmlFor: 'registration_page' }, "Registration Page"),
+                React.createElement(react_1.Select, { id: 'registration_page', placeholder: 'Select Registration Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.registration_page)))),
         React.createElement(react_1.FormControl, null,
             React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'login-page' }, "Login Page"),
-                React.createElement(react_1.Select, { id: 'login-page', placeholder: 'Select Login Page', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
+                React.createElement(react_1.FormLabel, { htmlFor: 'login_page' }, "Login Page"),
+                React.createElement(react_1.Select, { id: 'login_page', placeholder: 'Select Login Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.login_page)))),
         React.createElement(react_1.FormControl, null,
             React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'cart-page' }, "Cart Page"),
-                React.createElement(react_1.Select, { id: 'cart-page', placeholder: 'Select Cart Page', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
+                React.createElement(react_1.FormLabel, { htmlFor: 'cart_page' }, "Cart Page"),
+                React.createElement(react_1.Select, { id: 'cart_page', placeholder: 'Select Cart Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.cart_page)))),
         React.createElement(react_1.FormControl, null,
             React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'checkout-page' }, "Checkout Page"),
-                React.createElement(react_1.Select, { id: 'checkout-page', placeholder: 'Select Checkout Page', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria"))))));
+                React.createElement(react_1.FormLabel, { htmlFor: 'checkout_page' }, "Checkout Page"),
+                React.createElement(react_1.Select, { id: 'checkout_page', placeholder: 'Select Checkout Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.checkout_page))))));
 };
 exports["default"] = Pages;
 

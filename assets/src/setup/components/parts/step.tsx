@@ -9,7 +9,7 @@ import StepFooter from "../parts/step-footer";
 import StepBox from "./stepbox";
 import Themes from "../step/themes";
 import {useState, useEffect} from 'react';
-import {GeneralSettings} from "../../types/general-settings";
+import {Settings} from "../../types/settings";
 import SikshyaAPIFetch from "../../global/api";
 
 const steps = [
@@ -24,27 +24,30 @@ export const ClickableSteps = () => {
 	const {nextStep, prevStep, reset, activeStep, setStep} = useSteps({
 		initialStep: 0,
 	})
-	const [generalSettings, setGeneralSettings] = useState<GeneralSettings>();
+	const [settings, setSettings] = useState<Settings>();
 
-	const updateGeneralSettingItem = (id: string, value: any) => {
-		let general_settings = generalSettings;
+	const updateSettingItem = (id: string, value: any) => {
+		let all_settings = settings;
 		// @ts-ignore
-		if (general_settings.hasOwnProperty(id)) {
+		if (all_settings.hasOwnProperty(id)) {
 			// @ts-ignore
-			general_settings[id] = value;
+			all_settings[id] = value;//Settings[id] === "number" ? value.parseInt() : value;
 		}
 
-		setGeneralSettings(general_settings);
+		setSettings(all_settings);
+
+		console.log(settings);
 
 
 	}
-	if (activeStep === 2) {
+	if (activeStep === 2 || activeStep === 3) {
 		new Promise<void>((resolve, reject) => {
+			// @ts-ignore
 			SikshyaAPIFetch({
 				path: '/sikshya/v1/settings/update',
 				method: 'POST',
-				data: generalSettings
-			}).then((response) => {
+				data: settings
+			}).then((response: any) => {
 				console.log(response);
 			});
 		});
@@ -55,10 +58,11 @@ export const ClickableSteps = () => {
 			case 'welcome':
 				return <Welcome index={1}/>;
 			case 'general':
-				return <General updateGeneralSetting={setGeneralSettings}
-								updateGeneralSettingItem={updateGeneralSettingItem}/>;
+				return <General updateSettings={setSettings}
+								updateSettingItem={updateSettingItem}/>;
 			case 'pages':
-				return <Pages index={1}/>;
+				return <Pages updateSettings={setSettings}
+							  updateSettingItem={updateSettingItem}/>;
 			case 'finish':
 				return <Finish index={activeStep}/>;
 			case 'themes':

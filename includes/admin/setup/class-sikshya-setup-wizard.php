@@ -78,6 +78,8 @@ class Sikshya_Setup_Wizard
 
 		wp_enqueue_style('sikshya-setup', SIKSHYA_ASSETS_URL . '/build/style-setup.css', array(), $setup_dependency['version']);
 
+		$all_pages = get_pages();
+		$all_updated_pages = wp_list_pluck($all_pages, 'post_title', 'ID');
 		wp_localize_script('sikshya-setup', 'sikshyaSetup',
 			array(
 				'ajax_url' => admin_url('admin-ajax.php'),
@@ -87,8 +89,13 @@ class Sikshya_Setup_Wizard
 				'rest_version' => 'v1',
 				'currencies' => sikshya_get_currencies(),
 				'currency_symbol_type' => sikshya_get_currency_symbol_type(),
-				'currency_positions' => sikshya_get_currency_positions()
-
+				'currency_positions' => sikshya_get_currency_positions(),
+				'account_page' => sikshya_get_account_page(),
+				'registration_page' => sikshya_get_user_registration_page(),
+				'login_page' => sikshya_get_login_page(),
+				'cart_page' => sikshya_get_cart_page(),
+				'checkout_page' => sikshya_get_checkout_page(),
+				'all_pages' => $all_updated_pages
 
 			)
 		);

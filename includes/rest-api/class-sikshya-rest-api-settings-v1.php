@@ -63,7 +63,7 @@ class Sikshya_REST_API_Settings_V1
 				'currency_symbol_type' => get_option('sikshya_currency_symbol_type', 'symbol'),
 				'currency_position' => get_option('sikshya_currency_position', 'left'),
 				'thousand_separator' => get_option('sikshya_thousand_separator', ','),
-				'price_number_decimals' => get_option('sikshya_price_number_decimals', 2),
+				'number_of_decimals' => get_option('sikshya_price_number_decimals', 2),
 				'decimal_separator' => get_option('sikshya_decimal_separator', '.'),
 			);
 			return new \WP_REST_Response($response, 200);
@@ -81,7 +81,7 @@ class Sikshya_REST_API_Settings_V1
 		$currency_position = sanitize_text_field($request->get_param('currency_position'));
 		$currency_symbol_type = sanitize_text_field($request->get_param('currency_symbol_type'));
 		$decimal_separator = sanitize_text_field($request->get_param('decimal_separator'));
-		$price_number_decimals = absint($request->get_param('price_number_decimals'));
+		$price_number_decimals = absint($request->get_param('number_of_decimals'));
 		$thousand_separator = sanitize_text_field($request->get_param('thousand_separator'));
 		try {
 

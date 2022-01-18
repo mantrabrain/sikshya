@@ -869,6 +869,73 @@ VALUES (%d, %s, %s);
 	return false;
 }
 
+if (!function_exists('sikshya_get_cart_page')) {
+
+	function sikshya_get_cart_page($get_permalink = false, $redirect_url = '')
+	{
+		$page_id = absint(get_option('sikshya_cart_page'));
+
+		if ($page_id < 1) {
+
+			global $wpdb;
+
+			$page_id = $wpdb->get_var('SELECT ID FROM ' . $wpdb->prefix . 'posts WHERE post_content LIKE "%[sikshya_cart]%" AND post_parent = 0');
+		}
+
+		if ($get_permalink) {
+
+			if ($page_id > 0) {
+
+				$page_permalink = !empty($redirect_url) ? add_query_arg('redirect_to', urlencode($redirect_url), get_permalink($page_id)) : get_permalink($page_id);
+
+			} else {
+
+				$page_permalink = wp_login_url($redirect_url);
+			}
+
+
+			return $page_permalink;
+		}
+
+		return $page_id;
+
+
+	}
+}
+
+if (!function_exists('sikshya_get_checkout_page')) {
+
+	function sikshya_get_checkout_page($get_permalink = false, $redirect_url = '')
+	{
+		$page_id = absint(get_option('sikshya_checkout_page'));
+
+		if ($page_id < 1) {
+
+			global $wpdb;
+
+			$page_id = $wpdb->get_var('SELECT ID FROM ' . $wpdb->prefix . 'posts WHERE post_content LIKE "%[sikshya_checkout]%" AND post_parent = 0');
+		}
+
+		if ($get_permalink) {
+
+			if ($page_id > 0) {
+
+				$page_permalink = !empty($redirect_url) ? add_query_arg('redirect_to', urlencode($redirect_url), get_permalink($page_id)) : get_permalink($page_id);
+
+			} else {
+
+				$page_permalink = wp_login_url($redirect_url);
+			}
+
+
+			return $page_permalink;
+		}
+
+		return $page_id;
+
+
+	}
+}
 
 if (!function_exists('sikshya_get_login_page')) {
 
