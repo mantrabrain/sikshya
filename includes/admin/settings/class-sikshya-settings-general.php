@@ -166,10 +166,7 @@ class Sikshya_Settings_General extends Sikshya_Admin_Settings_Base
 						'id' => 'sikshya_currency_symbol_type',
 						'default' => 'symbol',
 						'type' => 'select',
-						'options' => array(
-							'code' => __('Currency Code', 'sikshya'),
-							'symbol' => __('Currency Symbol', 'sikshya')
-						),
+						'options' => sikshya_get_currency_symbol_type(),
 					),
 					array(
 						'title' => __('Currency position', 'sikshya'),

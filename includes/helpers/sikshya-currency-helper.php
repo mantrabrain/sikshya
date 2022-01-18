@@ -408,4 +408,12 @@ if (!function_exists('sikshya_get_active_currency')) {
 	}
 }
 
-
+if (!function_exists('sikshya_get_currency_symbol_type')) {
+	function sikshya_get_currency_symbol_type()
+	{
+		return array(
+			'code' => __('Currency Code', 'sikshya'),
+			'symbol' => __('Currency Symbol', 'sikshya')
+		);
+	}
+}

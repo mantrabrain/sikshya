@@ -49,7 +49,16 @@ class Sikshya_REST_API_Settings_V1
 	public function get_settings(\WP_REST_Request $request)
 	{
 		try {
-			return new \WP_REST_Response('Wow finally success', 200);
+
+			$response = array(
+				'currency' => get_option('sikshya_currency', 'USD'),
+				'currency_symbol_type' => get_option('sikshya_currency_symbol_type', 'symbol'),
+				'currency_position' => get_option('sikshya_currency_position', 'left'),
+				'thousand_separator' => get_option('sikshya_thousand_separator', ','),
+				'price_number_decimals' => get_option('sikshya_price_number_decimals', 2),
+				'decimal_separator' => get_option('sikshya_decimal_separator', '.'),
+			);
+			return new \WP_REST_Response($response, 200);
 		} catch (\Exception $e) {
 
 			$response_code = $e->getCode() > 0 ? $e->getCode() : 500;

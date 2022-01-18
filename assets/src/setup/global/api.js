@@ -1,7 +1,7 @@
 import apiFetch from "@wordpress/api-fetch";
 
-const sikshyaAPIFetch = (apiOptions) => {
+const SikshyaAPIFetch = (apiOptions) => {
 	return apiFetch(apiOptions);
 };
 
-export default sikshyaAPIFetch;
+export default SikshyaAPIFetch;

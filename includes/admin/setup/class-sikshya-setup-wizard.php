@@ -84,7 +84,10 @@ class Sikshya_Setup_Wizard
 				'admin_url' => admin_url('index.php'),
 				'course_page_url' => admin_url('edit.php?post_type=' . SIKSHYA_COURSES_CUSTOM_POST_TYPE),
 				'rest_namespace' => 'sikshya',
-				'rest_version' => 'v1'
+				'rest_version' => 'v1',
+				'currencies' => sikshya_get_currencies(),
+				'currency_symbol_type' => sikshya_get_currency_symbol_type(),
+				'currency_positions' => sikshya_get_currency_positions()
 
 
 			)

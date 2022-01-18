@@ -9,7 +9,6 @@ import Finish from "./../step/finish";
 import StepFooter from "../step/step-footer";
 import StepBox from "./stepbox";
 import Themes from "../step/themes";
-import Paragraph from "../../skeleton/paragraph";
 
 const steps = [
 	{label: "Welcome", "id": "welcome"},

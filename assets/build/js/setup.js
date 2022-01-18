@@ -39249,11 +39249,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0__);
 
 
-const sikshyaAPIFetch = apiOptions => {
+const SikshyaAPIFetch = apiOptions => {
   return _wordpress_api_fetch__WEBPACK_IMPORTED_MODULE_0___default()(apiOptions);
 };
 
-/* harmony default export */ __webpack_exports__["default"] = (sikshyaAPIFetch);
+/* harmony default export */ __webpack_exports__["default"] = (SikshyaAPIFetch);
 
 /***/ }),
 
@@ -58353,67 +58353,65 @@ exports["default"] = Finish;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var react_1 = __webpack_require__(/*! react */ "react");
+var react_2 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var api_1 = __webpack_require__(/*! ../../global/api */ "./assets/src/setup/global/api.js");
-var callAPI = function () {
-    return new Promise(function (resolve, reject) {
-        (0, api_1.default)({
-            path: '/sikshya/v1/settings',
-            method: 'GET',
-        }).then(function (response) {
-            console.log(response);
-        });
-    });
-};
+var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
 var General = function (props) {
-    /*async function api() {
-        await apiFetch({
-            path: sikshyaSetup.rest_namespace + sikshyaSetup.rest_version + '/settings',
-            method: 'GET'
+    var _a = (0, react_1.useState)(), apiResponse = _a[0], setApiResponse = _a[1];
+    var apiCall = function () {
+        new Promise(function (resolve, reject) {
+            (0, api_1.default)({
+                path: '/sikshya/v1/settings',
+                method: 'GET',
+            }).then(function (response) {
+                setApiResponse(response);
+            });
         });
-
-
+    };
+    (0, react_1.useEffect)(function () {
+        var size = !apiResponse ? 0 : Object.keys(apiResponse).length;
+        if (size == 0) {
+            apiCall();
+        }
+    }, [apiResponse]);
+    var size = !apiResponse ? 0 : Object.keys(apiResponse).length;
+    if (size < 1) {
+        return (React.createElement(paragraph_1.default, null));
     }
-
-    api().then(r => function () {
-        console.log(r);
-    });*/
-    callAPI();
-    return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%", gap: 5 },
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'currency' }, "Currency"),
-                React.createElement(react_1.Select, { id: 'currency', placeholder: 'Select currency', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'currency-symbol-type' }, "Currency Symbol Type"),
-                React.createElement(react_1.Select, { id: 'currency-symbol-type', placeholder: 'Currency Symbol Type', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'currency-position' }, "Currency Position"),
-                React.createElement(react_1.Select, { id: 'currency-position', placeholder: 'Currency Position', w: "md" },
-                    React.createElement("option", null, "United Arab Emirates"),
-                    React.createElement("option", null, "Nigeria")))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'thousand-separator' }, "Thousand Separator"),
-                React.createElement(react_1.Input, { id: 'thousand-separator', placeholder: 'Thousand Separator', w: "md" }))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'number-of-decimals' }, "Number Of Decimals"),
-                React.createElement(react_1.NumberInput, { id: 'number-of-decimals', defaultValue: 15, max: 30, clampValueOnBlur: false, w: "md" },
-                    React.createElement(react_1.NumberInputField, null),
-                    React.createElement(react_1.NumberInputStepper, null,
-                        React.createElement(react_1.NumberIncrementStepper, null),
-                        React.createElement(react_1.NumberDecrementStepper, null))))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'decimal-separator' }, "Currency Position"),
-                React.createElement(react_1.Input, { id: 'decimal-separator', placeholder: 'Decimal Separator', w: "md" })))));
+    var renderOptions = function (key, value) {
+        return (React.createElement("option", { value: key }, value));
+    };
+    // @ts-ignore
+    return (React.createElement(react_2.Flex, { flexDir: "column", width: "100%", gap: 5 },
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'currency' }, "Currency"),
+                React.createElement(react_2.Select, { id: 'currency', placeholder: 'Select currency', w: "md" }, Object.keys(sikshyaSetup.currencies).map(function (currency_key, index) { return (React.createElement("option", { selected: currency_key === apiResponse.currency, value: currency_key }, sikshyaSetup.currencies[currency_key])); })))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'currency-symbol-type' }, "Currency Symbol Type"),
+                React.createElement(react_2.Select, { id: 'currency-symbol-type', placeholder: 'Currency Symbol Type', w: "md" }, Object.keys(sikshyaSetup.currency_symbol_type).map(function (symbol_type_key, index) { return (React.createElement("option", { selected: symbol_type_key === apiResponse.currency_symbol_type, value: symbol_type_key }, sikshyaSetup.currency_symbol_type[symbol_type_key])); })))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'currency-position' }, "Currency Position"),
+                React.createElement(react_2.Select, { id: 'currency-position', placeholder: 'Currency Position', w: "md" }, Object.keys(sikshyaSetup.currency_positions).map(function (position_key, index) { return (React.createElement("option", { selected: position_key === apiResponse.currency_position, value: position_key }, sikshyaSetup.currency_positions[position_key])); })))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'thousand-separator' }, "Thousand Separator"),
+                React.createElement(react_2.Input, { id: 'thousand-separator', placeholder: 'Thousand Separator', w: "md", value: apiResponse.thousand_separator }))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'number-of-decimals' }, "Number Of Decimals"),
+                React.createElement(react_2.NumberInput, { id: 'number-of-decimals', defaultValue: apiResponse.price_number_decimals, max: 10, clampValueOnBlur: false, w: "md" },
+                    React.createElement(react_2.NumberInputField, null),
+                    React.createElement(react_2.NumberInputStepper, null,
+                        React.createElement(react_2.NumberIncrementStepper, null),
+                        React.createElement(react_2.NumberDecrementStepper, null))))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'decimal-separator' }, "Decimal Separator"),
+                React.createElement(react_2.Input, { id: 'decimal-separator', placeholder: 'Decimal Separator', w: "md", value: apiResponse.decimal_separator })))));
 };
 exports["default"] = General;
 
@@ -58648,6 +58646,36 @@ var Styles = {
     },
 };
 exports["default"] = Styles;
+
+
+/***/ }),
+
+/***/ "./assets/src/setup/skeleton/paragraph.tsx":
+/*!*************************************************!*\
+  !*** ./assets/src/setup/skeleton/paragraph.tsx ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var React = __webpack_require__(/*! react */ "react");
+var Paragraph_Skeleton = function () {
+    return (React.createElement(react_1.Stack, null,
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' }),
+        React.createElement(react_1.Skeleton, { height: '20px' })));
+};
+exports["default"] = Paragraph_Skeleton;
 
 
 /***/ }),
