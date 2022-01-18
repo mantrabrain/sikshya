@@ -9,24 +9,10 @@ import {
 } from "@chakra-ui/react";
 import SikshyaAPIFetch from "../../global/api";
 import Paragraph_Skeleton from "../../skeleton/paragraph";
-import StepBox from "../parts/stepbox";
-import StepFooter from "./step-footer";
+import {GeneralSettings} from "../../types/general-settings";
 
-type GeneralProps = {
-	index: number
-}
-type APIResponseType = {
-	currency: string,
-	currency_symbol_type: string,
-	currency_position: string,
-	thousand_separator: string,
-	price_number_decimals: number,
-	decimal_separator: string,
-
-}
-const General = (props: GeneralProps) => {
-
-	const [apiResponse, setApiResponse] = useState<APIResponseType>();
+const General = (props: any) => {
+	const [apiResponse, setApiResponse] = useState<GeneralSettings>();
 	const apiCall = () => {
 		new Promise<void>((resolve, reject) => {
 			SikshyaAPIFetch({
@@ -34,9 +20,11 @@ const General = (props: GeneralProps) => {
 				method: 'GET',
 			}).then((response) => {
 				setApiResponse(response);
+				props.updateGeneralSetting(response);
 			});
 		});
 	}
+
 	useEffect(() => {
 
 		let size = !apiResponse ? 0 : Object.keys(apiResponse).length;
@@ -45,6 +33,11 @@ const General = (props: GeneralProps) => {
 		}
 	}, [apiResponse]);
 
+	const update = (event: any) => {
+		const value = event.target.value;
+		const id = event.target.id;
+		props.updateGeneralSettingItem(id, value);
+	}
 
 	let size = !apiResponse ? 0 : Object.keys(apiResponse).length;
 	if (size < 1) {
@@ -53,20 +46,13 @@ const General = (props: GeneralProps) => {
 
 	}
 
-	const renderOptions = (key: string, value: string) => {
-		return (
-			<option value={key}>
-				{value}
-			</option>
-		)
-	}
 	// @ts-ignore
 	return (
 		<Flex flexDir="column" width="100%" gap={5}>
 			<FormControl>
 				<Flex justify="space-between" width="full" align="center">
 					<FormLabel htmlFor='currency'>Currency</FormLabel>
-					<Select id='currency' placeholder='Select currency' w="md">
+					<Select id='currency' placeholder='Select currency' w="md" onChange={update}>
 						{Object.keys(sikshyaSetup.currencies).map((currency_key: string, index: number) => (
 							<option selected={currency_key === apiResponse.currency}
 									value={currency_key}>{sikshyaSetup.currencies[currency_key]}</option>
@@ -76,8 +62,8 @@ const General = (props: GeneralProps) => {
 			</FormControl>
 			<FormControl>
 				<Flex justify="space-between" width="full" align="center">
-					<FormLabel htmlFor='currency-symbol-type'>Currency Symbol Type</FormLabel>
-					<Select id='currency-symbol-type' placeholder='Currency Symbol Type' w="md">
+					<FormLabel htmlFor='currency_symbol_type'>Currency Symbol Type</FormLabel>
+					<Select id='currency_symbol_type' placeholder='Currency Symbol Type' w="md" onChange={update}>
 						{Object.keys(sikshyaSetup.currency_symbol_type).map((symbol_type_key: string, index: number) => (
 							<option selected={symbol_type_key === apiResponse.currency_symbol_type}
 									value={symbol_type_key}>{sikshyaSetup.currency_symbol_type[symbol_type_key]}</option>
@@ -88,8 +74,8 @@ const General = (props: GeneralProps) => {
 			</FormControl>
 			<FormControl>
 				<Flex justify="space-between" width="full" align="center">
-					<FormLabel htmlFor='currency-position'>Currency Position</FormLabel>
-					<Select id='currency-position' placeholder='Currency Position' w="md">
+					<FormLabel htmlFor='currency_position'>Currency Position</FormLabel>
+					<Select id='currency_position' placeholder='Currency Position' w="md" onChange={update}>
 						{Object.keys(sikshyaSetup.currency_positions).map((position_key: string, index: number) => (
 							<option selected={position_key === apiResponse.currency_position}
 									value={position_key}>{sikshyaSetup.currency_positions[position_key]}</option>
@@ -101,20 +87,20 @@ const General = (props: GeneralProps) => {
 
 			<FormControl>
 				<Flex justify="space-between" width="full" align="center">
-					<FormLabel htmlFor='thousand-separator'>Thousand Separator</FormLabel>
-					<Input id='thousand-separator' placeholder='Thousand Separator' w="md"
-						   value={apiResponse.thousand_separator}/>
+					<FormLabel htmlFor='thousand_separator'>Thousand Separator</FormLabel>
+					<Input id='thousand_separator' placeholder='Thousand Separator' w="md"
+						   defaultValue={apiResponse.thousand_separator} onChange={update}/>
 
 				</Flex>
 			</FormControl>
 
 			<FormControl>
 				<Flex justify="space-between" width="full" align="center">
-					<FormLabel htmlFor='number-of-decimals'>Number Of Decimals</FormLabel>
+					<FormLabel htmlFor='number_of_decimals'>Number Of Decimals</FormLabel>
 
-					<NumberInput id='number-of-decimals' defaultValue={apiResponse.price_number_decimals} max={10}
+					<NumberInput id='number_of_decimals' defaultValue={apiResponse.number_of_decimals} max={10}
 								 clampValueOnBlur={false} w="md">
-						<NumberInputField/>
+						<NumberInputField onChange={update}/>
 						<NumberInputStepper>
 							<NumberIncrementStepper/>
 							<NumberDecrementStepper/>
@@ -125,10 +111,10 @@ const General = (props: GeneralProps) => {
 
 			<FormControl>
 				<Flex justify="space-between" width="full" align="center">
-					<FormLabel htmlFor='decimal-separator'>Decimal Separator</FormLabel>
+					<FormLabel htmlFor='decimal_separator'>Decimal Separator</FormLabel>
 
-					<Input id='decimal-separator' placeholder='Decimal Separator' w="md"
-						   value={apiResponse.decimal_separator}/>
+					<Input id='decimal_separator' placeholder='Decimal Separator' w="md"
+						   defaultValue={apiResponse.decimal_separator} onChange={update}/>
 				</Flex>
 			</FormControl>
 		</Flex>

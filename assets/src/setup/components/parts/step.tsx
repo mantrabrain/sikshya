@@ -1,14 +1,16 @@
 import {Heading, Box, Flex, Button, Center} from "@chakra-ui/react";
 import {Step, Steps, useSteps} from "chakra-ui-steps";
-import {ArrowBackIcon, ArrowForwardIcon} from "@chakra-ui/icons";
 import * as React from 'react';
 import Welcome from "./../step/welcome";
 import General from "./../step/general";
 import Pages from "./../step/pages";
 import Finish from "./../step/finish";
-import StepFooter from "../step/step-footer";
+import StepFooter from "../parts/step-footer";
 import StepBox from "./stepbox";
 import Themes from "../step/themes";
+import {useState, useEffect} from 'react';
+import {GeneralSettings} from "../../types/general-settings";
+import SikshyaAPIFetch from "../../global/api";
 
 const steps = [
 	{label: "Welcome", "id": "welcome"},
@@ -22,13 +24,39 @@ export const ClickableSteps = () => {
 	const {nextStep, prevStep, reset, activeStep, setStep} = useSteps({
 		initialStep: 0,
 	})
+	const [generalSettings, setGeneralSettings] = useState<GeneralSettings>();
+
+	const updateGeneralSettingItem = (id: string, value: any) => {
+		let general_settings = generalSettings;
+		// @ts-ignore
+		if (general_settings.hasOwnProperty(id)) {
+			// @ts-ignore
+			general_settings[id] = value;
+		}
+
+		setGeneralSettings(general_settings);
+
+
+	}
+	if (activeStep === 2) {
+		new Promise<void>((resolve, reject) => {
+			SikshyaAPIFetch({
+				path: '/sikshya/v1/settings/update',
+				method: 'POST',
+				data: generalSettings
+			}).then((response) => {
+				console.log(response);
+			});
+		});
+	}
 	const renderStepView = (id: string) => {
 
 		switch (id) {
 			case 'welcome':
 				return <Welcome index={1}/>;
 			case 'general':
-				return <General index={1}/>;
+				return <General updateGeneralSetting={setGeneralSettings}
+								updateGeneralSettingItem={updateGeneralSettingItem}/>;
 			case 'pages':
 				return <Pages index={1}/>;
 			case 'finish':

@@ -58241,6 +58241,35 @@ exports["default"] = Header;
 
 /***/ }),
 
+/***/ "./assets/src/setup/components/parts/step-footer.tsx":
+/*!***********************************************************!*\
+  !*** ./assets/src/setup/components/parts/step-footer.tsx ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/** @var sikshyaSetup */
+var React = __webpack_require__(/*! react */ "react");
+var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+var StepFooter = function (props) {
+    return (React.createElement(react_1.Flex, { width: "100%", justify: "space-between", align: "center", gap: 10, marginTop: 10 },
+        props.activeStep > 0 ?
+            React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.prevStep }, (0, i18n_1.__)('Back', 'sikshya'))
+            : "",
+        React.createElement(react_1.Link, { href: sikshyaSetup.course_page_url },
+            React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "outline" }, (0, i18n_1.__)('Go back to Dashboard', "sikshya"))),
+        props.steps.length > (props.activeStep + 1) ?
+            React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, (0, i18n_1.__)('Next', 'sikshya'))
+            : ""));
+};
+exports["default"] = StepFooter;
+
+
+/***/ }),
+
 /***/ "./assets/src/setup/components/parts/step.tsx":
 /*!****************************************************!*\
   !*** ./assets/src/setup/components/parts/step.tsx ***!
@@ -58258,9 +58287,11 @@ var welcome_1 = __webpack_require__(/*! ./../step/welcome */ "./assets/src/setup
 var general_1 = __webpack_require__(/*! ./../step/general */ "./assets/src/setup/components/step/general.tsx");
 var pages_1 = __webpack_require__(/*! ./../step/pages */ "./assets/src/setup/components/step/pages.tsx");
 var finish_1 = __webpack_require__(/*! ./../step/finish */ "./assets/src/setup/components/step/finish.tsx");
-var step_footer_1 = __webpack_require__(/*! ../step/step-footer */ "./assets/src/setup/components/step/step-footer.tsx");
+var step_footer_1 = __webpack_require__(/*! ../parts/step-footer */ "./assets/src/setup/components/parts/step-footer.tsx");
 var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var themes_1 = __webpack_require__(/*! ../step/themes */ "./assets/src/setup/components/step/themes.tsx");
+var react_2 = __webpack_require__(/*! react */ "react");
+var api_1 = __webpack_require__(/*! ../../global/api */ "./assets/src/setup/global/api.js");
 var steps = [
     { label: "Welcome", "id": "welcome" },
     { label: "General", id: "general" },
@@ -58272,12 +58303,33 @@ var ClickableSteps = function () {
     var _a = (0, chakra_ui_steps_1.useSteps)({
         initialStep: 0,
     }), nextStep = _a.nextStep, prevStep = _a.prevStep, reset = _a.reset, activeStep = _a.activeStep, setStep = _a.setStep;
+    var _b = (0, react_2.useState)(), generalSettings = _b[0], setGeneralSettings = _b[1];
+    var updateGeneralSettingItem = function (id, value) {
+        var general_settings = generalSettings;
+        // @ts-ignore
+        if (general_settings.hasOwnProperty(id)) {
+            // @ts-ignore
+            general_settings[id] = value;
+        }
+        setGeneralSettings(general_settings);
+    };
+    if (activeStep === 2) {
+        new Promise(function (resolve, reject) {
+            (0, api_1.default)({
+                path: '/sikshya/v1/settings/update',
+                method: 'POST',
+                data: generalSettings
+            }).then(function (response) {
+                console.log(response);
+            });
+        });
+    }
     var renderStepView = function (id) {
         switch (id) {
             case 'welcome':
                 return React.createElement(welcome_1.default, { index: 1 });
             case 'general':
-                return React.createElement(general_1.default, { index: 1 });
+                return React.createElement(general_1.default, { updateGeneralSetting: setGeneralSettings, updateGeneralSettingItem: updateGeneralSettingItem });
             case 'pages':
                 return React.createElement(pages_1.default, { index: 1 });
             case 'finish':
@@ -58366,6 +58418,7 @@ var General = function (props) {
                 method: 'GET',
             }).then(function (response) {
                 setApiResponse(response);
+                props.updateGeneralSetting(response);
             });
         });
     };
@@ -58375,43 +58428,45 @@ var General = function (props) {
             apiCall();
         }
     }, [apiResponse]);
+    var update = function (event) {
+        var value = event.target.value;
+        var id = event.target.id;
+        props.updateGeneralSettingItem(id, value);
+    };
     var size = !apiResponse ? 0 : Object.keys(apiResponse).length;
     if (size < 1) {
         return (React.createElement(paragraph_1.default, null));
     }
-    var renderOptions = function (key, value) {
-        return (React.createElement("option", { value: key }, value));
-    };
     // @ts-ignore
     return (React.createElement(react_2.Flex, { flexDir: "column", width: "100%", gap: 5 },
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'currency' }, "Currency"),
-                React.createElement(react_2.Select, { id: 'currency', placeholder: 'Select currency', w: "md" }, Object.keys(sikshyaSetup.currencies).map(function (currency_key, index) { return (React.createElement("option", { selected: currency_key === apiResponse.currency, value: currency_key }, sikshyaSetup.currencies[currency_key])); })))),
+                React.createElement(react_2.Select, { id: 'currency', placeholder: 'Select currency', w: "md", onChange: update }, Object.keys(sikshyaSetup.currencies).map(function (currency_key, index) { return (React.createElement("option", { selected: currency_key === apiResponse.currency, value: currency_key }, sikshyaSetup.currencies[currency_key])); })))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_2.FormLabel, { htmlFor: 'currency-symbol-type' }, "Currency Symbol Type"),
-                React.createElement(react_2.Select, { id: 'currency-symbol-type', placeholder: 'Currency Symbol Type', w: "md" }, Object.keys(sikshyaSetup.currency_symbol_type).map(function (symbol_type_key, index) { return (React.createElement("option", { selected: symbol_type_key === apiResponse.currency_symbol_type, value: symbol_type_key }, sikshyaSetup.currency_symbol_type[symbol_type_key])); })))),
+                React.createElement(react_2.FormLabel, { htmlFor: 'currency_symbol_type' }, "Currency Symbol Type"),
+                React.createElement(react_2.Select, { id: 'currency_symbol_type', placeholder: 'Currency Symbol Type', w: "md", onChange: update }, Object.keys(sikshyaSetup.currency_symbol_type).map(function (symbol_type_key, index) { return (React.createElement("option", { selected: symbol_type_key === apiResponse.currency_symbol_type, value: symbol_type_key }, sikshyaSetup.currency_symbol_type[symbol_type_key])); })))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_2.FormLabel, { htmlFor: 'currency-position' }, "Currency Position"),
-                React.createElement(react_2.Select, { id: 'currency-position', placeholder: 'Currency Position', w: "md" }, Object.keys(sikshyaSetup.currency_positions).map(function (position_key, index) { return (React.createElement("option", { selected: position_key === apiResponse.currency_position, value: position_key }, sikshyaSetup.currency_positions[position_key])); })))),
+                React.createElement(react_2.FormLabel, { htmlFor: 'currency_position' }, "Currency Position"),
+                React.createElement(react_2.Select, { id: 'currency_position', placeholder: 'Currency Position', w: "md", onChange: update }, Object.keys(sikshyaSetup.currency_positions).map(function (position_key, index) { return (React.createElement("option", { selected: position_key === apiResponse.currency_position, value: position_key }, sikshyaSetup.currency_positions[position_key])); })))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_2.FormLabel, { htmlFor: 'thousand-separator' }, "Thousand Separator"),
-                React.createElement(react_2.Input, { id: 'thousand-separator', placeholder: 'Thousand Separator', w: "md", value: apiResponse.thousand_separator }))),
+                React.createElement(react_2.FormLabel, { htmlFor: 'thousand_separator' }, "Thousand Separator"),
+                React.createElement(react_2.Input, { id: 'thousand_separator', placeholder: 'Thousand Separator', w: "md", defaultValue: apiResponse.thousand_separator, onChange: update }))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_2.FormLabel, { htmlFor: 'number-of-decimals' }, "Number Of Decimals"),
-                React.createElement(react_2.NumberInput, { id: 'number-of-decimals', defaultValue: apiResponse.price_number_decimals, max: 10, clampValueOnBlur: false, w: "md" },
-                    React.createElement(react_2.NumberInputField, null),
+                React.createElement(react_2.FormLabel, { htmlFor: 'number_of_decimals' }, "Number Of Decimals"),
+                React.createElement(react_2.NumberInput, { id: 'number_of_decimals', defaultValue: apiResponse.number_of_decimals, max: 10, clampValueOnBlur: false, w: "md" },
+                    React.createElement(react_2.NumberInputField, { onChange: update }),
                     React.createElement(react_2.NumberInputStepper, null,
                         React.createElement(react_2.NumberIncrementStepper, null),
                         React.createElement(react_2.NumberDecrementStepper, null))))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_2.FormLabel, { htmlFor: 'decimal-separator' }, "Decimal Separator"),
-                React.createElement(react_2.Input, { id: 'decimal-separator', placeholder: 'Decimal Separator', w: "md", value: apiResponse.decimal_separator })))));
+                React.createElement(react_2.FormLabel, { htmlFor: 'decimal_separator' }, "Decimal Separator"),
+                React.createElement(react_2.Input, { id: 'decimal_separator', placeholder: 'Decimal Separator', w: "md", defaultValue: apiResponse.decimal_separator, onChange: update })))));
 };
 exports["default"] = General;
 
@@ -58463,35 +58518,6 @@ var Pages = function (props) {
                     React.createElement("option", null, "Nigeria"))))));
 };
 exports["default"] = Pages;
-
-
-/***/ }),
-
-/***/ "./assets/src/setup/components/step/step-footer.tsx":
-/*!**********************************************************!*\
-  !*** ./assets/src/setup/components/step/step-footer.tsx ***!
-  \**********************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-/** @var sikshyaSetup */
-var React = __webpack_require__(/*! react */ "react");
-var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
-var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var StepFooter = function (props) {
-    return (React.createElement(react_1.Flex, { width: "100%", justify: "space-between", align: "center", gap: 10, marginTop: 10 },
-        props.activeStep > 0 ?
-            React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.prevStep }, (0, i18n_1.__)('Back', 'sikshya'))
-            : "",
-        React.createElement(react_1.Link, { href: sikshyaSetup.course_page_url },
-            React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "outline" }, (0, i18n_1.__)('Go back to Dashboard', "sikshya"))),
-        props.steps.length > (props.activeStep + 1) ?
-            React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, (0, i18n_1.__)('Next', 'sikshya'))
-            : ""));
-};
-exports["default"] = StepFooter;
 
 
 /***/ }),
