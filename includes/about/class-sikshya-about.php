@@ -34,7 +34,7 @@ if (!class_exists('Sikshya_About')) :
 
 
             add_submenu_page(
-                'sikshya',
+                'edit.php?post_type=sik_courses',
                 __('Sikshya About', 'sikshya'),
                 __('About', 'sikshya'),
                 'administrator',
