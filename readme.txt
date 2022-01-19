@@ -5,7 +5,7 @@ Tags: lms, elearning, education, learning management system, course, quizzes
 Requires at least: 4.7
 Tested up to: 5.8.3
 Requires PHP: 5.6
-Stable tag: 0.0.14
+Stable tag: 0.0.16
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,3 +67,14 @@ You can create issue from https://github.com/mantrabrain/sikshya/issues
 11. Single Course Page
 12. Checkout Page
 13. Order
+
+== Changelog ==
+
+= 0.0.16 | 2022/01/19 =
+* Added - Setup wizard on react js
+* Added - Status & Log updated
+* Added - Currency Option added
+* Added - Permalink Structure added
+* Fixed - Minor design issue fixed &  updated for archive pages ( course tag and course category)
+* Fixed - Some PHP warning fixed
+* Update - Other some code structural level enhancement
