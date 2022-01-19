@@ -112,6 +112,7 @@ class Sikshya_Rest_Server
 		return array(
 			'settings/general' => 'Sikshya_REST_API_Setting_General_V1',
 			'settings/pages' => 'Sikshya_REST_API_Setting_Pages_V1',
+			'settings/themes' => 'Sikshya_REST_API_Setting_Themes_V1',
 		);
 	}
 }

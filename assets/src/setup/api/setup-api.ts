@@ -60,6 +60,39 @@ class SetupAPI {
 		});
 	}
 
+	initThemeStatus(callback: any, getData: any): void {
+		new Promise<void>((resolve, reject) => {
+			SikshyaAPIFetch({
+				path: '/sikshya/v1/settings/themes/',
+				method: 'POST',
+				data: getData
+			}).then((response: GeneralSettings) => {
+				if (typeof callback === "function") {
+					callback(response);
+				}
+			});
+		});
+	}
+
+	initThemeAction(callback: any, getData: any): void {
+
+		new Promise<void>((resolve, reject) => {
+			SikshyaAPIFetch({
+				path: '/sikshya/v1/settings/themes/action',
+				method: 'POST',
+				data: getData
+			}).then((response: GeneralSettings) => {
+				if (typeof callback === "function") {
+					callback(response);
+				}
+			}).catch((response: any) => {
+				if (typeof callback === "function") {
+					callback(response);
+				}
+			});
+		});
+	}
+
 
 }
 
