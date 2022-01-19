@@ -80,7 +80,14 @@ class Sikshya_Permalink_Manager
 	public function post_type_links($post_link, $post)
 	{
 
-		
+
+		$permalink_structure = get_option('permalink_structure');
+
+		if ($permalink_structure == '' || is_null($permalink_structure)) {
+			return $post_link;
+		}
+
+
 		$permalinks = sikshya_get_permalink_structure();
 
 		$course_permalink = $permalinks['sikshya_course_base'];
