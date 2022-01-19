@@ -71,9 +71,14 @@ class Sikshya_Helper_Main
 		}
 		$page_id = $page_id > 0 ? $page_id : get_the_ID();
 
-		return add_query_arg(array(
-			'sikshya_account_page' => $key,
-		), get_permalink($page_id));
+		$structure = get_option('permalink_structure');
+		
+		if ($structure == '' || empty($structure)) {
+			return add_query_arg(array(
+				'sikshya_account_page' => $key,
+			), get_permalink($page_id));
+		}
 
+		return trailingslashit(get_permalink($page_id)) . $key;
 	}
 }
