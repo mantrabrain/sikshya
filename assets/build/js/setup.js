@@ -59251,6 +59251,7 @@ var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var react_2 = __webpack_require__(/*! react */ "react");
 var setup_api_1 = __webpack_require__(/*! ../../api/setup-api */ "./assets/src/setup/api/setup-api.ts");
 var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
+var icons_1 = __webpack_require__(/*! @chakra-ui/icons */ "./node_modules/@chakra-ui/icons/dist/chakra-ui-icons.esm.js");
 var Themes = function (props) {
     var property = {
         theme_image_url: 'https://i0.wp.com/themes.svn.wordpress.org/pragyan/0.0.8/screenshot.png',
@@ -59308,8 +59309,16 @@ var Themes = function (props) {
             React.createElement(react_1.Link, { href: property.theme_url, target: "_blank" },
                 React.createElement(react_1.Heading, { as: "h2", size: "lg" }, "Pragyan")),
             React.createElement("div", { className: "theme-actions" },
-                React.createElement(react_1.Button, { size: "md", colorScheme: "blue", isDisabled: install_disable, isLoading: !install_disable && isLoading, onClick: installThemeAction }, install_text),
-                React.createElement(react_1.Button, { size: "md", marginLeft: "5", className: "button activate", isDisabled: activate_disable, isLoading: !activate_disable && isLoading, onClick: activateThemeAction }, activate_text)))));
+                React.createElement(react_1.Button, { size: "md", colorScheme: "blue", isDisabled: install_disable, isLoading: !install_disable && isLoading, onClick: installThemeAction },
+                    themeStatus.installed ?
+                        React.createElement(icons_1.CheckCircleIcon, { w: 5, h: 5, color: "white.500", marginRight: "2" })
+                        : "",
+                    install_text),
+                React.createElement(react_1.Button, { size: "md", marginLeft: "5", className: "button activate", isDisabled: activate_disable, isLoading: !activate_disable && isLoading, onClick: activateThemeAction },
+                    themeStatus.installed && themeStatus.activated ?
+                        React.createElement(icons_1.CheckCircleIcon, { w: 5, h: 5, color: "white.500", marginRight: "2" })
+                        : "",
+                    activate_text)))));
 };
 exports["default"] = Themes;
 
@@ -59331,8 +59340,8 @@ var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var Welcome = function (props) {
     return (React.createElement("div", null,
         React.createElement(react_1.Heading, { size: 'lg', fontSize: '30px', marginBottom: 10 }, (0, i18n_1.__)("Welcome to Sikshya LMS", "sikshya")),
-        React.createElement(react_1.Text, null, (0, i18n_1.__)("Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")),
-        React.createElement(react_1.Text, { marginTop: 10 }, (0, i18n_1.__)("No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard."))));
+        React.createElement(react_1.Text, null, (0, i18n_1.__)("Thank you for choosing Sikshya LMS plugin for your course selling site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")),
+        React.createElement(react_1.Text, { marginTop: 10 }, (0, i18n_1.__)("No time right now? If you don’t want to go through the wizard, you can skip and return to the dashboard."))));
 };
 exports["default"] = Welcome;
 

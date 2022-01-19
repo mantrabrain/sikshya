@@ -14,11 +14,11 @@ const Welcome = (props: WelcomeProps) => {
 			<Heading size='lg' fontSize='30px' marginBottom={10}>
 				{__("Welcome to Sikshya LMS", "sikshya")}
 			</Heading>
-			<Text>{__("Thank you for choosing Yatra plugin for your travel & tour booking site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")}</Text>
+			<Text>{__("Thank you for choosing Sikshya LMS plugin for your course selling site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")}</Text>
 
 
 			<Text
-				marginTop={10}>{__("No time right now? If you don’t want to go through the wizard, you can skip and return to the WordPress dashboard.")}</Text>
+				marginTop={10}>{__("No time right now? If you don’t want to go through the wizard, you can skip and return to the dashboard.")}</Text>
 
 		</div>
 	);

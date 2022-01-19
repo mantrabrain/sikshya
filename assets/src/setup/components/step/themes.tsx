@@ -5,6 +5,7 @@ import {useState, useEffect} from 'react';
 import {ThemeSettings} from "../../types/theme-settings";
 import SetupAPI from "../../api/setup-api";
 import Paragraph_Skeleton from "../../skeleton/paragraph";
+import {CheckCircleIcon} from '@chakra-ui/icons'
 
 type ThemesProps = {
 	index: number
@@ -83,12 +84,18 @@ const Themes = (props: ThemesProps) => {
 					<Button size="md" colorScheme="blue" isDisabled={install_disable}
 							isLoading={!install_disable && isLoading}
 							onClick={installThemeAction}>
+						{themeStatus.installed ?
+							<CheckCircleIcon w={5} h={5} color="white.500" marginRight="2"/>
+							: ""}
 						{install_text}
 					</Button>
 
 					<Button size="md" marginLeft="5" className="button activate"
 							isDisabled={activate_disable} isLoading={!activate_disable && isLoading}
 							onClick={activateThemeAction}>
+						{themeStatus.installed && themeStatus.activated ?
+							<CheckCircleIcon w={5} h={5} color="white.500" marginRight="2"/>
+							: ""}
 						{activate_text}
 					</Button>
 				</div>
