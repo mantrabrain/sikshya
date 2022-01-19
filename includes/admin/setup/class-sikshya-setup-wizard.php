@@ -73,7 +73,6 @@ class Sikshya_Setup_Wizard
 
 		wp_enqueue_script('sikshya-setup', SIKSHYA_ASSETS_URL . '/build/js/setup.js', $setup_dependency['dependencies'], $setup_dependency['version']);
 
-		wp_enqueue_style('sikshya-setup', SIKSHYA_ASSETS_URL . '/build/style-setup.css', array(), $setup_dependency['version']);
 
 		$all_pages = get_pages();
 		$all_updated_pages = wp_list_pluck($all_pages, 'post_title', 'ID');
