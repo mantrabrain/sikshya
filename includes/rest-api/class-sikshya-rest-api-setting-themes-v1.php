@@ -123,6 +123,8 @@ class Sikshya_REST_API_Setting_Themes_V1
 
 				$theme_zip = "https://downloads.wordpress.org/theme/{$theme}.latest-stable.zip";
 
+				include_once ABSPATH . 'wp-admin/includes/file.php';
+				include_once ABSPATH . 'wp-admin/includes/misc.php';
 				include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 
 				wp_cache_flush();
