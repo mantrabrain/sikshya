@@ -11,6 +11,10 @@ type StepFooterProps = {
 	steps: Array<any>
 };
 const StepFooter = (props: StepFooterProps) => {
+	let go_back_text = __('Go back to Dashboard', "sikshya");
+	if (props.steps.length == (props.activeStep + 1)) {
+		go_back_text = __('Create new course', 'sikshya');
+	}
 	return (
 		<Flex width="100%" justify="space-between" align="center" gap={10} marginTop={10}>
 			{props.activeStep > 0 ?
@@ -25,7 +29,7 @@ const StepFooter = (props: StepFooterProps) => {
 					colorScheme='blue'
 					variant="outline"
 				>
-					{__('Go back to Dashboard', "sikshya")}
+					{go_back_text}
 
 				</Button>
 			</Link>

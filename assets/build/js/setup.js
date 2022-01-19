@@ -58951,12 +58951,16 @@ var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
 var StepFooter = function (props) {
+    var go_back_text = (0, i18n_1.__)('Go back to Dashboard', "sikshya");
+    if (props.steps.length == (props.activeStep + 1)) {
+        go_back_text = (0, i18n_1.__)('Create new course', 'sikshya');
+    }
     return (React.createElement(react_1.Flex, { width: "100%", justify: "space-between", align: "center", gap: 10, marginTop: 10 },
         props.activeStep > 0 ?
             React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.prevStep }, (0, i18n_1.__)('Back', 'sikshya'))
             : "",
         React.createElement(react_1.Link, { href: sikshyaSetup.course_page_url },
-            React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "outline" }, (0, i18n_1.__)('Go back to Dashboard', "sikshya"))),
+            React.createElement(react_1.Button, { size: "md", colorScheme: 'blue', variant: "outline" }, go_back_text)),
         props.steps.length > (props.activeStep + 1) ?
             React.createElement(react_1.Button, { size: "md", colorScheme: "blue", onClick: props.nextStep }, (0, i18n_1.__)('Next', 'sikshya'))
             : ""));
@@ -58988,13 +58992,6 @@ var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/compone
 var themes_1 = __webpack_require__(/*! ../step/themes */ "./assets/src/setup/components/step/themes.tsx");
 var react_2 = __webpack_require__(/*! react */ "react");
 var setup_api_1 = __webpack_require__(/*! ../../api/setup-api */ "./assets/src/setup/api/setup-api.ts");
-var steps = [
-    { label: "Welcome", "id": "welcome" },
-    { label: "General", id: "general" },
-    { label: "Pages", id: "pages" },
-    { label: "Themes", id: "themes" },
-    { label: "Finish", id: "finish" }
-];
 var ClickableSteps = function () {
     var _a = (0, chakra_ui_steps_1.useSteps)({
         initialStep: 0,
@@ -59002,38 +58999,43 @@ var ClickableSteps = function () {
     var _b = (0, react_2.useState)(), generalSettings = _b[0], setGeneralSettings = _b[1];
     var _c = (0, react_2.useState)(), pagesSettings = _c[0], setPagesSettings = _c[1];
     var _d = new setup_api_1.default, updateGeneralSetting = _d.updateGeneralSetting, updatePageSetting = _d.updatePageSetting;
-    if (activeStep === 2 && generalSettings) {
+    var getActiveStepID = function (step_id) {
+        var sikshyaSteps = sikshyaSetup.steps;
+        if (typeof sikshyaSteps[step_id] !== undefined) {
+            return sikshyaSteps[step_id].id;
+        }
+        return undefined;
+    };
+    if (getActiveStepID(activeStep) === "general" && generalSettings) {
         updateGeneralSetting(generalSettings);
         setGeneralSettings(null);
     }
-    else if (activeStep === 3 && pagesSettings) {
+    else if (getActiveStepID(activeStep) === "pages" && pagesSettings) {
         updatePageSetting(pagesSettings);
         setPagesSettings(null);
     }
     var renderStepView = function (id) {
         switch (id) {
             case 'welcome':
-                return React.createElement(welcome_1.default, { index: 1 });
+                return React.createElement(welcome_1.default, null);
             case 'general':
                 return React.createElement(general_1.default, { updateSettings: setGeneralSettings });
             case 'pages':
                 return React.createElement(pages_1.default, { updateSettings: setPagesSettings });
             case 'finish':
-                return React.createElement(finish_1.default, { index: activeStep });
+                return React.createElement(finish_1.default, null);
             case 'themes':
-                return React.createElement(themes_1.default, { index: 1 });
+                return React.createElement(themes_1.default, null);
             default:
-                return "<h2>Component {id} not found</h2>";
+                return React.createElement(react_1.Heading, { type: "h2" }, "Sorry! Component not found.");
         }
     };
+    // @ts-ignore
     return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%" },
-        React.createElement(chakra_ui_steps_1.Steps, { onClickStep: function (step) { return setStep(step); }, activeStep: activeStep }, steps.map(function (_a, index) {
-            var label = _a.label, id = _a.id;
-            return (React.createElement(chakra_ui_steps_1.Step, { label: label, key: label },
-                React.createElement(stepbox_1.default, null,
-                    renderStepView(id),
-                    React.createElement(step_footer_1.default, { activeStep: activeStep, prevStep: prevStep, nextStep: nextStep, steps: steps }))));
-        }))));
+        React.createElement(chakra_ui_steps_1.Steps, { onClickStep: function (step) { return setStep(step); }, activeStep: activeStep }, sikshyaSetup.steps.map(function (step_item, index) { return (React.createElement(chakra_ui_steps_1.Step, { label: step_item.label, key: step_item.label },
+            React.createElement(stepbox_1.default, null,
+                renderStepView(step_item.id),
+                React.createElement(step_footer_1.default, { activeStep: activeStep, prevStep: prevStep, nextStep: nextStep, steps: sikshyaSetup.steps })))); }))));
 };
 exports.ClickableSteps = ClickableSteps;
 exports["default"] = exports.ClickableSteps;
@@ -59073,7 +59075,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var icons_1 = __webpack_require__(/*! @chakra-ui/icons */ "./node_modules/@chakra-ui/icons/dist/chakra-ui-icons.esm.js");
-var Finish = function (props) {
+var Finish = function () {
     return (React.createElement("div", null,
         React.createElement(react_1.Heading, { m: "0 auto", align: "center", fontSize: "xl" }, "Woohoo!! Congratulations, Sikshya Setup completed!"),
         React.createElement(react_1.Flex, { justify: "space-between", align: "center", width: "100%", marginTop: 10 },
@@ -59252,7 +59254,7 @@ var react_2 = __webpack_require__(/*! react */ "react");
 var setup_api_1 = __webpack_require__(/*! ../../api/setup-api */ "./assets/src/setup/api/setup-api.ts");
 var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
 var icons_1 = __webpack_require__(/*! @chakra-ui/icons */ "./node_modules/@chakra-ui/icons/dist/chakra-ui-icons.esm.js");
-var Themes = function (props) {
+var Themes = function () {
     var property = {
         theme_image_url: 'https://i0.wp.com/themes.svn.wordpress.org/pragyan/0.0.8/screenshot.png',
         theme_url: 'https://wordpress.org/themes/pragyan/'
@@ -59337,7 +59339,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
 var i18n_1 = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-var Welcome = function (props) {
+var Welcome = function () {
     return (React.createElement("div", null,
         React.createElement(react_1.Heading, { size: 'lg', fontSize: '30px', marginBottom: 10 }, (0, i18n_1.__)("Welcome to Sikshya LMS", "sikshya")),
         React.createElement(react_1.Text, null, (0, i18n_1.__)("Thank you for choosing Sikshya LMS plugin for your course selling site. This setup wizard will help you configure the basic settings of the plugin. It’s completely optional and shouldn’t take longer than one minutes.")),

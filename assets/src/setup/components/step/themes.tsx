@@ -7,11 +7,8 @@ import SetupAPI from "../../api/setup-api";
 import Paragraph_Skeleton from "../../skeleton/paragraph";
 import {CheckCircleIcon} from '@chakra-ui/icons'
 
-type ThemesProps = {
-	index: number
-}
 
-const Themes = (props: ThemesProps) => {
+const Themes = ( ) => {
 	const property = {
 		theme_image_url: 'https://i0.wp.com/themes.svn.wordpress.org/pragyan/0.0.8/screenshot.png',
 		theme_url: 'https://wordpress.org/themes/pragyan/'

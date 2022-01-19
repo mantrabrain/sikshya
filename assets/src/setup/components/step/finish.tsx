@@ -2,12 +2,7 @@ import * as React from 'react';
 import {Heading, Center, Icon, Flex} from "@chakra-ui/react";
 import {CheckCircleIcon} from '@chakra-ui/icons'
 
-
-type FinishProps = {
-	index: number
-}
-
-const Finish = (props: FinishProps) => {
+const Finish = () => {
 
 	return (
 		<div>

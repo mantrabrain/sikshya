@@ -1,12 +1,8 @@
 import * as React from 'react';
- import {Heading, Text} from "@chakra-ui/react";
+import {Heading, Text} from "@chakra-ui/react";
 import {__} from '@wordpress/i18n';
 
-type WelcomeProps = {
-	index: number
-}
-
-const Welcome = (props: WelcomeProps) => {
+const Welcome = () => {
 
 	return (
 		<div>
