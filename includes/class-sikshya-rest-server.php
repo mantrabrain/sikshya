@@ -110,7 +110,8 @@ class Sikshya_Rest_Server
 	protected function get_v1_controllers()
 	{
 		return array(
-			'settings' => 'Sikshya_REST_API_Settings_V1',
+			'settings/general' => 'Sikshya_REST_API_Setting_General_V1',
+			'settings/pages' => 'Sikshya_REST_API_Setting_Pages_V1',
 		);
 	}
 }

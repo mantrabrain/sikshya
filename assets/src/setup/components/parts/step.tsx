@@ -9,8 +9,9 @@ import StepFooter from "../parts/step-footer";
 import StepBox from "./stepbox";
 import Themes from "../step/themes";
 import {useState, useEffect} from 'react';
-import {Settings} from "../../types/settings";
-import SikshyaAPIFetch from "../../global/api";
+import {GeneralSettings} from "../../types/general-settings";
+import SetupAPI from "../../api/setup-api";
+import {PagesSettings} from "../../types/pages-settings";
 
 const steps = [
 	{label: "Welcome", "id": "welcome"},
@@ -24,45 +25,28 @@ export const ClickableSteps = () => {
 	const {nextStep, prevStep, reset, activeStep, setStep} = useSteps({
 		initialStep: 0,
 	})
-	const [settings, setSettings] = useState<Settings>();
+	const [generalSettings, setGeneralSettings] = useState<GeneralSettings>();
+	const [pagesSettings, setPagesSettings] = useState<PagesSettings>();
 
-	const updateSettingItem = (id: string, value: any) => {
-		let all_settings = settings;
-		// @ts-ignore
-		if (all_settings.hasOwnProperty(id)) {
-			// @ts-ignore
-			all_settings[id] = value;
-		}
-
-		setSettings(all_settings);
-		console.log(settings);
+	const {updateGeneralSetting, updatePageSetting} = new SetupAPI;
 
 
-	}
-	if (activeStep === 2 || activeStep === 3) {
-		console.log(settings);
-		new Promise<void>((resolve, reject) => {
-			// @ts-ignore
-			SikshyaAPIFetch({
-				path: '/sikshya/v1/settings/update',
-				method: 'POST',
-				data: settings
-			}).then((response: any) => {
-				console.log(response);
-			});
-		});
+	if (activeStep === 2 && generalSettings) {
+		updateGeneralSetting(generalSettings)
+		setGeneralSettings(null);
+
+	} else if (activeStep === 3 && pagesSettings) {
+		updatePageSetting(pagesSettings);
+		setPagesSettings(null);
 	}
 	const renderStepView = (id: string) => {
-
 		switch (id) {
 			case 'welcome':
 				return <Welcome index={1}/>;
 			case 'general':
-				return <General updateSettings={setSettings}
-								updateSettingItem={updateSettingItem}/>;
+				return <General updateSettings={setGeneralSettings}/>;
 			case 'pages':
-				return <Pages updateSettings={setSettings}
-							  updateSettingItem={updateSettingItem}/>;
+				return <Pages updateSettings={setPagesSettings}/>;
 			case 'finish':
 				return <Finish index={activeStep}/>;
 			case 'themes':

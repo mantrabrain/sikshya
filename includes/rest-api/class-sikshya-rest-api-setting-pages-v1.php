@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 }
 
 
-class Sikshya_REST_API_Settings_V1
+class Sikshya_REST_API_Setting_Pages_V1
 {
 
 	/**
@@ -21,7 +21,7 @@ class Sikshya_REST_API_Settings_V1
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'settings';
+	protected $rest_base = 'settings/pages';
 
 
 	/**
@@ -59,12 +59,11 @@ class Sikshya_REST_API_Settings_V1
 		try {
 
 			$response = array(
-				'currency' => get_option('sikshya_currency', 'USD'),
-				'currency_symbol_type' => get_option('sikshya_currency_symbol_type', 'symbol'),
-				'currency_position' => get_option('sikshya_currency_position', 'left'),
-				'thousand_separator' => get_option('sikshya_thousand_separator', ','),
-				'number_of_decimals' => get_option('sikshya_price_number_decimals', 2),
-				'decimal_separator' => get_option('sikshya_decimal_separator', '.'),
+				'account_page' => sikshya_get_account_page(),
+				'registration_page' => sikshya_get_user_registration_page(),
+				'login_page' => sikshya_get_login_page(),
+				'cart_page' => sikshya_get_cart_page(),
+				'checkout_page' => sikshya_get_checkout_page()
 			);
 			return new \WP_REST_Response($response, 200);
 		} catch (\Exception $e) {
@@ -77,24 +76,13 @@ class Sikshya_REST_API_Settings_V1
 
 	public function update_settings(\WP_REST_Request $request)
 	{
-		$currency = sanitize_text_field($request->get_param('currency'));
-		$currency_position = sanitize_text_field($request->get_param('currency_position'));
-		$currency_symbol_type = sanitize_text_field($request->get_param('currency_symbol_type'));
-		$decimal_separator = sanitize_text_field($request->get_param('decimal_separator'));
-		$price_number_decimals = absint($request->get_param('number_of_decimals'));
-		$thousand_separator = sanitize_text_field($request->get_param('thousand_separator'));
-		$account_page = absint($request->get_param('account_page'));
 		$cart_page = absint($request->get_param('cart_page'));
 		$checkout_page = absint($request->get_param('checkout_page'));
 		$login_page = absint($request->get_param('login_page'));
 		$registration_page = absint($request->get_param('registration_page'));
+		$account_page = absint($request->get_param('account_page'));
 		try {
-			update_option('sikshya_currency', $currency);
-			update_option('sikshya_currency_symbol_type', $currency_symbol_type);
-			update_option('sikshya_currency_position', $currency_position);
-			update_option('sikshya_thousand_separator', $thousand_separator);
-			update_option('sikshya_price_number_decimals', $price_number_decimals);
-			update_option('sikshya_decimal_separator', $decimal_separator);
+
 			update_option('sikshya_account_page', $account_page);
 			update_option('sikshya_registration_page', $registration_page);
 			update_option('sikshya_login_page', $login_page);

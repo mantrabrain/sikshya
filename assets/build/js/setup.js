@@ -39124,6 +39124,19 @@ if (true) {
 
 /***/ }),
 
+/***/ "./assets/src/setup/style.scss":
+/*!*************************************!*\
+  !*** ./assets/src/setup/style.scss ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
 /***/ "./node_modules/aria-hidden/dist/es2015/index.js":
 /*!*******************************************************!*\
   !*** ./node_modules/aria-hidden/dist/es2015/index.js ***!
@@ -53183,19 +53196,6 @@ module.exports = mergeWith;
 
 /***/ }),
 
-/***/ "./assets/src/setup/style.scss":
-/*!*************************************!*\
-  !*** ./assets/src/setup/style.scss ***!
-  \*************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
 /***/ "./node_modules/object-assign/index.js":
 /*!*********************************************!*\
   !*** ./node_modules/object-assign/index.js ***!
@@ -58180,6 +58180,78 @@ module.exports = function () {
 
 /***/ }),
 
+/***/ "./assets/src/setup/api/setup-api.ts":
+/*!*******************************************!*\
+  !*** ./assets/src/setup/api/setup-api.ts ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var api_1 = __webpack_require__(/*! ../global/api */ "./assets/src/setup/global/api.js");
+var SetupAPI = /** @class */ (function () {
+    function SetupAPI() {
+    }
+    SetupAPI.prototype.initGeneralSetting = function (callback) {
+        new Promise(function (resolve, reject) {
+            (0, api_1.default)({
+                path: '/sikshya/v1/settings/general/',
+                method: 'GET',
+            }).then(function (response) {
+                if (typeof callback === "function") {
+                    callback(response);
+                }
+            });
+        });
+    };
+    SetupAPI.prototype.initPagesSetting = function (callback) {
+        new Promise(function (resolve, reject) {
+            (0, api_1.default)({
+                path: '/sikshya/v1/settings/pages/',
+                method: 'GET',
+            }).then(function (response) {
+                if (typeof callback === "function") {
+                    callback(response);
+                }
+            });
+        });
+    };
+    SetupAPI.prototype.updateGeneralSetting = function (postData, responseCallback) {
+        new Promise(function (resolve, reject) {
+            // @ts-ignore
+            (0, api_1.default)({
+                path: '/sikshya/v1/settings/general/update',
+                method: 'POST',
+                data: postData
+            }).then(function (response) {
+                if (typeof responseCallback === "function") {
+                    responseCallback(response);
+                }
+            });
+        });
+    };
+    SetupAPI.prototype.updatePageSetting = function (postData, responseCallback) {
+        new Promise(function (resolve, reject) {
+            // @ts-ignore
+            (0, api_1.default)({
+                path: '/sikshya/v1/settings/pages/update',
+                method: 'POST',
+                data: postData
+            }).then(function (response) {
+                if (typeof responseCallback === "function") {
+                    responseCallback(response);
+                }
+            });
+        });
+    };
+    return SetupAPI;
+}());
+exports["default"] = SetupAPI;
+
+
+/***/ }),
+
 /***/ "./assets/src/setup/components/body.tsx":
 /*!**********************************************!*\
   !*** ./assets/src/setup/components/body.tsx ***!
@@ -58291,7 +58363,7 @@ var step_footer_1 = __webpack_require__(/*! ../parts/step-footer */ "./assets/sr
 var stepbox_1 = __webpack_require__(/*! ./stepbox */ "./assets/src/setup/components/parts/stepbox.tsx");
 var themes_1 = __webpack_require__(/*! ../step/themes */ "./assets/src/setup/components/step/themes.tsx");
 var react_2 = __webpack_require__(/*! react */ "react");
-var api_1 = __webpack_require__(/*! ../../global/api */ "./assets/src/setup/global/api.js");
+var setup_api_1 = __webpack_require__(/*! ../../api/setup-api */ "./assets/src/setup/api/setup-api.ts");
 var steps = [
     { label: "Welcome", "id": "welcome" },
     { label: "General", id: "general" },
@@ -58303,38 +58375,25 @@ var ClickableSteps = function () {
     var _a = (0, chakra_ui_steps_1.useSteps)({
         initialStep: 0,
     }), nextStep = _a.nextStep, prevStep = _a.prevStep, reset = _a.reset, activeStep = _a.activeStep, setStep = _a.setStep;
-    var _b = (0, react_2.useState)(), settings = _b[0], setSettings = _b[1];
-    var updateSettingItem = function (id, value) {
-        var all_settings = settings;
-        // @ts-ignore
-        if (all_settings.hasOwnProperty(id)) {
-            // @ts-ignore
-            all_settings[id] = value;
-        }
-        setSettings(all_settings);
-        console.log(settings);
-    };
-    if (activeStep === 2 || activeStep === 3) {
-        console.log(settings);
-        new Promise(function (resolve, reject) {
-            // @ts-ignore
-            (0, api_1.default)({
-                path: '/sikshya/v1/settings/update',
-                method: 'POST',
-                data: settings
-            }).then(function (response) {
-                console.log(response);
-            });
-        });
+    var _b = (0, react_2.useState)(), generalSettings = _b[0], setGeneralSettings = _b[1];
+    var _c = (0, react_2.useState)(), pagesSettings = _c[0], setPagesSettings = _c[1];
+    var _d = new setup_api_1.default, updateGeneralSetting = _d.updateGeneralSetting, updatePageSetting = _d.updatePageSetting;
+    if (activeStep === 2 && generalSettings) {
+        updateGeneralSetting(generalSettings);
+        setGeneralSettings(null);
+    }
+    else if (activeStep === 3 && pagesSettings) {
+        updatePageSetting(pagesSettings);
+        setPagesSettings(null);
     }
     var renderStepView = function (id) {
         switch (id) {
             case 'welcome':
                 return React.createElement(welcome_1.default, { index: 1 });
             case 'general':
-                return React.createElement(general_1.default, { updateSettings: setSettings, updateSettingItem: updateSettingItem });
+                return React.createElement(general_1.default, { updateSettings: setGeneralSettings });
             case 'pages':
-                return React.createElement(pages_1.default, { updateSettings: setSettings, updateSettingItem: updateSettingItem });
+                return React.createElement(pages_1.default, { updateSettings: setPagesSettings });
             case 'finish':
                 return React.createElement(finish_1.default, { index: activeStep });
             case 'themes':
@@ -58410,38 +58469,36 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
 var react_1 = __webpack_require__(/*! react */ "react");
 var react_2 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
-var api_1 = __webpack_require__(/*! ../../global/api */ "./assets/src/setup/global/api.js");
 var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
+var setup_api_1 = __webpack_require__(/*! ../../api/setup-api */ "./assets/src/setup/api/setup-api.ts");
 var General = function (props) {
-    var _a = (0, react_1.useState)(), apiResponse = _a[0], setApiResponse = _a[1];
-    var apiCall = function () {
-        new Promise(function (resolve, reject) {
-            (0, api_1.default)({
-                path: '/sikshya/v1/settings',
-                method: 'GET',
-            }).then(function (response) {
-                setApiResponse(response);
-                response.account_page = sikshyaSetup.account_page;
-                response.registration_page = sikshyaSetup.registration_page;
-                response.login_page = sikshyaSetup.login_page;
-                response.cart_page = sikshyaSetup.cart_page;
-                response.checkout_page = sikshyaSetup.checkout_page;
-                props.updateSettings(response);
-            });
-        });
+    var _a = (0, react_1.useState)(), generalAPIResponse = _a[0], setGeneralAPIResponse = _a[1];
+    var initGeneralSetting = (new setup_api_1.default).initGeneralSetting;
+    var callbackCall = function (response) {
+        setGeneralAPIResponse(response);
+        props.updateSettings(response);
     };
     (0, react_1.useEffect)(function () {
-        var size = !apiResponse ? 0 : Object.keys(apiResponse).length;
+        var size = !generalAPIResponse ? 0 : Object.keys(generalAPIResponse).length;
         if (size == 0) {
-            apiCall();
+            initGeneralSetting(callbackCall);
         }
-    }, [apiResponse]);
+    }, [generalAPIResponse]);
+    var handleNumberOfDecimalChange = function (value) {
+        generalAPIResponse.number_of_decimals = value;
+        setGeneralAPIResponse(generalAPIResponse);
+        props.updateSettings(generalAPIResponse);
+    };
     var update = function (event) {
         var value = event.target.value;
         var id = event.target.id;
-        props.updateSettingItem(id, value);
+        if (generalAPIResponse.hasOwnProperty(id)) {
+            // @ts-ignore
+            generalAPIResponse[id] = value;
+        }
+        props.updateSettings(generalAPIResponse);
     };
-    var size = !apiResponse ? 0 : Object.keys(apiResponse).length;
+    var size = !generalAPIResponse ? 0 : Object.keys(generalAPIResponse).length;
     if (size < 1) {
         return (React.createElement(paragraph_1.default, null));
     }
@@ -58450,31 +58507,32 @@ var General = function (props) {
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'currency' }, "Currency"),
-                React.createElement(react_2.Select, { id: 'currency', placeholder: 'Select currency', w: "md", onChange: update }, Object.keys(sikshyaSetup.currencies).map(function (currency_key, index) { return (React.createElement("option", { selected: currency_key === apiResponse.currency, value: currency_key }, sikshyaSetup.currencies[currency_key])); })))),
+                React.createElement(react_2.Select, { id: 'currency', placeholder: 'Select currency', w: "md", onChange: update }, Object.keys(sikshyaSetup.currencies).map(function (currency_key, index) { return (React.createElement("option", { selected: currency_key === generalAPIResponse.currency, value: currency_key }, sikshyaSetup.currencies[currency_key])); })))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'currency_symbol_type' }, "Currency Symbol Type"),
-                React.createElement(react_2.Select, { id: 'currency_symbol_type', placeholder: 'Currency Symbol Type', w: "md", onChange: update }, Object.keys(sikshyaSetup.currency_symbol_type).map(function (symbol_type_key, index) { return (React.createElement("option", { selected: symbol_type_key === apiResponse.currency_symbol_type, value: symbol_type_key }, sikshyaSetup.currency_symbol_type[symbol_type_key])); })))),
+                React.createElement(react_2.Select, { id: 'currency_symbol_type', placeholder: 'Currency Symbol Type', w: "md", onChange: update }, Object.keys(sikshyaSetup.currency_symbol_type).map(function (symbol_type_key, index) { return (React.createElement("option", { selected: symbol_type_key === generalAPIResponse.currency_symbol_type, value: symbol_type_key }, sikshyaSetup.currency_symbol_type[symbol_type_key])); })))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'currency_position' }, "Currency Position"),
-                React.createElement(react_2.Select, { id: 'currency_position', placeholder: 'Currency Position', w: "md", onChange: update }, Object.keys(sikshyaSetup.currency_positions).map(function (position_key, index) { return (React.createElement("option", { selected: position_key === apiResponse.currency_position, value: position_key }, sikshyaSetup.currency_positions[position_key])); })))),
+                React.createElement(react_2.Select, { id: 'currency_position', placeholder: 'Currency Position', w: "md", onChange: update }, Object.keys(sikshyaSetup.currency_positions).map(function (position_key, index) { return (React.createElement("option", { selected: position_key === generalAPIResponse.currency_position, value: position_key }, sikshyaSetup.currency_positions[position_key])); })))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'thousand_separator' }, "Thousand Separator"),
-                React.createElement(react_2.Input, { id: 'thousand_separator', placeholder: 'Thousand Separator', w: "md", defaultValue: apiResponse.thousand_separator, onChange: update }))),
+                React.createElement(react_2.Input, { id: 'thousand_separator', placeholder: 'Thousand Separator', w: "md", defaultValue: generalAPIResponse.thousand_separator, onChange: update }))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_2.FormLabel, { htmlFor: 'number_of_decimals' }, "Number Of Decimals"),
-                React.createElement(react_2.NumberInput, { id: 'number_of_decimals', defaultValue: apiResponse.number_of_decimals, max: 10, clampValueOnBlur: false, w: "md" },
-                    React.createElement(react_2.NumberInputField, { onChange: update, defaultValue: apiResponse.number_of_decimals }),
-                    React.createElement(react_2.NumberInputStepper, null,
-                        React.createElement(react_2.NumberIncrementStepper, null),
-                        React.createElement(react_2.NumberDecrementStepper, null))))),
+                React.createElement(react_2.FormLabel, { htmlFor: 'number_of_decimals_input' }, "Number Of Decimals"),
+                React.createElement(react_2.Flex, { justify: "space-between", w: "md" },
+                    React.createElement(react_2.NumberInput, { id: 'number_of_decimals_input', defaultValue: generalAPIResponse.number_of_decimals, max: 5, min: 0, clampValueOnBlur: false, w: "md", onChange: handleNumberOfDecimalChange },
+                        React.createElement(react_2.NumberInputField, { defaultValue: generalAPIResponse.number_of_decimals, onChange: update }),
+                        React.createElement(react_2.NumberInputStepper, null,
+                            React.createElement(react_2.NumberIncrementStepper, null),
+                            React.createElement(react_2.NumberDecrementStepper, null)))))),
         React.createElement(react_2.FormControl, null,
             React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
                 React.createElement(react_2.FormLabel, { htmlFor: 'decimal_separator' }, "Decimal Separator"),
-                React.createElement(react_2.Input, { id: 'decimal_separator', placeholder: 'Decimal Separator', w: "md", defaultValue: apiResponse.decimal_separator, onChange: update })))));
+                React.createElement(react_2.Input, { id: 'decimal_separator', placeholder: 'Decimal Separator', w: "md", defaultValue: generalAPIResponse.decimal_separator, onChange: update })))));
 };
 exports["default"] = General;
 
@@ -58491,37 +58549,60 @@ exports["default"] = General;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var React = __webpack_require__(/*! react */ "react");
-var react_1 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var react_1 = __webpack_require__(/*! react */ "react");
+var react_2 = __webpack_require__(/*! @chakra-ui/react */ "./node_modules/@chakra-ui/react/dist/chakra-ui-react.esm.js");
+var setup_api_1 = __webpack_require__(/*! ../../api/setup-api */ "./assets/src/setup/api/setup-api.ts");
+var paragraph_1 = __webpack_require__(/*! ../../skeleton/paragraph */ "./assets/src/setup/skeleton/paragraph.tsx");
 var Pages = function (props) {
+    var RenderPages = function (selected_page_id) {
+        return (Object.keys(sikshyaSetup.all_pages).map(function (page_id, index) { return (React.createElement("option", { selected: parseInt(page_id) === parseInt(selected_page_id) && parseInt(selected_page_id) != 0, value: page_id }, sikshyaSetup.all_pages[page_id])); }));
+    };
+    var _a = (0, react_1.useState)(), pagesAPIResponse = _a[0], setPagesAPIResponse = _a[1];
+    var initPagesSetting = (new setup_api_1.default).initPagesSetting;
+    var callbackCall = function (response) {
+        setPagesAPIResponse(response);
+        props.updateSettings(response);
+    };
+    (0, react_1.useEffect)(function () {
+        var size = !pagesAPIResponse ? 0 : Object.keys(pagesAPIResponse).length;
+        if (size == 0) {
+            initPagesSetting(callbackCall);
+        }
+    }, [pagesAPIResponse]);
     var update = function (event) {
         var value = event.target.value;
         var id = event.target.id;
-        props.updateSettingItem(id, value);
+        if (pagesAPIResponse.hasOwnProperty(id)) {
+            // @ts-ignore
+            pagesAPIResponse[id] = value;
+        }
+        props.updateSettings(pagesAPIResponse);
     };
-    var RenderPages = function (selected_page_id) {
-        return (Object.keys(sikshyaSetup.all_pages).map(function (page_id, index) { return (React.createElement("option", { selected: page_id === selected_page_id, value: page_id }, sikshyaSetup.all_pages[page_id])); }));
-    };
-    return (React.createElement(react_1.Flex, { flexDir: "column", width: "100%", gap: 5 },
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'account_page' }, "Account Page"),
-                React.createElement(react_1.Select, { id: 'account_page', placeholder: 'Select Account Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.account_page)))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'registration_page' }, "Registration Page"),
-                React.createElement(react_1.Select, { id: 'registration_page', placeholder: 'Select Registration Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.registration_page)))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'login_page' }, "Login Page"),
-                React.createElement(react_1.Select, { id: 'login_page', placeholder: 'Select Login Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.login_page)))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'cart_page' }, "Cart Page"),
-                React.createElement(react_1.Select, { id: 'cart_page', placeholder: 'Select Cart Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.cart_page)))),
-        React.createElement(react_1.FormControl, null,
-            React.createElement(react_1.Flex, { justify: "space-between", width: "full", align: "center" },
-                React.createElement(react_1.FormLabel, { htmlFor: 'checkout_page' }, "Checkout Page"),
-                React.createElement(react_1.Select, { id: 'checkout_page', placeholder: 'Select Checkout Page', w: "md", onChange: update }, RenderPages(sikshyaSetup.checkout_page))))));
+    var size = !pagesAPIResponse ? 0 : Object.keys(pagesAPIResponse).length;
+    if (size < 1) {
+        return (React.createElement(paragraph_1.default, null));
+    }
+    return (React.createElement(react_2.Flex, { flexDir: "column", width: "100%", gap: 5 },
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'account_page' }, "Account Page"),
+                React.createElement(react_2.Select, { id: 'account_page', placeholder: 'Select Account Page', w: "md", onChange: update }, RenderPages(pagesAPIResponse.account_page)))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'registration_page' }, "Registration Page"),
+                React.createElement(react_2.Select, { id: 'registration_page', placeholder: 'Select Registration Page', w: "md", onChange: update }, RenderPages(pagesAPIResponse.registration_page)))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'login_page' }, "Login Page"),
+                React.createElement(react_2.Select, { id: 'login_page', placeholder: 'Select Login Page', w: "md", onChange: update }, RenderPages(pagesAPIResponse.login_page)))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'cart_page' }, "Cart Page"),
+                React.createElement(react_2.Select, { id: 'cart_page', placeholder: 'Select Cart Page', w: "md", onChange: update }, RenderPages(pagesAPIResponse.cart_page)))),
+        React.createElement(react_2.FormControl, null,
+            React.createElement(react_2.Flex, { justify: "space-between", width: "full", align: "center" },
+                React.createElement(react_2.FormLabel, { htmlFor: 'checkout_page' }, "Checkout Page"),
+                React.createElement(react_2.Select, { id: 'checkout_page', placeholder: 'Select Checkout Page', w: "md", onChange: update }, RenderPages(pagesAPIResponse.checkout_page))))));
 };
 exports["default"] = Pages;
 
