@@ -15,6 +15,8 @@ if (!class_exists('Sikshya_Taxonomy_Course_Category')) {
 
 		public function register()
 		{
+			$permalinks = sikshya_get_permalink_structure();
+
 			// Add new taxonomy, make it hierarchical (like categories)
 			$labels = array(
 				'name' => __('Category', 'sikshya'),
@@ -37,9 +39,11 @@ if (!class_exists('Sikshya_Taxonomy_Course_Category')) {
 				'show_in_menu' => 'edit.php?post_type=sik_courses',
 				'query_var' => true,
 				'rewrite' => array(
-					'slug' => 'sik_course_category',
+					'slug' => $permalinks['sikshya_course_category_base'],
 					'with_front' => true
-				)
+				),
+			
+
 			);
 			register_taxonomy('sik_course_category', array('sik_courses'), $args);
 
