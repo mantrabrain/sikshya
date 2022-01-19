@@ -9,12 +9,14 @@
 			list-style: none;
 			border: 1px solid #fff;
 			margin-bottom: 2px;
-			a{
+
+			a {
 				padding: 5px;
 				display: inline-block;
 				width: 100%;
-				.fa{
-					margin-right:5px;
+
+				.fa {
+					margin-right: 5px;
 				}
 
 			}
@@ -52,5 +54,8 @@
 		}
 
 		margin-bottom: 20px;
+	}
+	.sikshya-input-wrap {
+		padding: 10px 10px;
 	}
 }

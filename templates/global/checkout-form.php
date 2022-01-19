@@ -1,4 +1,4 @@
-<div class="sik-row sikshya-checkout-wrap">
+<div class="sikshya-checkout-wrap">
 	<div class="sik-row" id="sikshya_customer_details">
 		<div class="sik-col-md-6 sik-col-sm-12">
 			<div class="sikshya-billing-fields">
