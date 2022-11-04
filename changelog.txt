@@ -1,3 +1,12 @@
+= 0.0.16 | 2022/01/19 =
+* Added - Setup wizard on react js
+* Added - Status & Log updated
+* Added - Currency Option added
+* Added - Permalink Structure added
+* Fixed - Minor design issue fixed &  updated for archive pages ( course tag and course category)
+* Fixed - Some PHP warning fixed
+* Update - Other some code structural level enhancement
+
 = 0.0.14 | 2022/01/11 =
 * Fixed - Minor issue fixed
 * Added - Currency option added

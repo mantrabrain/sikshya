@@ -1,7 +1,7 @@
 <?php
 /**
  *  Plugin Name:     Sikshya
- *  Version:         0.0.16
+ *  Version:         0.0.17
  *  Plugin URI:      https://wordpress.org/plugins/sikshya
  *  Description:     Sikshya is free Learning management system (LMS) for WordPress. It helps to create course, lessons, quizzes, questions and answers for your online course system.
  *  Author:          mantrabrain
@@ -15,7 +15,7 @@ define('SIKSHYA_FILE', __FILE__);
 
 // Define SIKSHYA_VERSION.
 if (!defined('SIKSHYA_VERSION')) {
-	define('SIKSHYA_VERSION', '0.0.16');
+	define('SIKSHYA_VERSION', '0.0.17');
 }
 
 // Include the main Mantrabrain Starter Sites class.
