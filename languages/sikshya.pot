@@ -1,14 +1,14 @@
-# Copyright (C) 2022 mantrabrain
+# Copyright (C) 2023 mantrabrain
 # This file is distributed under the same license as the Sikshya package.
 msgid ""
 msgstr ""
-"Project-Id-Version: Sikshya 0.0.15\n"
+"Project-Id-Version: Sikshya 0.0.18\n"
 "Report-Msgid-Bugs-To: mantrabrain@gmail.com\n"
-"POT-Creation-Date: 2022-01-19 12:02:59+00:00\n"
+"POT-Creation-Date: 2023-02-19 11:41:59+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2022-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2023-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Mantrabrain <mantrabrain@gmail.com>\n"
 "Language-Team: Mantrabrain <mantrabrain@gmail.com>\n"
 "X-Generator: grunt-wp-i18n 1.0.3\n"
