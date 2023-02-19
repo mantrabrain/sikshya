@@ -151,7 +151,7 @@ if (!class_exists('Sikshya_About')) :
                     'title' => __('Post question', 'sikshya'),
                     'description' => __('You can post question about mantrabrain product from here.', 'sikshya'),
                     'link_title' => __('Submit your query', 'sikshya'),
-                    'link' => 'https://mantrabrain.com/support-forum/'
+                    'link' => 'https://mantrabrain.com/contact-us/'
                 )
 
             );
