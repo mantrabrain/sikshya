@@ -5,7 +5,7 @@ Tags: lms, elearning, education, learning management system, course, quizzes
 Requires at least: 4.7
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 0.0.18
+Stable tag: 0.0.19
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -70,8 +70,12 @@ You can create issue from https://github.com/mantrabrain/sikshya/issues
 
 == Changelog ==
 
-= 0.0.17 | 2022/11/04 =
-* Fixed - Version compatibility
+
+= 0.0.19 | 2023/02/19 =
+* Fixed - Section php warnign issue fixed
 
 = 0.0.18 | 2023/02/19 =
+* Fixed - Version compatibility
+
+= 0.0.17 | 2022/11/04 =
 * Fixed - Version compatibility
