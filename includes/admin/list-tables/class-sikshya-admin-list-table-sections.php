@@ -139,7 +139,9 @@ class Sikshya_Admin_List_Table_Sections extends Sikshya_Admin_List_Table
 
 		$courses = sikshya()->course->get_all_by_section($section_id);
 
-		if (count($courses)) {
+		$courses_count = is_array($courses) ? count($courses): 0;
+
+		if ($courses_count>0) {
 
 			echo '<div>';
 			foreach ($courses as $course) {

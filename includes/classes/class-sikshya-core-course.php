@@ -193,24 +193,10 @@ class Sikshya_Core_Course
 			$section_id = $section_id->ID;
 		}
 
-		$section_ids = $section_id;
+		$course_id = get_post_meta($section_id, 'course_id', true);
 
-		if (!is_array($section_ids)) {
+		$course_ids = $course_id == '' ? array() : array($course_id);
 
-			$section_ids = $section_ids !== '' ? array($section_ids) : array();
-		}
-
-		$course_ids = array();
-
-		foreach ($section_ids as $section_id) {
-
-			$course_ids = get_post_meta($section_id, 'course_id', true);
-
-			if (!is_array($course_ids) && '' != $course_ids && !is_null($course_ids)) {
-
-				$course_ids = array($course_ids);
-			}
-		}
 		if (count($course_ids) < 1) {
 			return array();
 		}
