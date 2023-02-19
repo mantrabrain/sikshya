@@ -110,8 +110,8 @@ class Sikshya_Custom_Post_Type
 	{
 
 		$this->course = new Sikshya_Custom_Post_Type_Course();
-		$this->lesson = new Sikshya_Custom_Post_Type_Lesson();
 		$this->section = new Sikshya_Custom_Post_Type_Section();
+		$this->lesson = new Sikshya_Custom_Post_Type_Lesson();
 		$this->quiz = new Sikshya_Custom_Post_Type_Quiz();
 		$this->question = new Sikshya_Custom_Post_Type_Question();
 		$this->order = new Sikshya_Custom_Post_Type_Order();

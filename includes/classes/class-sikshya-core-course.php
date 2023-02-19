@@ -187,6 +187,46 @@ class Sikshya_Core_Course
 		return $data;
 	}
 
+	public function get_all_by_section($section_id)
+	{
+		if ($section_id instanceof \WP_Post) {
+			$section_id = $section_id->ID;
+		}
+
+		$section_ids = $section_id;
+
+		if (!is_array($section_ids)) {
+
+			$section_ids = $section_ids !== '' ? array($section_ids) : array();
+		}
+
+		$course_ids = array();
+
+		foreach ($section_ids as $section_id) {
+
+			$course_ids = get_post_meta($section_id, 'course_id', true);
+
+			if (!is_array($course_ids) && '' != $course_ids && !is_null($course_ids)) {
+
+				$course_ids = array($course_ids);
+			}
+		}
+		if (count($course_ids) < 1) {
+			return array();
+		}
+
+		$args = array(
+			'numberposts' => -1,
+			'post__in' => $course_ids,
+			'no_found_rows' => true,
+			'orderby' => 'menu_order',
+			'order' => 'asc',
+			'post_type' => SIKSHYA_COURSES_CUSTOM_POST_TYPE,
+		);
+
+		return get_posts($args);
+	}
+
 	public function get_all_by_quiz($quiz_id)
 	{
 		if ($quiz_id instanceof \WP_Post) {

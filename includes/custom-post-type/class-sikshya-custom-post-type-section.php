@@ -21,7 +21,7 @@ if (!class_exists('Sikshya_Custom_Post_Type_Section')) {
                 'capability_type' => 'post',
                 'hierarchical' => false,
                 //'taxonomies' => $this->_getTaxArr(),
-                'menu_position' => null,
+                'menu_position' => 19,
                 'supports' => array(
                     'title',
                     'editor',

@@ -34,7 +34,7 @@ class Sikshya_Admin
 
 	public function admin_redirects()
 	{
-		
+
 
 		if (!get_transient('_sikshya_activation_redirect')) {
 			return;
@@ -90,6 +90,10 @@ class Sikshya_Admin
 			case 'edit-' . SIKSHYA_COURSES_CUSTOM_POST_TYPE:
 				include_once 'list-tables/class-sikshya-admin-list-table-courses.php';
 				new Sikshya_Admin_List_Table_Courses();
+				break;
+			case 'edit-' . SIKSHYA_SECTIONS_CUSTOM_POST_TYPE:
+				include_once 'list-tables/class-sikshya-admin-list-table-sections.php';
+				new Sikshya_Admin_List_Table_Sections();
 				break;
 			case 'edit-' . SIKSHYA_LESSONS_CUSTOM_POST_TYPE:
 				include_once 'list-tables/class-sikshya-admin-list-table-lessons.php';
