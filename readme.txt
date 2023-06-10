@@ -1,11 +1,11 @@
 === Learning Management System, eLearning, Course Builder, WordPress LMS Plugin - Sikshya LMS ===
-Contributors: mantrabrain, ughimire1
+Contributors: MantraBrain, gangadharkashyap
 Donate link: https://mantrabrain.com
 Tags: lms, elearning, education, learning management system, course, quizzes
 Requires at least: 4.7
-Tested up to: 6.1
+Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 0.0.19
+Stable tag: 0.0.20
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -69,6 +69,10 @@ You can create issue from https://github.com/mantrabrain/sikshya/issues
 13. Order
 
 == Changelog ==
+
+
+= 0.0.20 | 2023/06/10 =
+* Fixed - Version compatibility issue fixed
 
 
 = 0.0.19 | 2023/02/19 =
