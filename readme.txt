@@ -3,9 +3,9 @@ Contributors: MantraBrain, gangadharkashyap
 Donate link: https://mantrabrain.com
 Tags: lms, elearning, education, learning management system, course, quizzes
 Requires at least: 4.7
-Tested up to: 6.2
-Requires PHP: 5.6
-Stable tag: 0.0.20
+Tested up to: 6.5
+Requires PHP: 7.2
+Stable tag: 0.0.21
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -71,8 +71,9 @@ You can create issue from https://github.com/mantrabrain/sikshya/issues
 == Changelog ==
 
 
-= 0.0.20 | 2023/06/10 =
+= 0.0.21 | 2024/05/05 =
 * Fixed - Version compatibility issue fixed
+* Fixed - Minor php deprication issue fixed
 
 
 = 0.0.19 | 2023/02/19 =
