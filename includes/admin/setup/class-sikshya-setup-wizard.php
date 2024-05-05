@@ -113,8 +113,12 @@ class Sikshya_Setup_Wizard
 			<meta name="viewport" content="width=device-width"/>
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 			<title><?php _e('Sikshya &rsaquo; Setup Wizard', 'sikshya'); ?></title>
-			<?php wp_print_scripts('sikshya-setup'); ?>
-			<?php do_action('admin_print_styles'); ?>
+			<?php wp_print_scripts('sikshya-setup'); 
+			
+			if(function_exists('print_emoji_styles')) {
+                remove_action('admin_print_styles', 'print_emoji_styles');
+            }
+			do_action('admin_print_styles'); ?>
 			<?php //do_action('admin_head');
 			?>
 		</head>
