@@ -211,7 +211,7 @@ final class Sikshya
 	/**
 	 * Sikshya Constructor.
 	 */
-	public function __construct()
+	protected function __construct()
 	{
 		$this->define_constants();
 		$this->includes();
