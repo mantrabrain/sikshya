@@ -1,3 +1,17 @@
+= 0.0.21 | 2024/05/05 =
+* Fixed - Version compatibility issue fixed
+* Fixed - Minor php deprication issue fixed
+
+
+= 0.0.19 | 2023/02/19 =
+* Fixed - Section php warnign issue fixed
+
+= 0.0.18 | 2023/02/19 =
+* Fixed - Version compatibility
+
+= 0.0.17 | 2022/11/04 =
+* Fixed - Version compatibility
+
 = 0.0.16 | 2022/01/19 =
 * Added - Setup wizard on react js
 * Added - Status & Log updated
