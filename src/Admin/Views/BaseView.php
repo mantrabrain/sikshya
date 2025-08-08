@@ -1,0 +1,124 @@
+<?php
+
+namespace Sikshya\Admin\Views;
+
+use Sikshya\Core\Plugin;
+
+/**
+ * Base View Class for Custom UI Components
+ *
+ * @package Sikshya\Admin\Views
+ */
+abstract class BaseView
+{
+    /**
+     * Plugin instance
+     *
+     * @var Plugin
+     */
+    protected Plugin $plugin;
+
+    /**
+     * View data
+     *
+     * @var array
+     */
+    protected array $data = [];
+
+    /**
+     * Constructor
+     *
+     * @param Plugin $plugin
+     */
+    public function __construct(Plugin $plugin)
+    {
+        $this->plugin = $plugin;
+    }
+
+    /**
+     * Set view data
+     *
+     * @param array $data
+     * @return $this
+     */
+    public function setData(array $data): self
+    {
+        $this->data = array_merge($this->data, $data);
+        return $this;
+    }
+
+    /**
+     * Get view data
+     *
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * Render the view
+     *
+     * @param string $template
+     * @param array $data
+     */
+    public function render(string $template, array $data = []): void
+    {
+        try {
+            error_log('Sikshya BaseView: Starting render for template: ' . $template);
+            
+            $this->setData($data);
+            $this->includeTemplate($template);
+            
+            error_log('Sikshya BaseView: Finished render for template: ' . $template);
+        } catch (\Exception $e) {
+            error_log('Sikshya BaseView Error: ' . $e->getMessage());
+            error_log('Sikshya BaseView Stack: ' . $e->getTraceAsString());
+            echo '<div class="notice notice-error"><p><strong>Sikshya View Error:</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+        }
+    }
+
+    /**
+     * Include template file
+     *
+     * @param string $template
+     */
+    protected function includeTemplate(string $template): void
+    {
+        $template_path = $this->plugin->getTemplatePath("admin/views/{$template}.php");
+        
+        error_log('Sikshya BaseView: Looking for template at: ' . $template_path);
+        error_log('Sikshya BaseView: Template file exists: ' . (file_exists($template_path) ? 'YES' : 'NO'));
+        
+        if (file_exists($template_path)) {
+            try {
+                extract($this->data);
+                include $template_path;
+                error_log('Sikshya BaseView: Template included successfully: ' . $template);
+            } catch (\Exception $e) {
+                error_log('Sikshya BaseView: Template include error: ' . $e->getMessage());
+                throw $e;
+            }
+        } else {
+            error_log('Sikshya BaseView: Template not found: ' . $template_path);
+            echo '<div class="notice notice-error"><p><strong>Template Not Found:</strong> ' . esc_html($template) . '</p></div>';
+        }
+    }
+
+    /**
+     * Get template path
+     *
+     * @param string $template
+     * @return string
+     */
+    protected function getTemplatePath(string $template): string
+    {
+        return $this->plugin->getTemplatePath("admin/views/{$template}.php");
+    }
+
+    /**
+     * Enqueue view assets
+     */
+    abstract public function enqueueAssets(): void;
+} 

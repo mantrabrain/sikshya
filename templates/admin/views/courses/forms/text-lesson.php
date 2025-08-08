@@ -1,0 +1,225 @@
+<?php
+/**
+ * Advanced Text Lesson Form Template
+ * 
+ * @package Sikshya
+ * @since 1.0.0
+ */
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
+
+<div class="sikshya-form-section">
+    <h4 class="sikshya-form-section-title">Basic Information</h4>
+    
+    <div class="sikshya-form-row-small">
+        <label>Lesson Title *</label>
+        <input type="text" id="text-lesson-title" placeholder="Enter lesson title" required>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Description</label>
+        <textarea id="text-lesson-description" placeholder="Brief description of this lesson"></textarea>
+    </div>
+    
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Estimated Reading Time (minutes)</label>
+            <input type="number" id="text-lesson-duration" placeholder="15" min="1">
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Difficulty Level</label>
+            <select id="text-lesson-difficulty">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="sikshya-form-section">
+    <h4 class="sikshya-form-section-title">Lesson Content</h4>
+    
+    <div class="sikshya-form-row-small">
+        <label>Lesson Content *</label>
+        <textarea id="text-lesson-content" placeholder="Enter your lesson content here..." required style="min-height: 400px;"></textarea>
+        <small>You can use HTML formatting for rich text content</small>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Learning Objectives</label>
+        <textarea id="text-lesson-objectives" placeholder="What will students learn from this lesson? (One objective per line)"></textarea>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Key Takeaways</label>
+        <textarea id="text-lesson-takeaways" placeholder="Main points students should remember from this lesson"></textarea>
+    </div>
+</div>
+
+<div class="sikshya-form-section">
+    <h4 class="sikshya-form-section-title">Supporting Materials</h4>
+    
+    <div class="sikshya-form-row-small">
+        <label>Lesson Images</label>
+        <div class="sikshya-upload-area" onclick="document.getElementById('text-images-input').click()">
+            <input type="file" id="text-images-input" accept="image/*" multiple style="display: none;" onchange="handleImagesUpload(this)">
+            <i class="sikshya-upload-icon fas fa-image"></i>
+            <strong>Upload Images</strong>
+            <small>JPG, PNG, GIF (Max 5MB each)</small>
+        </div>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Additional Resources</label>
+        <textarea id="text-lesson-resources" placeholder="Links to additional resources, downloads, external readings, etc."></textarea>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Downloads & Attachments</label>
+        <div class="sikshya-upload-area" onclick="document.getElementById('text-attachments-input').click()">
+            <input type="file" id="text-attachments-input" multiple style="display: none;" onchange="handleAttachmentsUpload(this)">
+            <i class="sikshya-upload-icon fas fa-paperclip"></i>
+            <strong>Upload Files</strong>
+            <small>PDF, DOC, PPT, etc. (Max 20MB each)</small>
+        </div>
+    </div>
+</div>
+
+<div class="sikshya-form-section">
+    <h4 class="sikshya-form-section-title">Lesson Settings</h4>
+    
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Require Completion</label>
+            <select id="text-lesson-completion">
+                <option value="yes">Yes (Mark as read)</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Allow Comments</label>
+            <select id="text-lesson-comments">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Show Progress</label>
+            <select id="text-lesson-progress">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Print Friendly</label>
+            <select id="text-lesson-print">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<button class="sikshya-form-toggle" onclick="toggleAdvancedForm(this)">
+    <i class="fas fa-chevron-down"></i> Advanced Options
+</button>
+
+<div class="sikshya-form-advanced">
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Prerequisites</label>
+            <textarea id="text-lesson-prerequisites" placeholder="What should students know before this lesson?"></textarea>
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Tags</label>
+            <input type="text" id="text-lesson-tags" placeholder="Enter tags separated by commas">
+        </div>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>SEO Description</label>
+        <textarea id="text-lesson-seo" placeholder="SEO-friendly description for search engines"></textarea>
+    </div>
+    
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Lesson Format</label>
+            <select id="text-lesson-format">
+                <option value="article">Article</option>
+                <option value="tutorial">Tutorial</option>
+                <option value="guide">Guide</option>
+                <option value="reference">Reference</option>
+                <option value="case_study">Case Study</option>
+            </select>
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Reading Level</label>
+            <select id="text-lesson-reading-level">
+                <option value="basic">Basic</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+                <option value="expert">Expert</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Estimated Word Count</label>
+            <input type="number" id="text-lesson-word-count" placeholder="1000" min="1">
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Language</label>
+            <select id="text-lesson-language">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="zh">Chinese</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="sikshya-form-grid-2">
+        <div class="sikshya-form-row-small">
+            <label>Include Table of Contents</label>
+            <select id="text-lesson-toc">
+                <option value="auto">Auto-generate</option>
+                <option value="manual">Manual</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+        
+        <div class="sikshya-form-row-small">
+            <label>Enable Search</label>
+            <select id="text-lesson-search">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Related Lessons</label>
+        <textarea id="text-lesson-related" placeholder="Enter lesson IDs or titles of related lessons"></textarea>
+    </div>
+</div> 

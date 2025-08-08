@@ -1,2 +1,0 @@
-<p>Hello <strong><?php echo esc_html($user_display_name) ?></strong> (not <?php echo esc_html($user_display_name); ?>? <a href="<?php echo esc_url(wp_logout_url( )) ?>">Sign out</a>)</p>
-<p><?php echo esc_html($user_bio); ?></p>

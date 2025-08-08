@@ -1,0 +1,211 @@
+<?php
+
+namespace Sikshya\Database\Repositories;
+
+use WP_Query;
+
+class CourseRepository
+{
+    public function findAll(array $args = []): array
+    {
+        $defaults = [
+            'post_type' => 'sikshya_course',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ];
+        
+        $query_args = wp_parse_args($args, $defaults);
+        $query = new WP_Query($query_args);
+        
+        return $query->posts;
+    }
+
+    public function findById(int $id): ?object
+    {
+        $post = get_post($id);
+        return ($post && $post->post_type === 'sikshya_course') ? $post : null;
+    }
+
+    public function create(array $data): int
+    {
+        $post_data = [
+            'post_type' => 'sikshya_course',
+            'post_title' => sanitize_text_field($data['title'] ?? ''),
+            'post_content' => wp_kses_post($data['content'] ?? ''),
+            'post_excerpt' => sanitize_textarea_field($data['excerpt'] ?? ''),
+            'post_status' => $data['status'] ?? 'draft',
+            'post_author' => $data['author_id'] ?? get_current_user_id(),
+        ];
+
+        $post_id = wp_insert_post($post_data, true);
+        
+        if (is_wp_error($post_id)) {
+            return 0;
+        }
+
+        // Set custom meta fields
+        $this->setMetaFields($post_id, $data);
+        
+        return $post_id;
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $post_data = [
+            'ID' => $id,
+            'post_title' => sanitize_text_field($data['title'] ?? ''),
+            'post_content' => wp_kses_post($data['content'] ?? ''),
+            'post_excerpt' => sanitize_textarea_field($data['excerpt'] ?? ''),
+            'post_status' => $data['status'] ?? 'draft',
+        ];
+
+        $result = wp_update_post($post_data, true);
+        
+        if (is_wp_error($result)) {
+            return false;
+        }
+
+        // Update custom meta fields
+        $this->setMetaFields($id, $data);
+        
+        return true;
+    }
+
+    public function delete(int $id): bool
+    {
+        $result = wp_delete_post($id, true);
+        return $result !== false;
+    }
+
+    public function findByInstructor(int $instructor_id, array $args = []): array
+    {
+        $defaults = [
+            'post_type' => 'sikshya_course',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $instructor_id,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ];
+        
+        $query_args = wp_parse_args($args, $defaults);
+        $query = new WP_Query($query_args);
+        
+        return $query->posts;
+    }
+
+    public function findByStatus(string $status, array $args = []): array
+    {
+        $defaults = [
+            'post_type' => 'sikshya_course',
+            'post_status' => $status,
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ];
+        
+        $query_args = wp_parse_args($args, $defaults);
+        $query = new WP_Query($query_args);
+        
+        return $query->posts;
+    }
+
+    public function search(string $search_term, array $args = []): array
+    {
+        $defaults = [
+            'post_type' => 'sikshya_course',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            's' => $search_term,
+            'orderby' => 'relevance',
+        ];
+        
+        $query_args = wp_parse_args($args, $defaults);
+        $query = new WP_Query($query_args);
+        
+        return $query->posts;
+    }
+
+    public function getFeatured(array $args = []): array
+    {
+        $defaults = [
+            'post_type' => 'sikshya_course',
+            'post_status' => 'publish',
+            'posts_per_page' => 6,
+            'meta_query' => [
+                [
+                    'key' => '_sikshya_featured',
+                    'value' => '1',
+                    'compare' => '=',
+                ],
+            ],
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ];
+        
+        $query_args = wp_parse_args($args, $defaults);
+        $query = new WP_Query($query_args);
+        
+        return $query->posts;
+    }
+
+    public function getPopular(array $args = []): array
+    {
+        $defaults = [
+            'post_type' => 'sikshya_course',
+            'post_status' => 'publish',
+            'posts_per_page' => 6,
+            'meta_key' => '_sikshya_enrollment_count',
+            'orderby' => 'meta_value_num',
+            'order' => 'DESC',
+        ];
+        
+        $query_args = wp_parse_args($args, $defaults);
+        $query = new WP_Query($query_args);
+        
+        return $query->posts;
+    }
+
+    private function setMetaFields(int $post_id, array $data): void
+    {
+        $meta_fields = [
+            '_sikshya_price' => 'price',
+            '_sikshya_sale_price' => 'sale_price',
+            '_sikshya_duration' => 'duration',
+            '_sikshya_difficulty' => 'difficulty',
+            '_sikshya_max_students' => 'max_students',
+            '_sikshya_featured' => 'featured',
+            '_sikshya_thumbnail' => 'thumbnail',
+            '_sikshya_video_url' => 'video_url',
+            '_sikshya_course_level' => 'course_level',
+            '_sikshya_language' => 'language',
+            '_sikshya_certificate' => 'certificate',
+            '_sikshya_quizzes' => 'quizzes',
+            '_sikshya_assignments' => 'assignments',
+            '_sikshya_discussions' => 'discussions',
+        ];
+
+        foreach ($meta_fields as $meta_key => $data_key) {
+            if (isset($data[$data_key])) {
+                update_post_meta($post_id, $meta_key, $data[$data_key]);
+            }
+        }
+    }
+
+    public function getMeta(int $post_id, string $key, bool $single = true)
+    {
+        return get_post_meta($post_id, $key, $single);
+    }
+
+    public function setMeta(int $post_id, string $key, $value): bool
+    {
+        return update_post_meta($post_id, $key, $value);
+    }
+
+    public function deleteMeta(int $post_id, string $key): bool
+    {
+        return delete_post_meta($post_id, $key);
+    }
+} 

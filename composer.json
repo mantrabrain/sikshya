@@ -1,23 +1,60 @@
 {
-  "name": "mantrabrain/sikshya",
-  "description": "WordPress Travel & Tour Theme",
-  "homepage": "https://mantrabrain.com/downloads/yatri-travel-tour-theme/",
-  "type": "wordpress-plugin",
-  "license": "GPL-3.0+",
-  "require": {
-    "composer/installers": "~1.0"
-  },
-  "require-dev": {
-    "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "*",
-    "simplyadmire/composer-plugins": "@dev"
-  },
-  "scripts": {
-    "post-install-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
+    "name": "sikshya/lms",
+    "description": "A comprehensive WordPress Learning Management System plugin with modern SaaS design and enterprise-level architecture",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Sikshya Team",
+            "email": "team@sikshya.com"
+        }
     ],
-    "post-update-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs"
-    ]
-  }
-}
+    "require": {
+        "php": ">=8.1",
+        "composer/installers": "^2.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "monolog/monolog": "^3.0",
+        "ramsey/uuid": "^4.0",
+        "vlucas/phpdotenv": "^5.0",
+        "firebase/php-jwt": "^6.0",
+        "phpmailer/phpmailer": "^6.0",
+        "intervention/image": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.0",
+        "squizlabs/php_codesniffer": "^3.0",
+        "phpcompatibility/php-compatibility": "^9.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "mockery/mockery": "^1.0",
+        "fakerphp/faker": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sikshya\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sikshya\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage",
+        "phpstan": "phpstan analyse",
+        "phpcs": "phpcs --standard=PSR12 src/",
+        "phpcbf": "phpcbf --standard=PSR12 src/",
+        "build": "composer install --no-dev --optimize-autoloader"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+} 

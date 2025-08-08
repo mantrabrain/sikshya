@@ -1,0 +1,317 @@
+/* Sikshya LMS Admin Base Styles */
+
+/* Reset and base styles */
+.sikshya-admin-page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Common admin components */
+.sikshya-admin-header {
+    background: #fff;
+    border-bottom: 1px solid #dcdcde;
+    padding: 20px 0;
+    margin-bottom: 20px;
+}
+
+.sikshya-admin-title {
+    margin: 0;
+    color: #1d2327;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.sikshya-admin-subtitle {
+    margin: 10px 0 0 0;
+    color: #646970;
+    font-size: 14px;
+}
+
+/* Common button styles */
+.sikshya-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    background: #fff;
+    color: #1d2327;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sikshya-btn:hover {
+    background: #f8f9fa;
+    border-color: #2271b1;
+    color: #2271b1;
+}
+
+.sikshya-btn-primary {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: #fff;
+}
+
+.sikshya-btn-primary:hover {
+    background: #1e5a8a;
+    border-color: #1e5a8a;
+    color: #fff;
+}
+
+.sikshya-btn-danger {
+    background: #d63638;
+    border-color: #d63638;
+    color: #fff;
+}
+
+.sikshya-btn-danger:hover {
+    background: #b32d2e;
+    border-color: #b32d2e;
+    color: #fff;
+}
+
+/* Common form styles */
+.sikshya-form-group {
+    margin-bottom: 20px;
+}
+
+.sikshya-form-label {
+    display: block;
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.sikshya-form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: border-color 0.2s ease;
+}
+
+.sikshya-form-input:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.sikshya-form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.sikshya-form-select {
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%2020%20height%2020%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+/* Common table styles */
+.sikshya-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sikshya-table th,
+.sikshya-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dcdcde;
+}
+
+.sikshya-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.sikshya-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Common card styles */
+.sikshya-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.sikshya-card-header {
+    border-bottom: 1px solid #dcdcde;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.sikshya-card-title {
+    margin: 0;
+    color: #1d2327;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Common alert styles */
+.sikshya-alert {
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+}
+
+.sikshya-alert-success {
+    background: #f0f9ff;
+    border-color: #00a32a;
+    color: #1d2327;
+}
+
+.sikshya-alert-error {
+    background: #fef7f1;
+    border-color: #d63638;
+    color: #1d2327;
+}
+
+.sikshya-alert-warning {
+    background: #fef7f1;
+    border-color: #dba617;
+    color: #1d2327;
+}
+
+.sikshya-alert-info {
+    background: #f0f9ff;
+    border-color: #2271b1;
+    color: #1d2327;
+}
+
+/* Common loading states */
+.sikshya-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #646970;
+}
+
+.sikshya-loading i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Common grid layout */
+.sikshya-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.sikshya-grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.sikshya-grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.sikshya-grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .sikshya-grid-2,
+    .sikshya-grid-3,
+    .sikshya-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .sikshya-admin-title {
+        font-size: 20px;
+    }
+    
+    .sikshya-card {
+        padding: 15px;
+    }
+}
+
+/* Utility classes */
+.sikshya-text-center {
+    text-align: center;
+}
+
+.sikshya-text-right {
+    text-align: right;
+}
+
+.sikshya-text-left {
+    text-align: left;
+}
+
+.sikshya-mb-0 {
+    margin-bottom: 0;
+}
+
+.sikshya-mb-10 {
+    margin-bottom: 10px;
+}
+
+.sikshya-mb-20 {
+    margin-bottom: 20px;
+}
+
+.sikshya-mt-0 {
+    margin-top: 0;
+}
+
+.sikshya-mt-10 {
+    margin-top: 10px;
+}
+
+.sikshya-mt-20 {
+    margin-top: 20px;
+}
+
+.sikshya-hidden {
+    display: none;
+}
+
+.sikshya-visible {
+    display: block;
+}
+
+/* WordPress admin integration */
+.wp-admin .sikshya-admin-page {
+    margin: 20px 0;
+}
+
+.wp-admin .sikshya-admin-page .wrap {
+    margin: 0;
+}
+
+/* Ensure compatibility with WordPress admin styles */
+.wp-admin .sikshya-form-input,
+.wp-admin .sikshya-form-textarea,
+.wp-admin .sikshya-form-select {
+    max-width: 100%;
+}
+
+.wp-admin .sikshya-btn {
+    line-height: normal;
+    height: auto;
+} 

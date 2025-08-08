@@ -1,0 +1,2199 @@
+.sikshya-course-builder {
+    background: #fafafa;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.sikshya-header {
+    background: #2c3e50;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.sikshya-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color:#fff;
+}
+
+.sikshya-header h1 i {
+    font-size: 20px;
+    opacity: 0.9;
+}
+
+.sikshya-header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.sikshya-btn {
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sikshya-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sikshya-btn-primary {
+    background: #3498db;
+    border-color: #3498db;
+    color: white;
+    font-weight: 600;
+}
+
+.sikshya-btn-primary:hover {
+    background: #2980b9;
+    border-color: #2980b9;
+}
+
+.sikshya-btn-secondary {
+    background: #95a5a6;
+    border-color: #95a5a6;
+    color: white;
+    font-weight: 500;
+}
+
+.sikshya-btn-secondary:hover {
+    background: #7f8c8d;
+    border-color: #7f8c8d;
+}
+
+.sikshya-btn-danger {
+    background: #e74c3c;
+    border-color: #e74c3c;
+    color: white;
+    font-weight: 500;
+}
+
+.sikshya-btn-danger:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+}
+
+.sikshya-main-content {
+    display: flex;
+    min-height: 700px;
+}
+
+.sikshya-sidebar {
+    width: 280px;
+    background: white;
+    border-right: 1px solid #e1e8ed;
+}
+
+.sikshya-tab-nav {
+    list-style: none;
+    margin: 0;
+    padding: 24px 0;
+}
+
+.sikshya-tab-nav-item {
+    margin: 0;
+}
+
+.sikshya-tab-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    color: #5a6c7d;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    margin: 4px 0;
+}
+
+.sikshya-tab-nav-link:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+    border-left-color: #bdc3c7;
+}
+
+.sikshya-tab-nav-link.active {
+    background: #3498db;
+    color: white;
+    border-left-color: white;
+}
+
+.sikshya-tab-icon {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.sikshya-content {
+    flex: 1;
+    padding: 32px;
+    background: white;
+    overflow-y: auto;
+}
+
+.sikshya-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.sikshya-tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.sikshya-section {
+    margin-bottom: 32px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 24px;
+    border: 1px solid #e1e8ed;
+}
+
+.sikshya-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sikshya-section-title::before {
+    content: '';
+    width: 3px;
+    height: 20px;
+    background: #3498db;
+    border-radius: 2px;
+}
+
+.sikshya-form-row {
+    margin-bottom: 20px;
+}
+
+.sikshya-form-row label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #34495e;
+    font-size: 14px;
+}
+
+.sikshya-form-row input[type="text"],
+.sikshya-form-row input[type="number"],
+.sikshya-form-row input[type="email"],
+.sikshya-form-row select,
+.sikshya-form-row textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d8e0;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.sikshya-form-row input:focus,
+.sikshya-form-row select:focus,
+.sikshya-form-row textarea:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.sikshya-form-row textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.sikshya-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.sikshya-form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.sikshya-upload-area {
+    border: 2px dashed #bdc3c7;
+    padding: 32px 24px;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sikshya-upload-area:hover {
+    border-color: #3498db;
+    background: #ecf0f1;
+}
+
+.sikshya-upload-icon {
+    font-size: 28px;
+    color: #7f8c8d;
+    margin-bottom: 12px;
+}
+
+.sikshya-upload-area strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #2c3e50;
+    font-size: 15px;
+}
+
+.sikshya-upload-area small {
+    color: #7f8c8d;
+    font-size: 13px;
+}
+
+/* Chapter Styles */
+.sikshya-chapter {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.sikshya-chapter:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.sikshya-chapter.selected {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.sikshya-chapter-header {
+    background: #f8f9fa;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e1e8ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sikshya-chapter-header:hover {
+    background: #ecf0f1;
+}
+
+.sikshya-chapter-header.expanded {
+    background: #3498db;
+    color: white;
+    border-bottom-color: #3498db;
+}
+
+.sikshya-chapter-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-title {
+    color: white;
+}
+
+.sikshya-chapter-icon {
+    font-size: 18px;
+    color: #3498db;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-icon {
+    color: white;
+}
+
+.sikshya-chapter-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-info {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.sikshya-chapter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sikshya-chapter-btn {
+    background: none;
+    border: 1px solid #e1e8ed;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #7f8c8d;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sikshya-chapter-btn:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-btn {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.sikshya-chapter-content {
+    display: none;
+    padding: 20px;
+    background: white;
+}
+
+.sikshya-chapter-content.expanded {
+    display: block;
+}
+
+.sikshya-chapter-content-inner {
+    min-height: 100px;
+}
+
+.sikshya-chapter-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7f8c8d;
+}
+
+.sikshya-chapter-empty i {
+    font-size: 32px;
+    color: #bdc3c7;
+    margin-bottom: 12px;
+}
+
+.sikshya-chapter-empty h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+.sikshya-chapter-empty p {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.sikshya-add-chapter-btn {
+    width: 100%;
+    padding: 16px;
+    border: 2px dashed #bdc3c7;
+    background: #f8f9fa;
+    color: #7f8c8d;
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    margin-top: 16px;
+}
+
+.sikshya-add-chapter-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+    background: #ecf0f1;
+}
+
+.sikshya-lesson-item {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sikshya-lesson-item:hover {
+    border-color: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+}
+
+.sikshya-lesson-item.selected {
+    border-color: #3498db;
+    background: #f8f9fa;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.sikshya-lesson-item:last-child {
+    margin-bottom: 0;
+}
+
+.sikshya-lesson-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.sikshya-lesson-title {
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    flex: 1;
+}
+
+.sikshya-lesson-title i {
+    color: #3498db;
+    font-size: 16px;
+    min-width: 16px;
+}
+
+.sikshya-lesson-title-text {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.sikshya-lesson-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sikshya-icon-btn {
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #7f8c8d;
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+.sikshya-icon-btn:hover {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.sikshya-add-lesson-btn {
+    width: 100%;
+    padding: 12px;
+    border: 2px dashed #bdc3c7;
+    background: #f8f9fa;
+    color: #7f8c8d;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    margin-top: 12px;
+}
+
+.sikshya-add-lesson-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+    background: #ecf0f1;
+}
+
+.sikshya-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+    transition: all 0.2s ease;
+}
+
+.sikshya-checkbox-group:hover {
+    border-color: #3498db;
+}
+
+.sikshya-checkbox-group input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #3498db;
+}
+
+.sikshya-checkbox-group label {
+    margin: 0;
+    font-weight: 500;
+    color: #34495e;
+    cursor: pointer;
+}
+
+.sikshya-empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: #7f8c8d;
+}
+
+.sikshya-empty-state i {
+    font-size: 48px;
+    color: #bdc3c7;
+    margin-bottom: 16px;
+}
+
+.sikshya-empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+.sikshya-empty-state p {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.sikshya-progress-bar {
+    background: #ecf0f1;
+    height: 4px;
+    border-radius: 2px;
+    margin: 16px 0;
+    overflow: hidden;
+}
+
+.sikshya-progress-fill {
+    height: 100%;
+    background: #3498db;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Bulk Operations */
+.sikshya-bulk-actions {
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sikshya-bulk-actions.active {
+    display: flex;
+}
+
+.sikshya-bulk-info {
+    font-size: 14px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.sikshya-bulk-actions .sikshya-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+/* Inline Editing */
+.sikshya-inline-edit {
+    display: none;
+    margin-top: 8px;
+}
+
+.sikshya-inline-edit.active {
+    display: block;
+}
+
+.sikshya-inline-edit input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.sikshya-inline-edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sikshya-inline-edit-actions .sikshya-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Expandable Forms */
+.sikshya-form-advanced {
+    display: none;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.sikshya-form-advanced.active {
+    display: block;
+}
+
+.sikshya-form-toggle {
+    background: none;
+    border: none;
+    color: #3498db;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-form-toggle:hover {
+    color: #2980b9;
+}
+
+.sikshya-form-toggle i {
+    transition: transform 0.2s ease;
+}
+
+.sikshya-form-toggle.active i {
+    transform: rotate(180deg);
+}
+
+/* Full Width Modal */
+.sikshya-modal-full {
+    max-width: 90% !important;
+    width: 90% !important;
+}
+
+.sikshya-modal-full .sikshya-modal-body {
+    max-height: calc(70vh - 140px);
+    overflow-y: auto;
+}
+
+/* Prevent body scrolling when modal is open */
+body.sikshya-modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Ensure modal overlay covers everything */
+.sikshya-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 999999 !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+/* Override any WordPress admin styles that might interfere */
+body .sikshya-modal-overlay {
+    position: fixed !important;
+    z-index: 999999 !important;
+    display: flex !important;
+}
+
+/* Ensure modal is above everything */
+.sikshya-modal {
+    position: relative !important;
+    z-index: 1000000 !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    max-width: 600px !important;
+    width: 90% !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    transform: scale(0.9) !important;
+    transition: transform 0.3s ease !important;
+    margin: 20px !important;
+}
+
+.sikshya-modal-overlay.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Removed duplicate modal definition - using the one with proper z-index above */
+
+.sikshya-modal-overlay.active .sikshya-modal {
+    transform: scale(1) !important;
+}
+
+/* Ensure modal content is scrollable if needed */
+.sikshya-modal-body {
+    max-height: calc(90vh - 140px); /* Account for header and footer */
+    overflow-y: auto;
+    padding: 0 24px 24px 24px;
+}
+
+/* Full Width Modal */
+.sikshya-modal-full {
+    max-width: 90% !important;
+    width: 90% !important;
+}
+
+.sikshya-modal-full .sikshya-modal-body {
+    max-height: calc(70vh - 140px);
+    overflow-y: auto;
+}
+
+.sikshya-modal-header {
+    padding: 24px 24px 0 24px;
+    border-bottom: 1px solid #e1e8ed;
+    margin-bottom: 24px;
+}
+
+.sikshya-modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sikshya-modal-subtitle {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin: 0;
+}
+
+.sikshya-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-modal-close:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+}
+
+.sikshya-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e1e8ed;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Content Type Selection */
+.sikshya-content-types {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.sikshya-content-type {
+    background: #f8f9fa;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.sikshya-content-type:hover {
+    border-color: #3498db;
+    background: #ecf0f1;
+    transform: translateY(-2px);
+}
+
+.sikshya-content-type.selected {
+    border-color: #3498db;
+    background: #3498db;
+    color: white;
+}
+
+.sikshya-content-type-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: #3498db;
+}
+
+.sikshya-content-type.selected .sikshya-content-type-icon {
+    color: white;
+}
+
+.sikshya-content-type-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.sikshya-content-type-desc {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.sikshya-content-type.selected .sikshya-content-type-desc {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Content Type Specific Styles */
+.sikshya-content-type-text .sikshya-content-type-icon {
+    color: #e74c3c;
+}
+
+.sikshya-content-type-video .sikshya-content-type-icon {
+    color: #e67e22;
+}
+
+.sikshya-content-type-audio .sikshya-content-type-icon {
+    color: #f39c12;
+}
+
+.sikshya-content-type-quiz .sikshya-content-type-icon {
+    color: #9b59b6;
+}
+
+.sikshya-content-type-assignment .sikshya-content-type-icon {
+    color: #27ae60;
+}
+
+.sikshya-content-type.selected .sikshya-content-type-text .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-video .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-audio .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-quiz .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-assignment .sikshya-content-type-icon {
+    color: white;
+}
+
+/* Form Specific Styles */
+.sikshya-form-section {
+    margin-bottom: 24px;
+}
+
+.sikshya-form-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.sikshya-form-row-small {
+    margin-bottom: 16px;
+}
+
+.sikshya-form-row-small label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #34495e;
+    font-size: 13px;
+}
+
+.sikshya-form-row-small input,
+.sikshya-form-row-small select,
+.sikshya-form-row-small textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d8e0;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-form-row-small textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.sikshya-form-row-small input:focus,
+.sikshya-form-row-small select:focus,
+.sikshya-form-row-small textarea:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.sikshya-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.sikshya-form-grid-3-small {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+/* Quiz Specific Styles */
+.sikshya-quiz-questions {
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.sikshya-question-item {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.sikshya-question-header {
+    background: #f8f9fa;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.sikshya-question-number {
+    font-weight: 600;
+    color: #3498db;
+    font-size: 14px;
+}
+
+.sikshya-question-type {
+    color: #7f8c8d;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sikshya-question-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.sikshya-question-content {
+    padding: 16px;
+}
+
+.sikshya-question-text {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 12px;
+}
+
+.sikshya-question-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sikshya-question-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e1e8ed;
+}
+
+.sikshya-question-option input[type="radio"],
+.sikshya-question-option input[type="checkbox"] {
+    margin: 0;
+    accent-color: #3498db;
+}
+
+.sikshya-question-option label {
+    margin: 0;
+    font-size: 14px;
+    color: #34495e;
+    cursor: pointer;
+}
+
+/* Assignment Specific Styles */
+.sikshya-file-requirements {
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.sikshya-file-requirement {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.sikshya-file-requirement:last-child {
+    margin-bottom: 0;
+}
+
+.sikshya-file-requirement input[type="checkbox"] {
+    margin: 0;
+}
+
+.sikshya-file-requirement label {
+    margin: 0;
+    font-size: 13px;
+    color: #34495e;
+}
+
+/* File upload progress styles */
+.sikshya-upload-progress {
+    margin-top: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sikshya-upload-progress .sikshya-progress-bar {
+    height: 6px;
+    background: #e1e8ed;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.sikshya-upload-progress .sikshya-progress-fill {
+    height: 100%;
+    background: #3498db;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.sikshya-upload-status {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 5px;
+    text-align: center;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .sikshya-main-content {
+        flex-direction: column;
+    }
+    
+    .sikshya-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .sikshya-form-grid,
+    .sikshya-form-grid-3,
+    .sikshya-form-grid-2,
+    .sikshya-form-grid-3-small {
+        grid-template-columns: 1fr;
+    }
+
+    .sikshya-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .sikshya-content {
+        padding: 20px;
+    }
+
+    .sikshya-section {
+        padding: 20px;
+    }
+
+    .sikshya-content-types {
+        grid-template-columns: 1fr;
+    }
+
+    .sikshya-modal {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .sikshya-modal-full {
+        width: 95% !important;
+        max-width: 95% !important;
+    }
+
+    .sikshya-bulk-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sikshya-bulk-actions .sikshya-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sikshya-form-grid-2,
+    .sikshya-form-grid-3 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .sikshya-question-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .sikshya-question-actions {
+        align-self: flex-end;
+    }
+}
+
+/* Question Type Specific Styles */
+.sikshya-question-input {
+    margin-top: 12px;
+}
+
+.sikshya-question-input input[type="text"],
+.sikshya-question-input textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #f8f9fa;
+    color: #7f8c8d;
+}
+
+.sikshya-question-input textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.sikshya-question-matching {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 12px;
+}
+
+.sikshya-matching-left,
+.sikshya-matching-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sikshya-matching-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+/* Question Type Badges */
+.sikshya-question-type[data-type="multiple-choice"] {
+    background: #3498db;
+}
+
+.sikshya-question-type[data-type="true-false"] {
+    background: #e74c3c;
+}
+
+.sikshya-question-type[data-type="fill-blank"] {
+    background: #f39c12;
+}
+
+.sikshya-question-type[data-type="essay"] {
+    background: #9b59b6;
+}
+
+.sikshya-question-type[data-type="matching"] {
+    background: #27ae60;
+}
+
+/* Quiz Builder Layout */
+.sikshya-quiz-builder {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.sikshya-quiz-header {
+    background: #2c3e50;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.sikshya-quiz-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sikshya-quiz-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.sikshya-quiz-content {
+    display: flex;
+    min-height: 600px;
+}
+
+/* Quiz Sidebar */
+.sikshya-quiz-sidebar {
+    width: 200px;
+    background: #f8f9fa;
+    border-right: 1px solid #e1e8ed;
+}
+
+.sikshya-quiz-tabs {
+    display: flex;
+    flex-direction: column;
+}
+
+.sikshya-quiz-tab {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #e1e8ed;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #7f8c8d;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    width: 100%;
+}
+
+.sikshya-quiz-tab:hover {
+    background: #e9ecef;
+    color: #2c3e50;
+}
+
+.sikshya-quiz-tab.active {
+    background: #3498db;
+    color: white;
+    border-right: 3px solid #2980b9;
+}
+
+.sikshya-quiz-tab i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.sikshya-question-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Quiz Main Content */
+.sikshya-quiz-main {
+    flex: 1;
+    padding: 24px;
+    background: #fff;
+}
+
+.sikshya-quiz-tab-content {
+    display: none;
+}
+
+.sikshya-quiz-tab-content.active {
+    display: block;
+}
+
+/* Quiz Overview */
+.sikshya-quiz-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.sikshya-overview-card {
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sikshya-overview-icon {
+    width: 50px;
+    height: 50px;
+    background: #3498db;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.sikshya-overview-content h5 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+.sikshya-overview-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Questions Header */
+.sikshya-questions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sikshya-questions-header .sikshya-form-section-title {
+    margin: 0;
+}
+
+.sikshya-question-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Enhanced Question Items */
+.sikshya-question-item {
+    background: #fff;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.sikshya-question-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.sikshya-question-header {
+    background: #f8f9fa;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e1e8ed;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.sikshya-question-header:hover {
+    background: #e9ecef;
+}
+
+.sikshya-question-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.sikshya-question-title {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-left: 12px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sikshya-question-meta {
+    display: flex;
+    gap: 16px;
+    margin-left: 12px;
+    align-items: center;
+}
+
+.sikshya-question-points {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #f39c12;
+    font-weight: 500;
+    background: rgba(243, 156, 18, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.sikshya-question-points i {
+    font-size: 10px;
+}
+
+.sikshya-question-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #7f8c8d;
+    font-weight: 500;
+    background: rgba(127, 140, 141, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.sikshya-question-status.complete {
+    color: #27ae60;
+    background: rgba(39, 174, 96, 0.1);
+}
+
+.sikshya-question-status i {
+    font-size: 10px;
+}
+
+.sikshya-question-difficulty {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #3498db;
+    font-weight: 500;
+    background: rgba(52, 152, 219, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.sikshya-question-difficulty i {
+    font-size: 10px;
+}
+
+.sikshya-question-number {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+    background: #3498db;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.sikshya-question-type {
+    background: #3498db;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.sikshya-question-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sikshya-question-content {
+    padding: 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.sikshya-question-content.collapsed {
+    max-height: 0;
+    padding: 0 20px;
+    opacity: 0;
+}
+
+.sikshya-question-toggle {
+    transition: transform 0.3s ease;
+}
+
+.sikshya-question-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.sikshya-question-text {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.sikshya-question-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sikshya-question-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+}
+
+.sikshya-question-option input[type="radio"],
+.sikshya-question-option input[type="checkbox"] {
+    margin: 0;
+}
+
+.sikshya-question-option label {
+    margin: 0;
+    font-weight: 500;
+    color: #2c3e50;
+    flex: 1;
+}
+
+.sikshya-question-option.correct {
+    background: #d5f4e6;
+    border-color: #27ae60;
+}
+
+.sikshya-question-option.correct::after {
+    content: "✓ Correct";
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 12px;
+    margin-left: auto;
+}
+
+/* Question Edit Modal - Removed conflicting styles */
+
+.sikshya-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.sikshya-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.sikshya-modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-modal-close:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+}
+
+.sikshya-modal-body {
+    padding: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.sikshya-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e1e8ed;
+    background: #f8f9fa;
+}
+
+/* Question Options Editor */
+.sikshya-question-option-editor {
+    margin-top: 16px;
+}
+
+.sikshya-option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+}
+
+.sikshya-option-item input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.sikshya-option-item input[type="radio"],
+.sikshya-option-item input[type="checkbox"] {
+    margin: 0;
+}
+
+.sikshya-option-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.sikshya-option-actions button {
+    background: none;
+    border: none;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-option-actions button:hover {
+    background: #e9ecef;
+    color: #2c3e50;
+}
+
+.sikshya-add-option-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.sikshya-add-option-btn:hover {
+    background: #2980b9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-quiz-content {
+        flex-direction: column;
+    }
+    
+    .sikshya-quiz-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .sikshya-quiz-tabs {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .sikshya-quiz-tab {
+        flex-shrink: 0;
+        border-bottom: none;
+        border-right: 1px solid #e1e8ed;
+        min-width: 120px;
+    }
+    
+    .sikshya-quiz-tab.active {
+        border-right: 3px solid #2980b9;
+    }
+    
+    .sikshya-questions-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .sikshya-question-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .sikshya-quiz-overview {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Quiz Preview Styles */
+.sikshya-quiz-preview {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sikshya-quiz-preview-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e1e8ed;
+}
+
+.sikshya-quiz-preview-header h2 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 24px;
+}
+
+.sikshya-quiz-preview-info {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.sikshya-quiz-preview-info span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sikshya-quiz-preview-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sikshya-quiz-preview-question {
+    background: #fff;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.sikshya-question-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.sikshya-question-preview-number {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.sikshya-question-preview-type {
+    background: #3498db;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.sikshya-question-preview-points {
+    color: #7f8c8d;
+    font-size: 12px;
+}
+
+.sikshya-question-preview-text {
+    font-size: 16px;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.sikshya-question-preview-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sikshya-question-preview-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+}
+
+.sikshya-question-preview-option input[type="radio"] {
+    margin: 0;
+}
+
+.sikshya-question-preview-option label {
+    margin: 0;
+    font-weight: 500;
+    color: #2c3e50;
+    flex: 1;
+}
+
+.sikshya-question-preview-input input[type="text"],
+.sikshya-question-preview-input textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #f8f9fa;
+    color: #7f8c8d;
+}
+
+.sikshya-question-preview-input textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.sikshya-question-preview-matching {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.sikshya-matching-preview-left,
+.sikshya-matching-preview-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sikshya-matching-preview-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+/* Matching Pairs Editor */
+.sikshya-matching-pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.sikshya-matching-pair {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+}
+
+.sikshya-matching-pair input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.sikshya-matching-pair i {
+    color: #3498db;
+    font-size: 16px;
+}
+
+.sikshya-matching-pair button {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-matching-pair button:hover {
+    background: #fdf2f2;
+}
+
+/* Quiz Empty State */
+.sikshya-quiz-empty {
+    text-align: center;
+    padding: 40px;
+    background: #f8f9fa;
+    border: 2px dashed #e1e8ed;
+    border-radius: 6px;
+}
+
+.sikshya-quiz-empty i {
+    font-size: 48px;
+    color: #bdc3c7;
+    margin-bottom: 16px;
+}
+
+.sikshya-quiz-empty h4 {
+    margin: 0 0 8px 0;
+    color: #7f8c8d;
+}
+
+.sikshya-quiz-empty p {
+    margin: 0;
+    color: #95a5a6;
+}
+
+/* Notification System */
+.sikshya-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10000;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease;
+}
+
+.sikshya-notification-success {
+    border-left: 4px solid #27ae60;
+}
+
+.sikshya-notification-error {
+    border-left: 4px solid #e74c3c;
+}
+
+.sikshya-notification-info {
+    border-left: 4px solid #3498db;
+}
+
+.sikshya-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.sikshya-notification-content i {
+    font-size: 16px;
+}
+
+.sikshya-notification-success .sikshya-notification-content i {
+    color: #27ae60;
+}
+
+.sikshya-notification-error .sikshya-notification-content i {
+    color: #e74c3c;
+}
+
+.sikshya-notification-info .sikshya-notification-content i {
+    color: #3498db;
+}
+
+.sikshya-notification-content span {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.sikshya-notification-close {
+    background: none;
+    border: none;
+    color: #7f8c8d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-notification-close:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Question Preview Styles for Main Content Area */
+.sikshya-question-preview {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e1e8ed;
+}
+
+/* Modal overlay no longer needed for question editing */
+
+.sikshya-question-preview-text {
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    display: block;
+    line-height: 1.4;
+}
+
+.sikshya-question-preview-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.sikshya-question-preview-type {
+    background: #3498db;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.sikshya-question-preview-options {
+    color: #7f8c8d;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Inline Question Edit Form Styles */
+.sikshya-question-edit-form {
+    background: #f8f9fa;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.sikshya-question-edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.sikshya-question-edit-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sikshya-question-edit-header h4 i {
+    color: #3498db;
+}
+
+.sikshya-question-edit-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sikshya-question-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e1e8ed;
+} 
