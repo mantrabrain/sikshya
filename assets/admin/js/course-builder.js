@@ -31,8 +31,8 @@ function sikshyaAjax(action, data, callback) {
 
 // Tab switching
 function switchTab(tabName) {
-    // Remove active class from all tabs and content
-    document.querySelectorAll('.sikshya-tab-nav-link').forEach(link => {
+    // Remove active class from all nav links and content
+    document.querySelectorAll('.sikshya-nav-link').forEach(link => {
         link.classList.remove('active');
     });
     document.querySelectorAll('.sikshya-tab-content').forEach(content => {
@@ -40,8 +40,15 @@ function switchTab(tabName) {
     });
 
     // Add active class to clicked tab and corresponding content
-    event.target.closest('.sikshya-tab-nav-link').classList.add('active');
-    document.getElementById(tabName).classList.add('active');
+    const clickedLink = event.target.closest('.sikshya-nav-link');
+    if (clickedLink) {
+        clickedLink.classList.add('active');
+    }
+    
+    const targetContent = document.getElementById(tabName);
+    if (targetContent) {
+        targetContent.classList.add('active');
+    }
 }
 
 // Pricing toggle

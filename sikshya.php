@@ -58,7 +58,8 @@ add_action('plugins_loaded', function() {
         
         // Add admin notice
         add_action('admin_notices', function() use ($e) {
-            echo '<div class="notice notice-error"><p><strong>Sikshya LMS Initialization Error:</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+            // Error logged instead of displayed
+            error_log('Sikshya LMS Initialization Error: ' . $e->getMessage());
         });
     }
 });

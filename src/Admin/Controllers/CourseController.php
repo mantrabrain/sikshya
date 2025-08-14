@@ -213,7 +213,7 @@ class CourseController extends BaseView
         } catch (\Exception $e) {
             error_log('Sikshya CourseController Error: ' . $e->getMessage());
             error_log('Sikshya CourseController Stack: ' . $e->getTraceAsString());
-            echo '<div class="notice notice-error"><p><strong>Sikshya Course Builder Error:</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+            echo '<!-- Sikshya Course Builder Error: ' . esc_html($e->getMessage()) . ' -->';
         }
     }
 

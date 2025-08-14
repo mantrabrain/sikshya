@@ -84,7 +84,7 @@ class Dashboard extends BaseView
     {
         $this->enqueueAssets();
         
-        return $this->render('dashboard', [
+        return $this->renderToString('dashboard', [
             'config' => $this->config,
             'widgets' => $this->widgets,
         ]);

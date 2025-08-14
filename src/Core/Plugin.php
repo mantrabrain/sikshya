@@ -120,7 +120,8 @@ final class Plugin
             
             // Add admin notice
             add_action('admin_notices', function() use ($e) {
-                echo '<div class="notice notice-error"><p><strong>Sikshya LMS Error:</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+                // Error logged instead of displayed on Sikshya pages
+                error_log('Sikshya LMS Error: ' . $e->getMessage());
             });
         }
     }

@@ -75,7 +75,35 @@ abstract class BaseView
         } catch (\Exception $e) {
             error_log('Sikshya BaseView Error: ' . $e->getMessage());
             error_log('Sikshya BaseView Stack: ' . $e->getTraceAsString());
-            echo '<div class="notice notice-error"><p><strong>Sikshya View Error:</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+            // Removed notice display - errors are logged instead
+        }
+    }
+
+    /**
+     * Render the view and return as string
+     *
+     * @param string $template
+     * @param array $data
+     * @return string
+     */
+    public function renderToString(string $template, array $data = []): string
+    {
+        try {
+            error_log('Sikshya BaseView: Starting renderToString for template: ' . $template);
+            
+            $this->setData($data);
+            
+            ob_start();
+            $this->includeTemplate($template);
+            $output = ob_get_clean();
+            
+            error_log('Sikshya BaseView: Finished renderToString for template: ' . $template);
+            
+            return $output !== false ? $output : '';
+        } catch (\Exception $e) {
+            error_log('Sikshya BaseView Error: ' . $e->getMessage());
+            error_log('Sikshya BaseView Stack: ' . $e->getTraceAsString());
+            return '<!-- Sikshya View Error: ' . esc_html($e->getMessage()) . ' -->';
         }
     }
 
@@ -102,7 +130,7 @@ abstract class BaseView
             }
         } else {
             error_log('Sikshya BaseView: Template not found: ' . $template_path);
-            echo '<div class="notice notice-error"><p><strong>Template Not Found:</strong> ' . esc_html($template) . '</p></div>';
+            echo '<!-- Template Not Found: ' . esc_html($template) . ' -->';
         }
     }
 

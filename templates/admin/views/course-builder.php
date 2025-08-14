@@ -35,26 +35,155 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
 
     <div class="sikshya-main-content">
         <div class="sikshya-sidebar">
-            <ul class="sikshya-tab-nav">
-                <li class="sikshya-tab-nav-item">
-                    <a href="#" class="sikshya-tab-nav-link active" onclick="switchTab('course')">
-                        <i class="fas fa-book sikshya-tab-icon"></i>
-                        Course Information
-                    </a>
-                </li>
-                <li class="sikshya-tab-nav-item">
-                    <a href="#" class="sikshya-tab-nav-link" onclick="switchTab('curriculum')">
-                        <i class="fas fa-list-ul sikshya-tab-icon"></i>
-                        Curriculum
-                    </a>
-                </li>
-                <li class="sikshya-tab-nav-item">
-                    <a href="#" class="sikshya-tab-nav-link" onclick="switchTab('settings')">
-                        <i class="fas fa-cog sikshya-tab-icon"></i>
-                        Settings
-                    </a>
-                </li>
-            </ul>
+            <!-- Course Progress Summary -->
+            <div class="sikshya-sidebar-header">
+                <div class="sikshya-course-status">
+                    <div class="sikshya-status-indicator draft">
+                        <span class="sikshya-status-dot"></span>
+                        Draft
+                    </div>
+                    <div class="sikshya-completion-circle">
+                        <svg class="sikshya-progress-ring" width="40" height="40">
+                            <circle class="sikshya-progress-ring-circle" stroke="#e5e7eb" stroke-width="3" fill="transparent" r="16" cx="20" cy="20"/>
+                            <circle class="sikshya-progress-ring-progress" stroke="#2563eb" stroke-width="3" fill="transparent" r="16" cx="20" cy="20" style="stroke-dasharray: 100.53 100.53; stroke-dashoffset: 70.37;"/>
+                        </svg>
+                        <span class="sikshya-progress-text">30%</span>
+                    </div>
+                </div>
+                <div class="sikshya-course-title">
+                    <h3>New Course</h3>
+                    <p>Complete all sections to publish</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="sikshya-sidebar-nav">
+                <div class="sikshya-nav-section">
+                    <h4 class="sikshya-nav-section-title">Course Setup</h4>
+                    <ul class="sikshya-nav-list">
+                        <li class="sikshya-nav-item">
+                            <a href="#" class="sikshya-nav-link active" onclick="switchTab('course')" data-tab="course">
+                                <div class="sikshya-nav-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-nav-content">
+                                    <span class="sikshya-nav-title">Course Information</span>
+                                    <span class="sikshya-nav-desc">Basic details & media</span>
+                                </div>
+                                <div class="sikshya-nav-status completed">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20,6 9,17 4,12"/>
+                                    </svg>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sikshya-nav-item">
+                            <a href="#" class="sikshya-nav-link" onclick="switchTab('curriculum')" data-tab="curriculum">
+                                <div class="sikshya-nav-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-nav-content">
+                                    <span class="sikshya-nav-title">Curriculum</span>
+                                    <span class="sikshya-nav-desc">Lessons & content</span>
+                                </div>
+                                <div class="sikshya-nav-status in-progress">
+                                    <span class="sikshya-progress-count">2/5</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sikshya-nav-item">
+                            <a href="#" class="sikshya-nav-link" onclick="switchTab('settings')" data-tab="settings">
+                                <div class="sikshya-nav-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v6m0 6v6"/>
+                                        <path d="M1 12h6m6 0h6"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-nav-content">
+                                    <span class="sikshya-nav-title">Settings</span>
+                                    <span class="sikshya-nav-desc">Pricing & preferences</span>
+                                </div>
+                                <div class="sikshya-nav-status pending">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 6v6l4 2"/>
+                                    </svg>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sikshya-nav-section">
+                    <h4 class="sikshya-nav-section-title">Quick Actions</h4>
+                    <ul class="sikshya-nav-list">
+                        <li class="sikshya-nav-item">
+                            <a href="#" class="sikshya-nav-link sikshya-quick-action" onclick="previewCourse()">
+                                <div class="sikshya-nav-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </div>
+                                <span class="sikshya-nav-title">Preview Course</span>
+                            </a>
+                        </li>
+                        <li class="sikshya-nav-item">
+                            <a href="#" class="sikshya-nav-link sikshya-quick-action" onclick="saveDraft()">
+                                <div class="sikshya-nav-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                        <polyline points="17,21 17,13 7,13 7,21"/>
+                                        <polyline points="7,3 7,8 15,8"/>
+                                    </svg>
+                                </div>
+                                <span class="sikshya-nav-title">Save Draft</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Publish Section -->
+            <div class="sikshya-sidebar-footer">
+                <div class="sikshya-publish-checklist">
+                    <h4>Ready to Publish?</h4>
+                    <ul class="sikshya-checklist">
+                        <li class="completed">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20,6 9,17 4,12"/>
+                            </svg>
+                            Course information
+                        </li>
+                        <li class="pending">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            Add curriculum content
+                        </li>
+                        <li class="pending">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            Configure settings
+                        </li>
+                    </ul>
+                </div>
+                <button class="sikshya-publish-btn" onclick="publishCourse()" disabled>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+                    </svg>
+                    Publish Course
+                </button>
+            </div>
         </div>
 
         <div class="sikshya-content">
@@ -297,4 +426,410 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<!-- Design system is now integrated into admin.css -->
+
+<style>
+/* Course Builder using Design System */
+.sikshya-course-builder {
+    background: var(--sikshya-gray-50);
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-family: var(--sikshya-font-family);
+    min-height: 100vh;
+}
+
+.sikshya-main-content {
+    display: flex;
+    min-height: calc(100vh - 80px);
+}
+
+/* Sidebar Styling */
+.sikshya-sidebar {
+    width: 320px;
+    background: white;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* Sidebar Header */
+.sikshya-sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+
+.sikshya-course-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.sikshya-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 16px;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.sikshya-status-indicator.draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.sikshya-status-indicator.published {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.sikshya-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.sikshya-completion-circle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sikshya-progress-ring {
+    transform: rotate(-90deg);
+}
+
+.sikshya-progress-ring-circle {
+    transition: stroke-dashoffset 0.35s;
+}
+
+.sikshya-progress-text {
+    position: absolute;
+    font-size: 11px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.sikshya-course-title h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.sikshya-course-title p {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Navigation */
+.sikshya-sidebar-nav {
+    flex: 1;
+    padding: 0;
+    overflow-y: auto;
+}
+
+.sikshya-nav-section {
+    padding: 24px 16px 16px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.sikshya-nav-section:last-child {
+    border-bottom: none;
+}
+
+.sikshya-nav-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 16px 8px;
+}
+
+.sikshya-nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sikshya-nav-item {
+    margin-bottom: 2px;
+}
+
+.sikshya-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.sikshya-nav-link:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.sikshya-nav-link.active {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+    outline: none;
+    box-shadow: none;
+}
+
+.sikshya-nav-link:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.sikshya-nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #2563eb;
+    border-radius: 0 2px 2px 0;
+}
+
+.sikshya-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.sikshya-nav-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.sikshya-nav-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.sikshya-nav-desc {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.sikshya-nav-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sikshya-nav-status.completed {
+    color: #059669;
+}
+
+.sikshya-nav-status.in-progress {
+    color: #d97706;
+}
+
+.sikshya-nav-status.pending {
+    color: #6b7280;
+}
+
+.sikshya-progress-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #374151;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.sikshya-quick-action {
+    padding: 10px 12px;
+}
+
+.sikshya-quick-action .sikshya-nav-content {
+    display: none;
+}
+
+/* Sidebar Footer */
+.sikshya-sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+
+.sikshya-publish-checklist h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 12px 0;
+}
+
+.sikshya-checklist {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+}
+
+.sikshya-checklist li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.sikshya-checklist li.completed {
+    color: #059669;
+}
+
+.sikshya-checklist li.pending {
+    color: #6b7280;
+}
+
+.sikshya-publish-btn {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.sikshya-publish-btn:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.sikshya-publish-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Content Area */
+.sikshya-content {
+    flex: 1;
+    background: white;
+    overflow-y: auto;
+    padding: 32px;
+}
+
+/* Header Updates */
+.sikshya-header {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+    padding: 20px 32px;
+}
+
+.sikshya-header h1 {
+    color: #1f2937;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Button Updates */
+.sikshya-btn {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.sikshya-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.sikshya-btn-primary {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.sikshya-btn-primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .sikshya-sidebar {
+        width: 280px;
+    }
+    
+    .sikshya-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sikshya-main-content {
+        flex-direction: column;
+    }
+    
+    .sikshya-sidebar {
+        width: 100%;
+        max-height: 300px;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .sikshya-sidebar-nav {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .sikshya-nav-desc {
+        display: none;
+    }
+    
+    .sikshya-content {
+        padding: 20px;
+    }
+}
+</style> 

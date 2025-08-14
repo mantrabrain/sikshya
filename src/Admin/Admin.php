@@ -70,6 +70,15 @@ class Admin
         add_action('admin_notices', [$this, 'displayAdminNotices']);
         add_action('admin_footer', [$this, 'addAdminFooter']);
         
+        // Remove all other admin notices on Sikshya pages
+        add_action('admin_head', [$this, 'removeOtherNoticesOnSikshyaPages']);
+        
+        // Remove WordPress notices at action level
+        add_action('admin_init', [$this, 'removeWordPressNoticesOnSikshyaPages'], 1);
+        
+        // Suppress PHP notices and warnings on Sikshya pages
+        add_action('admin_init', [$this, 'suppressPHPNoticesOnSikshyaPages'], 1);
+        
         // Add AJAX handlers for settings
         add_action('wp_ajax_sikshya_load_settings_tab', [$this->controllers['setting'], 'handleLoadSettingsTab']);
         add_action('wp_ajax_sikshya_reset_settings_tab', [$this->controllers['setting'], 'handleResetSettingsTab']);
@@ -377,6 +386,14 @@ class Admin
      */
     public function displayAdminNotices(): void
     {
+        // Check if we're on a Sikshya admin page
+        if ($this->isSikshyaAdminPage()) {
+            // Don't display any notices on Sikshya pages
+            // Clear notices anyway to prevent accumulation
+            delete_option('sikshya_admin_notices');
+            return;
+        }
+
         // Get notices from session or options
         $notices = get_option('sikshya_admin_notices', []);
 
@@ -393,11 +410,193 @@ class Admin
     }
 
     /**
+     * Check if current page is a Sikshya admin page
+     *
+     * @return bool
+     */
+    private function isSikshyaAdminPage(): bool
+    {
+        $screen = get_current_screen();
+        
+        if (!$screen) {
+            return false;
+        }
+
+        // List of Sikshya admin page IDs
+        $sikshya_pages = [
+            'toplevel_page_sikshya',
+            'sikshya_page_sikshya-courses',
+            'sikshya_page_sikshya-add-course', 
+            'sikshya_page_sikshya-lessons',
+            'sikshya_page_sikshya-quizzes',
+            'sikshya_page_sikshya-questions',
+            'sikshya_page_sikshya-enrollments',
+            'sikshya_page_sikshya-reports',
+            'sikshya_page_sikshya-settings',
+            'sikshya_page_sikshya-tools',
+            'sikshya_page_sikshya-addons'
+        ];
+
+        return in_array($screen->id, $sikshya_pages, true);
+    }
+
+    /**
+     * Remove WordPress notices on Sikshya pages using proper WordPress functions
+     */
+    public function removeOtherNoticesOnSikshyaPages(): void
+    {
+        if ($this->isSikshyaAdminPage()) {
+            // Simple CSS to hide only known WordPress notice classes
+            echo '<style>
+                /* Hide only specific WordPress admin notice classes */
+                .notice.is-dismissible,
+                .error.is-dismissible, 
+                .updated.is-dismissible,
+                .update-nag,
+                .settings-error {
+                    display: none !important;
+                }
+            </style>';
+        }
+    }
+
+    /**
+     * Remove WordPress notices at the action level on Sikshya pages
+     */
+    public function removeWordPressNoticesOnSikshyaPages(): void
+    {
+        if ($this->isSikshyaAdminPage()) {
+            // Store our handler before removing all actions
+            $our_handler = [$this, 'displayAdminNotices'];
+            
+            // Remove all admin notice actions
+            remove_all_actions('admin_notices');
+            remove_all_actions('all_admin_notices');
+            remove_all_actions('network_admin_notices');
+            remove_all_actions('user_admin_notices');
+            
+            // Re-add only our Sikshya notice handler
+            add_action('admin_notices', $our_handler);
+            
+            // Remove specific WordPress update notices
+            remove_action('admin_notices', 'update_nag', 3);
+            remove_action('network_admin_notices', 'update_nag', 3);
+            remove_action('admin_notices', 'maintenance_nag', 10);
+            
+            // Remove file editing warnings
+            remove_action('admin_notices', 'wp_print_file_editor_templates');
+            
+            // Remove plugin update nags
+            remove_action('load-update-core.php', 'wp_update_plugins');
+            remove_action('load-plugins.php', 'wp_update_plugins');
+            remove_action('load-update.php', 'wp_update_plugins');
+            
+            // Clear any existing notices in the options
+            delete_option('sikshya_admin_notices');
+        }
+    }
+
+    /**
+     * Suppress PHP notices and warnings on Sikshya pages (simplified)
+     */
+    public function suppressPHPNoticesOnSikshyaPages(): void
+    {
+        if ($this->isSikshyaAdminPage()) {
+            // Add a custom error handler to filter out theme-related notices
+            set_error_handler([$this, 'sikshyaErrorHandler'], E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING);
+        }
+    }
+
+    /**
+     * Custom error handler for Sikshya pages
+     */
+    public function sikshyaErrorHandler(int $errno, string $errstr, string $errfile = '', int $errline = 0): bool
+    {
+        // Only handle notices and warnings
+        if (!in_array($errno, [E_NOTICE, E_WARNING, E_USER_NOTICE, E_USER_WARNING])) {
+            return false; // Let WordPress handle other errors
+        }
+        
+        // List of notices/warnings to suppress on Sikshya pages
+        $suppress_patterns = [
+            '/textdomain.*was triggered too early/i',
+            '/translation loading.*domain.*triggered too early/i',
+            '/_load_textdomain_just_in_time.*incorrectly/i',
+            '/pragyan.*domain.*triggered too early/i',
+        ];
+        
+        foreach ($suppress_patterns as $pattern) {
+            if (preg_match($pattern, $errstr)) {
+                // Log to our own log if needed (optional)
+                error_log("Sikshya: Suppressed notice on admin page: {$errstr}");
+                return true; // Suppress this error
+            }
+        }
+        
+        // For other notices/warnings, let WordPress handle them
+        return false;
+    }
+
+    /**
+     * Filter debug log contents for Sikshya pages
+     */
+    public function filterDebugLogForSikshyaPages(string $contents, string $file): string
+    {
+        if ($this->isSikshyaAdminPage()) {
+            // Remove lines containing theme-related notices
+            $lines = explode("\n", $contents);
+            $filtered_lines = [];
+            
+            foreach ($lines as $line) {
+                $should_suppress = false;
+                
+                $suppress_patterns = [
+                    '/textdomain.*was triggered too early/i',
+                    '/translation loading.*domain.*triggered too early/i',
+                    '/_load_textdomain_just_in_time.*incorrectly/i',
+                    '/pragyan.*domain.*triggered too early/i',
+                ];
+                
+                foreach ($suppress_patterns as $pattern) {
+                    if (preg_match($pattern, $line)) {
+                        $should_suppress = true;
+                        break;
+                    }
+                }
+                
+                if (!$should_suppress) {
+                    $filtered_lines[] = $line;
+                }
+            }
+            
+            return implode("\n", $filtered_lines);
+        }
+        
+        return $contents;
+    }
+
+    /**
+     * Restore error reporting when leaving Sikshya pages
+     */
+    public function restoreErrorReporting(): void
+    {
+        if (defined('SIKSHYA_ORIGINAL_ERROR_REPORTING')) {
+            error_reporting(SIKSHYA_ORIGINAL_ERROR_REPORTING);
+            restore_error_handler();
+        }
+    }
+
+    /**
      * Add admin footer
      */
     public function addAdminFooter(): void
     {
         $screen = get_current_screen();
+        
+        // Restore error reporting if not on Sikshya page
+        if (!$screen || !$this->isSikshyaAdminPage()) {
+            $this->restoreErrorReporting();
+        }
         
         if (!$screen || strpos($screen->id, 'sikshya') === false) {
             return;

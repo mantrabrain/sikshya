@@ -116,8 +116,10 @@ $setting_groups = [
                        class="sikshya-settings-tab <?php echo $current_tab === $tab_key ? 'active' : ''; ?>"
                        data-tab="<?php echo esc_attr($tab_key); ?>">
                         <i class="<?php echo esc_attr($tab_data['icon']); ?>"></i>
-                        <span class="tab-title"><?php echo esc_html($tab_data['title']); ?></span>
-                        <span class="tab-description"><?php echo esc_html($tab_data['description']); ?></span>
+                        <div class="tab-content">
+                            <span class="tab-title"><?php echo esc_html($tab_data['title']); ?></span>
+                            <span class="tab-description"><?php echo esc_html($tab_data['description']); ?></span>
+                        </div>
                     </a>
                 <?php endforeach; ?>
             </div>
