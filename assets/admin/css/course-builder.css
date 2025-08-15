@@ -2611,4 +2611,910 @@ body .sikshya-modal-overlay {
     margin-top: 20px;
     padding-top: 15px;
     border-top: 1px solid #e1e8ed;
+}
+
+/* ========================================
+   CURRICULUM BUILDER STYLES
+======================================== */
+
+
+
+
+
+.sikshya-curriculum-stats {
+    display: flex;
+    gap: var(--sikshya-space-8);
+}
+
+.sikshya-stat-item {
+    text-align: center;
+    padding: var(--sikshya-space-4);
+    background: var(--sikshya-gray-50);
+    border-radius: var(--sikshya-radius-lg);
+    min-width: 80px;
+}
+
+.sikshya-stat-number {
+    display: block;
+    font-size: var(--sikshya-text-xl);
+    font-weight: var(--sikshya-font-bold);
+    color: var(--sikshya-primary);
+    margin-bottom: var(--sikshya-space-1);
+}
+
+.sikshya-stat-label {
+    font-size: var(--sikshya-text-sm);
+    color: var(--sikshya-gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Progress Overview */
+.sikshya-progress-overview {
+    margin-bottom: var(--sikshya-space-8);
+    padding: var(--sikshya-space-6);
+    background: var(--sikshya-primary-bg);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-primary-border);
+}
+
+.sikshya-progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--sikshya-space-4);
+}
+
+.sikshya-progress-label {
+    font-size: var(--sikshya-text-base);
+    font-weight: var(--sikshya-font-medium);
+    color: var(--sikshya-gray-900);
+}
+
+.sikshya-progress-percentage {
+    font-size: var(--sikshya-text-lg);
+    font-weight: var(--sikshya-font-bold);
+    color: var(--sikshya-primary);
+}
+
+.sikshya-progress-bar {
+    height: 8px;
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-full);
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sikshya-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sikshya-primary) 0%, var(--sikshya-accent) 100%);
+    border-radius: var(--sikshya-radius-full);
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* ========================================
+   COMPACT EMPTY STATE DESIGN
+======================================== */
+
+.sikshya-curriculum-empty-state {
+    margin-bottom: var(--sikshya-space-8);
+}
+
+/* Compact Header with Inline Actions */
+.sikshya-empty-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sikshya-space-6);
+    padding: var(--sikshya-space-8);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-100);
+    box-shadow: var(--sikshya-shadow-sm);
+    margin-bottom: var(--sikshya-space-6);
+}
+
+.sikshya-empty-content {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+    flex: 1;
+}
+
+.sikshya-empty-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--sikshya-primary-bg);
+    color: var(--sikshya-primary);
+    border-radius: var(--sikshya-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sikshya-empty-text h3 {
+    font-size: var(--sikshya-text-xl);
+    font-weight: var(--sikshya-font-semibold);
+    color: var(--sikshya-gray-900);
+    margin: 0 0 var(--sikshya-space-1) 0;
+}
+
+.sikshya-empty-text p {
+    font-size: var(--sikshya-text-base);
+    color: var(--sikshya-gray-600);
+    margin: 0;
+    line-height: var(--sikshya-leading-normal);
+}
+
+.sikshya-empty-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+    flex-shrink: 0;
+}
+
+
+
+/* Tips Strip */
+.sikshya-tips-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-8);
+    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    background: var(--sikshya-gray-50);
+    border-radius: var(--sikshya-radius-lg);
+    border: 1px solid var(--sikshya-gray-100);
+    flex-wrap: wrap;
+}
+
+.sikshya-tip-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    color: var(--sikshya-gray-700);
+    font-size: var(--sikshya-text-sm);
+}
+
+.sikshya-tip-item svg {
+    color: var(--sikshya-success);
+    flex-shrink: 0;
+}
+
+.sikshya-help-link {
+    margin-left: auto;
+}
+
+.sikshya-help-link a {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    color: var(--sikshya-primary);
+    text-decoration: none;
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-help-link a:hover {
+    color: var(--sikshya-primary-hover);
+}
+
+/* Simple state management - existing curriculum items */
+.sikshya-curriculum-items {
+    margin-bottom: var(--sikshya-space-6);
+}
+
+/* ========================================
+   CHAPTER CONTENT DESIGN
+======================================== */
+
+/* Chapter Content Area */
+.sikshya-chapter-content {
+    border-top: 1px solid var(--sikshya-gray-200);
+    background: var(--sikshya-gray-50);
+    padding: 0;
+    margin-top: var(--sikshya-space-4);
+    border-radius: 0 0 var(--sikshya-radius-xl) var(--sikshya-radius-xl);
+    overflow: hidden;
+}
+
+.sikshya-chapter-content.expanded {
+    display: block;
+}
+
+/* Chapter Content Header */
+.sikshya-chapter-content-header {
+    background: var(--sikshya-primary);
+    color: white;
+    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sikshya-space-4);
+}
+
+.sikshya-content-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+}
+
+.sikshya-content-icon {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--sikshya-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sikshya-content-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sikshya-space-1);
+}
+
+.sikshya-content-count {
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sikshya-content-duration {
+    font-size: var(--sikshya-text-xs);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.sikshya-content-actions {
+    display: flex;
+    gap: var(--sikshya-space-2);
+}
+
+.sikshya-content-action-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--sikshya-radius-md);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-content-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Lessons Container */
+.sikshya-lessons-container {
+    padding: var(--sikshya-space-6);
+    background: white;
+    min-height: 200px;
+}
+
+/* Empty Chapter State */
+.sikshya-chapter-empty {
+    text-align: center;
+    padding: var(--sikshya-space-12) var(--sikshya-space-6);
+    color: var(--sikshya-gray-500);
+}
+
+.sikshya-chapter-empty-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--sikshya-gray-100);
+    border-radius: var(--sikshya-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--sikshya-space-4);
+    color: var(--sikshya-gray-400);
+}
+
+.sikshya-chapter-empty h4 {
+    font-size: var(--sikshya-text-lg);
+    font-weight: var(--sikshya-font-medium);
+    color: var(--sikshya-gray-700);
+    margin: 0 0 var(--sikshya-space-2) 0;
+}
+
+.sikshya-chapter-empty p {
+    font-size: var(--sikshya-text-base);
+    color: var(--sikshya-gray-500);
+    margin: 0 0 var(--sikshya-space-6) 0;
+    line-height: var(--sikshya-leading-normal);
+}
+
+/* Lesson Items */
+.sikshya-lesson-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+    padding: var(--sikshya-space-4);
+    background: white;
+    border: 1px solid var(--sikshya-gray-200);
+    border-radius: var(--sikshya-radius-lg);
+    margin-bottom: var(--sikshya-space-3);
+    transition: all var(--sikshya-transition-fast);
+    cursor: pointer;
+}
+
+.sikshya-lesson-item:hover {
+    background: var(--sikshya-gray-50);
+    border-color: var(--sikshya-primary-border);
+    box-shadow: var(--sikshya-shadow-sm);
+}
+
+.sikshya-lesson-item:last-child {
+    margin-bottom: 0;
+}
+
+.sikshya-lesson-drag {
+    color: var(--sikshya-gray-400);
+    cursor: grab;
+    flex-shrink: 0;
+    padding: var(--sikshya-space-1);
+}
+
+.sikshya-lesson-drag:active {
+    cursor: grabbing;
+}
+
+.sikshya-lesson-type {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--sikshya-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: var(--sikshya-text-lg);
+}
+
+/* Content Type Colors */
+.sikshya-lesson-item[data-type="video"] .sikshya-lesson-type {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.sikshya-lesson-item[data-type="text"] .sikshya-lesson-type {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.sikshya-lesson-item[data-type="quiz"] .sikshya-lesson-type {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.sikshya-lesson-item[data-type="assignment"] .sikshya-lesson-type {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.sikshya-lesson-item[data-type="audio"] .sikshya-lesson-type {
+    background: #f3e8ff;
+    color: #9333ea;
+}
+
+.sikshya-lesson-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sikshya-lesson-title {
+    font-size: var(--sikshya-text-base);
+    font-weight: var(--sikshya-font-medium);
+    color: var(--sikshya-gray-900);
+    margin: 0 0 var(--sikshya-space-1) 0;
+    line-height: var(--sikshya-leading-tight);
+}
+
+.sikshya-lesson-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+    font-size: var(--sikshya-text-sm);
+    color: var(--sikshya-gray-500);
+}
+
+.sikshya-lesson-type-label {
+    text-transform: capitalize;
+    font-weight: var(--sikshya-font-medium);
+}
+
+.sikshya-lesson-duration {
+    position: relative;
+}
+
+.sikshya-lesson-duration::before {
+    content: "•";
+    margin-right: var(--sikshya-space-2);
+    color: var(--sikshya-gray-300);
+}
+
+.sikshya-lesson-status {
+    padding: var(--sikshya-space-1) var(--sikshya-space-2);
+    border-radius: var(--sikshya-radius-sm);
+    font-size: var(--sikshya-text-xs);
+    font-weight: var(--sikshya-font-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.sikshya-lesson-status.completed {
+    background: var(--sikshya-success-bg);
+    color: var(--sikshya-success);
+}
+
+.sikshya-lesson-status.draft {
+    background: var(--sikshya-warning-bg);
+    color: var(--sikshya-warning);
+}
+
+.sikshya-lesson-status.published {
+    background: var(--sikshya-primary-bg);
+    color: var(--sikshya-primary);
+}
+
+.sikshya-lesson-actions {
+    display: flex;
+    gap: var(--sikshya-space-1);
+    opacity: 0;
+    transition: opacity var(--sikshya-transition-fast);
+}
+
+.sikshya-lesson-item:hover .sikshya-lesson-actions {
+    opacity: 1;
+}
+
+.sikshya-lesson-actions .sikshya-icon-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    border-radius: var(--sikshya-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sikshya-gray-400);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    font-size: var(--sikshya-text-sm);
+}
+
+.sikshya-lesson-actions .sikshya-icon-btn:hover {
+    background: var(--sikshya-gray-100);
+    color: var(--sikshya-gray-700);
+}
+
+/* Add Lesson Button */
+.sikshya-add-lesson {
+    padding: var(--sikshya-space-4) 0;
+    text-align: center;
+    border-top: 1px solid var(--sikshya-gray-100);
+    margin-top: var(--sikshya-space-4);
+}
+
+.sikshya-add-lesson-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    padding: var(--sikshya-space-3) var(--sikshya-space-4);
+    background: white;
+    border: 2px dashed var(--sikshya-gray-300);
+    border-radius: var(--sikshya-radius-lg);
+    color: var(--sikshya-gray-600);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-add-lesson-btn:hover {
+    border-color: var(--sikshya-primary);
+    color: var(--sikshya-primary);
+    background: var(--sikshya-primary-bg);
+}
+
+.sikshya-add-lesson-btn svg {
+    flex-shrink: 0;
+}
+
+/* Add New Content Button (Main CTA) */
+.sikshya-add-new-content {
+    padding: var(--sikshya-space-8);
+    text-align: center;
+}
+
+.sikshya-add-content-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    background: var(--sikshya-primary);
+    color: white;
+    border: none;
+    border-radius: var(--sikshya-radius-lg);
+    font-size: var(--sikshya-text-base);
+    font-weight: var(--sikshya-font-medium);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    box-shadow: var(--sikshya-shadow-sm);
+    min-width: 200px;
+}
+
+.sikshya-add-content-cta:hover {
+    background: var(--sikshya-primary-hover);
+    box-shadow: var(--sikshya-shadow-md);
+    transform: translateY(-1px);
+}
+
+.sikshya-add-content-cta svg {
+    flex-shrink: 0;
+}
+
+
+
+/* Primary Button */
+.sikshya-btn-primary {
+    background: var(--sikshya-primary);
+    color: var(--sikshya-white);
+    border: 1px solid var(--sikshya-primary);
+    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    border-radius: var(--sikshya-radius-lg);
+    font-size: var(--sikshya-text-base);
+    font-weight: var(--sikshya-font-medium);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    text-decoration: none;
+}
+
+.sikshya-btn-primary:hover {
+    background: var(--sikshya-primary-hover);
+    border-color: var(--sikshya-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    color: var(--sikshya-white);
+    text-decoration: none;
+}
+
+/* Chapter Cards */
+.sikshya-chapter-card {
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-200);
+    margin-bottom: var(--sikshya-space-6);
+    overflow: hidden;
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-chapter-card:hover {
+    border-color: var(--sikshya-primary-border);
+    box-shadow: var(--sikshya-shadow-md);
+}
+
+.sikshya-chapter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--sikshya-space-6);
+    background: var(--sikshya-gray-50);
+    cursor: pointer;
+    border-bottom: 1px solid var(--sikshya-gray-100);
+}
+
+.sikshya-chapter-info {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+    flex: 1;
+}
+
+.sikshya-chapter-drag {
+    color: var(--sikshya-gray-400);
+    cursor: grab;
+    padding: var(--sikshya-space-2);
+    border-radius: var(--sikshya-radius-md);
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-chapter-drag:hover {
+    color: var(--sikshya-gray-600);
+    background: var(--sikshya-gray-100);
+}
+
+.sikshya-chapter-drag:active {
+    cursor: grabbing;
+}
+
+.sikshya-chapter-details {
+    flex: 1;
+}
+
+.sikshya-chapter-title {
+    font-size: var(--sikshya-text-lg);
+    font-weight: var(--sikshya-font-semibold);
+    color: var(--sikshya-gray-900);
+    margin: 0 0 var(--sikshya-space-2) 0;
+}
+
+.sikshya-chapter-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+}
+
+.sikshya-chapter-meta span {
+    font-size: var(--sikshya-text-sm);
+    color: var(--sikshya-gray-600);
+    padding: var(--sikshya-space-1) var(--sikshya-space-3);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-full);
+    border: 1px solid var(--sikshya-gray-200);
+}
+
+.sikshya-chapter-status {
+    color: var(--sikshya-success) !important;
+    background: var(--sikshya-success-bg) !important;
+    border-color: var(--sikshya-success) !important;
+}
+
+.sikshya-chapter-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+}
+
+.sikshya-icon-btn {
+    background: transparent;
+    border: 1px solid var(--sikshya-gray-200);
+    color: var(--sikshya-gray-600);
+    padding: var(--sikshya-space-2);
+    border-radius: var(--sikshya-radius-md);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sikshya-icon-btn:hover {
+    background: var(--sikshya-gray-100);
+    border-color: var(--sikshya-gray-300);
+    color: var(--sikshya-gray-800);
+}
+
+.sikshya-chapter-toggle {
+    background: transparent !important;
+    border: none !important;
+    color: var(--sikshya-gray-500);
+    padding: var(--sikshya-space-2);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-chapter-toggle:hover {
+    color: var(--sikshya-gray-700);
+}
+
+/* Chapter Content */
+.sikshya-chapter-content {
+    display: none;
+    padding: var(--sikshya-space-6);
+    background: var(--sikshya-white);
+}
+
+.sikshya-chapter-content.expanded {
+    display: block;
+}
+
+/* Lesson Items */
+.sikshya-lesson-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+    padding: var(--sikshya-space-4);
+    background: var(--sikshya-gray-50);
+    border-radius: var(--sikshya-radius-lg);
+    margin-bottom: var(--sikshya-space-3);
+    transition: all var(--sikshya-transition-fast);
+    cursor: pointer;
+}
+
+.sikshya-lesson-item:hover {
+    background: var(--sikshya-primary-bg);
+    border-color: var(--sikshya-primary-border);
+}
+
+.sikshya-lesson-drag {
+    color: var(--sikshya-gray-400);
+    cursor: grab;
+    padding: var(--sikshya-space-1);
+}
+
+.sikshya-lesson-drag:active {
+    cursor: grabbing;
+}
+
+.sikshya-lesson-type {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--sikshya-primary-bg);
+    border-radius: var(--sikshya-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sikshya-primary);
+}
+
+.sikshya-lesson-info {
+    flex: 1;
+}
+
+.sikshya-lesson-title {
+    font-size: var(--sikshya-text-base);
+    font-weight: var(--sikshya-font-medium);
+    color: var(--sikshya-gray-900);
+    margin: 0 0 var(--sikshya-space-1) 0;
+}
+
+.sikshya-lesson-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+}
+
+.sikshya-lesson-meta span {
+    font-size: var(--sikshya-text-xs);
+    color: var(--sikshya-gray-600);
+    padding: var(--sikshya-space-1) var(--sikshya-space-2);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-md);
+}
+
+.sikshya-lesson-status.completed {
+    color: var(--sikshya-success) !important;
+    background: var(--sikshya-success-bg) !important;
+}
+
+.sikshya-lesson-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-1);
+}
+
+/* Add Lesson Button */
+.sikshya-add-lesson {
+    margin-top: var(--sikshya-space-4);
+    text-align: center;
+}
+
+.sikshya-add-lesson-btn {
+    background: transparent;
+    border: 2px dashed var(--sikshya-gray-300);
+    color: var(--sikshya-gray-600);
+    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    border-radius: var(--sikshya-radius-lg);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    width: 100%;
+    justify-content: center;
+}
+
+.sikshya-add-lesson-btn:hover {
+    border-color: var(--sikshya-primary);
+    color: var(--sikshya-primary);
+    background: var(--sikshya-primary-bg);
+}
+
+/* Curriculum Actions */
+.sikshya-curriculum-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+    padding: var(--sikshya-space-6);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-200);
+    margin-top: var(--sikshya-space-8);
+}
+
+.sikshya-btn-outline {
+    background: transparent;
+    color: var(--sikshya-gray-700);
+    border: 1px solid var(--sikshya-gray-300);
+    padding: var(--sikshya-space-3) var(--sikshya-space-5);
+    border-radius: var(--sikshya-radius-lg);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    text-decoration: none;
+}
+
+.sikshya-btn-outline:hover {
+    background: var(--sikshya-gray-50);
+    border-color: var(--sikshya-primary);
+    color: var(--sikshya-primary);
+    text-decoration: none;
+}
+
+.sikshya-action-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--sikshya-gray-200);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-empty-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sikshya-space-4);
+        padding: var(--sikshya-space-6);
+    }
+    
+    .sikshya-empty-content {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .sikshya-empty-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .sikshya-tips-strip {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sikshya-space-4);
+        padding: var(--sikshya-space-4);
+    }
+    
+    .sikshya-help-link {
+        margin-left: 0;
+        text-align: center;
+    }
+    
+    .sikshya-chapter-header {
+        flex-direction: column;
+        gap: var(--sikshya-space-4);
+        align-items: stretch;
+    }
+    
+    .sikshya-lesson-item {
+        flex-direction: column;
+        gap: var(--sikshya-space-3);
+        align-items: stretch;
+    }
+    
+    .sikshya-curriculum-actions {
+        flex-direction: column;
+        gap: var(--sikshya-space-3);
+    }
+    
+    .sikshya-btn-outline {
+        justify-content: center;
+    }
 } 

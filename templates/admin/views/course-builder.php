@@ -354,62 +354,80 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
 
             <!-- Curriculum Tab -->
             <div class="sikshya-tab-content <?php echo ($active_tab === 'curriculum') ? 'active' : ''; ?>" id="curriculum">
-                <!-- Curriculum Header -->
-                <div class="sikshya-curriculum-header">
-                    <div class="sikshya-curriculum-title">
-                        <h2>Course Curriculum</h2>
-                        <p>Structure your course content with chapters and lessons</p>
-                    </div>
-                    <div class="sikshya-curriculum-stats">
-                        <div class="sikshya-stat-item">
-                            <span class="sikshya-stat-number" id="total-chapters">0</span>
-                            <span class="sikshya-stat-label">Chapters</span>
-                        </div>
-                        <div class="sikshya-stat-item">
-                            <span class="sikshya-stat-number" id="total-lessons">0</span>
-                            <span class="sikshya-stat-label">Lessons</span>
-                        </div>
-                        <div class="sikshya-stat-item">
-                            <span class="sikshya-stat-number" id="total-duration">0h</span>
-                            <span class="sikshya-stat-label">Duration</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Progress Overview -->
-                <div class="sikshya-progress-overview">
-                    <div class="sikshya-progress-info">
-                        <span class="sikshya-progress-label">Course Completion</span>
-                        <span class="sikshya-progress-percentage">0%</span>
-                    </div>
-                    <div class="sikshya-progress-bar">
-                        <div class="sikshya-progress-fill" id="curriculum-progress"></div>
-                    </div>
-                </div>
-
                 <!-- Curriculum Content -->
                 <div class="sikshya-curriculum-builder" id="curriculum-content">
-                    <!-- Empty State -->
-                    <div class="sikshya-curriculum-empty" id="curriculum-empty-state">
-                        <div class="sikshya-empty-icon">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
+                    <!-- Compact Empty State -->
+                    <div class="sikshya-curriculum-empty-state" id="curriculum-empty-state">
+                        <!-- Header with Inline Actions -->
+                        <div class="sikshya-empty-header">
+                            <div class="sikshya-empty-content">
+                                <div class="sikshya-empty-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-empty-text">
+                                    <h3>Create Your First Chapter</h3>
+                                    <p>Start building your course curriculum with organized chapters and lessons.</p>
+                                </div>
+                            </div>
+                            <div class="sikshya-empty-actions">
+                                <button class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Create Chapter
+                                </button>
+                                <button class="sikshya-btn sikshya-btn-secondary" onclick="showTemplateModal()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Use Template
+                                </button>
+                                <button class="sikshya-btn sikshya-btn-secondary" onclick="showImportModal()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                                    </svg>
+                                    Import
+                                </button>
+                            </div>
                         </div>
-                        <h3>Build Your Course Curriculum</h3>
-                        <p>Start by creating your first chapter to organize your lessons and content</p>
-                        <button class="sikshya-btn-primary" onclick="showChapterModal()">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Create First Chapter
-                        </button>
+
+                        <!-- Quick Tips Strip -->
+                        <div class="sikshya-tips-strip">
+                            <div class="sikshya-tip-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Organize content into logical chapters</span>
+                            </div>
+                            <div class="sikshya-tip-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Mix videos, text, and interactive content</span>
+                            </div>
+                            <div class="sikshya-tip-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>Add quizzes to test understanding</span>
+                            </div>
+                            <div class="sikshya-help-link">
+                                <a href="#" onclick="openHelpGuide()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                        <path d="m12 17 .01 0"/>
+                                    </svg>
+                                    Course creation guide
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Curriculum Items Container -->
-                    <div class="sikshya-curriculum-items" id="curriculum-items">
-                        <!-- Sample Chapter Structure -->
-                        <div class="sikshya-chapter-card" data-chapter-id="chapter-1" style="display: none;">
+                    <!-- Existing Curriculum Structure (Hidden when empty) -->
+                    <div class="sikshya-curriculum-items" id="curriculum-items" style="display: none;">
                             <div class="sikshya-chapter-header" onclick="toggleChapter('chapter-1')">
                                 <div class="sikshya-chapter-info">
                                     <div class="sikshya-chapter-drag">
@@ -451,9 +469,64 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                             </div>
                             
                             <div class="sikshya-chapter-content" id="content-chapter-1">
+                                <!-- Chapter Content Header -->
+                                <div class="sikshya-chapter-content-header">
+                                    <div class="sikshya-content-summary">
+                                        <div class="sikshya-content-icon">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-content-stats">
+                                            <div class="sikshya-content-count">0 content items</div>
+                                            <div class="sikshya-content-duration">No content added yet</div>
+                                        </div>
+                                    </div>
+                                    <div class="sikshya-content-actions">
+                                        <button class="sikshya-content-action-btn" onclick="addLesson('chapter-1')" title="Add Content">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </button>
+                                        <button class="sikshya-content-action-btn" onclick="editChapter('chapter-1')" title="Edit Chapter">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="sikshya-content-action-btn" onclick="deleteChapter('chapter-1')" title="Delete Chapter">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Lessons Container -->
                                 <div class="sikshya-lessons-container">
-                                    <!-- Sample Lesson Structure -->
-                                    <div class="sikshya-lesson-item" data-lesson-id="lesson-1" data-type="video">
+                                    <!-- Empty State for Chapter Content -->
+                                    <div class="sikshya-chapter-empty">
+                                        <div class="sikshya-chapter-empty-icon">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <h4>No content yet</h4>
+                                        <p>Add your first content item to this chapter</p>
+                                        
+                                        <!-- Add New Content Button -->
+                                        <div class="sikshya-add-new-content">
+                                            <button class="sikshya-add-content-cta" onclick="addLesson('chapter-1')">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                                Add New Content
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sample Lesson Items (will replace empty state when content exists) -->
+                                    <div class="sikshya-lesson-item" data-lesson-id="lesson-1" data-type="video" style="display: none;">
                                         <div class="sikshya-lesson-drag">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01"/>
@@ -469,7 +542,7 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                                             <div class="sikshya-lesson-meta">
                                                 <span class="sikshya-lesson-type-label">Video</span>
                                                 <span class="sikshya-lesson-duration">5 min</span>
-                                                <span class="sikshya-lesson-status completed">Completed</span>
+                                                <span class="sikshya-lesson-status published">Published</span>
                                             </div>
                                         </div>
                                         <div class="sikshya-lesson-actions">
@@ -486,8 +559,75 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                                         </div>
                                     </div>
 
-                                    <!-- Add Lesson Button -->
-                                    <div class="sikshya-add-lesson">
+                                    <!-- Additional lesson types for demo -->
+                                    <div class="sikshya-lesson-item" data-lesson-id="lesson-2" data-type="text" style="display: none;">
+                                        <div class="sikshya-lesson-drag">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-lesson-type">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-lesson-info">
+                                            <h5 class="sikshya-lesson-title">Course Overview</h5>
+                                            <div class="sikshya-lesson-meta">
+                                                <span class="sikshya-lesson-type-label">Text</span>
+                                                <span class="sikshya-lesson-duration">3 min</span>
+                                                <span class="sikshya-lesson-status draft">Draft</span>
+                                            </div>
+                                        </div>
+                                        <div class="sikshya-lesson-actions">
+                                            <button class="sikshya-icon-btn" onclick="editLesson('lesson-2')" title="Edit Lesson">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="sikshya-icon-btn" onclick="deleteLesson('lesson-2')" title="Delete Lesson">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="sikshya-lesson-item" data-lesson-id="lesson-3" data-type="quiz" style="display: none;">
+                                        <div class="sikshya-lesson-drag">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-lesson-type">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-lesson-info">
+                                            <h5 class="sikshya-lesson-title">Knowledge Check</h5>
+                                            <div class="sikshya-lesson-meta">
+                                                <span class="sikshya-lesson-type-label">Quiz</span>
+                                                <span class="sikshya-lesson-duration">2 min</span>
+                                                <span class="sikshya-lesson-status completed">Completed</span>
+                                            </div>
+                                        </div>
+                                        <div class="sikshya-lesson-actions">
+                                            <button class="sikshya-icon-btn" onclick="editLesson('lesson-3')" title="Edit Quiz">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="sikshya-icon-btn" onclick="deleteLesson('lesson-3')" title="Delete Quiz">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add More Content (shown when lessons exist) -->
+                                    <div class="sikshya-add-lesson" style="display: none;">
                                         <button class="sikshya-add-lesson-btn" onclick="addLesson('chapter-1')">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
@@ -501,13 +641,22 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                     </div>
                 </div>
 
-                <!-- Curriculum Actions -->
+                                                <!-- Curriculum Actions -->
                 <div class="sikshya-curriculum-actions">
                     <button class="sikshya-btn-outline" onclick="showChapterModal()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
                         Add Chapter
+                    </button>
+                    
+                    <!-- Demo Button to Toggle Content -->
+                    <button class="sikshya-btn-outline" onclick="toggleDemoContent()" style="background: #f3e8ff; color: #9333ea; border-color: #c4b5fd;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        Preview Content
                     </button>
                     
                     <div class="sikshya-action-divider"></div>

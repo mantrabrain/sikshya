@@ -344,16 +344,13 @@ function saveChapter() {
 }
 
 function addChapterToCurriculum(html, chapterId) {
-    const curriculumContent = document.getElementById('curriculum-content');
+    // Hide empty state and show existing curriculum structure
+    showCurriculumItems();
     
-    // Remove empty state if it exists
-    const emptyState = curriculumContent.querySelector('.sikshya-empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
+    const curriculumItems = document.getElementById('curriculum-items');
     
-    // Add chapter HTML
-    curriculumContent.insertAdjacentHTML('beforeend', html);
+    // Add chapter HTML (from server response)
+    curriculumItems.insertAdjacentHTML('beforeend', html);
     
     chapterCount++;
 }
@@ -367,10 +364,7 @@ function toggleChapter(chapterId) {
     content.classList.toggle('expanded');
 }
 
-function addContentToChapter(chapterId) {
-    currentChapterId = chapterId;
-    showContentTypeModal();
-}
+
 
 function editChapter(chapterId) {
     const chapter = document.getElementById(chapterId);
@@ -463,8 +457,8 @@ function deleteChapter(chapterId) {
         chapterCount--;
         
         // Show empty state if no chapters
-        const curriculumContent = document.getElementById('curriculum-content');
-        if (curriculumContent.children.length === 0) {
+        const curriculumItems = document.getElementById('curriculum-items');
+        if (curriculumItems && curriculumItems.children.length === 0) {
             showEmptyState();
         }
         updateProgress();
@@ -943,26 +937,88 @@ function editContent(button) {
 }
 
 // Utility Functions
-function addLesson() {
-    showChapterModal();
+function addLesson(chapterId) {
+    if (chapterId) {
+        currentChapterId = chapterId;
+        showContentTypeModal();
+    } else {
+        showChapterModal();
+    }
+}
+
+// Simple UI State Management
+function showCurriculumItems() {
+    const emptyState = document.getElementById('curriculum-empty-state');
+    const curriculumItems = document.getElementById('curriculum-items');
+    
+    if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+    if (curriculumItems) {
+        curriculumItems.style.display = 'block';
+    }
 }
 
 function showEmptyState() {
-    const curriculumContent = document.getElementById('curriculum-content');
-    curriculumContent.innerHTML = `
-        <div class="sikshya-empty-state">
-            <i class="fas fa-play-circle"></i>
-            <h3>No chapters added yet</h3>
-            <p>Start building your course by adding your first chapter below.</p>
-        </div>
-    `;
+    const emptyState = document.getElementById('curriculum-empty-state');
+    const curriculumItems = document.getElementById('curriculum-items');
+    
+    if (emptyState) {
+        emptyState.style.display = 'block';
+    }
+    if (curriculumItems) {
+        curriculumItems.style.display = 'none';
+        curriculumItems.innerHTML = '';
+    }
+    
+    // Reset counters
+    chapterCount = 0;
+    lessonCount = 0;
 }
 
 function updateProgress() {
     const progressFill = document.getElementById('curriculum-progress');
     const totalItems = chapterCount + lessonCount;
     const progress = totalItems > 0 ? Math.min((totalItems / 10) * 100, 100) : 0;
-    progressFill.style.width = progress + '%';
+    if (progressFill) {
+        progressFill.style.width = progress + '%';
+    }
+}
+
+// Demo function to toggle content display
+function toggleDemoContent() {
+    const emptyState = document.querySelector('.sikshya-chapter-empty');
+    const lessonItems = document.querySelectorAll('.sikshya-lesson-item[data-lesson-id]');
+    const addLessonBtn = document.querySelector('.sikshya-add-lesson');
+    const contentStats = document.querySelector('.sikshya-content-stats');
+    
+    if (emptyState && emptyState.style.display !== 'none') {
+        // Show content state
+        emptyState.style.display = 'none';
+        lessonItems.forEach(item => item.style.display = 'flex');
+        if (addLessonBtn) addLessonBtn.style.display = 'block';
+        
+        // Update content stats
+        if (contentStats) {
+            contentStats.innerHTML = `
+                <div class="sikshya-content-count">3 content items</div>
+                <div class="sikshya-content-duration">15 min total duration</div>
+            `;
+        }
+    } else {
+        // Show empty state
+        if (emptyState) emptyState.style.display = 'block';
+        lessonItems.forEach(item => item.style.display = 'none');
+        if (addLessonBtn) addLessonBtn.style.display = 'none';
+        
+        // Reset content stats
+        if (contentStats) {
+            contentStats.innerHTML = `
+                <div class="sikshya-content-count">0 content items</div>
+                <div class="sikshya-content-duration">No content added yet</div>
+            `;
+        }
+    }
 }
 
 function previewCourse() {
@@ -2002,5 +2058,40 @@ function showNotification(message, type = 'info') {
         }
     }, 5000);
 }
+
+// Feature tabs functionality for empty state
+function initializeFeatureTabs() {
+    const tabs = document.querySelectorAll('.sikshya-feature-tab');
+    const contents = document.querySelectorAll('.sikshya-feature-content');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const feature = this.getAttribute('data-feature');
+            
+            // Remove active class from all tabs and contents
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            const targetContent = document.querySelector(`[data-content="${feature}"]`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+        });
+    });
+}
+
+// Initialize on page load (update the existing DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTabFromURL();
+    initializeFeatureTabs();
+    
+    // Initialize quiz builder if it exists
+    if (document.querySelector('.sikshya-quiz-builder')) {
+        updateQuestionCount();
+        updateQuizOverview();
+    }
+});
 
 // Quiz builder initialization is now handled in the main DOMContentLoaded listener above 
