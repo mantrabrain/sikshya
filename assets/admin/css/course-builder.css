@@ -180,18 +180,20 @@
     box-shadow: none;
 }
 
-/* Clean Sidebar Header Styling */
+/* Ultra-Clean Header */
 .sikshya-sidebar-header {
-    padding: var(--sikshya-space-6);
-    border-bottom: 1px solid var(--sikshya-gray-100);
-    background: var(--sikshya-gray-50);
+    padding: var(--sikshya-space-4) var(--sikshya-space-4) var(--sikshya-space-3);
+    background: var(--sikshya-white);
+    border-bottom: none;
+}
+
+/* Remove header icon for minimal design */
+.sikshya-header-icon {
+    display: none;
 }
 
 .sikshya-course-status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--sikshya-space-4);
+    display: none; /* Hide the complex status indicators */
 }
 
 .sikshya-status-indicator {
@@ -199,12 +201,19 @@
     align-items: center;
     gap: var(--sikshya-space-2);
     font-size: var(--sikshya-text-xs);
-    font-weight: var(--sikshya-font-medium);
-    color: var(--sikshya-gray-600);
+    font-weight: var(--sikshya-font-semibold);
+    color: var(--sikshya-gray-700);
     background: var(--sikshya-white);
-    padding: var(--sikshya-space-2) var(--sikshya-space-3);
-    border-radius: var(--sikshya-radius-md);
+    padding: var(--sikshya-space-2) var(--sikshya-space-4);
+    border-radius: var(--sikshya-radius-full);
     border: 1px solid var(--sikshya-gray-200);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: var(--sikshya-transition-normal);
+}
+
+.sikshya-status-indicator:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .sikshya-status-dot {
@@ -223,40 +232,56 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    filter: drop-shadow(0 1px 2px rgba(37, 99, 235, 0.2));
+    transition: var(--sikshya-transition-normal);
+}
+
+.sikshya-completion-circle:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.3));
 }
 
 .sikshya-progress-text {
     position: absolute;
     font-size: var(--sikshya-text-xs);
-    font-weight: var(--sikshya-font-semibold);
+    font-weight: var(--sikshya-font-bold);
     color: var(--sikshya-primary);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.sikshya-course-title {
+    text-align: left;
+    margin-bottom: 0;
 }
 
 .sikshya-course-title h3 {
-    margin: 0 0 var(--sikshya-space-1) 0;
-    font-size: var(--sikshya-text-lg);
+    margin: 0 0 2px 0;
+    font-size: var(--sikshya-text-base);
     font-weight: var(--sikshya-font-semibold);
     color: var(--sikshya-gray-900);
+    line-height: var(--sikshya-leading-tight);
 }
 
 .sikshya-course-title p {
     margin: 0;
     font-size: var(--sikshya-text-xs);
-    color: var(--sikshya-gray-500);
+    color: var(--sikshya-gray-400);
+    font-weight: var(--sikshya-font-normal);
 }
 
-/* Clean Navigation Section Styling */
+/* Ultra-Minimal Progress - Hide completely for clean design */
+.sikshya-progress-section {
+    display: none;
+}
+
+/* Modern Clean Navigation */
 .sikshya-nav-section {
-    margin-bottom: var(--sikshya-space-6);
+    margin: 0;
+    padding: 0;
 }
 
 .sikshya-nav-section-title {
-    font-size: var(--sikshya-text-xs);
-    font-weight: var(--sikshya-font-semibold);
-    color: var(--sikshya-gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 var(--sikshya-space-3) var(--sikshya-space-6);
+    display: none;
 }
 
 .sikshya-nav-list {
@@ -269,118 +294,208 @@
     margin: 0;
 }
 
+/* Clickable Navigation Cards */
 .sikshya-nav-link {
     display: flex;
     align-items: center;
+    gap: var(--sikshya-space-4);
     padding: var(--sikshya-space-4) var(--sikshya-space-6);
     text-decoration: none;
-    color: var(--sikshya-gray-800);
+    color: var(--sikshya-gray-700);
     position: relative;
-    background: transparent;
-    margin: 0 var(--sikshya-space-3);
+    background: var(--sikshya-white);
+    transition: all 0.2s ease;
+    cursor: pointer;
     border-radius: var(--sikshya-radius-md);
-    margin-bottom: var(--sikshya-space-1);
-    transition: var(--sikshya-transition-fast);
-    border-left: 2px solid transparent;
-    border-bottom: 1px solid var(--sikshya-gray-100);
+    margin: var(--sikshya-space-2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--sikshya-gray-100);
+    border-left: 3px solid transparent;
 }
 
 .sikshya-nav-link:hover {
-    background: var(--sikshya-gray-100);
+    background: var(--sikshya-white);
     color: var(--sikshya-gray-900);
     text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--sikshya-gray-200);
 }
 
-.sikshya-nav-link.active {
+/* Active State - Force proper borders */
+.sikshya-nav-link.active,
+.sikshya-nav-link.in-progress {
     background: var(--sikshya-primary-bg);
     color: var(--sikshya-primary);
     font-weight: var(--sikshya-font-medium);
-    border-left-color: var(--sikshya-primary);
-    outline: none;
-    box-shadow: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    border: 1px solid var(--sikshya-primary) !important;
+    border-left: 3px solid var(--sikshya-primary) !important;
 }
 
-.sikshya-nav-icon {
-    width: 20px;
-    margin-right: var(--sikshya-space-3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.sikshya-nav-link.active:hover,
+.sikshya-nav-link.in-progress:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
+    border: 1px solid var(--sikshya-primary) !important;
+    border-left: 3px solid var(--sikshya-primary) !important;
+}
+
+/* Completed State */
+.sikshya-nav-link.completed {
     color: var(--sikshya-gray-800);
-    flex-shrink: 0;
+    background: var(--sikshya-gray-50);
+    border-color: var(--sikshya-gray-200);
 }
 
-.sikshya-nav-link.active .sikshya-nav-icon {
-    color: var(--sikshya-primary);
+.sikshya-nav-link.completed:hover {
+    background: var(--sikshya-white);
+    color: var(--sikshya-gray-900);
 }
+
+
 
 .sikshya-nav-content {
-    flex: 1;
-    min-width: 0;
+    display: block;
+    width: 100%;
 }
 
+/* Clean SVG Icon Styling */
+.sikshya-nav-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+/* Icon color states */
+.sikshya-nav-link:hover .sikshya-nav-icon {
+    opacity: 0.9;
+}
+
+.sikshya-nav-link.active .sikshya-nav-icon,
+.sikshya-nav-link.in-progress .sikshya-nav-icon {
+    color: var(--sikshya-primary);
+    opacity: 1;
+}
+
+.sikshya-nav-link.completed .sikshya-nav-icon {
+    color: var(--sikshya-success);
+    opacity: 1;
+}
+
+/* Clean Navigation Typography */
 .sikshya-nav-title {
     display: block;
     font-size: var(--sikshya-text-base);
-    font-weight: var(--sikshya-font-semibold);
+    font-weight: var(--sikshya-font-medium);
     color: inherit;
-    margin-bottom: 1px;
+    margin: 0;
+    line-height: var(--sikshya-leading-tight);
 }
 
+/* Show minimal descriptions */
 .sikshya-nav-desc {
     display: block;
     font-size: var(--sikshya-text-xs);
     color: var(--sikshya-gray-500);
+    margin: var(--sikshya-space-1) 0 0 0;
     line-height: var(--sikshya-leading-normal);
-    opacity: 0.9;
+    opacity: 0.8;
 }
 
-.sikshya-nav-link.active .sikshya-nav-desc {
+/* Active state descriptions */
+.sikshya-nav-link.active .sikshya-nav-desc,
+.sikshya-nav-link.in-progress .sikshya-nav-desc {
     color: var(--sikshya-primary);
     opacity: 0.7;
 }
 
-.sikshya-nav-link:hover .sikshya-nav-desc {
-    color: var(--sikshya-gray-500);
+/* Hide status badges and time indicators for minimal design */
+.sikshya-nav-status,
+.sikshya-nav-time {
+    display: none;
 }
 
-.sikshya-nav-status {
-    margin-left: var(--sikshya-space-2);
+/* Clean Quick Actions */
+.sikshya-quick-actions-section {
+    padding: var(--sikshya-space-6);
+    margin-top: 0;
+    border-top: 1px solid var(--sikshya-gray-100);
+    background: var(--sikshya-gray-50);
+}
+
+.sikshya-quick-actions-title {
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-semibold);
+    color: var(--sikshya-gray-700);
+    margin: 0 0 var(--sikshya-space-3) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sikshya-quick-action {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.sikshya-nav-status.completed {
-    color: var(--sikshya-success);
-}
-
-.sikshya-nav-status.in-progress {
-    font-size: var(--sikshya-text-xs);
-    font-weight: var(--sikshya-font-medium);
-    color: var(--sikshya-primary);
-}
-
-.sikshya-nav-status.pending {
-    color: var(--sikshya-gray-400);
-}
-
-/* Quick Actions Styling */
-.sikshya-quick-action {
-    color: var(--sikshya-gray-600) !important;
-    font-size: var(--sikshya-text-sm) !important;
+    gap: var(--sikshya-space-2);
+    width: 100%;
+    padding: 10px 16px;
+    margin: 0 0 var(--sikshya-space-2) 0;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
 }
 
 .sikshya-quick-action:hover {
-    color: var(--sikshya-primary) !important;
+    background: #e5e7eb;
+    border-color: #9ca3af;
+    color: #374151;
+    text-decoration: none;
 }
 
-/* Sidebar Footer */
+.sikshya-quick-action.primary {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    font-weight: 500;
+}
+
+.sikshya-quick-action.primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: white;
+}
+
+/* SVG Icon Styling for Quick Actions */
+.sikshya-action-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    opacity: 1;
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-quick-action:hover .sikshya-action-icon {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.sikshya-quick-action.primary .sikshya-action-icon {
+    opacity: 1;
+}
+
+/* Remove secondary and disabled styles for minimal design */
+
+/* Hide old sidebar footer - replaced with quick actions */
 .sikshya-sidebar-footer {
-    padding: var(--sikshya-space-6);
-    border-top: 1px solid var(--sikshya-gray-100);
-    background: var(--sikshya-gray-50);
+    display: none;
 }
 
 .sikshya-publish-checklist h4 {
@@ -406,7 +521,7 @@
 }
 
 .sikshya-checklist li.completed {
-    color: var(--sikshya-success);
+    color: var(--sikshya-primary);
 }
 
 .sikshya-publish-btn {

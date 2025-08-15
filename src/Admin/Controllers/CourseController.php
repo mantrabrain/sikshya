@@ -201,12 +201,22 @@ class CourseController extends BaseView
 
             error_log('Sikshya: Starting to render course builder page');
             
+            // Get the active tab from URL parameter
+            $active_tab = sanitize_text_field($_GET['tab'] ?? 'course');
+            
+            // Validate tab parameter - only allow specific tabs
+            $valid_tabs = ['course', 'pricing', 'curriculum', 'settings'];
+            if (!in_array($active_tab, $valid_tabs)) {
+                $active_tab = 'course'; // Default to course tab
+            }
+            
             // Enqueue course builder assets
             $this->enqueueCourseBuilderAssets();
             
             // Render the course builder template
             $this->render('course-builder', [
                 'plugin' => $this->plugin,
+                'active_tab' => $active_tab,
             ]);
             
             error_log('Sikshya: Finished rendering course builder page');

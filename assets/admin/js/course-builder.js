@@ -29,8 +29,13 @@ function sikshyaAjax(action, data, callback) {
     });
 }
 
-// Tab switching
+// Tab switching with URL parameter support
 function switchTab(tabName) {
+    // Prevent default link behavior to avoid hash
+    if (event) {
+        event.preventDefault();
+    }
+    
     // Remove active class from all nav links and content
     document.querySelectorAll('.sikshya-nav-link').forEach(link => {
         link.classList.remove('active');
@@ -49,7 +54,65 @@ function switchTab(tabName) {
     if (targetContent) {
         targetContent.classList.add('active');
     }
+
+    // Update URL with tab parameter and mark as navigated (remove any hash)
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    url.hash = ''; // Remove any hash fragment
+    history.replaceState({navigated: true}, null, url.toString());
 }
+
+// Initialize tab from URL parameter on page load
+function initializeTabFromURL() {
+    // Only activate tab from URL if this was a navigation within the same session
+    // Check if we have a history state indicating internal navigation
+    const hasNavigationState = history.state && history.state.navigated;
+    
+    if (hasNavigationState) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabName = urlParams.get('tab');
+        
+        if (tabName) {
+            // Check if the tab exists
+            const targetContent = document.getElementById(tabName);
+            const targetNavLink = document.querySelector(`[data-tab="${tabName}"]`);
+            
+            if (targetContent && targetNavLink) {
+                // Remove active from all tabs
+                document.querySelectorAll('.sikshya-nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+                document.querySelectorAll('.sikshya-tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Activate the correct tab
+                targetNavLink.classList.add('active');
+                targetContent.classList.add('active');
+            }
+        }
+    }
+    // If no navigation state, let the default tab (from HTML) remain active
+}
+
+// Handle browser back/forward navigation
+function handlePopState() {
+    initializeTabFromURL();
+}
+
+// Add event listener for popstate (browser back/forward)
+window.addEventListener('popstate', handlePopState);
+
+// Initialize tab on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTabFromURL();
+    
+    // Initialize quiz builder if it exists
+    if (document.querySelector('.sikshya-quiz-builder')) {
+        updateQuestionCount();
+        updateQuizOverview();
+    }
+});
 
 // Pricing toggle
 function togglePricing(select) {
@@ -1940,11 +2003,4 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Initialize quiz builder when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize quiz builder if it exists
-    if (document.querySelector('.sikshya-quiz-builder')) {
-        updateQuestionCount();
-        updateQuizOverview();
-    }
-}); 
+// Quiz builder initialization is now handled in the main DOMContentLoaded listener above 

@@ -22,37 +22,49 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
         </h1>
         <div class="sikshya-header-actions">
             <button class="sikshya-btn" onclick="previewCourse()">
-                <i class="fas fa-eye"></i> Preview
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Preview
             </button>
             <button class="sikshya-btn" onclick="saveDraft()">
-                <i class="fas fa-save"></i> Save Draft
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                </svg>
+                Save Draft
             </button>
             <button class="sikshya-btn sikshya-btn-primary" onclick="publishCourse()">
-                <i class="fas fa-rocket"></i> Publish Course
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+                </svg>
+                Publish Course
             </button>
         </div>
     </div>
 
     <div class="sikshya-main-content">
         <div class="sikshya-sidebar">
-            <!-- Course Progress Summary -->
+            <!-- Modern Clean Header -->
             <div class="sikshya-sidebar-header">
-                <div class="sikshya-course-status">
-                    <div class="sikshya-status-indicator draft">
-                        <span class="sikshya-status-dot"></span>
-                        Draft
-                    </div>
-                    <div class="sikshya-completion-circle">
-                        <svg class="sikshya-progress-ring" width="40" height="40">
-                            <circle class="sikshya-progress-ring-circle" stroke="#e5e7eb" stroke-width="3" fill="transparent" r="16" cx="20" cy="20"/>
-                            <circle class="sikshya-progress-ring-progress" stroke="#2563eb" stroke-width="3" fill="transparent" r="16" cx="20" cy="20" style="stroke-dasharray: 100.53 100.53; stroke-dashoffset: 70.37;"/>
-                        </svg>
-                        <span class="sikshya-progress-text">30%</span>
-                    </div>
-                </div>
+                <div class="sikshya-header-icon"></div>
                 <div class="sikshya-course-title">
-                    <h3>New Course</h3>
-                    <p>Complete all sections to publish</p>
+                    <h3>Course Builder</h3>
+                    <p>Create amazing learning experiences</p>
+                </div>
+            </div>
+            
+            <!-- Compact Progress Overview -->
+            <div class="sikshya-progress-section">
+                <div class="sikshya-progress-header">
+                    <h4>Course Progress</h4>
+                    <span class="sikshya-progress-percentage">75%</span>
+                </div>
+                <div class="sikshya-progress-bar">
+                    <div class="sikshya-progress-fill"></div>
+                </div>
+                <div class="sikshya-progress-stats">
+                    3 of 4 steps completed
                 </div>
             </div>
 
@@ -62,91 +74,86 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                     <h4 class="sikshya-nav-section-title">Course Setup</h4>
                     <ul class="sikshya-nav-list">
                         <li class="sikshya-nav-item">
-                            <a href="#" class="sikshya-nav-link active" onclick="switchTab('course')" data-tab="course">
-                                <div class="sikshya-nav-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                                    </svg>
-                                </div>
+                            <a href="#" class="sikshya-nav-link <?php echo ($active_tab === 'course') ? 'active' : ''; ?>" onclick="switchTab('course'); return false;" data-tab="course">
+                                <svg class="sikshya-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
                                 <div class="sikshya-nav-content">
                                     <span class="sikshya-nav-title">Course Information</span>
-                                    <span class="sikshya-nav-desc">Basic details & media</span>
-                                </div>
-                                <div class="sikshya-nav-status completed">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="20,6 9,17 4,12"/>
-                                    </svg>
+                                    <span class="sikshya-nav-desc">Title, description, and basic details</span>
+                                    <div class="sikshya-nav-status completed">Completed</div>
+                                    <div class="sikshya-nav-time">2 min ago</div>
                                 </div>
                             </a>
                         </li>
                         <li class="sikshya-nav-item">
-                            <a href="#" class="sikshya-nav-link" onclick="switchTab('curriculum')" data-tab="curriculum">
-                                <div class="sikshya-nav-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
-                                    </svg>
+                            <a href="#" class="sikshya-nav-link <?php echo ($active_tab === 'pricing') ? 'active' : 'completed'; ?>" onclick="switchTab('pricing'); return false;" data-tab="pricing">
+                                <svg class="sikshya-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                </svg>
+                                <div class="sikshya-nav-content">
+                                    <span class="sikshya-nav-title">Pricing & Access</span>
+                                    <span class="sikshya-nav-desc">Set price and enrollment options</span>
+                                    <div class="sikshya-nav-status completed">Completed</div>
+                                    <div class="sikshya-nav-time">5 min ago</div>
                                 </div>
+                            </a>
+                        </li>
+                        <li class="sikshya-nav-item">
+                            <a href="#" class="sikshya-nav-link <?php echo ($active_tab === 'curriculum') ? 'active' : ''; ?>" onclick="switchTab('curriculum'); return false;" data-tab="curriculum">
+                                <svg class="sikshya-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
                                 <div class="sikshya-nav-content">
                                     <span class="sikshya-nav-title">Curriculum</span>
-                                    <span class="sikshya-nav-desc">Lessons & content</span>
-                                </div>
-                                <div class="sikshya-nav-status in-progress">
-                                    <span class="sikshya-progress-count">2/5</span>
+                                    <span class="sikshya-nav-desc">Add lessons, sections, and content</span>
+                                    <div class="sikshya-nav-status in-progress">In Progress</div>
+                                    <div class="sikshya-nav-time">~10 min left</div>
                                 </div>
                             </a>
                         </li>
                         <li class="sikshya-nav-item">
-                            <a href="#" class="sikshya-nav-link" onclick="switchTab('settings')" data-tab="settings">
-                                <div class="sikshya-nav-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="3"/>
-                                        <path d="M12 1v6m0 6v6"/>
-                                        <path d="M1 12h6m6 0h6"/>
-                                    </svg>
-                                </div>
+                            <a href="#" class="sikshya-nav-link <?php echo ($active_tab === 'settings') ? 'active' : ''; ?>" onclick="switchTab('settings'); return false;" data-tab="settings">
+                                <svg class="sikshya-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
                                 <div class="sikshya-nav-content">
                                     <span class="sikshya-nav-title">Settings</span>
-                                    <span class="sikshya-nav-desc">Pricing & preferences</span>
-                                </div>
-                                <div class="sikshya-nav-status pending">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <path d="M12 6v6l4 2"/>
-                                    </svg>
+                                    <span class="sikshya-nav-desc">Configure course features and preferences</span>
+                                    <div class="sikshya-nav-status pending">Pending</div>
+                                    <div class="sikshya-nav-time">~5 min</div>
                                 </div>
                             </a>
                         </li>
                     </ul>
                 </div>
 
-                <div class="sikshya-nav-section">
-                    <h4 class="sikshya-nav-section-title">Quick Actions</h4>
-                    <ul class="sikshya-nav-list">
-                        <li class="sikshya-nav-item">
-                            <a href="#" class="sikshya-nav-link sikshya-quick-action" onclick="previewCourse()">
-                                <div class="sikshya-nav-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </div>
-                                <span class="sikshya-nav-title">Preview Course</span>
-                            </a>
-                        </li>
-                        <li class="sikshya-nav-item">
-                            <a href="#" class="sikshya-nav-link sikshya-quick-action" onclick="saveDraft()">
-                                <div class="sikshya-nav-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                                        <polyline points="17,21 17,13 7,13 7,21"/>
-                                        <polyline points="7,3 7,8 15,8"/>
-                                    </svg>
-                                </div>
-                                <span class="sikshya-nav-title">Save Draft</span>
-                            </a>
-                        </li>
-                    </ul>
+                <!-- Modern Quick Actions -->
+                <div class="sikshya-quick-actions-section">
+                    <h4 class="sikshya-quick-actions-title">Quick Actions</h4>
+                    
+                    <a href="#" class="sikshya-quick-action" onclick="previewCourse()">
+                        <svg class="sikshya-action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        <span>Preview</span>
+                    </a>
+                    
+                    <a href="#" class="sikshya-quick-action" onclick="saveDraft()">
+                        <svg class="sikshya-action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                        </svg>
+                        <span>Save Draft</span>
+                    </a>
+                    
+                    <a href="#" class="sikshya-quick-action primary" onclick="publishCourse()">
+                        <svg class="sikshya-action-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+                        </svg>
+                        <span>Publish Course</span>
+                    </a>
                 </div>
             </nav>
 
@@ -188,7 +195,7 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
 
         <div class="sikshya-content">
             <!-- Course Tab -->
-            <div class="sikshya-tab-content active" id="course">
+            <div class="sikshya-tab-content <?php echo ($active_tab === 'course') ? 'active' : ''; ?>" id="course">
                 <form id="course-form">
                     <div class="sikshya-section">
                         <h3 class="sikshya-section-title">Basic Information</h3>
@@ -287,7 +294,12 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                             </div>
                         </div>
                     </div>
+                </form>
+            </div>
 
+            <!-- Pricing Tab -->
+            <div class="sikshya-tab-content <?php echo ($active_tab === 'pricing') ? 'active' : ''; ?>" id="pricing">
+                <form id="pricing-form">
                     <div class="sikshya-section">
                         <h3 class="sikshya-section-title">Pricing</h3>
                         
@@ -312,50 +324,212 @@ wp_enqueue_script('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-a
                             </div>
                         </div>
                     </div>
+
+                    <div class="sikshya-section">
+                        <h3 class="sikshya-section-title">Access Settings</h3>
+
+                        <div class="sikshya-checkbox-group">
+                            <input type="checkbox" id="enrollment" name="allow_enrollment" checked>
+                            <label for="enrollment">Allow New Enrollments</label>
+                        </div>
+
+                        <div class="sikshya-checkbox-group">
+                            <input type="checkbox" id="approval" name="require_approval">
+                            <label for="approval">Require Instructor Approval</label>
+                        </div>
+
+                        <div class="sikshya-form-row">
+                            <label>Access Duration</label>
+                            <select name="access_duration">
+                                <option value="lifetime" selected>Lifetime Access</option>
+                                <option value="1_month">1 Month</option>
+                                <option value="3_months">3 Months</option>
+                                <option value="6_months">6 Months</option>
+                                <option value="1_year">1 Year</option>
+                            </select>
+                        </div>
+                    </div>
                 </form>
             </div>
 
             <!-- Curriculum Tab -->
-            <div class="sikshya-tab-content" id="curriculum">
-                <div class="sikshya-section">
-                    <div class="sikshya-section-title" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <i class="fas fa-list"></i>
-                            Course Curriculum
-                        </div>
-                        <button class="sikshya-btn sikshya-btn-secondary" onclick="toggleBulkMode()" style="font-size: 12px; padding: 6px 12px;">
-                            <i class="fas fa-check-square"></i> Bulk Actions
-                        </button>
+            <div class="sikshya-tab-content <?php echo ($active_tab === 'curriculum') ? 'active' : ''; ?>" id="curriculum">
+                <!-- Curriculum Header -->
+                <div class="sikshya-curriculum-header">
+                    <div class="sikshya-curriculum-title">
+                        <h2>Course Curriculum</h2>
+                        <p>Structure your course content with chapters and lessons</p>
                     </div>
-                    
+                    <div class="sikshya-curriculum-stats">
+                        <div class="sikshya-stat-item">
+                            <span class="sikshya-stat-number" id="total-chapters">0</span>
+                            <span class="sikshya-stat-label">Chapters</span>
+                        </div>
+                        <div class="sikshya-stat-item">
+                            <span class="sikshya-stat-number" id="total-lessons">0</span>
+                            <span class="sikshya-stat-label">Lessons</span>
+                        </div>
+                        <div class="sikshya-stat-item">
+                            <span class="sikshya-stat-number" id="total-duration">0h</span>
+                            <span class="sikshya-stat-label">Duration</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Overview -->
+                <div class="sikshya-progress-overview">
+                    <div class="sikshya-progress-info">
+                        <span class="sikshya-progress-label">Course Completion</span>
+                        <span class="sikshya-progress-percentage">0%</span>
+                    </div>
                     <div class="sikshya-progress-bar">
                         <div class="sikshya-progress-fill" id="curriculum-progress"></div>
                     </div>
-                    
-                    <div id="curriculum-content">
-                        <div class="sikshya-empty-state">
-                            <i class="fas fa-play-circle"></i>
-                            <h3>No content added yet</h3>
-                            <p>Start building your course by adding your first content below.</p>
+                </div>
+
+                <!-- Curriculum Content -->
+                <div class="sikshya-curriculum-builder" id="curriculum-content">
+                    <!-- Empty State -->
+                    <div class="sikshya-curriculum-empty" id="curriculum-empty-state">
+                        <div class="sikshya-empty-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <h3>Build Your Course Curriculum</h3>
+                        <p>Start by creating your first chapter to organize your lessons and content</p>
+                        <button class="sikshya-btn-primary" onclick="showChapterModal()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Create First Chapter
+                        </button>
+                    </div>
+
+                    <!-- Curriculum Items Container -->
+                    <div class="sikshya-curriculum-items" id="curriculum-items">
+                        <!-- Sample Chapter Structure -->
+                        <div class="sikshya-chapter-card" data-chapter-id="chapter-1" style="display: none;">
+                            <div class="sikshya-chapter-header" onclick="toggleChapter('chapter-1')">
+                                <div class="sikshya-chapter-info">
+                                    <div class="sikshya-chapter-drag">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01"/>
+                                        </svg>
+                                    </div>
+                                    <div class="sikshya-chapter-details">
+                                        <h4 class="sikshya-chapter-title">Chapter 1: Introduction</h4>
+                                        <div class="sikshya-chapter-meta">
+                                            <span class="sikshya-lesson-count">3 lessons</span>
+                                            <span class="sikshya-chapter-duration">15 min</span>
+                                            <span class="sikshya-chapter-status">Published</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sikshya-chapter-actions">
+                                    <button class="sikshya-icon-btn" onclick="event.stopPropagation(); addLesson('chapter-1')" title="Add Lesson">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                    <button class="sikshya-icon-btn" onclick="event.stopPropagation(); editChapter('chapter-1')" title="Edit Chapter">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="sikshya-icon-btn" onclick="event.stopPropagation(); deleteChapter('chapter-1')" title="Delete Chapter">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                    <button class="sikshya-chapter-toggle" onclick="event.stopPropagation(); toggleChapter('chapter-1')" title="Toggle Chapter">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="sikshya-chapter-content" id="content-chapter-1">
+                                <div class="sikshya-lessons-container">
+                                    <!-- Sample Lesson Structure -->
+                                    <div class="sikshya-lesson-item" data-lesson-id="lesson-1" data-type="video">
+                                        <div class="sikshya-lesson-drag">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-lesson-type">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="sikshya-lesson-info">
+                                            <h5 class="sikshya-lesson-title">Welcome to the Course</h5>
+                                            <div class="sikshya-lesson-meta">
+                                                <span class="sikshya-lesson-type-label">Video</span>
+                                                <span class="sikshya-lesson-duration">5 min</span>
+                                                <span class="sikshya-lesson-status completed">Completed</span>
+                                            </div>
+                                        </div>
+                                        <div class="sikshya-lesson-actions">
+                                            <button class="sikshya-icon-btn" onclick="editLesson('lesson-1')" title="Edit Lesson">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="sikshya-icon-btn" onclick="deleteLesson('lesson-1')" title="Delete Lesson">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add Lesson Button -->
+                                    <div class="sikshya-add-lesson">
+                                        <button class="sikshya-add-lesson-btn" onclick="addLesson('chapter-1')">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Add Lesson
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Curriculum Actions -->
+                <div class="sikshya-curriculum-actions">
+                    <button class="sikshya-btn-outline" onclick="showChapterModal()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add Chapter
+                    </button>
                     
-                    <div class="sikshya-curriculum-actions" style="display: flex; gap: 12px; margin-top: 20px;">
-                        <button class="sikshya-add-chapter-btn" onclick="showChapterModal()">
-                            <i class="fas fa-plus"></i>
-                            Add New Chapter
-                        </button>
-                        
-                        <button class="sikshya-add-content-btn" onclick="showContentTypeModal()" style="background: #27ae60; border-color: #27ae60;">
-                            <i class="fas fa-plus"></i>
-                            Add New Content
-                        </button>
-                    </div>
+                    <div class="sikshya-action-divider"></div>
+                    
+                    <button class="sikshya-btn-outline" onclick="importContent()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                        </svg>
+                        Import Content
+                    </button>
+                    
+                    <button class="sikshya-btn-outline" onclick="toggleBulkMode()" id="bulk-mode-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Bulk Actions
+                    </button>
                 </div>
             </div>
 
             <!-- Settings Tab -->
-            <div class="sikshya-tab-content" id="settings">
+            <div class="sikshya-tab-content <?php echo ($active_tab === 'settings') ? 'active' : ''; ?>" id="settings">
                 <div class="sikshya-section">
                     <h3 class="sikshya-section-title">Enrollment Settings</h3>
 
