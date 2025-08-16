@@ -64,35 +64,34 @@ function switchTab(tabName) {
 
 // Initialize tab from URL parameter on page load
 function initializeTabFromURL() {
-    // Only activate tab from URL if this was a navigation within the same session
-    // Check if we have a history state indicating internal navigation
-    const hasNavigationState = history.state && history.state.navigated;
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabName = urlParams.get('tab');
     
-    if (hasNavigationState) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabName = urlParams.get('tab');
+    if (tabName) {
+        // Check if the tab exists
+        const targetContent = document.getElementById(tabName);
+        const targetNavLink = document.querySelector(`[data-tab="${tabName}"]`);
         
-        if (tabName) {
-            // Check if the tab exists
-            const targetContent = document.getElementById(tabName);
-            const targetNavLink = document.querySelector(`[data-tab="${tabName}"]`);
+        if (targetContent && targetNavLink) {
+            // Remove active from all tabs
+            document.querySelectorAll('.sikshya-nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelectorAll('.sikshya-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
             
-            if (targetContent && targetNavLink) {
-                // Remove active from all tabs
-                document.querySelectorAll('.sikshya-nav-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-                document.querySelectorAll('.sikshya-tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                
-                // Activate the correct tab
-                targetNavLink.classList.add('active');
-                targetContent.classList.add('active');
-            }
+            // Activate the correct tab
+            targetNavLink.classList.add('active');
+            targetContent.classList.add('active');
+            
+            console.log('Sikshya: Activated tab from URL:', tabName);
+        } else {
+            console.log('Sikshya: Tab not found:', tabName);
         }
+    } else {
+        console.log('Sikshya: No tab parameter in URL, using default');
     }
-    // If no navigation state, let the default tab (from HTML) remain active
 }
 
 // Handle browser back/forward navigation
@@ -492,6 +491,43 @@ function selectContentType(type) {
     currentContentType = type;
 }
 
+// Content type information for modal headers
+function getContentTypeInfo(contentType) {
+    const contentTypes = {
+        'text': {
+            title: 'Create Text Lesson',
+            subtitle: 'Add rich text content with formatting and media',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+        },
+        'video': {
+            title: 'Create Video Lesson',
+            subtitle: 'Upload video content with descriptions and transcripts',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>'
+        },
+        'audio': {
+            title: 'Create Audio Lesson',
+            subtitle: 'Add audio content with transcripts and notes',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>'
+        },
+        'quiz': {
+            title: 'Create Quiz',
+            subtitle: 'Build interactive assessments with questions and answers',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        },
+        'assignment': {
+            title: 'Create Assignment',
+            subtitle: 'Set up student submissions and project requirements',
+            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'
+        }
+    };
+    
+    return contentTypes[contentType] || {
+        title: `Create ${contentType.charAt(0).toUpperCase() + contentType.slice(1)}`,
+        subtitle: `Add ${contentType} content to your course`,
+        icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>'
+    };
+}
+
 function proceedToContentForm() {
     if (!currentContentType) return;
     
@@ -521,24 +557,36 @@ function showFullWidthModal(contentType) {
         console.log('Form template loaded successfully:', data); // Debug log
         console.log('HTML content length:', data.html ? data.html.length : 0); // Debug log
         
-        // Create modal wrapper
+        // Create modal wrapper with improved design
         const modal = document.createElement('div');
         modal.className = 'sikshya-modal-overlay';
+        
+        // Get content type display name and icon
+        const contentTypeInfo = getContentTypeInfo(contentType);
+        
         modal.innerHTML = `
             <div class="sikshya-modal sikshya-modal-full">
                 <div class="sikshya-modal-header">
-                    <button class="sikshya-modal-close" onclick="closeModal(this)">×</button>
-                    <h3 class="sikshya-modal-title">
-                        <i class="fas fa-edit"></i>
-                        Advanced ${contentType.charAt(0).toUpperCase() + contentType.slice(1)} Editor
-                    </h3>
-                    <p class="sikshya-modal-subtitle">Create detailed ${contentType} with advanced options</p>
+                    <button class="sikshya-modal-close" onclick="closeModal(this)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    <div class="sikshya-modal-header-content">
+                        <div class="sikshya-modal-title-wrapper">
+                            <div class="sikshya-modal-icon">
+                                ${contentTypeInfo.icon}
+                            </div>
+                            <h3 class="sikshya-modal-title">${contentTypeInfo.title}</h3>
+                        </div>
+                        <p class="sikshya-modal-subtitle">${contentTypeInfo.subtitle}</p>
+                    </div>
                 </div>
                 <div class="sikshya-modal-body">
                     ${data.html || '<p>No form content loaded</p>'}
                 </div>
                 <div class="sikshya-modal-footer">
-                    <button class="sikshya-btn" onclick="closeModal(this)">Cancel</button>
+                    <button class="sikshya-btn sikshya-btn-secondary" onclick="closeModal(this)">Cancel</button>
                     <button class="sikshya-btn sikshya-btn-secondary" onclick="saveAsDraft('${contentType}')">Save as Draft</button>
                     <button class="sikshya-btn sikshya-btn-primary" onclick="saveContent('${contentType}')">Add to Chapter</button>
                 </div>
@@ -985,53 +1033,182 @@ function updateProgress() {
     }
 }
 
-// Demo function to toggle content display
+// Load sample chapter using template system
+function loadSampleChapter() {
+    // Load sample chapter using the template system
+    sikshyaAjax('sikshya_load_sample_chapter', {
+        action: 'load_sample'
+    }, function(data) {
+        if (data.success && data.html) {
+            // Add the chapter HTML to curriculum items
+            const curriculumItems = document.getElementById('curriculum-items');
+            if (curriculumItems) {
+                curriculumItems.innerHTML = data.html;
+                showCurriculumItems();
+            }
+        } else {
+            console.error('Failed to load sample chapter:', data);
+            alert('Failed to load sample chapter. Please try again.');
+        }
+    });
+}
+
+// Keep the old function for backward compatibility
 function toggleDemoContent() {
-    const emptyState = document.querySelector('.sikshya-chapter-empty');
-    const lessonItems = document.querySelectorAll('.sikshya-lesson-item[data-lesson-id]');
-    const addLessonBtn = document.querySelector('.sikshya-add-lesson');
-    const contentStats = document.querySelector('.sikshya-content-stats');
-    
-    if (emptyState && emptyState.style.display !== 'none') {
-        // Show content state
-        emptyState.style.display = 'none';
-        lessonItems.forEach(item => item.style.display = 'flex');
-        if (addLessonBtn) addLessonBtn.style.display = 'block';
-        
-        // Update content stats
-        if (contentStats) {
-            contentStats.innerHTML = `
-                <div class="sikshya-content-count">3 content items</div>
-                <div class="sikshya-content-duration">15 min total duration</div>
-            `;
-        }
-    } else {
-        // Show empty state
-        if (emptyState) emptyState.style.display = 'block';
-        lessonItems.forEach(item => item.style.display = 'none');
-        if (addLessonBtn) addLessonBtn.style.display = 'none';
-        
-        // Reset content stats
-        if (contentStats) {
-            contentStats.innerHTML = `
-                <div class="sikshya-content-count">0 content items</div>
-                <div class="sikshya-content-duration">No content added yet</div>
-            `;
-        }
-    }
+    loadSampleChapter();
 }
 
 function previewCourse() {
     alert('Preview functionality will be implemented here.');
 }
 
+// Form submission functions
 function saveDraft() {
-    alert('Save draft functionality will be implemented here.');
+    document.getElementById('course-status-field').value = 'draft';
+    submitCourseForm();
 }
 
 function publishCourse() {
-    alert('Publish functionality will be implemented here.');
+    if (validateCourseForm()) {
+        document.getElementById('course-status-field').value = 'publish';
+        submitCourseForm();
+    }
 }
+
+function submitCourseForm() {
+    const form = document.getElementById('sikshya-course-builder-form');
+    const formData = new FormData(form);
+    
+    // Add curriculum data
+    const curriculumData = collectCurriculumData();
+    formData.append('curriculum_data', JSON.stringify(curriculumData));
+    
+    // Show loading state
+    showLoadingState();
+    
+    // Submit via AJAX
+    fetch(ajaxurl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoadingState();
+        if (data.success) {
+            showNotification('Course saved successfully!', 'success');
+            if (data.data.redirect) {
+                window.location.href = data.data.redirect;
+            }
+        } else {
+            showNotification(data.data.message || 'Error saving course', 'error');
+        }
+    })
+    .catch(error => {
+        hideLoadingState();
+        showNotification('Error saving course: ' + error.message, 'error');
+        console.error('Error:', error);
+    });
+}
+
+function validateCourseForm() {
+    const title = document.querySelector('input[name="title"]');
+    const description = document.querySelector('textarea[name="description"]');
+    
+    if (!title || !title.value.trim()) {
+        showNotification('Please enter a course title', 'error');
+        switchTab('course');
+        title.focus();
+        return false;
+    }
+    
+    if (!description || !description.value.trim()) {
+        showNotification('Please enter a course description', 'error');
+        switchTab('course');
+        description.focus();
+        return false;
+    }
+    
+    return true;
+}
+
+function collectCurriculumData() {
+    const curriculum = [];
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    
+    chapters.forEach((chapter, chapterIndex) => {
+        const chapterData = {
+            id: chapter.getAttribute('data-chapter-id'),
+            title: chapter.querySelector('.sikshya-chapter-title')?.textContent || '',
+            description: chapter.getAttribute('data-description') || '',
+            order: chapterIndex + 1,
+            lessons: []
+        };
+        
+        const lessons = chapter.querySelectorAll('.sikshya-lesson-item');
+        lessons.forEach((lesson, lessonIndex) => {
+            const lessonData = {
+                id: lesson.getAttribute('data-lesson-id'),
+                type: lesson.getAttribute('data-type'),
+                title: lesson.querySelector('.sikshya-lesson-title')?.textContent || '',
+                duration: lesson.getAttribute('data-duration') || '',
+                order: lessonIndex + 1
+            };
+            chapterData.lessons.push(lessonData);
+        });
+        
+        curriculum.push(chapterData);
+    });
+    
+    return curriculum;
+}
+
+function showLoadingState() {
+    const buttons = document.querySelectorAll('.sikshya-header-actions button');
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.querySelector('svg')) {
+            btn.querySelector('svg').style.display = 'none';
+        }
+        if (btn.textContent.includes('Save') || btn.textContent.includes('Publish')) {
+            btn.innerHTML = '<div class="sikshya-spinner"></div> Saving...';
+        }
+    });
+}
+
+function hideLoadingState() {
+    const buttons = document.querySelectorAll('.sikshya-header-actions button');
+    buttons.forEach(btn => {
+        btn.disabled = false;
+    });
+    // Restore original button content - would need to be improved for production
+    location.reload();
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `sikshya-notification sikshya-notification-${type}`;
+    notification.innerHTML = `
+        <div class="sikshya-notification-content">
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+
+
+
 
 function saveAsDraft(contentType) {
     alert('Save as draft functionality will be implemented here.');

@@ -69,7 +69,11 @@ if (!defined('ABSPATH')) {
         <label>Lesson Images</label>
         <div class="sikshya-upload-area" onclick="document.getElementById('text-images-input').click()">
             <input type="file" id="text-images-input" accept="image/*" multiple style="display: none;" onchange="handleImagesUpload(this)">
-            <i class="sikshya-upload-icon fas fa-image"></i>
+            <div class="sikshya-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
             <strong>Upload Images</strong>
             <small>JPG, PNG, GIF (Max 5MB each)</small>
         </div>
@@ -84,7 +88,11 @@ if (!defined('ABSPATH')) {
         <label>Downloads & Attachments</label>
         <div class="sikshya-upload-area" onclick="document.getElementById('text-attachments-input').click()">
             <input type="file" id="text-attachments-input" multiple style="display: none;" onchange="handleAttachmentsUpload(this)">
-            <i class="sikshya-upload-icon fas fa-paperclip"></i>
+            <div class="sikshya-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                </svg>
+            </div>
             <strong>Upload Files</strong>
             <small>PDF, DOC, PPT, etc. (Max 20MB each)</small>
         </div>
@@ -132,7 +140,10 @@ if (!defined('ABSPATH')) {
 </div>
 
 <button class="sikshya-form-toggle" onclick="toggleAdvancedForm(this)">
-    <i class="fas fa-chevron-down"></i> Advanced Options
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+    </svg>
+    Advanced Options
 </button>
 
 <div class="sikshya-form-advanced">

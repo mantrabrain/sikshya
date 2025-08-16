@@ -60,7 +60,11 @@ if (!defined('ABSPATH')) {
         <label>Upload Video File *</label>
         <div class="sikshya-upload-area" onclick="document.getElementById('video-file-input').click()">
             <input type="file" id="video-file-input" accept="video/*" style="display: none;" onchange="handleVideoUpload(this)">
-            <i class="sikshya-upload-icon fas fa-cloud-upload-alt"></i>
+            <div class="sikshya-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                </svg>
+            </div>
             <strong>Click to upload video</strong>
             <small>MP4, WebM, MOV (Max 500MB)</small>
         </div>
@@ -83,7 +87,9 @@ if (!defined('ABSPATH')) {
     <div id="video-preview-section" class="sikshya-form-row-small" style="display: none;">
         <label>Video Preview</label>
         <div id="video-preview-container" style="background: #f8f9fa; border: 1px solid #e1e8ed; border-radius: 6px; padding: 20px; text-align: center;">
-            <i class="fas fa-play-circle" style="font-size: 48px; color: #3498db;"></i>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--sikshya-primary);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
             <p id="video-preview-title">Video will appear here</p>
         </div>
     </div>
@@ -175,7 +181,10 @@ if (!defined('ABSPATH')) {
 </div>
 
 <button class="sikshya-form-toggle" onclick="toggleAdvancedForm(this)">
-    <i class="fas fa-chevron-down"></i> Advanced Options
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+    </svg>
+    Advanced Options
 </button>
 
 <div class="sikshya-form-advanced">
@@ -201,7 +210,11 @@ if (!defined('ABSPATH')) {
             <label>Video Thumbnail</label>
             <div class="sikshya-upload-area" onclick="document.getElementById('video-thumbnail-input').click()">
                 <input type="file" id="video-thumbnail-input" accept="image/*" style="display: none;" onchange="handleThumbnailUpload(this)">
-                <i class="sikshya-upload-icon fas fa-image"></i>
+                <div class="sikshya-upload-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
                 <strong>Upload Thumbnail</strong>
                 <small>JPG, PNG (16:9 ratio recommended)</small>
             </div>
@@ -211,7 +224,11 @@ if (!defined('ABSPATH')) {
             <label>Captions/Subtitles</label>
             <div class="sikshya-upload-area" onclick="document.getElementById('video-captions-input').click()">
                 <input type="file" id="video-captions-input" accept=".srt,.vtt" style="display: none;" onchange="handleCaptionsUpload(this)">
-                <i class="sikshya-upload-icon fas fa-closed-captioning"></i>
+                <div class="sikshya-upload-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                    </svg>
+                </div>
                 <strong>Upload Captions</strong>
                 <small>SRT, VTT format</small>
             </div>

@@ -29,21 +29,21 @@ $course_id = $data['course_id'] ?? '';
                 Course Builder
             </h1>
             <div class="sikshya-header-actions">
-                <button type="button" class="sikshya-btn sikshya-btn-secondary" onclick="previewCourse()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="button" class="sikshya-btn" onclick="previewCourse()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                     Preview
                 </button>
-                <button type="submit" class="sikshya-btn sikshya-btn-secondary" onclick="saveDraft()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="submit" class="sikshya-btn" onclick="saveDraft()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                     </svg>
                     Save Draft
                 </button>
                 <button type="submit" class="sikshya-btn sikshya-btn-primary" onclick="publishCourse()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
                     </svg>
                     Publish Course
@@ -132,34 +132,37 @@ $course_id = $data['course_id'] ?? '';
                     <!-- Quick Actions -->
                     <div class="sikshya-nav-section">
                         <h4 class="sikshya-nav-section-title">Quick Actions</h4>
-                        <div class="sikshya-quick-actions">
-                            <button type="button" class="sikshya-btn sikshya-btn-secondary" onclick="previewCourse()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                Preview
-                            </button>
-                            <button type="submit" class="sikshya-btn sikshya-btn-secondary" onclick="saveDraft()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                                </svg>
-                                Save Draft
-                            </button>
-                            <button type="submit" class="sikshya-btn sikshya-btn-primary" onclick="publishCourse()">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
-                                </svg>
-                                Publish Course
-                            </button>
-                        </div>
+                        <ul class="sikshya-nav-list">
+                            <li class="sikshya-nav-item">
+                                <button type="button" class="sikshya-nav-link sikshya-quick-action" onclick="previewCourse()">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </li>
+                            <li class="sikshya-nav-item">
+                                <button type="submit" class="sikshya-nav-link sikshya-quick-action" onclick="saveDraft()">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                                    </svg>
+                                </button>
+                            </li>
+                            <li class="sikshya-nav-item">
+                                <button type="submit" class="sikshya-nav-link sikshya-quick-action" onclick="publishCourse()">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+                                    </svg>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                 </nav>
             </div>
 
             <div class="sikshya-content">
                 <?php
-                // Include form templates based on active tab
+                // Include form templates
                 $templates_dir = plugin_dir_path(__FILE__) . 'courses/form/';
                 
                 // Course Information Form
@@ -186,3 +189,4 @@ $course_id = $data['course_id'] ?? '';
         </div>
     </form>
 </div>
+

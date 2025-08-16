@@ -229,7 +229,11 @@ if (!defined('ABSPATH')) {
         <label>Assignment Resources</label>
         <div class="sikshya-upload-area" onclick="document.getElementById('assignment-resources-input').click()">
             <input type="file" id="assignment-resources-input" multiple style="display: none;" onchange="handleResourcesUpload(this)">
-            <i class="sikshya-upload-icon fas fa-cloud-upload-alt"></i>
+            <div class="sikshya-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                </svg>
+            </div>
             <strong>Upload Supporting Files</strong>
             <small>Upload files that students need to complete the assignment</small>
         </div>
@@ -244,7 +248,11 @@ if (!defined('ABSPATH')) {
         <label>Sample Submission</label>
         <div class="sikshya-upload-area" onclick="document.getElementById('assignment-sample-input').click()">
             <input type="file" id="assignment-sample-input" style="display: none;" onchange="handleSampleUpload(this)">
-            <i class="sikshya-upload-icon fas fa-file-alt"></i>
+            <div class="sikshya-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
             <strong>Upload Sample Work</strong>
             <small>Provide an example of what you expect</small>
         </div>
@@ -252,7 +260,10 @@ if (!defined('ABSPATH')) {
 </div>
 
 <button class="sikshya-form-toggle" onclick="toggleAdvancedForm(this)">
-    <i class="fas fa-chevron-down"></i> Advanced Options
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+    </svg>
+    Advanced Options
 </button>
 
 <div class="sikshya-form-advanced">

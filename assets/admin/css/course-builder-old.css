@@ -1,8 +1,7 @@
 /* Import Sikshya Design System */
 @import url('./design-system.css');
 
-/* Course Builder Specific Styles */
-/* Note: Basic button, form, and component styles are inherited from design-system.css */
+/* Course Builder Styles using Design System */
 .sikshya-course-builder {
     background: #fafbfc;
     margin: 0;
@@ -578,89 +577,42 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Course Builder Section Styles - extends design system */
 .sikshya-section {
-    margin-bottom: var(--sikshya-space-8);
-    background: var(--sikshya-gray-50);
-    border-radius: var(--sikshya-radius-lg);
-    padding: var(--sikshya-space-6);
-    border: 1px solid var(--sikshya-gray-200);
+    margin-bottom: 32px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 24px;
+    border: 1px solid #e1e8ed;
 }
 
-/* Modern Section Design */
-.sikshya-section-modern {
-    background: var(--sikshya-white);
-    border: 1px solid var(--sikshya-gray-200);
-    border-radius: var(--sikshya-radius-lg);
-    padding: var(--sikshya-space-8);
-    box-shadow: var(--sikshya-shadow-sm);
-    transition: var(--sikshya-transition-normal);
-}
-
-.sikshya-section-modern:hover {
-    box-shadow: var(--sikshya-shadow-md);
-}
-
-.sikshya-section-header {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sikshya-space-4);
-    margin-bottom: var(--sikshya-space-6);
-}
-
-.sikshya-section-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: var(--sikshya-primary-bg);
-    border-radius: var(--sikshya-radius-lg);
-    color: var(--sikshya-primary);
-    flex-shrink: 0;
-}
-
-.sikshya-section-content {
-    flex: 1;
-}
-
-.sikshya-section-desc {
-    color: var(--sikshya-gray-600);
-    font-size: var(--sikshya-text-sm);
-    margin-top: var(--sikshya-space-1);
-    line-height: 1.5;
-}
-
-/* Course Builder Section Title Styles */
 .sikshya-section-title {
-    font-size: var(--sikshya-text-lg);
-    font-weight: var(--sikshya-font-semibold);
-    color: var(--sikshya-gray-800);
-    margin-bottom: var(--sikshya-space-5);
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: var(--sikshya-space-3);
+    gap: 12px;
 }
 
 .sikshya-section-title::before {
     content: '';
     width: 3px;
     height: 20px;
-    background: var(--sikshya-primary);
+    background: #3498db;
     border-radius: 2px;
 }
 
-/* Course Builder Specific Form Styles */
 .sikshya-form-row {
-    margin-bottom: var(--sikshya-space-5);
+    margin-bottom: 20px;
 }
 
 .sikshya-form-row label {
     display: block;
-    font-weight: var(--sikshya-font-semibold);
-    margin-bottom: var(--sikshya-space-2);
-    color: var(--sikshya-gray-700);
-    font-size: var(--sikshya-text-sm);
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #34495e;
+    font-size: 14px;
 }
 
 .sikshya-form-row input[type="text"],
@@ -669,21 +621,21 @@
 .sikshya-form-row select,
 .sikshya-form-row textarea {
     width: 100%;
-    padding: var(--sikshya-space-3) var(--sikshya-space-4);
-    border: 1px solid var(--sikshya-gray-300);
-    border-radius: var(--sikshya-radius-md);
-    font-size: var(--sikshya-text-sm);
-    line-height: var(--sikshya-leading-normal);
-    transition: var(--sikshya-transition-colors);
-    background: var(--sikshya-white);
+    padding: 12px 16px;
+    border: 1px solid #d1d8e0;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    background: white;
 }
 
 .sikshya-form-row input:focus,
 .sikshya-form-row select:focus,
 .sikshya-form-row textarea:focus {
-    border-color: var(--sikshya-primary);
+    border-color: #3498db;
     outline: none;
-    box-shadow: 0 0 0 3px var(--sikshya-primary-bg);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
 .sikshya-form-row textarea {
@@ -701,180 +653,6 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-}
-
-/* Media Upload Components */
-.sikshya-media-upload {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sikshya-space-4);
-}
-
-.sikshya-media-preview {
-    border: 2px dashed var(--sikshya-gray-300);
-    border-radius: var(--sikshya-radius-lg);
-    padding: var(--sikshya-space-8);
-    background: var(--sikshya-gray-50);
-    transition: var(--sikshya-transition-normal);
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.sikshya-media-preview:hover {
-    border-color: var(--sikshya-primary);
-    background: var(--sikshya-primary-bg);
-}
-
-.sikshya-media-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--sikshya-space-3);
-    color: var(--sikshya-gray-500);
-    text-align: center;
-}
-
-.sikshya-media-placeholder svg {
-    color: var(--sikshya-gray-400);
-}
-
-.sikshya-media-btn {
-    align-self: flex-start;
-}
-
-.sikshya-help-text {
-    color: var(--sikshya-gray-500);
-    font-size: var(--sikshya-text-sm);
-    margin: 0;
-}
-
-/* Repeater Components */
-.sikshya-repeater {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sikshya-space-3);
-    margin-bottom: var(--sikshya-space-4);
-}
-
-.sikshya-repeater-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-3);
-    padding: var(--sikshya-space-4);
-    background: var(--sikshya-gray-50);
-    border: 1px solid var(--sikshya-gray-200);
-    border-radius: var(--sikshya-radius-md);
-    transition: var(--sikshya-transition-normal);
-}
-
-.sikshya-repeater-item:hover {
-    background: var(--sikshya-white);
-    border-color: var(--sikshya-gray-300);
-    box-shadow: var(--sikshya-shadow-sm);
-}
-
-.sikshya-repeater-input {
-    flex: 1;
-}
-
-.sikshya-repeater-input input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    padding: 0;
-    font-size: var(--sikshya-text-sm);
-    color: var(--sikshya-gray-900);
-}
-
-.sikshya-repeater-input input:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-.sikshya-add-item {
-    align-self: flex-start;
-    margin-top: var(--sikshya-space-2);
-}
-
-/* Icon Button Variants - Course Builder Specific */
-.sikshya-btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--sikshya-radius-md);
-}
-
-/* Danger button variant - extends design system */
-.sikshya-btn-danger {
-    background: var(--sikshya-error-bg);
-    color: var(--sikshya-error);
-    border-color: var(--sikshya-error-bg);
-}
-
-.sikshya-btn-danger:hover {
-    background: var(--sikshya-error);
-    color: var(--sikshya-white);
-    border-color: var(--sikshya-error);
-}
-
-/* Quick Actions - Match Header Button Styling */
-.sikshya-quick-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sikshya-space-2);
-    padding: var(--sikshya-space-4);
-    background: var(--sikshya-gray-50);
-    border-radius: var(--sikshya-radius-lg);
-    border: 1px solid var(--sikshya-gray-200);
-}
-
-/* Quick Actions Button Styling - Match Header Buttons */
-.sikshya-quick-actions .sikshya-btn {
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-semibold);
-    padding: var(--sikshya-space-3) var(--sikshya-space-4);
-    border-radius: var(--sikshya-radius-md);
-    transition: var(--sikshya-transition-normal);
-    border: 1px solid var(--sikshya-gray-300);
-    box-shadow: var(--sikshya-shadow-sm);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sikshya-space-2);
-    text-decoration: none;
-    width: 100%;
-    justify-content: flex-start;
-}
-
-.sikshya-quick-actions .sikshya-btn-primary {
-    background: var(--sikshya-primary);
-    color: var(--sikshya-white);
-    border-color: var(--sikshya-primary);
-}
-
-.sikshya-quick-actions .sikshya-btn-primary:hover {
-    background: var(--sikshya-primary-hover);
-    border-color: var(--sikshya-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-md);
-}
-
-.sikshya-quick-actions .sikshya-btn-secondary {
-    background: var(--sikshya-white);
-    color: var(--sikshya-gray-700);
-    border-color: var(--sikshya-gray-400);
-}
-
-.sikshya-quick-actions .sikshya-btn-secondary:hover {
-    background: var(--sikshya-gray-50);
-    color: var(--sikshya-primary);
-    border-color: var(--sikshya-primary);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-md);
 }
 
 .sikshya-upload-area {
@@ -1350,9 +1128,9 @@
     transform: rotate(180deg);
 }
 
-/* Content Type Modal - Smaller width for better UX */
+/* Full Width Modal */
 .sikshya-modal-full {
-    max-width: 800px !important;
+    max-width: 90% !important;
     width: 90% !important;
 }
 
@@ -1429,9 +1207,9 @@ body .sikshya-modal-overlay {
     padding: 0 24px 24px 24px;
 }
 
-/* Content Type Modal - Smaller width for better UX */
+/* Full Width Modal */
 .sikshya-modal-full {
-    max-width: 800px !important;
+    max-width: 90% !important;
     width: 90% !important;
 }
 
@@ -1441,101 +1219,52 @@ body .sikshya-modal-overlay {
 }
 
 .sikshya-modal-header {
-    padding: var(--sikshya-space-6);
-    background: var(--sikshya-gray-50);
-    border-bottom: 1px solid var(--sikshya-gray-200);
-    margin-bottom: 0;
-    position: relative;
-}
-
-.sikshya-modal-header-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sikshya-space-2);
-}
-
-.sikshya-modal-title-wrapper {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-3);
-}
-
-.sikshya-modal-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: var(--sikshya-primary-bg);
-    border-radius: var(--sikshya-radius-lg);
-    color: var(--sikshya-primary);
-    flex-shrink: 0;
+    padding: 24px 24px 0 24px;
+    border-bottom: 1px solid #e1e8ed;
+    margin-bottom: 24px;
 }
 
 .sikshya-modal-title {
-    font-size: var(--sikshya-text-xl);
-    font-weight: var(--sikshya-font-semibold);
-    color: var(--sikshya-gray-800);
-    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .sikshya-modal-subtitle {
-    color: var(--sikshya-gray-500);
-    font-size: var(--sikshya-text-sm);
+    color: #7f8c8d;
+    font-size: 14px;
     margin: 0;
-    line-height: var(--sikshya-leading-normal);
 }
 
 .sikshya-modal-close {
     position: absolute;
-    top: var(--sikshya-space-5);
-    right: var(--sikshya-space-5);
+    top: 20px;
+    right: 20px;
     background: none;
     border: none;
-    color: var(--sikshya-gray-400);
+    font-size: 20px;
+    color: #7f8c8d;
     cursor: pointer;
-    padding: var(--sikshya-space-2);
-    border-radius: var(--sikshya-radius-md);
-    transition: var(--sikshya-transition-colors);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
 }
 
 .sikshya-modal-close:hover {
-    background: var(--sikshya-gray-100);
-    color: var(--sikshya-gray-600);
+    background: #f8f9fa;
+    color: #2c3e50;
 }
 
 .sikshya-modal-footer {
-    padding: var(--sikshya-space-4) var(--sikshya-space-6);
-    background: var(--sikshya-gray-50);
-    border-top: 1px solid var(--sikshya-gray-200);
+    padding: 16px 24px;
+    border-top: 1px solid #e1e8ed;
     display: flex;
     justify-content: flex-end;
-    gap: var(--sikshya-space-3);
-}
-
-/* Responsive modal sizing for content type forms */
-@media (max-width: 1200px) {
-    .sikshya-modal-full {
-        max-width: 700px !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .sikshya-modal-full {
-        max-width: 95% !important;
-        width: 95% !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .sikshya-modal-full {
-        max-width: 98% !important;
-        width: 98% !important;
-        margin: 10px !important;
-    }
+    gap: 12px;
 }
 
 /* Content Type Selection */
@@ -3093,81 +2822,54 @@ body .sikshya-modal-overlay {
     display: block;
 }
 
-/* ========================================
-   MODERN CHAPTER LISTING UI/UX
-======================================== */
-
-/* Chapter Cards - Clean Modern Design */
+/* Chapter Cards */
 .sikshya-chapter-card {
     background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-lg);
-    border: 1px solid var(--sikshya-gray-100);
-    margin-bottom: var(--sikshya-space-3);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-200);
+    box-shadow: var(--sikshya-shadow-sm);
+    margin-bottom: var(--sikshya-space-4);
     overflow: hidden;
-    transition: all var(--sikshya-transition-normal);
-    position: relative;
+    transition: all var(--sikshya-transition-fast);
 }
 
 .sikshya-chapter-card:hover {
-    border-color: var(--sikshya-primary);
-    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
-    transform: translateY(-1px);
+    box-shadow: var(--sikshya-shadow-md);
+    border-color: var(--sikshya-primary-border);
 }
 
-/* Chapter Header - Enhanced Layout */
 .sikshya-chapter-header {
     display: flex;
     align-items: center;
     gap: var(--sikshya-space-4);
-    padding: var(--sikshya-space-5) var(--sikshya-space-6);
+    padding: var(--sikshya-space-5);
     cursor: pointer;
     transition: all var(--sikshya-transition-fast);
     background: var(--sikshya-white);
-    border-bottom: 1px solid transparent;
 }
 
 .sikshya-chapter-header:hover {
     background: var(--sikshya-gray-50);
 }
 
-.sikshya-chapter-header.expanded {
-    border-bottom-color: var(--sikshya-gray-100);
-    background: var(--sikshya-primary-bg);
-}
-
-/* Drag Handle - Modern Grip */
 .sikshya-chapter-drag {
-    color: var(--sikshya-gray-300);
+    color: var(--sikshya-gray-400);
     cursor: grab;
     flex-shrink: 0;
-    padding: var(--sikshya-space-2);
-    border-radius: var(--sikshya-radius-md);
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-drag:hover {
-    color: var(--sikshya-gray-500);
-    background: var(--sikshya-gray-100);
+    padding: var(--sikshya-space-1);
 }
 
 .sikshya-chapter-drag:active {
     cursor: grabbing;
-    color: var(--sikshya-primary);
-    background: var(--sikshya-primary-bg);
 }
 
-/* Chapter Info - Clean Typography */
 .sikshya-chapter-info {
     flex: 1;
     min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-6);
 }
 
 .sikshya-chapter-main {
-    flex: 1;
-    min-width: 0;
+    margin-bottom: var(--sikshya-space-2);
 }
 
 .sikshya-chapter-title {
@@ -3176,205 +2878,77 @@ body .sikshya-modal-overlay {
     color: var(--sikshya-gray-900);
     margin: 0 0 var(--sikshya-space-1) 0;
     line-height: var(--sikshya-leading-tight);
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 .sikshya-chapter-description {
-    font-size: var(--sikshya-text-sm);
+    font-size: var(--sikshya-text-base);
     color: var(--sikshya-gray-600);
     margin: 0;
     line-height: var(--sikshya-leading-normal);
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
-/* Chapter Meta - Enhanced Stats */
 .sikshya-chapter-meta {
     display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-4);
+    gap: var(--sikshya-space-3);
     font-size: var(--sikshya-text-sm);
-    flex-shrink: 0;
 }
 
 .sikshya-chapter-lessons,
 .sikshya-chapter-duration {
     color: var(--sikshya-gray-500);
     font-weight: var(--sikshya-font-medium);
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-1);
-}
-
-.sikshya-chapter-lessons::before {
-    content: "📚";
-    font-size: 12px;
-}
-
-.sikshya-chapter-duration::before {
-    content: "⏱️";
-    font-size: 12px;
 }
 
 .sikshya-chapter-status {
-    padding: var(--sikshya-space-1) var(--sikshya-space-2);
-    border-radius: var(--sikshya-radius-full);
+    color: var(--sikshya-primary);
     font-weight: var(--sikshya-font-semibold);
     text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    line-height: 1.2;
+    font-size: var(--sikshya-text-xs);
+    letter-spacing: 0.025em;
 }
 
-.sikshya-chapter-status[data-status="draft"],
-.sikshya-chapter-status:not([data-status]) {
-    background: var(--sikshya-warning-bg);
-    color: var(--sikshya-warning);
-}
-
-.sikshya-chapter-status[data-status="published"] {
-    background: var(--sikshya-success-bg);
-    color: var(--sikshya-success);
-}
-
-.sikshya-chapter-status[data-status="private"] {
-    background: var(--sikshya-gray-100);
-    color: var(--sikshya-gray-600);
-}
-
-/* Chapter Actions - Modern Buttons */
 .sikshya-chapter-actions {
     display: flex;
-    align-items: center;
     gap: var(--sikshya-space-1);
     opacity: 0;
     transition: opacity var(--sikshya-transition-fast);
-    flex-shrink: 0;
 }
 
 .sikshya-chapter-card:hover .sikshya-chapter-actions {
     opacity: 1;
 }
 
-/* Icon Button - extends design system */
-/* Note: Basic .sikshya-btn-icon styles are inherited from design-system.css */
+.sikshya-btn-icon {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: var(--sikshya-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sikshya-gray-400);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+}
 
-/* Toggle Button - Enhanced Animation */
-.sikshya-chapter-toggle {
-    margin-left: var(--sikshya-space-2);
-    border-left: 1px solid var(--sikshya-gray-200);
-    padding-left: var(--sikshya-space-2);
+.sikshya-btn-icon:hover {
+    background: var(--sikshya-primary-bg);
+    color: var(--sikshya-primary);
 }
 
 .sikshya-chapter-toggle svg {
-    transition: transform var(--sikshya-transition-normal);
+    transition: transform var(--sikshya-transition-fast);
 }
 
 .sikshya-chapter-toggle.expanded svg {
     transform: rotate(180deg);
 }
 
-/* Progress Indicator */
-.sikshya-chapter-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--sikshya-gray-200);
-    transition: background var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-card:hover::before {
-    background: var(--sikshya-primary);
-}
-
-.sikshya-chapter-card.completed::before {
-    background: var(--sikshya-success);
-}
-
-.sikshya-chapter-card.in-progress::before {
-    background: var(--sikshya-warning);
-}
-
-/* ========================================
-   CHAPTER CONTENT AREA
-======================================== */
-
-/* Chapter Content */
-.sikshya-chapter-content {
-    border-top: 1px solid var(--sikshya-gray-100);
-    background: var(--sikshya-gray-50);
-    display: none;
-    transition: all var(--sikshya-transition-normal);
-}
-
-.sikshya-chapter-content.expanded {
-    display: block;
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* Lessons Container */
 .sikshya-chapter-lessons {
-    padding: var(--sikshya-space-4);
-    background: var(--sikshya-gray-50);
-}
-
-/* Add Lesson Button - Modern Design */
-.sikshya-add-lesson {
-    margin-top: var(--sikshya-space-3);
-}
-
-.sikshya-add-lesson-btn {
-    width: 100%;
-    background: var(--sikshya-white);
-    border: 2px dashed var(--sikshya-gray-300);
-    border-radius: var(--sikshya-radius-lg);
-    padding: var(--sikshya-space-4);
-    color: var(--sikshya-gray-600);
-    font-weight: var(--sikshya-font-medium);
-    font-size: var(--sikshya-text-sm);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sikshya-space-2);
-}
-
-.sikshya-add-lesson-btn:hover {
-    background: var(--sikshya-primary-bg);
-    border-color: var(--sikshya-primary);
-    color: var(--sikshya-primary);
-    transform: translateY(-1px);
-}
-
-.sikshya-add-lesson-btn svg {
-    width: 16px;
-    height: 16px;
-    opacity: 0.7;
-    transition: opacity var(--sikshya-transition-fast);
-}
-
-.sikshya-add-lesson-btn:hover svg {
-    opacity: 1;
+    padding: 0;
+    background: white;
 }
 
 /* Empty Chapter State */
@@ -3736,8 +3310,31 @@ body .sikshya-modal-overlay {
 
 
 
-/* Primary Button - extends design system */
-/* Note: Basic .sikshya-btn-primary styles are inherited from design-system.css */
+/* Primary Button */
+.sikshya-btn-primary {
+    background: var(--sikshya-primary);
+    color: var(--sikshya-white);
+    border: 1px solid var(--sikshya-primary);
+    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    border-radius: var(--sikshya-radius-lg);
+    font-size: var(--sikshya-text-base);
+    font-weight: var(--sikshya-font-medium);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
+    text-decoration: none;
+}
+
+.sikshya-btn-primary:hover {
+    background: var(--sikshya-primary-hover);
+    border-color: var(--sikshya-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    color: var(--sikshya-white);
+    text-decoration: none;
+}
 
 /* Chapter Cards */
 .sikshya-chapter-card {
@@ -3986,50 +3583,28 @@ body .sikshya-modal-overlay {
     margin-top: var(--sikshya-space-8);
 }
 
-/* Curriculum Actions Button Styling - Match Header Buttons */
-.sikshya-curriculum-actions .sikshya-btn {
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-semibold);
-    padding: var(--sikshya-space-3) var(--sikshya-space-5);
-    border-radius: var(--sikshya-radius-md);
-    transition: var(--sikshya-transition-normal);
+.sikshya-btn-outline {
+    background: transparent;
+    color: var(--sikshya-gray-700);
     border: 1px solid var(--sikshya-gray-300);
-    box-shadow: var(--sikshya-shadow-sm);
+    padding: var(--sikshya-space-3) var(--sikshya-space-5);
+    border-radius: var(--sikshya-radius-lg);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+    cursor: pointer;
+    transition: all var(--sikshya-transition-fast);
     display: inline-flex;
     align-items: center;
     gap: var(--sikshya-space-2);
     text-decoration: none;
 }
 
-.sikshya-curriculum-actions .sikshya-btn-primary {
-    background: var(--sikshya-primary);
-    color: var(--sikshya-white);
-    border-color: var(--sikshya-primary);
-}
-
-.sikshya-curriculum-actions .sikshya-btn-primary:hover {
-    background: var(--sikshya-primary-hover);
-    border-color: var(--sikshya-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-md);
-}
-
-.sikshya-curriculum-actions .sikshya-btn-secondary {
-    background: var(--sikshya-white);
-    color: var(--sikshya-gray-700);
-    border-color: var(--sikshya-gray-400);
-}
-
-.sikshya-curriculum-actions .sikshya-btn-secondary:hover {
+.sikshya-btn-outline:hover {
     background: var(--sikshya-gray-50);
-    color: var(--sikshya-primary);
     border-color: var(--sikshya-primary);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-md);
+    color: var(--sikshya-primary);
+    text-decoration: none;
 }
-
-/* Legacy button styles - now using design system */
-/* Note: .sikshya-btn-outline is now handled by design-system.css */
 
 .sikshya-action-divider {
     width: 1px;

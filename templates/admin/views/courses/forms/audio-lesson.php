@@ -60,7 +60,11 @@ if (!defined('ABSPATH')) {
         <label>Upload Audio File *</label>
         <div class="sikshya-upload-area" onclick="document.getElementById('audio-file-input').click()">
             <input type="file" id="audio-file-input" accept="audio/*" style="display: none;" onchange="handleAudioUpload(this)">
-            <i class="sikshya-upload-icon fas fa-cloud-upload-alt"></i>
+            <div class="sikshya-upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                </svg>
+            </div>
             <strong>Click to upload audio</strong>
             <small>MP3, WAV, M4A, OGG (Max 100MB)</small>
         </div>
@@ -83,7 +87,9 @@ if (!defined('ABSPATH')) {
     <div id="audio-preview-section" class="sikshya-form-row-small" style="display: none;">
         <label>Audio Preview</label>
         <div id="audio-preview-container" style="background: #f8f9fa; border: 1px solid #e1e8ed; border-radius: 6px; padding: 20px; text-align: center;">
-            <i class="fas fa-play-circle" style="font-size: 48px; color: #3498db;"></i>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--sikshya-primary);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
             <p id="audio-preview-title">Audio will appear here</p>
         </div>
     </div>
@@ -201,7 +207,10 @@ if (!defined('ABSPATH')) {
 </div>
 
 <button class="sikshya-form-toggle" onclick="toggleAdvancedForm(this)">
-    <i class="fas fa-chevron-down"></i> Advanced Options
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+    </svg>
+    Advanced Options
 </button>
 
 <div class="sikshya-form-advanced">
@@ -227,7 +236,11 @@ if (!defined('ABSPATH')) {
             <label>Audio Cover Art</label>
             <div class="sikshya-upload-area" onclick="document.getElementById('audio-cover-input').click()">
                 <input type="file" id="audio-cover-input" accept="image/*" style="display: none;" onchange="handleCoverUpload(this)">
-                <i class="sikshya-upload-icon fas fa-image"></i>
+                <div class="sikshya-upload-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
                 <strong>Upload Cover Art</strong>
                 <small>JPG, PNG (Square ratio recommended)</small>
             </div>

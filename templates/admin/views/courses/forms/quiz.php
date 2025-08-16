@@ -15,13 +15,25 @@ if (!defined('ABSPATH')) {
 <div class="sikshya-quiz-builder">
     <!-- Quiz Builder Header -->
     <div class="sikshya-quiz-header">
-        <h3><i class="fas fa-edit"></i> Quiz Builder</h3>
+        <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Quiz Builder
+        </h3>
         <div class="sikshya-quiz-actions">
             <button class="sikshya-btn sikshya-btn-secondary" onclick="previewQuiz()">
-                <i class="fas fa-eye"></i> Preview
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Preview
             </button>
             <button class="sikshya-btn sikshya-btn-primary" onclick="saveQuiz()">
-                <i class="fas fa-save"></i> Save Quiz
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                </svg>
+                Save Quiz
             </button>
         </div>
     </div>
@@ -31,16 +43,23 @@ if (!defined('ABSPATH')) {
         <div class="sikshya-quiz-sidebar">
             <div class="sikshya-quiz-tabs">
                 <button class="sikshya-quiz-tab active" data-tab="quiz" onclick="switchQuizTab('quiz')">
-                    <i class="fas fa-info-circle"></i>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                     <span>Quiz</span>
                 </button>
                 <button class="sikshya-quiz-tab" data-tab="questions" onclick="switchQuizTab('questions')">
-                    <i class="fas fa-question-circle"></i>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                     <span>Questions</span>
                     <span class="sikshya-question-count">0</span>
                 </button>
                 <button class="sikshya-quiz-tab" data-tab="settings" onclick="switchQuizTab('settings')">
-                    <i class="fas fa-cogs"></i>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
                     <span>Settings</span>
                 </button>
             </div>
@@ -86,7 +105,9 @@ if (!defined('ABSPATH')) {
                     <div class="sikshya-quiz-overview">
                         <div class="sikshya-overview-card">
                             <div class="sikshya-overview-icon">
-                                <i class="fas fa-question-circle"></i>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
                             <div class="sikshya-overview-content">
                                 <h5>Total Questions</h5>
@@ -96,7 +117,9 @@ if (!defined('ABSPATH')) {
                         
                         <div class="sikshya-overview-card">
                             <div class="sikshya-overview-icon">
-                                <i class="fas fa-star"></i>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
                             </div>
                             <div class="sikshya-overview-content">
                                 <h5>Total Points</h5>
@@ -106,7 +129,9 @@ if (!defined('ABSPATH')) {
                         
                         <div class="sikshya-overview-card">
                             <div class="sikshya-overview-icon">
-                                <i class="fas fa-clock"></i>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </div>
                             <div class="sikshya-overview-content">
                                 <h5>Estimated Time</h5>
@@ -124,26 +149,43 @@ if (!defined('ABSPATH')) {
                         <h4 class="sikshya-form-section-title">Quiz Questions</h4>
                         <div class="sikshya-question-actions">
                             <button class="sikshya-btn sikshya-btn-secondary" onclick="addQuestion('multiple-choice')" title="Choose one correct answer from multiple options">
-                                <i class="fas fa-list-ul"></i> Multiple Choice
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                </svg>
+                                Multiple Choice
                             </button>
                             <button class="sikshya-btn sikshya-btn-secondary" onclick="addQuestion('true-false')" title="Choose between True or False">
-                                <i class="fas fa-toggle-on"></i> True/False
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                True/False
                             </button>
                             <button class="sikshya-btn sikshya-btn-secondary" onclick="addQuestion('fill-blank')" title="Fill in the missing word or phrase">
-                                <i class="fas fa-pencil-alt"></i> Fill in the Blank
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Fill in the Blank
                             </button>
                             <button class="sikshya-btn sikshya-btn-secondary" onclick="addQuestion('essay')" title="Write a detailed response">
-                                <i class="fas fa-file-alt"></i> Essay
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Essay
                             </button>
                             <button class="sikshya-btn sikshya-btn-secondary" onclick="addQuestion('matching')" title="Match items from two columns">
-                                <i class="fas fa-link"></i> Matching
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                Matching
                             </button>
                         </div>
                     </div>
                     
                     <div id="quiz-questions-container">
                         <div class="sikshya-quiz-empty">
-                            <i class="fas fa-question-circle"></i>
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--sikshya-gray-400);">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                             <h4>No Questions Added Yet</h4>
                             <p>Add your first question to get started</p>
                         </div>
