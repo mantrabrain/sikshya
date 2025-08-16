@@ -325,42 +325,79 @@ function saveChapter() {
         duration: duration,
         order: order
     }, function(data) {
-        // Add chapter to curriculum
-        addChapterToCurriculum(data.html, data.chapter_id);
+        console.log('Chapter creation response:', data);
         
-        // Close modal
-        closeModal(document.querySelector('.sikshya-modal-overlay'));
-        
-        // Update progress
-        updateProgress();
-        
-        // Clear form
-        document.getElementById('chapter-title').value = '';
-        document.getElementById('chapter-description').value = '';
-        document.getElementById('chapter-duration').value = '';
-        document.getElementById('chapter-order').value = chapterCount + 2;
+        if (data.success && data.html && data.chapter_id) {
+            // Add chapter to curriculum
+            addChapterToCurriculum(data.html, data.chapter_id);
+            
+            // Close modal
+            closeModal(document.querySelector('.sikshya-modal-overlay'));
+            
+            // Update progress
+            updateProgress();
+            
+            // Clear form
+            document.getElementById('chapter-title').value = '';
+            document.getElementById('chapter-description').value = '';
+            document.getElementById('chapter-duration').value = '';
+            document.getElementById('chapter-order').value = chapterCount + 2;
+        } else {
+            console.error('Failed to create chapter:', data);
+            alert('Failed to create chapter. Please try again.');
+        }
     });
 }
 
 function addChapterToCurriculum(html, chapterId) {
+    console.log('Adding chapter to curriculum:', chapterId);
+    console.log('Chapter HTML:', html);
+    
     // Hide empty state and show existing curriculum structure
     showCurriculumItems();
     
     const curriculumItems = document.getElementById('curriculum-items');
+    console.log('Curriculum items container:', curriculumItems);
     
-    // Add chapter HTML (from server response)
-    curriculumItems.insertAdjacentHTML('beforeend', html);
-    
-    chapterCount++;
+    if (curriculumItems) {
+        // Add chapter HTML (from server response)
+        curriculumItems.insertAdjacentHTML('beforeend', html);
+        console.log('Chapter added successfully');
+        
+        // Verify the chapter was added
+        const addedChapter = document.getElementById(chapterId);
+        console.log('Added chapter element:', addedChapter);
+        
+        chapterCount++;
+        console.log('Chapter count updated:', chapterCount);
+    } else {
+        console.error('Curriculum items container not found!');
+    }
 }
 
 function toggleChapter(chapterId) {
     const chapter = document.getElementById(chapterId);
     const header = chapter.querySelector('.sikshya-chapter-header');
     const content = chapter.querySelector('.sikshya-chapter-content');
+    const toggleBtn = chapter.querySelector('.sikshya-chapter-toggle');
     
-    header.classList.toggle('expanded');
-    content.classList.toggle('expanded');
+    // Toggle expanded state
+    const isExpanded = header.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // Collapse
+        header.classList.remove('expanded');
+        content.classList.remove('expanded');
+        if (toggleBtn) toggleBtn.classList.remove('expanded');
+    } else {
+        // Expand
+        header.classList.add('expanded');
+        content.classList.add('expanded');
+        if (toggleBtn) toggleBtn.classList.add('expanded');
+    }
+    
+    // Update chapter info display
+    updateChapterInfo(chapterId);
 }
 
 
@@ -811,13 +848,86 @@ function addContentToChapterContent(html, contentId) {
 
 function updateChapterInfo(chapterId) {
     const chapter = document.getElementById(chapterId);
-    const contentItems = chapter.querySelectorAll('.sikshya-lesson-item');
-    const contentCount = contentItems.length;
+    if (!chapter) return;
     
-    const infoElement = chapter.querySelector('.sikshya-chapter-info span:first-child');
-    if (infoElement) {
-        infoElement.textContent = `${contentCount} content item${contentCount !== 1 ? 's' : ''}`;
+    // Count different types of content
+    const allContent = chapter.querySelectorAll('.sikshya-lesson-item');
+    let lessonCount = 0;
+    let quizCount = 0;
+    let assignmentCount = 0;
+    
+    allContent.forEach(item => {
+        const contentType = item.getAttribute('data-type');
+        switch(contentType) {
+            case 'text':
+            case 'video':
+            case 'audio':
+                lessonCount++;
+                break;
+            case 'quiz':
+                quizCount++;
+                break;
+            case 'assignment':
+                assignmentCount++;
+                break;
+            default:
+                lessonCount++; // Default to lesson
+        }
+    });
+    
+    // Update lesson count
+    const lessonCountElement = chapter.querySelector('.lesson-count');
+    if (lessonCountElement) {
+        lessonCountElement.textContent = lessonCount;
     }
+    
+    // Update quiz count
+    const quizCountElement = chapter.querySelector('.quiz-count');
+    if (quizCountElement) {
+        quizCountElement.textContent = quizCount;
+    }
+    
+    // Update assignment count
+    const assignmentCountElement = chapter.querySelector('.assignment-count');
+    if (assignmentCountElement) {
+        assignmentCountElement.textContent = assignmentCount;
+    }
+    
+    // Update total content count for display
+    const totalContent = lessonCount + quizCount + assignmentCount;
+    const totalCountElement = chapter.querySelector('.sikshya-chapter-lessons');
+    if (totalCountElement && totalContent > 0) {
+        const lessonText = totalCountElement.querySelector('span:last-child');
+        if (lessonText) {
+            lessonText.textContent = ` ${totalContent} items`;
+        }
+    }
+    
+    // Update chapter status based on content
+    const statusElement = chapter.querySelector('.sikshya-chapter-status');
+    if (statusElement) {
+        if (totalContent > 0) {
+            statusElement.textContent = 'Ready';
+            statusElement.setAttribute('data-status', 'published');
+        } else {
+            statusElement.textContent = 'Draft';
+            statusElement.setAttribute('data-status', 'draft');
+        }
+    }
+    
+    // Show/hide empty state
+    const emptyState = chapter.querySelector('.sikshya-chapter-empty');
+    const contentInner = chapter.querySelector('.sikshya-chapter-content-inner');
+    
+    if (emptyState && contentInner) {
+        if (totalContent > 0) {
+            emptyState.style.display = 'none';
+        } else {
+            emptyState.style.display = 'block';
+        }
+    }
+    
+    console.log(`Chapter ${chapterId} updated:`, { lessonCount, quizCount, assignmentCount, totalContent });
 }
 
 // Content editing with modal
@@ -996,14 +1106,21 @@ function addLesson(chapterId) {
 
 // Simple UI State Management
 function showCurriculumItems() {
+    console.log('Showing curriculum items...');
+    
     const emptyState = document.getElementById('curriculum-empty-state');
     const curriculumItems = document.getElementById('curriculum-items');
     
+    console.log('Empty state element:', emptyState);
+    console.log('Curriculum items element:', curriculumItems);
+    
     if (emptyState) {
         emptyState.style.display = 'none';
+        console.log('Hidden empty state');
     }
     if (curriculumItems) {
         curriculumItems.style.display = 'block';
+        console.log('Showed curriculum items');
     }
 }
 
@@ -1056,6 +1173,105 @@ function loadSampleChapter() {
 // Keep the old function for backward compatibility
 function toggleDemoContent() {
     loadSampleChapter();
+}
+
+// Temporary test function to debug chapter display
+function testAddChapter() {
+    console.log('Testing chapter addition...');
+    
+    const testHtml = `
+        <div class="sikshya-chapter-card" id="test-chapter-1" 
+             data-chapter-id="test-chapter-1"
+             data-description="Test chapter description"
+             data-duration="30"
+             data-order="1">
+            
+            <div class="sikshya-chapter-header" onclick="toggleChapter('test-chapter-1')">
+                <div class="sikshya-chapter-drag">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h.01M8 10h.01M8 14h.01M8 18h.01M16 6h.01M16 10h.01M16 14h.01M16 18h.01"/>
+                    </svg>
+                </div>
+                <div class="sikshya-chapter-info">
+                    <div class="sikshya-chapter-main">
+                        <h4 class="sikshya-chapter-title">Test Chapter</h4>
+                        <p class="sikshya-chapter-description">This is a test chapter description</p>
+                    </div>
+                    <div class="sikshya-chapter-meta">
+                        <span class="sikshya-chapter-lessons">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            <span class="lesson-count">0</span> lessons
+                        </span>
+                        <span class="sikshya-chapter-quizzes">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="quiz-count">0</span> quizzes
+                        </span>
+                        <span class="sikshya-chapter-assignments">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                            <span class="assignment-count">0</span> assignments
+                        </span>
+                        <span class="sikshya-chapter-duration">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            30 min
+                        </span>
+                        <span class="sikshya-chapter-status" data-status="draft">Draft</span>
+                    </div>
+                </div>
+                <div class="sikshya-chapter-actions">
+                    <button class="sikshya-btn-icon" onclick="event.stopPropagation(); editChapter('test-chapter-1')" title="Edit Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon" onclick="event.stopPropagation(); deleteChapter('test-chapter-1')" title="Delete Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="event.stopPropagation(); toggleChapter('test-chapter-1')" title="Toggle Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sikshya-chapter-content" id="content-test-chapter-1">
+                <div class="sikshya-chapter-content-inner">
+                    <div class="sikshya-chapter-lessons">
+                        <div class="sikshya-chapter-empty">
+                            <div class="sikshya-chapter-empty-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <h4>No Lessons Yet</h4>
+                            <p>Add your first lesson to this chapter</p>
+                        </div>
+                    </div>
+                    
+                    <div class="sikshya-add-lesson">
+                        <button class="sikshya-add-lesson-btn" onclick="addLesson('test-chapter-1')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Lesson
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    addChapterToCurriculum(testHtml, 'test-chapter-1');
 }
 
 function previewCourse() {

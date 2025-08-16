@@ -3097,21 +3097,22 @@ body .sikshya-modal-overlay {
    MODERN CHAPTER LISTING UI/UX
 ======================================== */
 
-/* Chapter Cards - Clean Modern Design */
+/* Chapter Cards - Enhanced Modern Design */
 .sikshya-chapter-card {
     background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-lg);
-    border: 1px solid var(--sikshya-gray-100);
-    margin-bottom: var(--sikshya-space-3);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-200);
+    margin-bottom: var(--sikshya-space-4);
     overflow: hidden;
     transition: all var(--sikshya-transition-normal);
     position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .sikshya-chapter-card:hover {
     border-color: var(--sikshya-primary);
-    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
-    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.12);
+    transform: translateY(-2px);
 }
 
 /* Chapter Header - Enhanced Layout */
@@ -3119,11 +3120,12 @@ body .sikshya-modal-overlay {
     display: flex;
     align-items: center;
     gap: var(--sikshya-space-4);
-    padding: var(--sikshya-space-5) var(--sikshya-space-6);
+    padding: var(--sikshya-space-6) var(--sikshya-space-6);
     cursor: pointer;
     transition: all var(--sikshya-transition-fast);
     background: var(--sikshya-white);
     border-bottom: 1px solid transparent;
+    position: relative;
 }
 
 .sikshya-chapter-header:hover {
@@ -3131,8 +3133,9 @@ body .sikshya-modal-overlay {
 }
 
 .sikshya-chapter-header.expanded {
-    border-bottom-color: var(--sikshya-gray-100);
+    border-bottom-color: var(--sikshya-gray-200);
     background: var(--sikshya-primary-bg);
+    box-shadow: inset 0 -1px 0 var(--sikshya-gray-200);
 }
 
 /* Drag Handle - Modern Grip */
@@ -3171,15 +3174,16 @@ body .sikshya-modal-overlay {
 }
 
 .sikshya-chapter-title {
-    font-size: var(--sikshya-text-lg);
-    font-weight: var(--sikshya-font-semibold);
+    font-size: var(--sikshya-text-xl);
+    font-weight: var(--sikshya-font-bold);
     color: var(--sikshya-gray-900);
-    margin: 0 0 var(--sikshya-space-1) 0;
+    margin: 0 0 var(--sikshya-space-2) 0;
     line-height: var(--sikshya-leading-tight);
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    letter-spacing: -0.025em;
 }
 
 .sikshya-chapter-description {
@@ -3197,28 +3201,38 @@ body .sikshya-modal-overlay {
 .sikshya-chapter-meta {
     display: flex;
     align-items: center;
-    gap: var(--sikshya-space-4);
+    gap: var(--sikshya-space-3);
     font-size: var(--sikshya-text-sm);
     flex-shrink: 0;
+    flex-wrap: wrap;
+    row-gap: var(--sikshya-space-2);
 }
 
 .sikshya-chapter-lessons,
+.sikshya-chapter-quizzes,
+.sikshya-chapter-assignments,
 .sikshya-chapter-duration {
     color: var(--sikshya-gray-500);
     font-weight: var(--sikshya-font-medium);
     display: flex;
     align-items: center;
     gap: var(--sikshya-space-1);
+    font-size: var(--sikshya-text-sm);
 }
 
-.sikshya-chapter-lessons::before {
-    content: "📚";
-    font-size: 12px;
+.sikshya-chapter-lessons svg,
+.sikshya-chapter-quizzes svg,
+.sikshya-chapter-assignments svg,
+.sikshya-chapter-duration svg {
+    flex-shrink: 0;
+    color: var(--sikshya-gray-400);
 }
 
-.sikshya-chapter-duration::before {
-    content: "⏱️";
-    font-size: 12px;
+.sikshya-chapter-lessons .lesson-count,
+.sikshya-chapter-quizzes .quiz-count,
+.sikshya-chapter-assignments .assignment-count {
+    font-weight: var(--sikshya-font-semibold);
+    color: var(--sikshya-gray-700);
 }
 
 .sikshya-chapter-status {
@@ -3309,15 +3323,21 @@ body .sikshya-modal-overlay {
 
 /* Chapter Content */
 .sikshya-chapter-content {
-    border-top: 1px solid var(--sikshya-gray-100);
+    border-top: 1px solid var(--sikshya-gray-200);
     background: var(--sikshya-gray-50);
     display: none;
     transition: all var(--sikshya-transition-normal);
+    position: relative;
 }
 
 .sikshya-chapter-content.expanded {
     display: block;
     animation: slideDown 0.3s ease-out;
+}
+
+.sikshya-chapter-content-inner {
+    padding: var(--sikshya-space-6);
+    background: var(--sikshya-gray-50);
 }
 
 @keyframes slideDown {
@@ -3337,9 +3357,9 @@ body .sikshya-modal-overlay {
     background: var(--sikshya-gray-50);
 }
 
-/* Add Lesson Button - Modern Design */
+/* Add Lesson Button - Enhanced Modern Design */
 .sikshya-add-lesson {
-    margin-top: var(--sikshya-space-3);
+    margin-top: var(--sikshya-space-4);
 }
 
 .sikshya-add-lesson-btn {
@@ -3347,9 +3367,15 @@ body .sikshya-modal-overlay {
     background: var(--sikshya-white);
     border: 2px dashed var(--sikshya-gray-300);
     border-radius: var(--sikshya-radius-lg);
-    padding: var(--sikshya-space-4);
-    color: var(--sikshya-gray-600);
+    padding: var(--sikshya-space-5);
+    transition: all var(--sikshya-transition-fast);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sikshya-space-2);
     font-weight: var(--sikshya-font-medium);
+    color: var(--sikshya-gray-600);
     font-size: var(--sikshya-text-sm);
     cursor: pointer;
     transition: all var(--sikshya-transition-fast);
@@ -3377,11 +3403,15 @@ body .sikshya-modal-overlay {
     opacity: 1;
 }
 
-/* Empty Chapter State */
+/* Empty Chapter State - Enhanced Design */
 .sikshya-chapter-empty {
     text-align: center;
     padding: var(--sikshya-space-12) var(--sikshya-space-6);
     color: var(--sikshya-gray-500);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-lg);
+    border: 2px dashed var(--sikshya-gray-200);
+    margin: var(--sikshya-space-4) 0;
 }
 
 .sikshya-chapter-empty-icon {
@@ -3394,11 +3424,18 @@ body .sikshya-modal-overlay {
     justify-content: center;
     margin: 0 auto var(--sikshya-space-4);
     color: var(--sikshya-gray-400);
+    transition: all var(--sikshya-transition-fast);
+}
+
+.sikshya-chapter-empty:hover .sikshya-chapter-empty-icon {
+    background: var(--sikshya-primary-bg);
+    color: var(--sikshya-primary);
+    transform: scale(1.05);
 }
 
 .sikshya-chapter-empty h4 {
     font-size: var(--sikshya-text-lg);
-    font-weight: var(--sikshya-font-medium);
+    font-weight: var(--sikshya-font-semibold);
     color: var(--sikshya-gray-700);
     margin: 0 0 var(--sikshya-space-2) 0;
 }
@@ -3407,7 +3444,7 @@ body .sikshya-modal-overlay {
     font-size: var(--sikshya-text-base);
     color: var(--sikshya-gray-500);
     margin: 0 0 var(--sikshya-space-6) 0;
-    line-height: var(--sikshya-leading-normal);
+    line-height: var(--sikshya-leading-relaxed);
 }
 
 /* Lesson Items */
