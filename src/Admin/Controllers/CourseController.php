@@ -668,6 +668,9 @@ class CourseController extends BaseView
             // Generate unique chapter ID
             $chapter_id = 'chapter-' . uniqid();
 
+            // Debug logging
+            error_log('Sikshya Chapter Data: ' . print_r($chapter_data, true));
+            
             // Load chapter template with data
             $args = [
                 'chapter_id' => $chapter_id,
@@ -677,6 +680,8 @@ class CourseController extends BaseView
                 'chapter_order' => $chapter_data['order'],
                 'content_count' => 0,
             ];
+            
+            error_log('Sikshya Template Args: ' . print_r($args, true));
 
             ob_start();
             $this->render('courses/chapter', $args);
