@@ -727,6 +727,10 @@ class CourseController extends BaseView
                 'duration' => sanitize_text_field($_POST['duration'] ?? ''),
             ];
 
+            // Debug logging
+            error_log('Sikshya Create Content - POST data: ' . print_r($_POST, true));
+            error_log('Sikshya Create Content - Content type: ' . $content_data['type']);
+
             // Validate required fields
             if (empty($content_data['title'])) {
                 wp_send_json_error('Content title is required');
@@ -744,6 +748,9 @@ class CourseController extends BaseView
                 'content_description' => $content_data['description'],
                 'content_duration' => $content_data['duration'],
             ];
+
+            // Debug logging
+            error_log('Sikshya Create Content - Template args: ' . print_r($args, true));
 
             ob_start();
             $this->render('courses/content-item', $args);

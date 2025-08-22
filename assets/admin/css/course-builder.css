@@ -953,30 +953,7 @@
     background: #ecf0f1;
 }
 
-.sikshya-lesson-item {
-    background: white;
-    border: 1px solid #e1e8ed;
-    border-radius: 6px;
-    padding: 16px;
-    margin-bottom: 12px;
-    transition: all 0.2s ease;
-    position: relative;
-}
 
-.sikshya-lesson-item:hover {
-    border-color: #3498db;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
-}
-
-.sikshya-lesson-item.selected {
-    border-color: #3498db;
-    background: #f8f9fa;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
-}
-
-.sikshya-lesson-item:last-child {
-    margin-bottom: 0;
-}
 
 .sikshya-lesson-header {
     display: flex;
@@ -987,7 +964,7 @@
 
 .sikshya-lesson-title {
     font-weight: 600;
-    color: #2c3e50;
+    color: #1e293b;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -996,17 +973,24 @@
 }
 
 .sikshya-lesson-title i {
-    color: #3498db;
+    color: var(--sikshya-primary);
     font-size: 16px;
     min-width: 16px;
 }
 
 .sikshya-lesson-title-text {
-    color: #2c3e50;
+    color: #1e293b;
     font-weight: 600;
     font-size: 14px;
     line-height: 1.4;
     word-break: break-word;
+}
+
+.sikshya-lesson-duration {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 400;
+    margin-left: 8px;
 }
 
 .sikshya-lesson-actions {
@@ -1404,14 +1388,14 @@ body .sikshya-modal-overlay {
 }
 
 .sikshya-content-type:hover {
-    border-color: #3498db;
+    border-color: var(--sikshya-primary);
     background: #ecf0f1;
     transform: translateY(-2px);
 }
 
 .sikshya-content-type.selected {
-    border-color: #3498db;
-    background: #3498db;
+    border-color: var(--sikshya-primary);
+    background: var(--sikshya-primary);
     color: white;
 }
 
@@ -1468,6 +1452,29 @@ body .sikshya-modal-overlay {
 .sikshya-content-type.selected .sikshya-content-type-assignment .sikshya-content-type-icon {
     color: white;
 }
+
+/* Content Type Modal Icons - Color Coding */
+.sikshya-content-type-text .sikshya-content-type-icon {
+    color: #e74c3c;
+}
+
+.sikshya-content-type-video .sikshya-content-type-icon {
+    color: #e67e22;
+}
+
+.sikshya-content-type-audio .sikshya-content-type-icon {
+    color: #f39c12;
+}
+
+.sikshya-content-type-quiz .sikshya-content-type-icon {
+    color: #9b59b6;
+}
+
+.sikshya-content-type-assignment .sikshya-content-type-icon {
+    color: #27ae60;
+}
+
+
 
 /* Form Specific Styles */
 .sikshya-form-section {
@@ -3581,7 +3588,16 @@ body .sikshya-modal-overlay {
 ======================================== */
 
 .sikshya-curriculum-items {
-    background: #ffffff;   
+    background: #ffffff;
+    min-height: 200px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.sikshya-curriculum-items.drag-active {
+    background: #f0f9ff;
+    border: 2px dashed #3b82f6;
+    border-radius: 12px;
 }
 
 /* ========================================
@@ -3608,17 +3624,33 @@ body .sikshya-modal-overlay {
 
 .sikshya-chapter-card.dragging {
     opacity: 0.3;
-    transform: rotate(5deg) scale(0.95);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    transform: rotate(3deg) scale(0.95);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.25);
     z-index: 1000;
+    transition: none;
+    position: relative;
+    border: 2px solid #3b82f6;
+}
+
+.sikshya-chapter-card.dragging::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px dashed #3b82f6;
+    border-radius: 12px;
     pointer-events: none;
 }
 
 .sikshya-chapter-card.drag-over {
     border-color: #3b82f6;
-    background: #f0f9ff;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     transform: translateY(2px);
     position: relative;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 }
 
 .sikshya-chapter-card.drag-over::before {
@@ -3727,6 +3759,12 @@ body .sikshya-modal-overlay {
     color: #374151;
     opacity: 1;
     transform: scale(1.1);
+    cursor: grab;
+}
+
+.sikshya-chapter-header:hover .sikshya-sortable-icon:active {
+    cursor: grabbing;
+    transform: scale(1.05);
 }
 
 .sikshya-chapter-header:hover {
@@ -3931,9 +3969,6 @@ body .sikshya-modal-overlay {
     box-shadow: none;
     opacity: 1 !important;
     visibility: visible !important;
-    position: relative !important;
-    z-index: 10 !important;
-    pointer-events: auto !important;
 }
 
 .sikshya-chapter-lessons {
@@ -4299,15 +4334,7 @@ body .sikshya-modal-overlay {
     padding: 28px 32px;
 }
 
-/* ========================================
-   STEP 8: LESSON LIST - CLEAN LAYOUT
-======================================== */
 
-.sikshya-lesson-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
 
 /* ========================================
    STEP 9: EMPTY STATE - VISUALLY APPEALING DESIGN
@@ -4564,6 +4591,249 @@ body .sikshya-modal-overlay {
     
     .sikshya-add-lesson {
         display: none;
+    }
+}
+
+/* ========================================
+   STEP 8: CHAPTER AND LESSON CARD STYLES
+======================================== */
+
+/* Chapter Icon */
+.sikshya-chapter-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    flex-shrink: 0;
+    margin: 0 8px;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2);
+}
+
+.sikshya-chapter-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Chapter Icons in Buttons and Other Elements - Keep default colors */
+.sikshya-btn svg[data-chapter-icon="true"],
+.sikshya-quick-action-icon[data-chapter-icon="true"],
+.sikshya-welcome-icon svg[data-chapter-icon="true"] {
+    /* Keep default colors for proper contrast */
+}
+
+/* Chapter Icon in Modal - Keep default colors */
+.sikshya-modal-icon svg[data-chapter-icon="true"] {
+    /* Keep default colors for proper contrast */
+}
+
+/* Chapter Icon in Empty States - Keep white for colored backgrounds */
+.sikshya-empty-icon svg[data-chapter-icon="true"],
+.sikshya-chapter-empty-icon svg[data-chapter-icon="true"] {
+    /* Keep default white color for colored backgrounds */
+}
+
+/* Lesson Card Container */
+.sikshya-lesson-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s ease;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sikshya-lesson-card:hover {
+    border-color: var(--sikshya-primary);
+    background: #f8fafc;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.sikshya-lesson-card:last-child {
+    margin-bottom: 0;
+}
+
+/* Lesson Checkbox */
+.sikshya-lesson-checkbox {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.sikshya-lesson-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sikshya-lesson-checkbox input[type="checkbox"]:checked {
+    background: var(--sikshya-primary);
+    border-color: var(--sikshya-primary);
+}
+
+.sikshya-lesson-checkbox label {
+    display: none;
+}
+
+/* Lesson Icon */
+.sikshya-lesson-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Content Type Specific Icon Colors */
+.sikshya-lesson-icon[data-type="text"],
+.sikshya-lesson-icon.sikshya-lesson-type[data-type="text"] {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.sikshya-lesson-icon[data-type="video"],
+.sikshya-lesson-icon.sikshya-lesson-type[data-type="video"] {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.sikshya-lesson-icon[data-type="audio"],
+.sikshya-lesson-icon.sikshya-lesson-type[data-type="audio"] {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+}
+
+.sikshya-lesson-icon[data-type="quiz"],
+.sikshya-lesson-icon.sikshya-lesson-type[data-type="quiz"] {
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+}
+
+.sikshya-lesson-icon[data-type="assignment"],
+.sikshya-lesson-icon.sikshya-lesson-type[data-type="assignment"] {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+/* Default fallback */
+.sikshya-lesson-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.sikshya-lesson-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Lesson Content */
+.sikshya-lesson-content {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 200px);
+    overflow: hidden;
+}
+
+.sikshya-lesson-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+/* Lesson Duration */
+.sikshya-lesson-duration {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    flex-shrink: 0;
+    padding: 4px 12px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Lesson Actions */
+.sikshya-lesson-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
+    min-width: 80px;
+}
+
+.sikshya-lesson-actions .sikshya-btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 10;
+}
+
+.sikshya-lesson-actions .sikshya-btn-icon:hover {
+    border-color: var(--sikshya-primary);
+    color: var(--sikshya-primary);
+    background: #f0f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.sikshya-lesson-actions .sikshya-btn-icon:last-child:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.sikshya-lesson-actions .sikshya-btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-lesson-card {
+        padding: 12px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .sikshya-lesson-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .sikshya-lesson-title {
+        font-size: 14px;
+    }
+    
+    .sikshya-lesson-duration {
+        font-size: 12px;
+        padding: 3px 8px;
+    }
+    
+    .sikshya-lesson-actions .sikshya-btn-icon {
+        width: 28px;
+        height: 28px;
     }
 }
 

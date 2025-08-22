@@ -433,10 +433,46 @@ function addChapterToCurriculum(html, chapterId) {
         // Add sortable icon to the new chapter
         addSortableIconsToChapters();
         
-        // Make the new chapter draggable
-        if (addedChapter) {
-            addedChapter.draggable = true;
+        // Make the new chapter draggable - try multiple ways to find it
+        let newChapter = addedChapter;
+        if (!newChapter) {
+            // Try to find the chapter by the last added element
+            const chapters = document.querySelectorAll('.sikshya-chapter-card');
+            newChapter = chapters[chapters.length - 1];
+            console.log('Found new chapter by last element:', newChapter);
         }
+        
+        if (newChapter) {
+            newChapter.draggable = true;
+            console.log('Made new chapter draggable:', newChapter.draggable);
+            console.log('New chapter ID:', newChapter.id);
+            
+            // Add mouse down event to test responsiveness
+            newChapter.addEventListener('mousedown', function(e) {
+                console.log('Mouse down on new chapter');
+                if (e.target.closest('.sikshya-sortable-icon')) {
+                    console.log('Mouse down on sortable icon of new chapter');
+                }
+            });
+            
+            // Also add a click handler to test if the element is responsive
+            newChapter.addEventListener('click', function(e) {
+                if (e.target.closest('.sikshya-sortable-icon')) {
+                    console.log('Sortable icon clicked on new chapter');
+                }
+            });
+        } else {
+            console.error('Could not find the newly added chapter!');
+        }
+        
+        // Test draggable status after a short delay
+        setTimeout(() => {
+            const allChapters = document.querySelectorAll('.sikshya-chapter-card');
+            console.log('Total chapters after adding:', allChapters.length);
+            allChapters.forEach((chapter, index) => {
+                console.log(`Chapter ${index + 1} (${chapter.id}) draggable:`, chapter.draggable);
+            });
+        }, 500);
     } else {
         console.error('Curriculum items container not found!');
     }
@@ -681,6 +717,8 @@ function showContentTypeModal() {
 }
 
 function selectContentType(type) {
+    console.log('selectContentType called with type:', type); // Debug log
+    
     // Remove previous selection
     document.querySelectorAll('.sikshya-content-type').forEach(item => {
         item.classList.remove('selected');
@@ -694,6 +732,7 @@ function selectContentType(type) {
     continueBtn.disabled = false;
     
     currentContentType = type;
+    console.log('currentContentType set to:', currentContentType); // Debug log
 }
 
 // Content type information for modal headers
@@ -734,7 +773,12 @@ function getContentTypeInfo(contentType) {
 }
 
 function proceedToContentForm() {
-    if (!currentContentType) return;
+    console.log('proceedToContentForm called, currentContentType:', currentContentType); // Debug log
+    
+    if (!currentContentType) {
+        console.error('No content type selected!'); // Debug log
+        return;
+    }
     
     // Close current modal
     const currentModal = document.querySelector('.sikshya-modal-overlay.active');
@@ -888,6 +932,7 @@ function saveContent(contentType) {
     console.log('Sending AJAX request with title:', formData.title); // Debug log
     console.log('Adding to chapter:', currentChapterId); // Debug log
     
+    console.log('Sending AJAX request with content type:', contentType); // Debug log
     sikshyaAjax('sikshya_create_content', {
         type: contentType,
         title: formData.title,
@@ -896,6 +941,7 @@ function saveContent(contentType) {
     }, function(data) {
         console.log('Content created successfully:', data); // Debug log
         console.log('HTML received:', data.html); // Debug log
+        console.log('Content type sent:', contentType); // Debug log
         
         // Add content to current chapter
         addContentToChapterContent(data.html, data.content_id);
@@ -1005,13 +1051,22 @@ function addContentToChapterContent(html, contentId) {
         emptyState.remove();
     }
     
-    // Add content HTML before the "Add Content" button
-    const addContentButton = contentInner.querySelector('.sikshya-add-lesson');
-    if (addContentButton) {
-        addContentButton.insertAdjacentHTML('beforebegin', html);
+    // Find the lesson list container
+    const lessonList = contentInner.querySelector('.sikshya-lesson-list');
+    if (lessonList) {
+        // Add content HTML to the lesson list
+        lessonList.insertAdjacentHTML('beforeend', html);
+        console.log('Content added to lesson list');
     } else {
-        // Fallback: add to the end if button not found
-        contentInner.insertAdjacentHTML('beforeend', html);
+        // Fallback: add to the content inner if lesson list not found
+        const addContentButton = contentInner.querySelector('.sikshya-add-lesson');
+        if (addContentButton) {
+            addContentButton.insertAdjacentHTML('beforebegin', html);
+        } else {
+            // Fallback: add to the end if button not found
+            contentInner.insertAdjacentHTML('beforeend', html);
+        }
+        console.log('Content added to fallback location');
     }
     
     // Update chapter info
@@ -1081,9 +1136,10 @@ function updateChapterContentSummary(chapter, lessonCount, quizCount, assignment
         }
     }
     
+    // Calculate total content
+    const totalContent = lessonCount + quizCount + assignmentCount;
+    
     if (summaryElement) {
-        const totalContent = lessonCount + quizCount + assignmentCount;
-        
         // Always show badges, even with zero counts
         summaryElement.innerHTML = `
             <div class="sikshya-chapter-meta">
@@ -2554,6 +2610,25 @@ document.addEventListener('DOMContentLoaded', function() {
     addSortableIconsToChapters();
     initializeChapterSorting();
     
+    // Add global drag event debugging
+    document.addEventListener('dragstart', function(e) {
+        console.log('Global drag start detected:', e.target);
+        console.log('Target draggable:', e.target.draggable);
+        console.log('Target classList:', e.target.classList);
+    });
+    
+    document.addEventListener('dragover', function(e) {
+        console.log('Global drag over detected:', e.target);
+    });
+    
+    // Test if any element is draggable
+    setTimeout(() => {
+        const chapters = document.querySelectorAll('.sikshya-chapter-card');
+        chapters.forEach((chapter, index) => {
+            console.log(`Chapter ${index + 1} draggable:`, chapter.draggable);
+        });
+    }, 2000);
+    
     // Initialize quiz builder if it exists
     if (document.querySelector('.sikshya-quiz-builder')) {
         updateQuestionCount();
@@ -2594,52 +2669,105 @@ function initializeChapterSorting() {
     
     let draggedElement = null;
     let draggedIndex = null;
+    let isDragging = false;
     
     // Use event delegation for dynamic content
     document.addEventListener('dragstart', function(e) {
         if (e.target.closest('.sikshya-chapter-card') && e.target.closest('#curriculum-items')) {
             console.log('Drag start event triggered');
-            console.log('Target:', e.target);
-            console.log('Closest chapter card:', e.target.closest('.sikshya-chapter-card'));
             
             draggedElement = e.target.closest('.sikshya-chapter-card');
             draggedIndex = Array.from(curriculumItems.children).indexOf(draggedElement);
+            isDragging = true;
+            
             console.log('Dragging chapter:', draggedIndex + 1);
             
+            // Add visual feedback
             draggedElement.classList.add('dragging');
+            curriculumItems.classList.add('drag-active');
+            
+            // Set drag data
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+            e.dataTransfer.setData('text/plain', 'chapter-drag');
+            e.dataTransfer.setData('application/json', JSON.stringify({
+                chapterId: draggedElement.id,
+                index: draggedIndex
+            }));
             
-            // Set drag image to be transparent
-            const dragImage = draggedElement.cloneNode(true);
-            dragImage.style.opacity = '0.5';
-            dragImage.style.transform = 'rotate(5deg)';
+            // Create a simple drag image
+            const dragImage = document.createElement('div');
+            dragImage.style.cssText = `
+                position: absolute;
+                top: -1000px;
+                left: -1000px;
+                width: 200px;
+                height: 60px;
+                background: #3b82f6;
+                color: white;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+                z-index: 9999;
+                pointer-events: none;
+            `;
+            dragImage.textContent = 'Moving Chapter...';
             document.body.appendChild(dragImage);
-            e.dataTransfer.setDragImage(dragImage, 0, 0);
+            e.dataTransfer.setDragImage(dragImage, 100, 30);
             
-            // Remove the temporary drag image after a short delay
+            // Clean up drag image
             setTimeout(() => {
                 if (document.body.contains(dragImage)) {
                     document.body.removeChild(dragImage);
                 }
-            }, 100);
+            }, 1000);
         }
     });
     
     document.addEventListener('dragend', function(e) {
+        console.log('Drag end event triggered');
+        
+        // Clean up visual states
         if (draggedElement) {
             draggedElement.classList.remove('dragging');
-            draggedElement = null;
-            draggedIndex = null;
         }
+        
+        // Remove all drag-over states
+        document.querySelectorAll('.sikshya-chapter-card.drag-over').forEach(card => {
+            card.classList.remove('drag-over');
+            card.removeAttribute('data-drop-position');
+        });
+        
+        // Remove drag-active class from curriculum container
+        if (curriculumItems) {
+            curriculumItems.classList.remove('drag-active');
+        }
+        
+        // Reset state
+        draggedElement = null;
+        draggedIndex = null;
+        isDragging = false;
     });
     
     document.addEventListener('dragover', function(e) {
+        if (!isDragging || !draggedElement) return;
+        
+        // Always prevent default to allow drop
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
         const chapterCard = e.target.closest('.sikshya-chapter-card');
-        if (chapterCard && chapterCard.closest('#curriculum-items') && chapterCard !== draggedElement) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            
+        const curriculumArea = e.target.closest('#curriculum-items');
+        
+        // Only allow dropping in curriculum area
+        if (!curriculumArea) {
+            e.dataTransfer.dropEffect = 'none';
+            return;
+        }
+        
+        if (chapterCard && chapterCard !== draggedElement) {
             const rect = chapterCard.getBoundingClientRect();
             const midY = rect.top + rect.height / 2;
             
@@ -2656,6 +2784,12 @@ function initializeChapterSorting() {
                 chapterCard.classList.add('drag-over');
                 chapterCard.setAttribute('data-drop-position', 'below');
             }
+        } else {
+            // Remove all drag-over states when not over a chapter
+            document.querySelectorAll('.sikshya-chapter-card.drag-over').forEach(card => {
+                card.classList.remove('drag-over');
+                card.removeAttribute('data-drop-position');
+            });
         }
     });
     
@@ -2668,33 +2802,53 @@ function initializeChapterSorting() {
     });
     
     document.addEventListener('drop', function(e) {
+        if (!isDragging || !draggedElement) return;
+        
+        e.preventDefault();
+        
         const chapterCard = e.target.closest('.sikshya-chapter-card');
-        if (chapterCard && chapterCard.closest('#curriculum-items') && draggedElement && chapterCard !== draggedElement) {
-            e.preventDefault();
-            
+        const curriculumArea = e.target.closest('#curriculum-items');
+        
+        // Only allow dropping in curriculum area
+        if (!curriculumArea) {
+            console.log('Drop outside curriculum area - cancelled');
+            return;
+        }
+        
+        // Remove all drag-over states
+        document.querySelectorAll('.sikshya-chapter-card.drag-over').forEach(card => {
+            card.classList.remove('drag-over');
+            card.removeAttribute('data-drop-position');
+        });
+        
+        if (chapterCard && chapterCard !== draggedElement) {
+            // Drop on another chapter
             const rect = chapterCard.getBoundingClientRect();
             const midY = rect.top + rect.height / 2;
-            const dropIndex = Array.from(curriculumItems.children).indexOf(chapterCard);
             
-            // Remove drag-over styling
-            chapterCard.classList.remove('drag-over');
-            chapterCard.removeAttribute('data-drop-position');
-            
-            // Reorder chapters
             if (e.clientY < midY) {
                 // Drop above
                 curriculumItems.insertBefore(draggedElement, chapterCard);
+                console.log('Chapter reordered - dropped above');
             } else {
                 // Drop below
                 curriculumItems.insertBefore(draggedElement, chapterCard.nextSibling);
+                console.log('Chapter reordered - dropped below');
             }
-            
-            // Update chapter order numbers
-            updateChapterOrderNumbers();
-            
-            // Save new order to server
-            saveChapterOrder();
+        } else {
+            // Drop in empty space - add to end
+            curriculumItems.appendChild(draggedElement);
+            console.log('Chapter moved to end');
         }
+        
+        // Update chapter order numbers
+        updateChapterOrderNumbers();
+        
+        // Save new order to server
+        saveChapterOrder();
+        
+        // Show success feedback
+        showDragSuccessFeedback();
     });
     
     // Make all chapters draggable
@@ -2707,6 +2861,14 @@ function makeChaptersDraggable() {
     chapters.forEach((chapter, index) => {
         chapter.draggable = true;
         console.log('Set draggable for chapter', index + 1, ':', chapter.draggable);
+        
+        // Add mouse down event to test responsiveness
+        chapter.addEventListener('mousedown', function(e) {
+            console.log('Mouse down on chapter', index + 1);
+            if (e.target.closest('.sikshya-sortable-icon')) {
+                console.log('Mouse down on sortable icon of chapter', index + 1);
+            }
+        });
         
         // Also add a click handler to test if the element is responsive
         chapter.addEventListener('click', function(e) {
@@ -2741,8 +2903,43 @@ function saveChapterOrder() {
         chapter_order: chapterOrder
     }, function(response) {
         console.log('Chapter order updated:', response);
-        showNotification('Chapter order updated successfully', 'success');
     });
+}
+
+function showDragSuccessFeedback() {
+    // Create a temporary success indicator
+    const feedback = document.createElement('div');
+    feedback.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    `;
+    feedback.textContent = '✓ Chapter reordered successfully';
+    document.body.appendChild(feedback);
+    
+    // Animate in
+    setTimeout(() => {
+        feedback.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Remove after 2 seconds
+    setTimeout(() => {
+        feedback.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (document.body.contains(feedback)) {
+                document.body.removeChild(feedback);
+            }
+        }, 300);
+    }, 2000);
 }
 
 // Quiz builder initialization is now handled in the main DOMContentLoaded listener above 
