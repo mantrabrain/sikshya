@@ -1303,6 +1303,11 @@ body .sikshya-modal-overlay {
     flex-shrink: 0;
 }
 
+.sikshya-modal-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
 .sikshya-modal-title {
     font-size: var(--sikshya-text-xl);
     font-weight: var(--sikshya-font-semibold);
@@ -3067,6 +3072,11 @@ body .sikshya-modal-overlay {
     opacity: 1;
 }
 
+/* Override for lesson cards - always show actions */
+.sikshya-lesson-card .sikshya-lesson-actions {
+    opacity: 1 !important;
+}
+
 .sikshya-lesson-actions .sikshya-icon-btn {
     width: 28px;
     height: 28px;
@@ -4636,6 +4646,20 @@ body .sikshya-modal-overlay {
     /* Keep default white color for colored backgrounds */
 }
 
+/* Chapter Content Container */
+.sikshya-chapter-content-inner {
+    width: 100%;
+    min-width: 100%;
+    overflow-x: auto;
+}
+
+/* Lesson List Container */
+.sikshya-lesson-list {
+    width: 100%;
+    min-width: 100%;
+    overflow-x: auto;
+}
+
 /* Lesson Card Container */
 .sikshya-lesson-card {
     background: white;
@@ -4649,13 +4673,14 @@ body .sikshya-modal-overlay {
     transition: all 0.2s ease;
     position: relative;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    min-width: 600px;
+    overflow: visible;
 }
 
 .sikshya-lesson-card:hover {
     border-color: var(--sikshya-primary);
     background: #f8fafc;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
-    transform: translateY(-1px);
 }
 
 .sikshya-lesson-card:last-child {
@@ -4753,6 +4778,13 @@ body .sikshya-modal-overlay {
     line-height: 1.4;
 }
 
+.sikshya-lesson-description {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+    margin: 0;
+}
+
 /* Lesson Duration */
 .sikshya-lesson-duration {
     color: #64748b;
@@ -4763,6 +4795,21 @@ body .sikshya-modal-overlay {
     background: #f1f5f9;
     border-radius: 6px;
     border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sikshya-lesson-duration::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12,6 12,12 16,14'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    flex-shrink: 0;
+    margin-right: 0;
 }
 
 /* Lesson Actions */
