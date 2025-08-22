@@ -429,6 +429,14 @@ function addChapterToCurriculum(html, chapterId) {
         
         // Update all chapter numbers
         updateChapterNumbers();
+        
+        // Add sortable icon to the new chapter
+        addSortableIconsToChapters();
+        
+        // Make the new chapter draggable
+        if (addedChapter) {
+            addedChapter.draggable = true;
+        }
     } else {
         console.error('Curriculum items container not found!');
     }
@@ -2543,6 +2551,8 @@ function initializeFeatureTabs() {
 document.addEventListener('DOMContentLoaded', function() {
     initializeTabFromURL();
     initializeFeatureTabs();
+    addSortableIconsToChapters();
+    initializeChapterSorting();
     
     // Initialize quiz builder if it exists
     if (document.querySelector('.sikshya-quiz-builder')) {
@@ -2550,5 +2560,189 @@ document.addEventListener('DOMContentLoaded', function() {
         updateQuizOverview();
     }
 });
+
+// Add sortable icons to chapters
+function addSortableIconsToChapters() {
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    console.log('Found chapters:', chapters.length);
+    
+    chapters.forEach((chapter, index) => {
+        const header = chapter.querySelector('.sikshya-chapter-header');
+        if (header && !header.querySelector('.sikshya-sortable-icon')) {
+            const sortableIcon = document.createElement('div');
+            sortableIcon.className = 'sikshya-sortable-icon';
+            sortableIcon.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="8" cy="6" r="1.5"></circle>
+                    <circle cx="16" cy="6" r="1.5"></circle>
+                    <circle cx="8" cy="12" r="1.5"></circle>
+                    <circle cx="16" cy="12" r="1.5"></circle>
+                    <circle cx="8" cy="18" r="1.5"></circle>
+                    <circle cx="16" cy="18" r="1.5"></circle>
+                </svg>
+            `;
+            header.insertBefore(sortableIcon, header.firstChild);
+            console.log('Added sortable icon to chapter', index + 1);
+        }
+    });
+}
+
+// Initialize chapter sorting functionality
+function initializeChapterSorting() {
+    const curriculumItems = document.getElementById('curriculum-items');
+    if (!curriculumItems) return;
+    
+    let draggedElement = null;
+    let draggedIndex = null;
+    
+    // Use event delegation for dynamic content
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.closest('.sikshya-chapter-card') && e.target.closest('#curriculum-items')) {
+            console.log('Drag start event triggered');
+            console.log('Target:', e.target);
+            console.log('Closest chapter card:', e.target.closest('.sikshya-chapter-card'));
+            
+            draggedElement = e.target.closest('.sikshya-chapter-card');
+            draggedIndex = Array.from(curriculumItems.children).indexOf(draggedElement);
+            console.log('Dragging chapter:', draggedIndex + 1);
+            
+            draggedElement.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+            
+            // Set drag image to be transparent
+            const dragImage = draggedElement.cloneNode(true);
+            dragImage.style.opacity = '0.5';
+            dragImage.style.transform = 'rotate(5deg)';
+            document.body.appendChild(dragImage);
+            e.dataTransfer.setDragImage(dragImage, 0, 0);
+            
+            // Remove the temporary drag image after a short delay
+            setTimeout(() => {
+                if (document.body.contains(dragImage)) {
+                    document.body.removeChild(dragImage);
+                }
+            }, 100);
+        }
+    });
+    
+    document.addEventListener('dragend', function(e) {
+        if (draggedElement) {
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+            draggedIndex = null;
+        }
+    });
+    
+    document.addEventListener('dragover', function(e) {
+        const chapterCard = e.target.closest('.sikshya-chapter-card');
+        if (chapterCard && chapterCard.closest('#curriculum-items') && chapterCard !== draggedElement) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const rect = chapterCard.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            
+            // Remove previous drag-over states
+            document.querySelectorAll('.sikshya-chapter-card.drag-over').forEach(card => {
+                card.classList.remove('drag-over');
+                card.removeAttribute('data-drop-position');
+            });
+            
+            if (e.clientY < midY) {
+                chapterCard.classList.add('drag-over');
+                chapterCard.setAttribute('data-drop-position', 'above');
+            } else {
+                chapterCard.classList.add('drag-over');
+                chapterCard.setAttribute('data-drop-position', 'below');
+            }
+        }
+    });
+    
+    document.addEventListener('dragleave', function(e) {
+        const chapterCard = e.target.closest('.sikshya-chapter-card');
+        if (chapterCard && chapterCard.closest('#curriculum-items')) {
+            chapterCard.classList.remove('drag-over');
+            chapterCard.removeAttribute('data-drop-position');
+        }
+    });
+    
+    document.addEventListener('drop', function(e) {
+        const chapterCard = e.target.closest('.sikshya-chapter-card');
+        if (chapterCard && chapterCard.closest('#curriculum-items') && draggedElement && chapterCard !== draggedElement) {
+            e.preventDefault();
+            
+            const rect = chapterCard.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            const dropIndex = Array.from(curriculumItems.children).indexOf(chapterCard);
+            
+            // Remove drag-over styling
+            chapterCard.classList.remove('drag-over');
+            chapterCard.removeAttribute('data-drop-position');
+            
+            // Reorder chapters
+            if (e.clientY < midY) {
+                // Drop above
+                curriculumItems.insertBefore(draggedElement, chapterCard);
+            } else {
+                // Drop below
+                curriculumItems.insertBefore(draggedElement, chapterCard.nextSibling);
+            }
+            
+            // Update chapter order numbers
+            updateChapterOrderNumbers();
+            
+            // Save new order to server
+            saveChapterOrder();
+        }
+    });
+    
+    // Make all chapters draggable
+    makeChaptersDraggable();
+}
+
+function makeChaptersDraggable() {
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    console.log('Making chapters draggable:', chapters.length);
+    chapters.forEach((chapter, index) => {
+        chapter.draggable = true;
+        console.log('Set draggable for chapter', index + 1, ':', chapter.draggable);
+        
+        // Also add a click handler to test if the element is responsive
+        chapter.addEventListener('click', function(e) {
+            if (e.target.closest('.sikshya-sortable-icon')) {
+                console.log('Sortable icon clicked on chapter', index + 1);
+            }
+        });
+    });
+}
+
+function updateChapterOrderNumbers() {
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    chapters.forEach((chapter, index) => {
+        const numberBadge = chapter.querySelector('.sikshya-chapter-number');
+        if (numberBadge) {
+            numberBadge.textContent = index + 1;
+        }
+        // Update data-order attribute
+        chapter.setAttribute('data-order', index + 1);
+    });
+}
+
+function saveChapterOrder() {
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    const chapterOrder = Array.from(chapters).map(chapter => ({
+        id: chapter.getAttribute('data-chapter-id'),
+        order: chapter.getAttribute('data-order')
+    }));
+    
+    // Send to server via AJAX
+    sikshyaAjax('sikshya_update_chapter_order', {
+        chapter_order: chapterOrder
+    }, function(response) {
+        console.log('Chapter order updated:', response);
+        showNotification('Chapter order updated successfully', 'success');
+    });
+}
 
 // Quiz builder initialization is now handled in the main DOMContentLoaded listener above 

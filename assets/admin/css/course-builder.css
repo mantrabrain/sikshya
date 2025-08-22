@@ -3598,6 +3598,46 @@ body .sikshya-modal-overlay {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     position: relative;
+    cursor: grab;
+    user-select: none;
+}
+
+.sikshya-chapter-card:active {
+    cursor: grabbing;
+}
+
+.sikshya-chapter-card.dragging {
+    opacity: 0.3;
+    transform: rotate(5deg) scale(0.95);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.sikshya-chapter-card.drag-over {
+    border-color: #3b82f6;
+    background: #f0f9ff;
+    transform: translateY(2px);
+    position: relative;
+}
+
+.sikshya-chapter-card.drag-over::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    height: 3px;
+    background: #3b82f6;
+    border-radius: 2px;
+    z-index: 10;
+}
+
+.sikshya-chapter-card.drag-over[data-drop-position="above"]::before {
+    top: -2px;
+}
+
+.sikshya-chapter-card.drag-over[data-drop-position="below"]::before {
+    bottom: -2px;
 }
 
 .sikshya-chapter-card.expanded {
@@ -3662,6 +3702,31 @@ body .sikshya-modal-overlay {
     position: relative;
     border-left: 4px solid transparent;
     border-radius: 12px 12px 0 0;
+}
+
+.sikshya-sortable-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sikshya-sortable-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.sikshya-chapter-header:hover .sikshya-sortable-icon {
+    color: #374151;
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .sikshya-chapter-header:hover {
@@ -4377,11 +4442,11 @@ body .sikshya-modal-overlay {
 }
 
 .sikshya-add-lesson-btn:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-    color: #6b7280;
+    background: #f1f5f9;
+    border-color: #6b7280;
+    color: #374151;
     transform: none;
-    box-shadow: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sikshya-add-lesson-btn:hover::before {
