@@ -22,6 +22,12 @@
     border-bottom: 1px solid var(--sikshya-gray-200);
 }
 
+.sikshya-header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+}
+
 .sikshya-header h1 {
     margin: 0;
     font-size: var(--sikshya-text-xl);
@@ -37,21 +43,25 @@
     color: var(--sikshya-primary);
 }
 
+.sikshya-version {
+    background: var(--sikshya-primary);
+    color: var(--sikshya-white);
+    font-size: var(--sikshya-text-xs);
+    font-weight: var(--sikshya-font-semibold);
+    padding: var(--sikshya-space-1) var(--sikshya-space-2);
+    border-radius: var(--sikshya-radius-md);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: var(--sikshya-shadow-sm);
+}
+
 .sikshya-header-actions {
     display: flex;
     gap: var(--sikshya-space-3);
     align-items: center;
 }
 
-.sikshya-version-info {
-    background: var(--sikshya-primary-bg);
-    color: var(--sikshya-primary);
-    padding: var(--sikshya-space-2) var(--sikshya-space-4);
-    border-radius: var(--sikshya-radius-md);
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-medium);
-    border: var(--sikshya-border-width) var(--sikshya-border-style) var(--sikshya-primary-border);
-}
+
 
 .sikshya-settings-page .wp-heading-inline {
     display: flex;

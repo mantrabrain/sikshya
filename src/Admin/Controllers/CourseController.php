@@ -55,6 +55,7 @@ class CourseController extends BaseView
         add_action('wp_ajax_sikshya_load_form_template', [$this, 'handleLoadFormTemplate']);
         add_action('wp_ajax_sikshya_create_chapter', [$this, 'handleCreateChapter']);
         add_action('wp_ajax_sikshya_create_content', [$this, 'handleCreateContent']);
+        add_action('wp_ajax_sikshya_test_ajax', [$this, 'handleTestAjax']);
     }
 
     /**
@@ -90,6 +91,7 @@ class CourseController extends BaseView
         wp_localize_script('sikshya-course-builder', 'sikshya_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sikshya_course_builder'),
+            'debug' => true,
         ]);
     }
 
@@ -668,9 +670,6 @@ class CourseController extends BaseView
             // Generate unique chapter ID
             $chapter_id = 'chapter-' . uniqid();
 
-            // Debug logging
-            error_log('Sikshya Chapter Data: ' . print_r($chapter_data, true));
-            
             // Load chapter template with data
             $args = [
                 'chapter_id' => $chapter_id,
@@ -680,21 +679,31 @@ class CourseController extends BaseView
                 'chapter_order' => $chapter_data['order'],
                 'content_count' => 0,
             ];
-            
-            error_log('Sikshya Template Args: ' . print_r($args, true));
 
-            ob_start();
-            $this->render('courses/chapter', $args);
-            $html = ob_get_clean();
+            $html = $this->renderToString('courses/chapter', $args);
 
             wp_send_json_success([
                 'html' => $html,
                 'chapter_id' => $chapter_id,
                 'message' => 'Chapter created successfully'
             ]);
+            
         } catch (\Exception $e) {
             error_log('Sikshya Create Chapter Error: ' . $e->getMessage());
             wp_send_json_error('Failed to create chapter: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle test AJAX request
+     */
+    public function handleTestAjax(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            wp_send_json_success(['message' => 'AJAX is working!']);
+        } catch (\Exception $e) {
+            wp_send_json_error('Test failed: ' . $e->getMessage());
         }
     }
 

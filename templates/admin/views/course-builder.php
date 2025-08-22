@@ -24,10 +24,13 @@ $course_id = $data['course_id'] ?? '';
         <input type="hidden" name="course_status" value="draft" id="course-status-field" />
         
         <div class="sikshya-header">
-            <h1>
-                <i class="fas fa-graduation-cap"></i>
-                Course Builder
-            </h1>
+            <div class="sikshya-header-title">
+                <h1>
+                    <i class="fas fa-graduation-cap"></i>
+                    Course Builder
+                </h1>
+                <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+            </div>
             <div class="sikshya-header-actions">
                 <button type="button" class="sikshya-btn sikshya-btn-secondary" onclick="previewCourse()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

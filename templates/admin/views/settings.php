@@ -96,14 +96,15 @@ $setting_groups = [
 
 <div class="wrap sikshya-settings-page">
     <div class="sikshya-header">
-        <h1>
-            <i class="fas fa-cogs"></i>
-            <?php _e('Settings', 'sikshya'); ?>
-        </h1>
+        <div class="sikshya-header-title">
+            <h1>
+                <i class="fas fa-cogs"></i>
+                <?php _e('Settings', 'sikshya'); ?>
+            </h1>
+            <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+        </div>
         <div class="sikshya-header-actions">
-            <span class="sikshya-version-info">
-                <?php printf(__('Version %s', 'sikshya'), SIKSHYA_VERSION); ?>
-            </span>
+            <!-- Additional header actions can be added here if needed -->
         </div>
     </div>
     

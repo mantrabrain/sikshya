@@ -103,11 +103,11 @@ error_log('Sikshya Template - Chapter Description: ' . $chapter_description);
             
             <!-- Add More Content -->
             <div class="sikshya-add-lesson">
-                <button class="sikshya-add-lesson-btn" onclick="addLesson('<?php echo esc_attr($chapter_id); ?>')">
+                <button class="sikshya-add-lesson-btn" onclick="addContent('<?php echo esc_attr($chapter_id); ?>')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Add Lesson
+                    Add Content
                 </button>
             </div>
         </div>

@@ -10,13 +10,28 @@ let isBulkMode = false;
 
 // AJAX helper function
 function sikshyaAjax(action, data, callback) {
+    // Check if sikshya_ajax is available
+    if (typeof sikshya_ajax === 'undefined') {
+        console.error('Sikshya: sikshya_ajax object is not defined!');
+        alert('Sikshya AJAX configuration is missing. Please refresh the page.');
+        return;
+    }
+    
     const ajaxData = {
         action: action,
         nonce: sikshya_ajax.nonce,
         ...data
     };
 
+    console.log('Sikshya AJAX Request:', {
+        action: action,
+        data: ajaxData,
+        url: sikshya_ajax.ajax_url
+    });
+
     jQuery.post(sikshya_ajax.ajax_url, ajaxData, function(response) {
+        console.log('Sikshya AJAX Raw Response:', response);
+        
         if (response.success) {
             callback(response.data);
         } else {
@@ -25,6 +40,8 @@ function sikshyaAjax(action, data, callback) {
         }
     }).fail(function(xhr, status, error) {
         console.error('Sikshya AJAX Failed:', error);
+        console.error('XHR Status:', xhr.status);
+        console.error('XHR Response:', xhr.responseText);
         alert('Request failed: ' + error);
     });
 }
@@ -104,6 +121,34 @@ window.addEventListener('popstate', handlePopState);
 
 // Initialize tab on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Check if sikshya_ajax is available
+    console.log('Sikshya: Checking sikshya_ajax object:', typeof sikshya_ajax);
+    if (typeof sikshya_ajax !== 'undefined') {
+        console.log('Sikshya: sikshya_ajax.ajax_url:', sikshya_ajax.ajax_url);
+        console.log('Sikshya: sikshya_ajax.nonce:', sikshya_ajax.nonce);
+        
+        // Test AJAX connection
+        console.log('Sikshya: Testing AJAX connection...');
+        jQuery.post(sikshya_ajax.ajax_url, {
+            action: 'sikshya_test_ajax',
+            nonce: sikshya_ajax.nonce
+        }, function(response) {
+            console.log('Sikshya: AJAX test response:', response);
+        }).fail(function(xhr, status, error) {
+            console.error('Sikshya: AJAX test failed:', error);
+            console.error('Sikshya: XHR status:', xhr.status);
+        });
+    } else {
+        console.error('Sikshya: sikshya_ajax object is not defined!');
+        // Try to use a fallback AJAX URL
+        console.log('Sikshya: Trying fallback AJAX URL...');
+        window.sikshya_ajax = {
+            ajax_url: '/wp-admin/admin-ajax.php',
+            nonce: '',
+            debug: true
+        };
+    }
+    
     initializeTabFromURL();
     
     // Initialize quiz builder if it exists
@@ -325,9 +370,9 @@ function saveChapter() {
         duration: duration,
         order: order
     }, function(data) {
-        console.log('Chapter creation response:', data);
+        console.log('Chapter creation response data:', data);
         
-        if (data.success && data.html && data.chapter_id) {
+        if (data && data.html && data.chapter_id) {
             // Add chapter to curriculum
             addChapterToCurriculum(data.html, data.chapter_id);
             
@@ -364,14 +409,25 @@ function addChapterToCurriculum(html, chapterId) {
         curriculumItems.insertAdjacentHTML('beforeend', html);
         console.log('Chapter added successfully');
         
-        // Verify the chapter was added
+        // Find the added chapter by the correct ID
         const addedChapter = document.getElementById(chapterId);
         console.log('Added chapter element:', addedChapter);
+        
+        if (addedChapter) {
+            // Update the chapter number immediately
+            const numberElement = addedChapter.querySelector('.sikshya-chapter-number');
+            if (numberElement) {
+                numberElement.textContent = chapterCount + 1;
+            }
+            
+            // Update the data-order attribute
+            addedChapter.setAttribute('data-order', chapterCount + 1);
+        }
         
         chapterCount++;
         console.log('Chapter count updated:', chapterCount);
         
-        // Update chapter numbers
+        // Update all chapter numbers
         updateChapterNumbers();
     } else {
         console.error('Curriculum items container not found!');
@@ -385,6 +441,8 @@ function updateChapterNumbers() {
         if (numberElement) {
             numberElement.textContent = index + 1;
         }
+        // Update the data-order attribute
+        chapter.setAttribute('data-order', index + 1);
     });
 }
 
@@ -939,8 +997,14 @@ function addContentToChapterContent(html, contentId) {
         emptyState.remove();
     }
     
-    // Add content HTML
-    contentInner.insertAdjacentHTML('beforeend', html);
+    // Add content HTML before the "Add Content" button
+    const addContentButton = contentInner.querySelector('.sikshya-add-lesson');
+    if (addContentButton) {
+        addContentButton.insertAdjacentHTML('beforebegin', html);
+    } else {
+        // Fallback: add to the end if button not found
+        contentInner.insertAdjacentHTML('beforeend', html);
+    }
     
     // Update chapter info
     updateChapterInfo(currentChapterId);
@@ -964,6 +1028,7 @@ function updateChapterInfo(chapterId) {
             case 'text':
             case 'video':
             case 'audio':
+            case 'lesson':
                 lessonCount++;
                 break;
             case 'quiz':
@@ -976,6 +1041,8 @@ function updateChapterInfo(chapterId) {
                 lessonCount++; // Default to lesson
         }
     });
+    
+    console.log('Chapter content counts:', { chapterId, lessonCount, quizCount, assignmentCount });
     
     // Update chapter content summary in header
     updateChapterContentSummary(chapter, lessonCount, quizCount, assignmentCount);
@@ -1009,17 +1076,14 @@ function updateChapterContentSummary(chapter, lessonCount, quizCount, assignment
     if (summaryElement) {
         const totalContent = lessonCount + quizCount + assignmentCount;
         
-        if (totalContent > 0) {
-            summaryElement.innerHTML = `
-                <div class="sikshya-chapter-meta">
-                    ${lessonCount > 0 ? `<span class="sikshya-chapter-lessons"><span class="lesson-count">${lessonCount}</span> lessons</span>` : ''}
-                    ${quizCount > 0 ? `<span class="sikshya-chapter-quizzes"><span class="quiz-count">${quizCount}</span> quizzes</span>` : ''}
-                    ${assignmentCount > 0 ? `<span class="sikshya-chapter-assignments"><span class="assignment-count">${assignmentCount}</span> assignments</span>` : ''}
-                </div>
-            `;
-        } else {
-            summaryElement.innerHTML = '';
-        }
+        // Always show badges, even with zero counts
+        summaryElement.innerHTML = `
+            <div class="sikshya-chapter-meta">
+                <span class="sikshya-chapter-lessons"><span class="lesson-count">${lessonCount}</span> lessons</span>
+                <span class="sikshya-chapter-quizzes"><span class="quiz-count">${quizCount}</span> quizzes</span>
+                <span class="sikshya-chapter-assignments"><span class="assignment-count">${assignmentCount}</span> assignments</span>
+            </div>
+        `;
     }
     
     // Show/hide empty state
@@ -1033,7 +1097,7 @@ function updateChapterContentSummary(chapter, lessonCount, quizCount, assignment
         if (emptyState) emptyState.style.display = 'block';
     }
     
-    console.log('Chapter ' + chapterId + ' updated:', { lessonCount, quizCount, assignmentCount, totalContent });
+    console.log('Chapter updated:', { lessonCount, quizCount, assignmentCount, totalContent });
 }
 
 // Content editing with modal
@@ -1202,7 +1266,7 @@ function editContent(button) {
 }
 
 // Utility Functions
-function addLesson(chapterId) {
+function addContent(chapterId) {
     if (chapterId) {
         currentChapterId = chapterId;
         showContentTypeModal();

@@ -26,6 +26,12 @@
     border-bottom: 1px solid var(--sikshya-gray-200);
 }
 
+.sikshya-header-title {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+}
+
 .sikshya-header h1 {
     margin: 0;
     font-size: var(--sikshya-text-xl);
@@ -39,6 +45,18 @@
 .sikshya-header h1 i {
     font-size: var(--sikshya-text-lg);
     color: var(--sikshya-primary);
+}
+
+.sikshya-version {
+    background: var(--sikshya-primary);
+    color: var(--sikshya-white);
+    font-size: var(--sikshya-text-xs);
+    font-weight: var(--sikshya-font-semibold);
+    padding: var(--sikshya-space-1) var(--sikshya-space-2);
+    border-radius: var(--sikshya-radius-md);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: var(--sikshya-shadow-sm);
 }
 
 .sikshya-header-actions {
@@ -123,7 +141,6 @@
 /* Content area styling - white background for better card contrast */
 .sikshya-tab-content {
     flex: 1;
-    padding: var(--sikshya-space-10);
     background: var(--sikshya-white);
     position: relative;
 }
@@ -910,155 +927,7 @@
     font-size: 13px;
 }
 
-/* Chapter Styles */
-.sikshya-chapter {
-    background: white;
-    border: 1px solid #e1e8ed;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
-}
 
-.sikshya-chapter:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.sikshya-chapter.selected {
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
-}
-
-.sikshya-chapter-header {
-    background: #f8f9fa;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e1e8ed;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.sikshya-chapter-header:hover {
-    background: #ecf0f1;
-}
-
-.sikshya-chapter-header.expanded {
-    background: #3498db;
-    color: white;
-    border-bottom-color: #3498db;
-}
-
-.sikshya-chapter-title {
-    font-weight: 600;
-    font-size: 16px;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-}
-
-.sikshya-chapter-header.expanded .sikshya-chapter-title {
-    color: white;
-}
-
-.sikshya-chapter-icon {
-    font-size: 18px;
-    color: #3498db;
-}
-
-.sikshya-chapter-header.expanded .sikshya-chapter-icon {
-    color: white;
-}
-
-.sikshya-chapter-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 13px;
-    color: #7f8c8d;
-}
-
-.sikshya-chapter-header.expanded .sikshya-chapter-info {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.sikshya-chapter-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.sikshya-chapter-btn {
-    background: none;
-    border: 1px solid #e1e8ed;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    color: #7f8c8d;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.sikshya-chapter-btn:hover {
-    background: #3498db;
-    color: white;
-    border-color: #3498db;
-}
-
-.sikshya-chapter-header.expanded .sikshya-chapter-btn {
-    border-color: rgba(255, 255, 255, 0.3);
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.sikshya-chapter-header.expanded .sikshya-chapter-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-.sikshya-chapter-content {
-    display: none;
-    padding: 20px;
-    background: white;
-}
-
-.sikshya-chapter-content.expanded {
-    display: block;
-}
-
-.sikshya-chapter-content-inner {
-    min-height: 100px;
-}
-
-.sikshya-chapter-empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: #7f8c8d;
-}
-
-.sikshya-chapter-empty i {
-    font-size: 32px;
-    color: #bdc3c7;
-    margin-bottom: 12px;
-}
-
-.sikshya-chapter-empty h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 6px;
-}
-
-.sikshya-chapter-empty p {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin: 0;
-}
 
 .sikshya-add-chapter-btn {
     width: 100%;
@@ -1162,29 +1031,7 @@
     border-color: #3498db;
 }
 
-.sikshya-add-lesson-btn {
-    width: 100%;
-    padding: 12px;
-    border: 2px dashed #bdc3c7;
-    background: #f8f9fa;
-    color: #7f8c8d;
-    cursor: pointer;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-    margin-top: 12px;
-}
 
-.sikshya-add-lesson-btn:hover {
-    border-color: #3498db;
-    color: #3498db;
-    background: #ecf0f1;
-}
 
 .sikshya-checkbox-group {
     display: flex;
@@ -3072,646 +2919,17 @@ body .sikshya-modal-overlay {
     color: var(--sikshya-primary-hover);
 }
 
-/* Simple state management - existing curriculum items */
-.sikshya-curriculum-items {
-    margin-bottom: var(--sikshya-space-6);
-}
 
-/* ========================================
-   CHAPTER CONTENT DESIGN
-======================================== */
 
-/* Chapter Content Area */
-.sikshya-chapter-content {
-    border-top: 1px solid var(--sikshya-gray-100);
-    padding: var(--sikshya-space-5);
-    background: var(--sikshya-gray-50);
-    display: none;
-}
 
-.sikshya-chapter-content.expanded {
-    display: block;
-}
 
-/* ========================================
-   MODERN CHAPTER LISTING UI/UX
-======================================== */
 
-/* Chapter Cards - Enhanced Modern Design */
-.sikshya-chapter-card {
-    background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-xl);
-    border: 1px solid var(--sikshya-gray-200);
-    margin-bottom: var(--sikshya-space-6);
-    overflow: hidden;
-    transition: all var(--sikshya-transition-normal);
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
 
-.sikshya-chapter-card:hover {
-    border-color: var(--sikshya-primary);
-    box-shadow: 0 12px 32px rgba(37, 99, 235, 0.15);
-    transform: translateY(-3px);
-}
 
-/* Chapter Header - Enhanced Layout */
-.sikshya-chapter-header {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-5);
-    padding: var(--sikshya-space-6) var(--sikshya-space-6);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-    background: linear-gradient(135deg, var(--sikshya-gray-50) 0%, var(--sikshya-white) 100%);
-    border-bottom: 1px solid var(--sikshya-gray-200);
-    position: relative;
-}
 
-.sikshya-chapter-header:hover {
-    background: linear-gradient(135deg, var(--sikshya-gray-100) 0%, var(--sikshya-gray-50) 100%);
-}
 
-.sikshya-chapter-header.expanded {
-    border-bottom-color: var(--sikshya-gray-200);
-    background: linear-gradient(135deg, var(--sikshya-gray-100) 0%, var(--sikshya-white) 100%);
-    box-shadow: inset 0 -1px 0 var(--sikshya-gray-200);
-}
 
-/* Chapter Controls - Checkbox and Number */
-.sikshya-chapter-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-3);
-    flex-shrink: 0;
-}
 
-.sikshya-chapter-checkbox {
-    position: relative;
-}
-
-.sikshya-checkbox {
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--sikshya-gray-300);
-    border-radius: var(--sikshya-radius-sm);
-    background: var(--sikshya-white);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-    position: relative;
-}
-
-.sikshya-checkbox:checked {
-    background: var(--sikshya-primary);
-    border-color: var(--sikshya-primary);
-}
-
-.sikshya-checkbox:checked::after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 6px;
-    height: 10px;
-    border: solid var(--sikshya-white);
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.sikshya-chapter-number {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--sikshya-primary) 0%, var(--sikshya-primary-hover) 100%);
-    color: var(--sikshya-white);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: var(--sikshya-font-bold);
-    font-size: var(--sikshya-text-sm);
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-header:hover .sikshya-chapter-number {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-}
-
-/* Chapter Info - Clean Typography */
-.sikshya-chapter-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: flex-start;
-}
-
-.sikshya-chapter-main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sikshya-space-2);
-}
-
-.sikshya-chapter-title {
-    font-size: var(--sikshya-text-xl);
-    font-weight: var(--sikshya-font-bold);
-    color: var(--sikshya-gray-900);
-    margin: 0;
-    line-height: var(--sikshya-leading-tight);
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    letter-spacing: -0.025em;
-    text-align: left;
-}
-
-.sikshya-chapter-description {
-    font-size: var(--sikshya-text-sm);
-    color: var(--sikshya-gray-600);
-    margin: 0;
-    line-height: var(--sikshya-leading-normal);
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* Chapter Meta - Enhanced Stats */
-.sikshya-chapter-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-3);
-    font-size: var(--sikshya-text-xs);
-    flex-wrap: wrap;
-    row-gap: var(--sikshya-space-2);
-    justify-content: flex-start;
-    margin-top: var(--sikshya-space-2);
-}
-
-/* Lesson List and Cards */
-.sikshya-lesson-list {
-    padding: var(--sikshya-space-4);
-    display: flex;
-    flex-direction: column;
-    gap: var(--sikshya-space-3);
-}
-
-.sikshya-lesson-card {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-3);
-    padding: var(--sikshya-space-4);
-    background: var(--sikshya-white);
-    border: 1px solid var(--sikshya-gray-200);
-    border-radius: var(--sikshya-radius-lg);
-    transition: all var(--sikshya-transition-fast);
-    position: relative;
-    overflow: hidden;
-}
-
-.sikshya-lesson-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--sikshya-success);
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-lesson-card[data-type="quiz"]::before {
-    background: var(--sikshya-warning);
-}
-
-.sikshya-lesson-card[data-type="assignment"]::before {
-    background: var(--sikshya-primary);
-}
-
-.sikshya-lesson-card:hover {
-    border-color: var(--sikshya-gray-300);
-    box-shadow: var(--sikshya-shadow-sm);
-    transform: translateY(-1px);
-}
-
-.sikshya-lesson-checkbox {
-    flex-shrink: 0;
-}
-
-.sikshya-lesson-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--sikshya-radius-md);
-    background: var(--sikshya-gray-50);
-    color: var(--sikshya-gray-600);
-    flex-shrink: 0;
-}
-
-.sikshya-lesson-type {
-    background: var(--sikshya-primary-bg);
-    color: var(--sikshya-primary);
-}
-
-.sikshya-lesson-card[data-type="quiz"] .sikshya-lesson-icon {
-    background: var(--sikshya-warning-bg);
-    color: var(--sikshya-warning);
-}
-
-.sikshya-lesson-card[data-type="assignment"] .sikshya-lesson-icon {
-    background: var(--sikshya-success-bg);
-    color: var(--sikshya-success);
-}
-
-.sikshya-lesson-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.sikshya-lesson-title {
-    font-size: var(--sikshya-text-base);
-    font-weight: var(--sikshya-font-semibold);
-    color: var(--sikshya-gray-900);
-    margin: 0 0 var(--sikshya-space-1) 0;
-    line-height: var(--sikshya-leading-tight);
-}
-
-.sikshya-lesson-description {
-    font-size: var(--sikshya-text-sm);
-    color: var(--sikshya-gray-600);
-    margin: 0;
-    line-height: var(--sikshya-leading-normal);
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.sikshya-lesson-duration {
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-medium);
-    color: var(--sikshya-gray-500);
-    flex-shrink: 0;
-    padding: var(--sikshya-space-1) var(--sikshya-space-2);
-    background: var(--sikshya-gray-50);
-    border-radius: var(--sikshya-radius-md);
-    border: 1px solid var(--sikshya-gray-200);
-}
-
-.sikshya-lesson-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-1);
-    flex-shrink: 0;
-    opacity: 0;
-    transition: opacity var(--sikshya-transition-fast);
-}
-
-.sikshya-lesson-card:hover .sikshya-lesson-actions {
-    opacity: 1;
-}
-
-.sikshya-lesson-actions .sikshya-btn-icon {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--sikshya-radius-md);
-    background: var(--sikshya-white);
-    border: 1px solid var(--sikshya-gray-200);
-    color: var(--sikshya-gray-600);
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-lesson-actions .sikshya-btn-icon:hover {
-    background: var(--sikshya-gray-50);
-    border-color: var(--sikshya-gray-300);
-    color: var(--sikshya-gray-800);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-sm);
-}
-
-.sikshya-chapter-lessons,
-.sikshya-chapter-quizzes,
-.sikshya-chapter-assignments {
-    color: var(--sikshya-gray-600);
-    font-weight: var(--sikshya-font-medium);
-    font-size: var(--sikshya-text-xs);
-    padding: var(--sikshya-space-2) var(--sikshya-space-3);
-    background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-lg);
-    border: 1px solid var(--sikshya-gray-300);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    user-select: none;
-}
-
-.sikshya-chapter-lessons:hover,
-.sikshya-chapter-quizzes:hover,
-.sikshya-chapter-assignments:hover {
-    border-color: var(--sikshya-primary);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-}
-
-/* Color coding for different badge types */
-.sikshya-chapter-lessons {
-    border-left: 3px solid var(--sikshya-primary);
-}
-
-.sikshya-chapter-lessons:hover {
-    background: var(--sikshya-primary-bg);
-    border-color: var(--sikshya-primary);
-}
-
-.sikshya-chapter-quizzes {
-    border-left: 3px solid var(--sikshya-warning);
-}
-
-.sikshya-chapter-quizzes:hover {
-    background: var(--sikshya-warning-bg);
-    border-color: var(--sikshya-warning);
-}
-
-.sikshya-chapter-assignments {
-    border-left: 3px solid var(--sikshya-success);
-}
-
-.sikshya-chapter-assignments:hover {
-    background: var(--sikshya-success-bg);
-    border-color: var(--sikshya-success);
-}
-
-/* Add subtle background pattern */
-.sikshya-chapter-lessons::before,
-.sikshya-chapter-quizzes::before,
-.sikshya-chapter-assignments::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.sikshya-chapter-lessons:hover::before,
-.sikshya-chapter-quizzes:hover::before,
-.sikshya-chapter-assignments:hover::before {
-    opacity: 1;
-}
-
-
-
-.sikshya-chapter-lessons .lesson-count,
-.sikshya-chapter-quizzes .quiz-count,
-.sikshya-chapter-assignments .assignment-count {
-    font-weight: var(--sikshya-font-bold);
-    color: var(--sikshya-gray-900);
-    font-size: var(--sikshya-text-sm);
-    margin-right: var(--sikshya-space-1);
-}
-
-.sikshya-chapter-status {
-    padding: var(--sikshya-space-1) var(--sikshya-space-2);
-    border-radius: var(--sikshya-radius-full);
-    font-weight: var(--sikshya-font-semibold);
-    text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    line-height: 1.2;
-}
-
-.sikshya-chapter-status[data-status="draft"],
-.sikshya-chapter-status:not([data-status]) {
-    background: var(--sikshya-warning-bg);
-    color: var(--sikshya-warning);
-}
-
-.sikshya-chapter-status[data-status="published"] {
-    background: var(--sikshya-success-bg);
-    color: var(--sikshya-success);
-}
-
-.sikshya-chapter-status[data-status="private"] {
-    background: var(--sikshya-gray-100);
-    color: var(--sikshya-gray-600);
-}
-
-/* Chapter Actions - Modern Buttons */
-.sikshya-chapter-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-1);
-    opacity: 0;
-    transition: opacity var(--sikshya-transition-fast);
-    flex-shrink: 0;
-}
-
-.sikshya-chapter-card:hover .sikshya-chapter-actions {
-    opacity: 1;
-}
-
-/* Icon Button - extends design system */
-/* Note: Basic .sikshya-btn-icon styles are inherited from design-system.css */
-
-/* Toggle Button - Enhanced Animation */
-.sikshya-chapter-toggle {
-    margin-left: var(--sikshya-space-2);
-    border-left: 1px solid var(--sikshya-gray-200);
-    padding-left: var(--sikshya-space-2);
-}
-
-.sikshya-chapter-toggle svg {
-    transition: transform var(--sikshya-transition-normal);
-}
-
-.sikshya-chapter-toggle.expanded svg {
-    transform: rotate(180deg);
-}
-
-/* Progress Indicator */
-.sikshya-chapter-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--sikshya-gray-200);
-    transition: background var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-card:hover::before {
-    background: var(--sikshya-primary);
-}
-
-.sikshya-chapter-card.completed::before {
-    background: var(--sikshya-success);
-}
-
-.sikshya-chapter-card.in-progress::before {
-    background: var(--sikshya-warning);
-}
-
-/* ========================================
-   CHAPTER CONTENT AREA
-======================================== */
-
-/* Chapter Content */
-.sikshya-chapter-content {
-    border-top: 1px solid var(--sikshya-gray-200);
-    background: var(--sikshya-gray-50);
-    display: none;
-    transition: all var(--sikshya-transition-normal);
-    position: relative;
-}
-
-.sikshya-chapter-content.expanded {
-    display: block;
-    animation: slideDown 0.3s ease-out;
-}
-
-.sikshya-chapter-content-inner {
-    padding: var(--sikshya-space-6);
-    background: var(--sikshya-gray-50);
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Lessons Container */
-.sikshya-chapter-lessons {
-    padding: var(--sikshya-space-4);
-    background: var(--sikshya-gray-50);
-}
-
-/* Add Lesson Button - Enhanced Modern Design */
-.sikshya-add-lesson {
-    margin-top: var(--sikshya-space-4);
-}
-
-.sikshya-add-lesson-btn {
-    width: 100%;
-    background: var(--sikshya-white);
-    border: 2px dashed var(--sikshya-gray-300);
-    border-radius: var(--sikshya-radius-lg);
-    padding: var(--sikshya-space-5);
-    transition: all var(--sikshya-transition-fast);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sikshya-space-2);
-    font-weight: var(--sikshya-font-medium);
-    color: var(--sikshya-gray-600);
-    font-size: var(--sikshya-text-sm);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--sikshya-space-2);
-}
-
-.sikshya-add-lesson-btn:hover {
-    background: var(--sikshya-primary-bg);
-    border-color: var(--sikshya-primary);
-    color: var(--sikshya-primary);
-    transform: translateY(-1px);
-}
-
-.sikshya-add-lesson-btn svg {
-    width: 16px;
-    height: 16px;
-    opacity: 0.7;
-    transition: opacity var(--sikshya-transition-fast);
-}
-
-.sikshya-add-lesson-btn:hover svg {
-    opacity: 1;
-}
-
-/* Empty Chapter State - Enhanced Design */
-.sikshya-chapter-empty {
-    text-align: center;
-    padding: var(--sikshya-space-12) var(--sikshya-space-6);
-    color: var(--sikshya-gray-500);
-    background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-lg);
-    border: 2px dashed var(--sikshya-gray-200);
-    margin: var(--sikshya-space-4) 0;
-}
-
-.sikshya-chapter-empty-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--sikshya-gray-100);
-    border-radius: var(--sikshya-radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--sikshya-space-4);
-    color: var(--sikshya-gray-400);
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-empty:hover .sikshya-chapter-empty-icon {
-    background: var(--sikshya-primary-bg);
-    color: var(--sikshya-primary);
-    transform: scale(1.05);
-}
-
-.sikshya-chapter-empty h4 {
-    font-size: var(--sikshya-text-lg);
-    font-weight: var(--sikshya-font-semibold);
-    color: var(--sikshya-gray-700);
-    margin: 0 0 var(--sikshya-space-2) 0;
-}
-
-.sikshya-chapter-empty p {
-    font-size: var(--sikshya-text-base);
-    color: var(--sikshya-gray-500);
-    margin: 0 0 var(--sikshya-space-6) 0;
-    line-height: var(--sikshya-leading-relaxed);
-}
-
-/* Lesson Items */
-.sikshya-lesson-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-4);
-    padding: var(--sikshya-space-4);
-    background: white;
-    border: 1px solid var(--sikshya-gray-200);
-    border-radius: var(--sikshya-radius-lg);
-    margin-bottom: var(--sikshya-space-3);
-    transition: all var(--sikshya-transition-fast);
-    cursor: pointer;
-}
 
 .sikshya-lesson-item:hover {
     background: var(--sikshya-gray-50);
@@ -3862,38 +3080,7 @@ body .sikshya-modal-overlay {
     color: var(--sikshya-gray-700);
 }
 
-/* Add Lesson Button */
-.sikshya-add-lesson {
-    padding: var(--sikshya-space-4) 0;
-    text-align: center;
-    border-top: 1px solid var(--sikshya-gray-100);
-    margin-top: var(--sikshya-space-4);
-}
 
-.sikshya-add-lesson-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sikshya-space-2);
-    padding: var(--sikshya-space-3) var(--sikshya-space-4);
-    background: white;
-    border: 2px dashed var(--sikshya-gray-300);
-    border-radius: var(--sikshya-radius-lg);
-    color: var(--sikshya-gray-600);
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-medium);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-add-lesson-btn:hover {
-    border-color: var(--sikshya-primary);
-    color: var(--sikshya-primary);
-    background: var(--sikshya-primary-bg);
-}
-
-.sikshya-add-lesson-btn svg {
-    flex-shrink: 0;
-}
 
 /* Add New Content Button (Main CTA) */
 .sikshya-add-new-content {
@@ -4018,145 +3205,14 @@ body .sikshya-modal-overlay {
     }
 }
 
-/* Ensure dashed border button is hidden in empty state */
-.sikshya-chapter-empty + .sikshya-add-lesson {
-    display: none !important;
-}
+
 
 
 
 /* Primary Button - extends design system */
 /* Note: Basic .sikshya-btn-primary styles are inherited from design-system.css */
 
-/* Chapter Cards */
-.sikshya-chapter-card {
-    background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-xl);
-    border: 1px solid var(--sikshya-gray-200);
-    margin-bottom: var(--sikshya-space-6);
-    overflow: hidden;
-    transition: all var(--sikshya-transition-fast);
-}
 
-.sikshya-chapter-card:hover {
-    border-color: var(--sikshya-primary-border);
-    box-shadow: var(--sikshya-shadow-md);
-}
-
-.sikshya-chapter-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--sikshya-space-6);
-    background: var(--sikshya-gray-50);
-    cursor: pointer;
-    border-bottom: 1px solid var(--sikshya-gray-100);
-}
-
-.sikshya-chapter-info {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-4);
-    flex: 1;
-}
-
-.sikshya-chapter-drag {
-    color: var(--sikshya-gray-400);
-    cursor: grab;
-    padding: var(--sikshya-space-2);
-    border-radius: var(--sikshya-radius-md);
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-drag:hover {
-    color: var(--sikshya-gray-600);
-    background: var(--sikshya-gray-100);
-}
-
-.sikshya-chapter-drag:active {
-    cursor: grabbing;
-}
-
-.sikshya-chapter-details {
-    flex: 1;
-}
-
-.sikshya-chapter-title {
-    font-size: var(--sikshya-text-lg);
-    font-weight: var(--sikshya-font-semibold);
-    color: var(--sikshya-gray-900);
-    margin: 0 0 var(--sikshya-space-2) 0;
-}
-
-.sikshya-chapter-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-4);
-}
-
-.sikshya-chapter-meta span {
-    font-size: var(--sikshya-text-sm);
-    color: var(--sikshya-gray-600);
-    padding: var(--sikshya-space-1) var(--sikshya-space-3);
-    background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-full);
-    border: 1px solid var(--sikshya-gray-200);
-}
-
-.sikshya-chapter-status {
-    color: var(--sikshya-success) !important;
-    background: var(--sikshya-success-bg) !important;
-    border-color: var(--sikshya-success) !important;
-}
-
-.sikshya-chapter-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--sikshya-space-2);
-}
-
-.sikshya-icon-btn {
-    background: transparent;
-    border: 1px solid var(--sikshya-gray-200);
-    color: var(--sikshya-gray-600);
-    padding: var(--sikshya-space-2);
-    border-radius: var(--sikshya-radius-md);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.sikshya-icon-btn:hover {
-    background: var(--sikshya-gray-100);
-    border-color: var(--sikshya-gray-300);
-    color: var(--sikshya-gray-800);
-}
-
-.sikshya-chapter-toggle {
-    background: transparent !important;
-    border: none !important;
-    color: var(--sikshya-gray-500);
-    padding: var(--sikshya-space-2);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-}
-
-.sikshya-chapter-toggle:hover {
-    color: var(--sikshya-gray-700);
-}
-
-/* Chapter Content */
-.sikshya-chapter-content {
-    display: none;
-    padding: var(--sikshya-space-6);
-    background: var(--sikshya-white);
-}
-
-.sikshya-chapter-content.expanded {
-    display: block;
-}
 
 /* Lesson Items */
 .sikshya-lesson-item {
@@ -4234,34 +3290,7 @@ body .sikshya-modal-overlay {
     gap: var(--sikshya-space-1);
 }
 
-/* Add Lesson Button */
-.sikshya-add-lesson {
-    margin-top: var(--sikshya-space-4);
-    text-align: center;
-}
 
-.sikshya-add-lesson-btn {
-    background: transparent;
-    border: 2px dashed var(--sikshya-gray-300);
-    color: var(--sikshya-gray-600);
-    padding: var(--sikshya-space-4) var(--sikshya-space-6);
-    border-radius: var(--sikshya-radius-lg);
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-medium);
-    cursor: pointer;
-    transition: all var(--sikshya-transition-fast);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sikshya-space-2);
-    width: 100%;
-    justify-content: center;
-}
-
-.sikshya-add-lesson-btn:hover {
-    border-color: var(--sikshya-primary);
-    color: var(--sikshya-primary);
-    background: var(--sikshya-primary-bg);
-}
 
 /* Curriculum Actions */
 .sikshya-curriculum-actions {
@@ -4357,11 +3386,7 @@ body .sikshya-modal-overlay {
         text-align: center;
     }
     
-    .sikshya-chapter-header {
-        flex-direction: column;
-        gap: var(--sikshya-space-4);
-        align-items: stretch;
-    }
+
     
     .sikshya-lesson-item {
         flex-direction: column;
@@ -4378,3 +3403,1106 @@ body .sikshya-modal-overlay {
         justify-content: center;
     }
 } 
+
+/* ========================================
+   CURRICULUM BUILDER - MODERN REDESIGN
+======================================== */
+
+/* Curriculum Builder Container */
+.sikshya-curriculum-builder {
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-xl);
+    box-shadow: var(--sikshya-shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--sikshya-space-8);
+}
+
+/* Empty State - Modern Design */
+.sikshya-curriculum-empty-state {
+    padding: var(--sikshya-space-12);
+    text-align: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: var(--sikshya-radius-xl);
+    margin: var(--sikshya-space-8);
+}
+
+/* Empty Header with Inline Actions */
+.sikshya-empty-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sikshya-space-8);
+    padding: var(--sikshya-space-8);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-100);
+    box-shadow: var(--sikshya-shadow-sm);
+    margin-bottom: var(--sikshya-space-6);
+}
+
+.sikshya-empty-content {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-6);
+    flex: 1;
+}
+
+.sikshya-empty-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--sikshya-primary) 0%, var(--sikshya-primary-hover) 100%);
+    color: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-2xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+}
+
+.sikshya-empty-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.sikshya-empty-text h3 {
+    font-size: var(--sikshya-text-2xl);
+    font-weight: var(--sikshya-font-bold);
+    color: var(--sikshya-gray-900);
+    margin: 0 0 var(--sikshya-space-2) 0;
+    line-height: 1.2;
+}
+
+.sikshya-empty-text p {
+    font-size: var(--sikshya-text-lg);
+    color: var(--sikshya-gray-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.sikshya-empty-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+    flex-shrink: 0;
+}
+
+/* Tips Strip */
+.sikshya-tips-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-8);
+    padding: var(--sikshya-space-6);
+    background: var(--sikshya-white);
+    border-radius: var(--sikshya-radius-xl);
+    border: 1px solid var(--sikshya-gray-100);
+    flex-wrap: wrap;
+    margin: 0 var(--sikshya-space-8) var(--sikshya-space-8);
+}
+
+.sikshya-tip-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+    color: var(--sikshya-gray-700);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+}
+
+.sikshya-tip-item strong {
+    color: var(--sikshya-gray-900);
+    font-weight: var(--sikshya-font-semibold);
+}
+
+.sikshya-help-link {
+    margin-left: auto;
+}
+
+.sikshya-help-link a {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    color: var(--sikshya-primary);
+    text-decoration: none;
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-semibold);
+    transition: all var(--sikshya-transition-fast);
+    padding: var(--sikshya-space-2) var(--sikshya-space-4);
+    border-radius: var(--sikshya-radius-lg);
+    background: var(--sikshya-primary-bg);
+}
+
+
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-empty-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sikshya-space-4);
+        padding: var(--sikshya-space-6);
+    }
+    
+    .sikshya-empty-content {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .sikshya-empty-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .sikshya-tips-strip {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sikshya-space-4);
+        padding: var(--sikshya-space-4);
+        margin: var(--sikshya-space-4);
+    }
+    
+    .sikshya-help-link {
+        margin-left: 0;
+        text-align: center;
+    }
+    
+
+} 
+
+/* ========================================
+   CHAPTER LISTING - PROFESSIONAL LMS DESIGN
+   Designed with 10+ years LMS experience
+======================================== */
+
+/* ========================================
+   STEP 1: CURRICULUM CONTAINER
+======================================== */
+
+.sikshya-curriculum-items {
+    background: #ffffff;   
+}
+
+/* ========================================
+   STEP 2: CHAPTER CARD DESIGN - INDIVIDUAL CARD STYLE
+======================================== */
+
+.sikshya-chapter-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    position: relative;
+}
+
+.sikshya-chapter-card.expanded {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+
+
+.sikshya-chapter-card::after {
+    content: 'Chapter';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #6b7280;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0.7;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.sikshya-chapter-card.expanded::after {
+    content: 'Active';
+    color: #1e40af;
+    background: rgba(239, 246, 255, 0.95);
+    font-weight: 700;
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.sikshya-chapter-card:last-child {
+    margin-bottom: 0;
+}
+
+.sikshya-chapter-card:hover {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    border-color: #d1d5db;
+}
+
+.sikshya-chapter-card:not(:last-child) {
+    margin-bottom: 12px;
+}
+
+/* ========================================
+   STEP 3: CHAPTER HEADER - COMPACT DESIGN
+======================================== */
+
+.sikshya-chapter-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    border-left: 4px solid transparent;
+    border-radius: 12px 12px 0 0;
+}
+
+.sikshya-chapter-header:hover {
+    background: #f8fafc;
+}
+
+.sikshya-chapter-header.expanded {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid #3b82f6;
+    box-shadow: inset 0 2px 4px rgba(59, 130, 246, 0.15), 0 2px 8px rgba(59, 130, 246, 0.1);
+    position: relative;
+}
+
+.sikshya-chapter-header.expanded::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+/* ========================================
+   STEP 4: CHAPTER CONTROLS - ENHANCED SPACING
+======================================== */
+
+.sikshya-chapter-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-right: 24px;
+    flex-shrink: 0;
+    padding: 4px 0;
+}
+
+/* Checkbox Design */
+.sikshya-chapter-checkbox {
+    position: relative;
+}
+
+.sikshya-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sikshya-checkbox:checked {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.sikshya-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Chapter Number Badge - Compact */
+.sikshya-chapter-number {
+    width: 28px;
+    height: 28px;
+    background: #374151;
+    color: #ffffff;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+    flex-shrink: 0;
+    box-shadow: none;
+    transition: all 0.2s ease;
+    border: 1px solid #374151;
+}
+
+.sikshya-chapter-header:hover .sikshya-chapter-number {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-number {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 6px 12px rgba(29, 78, 216, 0.4);
+    transform: scale(1.05);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1.05); }
+    50% { transform: scale(1.08); }
+}
+
+/* ========================================
+   STEP 5: CHAPTER INFO - ENHANCED SPACING
+======================================== */
+
+.sikshya-chapter-info {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 0;
+}
+
+.sikshya-chapter-main {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Chapter Title - Compact */
+.sikshya-chapter-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+    transition: color 0.2s ease;
+}
+
+.sikshya-chapter-header:hover .sikshya-chapter-title {
+    color: #1f2937;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-title {
+    color: #1e40af;
+    text-shadow: 0 1px 2px rgba(30, 64, 175, 0.1);
+    transform: translateX(4px);
+    transition: all 0.3s ease;
+}
+
+/* Ensure badges remain visible when chapter is expanded */
+.sikshya-chapter-header.expanded .sikshya-chapter-lessons,
+.sikshya-chapter-header.expanded .sikshya-chapter-quizzes,
+.sikshya-chapter-header.expanded .sikshya-chapter-assignments {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-meta {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-content-summary {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Chapter Content Summary */
+.sikshya-chapter-content-summary {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-height: 20px;
+}
+
+/* Chapter Meta Badges - Enhanced */
+.sikshya-chapter-meta {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-height: 24px;
+}
+
+.sikshya-chapter-lessons,
+.sikshya-chapter-quizzes,
+.sikshya-chapter-assignments {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 400;
+    color: #9ca3af;
+    background: #f1f1f1;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    box-shadow: none;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+.sikshya-chapter-lessons {
+    color: #6b7280;
+    background: transparent;
+    border-color: #e5e7eb;
+}
+
+.sikshya-chapter-quizzes {
+    color: #6b7280;
+    background: transparent;
+    border-color: #e5e7eb;
+}
+
+.sikshya-chapter-assignments {
+    color: #6b7280;
+    background: transparent;
+    border-color: #e5e7eb;
+}
+
+/* Ensure badges are always visible even with zero counts */
+.sikshya-chapter-lessons:empty::before,
+.sikshya-chapter-quizzes:empty::before,
+.sikshya-chapter-assignments:empty::before {
+    content: '0';
+    display: inline-block !important;
+    font-weight: 700;
+    background: #ffffff;
+    color: #111827;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin-right: 8px;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.sikshya-chapter-lessons:empty::after {
+    content: 'lessons';
+    color: #059669;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.sikshya-chapter-quizzes:empty::after {
+    content: 'quizzes';
+    color: #d97706;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.sikshya-chapter-assignments:empty::after {
+    content: 'assignments';
+    color: #7c3aed;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Force badges to always be visible regardless of JavaScript */
+.sikshya-chapter-lessons,
+.sikshya-chapter-quizzes,
+.sikshya-chapter-assignments {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 999 !important;
+    pointer-events: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* Override any JavaScript hiding */
+.sikshya-chapter-lessons[style*="display: none"],
+.sikshya-chapter-quizzes[style*="display: none"],
+.sikshya-chapter-assignments[style*="display: none"] {
+    display: inline-flex !important;
+}
+
+.sikshya-chapter-lessons[style*="visibility: hidden"],
+.sikshya-chapter-quizzes[style*="visibility: hidden"],
+.sikshya-chapter-assignments[style*="visibility: hidden"] {
+    visibility: visible !important;
+}
+
+.sikshya-chapter-lessons[style*="opacity: 0"],
+.sikshya-chapter-quizzes[style*="opacity: 0"],
+.sikshya-chapter-assignments[style*="opacity: 0"] {
+    opacity: 1 !important;
+}
+
+/* Additional comprehensive fixes for badge visibility */
+.sikshya-chapter-lessons,
+.sikshya-chapter-quizzes,
+.sikshya-chapter-assignments {
+    /* Override any inline styles that might hide badges */
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 999 !important;
+    pointer-events: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    transform: none !important;
+    filter: none !important;
+    /* Prevent any CSS transforms that might hide elements */
+    transform-origin: center !important;
+    backface-visibility: visible !important;
+    perspective: none !important;
+    /* Ensure proper rendering */
+    will-change: auto !important;
+    contain: none !important;
+}
+
+/* Force visibility on all possible states */
+.sikshya-chapter-lessons *,
+.sikshya-chapter-quizzes *,
+.sikshya-chapter-assignments * {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+}
+
+/* Override any JavaScript classes that might hide badges */
+.sikshya-chapter-lessons.hidden,
+.sikshya-chapter-quizzes.hidden,
+.sikshya-chapter-assignments.hidden,
+.sikshya-chapter-lessons.d-none,
+.sikshya-chapter-quizzes.d-none,
+.sikshya-chapter-assignments.d-none {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+
+
+
+
+
+
+/* Force display of badges even when parent is empty */
+.sikshya-chapter-content-summary:empty .sikshya-chapter-meta,
+.sikshya-chapter-meta:empty {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure badges are always rendered */
+.sikshya-chapter-content-summary:empty .sikshya-chapter-lessons,
+.sikshya-chapter-content-summary:empty .sikshya-chapter-quizzes,
+.sikshya-chapter-content-summary:empty .sikshya-chapter-assignments {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ultimate fallback - inject badges when they don't exist */
+.sikshya-chapter-content-summary:not(:has(.sikshya-chapter-meta))::after {
+    content: '<div class="sikshya-chapter-meta"><span class="sikshya-chapter-lessons"><span class="lesson-count">0</span> lessons</span><span class="sikshya-chapter-quizzes"><span class="quiz-count">0</span> quizzes</span><span class="sikshya-chapter-assignments"><span class="assignment-count">0</span> assignments</span></div>';
+    display: block;
+    position: relative;
+    z-index: 1000;
+}
+
+/* Alternative approach for browsers that don't support :has() */
+.sikshya-chapter-content-summary:empty::after {
+    content: '<div class="sikshya-chapter-meta"><span class="sikshya-chapter-lessons"><span class="lesson-count">0</span> lessons</span><span class="sikshya-chapter-quizzes"><span class="quiz-count">0</span> quizzes</span><span class="sikshya-chapter-assignments"><span class="assignment-count">0</span> assignments</span></div>';
+    display: block;
+    position: relative;
+    z-index: 1000;
+}
+
+/* Force the injected content to be visible */
+.sikshya-chapter-content-summary::after {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* Global badge persistence - ensure badges never disappear from any chapter */
+.sikshya-chapter-card .sikshya-chapter-content-summary {
+    min-height: 24px !important;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.sikshya-chapter-card .sikshya-chapter-meta {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-height: 20px !important;
+}
+
+
+
+/* Override any JavaScript that might affect all chapters */
+.sikshya-chapter-card * .sikshya-chapter-lessons,
+.sikshya-chapter-card * .sikshya-chapter-quizzes,
+.sikshya-chapter-card * .sikshya-chapter-assignments {
+    display: inline-flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 999 !important;
+    pointer-events: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* Ensure count badges are always visible */
+.sikshya-chapter-card * .lesson-count,
+.sikshya-chapter-card * .quiz-count,
+.sikshya-chapter-card * .assignment-count {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    font-weight: 700;
+    background: #ffffff;
+    color: #111827;
+    padding: 0px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Prevent any global JavaScript from hiding badges */
+.sikshya-chapter-card .sikshya-chapter-content-summary[style*="display: none"],
+.sikshya-chapter-card .sikshya-chapter-meta[style*="display: none"],
+.sikshya-chapter-card .sikshya-chapter-lessons[style*="display: none"],
+.sikshya-chapter-card .sikshya-chapter-quizzes[style*="display: none"],
+.sikshya-chapter-card .sikshya-chapter-assignments[style*="display: none"] {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+
+
+/* Count Badges - Enhanced */
+.lesson-count,
+.quiz-count,
+.assignment-count {
+    font-weight: 700;
+    background: #ffffff;
+    color: #111827;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    min-width: 18px;
+    text-align: center;
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* ========================================
+   STEP 6: CHAPTER ACTIONS - ENHANCED SPACING
+======================================== */
+
+.sikshya-chapter-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 20px;
+    flex-shrink: 0;
+    padding: 4px 0;
+}
+
+/* Icon Buttons - Compact */
+.sikshya-chapter-actions .sikshya-btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sikshya-chapter-actions .sikshya-btn-icon:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    color: #374151;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Toggle Button */
+.sikshya-chapter-toggle {
+    transition: transform 0.2s ease;
+}
+
+.sikshya-chapter-header.expanded .sikshya-chapter-toggle {
+    transform: rotate(180deg);
+}
+
+/* ========================================
+   STEP 7: CHAPTER CONTENT - ENHANCED SPACING
+======================================== */
+
+.sikshya-chapter-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-top: 1px solid #f3f4f6;
+    display: none;
+    overflow: hidden;
+    margin-bottom: 0;
+    border-radius: 0 0 12px 12px;
+    position: relative;
+}
+
+.sikshya-chapter-content.expanded {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    border-top: 2px solid #3b82f6;
+    box-shadow: inset 0 2px 4px rgba(59, 130, 246, 0.05);
+}
+
+.sikshya-chapter-content.expanded {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sikshya-chapter-content-inner {
+    padding: 28px 32px;
+}
+
+/* ========================================
+   STEP 8: LESSON LIST - CLEAN LAYOUT
+======================================== */
+
+.sikshya-lesson-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ========================================
+   STEP 9: EMPTY STATE - VISUALLY APPEALING DESIGN
+======================================== */
+
+.sikshya-chapter-empty {
+    text-align: center;
+    padding: 60px 32px;
+    color: #6b7280;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    border: 2px dashed #cbd5e1;
+    margin: 24px 0;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.sikshya-chapter-empty::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.03) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(180deg); }
+}
+
+.sikshya-chapter-empty-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.sikshya-chapter-empty-icon svg {
+    width: 36px;
+    height: 36px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.sikshya-chapter-empty:hover .sikshya-chapter-empty-icon {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+}
+
+.sikshya-chapter-empty h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 12px 0;
+    position: relative;
+    z-index: 2;
+    letter-spacing: -0.025em;
+}
+
+.sikshya-chapter-empty p {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+    position: relative;
+    z-index: 2;
+    font-weight: 500;
+}
+
+/* ========================================
+   STEP 10: ADD CONTENT BUTTON - VISUALLY APPEALING CTA
+======================================== */
+
+.sikshya-add-lesson {
+    margin-top: 32px;
+    position: relative;
+}
+
+.sikshya-add-lesson::before {
+    content: '';
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #e2e8f0 50%, transparent 100%);
+}
+
+.sikshya-add-lesson-btn {
+    width: 100%;
+    background: #f8fafc;
+    border: 2px dashed #9ca3af;
+    border-radius: 8px;
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 13px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sikshya-add-lesson-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.sikshya-add-lesson-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #6b7280;
+    transform: none;
+    box-shadow: none;
+}
+
+.sikshya-add-lesson-btn:hover::before {
+    left: 100%;
+}
+
+.sikshya-add-lesson-btn svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.sikshya-add-lesson-btn:hover svg {
+    opacity: 1;
+    transform: scale(1.1);
+    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+}
+
+/* ========================================
+   STEP 11: RESPONSIVE DESIGN - MOBILE FIRST
+======================================== */
+
+@media (max-width: 768px) {
+    .sikshya-chapter-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+        padding: 20px 24px;
+    }
+    
+    .sikshya-chapter-controls {
+        justify-content: center;
+        margin-right: 0;
+        gap: 16px;
+    }
+    
+    .sikshya-chapter-actions {
+        justify-content: center;
+        margin-left: 0;
+        gap: 10px;
+    }
+    
+    .sikshya-chapter-meta {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .sikshya-chapter-content-inner {
+        padding: 24px;
+    }
+    
+    .sikshya-chapter-title {
+        text-align: center;
+        font-size: 16px;
+    }
+    
+    .sikshya-chapter-number {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .sikshya-chapter-actions .sikshya-btn-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* ========================================
+   STEP 12: ACCESSIBILITY & FOCUS STATES
+======================================== */
+
+.sikshya-chapter-header:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+}
+
+.sikshya-btn-icon:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.sikshya-add-lesson-btn:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* ========================================
+   STEP 13: PERFORMANCE OPTIMIZATIONS
+======================================== */
+
+.sikshya-chapter-card {
+    will-change: transform;
+}
+
+.sikshya-chapter-header {
+    will-change: background-color;
+}
+
+/* ========================================
+   STEP 14: PRINT STYLES
+======================================== */
+
+@media print {
+    .sikshya-chapter-actions {
+        display: none;
+    }
+    
+    .sikshya-chapter-content {
+        display: block !important;
+    }
+    
+    .sikshya-add-lesson {
+        display: none;
+    }
+}
+
+
+
+
+

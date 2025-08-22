@@ -817,22 +817,75 @@ class Admin
 
         ob_start();
         ?>
-        <div class="sikshya-grid sikshya-grid-cols-2">
-            <div class="sikshya-stat-card">
-                <div class="sikshya-stat-number"><?php echo esc_html($stats['total_courses']); ?></div>
-                <div class="sikshya-stat-label"><?php _e('Courses', 'sikshya'); ?></div>
+        <div class="sikshya-stat-card">
+            <div class="sikshya-stat-header">
+                <div class="sikshya-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                </div>
             </div>
-            <div class="sikshya-stat-card">
-                <div class="sikshya-stat-number"><?php echo esc_html($stats['total_students']); ?></div>
-                <div class="sikshya-stat-label"><?php _e('Students', 'sikshya'); ?></div>
+            <div class="sikshya-stat-number"><?php echo esc_html($stats['total_courses']); ?></div>
+            <div class="sikshya-stat-label"><?php _e('Total Courses', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change positive">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 14l3-3m0 0l3 3m-3-3v9"/>
+                </svg>
+                +12% from last month
             </div>
-            <div class="sikshya-stat-card">
-                <div class="sikshya-stat-number"><?php echo esc_html($stats['total_revenue']); ?></div>
-                <div class="sikshya-stat-label"><?php _e('Revenue', 'sikshya'); ?></div>
+        </div>
+        
+        <div class="sikshya-stat-card">
+            <div class="sikshya-stat-header">
+                <div class="sikshya-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                    </svg>
+                </div>
             </div>
-            <div class="sikshya-stat-card">
-                <div class="sikshya-stat-number"><?php echo esc_html($stats['active_enrollments']); ?></div>
-                <div class="sikshya-stat-label"><?php _e('Enrollments', 'sikshya'); ?></div>
+            <div class="sikshya-stat-number"><?php echo esc_html($stats['total_students']); ?></div>
+            <div class="sikshya-stat-label"><?php _e('Total Students', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change positive">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 14l3-3m0 0l3 3m-3-3v9"/>
+                </svg>
+                +8% from last month
+            </div>
+        </div>
+        
+        <div class="sikshya-stat-card">
+            <div class="sikshya-stat-header">
+                <div class="sikshya-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="sikshya-stat-number"><?php echo esc_html($stats['total_revenue']); ?></div>
+            <div class="sikshya-stat-label"><?php _e('Total Revenue', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change positive">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 14l3-3m0 0l3 3m-3-3v9"/>
+                </svg>
+                +15% from last month
+            </div>
+        </div>
+        
+        <div class="sikshya-stat-card">
+            <div class="sikshya-stat-header">
+                <div class="sikshya-stat-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="sikshya-stat-number"><?php echo esc_html($stats['active_enrollments']); ?></div>
+            <div class="sikshya-stat-label"><?php _e('Active Enrollments', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change neutral">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                </svg>
+                No change
             </div>
         </div>
         <?php
@@ -854,15 +907,36 @@ class Admin
         if (!empty($recent_courses)) {
             echo '<ul class="sikshya-list">';
             foreach ($recent_courses as $course) {
+                $author = get_userdata($course->post_author);
+                $author_initials = substr($author->display_name, 0, 2);
+                $course_date = get_the_date('M j, Y', $course->ID);
+                
                 echo '<li class="sikshya-list-item">';
+                echo '<div class="sikshya-list-item-content">';
+                echo '<div class="sikshya-list-item-avatar">' . esc_html($author_initials) . '</div>';
+                echo '<div class="sikshya-list-item-text">';
+                echo '<div class="sikshya-list-item-title">';
                 echo '<a href="' . get_edit_post_link($course->ID) . '" class="sikshya-link">';
                 echo esc_html($course->post_title);
                 echo '</a>';
+                echo '</div>';
+                echo '<div class="sikshya-list-item-subtitle">By ' . esc_html($author->display_name) . '</div>';
+                echo '</div>';
+                echo '</div>';
+                echo '<div class="sikshya-list-item-meta">';
+                echo '<span class="sikshya-list-item-badge success">Published</span>';
+                echo '<span>' . esc_html($course_date) . '</span>';
+                echo '</div>';
                 echo '</li>';
             }
             echo '</ul>';
         } else {
-            echo '<p class="sikshya-text-gray-500">' . __('No courses found.', 'sikshya') . '</p>';
+            echo '<div class="sikshya-empty-state">';
+            echo '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+            echo '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>';
+            echo '</svg>';
+            echo '<p>' . __('No courses found. Create your first course to get started.', 'sikshya') . '</p>';
+            echo '</div>';
         }
         return ob_get_clean();
     }

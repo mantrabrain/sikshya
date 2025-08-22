@@ -120,7 +120,7 @@ class AssetService
         // Dashboard CSS
         wp_enqueue_style(
             'sikshya-dashboard',
-            $this->plugin->getAssetUrl('css/admin.css'),
+            $this->plugin->getAssetUrl('admin/css/dashboard.css'),
             ['sikshya-admin'],
             SIKSHYA_VERSION
         );
