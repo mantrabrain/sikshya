@@ -4,6 +4,7 @@ namespace Sikshya\Admin\Controllers;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\BaseView;
+use Sikshya\Admin\Settings\SettingsManager;
 
 /**
  * Setting Controller
@@ -13,6 +14,13 @@ use Sikshya\Admin\Views\BaseView;
 class SettingController extends BaseView
 {
     /**
+     * Settings Manager instance
+     *
+     * @var SettingsManager
+     */
+    protected SettingsManager $settingsManager;
+
+    /**
      * Constructor
      *
      * @param Plugin $plugin
@@ -20,6 +28,7 @@ class SettingController extends BaseView
     public function __construct(Plugin $plugin)
     {
         parent::__construct($plugin);
+        $this->settingsManager = new SettingsManager($plugin);
         $this->initHooks();
     }
 
@@ -38,6 +47,24 @@ class SettingController extends BaseView
      */
     public function renderSettingsPage(): void
     {
+        // Get current tab from URL or default to general
+        $current_tab = sanitize_text_field($_GET['tab'] ?? 'general');
+        
+        // Validate tab exists
+        $valid_tabs = array_keys($this->settingsManager->getAllSettings());
+        if (!in_array($current_tab, $valid_tabs)) {
+            $current_tab = 'general';
+        }
+        
+        // Render initial tab content
+        $initial_content = $this->settingsManager->renderTabSettings($current_tab);
+        
+        // Pass data to template
+        $this->data = [
+            'current_tab' => $current_tab,
+            'initial_content' => $initial_content
+        ];
+        
         $this->render('settings');
     }
 
@@ -52,110 +79,34 @@ class SettingController extends BaseView
                 return;
             }
 
-            check_ajax_referer('sikshya_course_builder', 'nonce');
+            // Verify nonce
+            if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_settings_nonce')) {
+                wp_send_json_error(['message' => __('Security check failed.', 'sikshya')]);
+                return;
+            }
 
             $tab = sanitize_text_field($_POST['tab'] ?? 'general');
             
-            // Define setting groups (same as in settings.php)
-            $setting_groups = [
-                'general' => [
-                    'title' => __('General', 'sikshya'),
-                    'icon' => 'fas fa-cog',
-                    'description' => __('Basic LMS configuration settings', 'sikshya')
-                ],
-                'courses' => [
-                    'title' => __('Courses', 'sikshya'),
-                    'icon' => 'fas fa-graduation-cap',
-                    'description' => __('Course management and display settings', 'sikshya')
-                ],
-                'enrollment' => [
-                    'title' => __('Enrollment', 'sikshya'),
-                    'icon' => 'fas fa-user-plus',
-                    'description' => __('Student enrollment and access settings', 'sikshya')
-                ],
-                'payment' => [
-                    'title' => __('Payment', 'sikshya'),
-                    'icon' => 'fas fa-credit-card',
-                    'description' => __('Payment gateway and pricing settings', 'sikshya')
-                ],
-                'certificates' => [
-                    'title' => __('Certificates', 'sikshya'),
-                    'icon' => 'fas fa-certificate',
-                    'description' => __('Certificate generation and design settings', 'sikshya')
-                ],
-                'email' => [
-                    'title' => __('Email', 'sikshya'),
-                    'icon' => 'fas fa-envelope',
-                    'description' => __('Email notification and template settings', 'sikshya')
-                ],
-                'instructors' => [
-                    'title' => __('Instructors', 'sikshya'),
-                    'icon' => 'fas fa-chalkboard-teacher',
-                    'description' => __('Instructor management and permissions', 'sikshya')
-                ],
-                'students' => [
-                    'title' => __('Students', 'sikshya'),
-                    'icon' => 'fas fa-users',
-                    'description' => __('Student management and profile settings', 'sikshya')
-                ],
-                'quizzes' => [
-                    'title' => __('Quizzes', 'sikshya'),
-                    'icon' => 'fas fa-question-circle',
-                    'description' => __('Quiz and assessment settings', 'sikshya')
-                ],
-                'assignments' => [
-                    'title' => __('Assignments', 'sikshya'),
-                    'icon' => 'fas fa-tasks',
-                    'description' => __('Assignment submission and grading settings', 'sikshya')
-                ],
-                'progress' => [
-                    'title' => __('Progress', 'sikshya'),
-                    'icon' => 'fas fa-chart-line',
-                    'description' => __('Progress tracking and completion settings', 'sikshya')
-                ],
-                'notifications' => [
-                    'title' => __('Notifications', 'sikshya'),
-                    'icon' => 'fas fa-bell',
-                    'description' => __('In-app and push notification settings', 'sikshya')
-                ],
-                'integrations' => [
-                    'title' => __('Integrations', 'sikshya'),
-                    'icon' => 'fas fa-plug',
-                    'description' => __('Third-party integrations and APIs', 'sikshya')
-                ],
-                'security' => [
-                    'title' => __('Security', 'sikshya'),
-                    'icon' => 'fas fa-shield-alt',
-                    'description' => __('Security and privacy settings', 'sikshya')
-                ],
-                'advanced' => [
-                    'title' => __('Advanced', 'sikshya'),
-                    'icon' => 'fas fa-tools',
-                    'description' => __('Advanced configuration and debugging', 'sikshya')
-                ]
-            ];
-            
-            // Get tab data
-            $tab_data = $setting_groups[$tab] ?? $setting_groups['general'];
-            
-            // Load the appropriate settings template
-            $template = 'settings/tabs/' . $tab;
-            
-            ob_start();
-            $this->render($template);
-            $html = ob_get_clean();
+            // Validate tab exists
+            $valid_tabs = array_keys($this->settingsManager->getAllSettings());
+            if (!in_array($tab, $valid_tabs)) {
+                wp_send_json_error(['message' => __('Invalid settings tab.', 'sikshya')]);
+                return;
+            }
 
+            // Render tab content using SettingsManager
+            $content = $this->settingsManager->renderTabSettings($tab);
+            
             wp_send_json_success([
-                'html' => $html,
-                'header' => [
-                    'title' => $tab_data['title'] . ' Settings',
-                    'icon' => $tab_data['icon'],
-                    'description' => $tab_data['description']
-                ]
+                'content' => $content,
+                'tab' => $tab
             ]);
+
         } catch (\Exception $e) {
-            error_log('Sikshya Settings Tab Error: ' . $e->getMessage());
-            wp_send_json_error('Failed to load settings tab: ' . $e->getMessage());
+            wp_send_json_error([
+                'message' => __('Error loading settings content.', 'sikshya'),
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -170,17 +121,47 @@ class SettingController extends BaseView
                 return;
             }
 
-            check_ajax_referer('sikshya_course_builder', 'nonce');
+            // Verify nonce
+            if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_settings_nonce')) {
+                wp_send_json_error(['message' => __('Security check failed.', 'sikshya')]);
+                return;
+            }
 
             $tab = sanitize_text_field($_POST['tab'] ?? 'general');
-            
-            // Reset settings for the specific tab
-            $this->resetTabSettings($tab);
 
-            wp_send_json_success('Settings reset successfully');
+            // Validate tab exists
+            $valid_tabs = array_keys($this->settingsManager->getAllSettings());
+            if (!in_array($tab, $valid_tabs)) {
+                wp_send_json_error(['message' => __('Invalid settings tab.', 'sikshya')]);
+                return;
+            }
+
+            $reset_count = 0;
+            $tab_settings = $this->settingsManager->getTabSettings($tab);
+
+            // Reset each field to its default value
+            foreach ($tab_settings as $section) {
+                if (isset($section['fields']) && is_array($section['fields'])) {
+                    foreach ($section['fields'] as $field) {
+                        if (isset($field['key']) && isset($field['default'])) {
+                            if ($this->settingsManager->saveSetting($field['key'], $field['default'])) {
+                                $reset_count++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            wp_send_json_success([
+                'message' => sprintf(__('%d settings reset to defaults.', 'sikshya'), $reset_count),
+                'reset_count' => $reset_count
+            ]);
+
         } catch (\Exception $e) {
-            error_log('Sikshya Reset Settings Error: ' . $e->getMessage());
-            wp_send_json_error('Failed to reset settings: ' . $e->getMessage());
+            wp_send_json_error([
+                'message' => __('Error resetting settings.', 'sikshya'),
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -189,135 +170,144 @@ class SettingController extends BaseView
      */
     public function handleSettingsSave(): void
     {
-        check_ajax_referer('sikshya_settings_nonce', 'sikshya_nonce');
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_settings_nonce')) {
+            wp_send_json_error(['message' => __('Security check failed.', 'sikshya')]);
+            return;
+        }
 
+        // Check permissions
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('You do not have permission to save settings.', 'sikshya'));
+            wp_send_json_error(['message' => __('You do not have permission to save settings.', 'sikshya')]);
+            return;
+        }
+
+        $tab = sanitize_text_field($_POST['tab'] ?? 'general');
+        $settings_data = $_POST['settings'] ?? [];
+
+        // Validate tab exists
+        $valid_tabs = array_keys($this->settingsManager->getAllSettings());
+        if (!in_array($tab, $valid_tabs)) {
+            wp_send_json_error(['message' => __('Invalid settings tab.', 'sikshya')]);
+            return;
         }
 
         try {
-            $current_tab = sanitize_text_field($_POST['current_tab'] ?? 'general');
-            
-            // Save settings based on the current tab
-            $this->saveTabSettings($current_tab, $_POST);
+            $saved_count = 0;
+            $errors = [];
 
-            wp_send_json_success(__('Settings saved successfully!', 'sikshya'));
+            // Get all fields for this tab
+            $tab_settings = $this->settingsManager->getTabSettings($tab);
+            $valid_fields = [];
+
+            // Extract all valid field keys from the tab settings
+            foreach ($tab_settings as $section) {
+                if (isset($section['fields']) && is_array($section['fields'])) {
+                    foreach ($section['fields'] as $field) {
+                        if (isset($field['key'])) {
+                            $valid_fields[] = $field['key'];
+                        }
+                    }
+                }
+            }
+
+            // Process each setting
+            foreach ($settings_data as $key => $value) {
+                // Only save valid fields
+                if (in_array($key, $valid_fields)) {
+                    // Sanitize based on field type
+                    $sanitized_value = $this->sanitizeSettingValue($key, $value, $tab_settings);
+                    
+                    if ($this->settingsManager->saveSetting($key, $sanitized_value)) {
+                        $saved_count++;
+                    } else {
+                        $errors[] = sprintf(__('Failed to save setting: %s', 'sikshya'), $key);
+                    }
+                }
+            }
+
+            if (empty($errors)) {
+                wp_send_json_success([
+                    'message' => sprintf(__('%d settings saved successfully.', 'sikshya'), $saved_count),
+                    'saved_count' => $saved_count
+                ]);
+            } else {
+                wp_send_json_error([
+                    'message' => __('Some settings could not be saved.', 'sikshya'),
+                    'errors' => $errors,
+                    'saved_count' => $saved_count
+                ]);
+            }
+
         } catch (\Exception $e) {
-            wp_send_json_error($e->getMessage());
+            wp_send_json_error([
+                'message' => __('Error saving settings.', 'sikshya'),
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
     /**
-     * Save settings for a specific tab
+     * Sanitize setting value based on field type
+     *
+     * @param string $key
+     * @param mixed $value
+     * @param array $tab_settings
+     * @return mixed
      */
-    private function saveTabSettings(string $tab, array $data): void
+    private function sanitizeSettingValue(string $key, $value, array $tab_settings): mixed
     {
-        switch ($tab) {
-            case 'general':
-                $this->saveGeneralSettings($data);
-                break;
-            case 'courses':
-                $this->saveCourseSettings($data);
-                break;
-            case 'enrollment':
-                $this->saveEnrollmentSettings($data);
-                break;
-            case 'payment':
-                $this->savePaymentSettings($data);
-                break;
-            case 'certificates':
-                $this->saveCertificateSettings($data);
-                break;
-            case 'email':
-                $this->saveEmailSettings($data);
-                break;
-            case 'instructors':
-                $this->saveInstructorSettings($data);
-                break;
-            case 'students':
-                $this->saveStudentSettings($data);
-                break;
-            case 'quizzes':
-                $this->saveQuizSettings($data);
-                break;
-            case 'assignments':
-                $this->saveAssignmentSettings($data);
-                break;
-            case 'progress':
-                $this->saveProgressSettings($data);
-                break;
-            case 'notifications':
-                $this->saveNotificationSettings($data);
-                break;
-            case 'integrations':
-                $this->saveIntegrationSettings($data);
-                break;
-            case 'security':
-                $this->saveSecuritySettings($data);
-                break;
-            case 'advanced':
-                $this->saveAdvancedSettings($data);
-                break;
+        // Find the field definition
+        $field = null;
+        foreach ($tab_settings as $section) {
+            if (isset($section['fields']) && is_array($section['fields'])) {
+                foreach ($section['fields'] as $field_def) {
+                    if (isset($field_def['key']) && $field_def['key'] === $key) {
+                        $field = $field_def;
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        if (!$field) {
+            return $value;
+        }
+
+        $type = $field['type'] ?? 'text';
+
+        switch ($type) {
+            case 'checkbox':
+                return $value === '1' || $value === true ? '1' : '0';
+                
+            case 'number':
+                $value = floatval($value);
+                if (isset($field['min']) && $value < $field['min']) {
+                    $value = $field['min'];
+                }
+                if (isset($field['max']) && $value > $field['max']) {
+                    $value = $field['max'];
+                }
+                return $value;
+                
+            case 'select':
+                $options = $field['options'] ?? [];
+                return in_array($value, array_keys($options)) ? $value : ($field['default'] ?? '');
+                
+            case 'textarea':
+                return sanitize_textarea_field($value);
+                
+            case 'text':
             default:
-                throw new \Exception('Invalid settings tab');
+                return sanitize_text_field($value);
         }
     }
 
     /**
-     * Reset settings for a specific tab
+     * Note: All settings are now handled by the SettingsManager class
+     * which uses the _sikshya_ prefix and array-based configuration.
+     * The old save/reset methods have been removed in favor of the new system.
      */
-    private function resetTabSettings(string $tab): void
-    {
-        switch ($tab) {
-            case 'general':
-                $this->resetGeneralSettings();
-                break;
-            case 'courses':
-                $this->resetCourseSettings();
-                break;
-            case 'enrollment':
-                $this->resetEnrollmentSettings();
-                break;
-            case 'payment':
-                $this->resetPaymentSettings();
-                break;
-            case 'certificates':
-                $this->resetCertificateSettings();
-                break;
-            case 'email':
-                $this->resetEmailSettings();
-                break;
-            case 'instructors':
-                $this->resetInstructorSettings();
-                break;
-            case 'students':
-                $this->resetStudentSettings();
-                break;
-            case 'quizzes':
-                $this->resetQuizSettings();
-                break;
-            case 'assignments':
-                $this->resetAssignmentSettings();
-                break;
-            case 'progress':
-                $this->resetProgressSettings();
-                break;
-            case 'notifications':
-                $this->resetNotificationSettings();
-                break;
-            case 'integrations':
-                $this->resetIntegrationSettings();
-                break;
-            case 'security':
-                $this->resetSecuritySettings();
-                break;
-            case 'advanced':
-                $this->resetAdvancedSettings();
-                break;
-            default:
-                throw new \Exception('Invalid settings tab');
-        }
-    }
 
     // General Settings Methods
     private function saveGeneralSettings(array $data): void

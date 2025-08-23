@@ -11,8 +11,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Get current tab
-$current_tab = sanitize_text_field($_GET['tab'] ?? 'general');
+// Get current tab from passed data or URL
+$current_tab = $current_tab ?? sanitize_text_field($_GET['tab'] ?? 'general');
 
 // Define all setting groups
 $setting_groups = [
@@ -138,16 +138,25 @@ $setting_groups = [
 
             <div class="sikshya-settings-form-container">
                 <form id="sikshya-settings-form" method="post" action="">
-                    <?php wp_nonce_field('sikshya_settings_nonce', 'sikshya_nonce'); ?>
-                    <input type="hidden" name="action" value="sikshya_settings_save">
+                    <?php wp_nonce_field('sikshya_settings_nonce', 'nonce'); ?>
+                    <input type="hidden" name="action" value="sikshya_save_settings">
                     <input type="hidden" name="current_tab" value="<?php echo esc_attr($current_tab); ?>">
+                    
+                    <!-- Add nonce for JavaScript -->
+                    <script>
+                        window.sikshya_settings_nonce = '<?php echo wp_create_nonce('sikshya_settings_nonce'); ?>';
+                    </script>
 
                     <!-- Settings content will be loaded here via AJAX -->
                     <div id="sikshya-settings-content">
-                        <div class="sikshya-loading">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <span><?php _e('Loading settings...', 'sikshya'); ?></span>
-                        </div>
+                        <?php if (isset($initial_content)): ?>
+                            <?php echo $initial_content; ?>
+                        <?php else: ?>
+                            <div class="sikshya-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <span><?php _e('Loading settings...', 'sikshya'); ?></span>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="sikshya-settings-actions">

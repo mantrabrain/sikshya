@@ -1,321 +1,320 @@
-// Enhanced Sikshya LMS Settings Page JavaScript
+/**
+ * Sikshya Settings JavaScript
+ * 
+ * @package Sikshya
+ * @since 1.0.0
+ */
 
-jQuery(document).ready(function($) {
-    // Initialize settings page
-    initializeSettingsPage();
-    
-    // Load settings content for current tab
-    loadSettingsContent(getCurrentTab());
-    
-    // Handle tab clicks
-    $('.sikshya-settings-tab').on('click', function(e) {
-        e.preventDefault();
-        const tab = $(this).data('tab');
+(function($) {
+    'use strict';
+
+    // Settings namespace
+    window.SikshyaSettings = {
         
-        // Load content directly
-        loadSettingsContent(tab);
+        // Current active tab
+        currentTab: 'general',
         
-        // Update URL without page reload
-        const url = new URL(window.location);
-        url.searchParams.set('tab', tab);
-        window.history.pushState({}, '', url);
-        
-        // Update active tab
-        $('.sikshya-settings-tab').removeClass('active');
-        $(this).addClass('active');
-    });
-    
-    // Handle form submission with enhanced UX
-    $('#sikshya-settings-form').on('submit', function(e) {
-        e.preventDefault();
-        saveSettings();
-    });
-    
-    // Handle reset button with confirmation
-    $('.sikshya-reset-settings').on('click', function() {
-        const tab = $(this).data('tab');
-        const button = $(this);
-        
-        // Show confirmation dialog
-        if (confirm('Are you sure you want to reset all settings for this tab to defaults? This action cannot be undone.')) {
-            button.addClass('loading').prop('disabled', true);
-            resetSettings(tab);
+        // Initialize settings functionality
+        init: function() {
+            this.bindEvents();
+            this.loadInitialTab();
+        },
+
+        // Bind event listeners
+        bindEvents: function() {
+            // Tab switching
+            $(document).on('click', '.sikshya-settings-tab', this.handleTabSwitch);
             
-            setTimeout(() => {
-                button.removeClass('loading').prop('disabled', false);
-            }, 2000);
-        }
-    });
-    
-    
-    // Checkbox animations
-    $('.sikshya-checkbox-label input[type="checkbox"]').on('change', function() {
-        const field = $(this).closest('.sikshya-settings-field');
-        if (this.checked) {
-            field.addClass('success').removeClass('error');
-        } else {
-            field.removeClass('success error');
-        }
-    });
-    
-    // Auto-save indicator
-    let saveTimeout;
-    $('.sikshya-settings-field input, .sikshya-settings-field select, .sikshya-settings-field textarea').on('input change', function() {
-        clearTimeout(saveTimeout);
-        showAutoSaveIndicator();
-        
-        saveTimeout = setTimeout(() => {
-            hideAutoSaveIndicator();
-        }, 2000);
-    });
-    
-    // Enhanced form field interactions for existing functionality
-    $(document).on('change', '#prerequisite_check_type', function() {
-        const selectedValue = $(this).val();
-        const $gradeField = $('#minimum_grade_prerequisite');
-        const $gradeLabel = $('#minimum_grade_label');
-        const $gradeDesc = $('#minimum_grade_desc');
-        
-        if (selectedValue === 'grade') {
-            $gradeField.show();
-            $gradeLabel.show();
-            $gradeDesc.show();
-        } else {
-            $gradeField.hide();
-            $gradeLabel.hide();
-            $gradeDesc.hide();
-        }
-    });
-    $('#prerequisite_check_type').trigger('change');
-
-    // Courses/Progress Tab: Completion criteria fields
-    $(document).on('change', '#course_completion_criteria, #completion_method', function() {
-        const selectedValue = $(this).val();
-        const $percentageField = $('#completion_percentage');
-        const $percentageLabel = $('#completion_percentage_label');
-        const $percentageDesc = $('#completion_percentage_desc');
-        const $timeField = $('#minimum_time_minutes');
-        const $timeLabel = $('#minimum_time_label');
-        const $timeDesc = $('#minimum_time_desc');
-        
-        // Hide all fields first
-        $percentageField.hide();
-        $percentageLabel.hide();
-        $percentageDesc.hide();
-        $timeField && $timeField.hide();
-        $timeLabel && $timeLabel.hide();
-        $timeDesc && $timeDesc.hide();
-        
-        // Show relevant fields
-        if (selectedValue === 'percentage') {
-            $percentageField.show();
-            $percentageLabel.show();
-            $percentageDesc.show();
-        } else if (selectedValue === 'time_spent') {
-            $timeField && $timeField.show();
-            $timeLabel && $timeLabel.show();
-            $timeDesc && $timeDesc.show();
-        }
-    });
-    $('#course_completion_criteria, #completion_method').trigger('change');
-
-    // Integrations Tab: AWS fields
-    $(document).on('change', '#cloud_storage_provider', function() {
-        const selectedValue = $(this).val();
-        const $awsFields = $('#aws_access_key, #aws_access_key_label, #aws_access_key_desc, #aws_secret_key, #aws_secret_key_label, #aws_secret_key_desc, #aws_bucket, #aws_bucket_label, #aws_bucket_desc');
-        
-        if (selectedValue === 'aws') {
-            $awsFields.show();
-        } else {
-            $awsFields.hide();
-        }
-    });
-    $('#cloud_storage_provider').trigger('change');
-});
-
-function initializeSettingsPage() {
-    // Initialize tooltips
-    jQuery('.sikshya-settings-field .description').each(function() {
-        jQuery(this).attr('title', jQuery(this).text());
-    });
-    
-    // Add progress indicator
-    jQuery('body').append('<div class="sikshya-settings-progress"><div class="sikshya-settings-progress-bar"></div></div>');
-}
-
-function getCurrentTab() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('tab') || 'general';
-}
-
-function showAutoSaveIndicator() {
-    if (jQuery('.auto-save-indicator').length === 0) {
-        jQuery('.sikshya-settings-actions').prepend(
-            '<div class="auto-save-indicator" style="position: absolute; top: -30px; right: 0; background: #00a32a; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px;">Auto-saving...</div>'
-        );
-    }
-    jQuery('.auto-save-indicator').show();
-}
-
-function hideAutoSaveIndicator() {
-    jQuery('.auto-save-indicator').hide();
-    setTimeout(() => {
-        jQuery('.auto-save-indicator').remove();
-    }, 100);
-}
-
-function showNotification(message, type = 'info') {
-    const notification = jQuery(`
-        <div class="sikshya-notification ${type}">
-            ${message}
-        </div>
-    `);
-    
-    jQuery('body').append(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-function updateProgressBar(percentage) {
-    jQuery('.sikshya-settings-progress-bar').css('width', percentage + '%');
-}
-
-function loadSettingsContent(tab) {
-    const $content = jQuery('#sikshya-settings-content');
-    $content.html('<div class="sikshya-loading"><i class="fas fa-spinner fa-spin"></i><span>Loading settings...</span></div>');
-    
-    updateProgressBar(30);
-    
-    jQuery.ajax({
-        url: sikshya_ajax.ajax_url,
-        type: 'POST',
-        data: {
-            action: 'sikshya_load_settings_tab',
-            tab: tab,
-            nonce: sikshya_ajax.nonce
+            // Form submission
+            $(document).on('submit', '#sikshya-settings-form', this.handleFormSubmit);
+            
+            // Reset button
+            $(document).on('click', '.sikshya-reset-settings', this.handleResetSettings);
+            
+            // URL hash change (for direct tab access)
+            $(window).on('hashchange', this.handleHashChange);
         },
-        success: function(response) {
-            updateProgressBar(100);
-            if (response.success) {
-                $content.html(response.data.html);
-                
-                // Update the settings header
-                if (response.data.header) {
-                    const header = response.data.header;
-                    jQuery('.sikshya-settings-header h2').html('<i class="' + header.icon + '"></i> ' + header.title);
-                    jQuery('.sikshya-settings-header p').text(header.description);
+
+        // Load initial tab based on URL or default
+        loadInitialTab: function() {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && $('.sikshya-settings-tab[data-tab="' + hash + '"]').length) {
+                this.switchTab(hash);
+            } else {
+                // Set initial tab from URL parameter or default
+                const urlParams = new URLSearchParams(window.location.search);
+                const tabParam = urlParams.get('tab');
+                if (tabParam && $('.sikshya-settings-tab[data-tab="' + tabParam + '"]').length) {
+                    this.switchTab(tabParam);
                 }
-                
-                // Re-initialize form interactions for new content
-                initializeFormInteractions();
-                showNotification('Settings loaded successfully', 'success');
-            } else {
-                $content.html('<div class="notice notice-error"><p>Error loading settings: ' + response.data + '</p></div>');
-                showNotification('Failed to load settings', 'error');
             }
         },
-        error: function() {
-            updateProgressBar(100);
-            $content.html('<div class="notice notice-error"><p>Failed to load settings. Please try again.</p></div>');
-            showNotification('Network error occurred', 'error');
-        }
-    });
-}
 
-function saveSettings() {
-    const form = jQuery('#sikshya-settings-form');
-    const formData = new FormData(form[0]);
-    const currentTab = getCurrentTab();
-    
-    // Add loading state
-    jQuery('.sikshya-save-settings').addClass('loading').prop('disabled', true);
-    updateProgressBar(20);
-    
-    jQuery.ajax({
-        url: sikshya_ajax.ajax_url,
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            updateProgressBar(100);
-            if (response.success) {
-                showNotification('Settings saved successfully!', 'success');
-                // Reload the current tab to show updated values
-                loadSettingsContent(currentTab);
-            } else {
-                showNotification('Failed to save settings: ' + response.data, 'error');
+        // Handle tab switching
+        handleTabSwitch: function(e) {
+            e.preventDefault();
+            const tab = $(this).data('tab');
+            SikshyaSettings.switchTab(tab);
+        },
+
+        // Switch to a specific tab
+        switchTab: function(tab) {
+            if (tab === this.currentTab) {
+                return;
+            }
+
+            // Update active tab
+            $('.sikshya-settings-tab').removeClass('active');
+            $('.sikshya-settings-tab[data-tab="' + tab + '"]').addClass('active');
+
+            // Update current tab
+            this.currentTab = tab;
+
+            // Update URL
+            this.updateURL(tab);
+
+            // Load tab content via AJAX
+            this.loadTabContent(tab);
+
+            // Update form hidden field
+            $('input[name="current_tab"]').val(tab);
+        },
+
+        // Load tab content via AJAX
+        loadTabContent: function(tab) {
+            const $content = $('#sikshya-settings-content');
+            
+            // Show loading state
+            $content.html(`
+                <div class="sikshya-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>${sikshya_ajax.loading_text || 'Loading settings...'}</span>
+                </div>
+            `);
+
+            // Debug: Log the nonce being sent
+            const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
+            console.log('Sending nonce:', nonce);
+            console.log('sikshya_ajax object:', sikshya_ajax);
+            
+            // Make AJAX request
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'sikshya_load_settings_tab',
+                    tab: tab,
+                    nonce: nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $content.html(response.data.content);
+                        SikshyaSettings.showNotification('Settings loaded successfully.', 'success');
+                    } else {
+                        $content.html(`
+                            <div class="sikshya-error">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>${response.data.message || 'Error loading settings.'}</span>
+                            </div>
+                        `);
+                        SikshyaSettings.showNotification(response.data.message || 'Error loading settings.', 'error');
+                    }
+                },
+                error: function() {
+                    $content.html(`
+                        <div class="sikshya-error">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Network error. Please try again.</span>
+                        </div>
+                    `);
+                    SikshyaSettings.showNotification('Network error. Please try again.', 'error');
+                }
+            });
+        },
+
+        // Handle form submission
+        handleFormSubmit: function(e) {
+            e.preventDefault();
+            
+            const $form = $(this);
+            const $submitBtn = $form.find('.sikshya-save-settings');
+            const originalText = $submitBtn.html();
+            
+            // Show loading state
+            $submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+            
+            // Collect form data
+            const formData = new FormData($form[0]);
+            const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
+            formData.append('action', 'sikshya_save_settings');
+            formData.append('nonce', nonce);
+            formData.append('tab', SikshyaSettings.currentTab);
+            
+            // Convert FormData to object for settings
+            const settings = {};
+            for (let [key, value] of formData.entries()) {
+                if (key !== 'action' && key !== 'nonce' && key !== 'current_tab') {
+                    settings[key] = value;
+                }
+            }
+            formData.append('settings', JSON.stringify(settings));
+            
+            // Make AJAX request
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        SikshyaSettings.showNotification(response.data.message, 'success');
+                        
+                        // Reload tab content to show updated values
+                        SikshyaSettings.loadTabContent(SikshyaSettings.currentTab);
+                    } else {
+                        SikshyaSettings.showNotification(response.data.message, 'error');
+                        
+                        if (response.data.errors && response.data.errors.length > 0) {
+                            console.error('Settings errors:', response.data.errors);
+                        }
+                    }
+                },
+                error: function() {
+                    SikshyaSettings.showNotification('Network error. Please try again.', 'error');
+                },
+                complete: function() {
+                    // Restore button state
+                    $submitBtn.html(originalText).prop('disabled', false);
+                }
+            });
+        },
+
+        // Handle reset settings
+        handleResetSettings: function(e) {
+            e.preventDefault();
+            
+            if (!confirm('Are you sure you want to reset all settings for this tab to their default values? This action cannot be undone.')) {
+                return;
+            }
+            
+            const $btn = $(this);
+            const originalText = $btn.html();
+            
+            // Show loading state
+            $btn.html('<i class="fas fa-spinner fa-spin"></i> Resetting...').prop('disabled', true);
+            
+            // Make AJAX request
+            const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'sikshya_reset_settings',
+                    tab: SikshyaSettings.currentTab,
+                    nonce: nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        SikshyaSettings.showNotification(response.data.message, 'success');
+                        
+                        // Reload tab content to show reset values
+                        SikshyaSettings.loadTabContent(SikshyaSettings.currentTab);
+                    } else {
+                        SikshyaSettings.showNotification(response.data.message, 'error');
+                    }
+                },
+                error: function() {
+                    SikshyaSettings.showNotification('Network error. Please try again.', 'error');
+                },
+                complete: function() {
+                    // Restore button state
+                    $btn.html(originalText).prop('disabled', false);
+                }
+            });
+        },
+
+        // Handle URL hash change
+        handleHashChange: function() {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && $('.sikshya-settings-tab[data-tab="' + hash + '"]').length) {
+                SikshyaSettings.switchTab(hash);
             }
         },
-        error: function() {
-            updateProgressBar(100);
-            showNotification('Network error occurred while saving', 'error');
-        },
-        complete: function() {
-            setTimeout(() => {
-                jQuery('.sikshya-save-settings').removeClass('loading').prop('disabled', false);
-                updateProgressBar(0);
-            }, 1000);
-        }
-    });
-}
 
-function resetSettings(tab) {
-    updateProgressBar(20);
-    
-    jQuery.ajax({
-        url: sikshya_ajax.ajax_url,
-        type: 'POST',
-        data: {
-            action: 'sikshya_reset_settings_tab',
-            tab: tab,
-            nonce: sikshya_ajax.nonce
+        // Update URL without page reload
+        updateURL: function(tab) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tab);
+            url.hash = tab;
+            window.history.replaceState({}, '', url);
         },
-        success: function(response) {
-            updateProgressBar(100);
-            if (response.success) {
-                showNotification('Settings reset to defaults successfully!', 'success');
-                // Reload the current tab to show reset values
-                loadSettingsContent(tab);
-            } else {
-                showNotification('Failed to reset settings: ' + response.data, 'error');
+
+        // Show notification
+        showNotification: function(message, type = 'info') {
+            // Remove existing notifications
+            $('.sikshya-notification').remove();
+            
+            // Create notification element
+            const $notification = $(`
+                <div class="sikshya-notification sikshya-notification-${type}">
+                    <div class="sikshya-notification-content">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                    <button class="sikshya-notification-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `);
+            
+            // Add to page
+            $('.sikshya-settings-page').prepend($notification);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(function() {
+                $notification.fadeOut(function() {
+                    $(this).remove();
+                });
+            }, 5000);
+            
+            // Close button functionality
+            $notification.find('.sikshya-notification-close').on('click', function() {
+                $notification.fadeOut(function() {
+                    $(this).remove();
+                });
+            });
+        },
+
+        // Get setting value
+        getSetting: function(key, defaultValue = '') {
+            const $field = $('[name="' + key + '"]');
+            if ($field.length) {
+                if ($field.attr('type') === 'checkbox') {
+                    return $field.is(':checked') ? '1' : '0';
+                } else {
+                    return $field.val() || defaultValue;
+                }
             }
+            return defaultValue;
         },
-        error: function() {
-            updateProgressBar(100);
-            showNotification('Network error occurred while resetting', 'error');
-        },
-        complete: function() {
-            setTimeout(() => {
-                updateProgressBar(0);
-            }, 1000);
-        }
-    });
-}
 
-function initializeFormInteractions() {
-    
-    
-    // Re-initialize checkbox animations
-    jQuery('.sikshya-checkbox-label input[type="checkbox"]').off('change').on('change', function() {
-        const field = jQuery(this).closest('.sikshya-settings-field');
-        if (this.checked) {
-            field.addClass('success').removeClass('error');
-        } else {
-            field.removeClass('success error');
+        // Set setting value
+        setSetting: function(key, value) {
+            const $field = $('[name="' + key + '"]');
+            if ($field.length) {
+                if ($field.attr('type') === 'checkbox') {
+                    $field.prop('checked', value === '1' || value === true);
+                } else {
+                    $field.val(value);
+                }
+            }
         }
+    };
+
+    // Initialize when document is ready
+    $(document).ready(function() {
+        SikshyaSettings.init();
     });
-    
-    // Re-initialize auto-save indicator
-    let saveTimeout;
-    jQuery('.sikshya-settings-field input, .sikshya-settings-field select, .sikshya-settings-field textarea').off('input change').on('input change', function() {
-        clearTimeout(saveTimeout);
-        showAutoSaveIndicator();
-        
-        saveTimeout = setTimeout(() => {
-            hideAutoSaveIndicator();
-        }, 2000);
-    });
-} 
+
+})(jQuery); 
