@@ -41,16 +41,7 @@ if (!defined('ABSPATH')) {
                 </div>
             </div>
             
-            <!-- Tips Strip -->
-            <div class="sikshya-tips-strip">
-                <div class="sikshya-tip-item">
-                    <strong>💡 Pro Tip:</strong> Organize content into logical chapters for better learning flow
-                </div>
-                <div class="sikshya-tip-item">
-                    <strong>📚 Best Practice:</strong> Keep lessons between 5-15 minutes for optimal engagement
-                </div>
-                <a href="#" class="sikshya-help-link">View Course Building Guide →</a>
-            </div>
+
         </div>
         
         <!-- Existing Curriculum Structure (Hidden when empty) -->
