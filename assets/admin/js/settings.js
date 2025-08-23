@@ -92,10 +92,7 @@
                 </div>
             `);
 
-            // Debug: Log the nonce being sent
             const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
-            console.log('Sending nonce:', nonce);
-            console.log('sikshya_ajax object:', sikshya_ajax);
             
             // Make AJAX request
             $.ajax({
