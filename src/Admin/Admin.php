@@ -295,11 +295,42 @@ class Admin
                 SIKSHYA_VERSION,
                 true
             );
+            
+            // Enqueue modal system for settings page
+            wp_enqueue_style(
+                'sikshya-modal',
+                SIKSHYA_PLUGIN_URL . 'assets/admin/css/modal.css',
+                [],
+                SIKSHYA_VERSION
+            );
+            wp_enqueue_script(
+                'sikshya-modal',
+                SIKSHYA_PLUGIN_URL . 'assets/admin/js/modal.js',
+                ['jquery'],
+                SIKSHYA_VERSION,
+                true
+            );
+            
             error_log('Sikshya: Settings assets enqueued successfully');
         } else {
             error_log('Sikshya: Not enqueuing settings assets. Screen ID: ' . ($screen ? $screen->id : 'null'));
             error_log('Sikshya: Expected screen ID: sikshya_page_sikshya-settings');
         }
+        
+        // Enqueue toast system assets on all admin pages
+        wp_enqueue_style(
+            'sikshya-toast',
+            SIKSHYA_PLUGIN_URL . 'assets/admin/css/toast.css',
+            [],
+            SIKSHYA_VERSION
+        );
+        wp_enqueue_script(
+            'sikshya-toast',
+            SIKSHYA_PLUGIN_URL . 'assets/admin/js/toast.js',
+            ['jquery'],
+            SIKSHYA_VERSION,
+            true
+        );
     }
 
     /**

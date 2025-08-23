@@ -61,6 +61,16 @@
     align-items: center;
 }
 
+.sikshya-header-actions .sikshya-btn {
+    padding: var(--sikshya-space-3) var(--sikshya-space-6);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+}
+
+.sikshya-header-actions .sikshya-btn i {
+    font-size: 16px;
+}
+
 
 
 .sikshya-settings-page .wp-heading-inline {
@@ -284,58 +294,13 @@
     background: linear-gradient(90deg, transparent, #dcdcde, transparent);
 }
 
-.sikshya-settings-actions .button {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sikshya-space-2);
+.sikshya-settings-actions .sikshya-btn {
     padding: var(--sikshya-space-3) var(--sikshya-space-6);
-    height: auto;
-    border-radius: var(--sikshya-radius-md);
-    font-weight: var(--sikshya-font-medium);
     font-size: var(--sikshya-text-sm);
-    border: var(--sikshya-border-width-2) var(--sikshya-border-style) transparent;
-    position: relative;
-    overflow: hidden;
-    transition: var(--sikshya-transition-all);
+    font-weight: var(--sikshya-font-medium);
 }
 
-.sikshya-settings-actions .button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-}
-
-.sikshya-settings-actions .button-primary {
-    background: var(--sikshya-primary);
-    border-color: var(--sikshya-primary);
-    color: var(--sikshya-white);
-    box-shadow: var(--sikshya-shadow-md);
-}
-
-.sikshya-settings-actions .button-primary:hover {
-    background: var(--sikshya-primary-hover);
-    border-color: var(--sikshya-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-lg);
-}
-
-.sikshya-settings-actions .button:not(.button-primary) {
-    background: var(--sikshya-white);
-    border-color: var(--sikshya-gray-200);
-    color: var(--sikshya-gray-700);
-}
-
-.sikshya-settings-actions .button:not(.button-primary):hover {
-    background: var(--sikshya-gray-50);
-    border-color: var(--sikshya-primary);
-    color: var(--sikshya-primary);
-}
-
-.sikshya-settings-actions .button i {
+.sikshya-settings-actions .sikshya-btn i {
     font-size: 16px;
 }
 
@@ -452,6 +417,27 @@
     background: #ffffff;
 }
 
+/* Error states */
+.sikshya-settings-field.has-error input,
+.sikshya-settings-field.has-error select,
+.sikshya-settings-field.has-error textarea {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.sikshya-settings-field.has-error .sikshya-field-error {
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sikshya-settings-field.has-error .sikshya-field-error i {
+    font-size: 12px;
+}
+
 .sikshya-settings-field input:hover,
 .sikshya-settings-field select:hover,
 .sikshya-settings-field textarea:hover {
@@ -490,6 +476,30 @@
 /* Field Group Styling */
 .sikshya-settings-field + .sikshya-settings-field {
     margin-top: 0;
+}
+
+/* Checkbox wrapper for inline layout */
+.sikshya-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+}
+
+.sikshya-checkbox-wrapper input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.sikshya-checkbox-wrapper label {
+    margin: 0;
+    font-weight: var(--sikshya-font-medium);
+    cursor: pointer;
+}
+
+/* Remove bottom margin for labels in checkbox fields */
+.sikshya-settings-field:has(.sikshya-checkbox-wrapper) label {
+    margin-bottom: 0;
 }
 
 /* Responsive Design */
@@ -1205,4 +1215,147 @@ html {
 
 .sikshya-skeleton-field:nth-child(3) .sikshya-skeleton-description {
     width: 85%;
+} 
+
+/* Reset Confirmation Modal */
+.sikshya-reset-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sikshya-reset-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sikshya-reset-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.sikshya-reset-modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.sikshya-reset-modal.show .sikshya-reset-modal-content {
+    transform: scale(1);
+}
+
+.sikshya-reset-modal-header {
+    padding: 20px 24px 0;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sikshya-reset-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sikshya-reset-modal-header h3 i {
+    color: #f59e0b;
+}
+
+.sikshya-reset-modal-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-reset-modal-close:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.sikshya-reset-modal-body {
+    padding: 24px;
+}
+
+.sikshya-reset-modal-body p {
+    margin: 0 0 16px 0;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.sikshya-reset-modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.sikshya-reset-modal-body p strong {
+    color: #1f2937;
+}
+
+.sikshya-reset-modal-footer {
+    padding: 0 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.sikshya-reset-modal-footer .sikshya-btn {
+    min-width: 120px;
+    justify-content: center;
+}
+
+.sikshya-reset-modal-footer .sikshya-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.sikshya-reset-modal-footer .sikshya-btn-secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.sikshya-reset-modal-footer .sikshya-btn-danger {
+    background: #dc2626;
+    color: #fff;
+    border: 1px solid #dc2626;
+}
+
+.sikshya-reset-modal-footer .sikshya-btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.sikshya-reset-modal-footer .sikshya-btn-danger:disabled {
+    background: #fca5a5;
+    border-color: #fca5a5;
+    cursor: not-allowed;
 } 

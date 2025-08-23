@@ -1549,25 +1549,43 @@ function hideLoadingState() {
 }
 
 function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `sikshya-notification sikshya-notification-${type}`;
-    notification.innerHTML = `
-        <div class="sikshya-notification-content">
-            <span>${message}</span>
-            <button onclick="this.parentElement.parentElement.remove()">×</button>
-        </div>
-    `;
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
+    // Use toast system if available, otherwise fallback to old notification
+    if (window.SikshyaToast) {
+        switch (type) {
+            case 'success':
+                SikshyaToast.successMessage(message);
+                break;
+            case 'error':
+                SikshyaToast.errorMessage(message);
+                break;
+            case 'warning':
+                SikshyaToast.warningMessage(message);
+                break;
+            default:
+                SikshyaToast.infoMessage(message);
+                break;
         }
-    }, 5000);
+    } else {
+        // Fallback to old notification system
+        const notification = document.createElement('div');
+        notification.className = `sikshya-notification sikshya-notification-${type}`;
+        notification.innerHTML = `
+            <div class="sikshya-notification-content">
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
 }
 
 

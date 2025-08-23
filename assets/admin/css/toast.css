@@ -1,0 +1,240 @@
+/* Sikshya Toast Notification System - Modern Design */
+.sikshya-toast-container {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: none;
+}
+
+.sikshya-toast {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
+    padding: 20px;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transform: translateX(100%) scale(0.95);
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.sikshya-toast.show {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+}
+
+.sikshya-toast.hide {
+    transform: translateX(100%) scale(0.95);
+    opacity: 0;
+}
+
+/* Toast Icon */
+.sikshya-toast-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Toast Content */
+.sikshya-toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.sikshya-toast-title {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.4;
+    margin: 0 0 4px 0;
+    color: #0f172a;
+}
+
+.sikshya-toast-message {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    color: #475569;
+}
+
+/* Toast Close Button */
+.sikshya-toast-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+}
+
+.sikshya-toast-close:hover {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.sikshya-toast-close i {
+    font-size: 14px;
+}
+
+/* Toast Types */
+.sikshya-toast.success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.sikshya-toast.success .sikshya-toast-icon {
+    background: #22c55e;
+    color: #ffffff;
+}
+
+.sikshya-toast.error {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.sikshya-toast.error .sikshya-toast-icon {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.sikshya-toast.warning {
+    background: #fffbeb;
+    border-color: #fed7aa;
+}
+
+.sikshya-toast.warning .sikshya-toast-icon {
+    background: #f59e0b;
+    color: #ffffff;
+}
+
+.sikshya-toast.info {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.sikshya-toast.info .sikshya-toast-icon {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+/* Progress Bar */
+.sikshya-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.05);
+    width: 100%;
+    overflow: hidden;
+}
+
+.sikshya-toast-progress-bar {
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    width: 100%;
+    transform: translateX(-100%);
+    transition: transform linear;
+}
+
+.sikshya-toast.success .sikshya-toast-progress-bar {
+    background: rgba(34, 197, 94, 0.3);
+}
+
+.sikshya-toast.error .sikshya-toast-progress-bar {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.sikshya-toast.warning .sikshya-toast-progress-bar {
+    background: rgba(245, 158, 11, 0.3);
+}
+
+.sikshya-toast.info .sikshya-toast-progress-bar {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+/* Animation for multiple toasts */
+.sikshya-toast:nth-child(1) { transition-delay: 0ms; }
+.sikshya-toast:nth-child(2) { transition-delay: 30ms; }
+.sikshya-toast:nth-child(3) { transition-delay: 60ms; }
+.sikshya-toast:nth-child(4) { transition-delay: 90ms; }
+.sikshya-toast:nth-child(5) { transition-delay: 120ms; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-toast-container {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+    }
+    
+    .sikshya-toast {
+        min-width: auto;
+        max-width: none;
+        padding: 16px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .sikshya-toast {
+        background: #1e293b;
+        border-color: #334155;
+        color: #f1f5f9;
+    }
+    
+    .sikshya-toast.success {
+        background: #064e3b;
+        border-color: #065f46;
+    }
+    
+    .sikshya-toast.error {
+        background: #450a0a;
+        border-color: #7f1d1d;
+    }
+    
+    .sikshya-toast.warning {
+        background: #451a03;
+        border-color: #78350f;
+    }
+    
+    .sikshya-toast.info {
+        background: #0c4a6e;
+        border-color: #1e40af;
+    }
+    
+    .sikshya-toast-title {
+        color: #f8fafc;
+    }
+    
+    .sikshya-toast-message {
+        color: #cbd5e1;
+    }
+    
+    .sikshya-toast-close:hover {
+        background: #334155;
+        color: #cbd5e1;
+    }
+}

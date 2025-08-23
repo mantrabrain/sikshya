@@ -104,7 +104,10 @@ $setting_groups = [
             <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
         </div>
         <div class="sikshya-header-actions">
-            <!-- Additional header actions can be added here if needed -->
+            <button type="submit" class="sikshya-btn sikshya-btn-primary sikshya-save-settings" form="sikshya-settings-form">
+                <i class="fas fa-save"></i>
+                <?php _e('Save Settings', 'sikshya'); ?>
+            </button>
         </div>
     </div>
     
@@ -160,13 +163,13 @@ $setting_groups = [
                     </div>
 
                     <div class="sikshya-settings-actions">
-                        <button type="submit" class="button button-primary sikshya-save-settings">
+                        <button type="submit" class="sikshya-btn sikshya-btn-primary sikshya-save-settings">
                             <i class="fas fa-save"></i>
                             <?php _e('Save Settings', 'sikshya'); ?>
                         </button>
-                        <button type="button" class="button sikshya-reset-settings" data-tab="<?php echo esc_attr($current_tab); ?>">
+                        <button type="button" class="sikshya-btn sikshya-btn-secondary sikshya-reset-settings" data-tab="<?php echo esc_attr($current_tab); ?>">
                             <i class="fas fa-undo"></i>
-                            <?php _e('Reset to Defaults', 'sikshya'); ?>
+                            <?php _e('Reset All Settings', 'sikshya'); ?>
                         </button>
                     </div>
                 </form>

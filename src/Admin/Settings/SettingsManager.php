@@ -99,11 +99,11 @@ class SettingsManager
      */
     public function getSetting(string $key, $default = '')
     {
-        return get_option('sikshya_' . $key, $default);
+        return get_option('_sikshya_' . $key, $default);
     }
 
     /**
-     * Save setting with sikshya_ prefix
+     * Save setting with _sikshya_ prefix
      *
      * @param string $key
      * @param mixed $value
@@ -111,7 +111,32 @@ class SettingsManager
      */
     public function saveSetting(string $key, $value): bool
     {
-        return update_option('sikshya_' . $key, $value);
+        $option_name = '_sikshya_' . $key;
+        $old_value = get_option($option_name);
+        $result = update_option($option_name, $value);
+        
+        // Debug logging
+        error_log('Sikshya SettingsManager - Saving option: ' . $option_name . ' = ' . $value . ' (result: ' . ($result ? 'true' : 'false') . ')');
+        
+        // Check if the option was actually saved
+        $saved_value = get_option($option_name);
+        error_log('Sikshya SettingsManager - Retrieved option: ' . $option_name . ' = ' . $saved_value);
+        
+        // WordPress update_option returns false if value didn't change, but that's not a failure
+        // We consider it successful if the value is now what we wanted it to be
+        // Handle type differences (string vs int, empty string vs null, etc.)
+        $value_normalized = $this->normalizeValue($value);
+        $saved_normalized = $this->normalizeValue($saved_value);
+        
+        error_log('Sikshya SettingsManager - Value comparison: original="' . $value . '" normalized="' . $value_normalized . '", saved="' . $saved_value . '" normalized="' . $saved_normalized . '"');
+        
+        if ($value_normalized === $saved_normalized) {
+            error_log('Sikshya SettingsManager - Option saved successfully (value matches)');
+            return true;
+        } else {
+            error_log('Sikshya SettingsManager - Option save failed (value mismatch: expected "' . $value_normalized . '", got "' . $saved_normalized . '")');
+            return false;
+        }
     }
 
     /**
@@ -135,9 +160,10 @@ class SettingsManager
      * Render settings form for a tab
      *
      * @param string $tab
+     * @param array $field_errors
      * @return string
      */
-    public function renderTabSettings(string $tab): string
+    public function renderTabSettings(string $tab, array $field_errors = []): string
     {
         $settings = $this->getTabSettings($tab);
         if (empty($settings)) {
@@ -147,7 +173,7 @@ class SettingsManager
         $output = '<div class="sikshya-settings-tab-content">';
         
         foreach ($settings as $section) {
-            $output .= $this->renderSection($section);
+            $output .= $this->renderSection($section, $field_errors);
         }
         
         $output .= '</div>';
@@ -159,9 +185,10 @@ class SettingsManager
      * Render a settings section
      *
      * @param array $section
+     * @param array $field_errors
      * @return string
      */
-    protected function renderSection(array $section): string
+    protected function renderSection(array $section, array $field_errors = []): string
     {
         $output = '<div class="sikshya-settings-section">' . "\n";
         
@@ -178,7 +205,8 @@ class SettingsManager
             $output .= '        <div class="sikshya-settings-grid">' . "\n";
             $field_count = count($section['fields']);
             foreach ($section['fields'] as $index => $field) {
-                $output .= $this->renderField($field);
+                $field_error = $field_errors[$field['key'] ?? ''] ?? '';
+                $output .= $this->renderField($field, $field_error);
                 // Add empty line between fields (except after the last field)
                 if ($index < $field_count - 1) {
                     $output .= '            ' . "\n";
@@ -196,9 +224,10 @@ class SettingsManager
      * Render a settings field
      *
      * @param array $field
+     * @param string $error_message
      * @return string
      */
-    protected function renderField(array $field): string
+    protected function renderField(array $field, string $error_message = ''): string
     {
         $key = $field['key'] ?? '';
         $type = $field['type'] ?? 'text';
@@ -210,10 +239,15 @@ class SettingsManager
         
         $current_value = $this->getSetting($key, $default);
         
-        $output = '            <div class="sikshya-settings-field">' . "\n";
+        $field_class = 'sikshya-settings-field';
+        if (!empty($error_message)) {
+            $field_class .= ' has-error';
+        }
         
-        // Label
-        if (!empty($label)) {
+        $output = '            <div class="' . $field_class . '">' . "\n";
+        
+        // Label (skip for checkbox as it's handled in the checkbox case)
+        if (!empty($label) && $type !== 'checkbox') {
             $output .= '                <label for="' . esc_attr($key) . '">' . esc_html($label) . '</label>' . "\n";
         }
         
@@ -238,7 +272,12 @@ class SettingsManager
                 
             case 'checkbox':
                 $checked = checked($current_value, '1', false);
-                $output .= '                <input type="checkbox" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="1"' . $checked . '>' . "\n";
+                $output .= '                <div class="sikshya-checkbox-wrapper">' . "\n";
+                $output .= '                    <input type="checkbox" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="1"' . $checked . '>' . "\n";
+                if (!empty($label)) {
+                    $output .= '                    <label for="' . esc_attr($key) . '">' . esc_html($label) . '</label>' . "\n";
+                }
+                $output .= '                </div>' . "\n";
                 break;
                 
             case 'radio':
@@ -281,6 +320,14 @@ class SettingsManager
             $output .= '                <p class="description">' . esc_html($description) . '</p>' . "\n";
         }
         
+        // Error message
+        if (!empty($error_message)) {
+            $output .= '                <div class="sikshya-field-error">' . "\n";
+            $output .= '                    <i class="fas fa-exclamation-triangle"></i>' . "\n";
+            $output .= '                    <span>' . esc_html($error_message) . '</span>' . "\n";
+            $output .= '                </div>' . "\n";
+        }
+        
         $output .= '            </div>' . "\n";
         
         return $output;
@@ -305,7 +352,11 @@ class SettingsManager
                         'description' => __('The title of your learning management system', 'sikshya'),
                         'placeholder' => __('Enter your LMS site title', 'sikshya'),
                         'default' => get_bloginfo('name'),
-                        'required' => true
+                        'required' => true,
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'validate_callback' => function($value) {
+                            return !empty(trim($value)) ? true : __('Site title cannot be empty.', 'sikshya');
+                        }
                     ],
                     [
                         'key' => 'site_description',
@@ -313,7 +364,45 @@ class SettingsManager
                         'label' => __('LMS Description', 'sikshya'),
                         'description' => __('A brief description of your learning platform', 'sikshya'),
                         'placeholder' => __('Enter a description for your LMS', 'sikshya'),
-                        'default' => get_bloginfo('description')
+                        'default' => get_bloginfo('description'),
+                        'sanitize_callback' => 'sanitize_textarea_field',
+                        'validate_callback' => function($value) {
+                            return strlen($value) <= 500 ? true : __('Description cannot exceed 500 characters.', 'sikshya');
+                        }
+                    ],
+                    [
+                        'key' => 'admin_email',
+                        'type' => 'text',
+                        'label' => __('Admin Email', 'sikshya'),
+                        'description' => __('Primary email address for system notifications', 'sikshya'),
+                        'placeholder' => __('admin@example.com', 'sikshya'),
+                        'default' => get_option('admin_email'),
+                        'required' => true,
+                        'sanitize_callback' => 'sanitize_email',
+                        'validate_callback' => function($value) {
+                            return is_email($value) ? true : __('Please enter a valid email address.', 'sikshya');
+                        }
+                    ],
+                    [
+                        'key' => 'max_file_size',
+                        'type' => 'number',
+                        'label' => __('Maximum File Upload Size (MB)', 'sikshya'),
+                        'description' => __('Maximum allowed file size for course materials', 'sikshya'),
+                        'placeholder' => __('10', 'sikshya'),
+                        'default' => 10,
+                        'min' => 1,
+                        'max' => 100,
+                        'sanitize_callback' => 'intval',
+                        'validate_callback' => function($value) {
+                            $value = intval($value);
+                            if ($value < 1) {
+                                return __('File size must be at least 1 MB.', 'sikshya');
+                            }
+                            if ($value > 100) {
+                                return __('File size cannot exceed 100 MB.', 'sikshya');
+                            }
+                            return true;
+                        }
                     ]
                 ]
             ],
@@ -338,7 +427,12 @@ class SettingsManager
                             'BRL' => __('Brazilian Real (R$)', 'sikshya'),
                             'MXN' => __('Mexican Peso ($)', 'sikshya'),
                             'SGD' => __('Singapore Dollar (S$)', 'sikshya')
-                        ]
+                        ],
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'validate_callback' => function($value) {
+                            $valid_currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR', 'BRL', 'MXN', 'SGD'];
+                            return in_array($value, $valid_currencies) ? true : __('Invalid currency selected.', 'sikshya');
+                        }
                     ],
                     [
                         'key' => 'currency_position',
@@ -351,7 +445,12 @@ class SettingsManager
                             'right' => __('Right (100$)', 'sikshya'),
                             'left_space' => __('Left with space ($ 100)', 'sikshya'),
                             'right_space' => __('Right with space (100 $)', 'sikshya')
-                        ]
+                        ],
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'validate_callback' => function($value) {
+                            $valid_positions = ['left', 'right', 'left_space', 'right_space'];
+                            return in_array($value, $valid_positions) ? true : __('Invalid currency position selected.', 'sikshya');
+                        }
                     ]
                 ]
             ],
@@ -365,7 +464,11 @@ class SettingsManager
                         'label' => __('Timezone', 'sikshya'),
                         'description' => __('Timezone for displaying dates and times', 'sikshya'),
                         'default' => get_option('timezone_string'),
-                        'options' => $this->getTimezoneOptions()
+                        'options' => $this->getTimezoneOptions(),
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'validate_callback' => function($value) {
+                            return in_array($value, \DateTimeZone::listIdentifiers()) ? true : __('Invalid timezone selected.', 'sikshya');
+                        }
                     ],
                     [
                         'key' => 'date_format',
@@ -379,7 +482,12 @@ class SettingsManager
                             'm/d/Y' => date('m/d/Y'),
                             'd/m/Y' => date('d/m/Y'),
                             'j F Y' => date('j F Y')
-                        ]
+                        ],
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'validate_callback' => function($value) {
+                            $valid_formats = ['F j, Y', 'Y-m-d', 'm/d/Y', 'd/m/Y', 'j F Y'];
+                            return in_array($value, $valid_formats) ? true : __('Invalid date format selected.', 'sikshya');
+                        }
                     ],
                     [
                         'key' => 'time_format',
@@ -390,7 +498,12 @@ class SettingsManager
                         'options' => [
                             'g:i a' => date('g:i a'),
                             'H:i' => date('H:i')
-                        ]
+                        ],
+                        'sanitize_callback' => 'sanitize_text_field',
+                        'validate_callback' => function($value) {
+                            $valid_formats = ['g:i a', 'H:i'];
+                            return in_array($value, $valid_formats) ? true : __('Invalid time format selected.', 'sikshya');
+                        }
                     ]
                 ]
             ],
@@ -1599,5 +1712,30 @@ class SettingsManager
         }
         
         return $options;
+    }
+
+    /**
+     * Normalize value for comparison (handle type differences)
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private function normalizeValue($value): string
+    {
+        // Convert null to empty string
+        if ($value === null) {
+            return '';
+        }
+        
+        // Convert to string and trim
+        $normalized = (string) $value;
+        $normalized = trim($normalized);
+        
+        // Handle numeric values (convert "0" to "0", not empty)
+        if (is_numeric($value) && $value == 0) {
+            return '0';
+        }
+        
+        return $normalized;
     }
 }

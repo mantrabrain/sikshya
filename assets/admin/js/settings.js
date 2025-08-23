@@ -143,7 +143,6 @@
                 success: function(response) {
                     if (response.success) {
                         $content.html(response.data.content);
-                        SikshyaSettings.showNotification('Settings loaded successfully.', 'success');
                     } else {
                         $content.html(`
                             <div class="sikshya-error">
@@ -171,11 +170,18 @@
             e.preventDefault();
             
             const $form = $(this);
-            const $submitBtn = $form.find('.sikshya-save-settings');
-            const originalText = $submitBtn.html();
+            const $submitBtns = $('.sikshya-save-settings');
+            const originalTexts = [];
             
-            // Show loading state
-            $submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+            // Store original text for all save buttons
+            $submitBtns.each(function() {
+                originalTexts.push($(this).html());
+            });
+            
+            // Show loading state for all save buttons
+            $submitBtns.each(function() {
+                $(this).html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+            });
             
             // Collect form data
             const formData = new FormData($form[0]);
@@ -184,14 +190,11 @@
             formData.append('nonce', nonce);
             formData.append('tab', SikshyaSettings.currentTab);
             
-            // Convert FormData to object for settings
-            const settings = {};
+            // Debug: Log the form data being sent
+            console.log('Form data entries:');
             for (let [key, value] of formData.entries()) {
-                if (key !== 'action' && key !== 'nonce' && key !== 'current_tab') {
-                    settings[key] = value;
-                }
+                console.log(key + ': ' + value);
             }
-            formData.append('settings', JSON.stringify(settings));
             
             // Make AJAX request
             $.ajax({
@@ -207,10 +210,22 @@
                         // Reload tab content to show updated values
                         SikshyaSettings.loadTabContent(SikshyaSettings.currentTab);
                     } else {
+                        // Show general error message
                         SikshyaSettings.showNotification(response.data.message, 'error');
                         
-                        if (response.data.errors && response.data.errors.length > 0) {
-                            console.error('Settings errors:', response.data.errors);
+                        // Show field-specific errors if any
+                        if (response.data.field_errors && Object.keys(response.data.field_errors).length > 0) {
+                            console.error('Field errors:', response.data.field_errors);
+                            
+                            // Update form content with error states
+                            if (response.data.updated_content) {
+                                $('#sikshya-settings-content').html(response.data.updated_content);
+                            }
+                        }
+                        
+                        // Show general errors if any
+                        if (response.data.general_errors && response.data.general_errors.length > 0) {
+                            console.error('General errors:', response.data.general_errors);
                         }
                     }
                 },
@@ -218,8 +233,10 @@
                     SikshyaSettings.showNotification('Network error. Please try again.', 'error');
                 },
                 complete: function() {
-                    // Restore button state
-                    $submitBtn.html(originalText).prop('disabled', false);
+                    // Restore button state for all save buttons
+                    $submitBtns.each(function(index) {
+                        $(this).html(originalTexts[index]).prop('disabled', false);
+                    });
                 }
             });
         },
@@ -228,31 +245,40 @@
         handleResetSettings: function(e) {
             e.preventDefault();
             
-            if (!confirm('Are you sure you want to reset all settings for this tab to their default values? This action cannot be undone.')) {
-                return;
-            }
-            
-            const $btn = $(this);
+            // Show custom confirmation modal using our new modal system
+            SikshyaModal.confirm({
+                title: 'Reset All Settings',
+                message: 'Are you sure you want to reset ALL settings across ALL tabs to their default values?',
+                warning: 'This action will reset every setting in the entire plugin to its default value. This action cannot be undone.',
+                confirmText: 'Reset All Settings',
+                cancelText: 'Cancel',
+                confirmCallback: 'SikshyaSettings.executeResetAllSettings',
+                type: 'danger'
+            });
+        },
+
+        // Execute reset all settings (called by modal)
+        executeResetAllSettings: function() {
+            const $btn = $('.sikshya-reset-settings');
             const originalText = $btn.html();
             
             // Show loading state
-            $btn.html('<i class="fas fa-spinner fa-spin"></i> Resetting...').prop('disabled', true);
+            $btn.html('<i class="fas fa-spinner fa-spin"></i> Resetting All Settings...').prop('disabled', true);
             
-            // Make AJAX request
+            // Make AJAX request to reset all settings
             const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
             $.ajax({
                 url: sikshya_ajax.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'sikshya_reset_settings',
-                    tab: SikshyaSettings.currentTab,
                     nonce: nonce
                 },
                 success: function(response) {
                     if (response.success) {
                         SikshyaSettings.showNotification(response.data.message, 'success');
                         
-                        // Reload tab content to show reset values
+                        // Reload current tab content to show reset values
                         SikshyaSettings.loadTabContent(SikshyaSettings.currentTab);
                     } else {
                         SikshyaSettings.showNotification(response.data.message, 'error');
@@ -284,8 +310,31 @@
             window.history.replaceState({}, '', url);
         },
 
-        // Show notification
+        // Show notification using toast system
         showNotification: function(message, type = 'info') {
+            if (window.SikshyaToast) {
+                switch (type) {
+                    case 'success':
+                        SikshyaToast.successMessage(message);
+                        break;
+                    case 'error':
+                        SikshyaToast.errorMessage(message);
+                        break;
+                    case 'warning':
+                        SikshyaToast.warningMessage(message);
+                        break;
+                    default:
+                        SikshyaToast.infoMessage(message);
+                        break;
+                }
+            } else {
+                // Fallback to old notification system
+                this.showFallbackNotification(message, type);
+            }
+        },
+        
+        // Fallback notification system
+        showFallbackNotification: function(message, type = 'info') {
             // Remove existing notifications
             $('.sikshya-notification').remove();
             
