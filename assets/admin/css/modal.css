@@ -129,6 +129,24 @@
     background: #b91c1c;
 }
 
+.sikshya-modal-btn-warning {
+    background: #f59e0b;
+    color: #fff;
+}
+
+.sikshya-modal-btn-warning:hover {
+    background: #d97706;
+}
+
+.sikshya-modal-btn-info {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.sikshya-modal-btn-info:hover {
+    background: #2563eb;
+}
+
 .sikshya-modal-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;

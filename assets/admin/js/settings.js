@@ -244,6 +244,7 @@
         // Handle reset settings
         handleResetSettings: function(e) {
             e.preventDefault();
+            console.log('SikshyaSettings: Reset button clicked');
             
             // Show custom confirmation modal using our new modal system
             SikshyaModal.confirm({
@@ -252,13 +253,15 @@
                 warning: 'This action will reset every setting in the entire plugin to its default value. This action cannot be undone.',
                 confirmText: 'Reset All Settings',
                 cancelText: 'Cancel',
-                confirmCallback: 'SikshyaSettings.executeResetAllSettings',
+                confirmCallback: 'executeResetAllSettings',
                 type: 'danger'
             });
         },
 
         // Execute reset all settings (called by modal)
         executeResetAllSettings: function() {
+            console.log('SikshyaSettings: executeResetAllSettings called');
+            
             const $btn = $('.sikshya-reset-settings');
             const originalText = $btn.html();
             
@@ -267,6 +270,7 @@
             
             // Make AJAX request to reset all settings
             const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
+            console.log('SikshyaSettings: Making AJAX request with nonce:', nonce);
             $.ajax({
                 url: sikshya_ajax.ajax_url,
                 type: 'POST',
@@ -275,6 +279,7 @@
                     nonce: nonce
                 },
                 success: function(response) {
+                    console.log('SikshyaSettings: AJAX response:', response);
                     if (response.success) {
                         SikshyaSettings.showNotification(response.data.message, 'success');
                         
@@ -284,7 +289,8 @@
                         SikshyaSettings.showNotification(response.data.message, 'error');
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('SikshyaSettings: AJAX error:', {xhr, status, error});
                     SikshyaSettings.showNotification('Network error. Please try again.', 'error');
                 },
                 complete: function() {
@@ -399,5 +405,10 @@
     $(document).ready(function() {
         SikshyaSettings.init();
     });
+
+    // Make reset function globally accessible for modal callback
+    window.executeResetAllSettings = function() {
+        SikshyaSettings.executeResetAllSettings();
+    };
 
 })(jQuery); 
