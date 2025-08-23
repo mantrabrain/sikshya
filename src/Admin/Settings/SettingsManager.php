@@ -99,11 +99,11 @@ class SettingsManager
      */
     public function getSetting(string $key, $default = '')
     {
-        return get_option('_sikshya_' . $key, $default);
+        return get_option('sikshya_' . $key, $default);
     }
 
     /**
-     * Save setting with _sikshya_ prefix
+     * Save setting with sikshya_ prefix
      *
      * @param string $key
      * @param mixed $value
@@ -111,7 +111,7 @@ class SettingsManager
      */
     public function saveSetting(string $key, $value): bool
     {
-        return update_option('_sikshya_' . $key, $value);
+        return update_option('sikshya_' . $key, $value);
     }
 
     /**
@@ -163,25 +163,31 @@ class SettingsManager
      */
     protected function renderSection(array $section): string
     {
-        $output = '<div class="sikshya-settings-section">';
+        $output = '<div class="sikshya-settings-section">' . "\n";
         
         if (!empty($section['title'])) {
             $icon = $section['icon'] ?? 'fas fa-cog';
-            $output .= '<h3 class="sikshya-settings-section-title">';
-            $output .= '<i class="' . esc_attr($icon) . '"></i>';
-            $output .= esc_html($section['title']);
-            $output .= '</h3>';
+            $output .= '        <h3 class="sikshya-settings-section-title">' . "\n";
+            $output .= '            <i class="' . esc_attr($icon) . '"></i>' . "\n";
+            $output .= '            ' . esc_html($section['title']) . '        ' . "\n";
+            $output .= '        </h3>' . "\n";
         }
         
         if (!empty($section['fields'])) {
-            $output .= '<div class="sikshya-settings-grid">';
-            foreach ($section['fields'] as $field) {
+            $output .= '        ' . "\n";
+            $output .= '        <div class="sikshya-settings-grid">' . "\n";
+            $field_count = count($section['fields']);
+            foreach ($section['fields'] as $index => $field) {
                 $output .= $this->renderField($field);
+                // Add empty line between fields (except after the last field)
+                if ($index < $field_count - 1) {
+                    $output .= '            ' . "\n";
+                }
             }
-            $output .= '</div>';
+            $output .= '        </div>' . "\n";
         }
         
-        $output .= '</div>';
+        $output .= '    </div>';
         
         return $output;
     }
@@ -201,61 +207,52 @@ class SettingsManager
         $default = $field['default'] ?? '';
         $placeholder = $field['placeholder'] ?? '';
         $options = $field['options'] ?? [];
-        $required = $field['required'] ?? false;
         
         $current_value = $this->getSetting($key, $default);
         
-        $output = '<div class="sikshya-settings-field">';
+        $output = '            <div class="sikshya-settings-field">' . "\n";
         
         // Label
         if (!empty($label)) {
-            $required_mark = $required ? ' <span class="required">*</span>' : '';
-            $output .= '<label for="' . esc_attr($key) . '">' . esc_html($label) . $required_mark . '</label>';
+            $output .= '                <label for="' . esc_attr($key) . '">' . esc_html($label) . '</label>' . "\n";
         }
         
         // Field input
         switch ($type) {
             case 'textarea':
-                $output .= '<textarea id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" rows="3"';
+                $output .= '                <textarea id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" rows="3"';
                 if (!empty($placeholder)) {
                     $output .= ' placeholder="' . esc_attr($placeholder) . '"';
                 }
-                if ($required) {
-                    $output .= ' required';
-                }
-                $output .= '>' . esc_textarea($current_value) . '</textarea>';
+                $output .= '>' . esc_textarea($current_value) . '</textarea>' . "\n";
                 break;
                 
             case 'select':
-                $output .= '<select id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
-                if ($required) {
-                    $output .= ' required';
-                }
-                $output .= '>';
+                $output .= '                <select id="' . esc_attr($key) . '" name="' . esc_attr($key) . '">' . "\n";
                 foreach ($options as $option_value => $option_label) {
                     $selected = selected($current_value, $option_value, false);
-                    $output .= '<option value="' . esc_attr($option_value) . '"' . $selected . '>' . esc_html($option_label) . '</option>';
+                    $output .= '                    <option value="' . esc_attr($option_value) . '"' . $selected . '>' . esc_html($option_label) . '</option>' . "\n";
                 }
-                $output .= '</select>';
+                $output .= '                </select>' . "\n";
                 break;
                 
             case 'checkbox':
                 $checked = checked($current_value, '1', false);
-                $output .= '<input type="checkbox" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="1"' . $checked . '>';
+                $output .= '                <input type="checkbox" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '" value="1"' . $checked . '>' . "\n";
                 break;
                 
             case 'radio':
                 foreach ($options as $option_value => $option_label) {
                     $checked = checked($current_value, $option_value, false);
-                    $output .= '<label class="radio-label">';
-                    $output .= '<input type="radio" name="' . esc_attr($key) . '" value="' . esc_attr($option_value) . '"' . $checked . '>';
-                    $output .= '<span>' . esc_html($option_label) . '</span>';
-                    $output .= '</label>';
+                    $output .= '                <label class="radio-label">' . "\n";
+                    $output .= '                    <input type="radio" name="' . esc_attr($key) . '" value="' . esc_attr($option_value) . '"' . $checked . '>' . "\n";
+                    $output .= '                    <span>' . esc_html($option_label) . '</span>' . "\n";
+                    $output .= '                </label>' . "\n";
                 }
                 break;
                 
             case 'number':
-                $output .= '<input type="number" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= '                <input type="number" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
                 if (!empty($placeholder)) {
                     $output .= ' placeholder="' . esc_attr($placeholder) . '"';
@@ -266,31 +263,25 @@ class SettingsManager
                 if (isset($field['max'])) {
                     $output .= ' max="' . esc_attr($field['max']) . '"';
                 }
-                if ($required) {
-                    $output .= ' required';
-                }
-                $output .= '>';
+                $output .= '>' . "\n";
                 break;
                 
             default: // text
-                $output .= '<input type="text" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= '                <input type="text" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
                 if (!empty($placeholder)) {
                     $output .= ' placeholder="' . esc_attr($placeholder) . '"';
                 }
-                if ($required) {
-                    $output .= ' required';
-                }
-                $output .= '>';
+                $output .= '>' . "\n";
                 break;
         }
         
         // Description
         if (!empty($description)) {
-            $output .= '<p class="description">' . esc_html($description) . '</p>';
+            $output .= '                <p class="description">' . esc_html($description) . '</p>' . "\n";
         }
         
-        $output .= '</div>';
+        $output .= '            </div>' . "\n";
         
         return $output;
     }
