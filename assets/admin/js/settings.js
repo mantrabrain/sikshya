@@ -84,11 +84,48 @@
         loadTabContent: function(tab) {
             const $content = $('#sikshya-settings-content');
             
-            // Show loading state
+            // Show skeleton loading state
             $content.html(`
-                <div class="sikshya-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <span>${sikshya_ajax.loading_text || 'Loading settings...'}</span>
+                <div class="sikshya-skeleton-section">
+                    <div class="sikshya-skeleton-header">
+                        <div class="sikshya-skeleton-icon sikshya-skeleton"></div>
+                        <div class="sikshya-skeleton-title sikshya-skeleton"></div>
+                    </div>
+                    <div class="sikshya-skeleton-content">
+                        <div class="sikshya-skeleton-field">
+                            <div class="sikshya-skeleton-label sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-input sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-description sikshya-skeleton"></div>
+                        </div>
+                        <div class="sikshya-skeleton-field">
+                            <div class="sikshya-skeleton-label sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-input sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-description sikshya-skeleton"></div>
+                        </div>
+                        <div class="sikshya-skeleton-field">
+                            <div class="sikshya-skeleton-label sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-input sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-description sikshya-skeleton"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sikshya-skeleton-section">
+                    <div class="sikshya-skeleton-header">
+                        <div class="sikshya-skeleton-icon sikshya-skeleton"></div>
+                        <div class="sikshya-skeleton-title sikshya-skeleton"></div>
+                    </div>
+                    <div class="sikshya-skeleton-content">
+                        <div class="sikshya-skeleton-field">
+                            <div class="sikshya-skeleton-label sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-input sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-description sikshya-skeleton"></div>
+                        </div>
+                        <div class="sikshya-skeleton-field">
+                            <div class="sikshya-skeleton-label sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-input sikshya-skeleton"></div>
+                            <div class="sikshya-skeleton-description sikshya-skeleton"></div>
+                        </div>
+                    </div>
                 </div>
             `);
 

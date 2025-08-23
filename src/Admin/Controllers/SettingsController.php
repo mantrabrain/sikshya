@@ -44,47 +44,10 @@ class SettingsController
      */
     protected function initHooks(): void
     {
-        add_action('wp_ajax_sikshya_load_settings_tab', [$this, 'handleLoadSettingsTab']);
-        add_action('wp_ajax_sikshya_save_settings', [$this, 'handleSaveSettings']);
-        add_action('wp_ajax_sikshya_reset_settings', [$this, 'handleResetSettings']);
+        // AJAX actions are handled by SettingController to avoid conflicts
     }
 
-    /**
-     * Handle loading settings tab content via AJAX
-     */
-    public function handleLoadSettingsTab(): void
-    {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_settings_nonce')) {
-            wp_send_json_error(['message' => __('Security check failed.', 'sikshya')]);
-        }
 
-        // Check permissions
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => __('You do not have permission to access settings.', 'sikshya')]);
-        }
-
-        $tab = sanitize_text_field($_POST['tab'] ?? 'general');
-        
-        // Validate tab exists
-        $valid_tabs = array_keys($this->settingsManager->getAllSettings());
-        if (!in_array($tab, $valid_tabs)) {
-            wp_send_json_error(['message' => __('Invalid settings tab.', 'sikshya')]);
-        }
-
-        try {
-            $content = $this->settingsManager->renderTabSettings($tab);
-            wp_send_json_success([
-                'content' => $content,
-                'tab' => $tab
-            ]);
-        } catch (\Exception $e) {
-            wp_send_json_error([
-                'message' => __('Error loading settings content.', 'sikshya'),
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
 
     /**
      * Handle saving settings via AJAX

@@ -79,10 +79,8 @@ class Admin
         // Suppress PHP notices and warnings on Sikshya pages
         add_action('admin_init', [$this, 'suppressPHPNoticesOnSikshyaPages'], 1);
         
-        // Add AJAX handlers for settings
-        add_action('wp_ajax_sikshya_load_settings_tab', [$this->controllers['setting'], 'handleLoadSettingsTab']);
-        add_action('wp_ajax_sikshya_save_settings', [$this->controllers['setting'], 'handleSettingsSave']);
-        add_action('wp_ajax_sikshya_reset_settings', [$this->controllers['setting'], 'handleResetSettingsTab']);
+
+        
     }
 
     /**
