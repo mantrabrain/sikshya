@@ -92,11 +92,6 @@ final class Plugin
         add_action('admin_init', [$this, 'onAdminInit']);
         add_action('wp_enqueue_scripts', [$this, 'onEnqueueScripts']);
         add_action('admin_enqueue_scripts', [$this, 'onAdminEnqueueScripts']);
-        
-        // Ensure AJAX handlers are registered early
-        add_action('wp_ajax_nopriv_sikshya_save_course_builder', [$this, 'ensureAjaxHandlers']);
-        add_action('wp_ajax_sikshya_save_course_builder', [$this, 'ensureAjaxHandlers']);
-        add_action('wp_ajax_sikshya_save_settings', [$this, 'ensureAjaxHandlers']);
     }
 
     /**
@@ -201,6 +196,8 @@ final class Plugin
     {
         $this->services['assets']->enqueueAdminAssets();
     }
+
+
 
     /**
      * Load plugin textdomain

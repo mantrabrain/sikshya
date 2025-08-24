@@ -43,7 +43,7 @@ if (file_exists(SIKSHYA_PLUGIN_DIR . 'vendor/autoload.php')) {
 }
 
 // Initialize the plugin
-add_action('plugins_loaded', function() {
+function sikshya() {
     try {
         // Check requirements
         if (!\Sikshya\Core\Requirements::check()) {
@@ -62,7 +62,7 @@ add_action('plugins_loaded', function() {
             error_log('Sikshya LMS Initialization Error: ' . $e->getMessage());
         });
     }
-});
+}
 
 // Activation hook
 register_activation_hook(__FILE__, function() {
@@ -74,4 +74,7 @@ register_deactivation_hook(__FILE__, function() {
     \Sikshya\Core\Deactivator::deactivate();
 });
 
-// Uninstall hook is handled by uninstall.php file 
+// Uninstall hook is handled by uninstall.php file
+
+// Initialize the plugin
+sikshya(); 

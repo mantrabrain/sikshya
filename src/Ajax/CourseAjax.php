@@ -24,6 +24,7 @@ class CourseAjax extends AjaxAbstract
      */
     protected function initHooks(): void
     {
+        echo '<h1>Herllo World</h1>';
         error_log('Sikshya: CourseAjax initHooks called');
         
         // Course builder AJAX handlers
@@ -58,6 +59,10 @@ class CourseAjax extends AjaxAbstract
      */
     public function handleSaveCourseBuilder(): void
     {
+        die('die');
+        error_log('Sikshya: handleSaveCourseBuilder method called');
+        error_log('Sikshya: POST data: ' . print_r($_POST, true));
+        
         try {
             if (!$this->verifyNonce('sikshya_course_builder')) {
                 $this->sendError('Invalid nonce');

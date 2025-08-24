@@ -38,6 +38,9 @@ class SettingsAjax extends AjaxAbstract
      */
     public function handleSaveSettings(): void
     {
+        error_log('Sikshya: handleSaveSettings method called');
+        error_log('Sikshya: POST data: ' . print_r($_POST, true));
+        
         try {
             if (!$this->verifyNonce('sikshya_settings_nonce')) {
                 $this->sendError('Invalid nonce');
