@@ -4884,6 +4884,61 @@ body .sikshya-modal-overlay {
     }
 }
 
+/* Auto-save Status Indicator */
+.sikshya-auto-save-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #6c757d;
+    border: 1px solid #e9ecef;
+}
+
+.sikshya-auto-save-text {
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.sikshya-auto-save-text.saved {
+    color: #28a745;
+}
+
+.sikshya-auto-save-text.saving {
+    color: #007cba;
+}
+
+.sikshya-auto-save-text.error {
+    color: #dc3545;
+}
+
+.sikshya-auto-save-toggle {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.sikshya-auto-save-toggle:hover {
+    background-color: #e9ecef;
+}
+
+/* Field Error Styles */
+.sikshya-form-row.has-error {
+    border-color: #dc3545;
+}
+
+.sikshya-field-error {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
 
 
 

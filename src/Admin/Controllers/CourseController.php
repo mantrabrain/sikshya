@@ -56,6 +56,15 @@ class CourseController extends BaseView
         add_action('wp_ajax_sikshya_create_chapter', [$this, 'handleCreateChapter']);
         add_action('wp_ajax_sikshya_create_content', [$this, 'handleCreateContent']);
         add_action('wp_ajax_sikshya_test_ajax', [$this, 'handleTestAjax']);
+        
+        // Dynamic course builder AJAX handlers
+        add_action('wp_ajax_sikshya_save_course_builder', [$this, 'handleSaveCourseBuilder']);
+        add_action('wp_ajax_sikshya_load_course_data', [$this, 'handleLoadCourseData']);
+        add_action('wp_ajax_sikshya_save_chapter_order', [$this, 'handleSaveChapterOrder']);
+        add_action('wp_ajax_sikshya_save_lesson_order', [$this, 'handleSaveLessonOrder']);
+        add_action('wp_ajax_sikshya_save_content_type', [$this, 'handleSaveContentType']);
+        add_action('wp_ajax_sikshya_load_content_type_form', [$this, 'handleLoadContentTypeForm']);
+        add_action('wp_ajax_sikshya_validate_course_field', [$this, 'handleValidateCourseField']);
     }
 
     /**
@@ -87,8 +96,17 @@ class CourseController extends BaseView
             true
         );
 
+        // Enqueue dynamic course builder save script
+        wp_enqueue_script(
+            'sikshya-course-builder-save',
+            SIKSHYA_PLUGIN_URL . 'assets/admin/js/course-builder-save.js',
+            ['jquery'],
+            SIKSHYA_VERSION,
+            true
+        );
+
         // Localize script with AJAX data
-        wp_localize_script('sikshya-course-builder', 'sikshya_ajax', [
+        wp_localize_script('sikshya-course-builder-save', 'sikshya_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('sikshya_course_builder'),
             'debug' => true,
@@ -206,19 +224,17 @@ class CourseController extends BaseView
             // Get the active tab from URL parameter
             $active_tab = sanitize_text_field($_GET['tab'] ?? 'course');
             
-            // Validate tab parameter - only allow specific tabs
-            $valid_tabs = ['course', 'pricing', 'curriculum', 'settings'];
-            if (!in_array($active_tab, $valid_tabs)) {
-                $active_tab = 'course'; // Default to course tab
-            }
+            // Get course ID from URL parameter
+            $course_id = (int) ($_GET['course_id'] ?? 0);
             
             // Enqueue course builder assets
             $this->enqueueCourseBuilderAssets();
             
-            // Render the course builder template
-            $this->render('course-builder', [
+            // Render the dynamic course builder template
+            $this->render('course-builder-dynamic', [
                 'plugin' => $this->plugin,
                 'active_tab' => $active_tab,
+                'course_id' => $course_id,
             ]);
             
             error_log('Sikshya: Finished rendering course builder page');
@@ -764,6 +780,292 @@ class CourseController extends BaseView
         } catch (\Exception $e) {
             error_log('Sikshya Create Content Error: ' . $e->getMessage());
             wp_send_json_error('Failed to create content: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle save course builder AJAX request
+     */
+    public function handleSaveCourseBuilder(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $data = $_POST['data'] ?? [];
+            $course_id = (int) ($data['course_id'] ?? 0);
+            
+            // Initialize course builder manager
+            $course_builder_manager = new \Sikshya\Admin\CourseBuilder\CourseBuilderManager($this->plugin);
+            
+            // Validate data
+            $errors = $course_builder_manager->validateAllTabs($data);
+            if (!empty($errors)) {
+                wp_send_json_error(['message' => 'Validation failed', 'errors' => $errors]);
+                return;
+            }
+            
+            // Create course if it doesn't exist
+            if ($course_id === 0) {
+                $course_id = wp_insert_post([
+                    'post_title' => $data['title'] ?? 'New Course',
+                    'post_content' => $data['description'] ?? '',
+                    'post_type' => 'sikshya_course',
+                    'post_status' => 'draft',
+                ]);
+                
+                if (is_wp_error($course_id)) {
+                    wp_send_json_error(['message' => 'Failed to create course']);
+                    return;
+                }
+            }
+            
+            // Save all tab data
+            $save_errors = $course_builder_manager->saveAllTabs($data, $course_id);
+            if (!empty($save_errors)) {
+                wp_send_json_error(['message' => 'Failed to save some data', 'errors' => $save_errors]);
+                return;
+            }
+            
+            wp_send_json_success([
+                'message' => 'Course saved successfully',
+                'course_id' => $course_id
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Save Course Builder Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Failed to save course: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Handle load course data AJAX request
+     */
+    public function handleLoadCourseData(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $course_id = (int) ($_POST['course_id'] ?? 0);
+            
+            if ($course_id === 0) {
+                wp_send_json_error(['message' => 'Invalid course ID']);
+                return;
+            }
+            
+            // Initialize course builder manager
+            $course_builder_manager = new \Sikshya\Admin\CourseBuilder\CourseBuilderManager($this->plugin);
+            
+            // Load all tab data
+            $data = $course_builder_manager->loadAllTabs($course_id);
+            
+            wp_send_json_success(['data' => $data]);
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Load Course Data Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Failed to load course data: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Handle save chapter order AJAX request
+     */
+    public function handleSaveChapterOrder(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $course_id = (int) ($_POST['course_id'] ?? 0);
+            $chapter_order = $_POST['chapter_order'] ?? [];
+            
+            if ($course_id === 0) {
+                wp_send_json_error(['message' => 'Invalid course ID']);
+                return;
+            }
+            
+            // Save chapter order to course meta
+            update_post_meta($course_id, '_sikshya_chapter_order', $chapter_order);
+            
+            wp_send_json_success(['message' => 'Chapter order saved successfully']);
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Save Chapter Order Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Failed to save chapter order: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Handle save lesson order AJAX request
+     */
+    public function handleSaveLessonOrder(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $chapter_id = (int) ($_POST['chapter_id'] ?? 0);
+            $lesson_order = $_POST['lesson_order'] ?? [];
+            
+            if ($chapter_id === 0) {
+                wp_send_json_error(['message' => 'Invalid chapter ID']);
+                return;
+            }
+            
+            // Save lesson order to chapter meta
+            update_post_meta($chapter_id, '_sikshya_lesson_order', $lesson_order);
+            
+            wp_send_json_success(['message' => 'Lesson order saved successfully']);
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Save Lesson Order Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Failed to save lesson order: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Handle save content type AJAX request
+     */
+    public function handleSaveContentType(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $item_id = (int) ($_POST['item_id'] ?? 0);
+            $data = $_POST['data'] ?? [];
+            
+            if ($item_id === 0) {
+                wp_send_json_error(['message' => 'Invalid item ID']);
+                return;
+            }
+            
+            // Save content type data
+            foreach ($data as $key => $value) {
+                update_post_meta($item_id, '_sikshya_' . $key, $value);
+            }
+            
+            wp_send_json_success(['message' => 'Content saved successfully']);
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Save Content Type Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Failed to save content: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Handle load content type form AJAX request
+     */
+    public function handleLoadContentTypeForm(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $content_type = sanitize_text_field($_POST['content_type'] ?? '');
+            
+            if (empty($content_type)) {
+                wp_send_json_error(['message' => 'Content type is required']);
+                return;
+            }
+            
+            // Load content type form template
+            $args = [
+                'content_type' => $content_type,
+                'item_id' => $_POST['item_id'] ?? '',
+            ];
+            
+            ob_start();
+            $this->render('courses/content-type-form', $args);
+            $html = ob_get_clean();
+            
+            wp_send_json_success(['html' => $html]);
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Load Content Type Form Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Failed to load form: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Handle validate course field AJAX request
+     */
+    public function handleValidateCourseField(): void
+    {
+        try {
+            check_ajax_referer('sikshya_course_builder', 'nonce');
+            
+            if (!current_user_can('edit_posts')) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $field_name = sanitize_text_field($_POST['field_name'] ?? '');
+            $field_value = $_POST['field_value'] ?? '';
+            $field_type = sanitize_text_field($_POST['field_type'] ?? 'text');
+            
+            if (empty($field_name)) {
+                wp_send_json_error(['message' => 'Field name is required']);
+                return;
+            }
+            
+            // Basic validation based on field type
+            $error = '';
+            
+            switch ($field_type) {
+                case 'email':
+                    if (!empty($field_value) && !is_email($field_value)) {
+                        $error = 'Please enter a valid email address.';
+                    }
+                    break;
+                    
+                case 'url':
+                    if (!empty($field_value) && !filter_var($field_value, FILTER_VALIDATE_URL)) {
+                        $error = 'Please enter a valid URL.';
+                    }
+                    break;
+                    
+                case 'number':
+                    if (!empty($field_value) && !is_numeric($field_value)) {
+                        $error = 'Please enter a valid number.';
+                    }
+                    break;
+            }
+            
+            if (!empty($error)) {
+                wp_send_json_error(['message' => $error]);
+            } else {
+                wp_send_json_success(['message' => 'Field is valid']);
+            }
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya Validate Course Field Error: ' . $e->getMessage());
+            wp_send_json_error(['message' => 'Validation failed: ' . $e->getMessage()]);
         }
     }
 } 
