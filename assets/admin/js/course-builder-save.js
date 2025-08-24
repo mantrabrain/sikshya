@@ -15,7 +15,6 @@
          */
         init: function() {
             this.bindEvents();
-            this.initAutoSave();
             this.loadExistingData();
         },
 
@@ -26,30 +25,8 @@
             // Form submission
             $('#sikshya-course-builder-form').on('submit', this.handleFormSubmit.bind(this));
             
-            // Field changes for auto-save
-            $('#sikshya-course-builder-form').on('change', 'input, select, textarea', this.handleFieldChange.bind(this));
-            
             // Tab switching
             $(document).on('click', '.sikshya-nav-link', this.handleTabSwitch.bind(this));
-            
-            // Auto-save toggle
-            $(document).on('click', '.sikshya-auto-save-toggle', this.toggleAutoSave.bind(this));
-        },
-
-        /**
-         * Handle field changes for auto-save
-         */
-        handleFieldChange: function(e) {
-            const field = $(e.target);
-            const fieldName = field.attr('name');
-            
-            if (!fieldName) return;
-            
-            // Update save status
-            this.updateSaveStatus('unsaved');
-            
-            // Schedule auto-save
-            this.scheduleAutoSave();
         },
 
         /**
@@ -152,9 +129,6 @@
          * Handle successful save
          */
         handleSaveSuccess: function(response) {
-            this.updateSaveStatus('saved');
-            this.updateLastSavedTime();
-            
             if (response.course_id) {
                 this.updateCourseIdInForm(response.course_id);
             }
@@ -166,98 +140,7 @@
          * Handle save error
          */
         handleSaveError: function(response) {
-            this.updateSaveStatus('error');
             this.showNotification('error', response.message || 'Failed to save course');
-        },
-
-        /**
-         * Initialize auto-save functionality
-         */
-        initAutoSave: function() {
-            this.autoSaveEnabled = true;
-            this.autoSaveInterval = null;
-            this.autoSaveDelay = 3000; // 3 seconds
-            
-            // Create auto-save status indicator
-            this.createAutoSaveIndicator();
-        },
-
-        /**
-         * Create auto-save status indicator
-         */
-        createAutoSaveIndicator: function() {
-            const indicator = $(`
-                <div class="sikshya-auto-save-status">
-                    <span class="sikshya-auto-save-text">All changes saved</span>
-                    <button class="sikshya-auto-save-toggle" title="Toggle auto-save">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </button>
-                </div>
-            `);
-            
-            $('.sikshya-header-actions').append(indicator);
-        },
-
-        /**
-         * Start auto-save timer
-         */
-        startAutoSave: function() {
-            this.stopAutoSave();
-            
-            if (this.autoSaveEnabled) {
-                this.autoSaveInterval = setTimeout(function() {
-                    this.performAutoSave();
-                }.bind(this), this.autoSaveDelay);
-            }
-        },
-
-        /**
-         * Stop auto-save timer
-         */
-        stopAutoSave: function() {
-            if (this.autoSaveInterval) {
-                clearTimeout(this.autoSaveInterval);
-                this.autoSaveInterval = null;
-            }
-        },
-
-        /**
-         * Toggle auto-save
-         */
-        toggleAutoSave: function() {
-            this.autoSaveEnabled = !this.autoSaveEnabled;
-            
-            if (this.autoSaveEnabled) {
-                this.showNotification('info', 'Auto-save enabled');
-            } else {
-                this.showNotification('info', 'Auto-save disabled');
-            }
-        },
-
-        /**
-         * Schedule auto-save
-         */
-        scheduleAutoSave: function() {
-            this.updateSaveStatus('saving');
-            this.startAutoSave();
-        },
-
-        /**
-         * Perform auto-save
-         */
-        performAutoSave: function() {
-            const formData = this.collectFormData();
-            
-            this.saveData(formData, function(success, response) {
-                if (success) {
-                    this.updateSaveStatus('saved');
-                    this.updateLastSavedTime();
-                } else {
-                    this.updateSaveStatus('error');
-                }
-            }.bind(this));
         },
 
         /**
@@ -372,42 +255,6 @@
         },
 
         /**
-         * Update save status
-         */
-        updateSaveStatus: function(status) {
-            const statusElement = $('.sikshya-auto-save-text');
-            
-            switch (status) {
-                case 'saved':
-                    statusElement.text('All changes saved');
-                    statusElement.removeClass('saving error').addClass('saved');
-                    break;
-                case 'saving':
-                    statusElement.text('Saving...');
-                    statusElement.removeClass('saved error').addClass('saving');
-                    break;
-                case 'unsaved':
-                    statusElement.text('Unsaved changes');
-                    statusElement.removeClass('saved saving').addClass('error');
-                    break;
-                case 'error':
-                    statusElement.text('Save failed');
-                    statusElement.removeClass('saved saving').addClass('error');
-                    break;
-            }
-        },
-
-        /**
-         * Update last saved time
-         */
-        updateLastSavedTime: function() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            
-            $('.sikshya-auto-save-text').attr('title', `Last saved: ${timeString}`);
-        },
-
-        /**
          * Update course ID in form
          */
         updateCourseIdInForm: function(courseId) {
@@ -428,7 +275,22 @@
          */
         showNotification: function(type, message) {
             if (window.SikshyaToast) {
-                window.SikshyaToast[type](message);
+                switch(type) {
+                    case 'success':
+                        window.SikshyaToast.successMessage(message);
+                        break;
+                    case 'error':
+                        window.SikshyaToast.errorMessage(message);
+                        break;
+                    case 'warning':
+                        window.SikshyaToast.warningMessage(message);
+                        break;
+                    case 'info':
+                        window.SikshyaToast.infoMessage(message);
+                        break;
+                    default:
+                        window.SikshyaToast.infoMessage(message);
+                }
             } else {
                 // Fallback to alert
                 alert(message);

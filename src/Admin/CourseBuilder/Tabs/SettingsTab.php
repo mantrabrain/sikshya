@@ -174,75 +174,193 @@ class SettingsTab extends AbstractTab
         <div class="sikshya-section">
             <h3 class="sikshya-section-title"><?php _e('Course Visibility', 'sikshya'); ?></h3>
             
-            <?php echo $this->renderField('course_status', $this->getFields()['course_status'], $data['course_status'] ?? ''); ?>
-            
-            <div class="sikshya-form-row" id="password-field" style="display: none;">
-                <?php echo $this->renderField('course_password', $this->getFields()['course_password'], $data['course_password'] ?? ''); ?>
+            <div class="sikshya-form-row">
+                <label><?php _e('Course Status', 'sikshya'); ?></label>
+                <select name="course_status" onchange="togglePasswordField(this)">
+                    <option value="draft" <?php selected($data['course_status'] ?? 'draft', 'draft'); ?>><?php _e('Draft', 'sikshya'); ?></option>
+                    <option value="published" <?php selected($data['course_status'] ?? '', 'published'); ?>><?php _e('Published', 'sikshya'); ?></option>
+                    <option value="private" <?php selected($data['course_status'] ?? '', 'private'); ?>><?php _e('Private', 'sikshya'); ?></option>
+                    <option value="password_protected" <?php selected($data['course_status'] ?? '', 'password_protected'); ?>><?php _e('Password Protected', 'sikshya'); ?></option>
+                </select>
             </div>
             
-            <?php echo $this->renderField('featured_course', $this->getFields()['featured_course'], $data['featured_course'] ?? ''); ?>
+            <div class="sikshya-form-row" id="password-field" style="display: none;">
+                <label><?php _e('Course Password', 'sikshya'); ?></label>
+                <input type="password" name="course_password" value="<?php echo esc_attr($data['course_password'] ?? ''); ?>" placeholder="<?php _e('Enter course password', 'sikshya'); ?>">
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label class="sikshya-checkbox-label">
+                    <input type="checkbox" name="featured_course" class="sikshya-checkbox" <?php checked($data['featured_course'] ?? '', '1'); ?>>
+                    <?php _e('Mark as Featured Course', 'sikshya'); ?>
+                </label>
+                <p class="sikshya-help-text"><?php _e('Featured courses appear prominently on your site', 'sikshya'); ?></p>
+            </div>
         </div>
 
         <div class="sikshya-section">
             <h3 class="sikshya-section-title"><?php _e('Discussion & Community', 'sikshya'); ?></h3>
             
-            <?php echo $this->renderField('enable_discussions', $this->getFields()['enable_discussions'], $data['enable_discussions'] ?? ''); ?>
-            <?php echo $this->renderField('enable_qa', $this->getFields()['enable_qa'], $data['enable_qa'] ?? ''); ?>
-            <?php echo $this->renderField('enable_reviews', $this->getFields()['enable_reviews'], $data['enable_reviews'] ?? ''); ?>
+            <div class="sikshya-form-grid">
+                <div class="sikshya-form-row">
+                    <label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="enable_discussions" class="sikshya-checkbox" <?php checked($data['enable_discussions'] ?? '1', '1'); ?>>
+                        <?php _e('Enable Course Discussions', 'sikshya'); ?>
+                    </label>
+                    <p class="sikshya-help-text"><?php _e('Allow students to ask questions and discuss topics', 'sikshya'); ?></p>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="enable_qa" class="sikshya-checkbox" <?php checked($data['enable_qa'] ?? '', '1'); ?>>
+                        <?php _e('Enable Q&A Section', 'sikshya'); ?>
+                    </label>
+                    <p class="sikshya-help-text"><?php _e('Dedicated section for course-related questions', 'sikshya'); ?></p>
+                </div>
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label class="sikshya-checkbox-label">
+                    <input type="checkbox" name="enable_reviews" class="sikshya-checkbox" <?php checked($data['enable_reviews'] ?? '', '1'); ?>>
+                    <?php _e('Allow Course Reviews', 'sikshya'); ?>
+                </label>
+                <p class="sikshya-help-text"><?php _e('Students can rate and review the course', 'sikshya'); ?></p>
+            </div>
         </div>
 
         <div class="sikshya-section">
             <h3 class="sikshya-section-title"><?php _e('Certificates & Completion', 'sikshya'); ?></h3>
             
-            <?php echo $this->renderField('enable_certificate', $this->getFields()['enable_certificate'], $data['enable_certificate'] ?? ''); ?>
+            <div class="sikshya-form-row">
+                <label class="sikshya-checkbox-label">
+                    <input type="checkbox" name="enable_certificate" class="sikshya-checkbox" <?php checked($data['enable_certificate'] ?? '', '1'); ?> onchange="toggleCertificateSettings(this)">
+                    <?php _e('Enable Course Completion Certificate', 'sikshya'); ?>
+                </label>
+                <p class="sikshya-help-text"><?php _e('Award certificate when students complete the course', 'sikshya'); ?></p>
+            </div>
             
             <div class="sikshya-form-grid" id="certificate-settings" style="display: none;">
-                <?php echo $this->renderField('certificate_template', $this->getFields()['certificate_template'], $data['certificate_template'] ?? ''); ?>
-                <?php echo $this->renderField('completion_threshold', $this->getFields()['completion_threshold'], $data['completion_threshold'] ?? ''); ?>
+                <div class="sikshya-form-row">
+                    <label><?php _e('Certificate Template', 'sikshya'); ?></label>
+                    <select name="certificate_template">
+                        <option value="default" <?php selected($data['certificate_template'] ?? 'default', 'default'); ?>><?php _e('Default Template', 'sikshya'); ?></option>
+                        <option value="modern" <?php selected($data['certificate_template'] ?? '', 'modern'); ?>><?php _e('Modern Template', 'sikshya'); ?></option>
+                        <option value="classic" <?php selected($data['certificate_template'] ?? '', 'classic'); ?>><?php _e('Classic Template', 'sikshya'); ?></option>
+                        <option value="custom" <?php selected($data['certificate_template'] ?? '', 'custom'); ?>><?php _e('Custom Template', 'sikshya'); ?></option>
+                    </select>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label><?php _e('Completion Threshold (%)', 'sikshya'); ?></label>
+                    <input type="number" name="completion_threshold" value="<?php echo esc_attr($data['completion_threshold'] ?? '100'); ?>" min="50" max="100">
+                </div>
             </div>
         </div>
 
         <div class="sikshya-section">
-            <h3 class="sikshya-section-title"><?php _e('SEO & Meta', 'sikshya'); ?></h3>
+            <h3 class="sikshya-section-title"><?php _e('SEO & Metadata', 'sikshya'); ?></h3>
             
-            <?php echo $this->renderField('seo_title', $this->getFields()['seo_title'], $data['seo_title'] ?? ''); ?>
-            <?php echo $this->renderField('seo_description', $this->getFields()['seo_description'], $data['seo_description'] ?? ''); ?>
-            <?php echo $this->renderField('seo_keywords', $this->getFields()['seo_keywords'], $data['seo_keywords'] ?? ''); ?>
+            <div class="sikshya-form-grid">
+                <div class="sikshya-form-row">
+                    <label><?php _e('SEO Title', 'sikshya'); ?></label>
+                    <input type="text" name="seo_title" value="<?php echo esc_attr($data['seo_title'] ?? ''); ?>" placeholder="<?php _e('Optimized title for search engines', 'sikshya'); ?>">
+                    <p class="sikshya-help-text"><?php _e('Leave empty to use course title', 'sikshya'); ?></p>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label><?php _e('Focus Keywords', 'sikshya'); ?></label>
+                    <input type="text" name="focus_keywords" value="<?php echo esc_attr($data['focus_keywords'] ?? ''); ?>" placeholder="<?php _e('keyword1, keyword2, keyword3', 'sikshya'); ?>">
+                    <p class="sikshya-help-text"><?php _e('Comma-separated keywords for SEO', 'sikshya'); ?></p>
+                </div>
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label><?php _e('Meta Description', 'sikshya'); ?></label>
+                <textarea name="meta_description" placeholder="<?php _e('Brief description for search engine results (155 characters max)', 'sikshya'); ?>" maxlength="155"><?php echo esc_textarea($data['meta_description'] ?? ''); ?></textarea>
+                <p class="sikshya-help-text"><?php _e('Recommended: 150-155 characters', 'sikshya'); ?></p>
+            </div>
+        </div>
+
+        <div class="sikshya-section">
+            <h3 class="sikshya-section-title"><?php _e('Advanced Settings', 'sikshya'); ?></h3>
+            
+            <div class="sikshya-form-grid">
+                <div class="sikshya-form-row">
+                    <label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="enable_progress_tracking" class="sikshya-checkbox" <?php checked($data['enable_progress_tracking'] ?? '1', '1'); ?>>
+                        <?php _e('Track Student Progress', 'sikshya'); ?>
+                    </label>
+                    <p class="sikshya-help-text"><?php _e('Monitor how students progress through the course', 'sikshya'); ?></p>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="enable_analytics" class="sikshya-checkbox" <?php checked($data['enable_analytics'] ?? '', '1'); ?>>
+                        <?php _e('Enable Course Analytics', 'sikshya'); ?>
+                    </label>
+                    <p class="sikshya-help-text"><?php _e('Detailed analytics and reporting for this course', 'sikshya'); ?></p>
+                </div>
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label class="sikshya-checkbox-label">
+                    <input type="checkbox" name="enable_offline_access" class="sikshya-checkbox" <?php checked($data['enable_offline_access'] ?? '', '1'); ?>>
+                    <?php _e('Allow Offline Access', 'sikshya'); ?>
+                </label>
+                <p class="sikshya-help-text"><?php _e('Students can download content for offline viewing', 'sikshya'); ?></p>
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label><?php _e('Course Expiry', 'sikshya'); ?></label>
+                <select name="course_expiry_type">
+                    <option value="never" <?php selected($data['course_expiry_type'] ?? 'never', 'never'); ?>><?php _e('Never Expires', 'sikshya'); ?></option>
+                    <option value="fixed_date" <?php selected($data['course_expiry_type'] ?? '', 'fixed_date'); ?>><?php _e('Fixed Date', 'sikshya'); ?></option>
+                    <option value="relative" <?php selected($data['course_expiry_type'] ?? '', 'relative'); ?>><?php _e('Relative to Enrollment', 'sikshya'); ?></option>
+                </select>
+            </div>
+            
+            <div class="sikshya-form-row" id="expiry-date-field" style="display: none;">
+                <label><?php _e('Expiry Date', 'sikshya'); ?></label>
+                <input type="date" name="expiry_date" value="<?php echo esc_attr($data['expiry_date'] ?? ''); ?>">
+            </div>
+            
+            <div class="sikshya-form-row" id="expiry-duration-field" style="display: none;">
+                <label><?php _e('Access Duration (Days)', 'sikshya'); ?></label>
+                <input type="number" name="access_duration" value="<?php echo esc_attr($data['access_duration'] ?? ''); ?>" placeholder="365" min="1">
+            </div>
+        </div>
+
+        <div class="sikshya-section">
+            <h3 class="sikshya-section-title"><?php _e('Notifications', 'sikshya'); ?></h3>
+            
+            <div class="sikshya-form-grid">
+                <div class="sikshya-form-row">
+                    <label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="notify_enrollment" class="sikshya-checkbox" <?php checked($data['notify_enrollment'] ?? '1', '1'); ?>>
+                        <?php _e('Email on New Enrollment', 'sikshya'); ?>
+                    </label>
+                    <p class="sikshya-help-text"><?php _e('Get notified when someone enrolls in this course', 'sikshya'); ?></p>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="notify_completion" class="sikshya-checkbox" <?php checked($data['notify_completion'] ?? '', '1'); ?>>
+                        <?php _e('Email on Course Completion', 'sikshya'); ?>
+                    </label>
+                    <p class="sikshya-help-text"><?php _e('Get notified when someone completes this course', 'sikshya'); ?></p>
+                </div>
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label class="sikshya-checkbox-label">
+                    <input type="checkbox" name="send_welcome_email" class="sikshya-checkbox" <?php checked($data['send_welcome_email'] ?? '1', '1'); ?>>
+                    <?php _e('Send Welcome Email to Students', 'sikshya'); ?>
+                </label>
+                <p class="sikshya-help-text"><?php _e('Automatically send welcome email upon enrollment', 'sikshya'); ?></p>
+            </div>
         </div>
         <?php
         return ob_get_clean();
     }
     
-    /**
-     * Override renderField to handle conditional fields
-     * 
-     * @param string $field_id
-     * @param array $field_config
-     * @param mixed $value
-     * @return string
-     */
-    protected function renderField(string $field_id, array $field_config, $value = ''): string
-    {
-        $field_html = parent::renderField($field_id, $field_config, $value);
-        
-        // Add conditional logic for course status
-        if ($field_id === 'course_status') {
-            $field_html = str_replace(
-                '<select name="course_status"',
-                '<select name="course_status" onchange="togglePasswordField(this)"',
-                $field_html
-            );
-        }
-        
-        // Add conditional logic for certificate settings
-        if ($field_id === 'enable_certificate') {
-            $field_html = str_replace(
-                '<input type="checkbox" name="enable_certificate"',
-                '<input type="checkbox" name="enable_certificate" onchange="toggleCertificateSettings(this)"',
-                $field_html
-            );
-        }
-        
-        return $field_html;
-    }
 }

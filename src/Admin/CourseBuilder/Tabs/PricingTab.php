@@ -84,23 +84,21 @@ class PricingTab extends AbstractTab
                     'subscription' => __('Subscription Only', 'sikshya'),
                 ],
                 'default' => 'paid',
-                'description' => __('Choose how your course will be monetized', 'sikshya'),
             ],
             'price' => [
                 'type' => 'number',
                 'label' => __('Course Price', 'sikshya'),
                 'placeholder' => '99.99',
-                'step' => 0.01,
-                'min' => 0,
-                'description' => __('Regular price of the course', 'sikshya'),
+                'step' => '0.01',
+                'min' => '0',
+                'required' => true,
             ],
             'sale_price' => [
                 'type' => 'number',
                 'label' => __('Discount Price', 'sikshya'),
                 'placeholder' => '79.99',
-                'step' => 0.01,
-                'min' => 0,
-                'description' => __('Sale price when discounted', 'sikshya'),
+                'step' => '0.01',
+                'min' => '0',
             ],
             'enrollment_status' => [
                 'type' => 'select',
@@ -111,32 +109,52 @@ class PricingTab extends AbstractTab
                     'invite_only' => __('Invite Only', 'sikshya'),
                 ],
                 'default' => 'open',
-                'description' => __('Control who can enroll in the course', 'sikshya'),
             ],
             'max_students' => [
                 'type' => 'number',
                 'label' => __('Maximum Students', 'sikshya'),
                 'placeholder' => '100',
-                'min' => 1,
-                'description' => __('Leave empty for unlimited enrollment', 'sikshya'),
+                'min' => '1',
             ],
             'course_duration' => [
                 'type' => 'number',
                 'label' => __('Course Duration (Days)', 'sikshya'),
                 'placeholder' => '90',
-                'min' => 1,
-                'description' => __('How long students have access', 'sikshya'),
+                'min' => '1',
             ],
             'prerequisites' => [
-                'type' => 'textarea',
+                'type' => 'repeater',
                 'label' => __('Prerequisites', 'sikshya'),
-                'placeholder' => __('What should students know before taking this course?', 'sikshya'),
-                'description' => __('List any requirements or prior knowledge needed', 'sikshya'),
+                'placeholder' => __('Basic knowledge of...', 'sikshya'),
             ],
-            'certificate_enabled' => [
+            'requirements' => [
+                'type' => 'repeater',
+                'label' => __('Course Requirements', 'sikshya'),
+                'placeholder' => __('Computer with internet access', 'sikshya'),
+            ],
+            'enable_drip' => [
                 'type' => 'checkbox',
-                'label' => __('Enable Certificate', 'sikshya'),
-                'description' => __('Allow students to earn a certificate upon completion', 'sikshya'),
+                'label' => __('Enable Drip Content', 'sikshya'),
+            ],
+            'drip_type' => [
+                'type' => 'select',
+                'label' => __('Drip Type', 'sikshya'),
+                'options' => [
+                    'interval' => __('Time Interval', 'sikshya'),
+                    'completion' => __('After Completion', 'sikshya'),
+                    'specific_date' => __('Specific Dates', 'sikshya'),
+                ],
+                'default' => 'interval',
+            ],
+            'drip_interval' => [
+                'type' => 'number',
+                'label' => __('Drip Interval (Days)', 'sikshya'),
+                'placeholder' => '7',
+                'min' => '1',
+            ],
+            'enable_certificate' => [
+                'type' => 'checkbox',
+                'label' => __('Enable Course Completion Certificate', 'sikshya'),
             ],
             'certificate_template' => [
                 'type' => 'select',
@@ -145,9 +163,9 @@ class PricingTab extends AbstractTab
                     'default' => __('Default Template', 'sikshya'),
                     'modern' => __('Modern Template', 'sikshya'),
                     'classic' => __('Classic Template', 'sikshya'),
+                    'custom' => __('Custom Template', 'sikshya'),
                 ],
                 'default' => 'default',
-                'description' => __('Choose the certificate design', 'sikshya'),
             ],
         ];
     }
@@ -175,11 +193,25 @@ class PricingTab extends AbstractTab
                 </div>
             </div>
             
-            <?php echo $this->renderField('course_type', $this->getFields()['course_type'], $data['course_type'] ?? ''); ?>
+            <div class="sikshya-form-row">
+                <label><?php _e('Course Type', 'sikshya'); ?></label>
+                <select name="course_type" onchange="togglePricing(this)">
+                    <option value="free" <?php selected($data['course_type'] ?? '', 'free'); ?>><?php _e('Free Course', 'sikshya'); ?></option>
+                    <option value="paid" <?php selected($data['course_type'] ?? 'paid', 'paid'); ?>><?php _e('Paid Course', 'sikshya'); ?></option>
+                    <option value="subscription" <?php selected($data['course_type'] ?? '', 'subscription'); ?>><?php _e('Subscription Only', 'sikshya'); ?></option>
+                </select>
+            </div>
 
             <div class="sikshya-form-grid" id="pricing-fields">
-                <?php echo $this->renderField('price', $this->getFields()['price'], $data['price'] ?? ''); ?>
-                <?php echo $this->renderField('sale_price', $this->getFields()['sale_price'], $data['sale_price'] ?? ''); ?>
+                <div class="sikshya-form-row">
+                    <label><?php _e('Course Price', 'sikshya'); ?> *</label>
+                    <input type="number" name="price" value="<?php echo esc_attr($data['price'] ?? ''); ?>" placeholder="99.99" step="0.01" min="0">
+                </div>
+
+                <div class="sikshya-form-row">
+                    <label><?php _e('Discount Price', 'sikshya'); ?></label>
+                    <input type="number" name="sale_price" value="<?php echo esc_attr($data['sale_price'] ?? ''); ?>" placeholder="79.99" step="0.01" min="0">
+                </div>
             </div>
         </div>
 
@@ -196,11 +228,27 @@ class PricingTab extends AbstractTab
                 </div>
             </div>
             
-            <?php echo $this->renderField('enrollment_status', $this->getFields()['enrollment_status'], $data['enrollment_status'] ?? ''); ?>
+            <div class="sikshya-form-row">
+                <label><?php _e('Enrollment Status', 'sikshya'); ?></label>
+                <select name="enrollment_status">
+                    <option value="open" <?php selected($data['enrollment_status'] ?? 'open', 'open'); ?>><?php _e('Open Enrollment', 'sikshya'); ?></option>
+                    <option value="closed" <?php selected($data['enrollment_status'] ?? '', 'closed'); ?>><?php _e('Closed Enrollment', 'sikshya'); ?></option>
+                    <option value="invite_only" <?php selected($data['enrollment_status'] ?? '', 'invite_only'); ?>><?php _e('Invite Only', 'sikshya'); ?></option>
+                </select>
+            </div>
             
             <div class="sikshya-form-grid">
-                <?php echo $this->renderField('max_students', $this->getFields()['max_students'], $data['max_students'] ?? ''); ?>
-                <?php echo $this->renderField('course_duration', $this->getFields()['course_duration'], $data['course_duration'] ?? ''); ?>
+                <div class="sikshya-form-row">
+                    <label><?php _e('Maximum Students', 'sikshya'); ?></label>
+                    <input type="number" name="max_students" value="<?php echo esc_attr($data['max_students'] ?? ''); ?>" placeholder="100" min="1">
+                    <p class="sikshya-help-text"><?php _e('Leave empty for unlimited enrollment', 'sikshya'); ?></p>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label><?php _e('Course Duration (Days)', 'sikshya'); ?></label>
+                    <input type="number" name="course_duration" value="<?php echo esc_attr($data['course_duration'] ?? ''); ?>" placeholder="90" min="1">
+                    <p class="sikshya-help-text"><?php _e('How long students have access', 'sikshya'); ?></p>
+                </div>
             </div>
         </div>
 
@@ -217,59 +265,101 @@ class PricingTab extends AbstractTab
                 </div>
             </div>
             
-            <?php echo $this->renderField('prerequisites', $this->getFields()['prerequisites'], $data['prerequisites'] ?? ''); ?>
+            <div class="sikshya-repeater" id="prerequisites">
+                <div class="sikshya-repeater-item">
+                    <div class="sikshya-repeater-input">
+                        <input type="text" name="prerequisites[]" value="<?php echo esc_attr($data['prerequisites'][0] ?? ''); ?>" placeholder="<?php _e('Basic knowledge of...', 'sikshya'); ?>">
+                    </div>
+                    <button type="button" class="sikshya-btn sikshya-btn-icon sikshya-btn-danger" onclick="removeRepeaterItem(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-add-item" onclick="addRepeaterItem('prerequisites', 'prerequisites[]', '<?php _e('Basic knowledge of...', 'sikshya'); ?>')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <?php _e('Add Prerequisite', 'sikshya'); ?>
+            </button>
         </div>
 
         <div class="sikshya-section sikshya-section-modern">
             <div class="sikshya-section-header">
                 <div class="sikshya-section-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </div>
                 <div class="sikshya-section-content">
-                    <h3 class="sikshya-section-title"><?php _e('Certificates', 'sikshya'); ?></h3>
-                    <p class="sikshya-section-desc"><?php _e('Configure certificate settings for course completion', 'sikshya'); ?></p>
+                    <h3 class="sikshya-section-title"><?php _e('Course Requirements', 'sikshya'); ?></h3>
+                    <p class="sikshya-section-desc"><?php _e('What tools or materials will students need?', 'sikshya'); ?></p>
                 </div>
             </div>
             
-            <?php echo $this->renderField('certificate_enabled', $this->getFields()['certificate_enabled'], $data['certificate_enabled'] ?? ''); ?>
-            <?php echo $this->renderField('certificate_template', $this->getFields()['certificate_template'], $data['certificate_template'] ?? ''); ?>
+            <div class="sikshya-repeater" id="requirements">
+                <div class="sikshya-repeater-item">
+                    <div class="sikshya-repeater-input">
+                        <input type="text" name="requirements[]" value="<?php echo esc_attr($data['requirements'][0] ?? ''); ?>" placeholder="<?php _e('Computer with internet access', 'sikshya'); ?>">
+                    </div>
+                    <button type="button" class="sikshya-btn sikshya-btn-icon sikshya-btn-danger" onclick="removeRepeaterItem(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-add-item" onclick="addRepeaterItem('requirements', 'requirements[]', '<?php _e('Computer with internet access', 'sikshya'); ?>')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <?php _e('Add Requirement', 'sikshya'); ?>
+            </button>
+        </div>
+
+        <div class="sikshya-section sikshya-section-modern">
+            <div class="sikshya-section-header">
+                <div class="sikshya-section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="sikshya-section-content">
+                    <h3 class="sikshya-section-title"><?php _e('Drip Content', 'sikshya'); ?></h3>
+                    <p class="sikshya-section-desc"><?php _e('Release lessons gradually over time', 'sikshya'); ?></p>
+                </div>
+            </div>
+            
+            <div class="sikshya-form-row">
+                <label class="sikshya-checkbox-label">
+                    <input type="checkbox" name="enable_drip" <?php checked($data['enable_drip'] ?? '', '1'); ?> onchange="toggleDripContent(this)">
+                    <span class="sikshya-checkbox"></span>
+                    <?php _e('Enable Drip Content', 'sikshya'); ?>
+                </label>
+                <p class="sikshya-help-text"><?php _e('Release lessons gradually over time', 'sikshya'); ?></p>
+            </div>
+            
+            <div class="sikshya-form-grid" id="drip-settings" style="display: none;">
+                <div class="sikshya-form-row">
+                    <label><?php _e('Drip Type', 'sikshya'); ?></label>
+                    <select name="drip_type">
+                        <option value="interval" <?php selected($data['drip_type'] ?? 'interval', 'interval'); ?>><?php _e('Time Interval', 'sikshya'); ?></option>
+                        <option value="completion" <?php selected($data['drip_type'] ?? '', 'completion'); ?>><?php _e('After Completion', 'sikshya'); ?></option>
+                        <option value="specific_date" <?php selected($data['drip_type'] ?? '', 'specific_date'); ?>><?php _e('Specific Dates', 'sikshya'); ?></option>
+                    </select>
+                </div>
+                
+                <div class="sikshya-form-row">
+                    <label><?php _e('Drip Interval (Days)', 'sikshya'); ?></label>
+                    <input type="number" name="drip_interval" value="<?php echo esc_attr($data['drip_interval'] ?? ''); ?>" placeholder="7" min="1">
+                </div>
+            </div>
         </div>
         <?php
         return ob_get_clean();
     }
     
-    /**
-     * Override renderField to handle conditional fields
-     * 
-     * @param string $field_id
-     * @param array $field_config
-     * @param mixed $value
-     * @return string
-     */
-    protected function renderField(string $field_id, array $field_config, $value = ''): string
-    {
-        $field_html = parent::renderField($field_id, $field_config, $value);
-        
-        // Add conditional logic for pricing fields
-        if ($field_id === 'course_type') {
-            $field_html = str_replace(
-                '<select name="course_type"',
-                '<select name="course_type" onchange="togglePricing(this)"',
-                $field_html
-            );
-        }
-        
-        // Add conditional logic for certificate template
-        if ($field_id === 'certificate_template') {
-            $field_html = str_replace(
-                '<div class="sikshya-form-row">',
-                '<div class="sikshya-form-row" id="certificate-template-field" style="display: none;">',
-                $field_html
-            );
-        }
-        
-        return $field_html;
-    }
 }

@@ -577,13 +577,14 @@
 .sikshya-content {
     flex: 1;
     padding: var(--sikshya-space-10);
-    background: var(--sikshya-white);
+    background: #f5f7fa;
     overflow-y: auto;
 }
 
 .sikshya-tab-content {
     display: none;
     animation: fadeIn 0.3s ease;
+    background: #f5f7fa;
 }
 
 .sikshya-tab-content.active {
@@ -767,6 +768,65 @@
     margin: 0;
 }
 
+/* Permalink Styles - WordPress-like */
+.sikshya-permalink-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+    flex-wrap: wrap;
+}
+
+.sikshya-permalink-display {
+    display: flex;
+    align-items: center;
+    background: var(--sikshya-gray-50);
+    border: 1px solid var(--sikshya-gray-300);
+    border-radius: var(--sikshya-radius-md);
+    padding: var(--sikshya-space-2) var(--sikshya-space-3);
+    font-family: var(--sikshya-font-mono);
+    font-size: var(--sikshya-text-sm);
+    color: var(--sikshya-gray-700);
+    min-height: 38px;
+    flex: 1;
+    min-width: 200px;
+    transition: var(--sikshya-transition-colors);
+}
+
+.sikshya-permalink-display:hover {
+    border-color: var(--sikshya-gray-400);
+    background: var(--sikshya-white);
+}
+
+.sikshya-permalink-base {
+    color: var(--sikshya-gray-500);
+    margin-right: 2px;
+}
+
+.sikshya-permalink-slug {
+    color: var(--sikshya-gray-900);
+    font-weight: var(--sikshya-font-medium);
+}
+
+.sikshya-permalink-edit {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    flex: 1;
+    min-width: 200px;
+}
+
+.sikshya-permalink-edit input {
+    flex: 1;
+    min-width: 150px;
+}
+
+.sikshya-btn-sm {
+    padding: var(--sikshya-space-2) var(--sikshya-space-3);
+    font-size: var(--sikshya-text-xs);
+    height: auto;
+    min-height: 32px;
+}
+
 /* Repeater Components */
 .sikshya-repeater {
     display: flex;
@@ -846,8 +906,7 @@
     gap: var(--sikshya-space-2);
     padding: var(--sikshya-space-4);
     background: var(--sikshya-gray-50);
-    border-radius: var(--sikshya-radius-lg);
-    border: 1px solid var(--sikshya-gray-200);
+    border-top: 1px solid var(--sikshya-gray-200);
 }
 
 /* Quick Actions Button Styling - Match Header Buttons */
@@ -1717,6 +1776,7 @@ body .sikshya-modal-overlay {
 
     .sikshya-content {
         padding: 20px;
+        background: #f5f7fa;
     }
 
     .sikshya-section {
@@ -3837,13 +3897,13 @@ body .sikshya-modal-overlay {
 .sikshya-checkbox:checked::after {
     content: '';
     position: absolute;
-    left: 6px;
-    top: 2px;
+    left: 50%;
+    top: 50%;
     width: 6px;
     height: 10px;
     border: solid #ffffff;
     border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+    transform: translate(-50%, -50%) rotate(45deg);
 }
 
 /* Chapter Number Badge - Compact */
@@ -4884,48 +4944,7 @@ body .sikshya-modal-overlay {
     }
 }
 
-/* Auto-save Status Indicator */
-.sikshya-auto-save-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    font-size: 12px;
-    color: #6c757d;
-    border: 1px solid #e9ecef;
-}
 
-.sikshya-auto-save-text {
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.sikshya-auto-save-text.saved {
-    color: #28a745;
-}
-
-.sikshya-auto-save-text.saving {
-    color: #007cba;
-}
-
-.sikshya-auto-save-text.error {
-    color: #dc3545;
-}
-
-.sikshya-auto-save-toggle {
-    background: none;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.sikshya-auto-save-toggle:hover {
-    background-color: #e9ecef;
-}
 
 /* Field Error Styles */
 .sikshya-form-row.has-error {

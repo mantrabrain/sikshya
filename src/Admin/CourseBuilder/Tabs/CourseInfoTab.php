@@ -188,6 +188,29 @@ class CourseInfoTab extends AbstractTab
             </div>
             
             <div class="sikshya-form-row">
+                <label><?php _e('Permalink', 'sikshya'); ?></label>
+                <div class="sikshya-permalink-wrapper">
+                    <div class="sikshya-permalink-display" id="permalink-display">
+                        <span class="sikshya-permalink-base"><?php echo esc_url(home_url('/courses/')); ?></span>
+                        <span class="sikshya-permalink-slug" id="permalink-slug"><?php echo esc_html($data['slug'] ?? ''); ?></span>
+                    </div>
+                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" id="edit-permalink-btn" onclick="togglePermalinkEdit()">
+                        <?php _e('Edit', 'sikshya'); ?>
+                    </button>
+                    <div class="sikshya-permalink-edit" id="permalink-edit" style="display: none;">
+                        <input type="text" name="slug" id="permalink-input" value="<?php echo esc_attr($data['slug'] ?? ''); ?>" placeholder="<?php _e('course-slug', 'sikshya'); ?>">
+                        <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-sm" onclick="savePermalink()">
+                            <?php _e('OK', 'sikshya'); ?>
+                        </button>
+                        <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" onclick="cancelPermalinkEdit()">
+                            <?php _e('Cancel', 'sikshya'); ?>
+                        </button>
+                    </div>
+                </div>
+                <p class="sikshya-help-text"><?php _e('The URL-friendly version of your course title', 'sikshya'); ?></p>
+            </div>
+            
+            <div class="sikshya-form-row">
                 <label><?php _e('Short Description', 'sikshya'); ?></label>
                 <input type="text" name="short_description" value="<?php echo esc_attr($data['short_description'] ?? ''); ?>" placeholder="<?php _e('Brief one-line description for course cards', 'sikshya'); ?>">
             </div>
@@ -257,14 +280,82 @@ class CourseInfoTab extends AbstractTab
             </div>
             
             <div class="sikshya-form-row">
-                <label><?php _e('Featured Image URL', 'sikshya'); ?></label>
-                <input type="url" name="featured_image" value="<?php echo esc_attr($data['featured_image'] ?? ''); ?>" placeholder="<?php _e('https://example.com/image.jpg', 'sikshya'); ?>">
+                <label><?php _e('Course Featured Image', 'sikshya'); ?></label>
+                <div class="sikshya-media-upload">
+                    <div class="sikshya-media-preview" id="featured_image_preview">
+                        <div class="sikshya-media-placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <span><?php _e('No image selected', 'sikshya'); ?></span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="featured_image" id="featured_image" value="<?php echo esc_attr($data['featured_image'] ?? ''); ?>">
+                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-media-btn" onclick="openMediaUpload('featured_image')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                        </svg>
+                        <?php _e('Upload Featured Image', 'sikshya'); ?>
+                    </button>
+                    <p class="sikshya-help-text"><?php _e('Recommended: 1200x675px (16:9 ratio)', 'sikshya'); ?></p>
+                </div>
             </div>
             
             <div class="sikshya-form-row">
-                <label><?php _e('Preview Video URL', 'sikshya'); ?></label>
-                <input type="url" name="video_url" value="<?php echo esc_attr($data['video_url'] ?? ''); ?>" placeholder="<?php _e('https://youtube.com/watch?v=...', 'sikshya'); ?>">
+                <label><?php _e('Course Trailer Video', 'sikshya'); ?></label>
+                <div class="sikshya-media-upload">
+                    <div class="sikshya-media-preview" id="trailer_video_preview">
+                        <div class="sikshya-media-placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <span><?php _e('No video selected', 'sikshya'); ?></span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="trailer_video" id="trailer_video" value="<?php echo esc_attr($data['trailer_video'] ?? ''); ?>">
+                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-media-btn" onclick="openMediaUpload('trailer_video')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                        </svg>
+                        <?php _e('Upload Trailer Video', 'sikshya'); ?>
+                    </button>
+                    <p class="sikshya-help-text"><?php _e('Optional promotional video for your course', 'sikshya'); ?></p>
+                </div>
             </div>
+        </div>
+
+        <div class="sikshya-section sikshya-section-modern">
+            <div class="sikshya-section-header">
+                <div class="sikshya-section-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="sikshya-section-content">
+                    <h3 class="sikshya-section-title"><?php _e('Learning Outcomes', 'sikshya'); ?></h3>
+                    <p class="sikshya-section-desc"><?php _e('What will students learn from this course?', 'sikshya'); ?></p>
+                </div>
+            </div>
+            
+            <div class="sikshya-repeater" id="learning-outcomes">
+                <div class="sikshya-repeater-item">
+                    <div class="sikshya-repeater-input">
+                        <input type="text" name="learning_outcomes[]" value="<?php echo esc_attr($data['learning_outcomes'][0] ?? ''); ?>" placeholder="<?php _e('Students will be able to...', 'sikshya'); ?>">
+                    </div>
+                    <button type="button" class="sikshya-btn sikshya-btn-icon sikshya-btn-danger" onclick="removeRepeaterItem(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-add-item" onclick="addRepeaterItem('learning-outcomes', 'learning_outcomes[]', '<?php _e('Students will be able to...', 'sikshya'); ?>')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <?php _e('Add Learning Outcome', 'sikshya'); ?>
+            </button>
         </div>
         <?php
         return ob_get_clean();

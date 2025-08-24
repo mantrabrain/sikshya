@@ -265,13 +265,152 @@ function previewCourse() {
 }
 
 function saveDraft() {
-    document.getElementById('course-status-field').value = 'draft';
-    document.getElementById('sikshya-course-builder-form').submit();
+    const form = document.getElementById('sikshya-course-builder-form');
+    const statusField = document.getElementById('course-status-field');
+    const submitButton = document.querySelector('button[onclick="saveDraft()"]');
+    
+    if (!form || !statusField) {
+        console.error('Form elements not found');
+        return;
+    }
+    
+    // Set status to draft
+    statusField.value = 'draft';
+    
+    // Show loading state
+    if (submitButton) {
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Saving Draft...';
+        
+        // Submit form via AJAX
+        submitFormAjax(form, 'draft', function(success, response) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            
+            if (success) {
+                if (window.SikshyaToast) {
+                    window.SikshyaToast.successMessage('Course draft saved successfully!');
+                }
+                
+                // Update course ID if returned
+                if (response.course_id) {
+                    updateCourseIdInForm(response.course_id);
+                }
+            } else {
+                if (window.SikshyaToast) {
+                    window.SikshyaToast.errorMessage(response.message || 'Failed to save draft');
+                }
+            }
+        });
+    }
 }
 
 function publishCourse() {
-    document.getElementById('course-status-field').value = 'published';
-    document.getElementById('sikshya-course-builder-form').submit();
+    const form = document.getElementById('sikshya-course-builder-form');
+    const statusField = document.getElementById('course-status-field');
+    const submitButton = document.querySelector('button[onclick="publishCourse()"]');
+    
+    if (!form || !statusField) {
+        console.error('Form elements not found');
+        return;
+    }
+    
+    // Validate required fields before publishing
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    const errors = [];
+    
+    requiredFields.forEach(function(field) {
+        if (!field.value.trim()) {
+            isValid = false;
+            errors.push(field.name + ' is required');
+            field.classList.add('error');
+        } else {
+            field.classList.remove('error');
+        }
+    });
+    
+    if (!isValid) {
+        if (window.SikshyaToast) {
+            window.SikshyaToast.errorMessage('Please fill in all required fields before publishing');
+        }
+        return;
+    }
+    
+    // Set status to published
+    statusField.value = 'published';
+    
+    // Show loading state
+    if (submitButton) {
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Publishing...';
+        
+        // Submit form via AJAX
+        submitFormAjax(form, 'published', function(success, response) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            
+            if (success) {
+                if (window.SikshyaToast) {
+                    window.SikshyaToast.successMessage('Course published successfully!');
+                }
+                
+                // Update course ID if returned
+                if (response.course_id) {
+                    updateCourseIdInForm(response.course_id);
+                }
+                
+                // Redirect to course list or show success page
+                setTimeout(function() {
+                    window.location.href = '<?php echo admin_url('admin.php?page=sikshya-courses'); ?>';
+                }, 1500);
+            } else {
+                if (window.SikshyaToast) {
+                    window.SikshyaToast.errorMessage(response.message || 'Failed to publish course');
+                }
+            }
+        });
+    }
+}
+
+// Helper function to submit form via AJAX
+function submitFormAjax(form, status, callback) {
+    const formData = new FormData(form);
+    formData.append('action', 'sikshya_save_course_builder');
+    formData.append('nonce', '<?php echo wp_create_nonce('sikshya_course_builder_nonce'); ?>');
+    formData.append('course_status', status);
+    
+    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            callback(true, data.data);
+        } else {
+            callback(false, data.data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        callback(false, { message: 'Network error occurred' });
+    });
+}
+
+// Helper function to update course ID in form
+function updateCourseIdInForm(courseId) {
+    const courseIdField = document.querySelector('input[name="course_id"]');
+    if (courseIdField) {
+        courseIdField.value = courseId;
+    }
+    
+    // Update URL if needed
+    const url = new URL(window.location);
+    url.searchParams.set('course_id', courseId);
+    window.history.pushState({}, '', url);
 }
 
 // Conditional field functions
@@ -302,6 +441,96 @@ function toggleCertificateSettings(checkbox) {
     }
 }
 
+// Permalink functions
+function togglePermalinkEdit() {
+    const display = document.getElementById('permalink-display');
+    const edit = document.getElementById('permalink-edit');
+    const editBtn = document.getElementById('edit-permalink-btn');
+    
+    if (display.style.display !== 'none') {
+        display.style.display = 'none';
+        edit.style.display = 'flex';
+        editBtn.style.display = 'none';
+        document.getElementById('permalink-input').focus();
+    } else {
+        display.style.display = 'flex';
+        edit.style.display = 'none';
+        editBtn.style.display = 'inline-block';
+    }
+}
+
+function savePermalink() {
+    const input = document.getElementById('permalink-input');
+    const slug = input.value.trim();
+    const slugDisplay = document.getElementById('permalink-slug');
+    
+    if (slug) {
+        slugDisplay.textContent = slug;
+        togglePermalinkEdit();
+    } else {
+        // If slug is empty, revert to original
+        cancelPermalinkEdit();
+    }
+}
+
+function cancelPermalinkEdit() {
+    const input = document.getElementById('permalink-input');
+    const slugDisplay = document.getElementById('permalink-slug');
+    const originalSlug = slugDisplay.textContent || '<?php echo esc_js($data['slug'] ?? ''); ?>';
+    
+    input.value = originalSlug;
+    togglePermalinkEdit();
+}
+
+// Auto-generate slug from title
+function generateSlugFromTitle() {
+    const titleInput = document.querySelector('input[name="title"]');
+    const slugInput = document.getElementById('permalink-input');
+    const slugDisplay = document.getElementById('permalink-slug');
+    
+    if (titleInput && slugInput) {
+        titleInput.addEventListener('input', function() {
+            const title = this.value;
+            const slug = title.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/-+/g, '-') // Replace multiple hyphens with single
+                .trim('-'); // Remove leading/trailing hyphens
+            
+            slugInput.value = slug;
+            slugDisplay.textContent = slug;
+        });
+    }
+}
+
+// Initialize permalink functionality
+document.addEventListener('DOMContentLoaded', function() {
+    generateSlugFromTitle();
+    
+    // Initialize permalink display
+    const slugDisplay = document.getElementById('permalink-slug');
+    const slugInput = document.getElementById('permalink-input');
+    
+    if (slugDisplay && slugInput) {
+        // Set initial display
+        if (!slugDisplay.textContent.trim()) {
+            slugDisplay.textContent = 'course-slug';
+        }
+        
+        // Handle Enter key in permalink input
+        slugInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                savePermalink();
+            }
+        });
+    }
+});
+    } else {
+        certificateSettings.style.display = 'none';
+    }
+}
+
 // Curriculum functions
 function showChapterModal() {
     // Implementation for chapter modal
@@ -322,4 +551,18 @@ function bulkImport() {
     // Implementation for bulk import
     console.log('Bulk import');
 }
+
+// Test toast system on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Test toast system
+    if (window.SikshyaToast) {
+        console.log('SikshyaToast is loaded and available');
+        // Test toast after 2 seconds
+        setTimeout(function() {
+            window.SikshyaToast.infoMessage('Course builder loaded successfully!');
+        }, 2000);
+    } else {
+        console.error('SikshyaToast is not loaded');
+    }
+});
 </script>

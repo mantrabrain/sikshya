@@ -81,6 +81,14 @@ class CourseController extends BaseView
      */
     public function enqueueCourseBuilderAssets(): void
     {
+        // Enqueue toast CSS
+        wp_enqueue_style(
+            'sikshya-toast',
+            SIKSHYA_PLUGIN_URL . 'assets/admin/css/toast.css',
+            [],
+            SIKSHYA_VERSION
+        );
+        
         wp_enqueue_style(
             'sikshya-course-builder',
             SIKSHYA_PLUGIN_URL . 'assets/admin/css/course-builder.css',
@@ -88,10 +96,19 @@ class CourseController extends BaseView
             SIKSHYA_VERSION
         );
         
+        // Enqueue toast system
+        wp_enqueue_script(
+            'sikshya-toast',
+            SIKSHYA_PLUGIN_URL . 'assets/admin/js/toast.js',
+            ['jquery'],
+            SIKSHYA_VERSION,
+            true
+        );
+        
         wp_enqueue_script(
             'sikshya-course-builder',
             SIKSHYA_PLUGIN_URL . 'assets/admin/js/course-builder.js',
-            ['jquery'],
+            ['jquery', 'sikshya-toast'],
             SIKSHYA_VERSION,
             true
         );
@@ -100,7 +117,7 @@ class CourseController extends BaseView
         wp_enqueue_script(
             'sikshya-course-builder-save',
             SIKSHYA_PLUGIN_URL . 'assets/admin/js/course-builder-save.js',
-            ['jquery'],
+            ['jquery', 'sikshya-toast'],
             SIKSHYA_VERSION,
             true
         );
@@ -789,7 +806,7 @@ class CourseController extends BaseView
     public function handleSaveCourseBuilder(): void
     {
         try {
-            check_ajax_referer('sikshya_course_builder', 'nonce');
+            check_ajax_referer('sikshya_course_builder_nonce', 'nonce');
             
             if (!current_user_can('edit_posts')) {
                 wp_send_json_error(['message' => 'Insufficient permissions']);
@@ -798,6 +815,7 @@ class CourseController extends BaseView
 
             $data = $_POST['data'] ?? [];
             $course_id = (int) ($data['course_id'] ?? 0);
+            $course_status = sanitize_text_field($_POST['course_status'] ?? 'draft');
             
             // Initialize course builder manager
             $course_builder_manager = new \Sikshya\Admin\CourseBuilder\CourseBuilderManager($this->plugin);
@@ -815,13 +833,19 @@ class CourseController extends BaseView
                     'post_title' => $data['title'] ?? 'New Course',
                     'post_content' => $data['description'] ?? '',
                     'post_type' => 'sikshya_course',
-                    'post_status' => 'draft',
+                    'post_status' => $course_status,
                 ]);
                 
                 if (is_wp_error($course_id)) {
                     wp_send_json_error(['message' => 'Failed to create course']);
                     return;
                 }
+            } else {
+                // Update existing course status
+                wp_update_post([
+                    'ID' => $course_id,
+                    'post_status' => $course_status,
+                ]);
             }
             
             // Save all tab data
@@ -831,9 +855,12 @@ class CourseController extends BaseView
                 return;
             }
             
+            $message = $course_status === 'published' ? 'Course published successfully!' : 'Course draft saved successfully!';
+            
             wp_send_json_success([
-                'message' => 'Course saved successfully',
-                'course_id' => $course_id
+                'message' => $message,
+                'course_id' => $course_id,
+                'status' => $course_status
             ]);
             
         } catch (\Exception $e) {
@@ -848,7 +875,7 @@ class CourseController extends BaseView
     public function handleLoadCourseData(): void
     {
         try {
-            check_ajax_referer('sikshya_course_builder', 'nonce');
+            check_ajax_referer('sikshya_course_builder_nonce', 'nonce');
             
             if (!current_user_can('edit_posts')) {
                 wp_send_json_error(['message' => 'Insufficient permissions']);
