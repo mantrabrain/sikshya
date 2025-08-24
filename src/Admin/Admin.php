@@ -39,9 +39,11 @@ class Admin
      */
     public function __construct(Plugin $plugin)
     {
+        error_log('Sikshya: Admin constructor called');
         $this->plugin = $plugin;
         $this->initControllers();
         $this->initHooks();
+        error_log('Sikshya: Admin constructor completed');
     }
 
     /**
@@ -49,6 +51,7 @@ class Admin
      */
     private function initControllers(): void
     {
+        error_log('Sikshya: Admin initControllers called');
         $this->controllers['course'] = new \Sikshya\Admin\Controllers\CourseController($this->plugin);
         $this->controllers['lesson'] = new \Sikshya\Admin\Controllers\LessonController($this->plugin);
         $this->controllers['quiz'] = new \Sikshya\Admin\Controllers\QuizController($this->plugin);
@@ -56,6 +59,7 @@ class Admin
         $this->controllers['instructor'] = new \Sikshya\Admin\Controllers\InstructorController($this->plugin);
         $this->controllers['report'] = new \Sikshya\Admin\Controllers\ReportController($this->plugin);
         $this->controllers['setting'] = new \Sikshya\Admin\Controllers\SettingController($this->plugin);
+        error_log('Sikshya: Admin controllers initialized');
     }
 
     /**

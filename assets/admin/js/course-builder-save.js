@@ -8,6 +8,8 @@
 (function($) {
     'use strict';
 
+    console.log('CourseBuilderSave script loaded!');
+
     // Course Builder Save Handler
     window.SikshyaCourseBuilderSave = {
         /**
@@ -18,12 +20,19 @@
             console.log('sikshya_ajax object:', window.sikshya_ajax);
             this.bindEvents();
             this.loadExistingData();
+            
+            // Test AJAX call
+            // this.testAjax();
         },
 
         /**
          * Bind event handlers
          */
         bindEvents: function() {
+            console.log('CourseBuilderSave: Binding events...');
+            console.log('CourseBuilderSave: Looking for save buttons...');
+            console.log('CourseBuilderSave: #save-draft-btn exists:', $('#save-draft-btn').length);
+            console.log('CourseBuilderSave: #sidebar-save-draft-btn exists:', $('#sidebar-save-draft-btn').length);
             // Prevent ALL form submissions - we handle everything via AJAX
             $(document).on('submit', '#sikshya-course-builder-form', function(e) {
                 e.preventDefault();
@@ -49,6 +58,31 @@
             
             // Tab switching
             $(document).on('click', '.sikshya-nav-link', this.handleTabSwitch.bind(this));
+        },
+
+        /**
+         * Test AJAX functionality
+         */
+        testAjax: function() {
+            console.log('CourseBuilderSave: Testing AJAX...');
+            if (typeof sikshya_ajax !== 'undefined') {
+                $.ajax({
+                    url: sikshya_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'sikshya_test_ajax',
+                        nonce: sikshya_ajax.nonce
+                    },
+                    success: function(response) {
+                        console.log('CourseBuilderSave: Test AJAX success:', response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('CourseBuilderSave: Test AJAX error:', error);
+                    }
+                });
+            } else {
+                console.error('CourseBuilderSave: sikshya_ajax not available');
+            }
         },
 
         /**
@@ -113,7 +147,7 @@
          * Load existing course data
          */
         loadExistingData: function() {
-            const courseId = window.sikshyaCourseBuilder.courseId;
+            const courseId = window.sikshyaCourseBuilder ? window.sikshyaCourseBuilder.courseId : null;
             
             if (courseId && courseId > 0) {
                 this.loadCourseData(courseId);
@@ -290,6 +324,7 @@
          * Handle Save Draft button click
          */
         handleSaveDraft: function(e) {
+            console.log('CourseBuilderSave: handleSaveDraft called!');
             e.preventDefault();
             e.stopPropagation();
             
@@ -469,7 +504,12 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
-        window.SikshyaCourseBuilder.init();
+        console.log('CourseBuilderSave: Document ready, initializing...');
+        if (window.SikshyaCourseBuilderSave) {
+            window.SikshyaCourseBuilderSave.init();
+        } else {
+            console.error('CourseBuilderSave: SikshyaCourseBuilderSave object not found!');
+        }
     });
 
 })(jQuery);
