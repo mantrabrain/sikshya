@@ -9,11 +9,13 @@
     'use strict';
 
     // Course Builder Save Handler
-    window.SikshyaCourseBuilder = {
+    window.SikshyaCourseBuilderSave = {
         /**
          * Initialize the course builder
          */
         init: function() {
+            console.log('CourseBuilderSave initializing...');
+            console.log('sikshya_ajax object:', window.sikshya_ajax);
             this.bindEvents();
             this.loadExistingData();
         },
@@ -22,8 +24,28 @@
          * Bind event handlers
          */
         bindEvents: function() {
-            // Form submission
-            $('#sikshya-course-builder-form').on('submit', this.handleFormSubmit.bind(this));
+            // Prevent ALL form submissions - we handle everything via AJAX
+            $(document).on('submit', '#sikshya-course-builder-form', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            });
+            
+            // Prevent Enter key from submitting forms
+            $(document).on('keypress', '#sikshya-course-builder-form input, #sikshya-course-builder-form textarea', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            });
+            
+            // Save Draft button
+            $(document).on('click', '#save-draft-btn, #sidebar-save-draft-btn', this.handleSaveDraft.bind(this));
+            
+            // Publish Course button
+            $(document).on('click', '#publish-course-btn, #sidebar-publish-btn', this.handlePublishCourse.bind(this));
             
             // Tab switching
             $(document).on('click', '.sikshya-nav-link', this.handleTabSwitch.bind(this));
@@ -44,65 +66,9 @@
             }
         },
 
-        /**
-         * Handle form submission
-         */
-        handleFormSubmit: function(e) {
-            e.preventDefault();
-            
-            const form = $(e.target);
-            const submitButton = form.find('button[type="submit"]');
-            const originalText = submitButton.text();
-            
-            // Show loading state
-            submitButton.prop('disabled', true).text('Saving...');
-            
-            // Collect form data
-            const formData = this.collectFormData();
-            
-            // Validate form
-            const errors = this.validateForm(formData);
-            if (errors.length > 0) {
-                this.showFieldErrors(errors);
-                submitButton.prop('disabled', false).text(originalText);
-                return;
-            }
-            
-            // Save data
-            this.saveData(formData, function(success, response) {
-                if (success) {
-                    this.handleSaveSuccess(response);
-                } else {
-                    this.handleSaveError(response);
-                }
-                submitButton.prop('disabled', false).text(originalText);
-            }.bind(this));
-        },
 
-        /**
-         * Save data via AJAX
-         */
-        saveData: function(data, callback) {
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_save_course_builder',
-                    nonce: sikshya_ajax.nonce,
-                    data: data
-                },
-                success: function(response) {
-                    if (response.success) {
-                        callback(true, response.data);
-                    } else {
-                        callback(false, response.data);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    callback(false, { message: 'Network error occurred' });
-                }
-            });
-        },
+
+
 
         /**
          * Collect form data
@@ -318,6 +284,186 @@
                     }
                 }.bind(this)
             });
+        },
+
+        /**
+         * Handle Save Draft button click
+         */
+        handleSaveDraft: function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const form = $('#sikshya-course-builder-form');
+            const statusField = $('#course-status-field');
+            const submitButton = $(e.currentTarget);
+            
+            if (!form.length || !statusField.length) {
+                console.error('Form elements not found');
+                return;
+            }
+            
+            // Set status to draft
+            statusField.val('draft');
+            
+            // Show loading state
+            const originalText = submitButton.text();
+            submitButton.prop('disabled', true).text('Saving Draft...');
+            
+            // Collect form data
+            const formData = this.collectFormData();
+            formData.course_status = 'draft';
+            
+            // Save data
+            this.saveData(formData, function(success, response) {
+                submitButton.prop('disabled', false).text(originalText);
+                
+                if (success) {
+                    this.handleSaveSuccess(response);
+                } else {
+                    this.handleSaveError(response);
+                }
+            }.bind(this));
+        },
+
+        /**
+         * Handle Publish Course button click
+         */
+        handlePublishCourse: function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const form = $('#sikshya-course-builder-form');
+            const statusField = $('#course-status-field');
+            const submitButton = $(e.currentTarget);
+            
+            if (!form.length || !statusField.length) {
+                console.error('Form elements not found');
+                return;
+            }
+            
+            // Validate required fields before publishing
+            const errors = this.validateForm(this.collectFormData());
+            if (errors.length > 0) {
+                this.showFieldErrors(errors);
+                this.showNotification('error', 'Please fill in all required fields before publishing');
+                return;
+            }
+            
+            // Set status to published
+            statusField.val('published');
+            
+            // Show loading state
+            const originalText = submitButton.text();
+            submitButton.prop('disabled', true).text('Publishing...');
+            
+            // Collect form data
+            const formData = this.collectFormData();
+            formData.course_status = 'published';
+            
+            // Save data
+            this.saveData(formData, function(success, response) {
+                submitButton.prop('disabled', false).text(originalText);
+                
+                if (success) {
+                    this.handleSaveSuccess(response);
+                } else {
+                    this.handleSaveError(response);
+                }
+            }.bind(this));
+        },
+
+        /**
+         * Save data via AJAX
+         */
+        saveData: function(formData, callback) {
+            console.log('saveData method called with:', formData);
+            console.log('sikshya_ajax available:', typeof sikshya_ajax !== 'undefined');
+            if (typeof sikshya_ajax !== 'undefined') {
+                console.log('sikshya_ajax object:', sikshya_ajax);
+            }
+            
+            const ajaxData = {
+                action: 'sikshya_save_course_builder',
+                nonce: sikshya_ajax.nonce,
+                data: formData,
+                course_status: formData.course_status || 'draft'
+            };
+            
+            console.log('Sending AJAX request to save course:', {
+                url: sikshya_ajax.ajax_url,
+                action: 'sikshya_save_course_builder',
+                nonce: sikshya_ajax.nonce,
+                data: formData
+            });
+            
+            console.log('Full AJAX data being sent:', ajaxData);
+            
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: ajaxData,
+                success: function(response) {
+                    if (response.success) {
+                        callback(true, response.data);
+                    } else {
+                        callback(false, response.data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    callback(false, { message: 'Network error occurred' });
+                }
+            });
+        },
+
+        /**
+         * Handle successful save
+         */
+        handleSaveSuccess: function(response) {
+            const message = response.status === 'published' 
+                ? 'Course published successfully!' 
+                : 'Course draft saved successfully!';
+            
+            this.showNotification('success', message);
+            
+            // Check if this is the first time saving (no course ID in URL)
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentCourseId = urlParams.get('id');
+            
+            if (response.course_id && !currentCourseId) {
+                // First time saving - reload page with course ID after 2 seconds
+                setTimeout(() => {
+                    const newUrl = new URL(window.location);
+                    newUrl.searchParams.set('id', response.course_id);
+                    newUrl.searchParams.set('tab', 'course');
+                    window.location.href = newUrl.toString();
+                }, 2000);
+            } else if (response.course_id) {
+                // Subsequent saves - just update the form
+                this.updateCourseIdInForm(response.course_id);
+            }
+        },
+
+        /**
+         * Handle save error
+         */
+        handleSaveError: function(response) {
+            this.showNotification('error', response.message || 'Failed to save course');
+        },
+
+        /**
+         * Update course ID in form
+         */
+        updateCourseIdInForm: function(courseId) {
+            const courseIdField = $('input[name="course_id"]');
+            if (courseIdField.length) {
+                courseIdField.val(courseId);
+            }
+            
+            // Update URL if needed
+            const url = new URL(window.location);
+            url.searchParams.set('course_id', courseId);
+            window.history.pushState({}, '', url);
         }
     };
 

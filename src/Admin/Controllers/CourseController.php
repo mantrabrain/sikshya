@@ -55,7 +55,6 @@ class CourseController extends BaseView
         add_action('wp_ajax_sikshya_load_form_template', [$this, 'handleLoadFormTemplate']);
         add_action('wp_ajax_sikshya_create_chapter', [$this, 'handleCreateChapter']);
         add_action('wp_ajax_sikshya_create_content', [$this, 'handleCreateContent']);
-        add_action('wp_ajax_sikshya_test_ajax', [$this, 'handleTestAjax']);
         
         // Dynamic course builder AJAX handlers
         add_action('wp_ajax_sikshya_save_course_builder', [$this, 'handleSaveCourseBuilder']);
@@ -805,8 +804,10 @@ class CourseController extends BaseView
      */
     public function handleSaveCourseBuilder(): void
     {
+        error_log('Sikshya: handleSaveCourseBuilder called');
+        error_log('Sikshya: POST data received: ' . print_r($_POST, true));
         try {
-            check_ajax_referer('sikshya_course_builder_nonce', 'nonce');
+            check_ajax_referer('sikshya_course_builder', 'nonce');
             
             if (!current_user_can('edit_posts')) {
                 wp_send_json_error(['message' => 'Insufficient permissions']);
@@ -818,7 +819,13 @@ class CourseController extends BaseView
             $course_status = sanitize_text_field($_POST['course_status'] ?? 'draft');
             
             // Initialize course builder manager
-            $course_builder_manager = new \Sikshya\Admin\CourseBuilder\CourseBuilderManager($this->plugin);
+            try {
+                $course_builder_manager = new \Sikshya\Admin\CourseBuilder\CourseBuilderManager($this->plugin);
+            } catch (\Exception $e) {
+                error_log('Sikshya: Failed to instantiate CourseBuilderManager: ' . $e->getMessage());
+                wp_send_json_error(['message' => 'Failed to initialize course builder']);
+                return;
+            }
             
             // Validate data
             $errors = $course_builder_manager->validateAllTabs($data);
@@ -875,7 +882,7 @@ class CourseController extends BaseView
     public function handleLoadCourseData(): void
     {
         try {
-            check_ajax_referer('sikshya_course_builder_nonce', 'nonce');
+            check_ajax_referer('sikshya_course_builder', 'nonce');
             
             if (!current_user_can('edit_posts')) {
                 wp_send_json_error(['message' => 'Insufficient permissions']);

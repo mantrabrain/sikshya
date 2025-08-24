@@ -121,34 +121,7 @@ window.addEventListener('popstate', handlePopState);
 
 // Initialize tab on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Debug: Check if sikshya_ajax is available
-    console.log('Sikshya: Checking sikshya_ajax object:', typeof sikshya_ajax);
-    if (typeof sikshya_ajax !== 'undefined') {
-        console.log('Sikshya: sikshya_ajax.ajax_url:', sikshya_ajax.ajax_url);
-        console.log('Sikshya: sikshya_ajax.nonce:', sikshya_ajax.nonce);
-        
-        // Test AJAX connection
-        console.log('Sikshya: Testing AJAX connection...');
-        jQuery.post(sikshya_ajax.ajax_url, {
-            action: 'sikshya_test_ajax',
-            nonce: sikshya_ajax.nonce
-        }, function(response) {
-            console.log('Sikshya: AJAX test response:', response);
-        }).fail(function(xhr, status, error) {
-            console.error('Sikshya: AJAX test failed:', error);
-            console.error('Sikshya: XHR status:', xhr.status);
-        });
-    } else {
-        console.error('Sikshya: sikshya_ajax object is not defined!');
-        // Try to use a fallback AJAX URL
-        console.log('Sikshya: Trying fallback AJAX URL...');
-        window.sikshya_ajax = {
-            ajax_url: '/wp-admin/admin-ajax.php',
-            nonce: '',
-            debug: true
-        };
-    }
-    
+      
     initializeTabFromURL();
     
     // Initialize quiz builder if it exists
@@ -2594,29 +2567,187 @@ function generateQuestionPreviewOptions(question) {
 
 // Notification system
 function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `sikshya-notification sikshya-notification-${type}`;
-    notification.innerHTML = `
-        <div class="sikshya-notification-content">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            <span>${message}</span>
-        </div>
-        <button class="sikshya-notification-close" onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
+    // Use toast system if available, otherwise fallback to old notification
+    if (window.SikshyaToast) {
+        switch (type) {
+            case 'success':
+                SikshyaToast.successMessage(message);
+                break;
+            case 'error':
+                SikshyaToast.errorMessage(message);
+                break;
+            case 'warning':
+                SikshyaToast.warningMessage(message);
+                break;
+            default:
+                SikshyaToast.infoMessage(message);
+                break;
         }
-    }, 5000);
+    } else {
+        // Fallback to old notification system
+        const notification = document.createElement('div');
+        notification.className = `sikshya-notification sikshya-notification-${type}`;
+        notification.innerHTML = `
+            <div class="sikshya-notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
 }
+
+// Tab switching function for dynamic course builder
+function switchTab(tabId) {
+    // Remove active class from all tabs
+    document.querySelectorAll('.sikshya-nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Add active class to clicked tab
+    document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+    
+    // Hide all tab content
+    document.querySelectorAll('.sikshya-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    const selectedContent = document.getElementById(tabId);
+    if (selectedContent) {
+        selectedContent.classList.add('active');
+    }
+    
+    // Update active tab
+    if (window.sikshyaCourseBuilder) {
+        window.sikshyaCourseBuilder.activeTab = tabId;
+    }
+}
+
+// Conditional field functions
+function togglePricing(select) {
+    const pricingFields = document.getElementById('pricing-fields');
+    if (select.value === 'free') {
+        pricingFields.style.display = 'none';
+    } else {
+        pricingFields.style.display = 'block';
+    }
+}
+
+function togglePasswordField(select) {
+    const passwordField = document.getElementById('password-field');
+    if (select.value === 'password_protected') {
+        passwordField.style.display = 'block';
+    } else {
+        passwordField.style.display = 'none';
+    }
+}
+
+function toggleCertificateSettings(checkbox) {
+    const certificateSettings = document.getElementById('certificate-settings');
+    if (checkbox.checked) {
+        certificateSettings.style.display = 'block';
+    } else {
+        certificateSettings.style.display = 'none';
+    }
+}
+
+// Permalink functions
+function togglePermalinkEdit() {
+    const display = document.getElementById('permalink-display');
+    const edit = document.getElementById('permalink-edit');
+    const editBtn = document.getElementById('edit-permalink-btn');
+    
+    if (display.style.display !== 'none') {
+        display.style.display = 'none';
+        edit.style.display = 'flex';
+        editBtn.style.display = 'none';
+        document.getElementById('permalink-input').focus();
+    } else {
+        display.style.display = 'flex';
+        edit.style.display = 'none';
+        editBtn.style.display = 'inline-block';
+    }
+}
+
+function savePermalink() {
+    const input = document.getElementById('permalink-input');
+    const slug = input.value.trim();
+    const slugDisplay = document.getElementById('permalink-slug');
+    
+    if (slug) {
+        slugDisplay.textContent = slug;
+        togglePermalinkEdit();
+    } else {
+        // If slug is empty, revert to original
+        cancelPermalinkEdit();
+    }
+}
+
+function cancelPermalinkEdit() {
+    const input = document.getElementById('permalink-input');
+    const slugDisplay = document.getElementById('permalink-slug');
+    const originalSlug = slugDisplay.textContent || 'course-slug';
+    
+    input.value = originalSlug;
+    togglePermalinkEdit();
+}
+
+// Auto-generate slug from title
+function generateSlugFromTitle() {
+    const titleInput = document.querySelector('input[name="title"]');
+    const slugInput = document.getElementById('permalink-input');
+    const slugDisplay = document.getElementById('permalink-slug');
+    
+    if (titleInput && slugInput) {
+        titleInput.addEventListener('input', function() {
+            const title = this.value;
+            const slug = title.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+                .replace(/\s+/g, '-') // Replace spaces with hyphens
+                .replace(/-+/g, '-') // Replace multiple hyphens with single
+                .trim('-'); // Remove leading/trailing hyphens
+            
+            slugInput.value = slug;
+            slugDisplay.textContent = slug;
+        });
+    }
+}
+
+// Initialize permalink functionality
+document.addEventListener('DOMContentLoaded', function() {
+    generateSlugFromTitle();
+    
+    // Initialize permalink display
+    const slugDisplay = document.getElementById('permalink-slug');
+    const slugInput = document.getElementById('permalink-input');
+    
+    if (slugDisplay && slugInput) {
+        // Set initial display
+        if (!slugDisplay.textContent.trim()) {
+            slugDisplay.textContent = 'course-slug';
+        }
+        
+        // Handle Enter key in permalink input
+        slugInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                savePermalink();
+            }
+        });
+    }
+    
+});
 
 // Feature tabs functionality for empty state
 function initializeFeatureTabs() {
@@ -2672,7 +2803,159 @@ document.addEventListener('DOMContentLoaded', function() {
         updateQuestionCount();
         updateQuizOverview();
     }
+    
+    // Add event listeners for buttons
+    document.addEventListener('click', function(e) {
+        // Tab switching
+        if (e.target.closest('.sikshya-nav-link')) {
+            e.preventDefault();
+            const tabLink = e.target.closest('.sikshya-nav-link');
+            const tabId = tabLink.getAttribute('data-tab');
+            if (tabId) {
+                switchTab(tabId);
+            }
+        }
+        
+        // Preview course
+        if (e.target.closest('#preview-course-btn') || e.target.closest('#sidebar-preview-btn')) {
+            e.preventDefault();
+            previewCourse();
+        }
+    });
+    
+    // Load course data if course ID is present in URL
+    loadCourseDataIfNeeded();
 });
+
+// Load course data if course ID is present in URL
+function loadCourseDataIfNeeded() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const courseId = urlParams.get('id');
+    
+    if (courseId && courseId !== '0') {
+        console.log('Loading course data for ID:', courseId);
+        
+        // Show loading state
+        showLoadingState();
+        
+        // Load course data via AJAX
+        $.ajax({
+            url: sikshya_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'sikshya_load_course_data',
+                nonce: sikshya_ajax.nonce,
+                course_id: courseId
+            },
+            success: function(response) {
+                hideLoadingState();
+                
+                if (response.success && response.data) {
+                    populateCourseForm(response.data);
+                    console.log('Course data loaded successfully');
+                } else {
+                    console.error('Failed to load course data:', response.data);
+                    if (window.SikshyaToast) {
+                        window.SikshyaToast.errorMessage('Failed to load course data');
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                hideLoadingState();
+                console.error('AJAX Error loading course data:', error);
+                if (window.SikshyaToast) {
+                    window.SikshyaToast.errorMessage('Error loading course data');
+                }
+            }
+        });
+    }
+}
+
+// Populate form with course data
+function populateCourseForm(courseData) {
+    console.log('Populating form with course data:', courseData);
+    
+    // Basic course information
+    if (courseData.title) {
+        const titleField = document.querySelector('input[name="title"]');
+        if (titleField) {
+            titleField.value = courseData.title;
+        }
+    }
+    
+    if (courseData.description) {
+        const descField = document.querySelector('textarea[name="description"]');
+        if (descField) {
+            descField.value = courseData.description;
+        }
+    }
+    
+    if (courseData.slug) {
+        const slugDisplay = document.getElementById('permalink-slug');
+        if (slugDisplay) {
+            slugDisplay.textContent = courseData.slug;
+        }
+    }
+    
+    // Course meta fields
+    if (courseData.meta) {
+        Object.keys(courseData.meta).forEach(key => {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field) {
+                if (field.type === 'checkbox') {
+                    field.checked = courseData.meta[key] === '1' || courseData.meta[key] === true;
+                } else {
+                    field.value = courseData.meta[key];
+                }
+            }
+        });
+    }
+    
+    // Trigger any necessary UI updates
+    if (courseData.title) {
+        // Update permalink if title was set
+        const titleInput = document.querySelector('input[name="title"]');
+        if (titleInput) {
+            titleInput.dispatchEvent(new Event('input'));
+        }
+    }
+    
+    console.log('Form populated successfully');
+}
+
+// Show loading state
+function showLoadingState() {
+    const form = document.getElementById('sikshya-course-builder-form');
+    if (form) {
+        form.classList.add('loading');
+    }
+    
+    // Show loading overlay
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'sikshya-loading-overlay';
+    loadingOverlay.className = 'sikshya-loading-overlay';
+    loadingOverlay.innerHTML = `
+        <div class="sikshya-loading-spinner">
+            <div class="sikshya-spinner"></div>
+            <p>Loading course data...</p>
+        </div>
+    `;
+    document.body.appendChild(loadingOverlay);
+}
+
+// Hide loading state
+function hideLoadingState() {
+    const form = document.getElementById('sikshya-course-builder-form');
+    if (form) {
+        form.classList.remove('loading');
+    }
+    
+    // Remove loading overlay
+    const loadingOverlay = document.getElementById('sikshya-loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.remove();
+    }
+}
 
 // Add sortable icons to chapters
 function addSortableIconsToChapters() {
