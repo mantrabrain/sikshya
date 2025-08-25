@@ -154,25 +154,32 @@ abstract class AbstractTab implements TabInterface
         $fields = $this->getFields();
         $success = true;
         
-        foreach ($fields as $field_id => $field_config) {
-            $value = $data[$field_id] ?? '';
+        // Save structured fields (sections)
+        foreach ($fields as $section_id => $section_config) {
+            $section_fields = $section_config['fields'] ?? [];
             
-            // Sanitize the value
-            $value = $this->sanitizeField($field_id, $value, $field_config);
-            
-            // Save to post meta with _sikshya_ prefix
-            $meta_key = '_sikshya_' . $field_id;
-            $result = update_post_meta($course_id, $meta_key, $value);
-            
-            // update_post_meta returns false if value didn't change, but that's not a failure
-            // We only consider it a failure if the post doesn't exist or we don't have permission
-            if ($result === false && !current_user_can('edit_post', $course_id)) {
-                $success = false;
+            foreach ($section_fields as $field_id => $field_config) {
+                $value = $data[$field_id] ?? '';
+                
+                // Sanitize the value using field configuration
+                $sanitized_value = $this->sanitizeField($field_id, $value, $field_config);
+                
+                // Save to post meta with _sikshya_ prefix
+                $meta_key = '_sikshya_' . $field_id;
+                $result = update_post_meta($course_id, $meta_key, $sanitized_value);
+                
+                // update_post_meta returns false if value didn't change, but that's not a failure
+                // We only consider it a failure if the post doesn't exist or we don't have permission
+                if ($result === false && !current_user_can('edit_post', $course_id)) {
+                    $success = false;
+                }
             }
         }
         
         return $success;
     }
+    
+
     
     /**
      * Sanitize a field value
@@ -226,16 +233,21 @@ abstract class AbstractTab implements TabInterface
         $fields = $this->getFields();
         $data = [];
         
-        foreach ($fields as $field_id => $field_config) {
-            $meta_key = '_sikshya_' . $field_id;
-            $value = get_post_meta($course_id, $meta_key, true);
+        // Load structured fields (sections)
+        foreach ($fields as $section_id => $section_config) {
+            $section_fields = $section_config['fields'] ?? [];
             
-            // Set default value if empty
-            if (empty($value) && isset($field_config['default'])) {
-                $value = $field_config['default'];
+            foreach ($section_fields as $field_id => $field_config) {
+                $meta_key = '_sikshya_' . $field_id;
+                $value = get_post_meta($course_id, $meta_key, true);
+                
+                // Set default value if empty
+                if (empty($value) && isset($field_config['default'])) {
+                    $value = $field_config['default'];
+                }
+                
+                $data[$field_id] = $value;
             }
-            
-            $data[$field_id] = $value;
         }
         
         return $data;
@@ -270,6 +282,166 @@ abstract class AbstractTab implements TabInterface
      * @return string
      */
     abstract protected function renderContent(array $data): string;
+    
+    /**
+     * Render sections dynamically based on field definitions
+     * 
+     * @param array $data
+     * @return string
+     */
+    protected function renderSections(array $data): string
+    {
+        ob_start();
+        
+        $fields = $this->getFields();
+        
+        foreach ($fields as $section_id => $section_config) {
+            $section = $section_config['section'] ?? [];
+            $section_fields = $section_config['fields'] ?? [];
+            
+            // Render section header
+            ?>
+            <div class="sikshya-section sikshya-section-modern">
+                <div class="sikshya-section-header">
+                    <div class="sikshya-section-icon">
+                        <?php 
+                        $icon = $section['icon'] ?? '';
+                        if (!empty($icon)) {
+                            // Allow SVG elements and attributes for icons
+                            $allowed_html = array(
+                                'svg' => array(
+                                    'width' => array(),
+                                    'height' => array(),
+                                    'viewbox' => array(),
+                                    'fill' => array(),
+                                    'stroke' => array(),
+                                    'stroke-width' => array(),
+                                    'xmlns' => array(),
+                                ),
+                                'path' => array(
+                                    'stroke-linecap' => array(),
+                                    'stroke-linejoin' => array(),
+                                    'd' => array(),
+                                    'fill' => array(),
+                                    'stroke' => array(),
+                                    'stroke-width' => array(),
+                                ),
+                                'circle' => array(
+                                    'cx' => array(),
+                                    'cy' => array(),
+                                    'r' => array(),
+                                    'fill' => array(),
+                                    'stroke' => array(),
+                                    'stroke-width' => array(),
+                                ),
+                                'rect' => array(
+                                    'x' => array(),
+                                    'y' => array(),
+                                    'width' => array(),
+                                    'height' => array(),
+                                    'fill' => array(),
+                                    'stroke' => array(),
+                                    'stroke-width' => array(),
+                                ),
+                            );
+                            echo wp_kses($icon, $allowed_html);
+                        } else {
+                            // Fallback icon if none provided
+                            echo '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>';
+                        }
+                        ?>
+                    </div>
+                    <div class="sikshya-section-content">
+                        <h3 class="sikshya-section-title"><?php echo esc_html($section['title'] ?? ''); ?></h3>
+                        <p class="sikshya-section-desc"><?php echo esc_html($section['description'] ?? ''); ?></p>
+                    </div>
+                </div>
+                
+                <?php
+                // Render fields in order, grouping consecutive fields with the same layout
+                $current_layout = null;
+                $current_group = [];
+                
+                foreach ($section_fields as $field_id => $field_config) {
+                    $layout = $field_config['layout'] ?? 'single';
+                    
+                    // If layout changed, render the current group
+                    if ($current_layout !== null && $current_layout !== $layout) {
+                        $this->renderFieldGroup($current_group, $current_layout, $data);
+                        $current_group = [];
+                    }
+                    
+                    $current_layout = $layout;
+                    $current_group[$field_id] = $field_config;
+                }
+                
+                // Render the last group
+                if (!empty($current_group)) {
+                    $this->renderFieldGroup($current_group, $current_layout, $data);
+                }
+                ?>
+            </div>
+            <?php
+        }
+        
+        return ob_get_clean();
+    }
+    
+    /**
+     * Render a group of fields with the same layout
+     * 
+     * @param array $fields
+     * @param string $layout
+     * @param array $data
+     */
+    protected function renderFieldGroup(array $fields, string $layout, array $data): void
+    {
+        if ($layout === 'single') {
+            // Render single fields normally
+            foreach ($fields as $field_id => $field_config) {
+                $field_value = $data[$field_id] ?? '';
+                echo '<div class="sikshya-form-row">';
+                echo $this->renderField($field_id, $field_config, $field_value);
+                echo '</div>';
+            }
+        } else {
+            // Render multi-column fields
+            echo '<div class="sikshya-multi-column-row sikshya-' . esc_attr($layout) . '">';
+            
+            foreach ($fields as $field_id => $field_config) {
+                $field_value = $data[$field_id] ?? '';
+                echo '<div class="sikshya-form-row">';
+                echo $this->renderField($field_id, $field_config, $field_value);
+                echo '</div>';
+            }
+            
+            echo '</div>';
+        }
+    }
+    
+    /**
+     * Get column count from layout name
+     * 
+     * @param string $layout
+     * @return int
+     */
+    protected function getColumnCountFromLayout(string $layout): int
+    {
+        switch ($layout) {
+            case 'two_column':
+                return 2;
+            case 'three_column':
+                return 3;
+            case 'four_column':
+                return 4;
+            case 'media_row':
+                return 2; // Media fields are typically 2 columns
+            default:
+                return 1;
+        }
+    }
     
     /**
      * Render a form field
@@ -318,10 +490,14 @@ abstract class AbstractTab implements TabInterface
             case 'checkbox':
                 $checked = $value ? 'checked' : '';
                 $field_html = sprintf(
-                    '<input type="checkbox" name="%s" value="1" %s %s>',
+                    '<label class="sikshya-checkbox-label">
+                        <input type="checkbox" name="%s" value="1" %s %s>
+                        %s
+                    </label>',
                     esc_attr($field_id),
                     $checked,
-                    $required
+                    $required,
+                    esc_html($label)
                 );
                 break;
                 
@@ -356,6 +532,17 @@ abstract class AbstractTab implements TabInterface
                 $field_html = $this->renderMediaUploadField($field_id, $field_config, $value, $media_type);
                 break;
                 
+            case 'repeater':
+                $field_html = $this->renderRepeaterField($field_id, $field_config, $value);
+                break;
+                
+            case 'permalink':
+                $field_html = $this->renderPermalinkField($field_id, $field_config, $value);
+                break;
+            case 'curriculum_builder':
+                $field_html = $this->renderCurriculumBuilderField($field_id, $field_config, $value);
+                break;
+                
             default:
                 $field_html = sprintf(
                     '<input type="%s" name="%s" value="%s" placeholder="%s" %s>',
@@ -367,14 +554,42 @@ abstract class AbstractTab implements TabInterface
                 );
         }
         
+        // For checkbox fields, the label is already included in the field_html
+        if ($field_type === 'checkbox') {
+            $description_html = !empty($description) ? sprintf('<p class="sikshya-help-text">%s</p>', esc_html($description)) : '';
+            return sprintf(
+                '<div class="sikshya-form-row">
+                    %s
+                    %s
+                </div>',
+                $field_html,
+                $description_html
+            );
+        }
+        
+        // For curriculum builder fields, the label is already included in the field_html
+        if ($field_type === 'curriculum_builder') {
+            $description_html = !empty($description) ? sprintf('<p class="sikshya-help-text">%s</p>', esc_html($description)) : '';
+            return sprintf(
+                '<div class="sikshya-form-row">
+                    %s
+                    %s
+                </div>',
+                $field_html,
+                $description_html
+            );
+        }
+        
         return sprintf(
             '<div class="sikshya-form-row">
                 <label>%s %s</label>
                 %s
+                %s
             </div>',
             esc_html($label),
             $required ? '<span class="required">*</span>' : '',
-            $field_html
+            $field_html,
+            !empty($description) ? sprintf('<p class="sikshya-help-text">%s</p>', esc_html($description)) : ''
         );
     }
     
@@ -413,7 +628,7 @@ abstract class AbstractTab implements TabInterface
         <div class="sikshya-media-upload">
             <div class="sikshya-media-preview" id="<?php echo esc_attr($field_id); ?>_preview">
                 <div class="sikshya-media-placeholder">
-                    <?php echo $icon; ?>
+                                                <?php echo wp_kses_post($icon); ?>
                     <span><?php echo esc_html($placeholder_text); ?></span>
                 </div>
             </div>
@@ -424,11 +639,214 @@ abstract class AbstractTab implements TabInterface
                 </svg>
                 <?php echo esc_html($button_text); ?>
             </button>
-            <?php if (!empty($description)): ?>
-                <p class="sikshya-help-text"><?php echo esc_html($description); ?></p>
-            <?php endif; ?>
         </div>
         <?php
         return ob_get_clean();
     }
+    
+    /**
+     * Render a repeater field
+     * 
+     * @param string $field_id
+     * @param array $field_config
+     * @param mixed $value
+     * @return string
+     */
+    protected function renderRepeaterField(string $field_id, array $field_config, $value): string
+    {
+        $label = $field_config['label'] ?? $field_id;
+        $placeholder = $field_config['placeholder'] ?? '';
+        $add_button_text = $field_config['add_button_text'] ?? __('Add Item', 'sikshya');
+        
+        // Ensure value is an array
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+        
+        // If empty, provide at least one item
+        if (empty($value)) {
+            $value = [''];
+        }
+        
+        ob_start();
+        ?>
+        <div class="sikshya-repeater" id="<?php echo esc_attr($field_id); ?>">
+            <?php foreach ($value as $index => $item_value): ?>
+                <div class="sikshya-repeater-item">
+                    <div class="sikshya-repeater-input">
+                        <input type="text" name="<?php echo esc_attr($field_id); ?>[]" value="<?php echo esc_attr($item_value); ?>" placeholder="<?php echo esc_attr($placeholder); ?>">
+                    </div>
+                    <button type="button" class="sikshya-btn sikshya-btn-icon sikshya-btn-danger" onclick="removeRepeaterItem(this)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-add-item" onclick="addRepeaterItem('<?php echo esc_attr($field_id); ?>', '<?php echo esc_attr($field_id); ?>[]', '<?php echo esc_attr($placeholder); ?>')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            <?php echo esc_html($add_button_text); ?>
+        </button>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Render a permalink field
+     * 
+     * @param string $field_id
+     * @param array $field_config
+     * @param mixed $value
+     * @return string
+     */
+    protected function renderPermalinkField(string $field_id, array $field_config, $value): string
+    {
+        $label = $field_config['label'] ?? $field_id;
+        $description = $field_config['description'] ?? '';
+        
+        ob_start();
+        ?>
+        <div class="sikshya-permalink-wrapper">
+            <div class="sikshya-permalink-display" id="permalink-display">
+                <span class="sikshya-permalink-base"><?php echo esc_url(home_url('/courses/')); ?></span>
+                <span class="sikshya-permalink-slug" id="permalink-slug"><?php echo esc_html($value); ?></span>
+            </div>
+            <?php if (empty($value) || !isset($this->data['id'])): ?>
+                <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" id="edit-permalink-btn" onclick="togglePermalinkEdit()">
+                    <?php _e('Edit', 'sikshya'); ?>
+                </button>
+                <div class="sikshya-permalink-edit" id="permalink-edit" style="display: none;">
+                    <input type="text" name="<?php echo esc_attr($field_id); ?>" id="permalink-input" value="<?php echo esc_attr($value); ?>" placeholder="<?php _e('course-slug', 'sikshya'); ?>">
+                    <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-sm" onclick="savePermalink()">
+                        <?php _e('OK', 'sikshya'); ?>
+                    </button>
+                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" onclick="cancelPermalinkEdit()">
+                        <?php _e('Cancel', 'sikshya'); ?>
+                    </button>
+                </div>
+            <?php else: ?>
+                <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" id="edit-permalink-btn" onclick="togglePermalinkEdit()" title="<?php _e('Click to edit permalink', 'sikshya'); ?>">
+                    <?php _e('Edit', 'sikshya'); ?>
+                </button>
+                <div class="sikshya-permalink-edit" id="permalink-edit" style="display: none;">
+                    <input type="text" name="<?php echo esc_attr($field_id); ?>" id="permalink-input" value="<?php echo esc_attr($value); ?>" placeholder="<?php _e('course-slug', 'sikshya'); ?>">
+                    <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-sm" onclick="savePermalink()">
+                        <?php _e('OK', 'sikshya'); ?>
+                    </button>
+                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" onclick="cancelPermalinkEdit()">
+                        <?php _e('Cancel', 'sikshya'); ?>
+                    </button>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php if (!empty($description)): ?>
+            <p class="sikshya-help-text">
+                <?php if (empty($value) || !isset($this->data['id'])): ?>
+                    <?php _e('The URL-friendly version of your course title. Auto-generated from the title.', 'sikshya'); ?>
+                <?php else: ?>
+                    <?php _e('The URL-friendly version of your course title. Click Edit to modify.', 'sikshya'); ?>
+                <?php endif; ?>
+            </p>
+        <?php endif; ?>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Render a curriculum builder field
+     * 
+     * @param string $field_id
+     * @param array $field_config
+     * @param mixed $value
+     * @return string
+     */
+    protected function renderCurriculumBuilderField(string $field_id, array $field_config, $value): string
+    {
+        $label = $field_config['label'] ?? '';
+        $description = $field_config['description'] ?? '';
+        
+        ob_start();
+        ?>
+        <div class="sikshya-form-row">
+            <label><?php echo esc_html($label); ?></label>
+            <div class="sikshya-curriculum-builder" id="curriculum-content">
+                <!-- Compact Empty State -->
+                <div class="sikshya-curriculum-empty-state" id="curriculum-empty-state">
+                    <!-- Header with Inline Actions -->
+                    <div class="sikshya-empty-header">
+                        <div class="sikshya-empty-content">
+                            <div class="sikshya-empty-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-chapter-icon="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                            </div>
+                            <div class="sikshya-empty-text">
+                                <h3><?php _e('Create Your First Chapter', 'sikshya'); ?></h3>
+                                <p><?php _e('Start building your course curriculum with organized chapters and lessons.', 'sikshya'); ?></p>
+                            </div>
+                        </div>
+                        <div class="sikshya-empty-actions">
+                            <button class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-chapter-icon="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <?php _e('Add Chapter', 'sikshya'); ?>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Existing Curriculum Structure (Hidden when empty) -->
+                <div class="sikshya-curriculum-items" id="curriculum-items" style="display: none;">
+                    <?php
+                    // Sample chapter for demo (when not empty)
+                    // This will be dynamically populated via AJAX using chapter.php template
+                    ?>
+                </div>
+            </div>
+
+            <!-- Curriculum Actions -->
+            <div class="sikshya-curriculum-actions">
+                <button class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-chapter-icon="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <?php _e('Add Chapter', 'sikshya'); ?>
+                </button>
+                
+                <!-- Demo Button to Toggle Content -->
+                <button class="sikshya-btn sikshya-btn-secondary" onclick="toggleDemoContent()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    <?php _e('Load Sample Chapter', 'sikshya'); ?>
+                </button>
+                
+                <div class="sikshya-action-divider"></div>
+                
+                <button class="sikshya-btn sikshya-btn-secondary" onclick="importFromTemplate()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                    </svg>
+                    <?php _e('Import from Template', 'sikshya'); ?>
+                </button>
+                
+                <button class="sikshya-btn sikshya-btn-secondary" onclick="bulkImport()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <?php _e('Bulk Import', 'sikshya'); ?>
+                </button>
+            </div>
+            
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
 }

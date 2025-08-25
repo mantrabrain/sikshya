@@ -119,7 +119,7 @@ if (!defined('ABSPATH')) {
                     </svg>
                     Upload Featured Image
                 </button>
-                <p class="sikshya-help-text">Recommended: 1200x675px (16:9 ratio)</p>
+                <p class="sikshya-help-text">Recommended:ddddd 1200x675px (16:9 ratio)</p>
             </div>
         </div>
         

@@ -682,6 +682,14 @@
     border-radius: var(--sikshya-radius-lg);
     color: var(--sikshya-primary);
     flex-shrink: 0;
+    min-width: 48px;
+    min-height: 48px;
+}
+
+.sikshya-section-icon svg {
+    width: 24px;
+    height: 24px;
+    color: inherit;
 }
 
 .sikshya-section-content {
@@ -743,6 +751,52 @@
     .sikshya-media-row .sikshya-form-row {
         margin-bottom: var(--sikshya-space-4);
     }
+}
+
+/* Media Upload Styles */
+.sikshya-media-upload {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sikshya-space-3);
+}
+
+.sikshya-media-preview {
+    border: 2px dashed var(--sikshya-gray-300);
+    border-radius: var(--sikshya-radius-lg);
+    padding: var(--sikshya-space-8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sikshya-gray-50);
+    min-height: 120px;
+    transition: var(--sikshya-transition-colors);
+}
+
+.sikshya-media-preview:hover {
+    border-color: var(--sikshya-primary);
+    background: var(--sikshya-primary-bg);
+}
+
+.sikshya-media-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    color: var(--sikshya-gray-500);
+    text-align: center;
+}
+
+.sikshya-media-placeholder svg {
+    color: var(--sikshya-gray-400);
+}
+
+.sikshya-media-placeholder span {
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-medium);
+}
+
+.sikshya-media-btn {
+    align-self: flex-start;
 }
 
 .sikshya-form-row label {
@@ -5120,6 +5174,50 @@ body .sikshya-modal-overlay {
 #sikshya-course-builder-form.loading {
     pointer-events: none;
     opacity: 0.7;
+}
+
+/* Multi-Column Layout System */
+.sikshya-multi-column-row {
+    display: grid;
+    gap: var(--sikshya-space-6);
+    margin-bottom: var(--sikshya-space-6);
+}
+
+/* Two Column Layout */
+.sikshya-two_column {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Three Column Layout */
+.sikshya-three_column {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* Four Column Layout */
+.sikshya-four_column {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Responsive Design for Multi-Column Layouts */
+@media (max-width: 768px) {
+    .sikshya-multi-column-row {
+        grid-template-columns: 1fr !important;
+        gap: var(--sikshya-space-4);
+    }
+    
+    .sikshya-two_column,
+    .sikshya-three_column,
+    .sikshya-four_column {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Medium screens - stack 3+ columns to 2 columns */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sikshya-three_column,
+    .sikshya-four_column {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 

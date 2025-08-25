@@ -588,7 +588,7 @@ class Course
         
         return $query->found_posts;
     }
-    
+
     /**
      * Delete course
      * 
