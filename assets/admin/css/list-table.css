@@ -493,33 +493,38 @@
 .sikshya-status-badge {
     display: inline-flex;
     align-items: center;
-    padding: var(--sikshya-space-1) var(--sikshya-space-3);
-    border-radius: var(--sikshya-radius-full);
-    font-size: var(--sikshya-text-xs);
-    font-weight: var(--sikshya-font-medium);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
     white-space: nowrap;
+    border: 1px solid transparent;
 }
 
 .sikshya-status-publish {
-    background: var(--sikshya-success-bg);
-    color: var(--sikshya-success);
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
 }
 
 .sikshya-status-draft {
-    background: var(--sikshya-gray-100);
-    color: var(--sikshya-gray-600);
+    background: #f3f4f6;
+    color: #6b7280;
+    border-color: #e5e7eb;
 }
 
 .sikshya-status-private {
-    background: var(--sikshya-warning-bg);
-    color: var(--sikshya-warning);
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
 }
 
 .sikshya-status-pending {
-    background: var(--sikshya-info-bg);
-    color: var(--sikshya-info);
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
 }
 
 /* ===== PRICE DISPLAY ===== */

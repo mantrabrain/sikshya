@@ -422,18 +422,31 @@ class CoursesListTable extends AbstractListTable
         $title = $item->post_title;
         $edit_url = admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->ID);
         
-        // Get course details
-        $lessons = $item->meta['course_lessons'] ?? 0;
-        $quizzes = $item->meta['course_quizzes'] ?? 0;
-        $assignments = $item->meta['course_assignments'] ?? 0;
-        $duration = $item->meta['course_duration'] ?? 0;
+        $delete_url = wp_nonce_url(admin_url('admin.php?page=sikshya-courses&action=delete&id=' . $item->ID), 'delete-course_' . $item->ID);
         
-        $actions = [
-            'edit' => sprintf('<a href="%s">%s</a>', esc_url($edit_url), __('Edit', 'sikshya')),
-            'view' => sprintf('<a href="#" onclick="return false;">%s</a>', __('View', 'sikshya')),
-        ];
-
-        $row_actions = $this->row_actions($actions);
+        $row_actions = '<div class="row-actions">';
+        $row_actions .= '<span class="edit">';
+        $row_actions .= '<a href="' . esc_url($edit_url) . '">';
+        $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
+        $row_actions .= '</svg>';
+        $row_actions .= esc_html__('Edit', 'sikshya') . '</a> | </span>';
+        
+        $row_actions .= '<span class="view">';
+        $row_actions .= '<a href="#" onclick="return false;">';
+        $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>';
+        $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+        $row_actions .= '</svg>';
+        $row_actions .= esc_html__('View', 'sikshya') . '</a> | </span>';
+        
+        $row_actions .= '<span class="delete">';
+        $row_actions .= '<a href="' . esc_url($delete_url) . '" onclick="return confirm(\'' . esc_js(__('Are you sure you want to delete this course?', 'sikshya')) . '\');">';
+        $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>';
+        $row_actions .= '</svg>';
+        $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
+        $row_actions .= '</div>';
         
         $output = '<div class="sikshya-course-title-wrapper">';
         $output .= '<div class="sikshya-course-thumbnail">';
@@ -446,13 +459,6 @@ class CoursesListTable extends AbstractListTable
             esc_url($edit_url),
             esc_html($title)
         );
-        
-        $output .= '<div class="sikshya-course-details">';
-        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>' . esc_html($lessons) . ' Lessons</span>';
-        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' . esc_html($quizzes) . ' Quizzes</span>';
-        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>' . esc_html($assignments) . ' Assignments</span>';
-        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' . esc_html($duration) . 'h Duration</span>';
-        $output .= '</div>';
         $output .= '</div>';
         $output .= '</div>';
         
