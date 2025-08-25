@@ -129,6 +129,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateQuestionCount();
         updateQuizOverview();
     }
+    
+    // Note: Form fields are populated by PHP, not JavaScript
+    if (window.sikshyaCourseBuilder && window.sikshyaCourseBuilder.courseData) {
+        console.log('Sikshya: Course data available:', window.sikshyaCourseBuilder.courseData);
+    } else {
+        console.log('Sikshya: No course data available');
+    }
 });
 
 // Pricing toggle
@@ -2823,53 +2830,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Load course data if course ID is present in URL
-    loadCourseDataIfNeeded();
+    // Course data is now loaded directly in PHP template, no need for AJAX loading
+    console.log('Sikshya: Course data loaded directly in PHP template');
 });
 
-// Load course data if course ID is present in URL
-function loadCourseDataIfNeeded() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const courseId = urlParams.get('id');
-    
-    if (courseId && courseId !== '0') {
-        console.log('Loading course data for ID:', courseId);
-        
-        // Show loading state
-        showLoadingState();
-        
-        // Load course data via AJAX
-        $.ajax({
-            url: sikshya_ajax.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'sikshya_load_course_data',
-                nonce: sikshya_ajax.nonce,
-                course_id: courseId
-            },
-            success: function(response) {
-                hideLoadingState();
-                
-                if (response.success && response.data) {
-                    populateCourseForm(response.data);
-                    console.log('Course data loaded successfully');
-                } else {
-                    console.error('Failed to load course data:', response.data);
-                    if (window.SikshyaToast) {
-                        window.SikshyaToast.errorMessage('Failed to load course data');
-                    }
-                }
-            },
-            error: function(xhr, status, error) {
-                hideLoadingState();
-                console.error('AJAX Error loading course data:', error);
-                if (window.SikshyaToast) {
-                    window.SikshyaToast.errorMessage('Error loading course data');
-                }
-            }
-        });
-    }
-}
+
+
+
 
 // Populate form with course data
 function populateCourseForm(courseData) {
@@ -2878,15 +2845,23 @@ function populateCourseForm(courseData) {
     // Basic course information
     if (courseData.title) {
         const titleField = document.querySelector('input[name="title"]');
+        console.log('Sikshya: Title field found:', titleField);
         if (titleField) {
             titleField.value = courseData.title;
+            console.log('Sikshya: Set title field value to:', courseData.title);
+        } else {
+            console.log('Sikshya: Title field not found');
         }
     }
     
     if (courseData.description) {
         const descField = document.querySelector('textarea[name="description"]');
+        console.log('Sikshya: Description field found:', descField);
         if (descField) {
             descField.value = courseData.description;
+            console.log('Sikshya: Set description field value to:', courseData.description);
+        } else {
+            console.log('Sikshya: Description field not found');
         }
     }
     
@@ -2899,14 +2874,20 @@ function populateCourseForm(courseData) {
     
     // Course meta fields
     if (courseData.meta) {
+        console.log('Sikshya: Processing meta fields:', courseData.meta);
         Object.keys(courseData.meta).forEach(key => {
             const field = document.querySelector(`[name="${key}"]`);
+            console.log('Sikshya: Meta field', key, 'found:', field);
             if (field) {
                 if (field.type === 'checkbox') {
                     field.checked = courseData.meta[key] === '1' || courseData.meta[key] === true;
+                    console.log('Sikshya: Set checkbox field', key, 'to:', field.checked);
                 } else {
                     field.value = courseData.meta[key];
+                    console.log('Sikshya: Set field', key, 'value to:', courseData.meta[key]);
                 }
+            } else {
+                console.log('Sikshya: Meta field', key, 'not found in DOM');
             }
         });
     }
@@ -2920,7 +2901,16 @@ function populateCourseForm(courseData) {
         }
     }
     
-    console.log('Form populated successfully');
+    console.log('Sikshya: Form populated successfully');
+    console.log('Sikshya: All form fields after population:', {
+        title: document.querySelector('input[name="title"]')?.value,
+        description: document.querySelector('textarea[name="description"]')?.value,
+        short_description: document.querySelector('input[name="short_description"]')?.value,
+        category: document.querySelector('select[name="category"]')?.value,
+        difficulty: document.querySelector('select[name="difficulty"]')?.value,
+        duration: document.querySelector('input[name="duration"]')?.value,
+        language: document.querySelector('select[name="language"]')?.value
+    });
 }
 
 // Show loading state

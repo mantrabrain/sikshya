@@ -171,7 +171,9 @@ class CourseBuilderManager
                 <?php
                 $data = [];
                 if ($course_id > 0) {
+                    error_log('Sikshya: Loading data for tab: ' . $tab->getId() . ' with course_id: ' . $course_id);
                     $data = $tab->load($course_id);
+                    error_log('Sikshya: Tab ' . $tab->getId() . ' data: ' . print_r($data, true));
                 }
                 echo $tab->render($data, $active_tab);
                 ?>

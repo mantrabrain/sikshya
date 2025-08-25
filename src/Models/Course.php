@@ -1,453 +1,655 @@
 <?php
-
-namespace Sikshya\Models;
-
-use WP_Post;
-use Sikshya\Constants\PostTypes;
-
 /**
  * Course Model
  * 
- * Handles all course-related data operations
- * 
- * @package Sikshya\Models
+ * @package Sikshya
+ * @since 1.0.0
  */
+
+namespace Sikshya\Models;
+
+use Sikshya\Constants\PostTypes;
+
+// Prevent direct access
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class Course
 {
     /**
+     * Course post object
+     * 
+     * @var \WP_Post|null
+     */
+    private $post;
+    
+    /**
+     * Course meta data
+     * 
+     * @var array
+     */
+    private $meta = [];
+    
+    /**
+     * Course ID
+     * 
+     * @var int
+     */
+    private $id;
+    
+    /**
      * Constructor
-     */
-    public function __construct()
-    {
-        // No dependencies needed for this model
-    }
-
-    /**
-     * Get all courses
      * 
-     * @param array $args Query arguments
-     * @return array Array of courses
+     * @param int|WP_Post $course_id_or_post
      */
-    public function getAll(array $args = []): array
+    public function __construct($course_id_or_post = 0)
     {
-        $defaults = [
-            'post_type' => PostTypes::COURSE,
-            'post_status' => 'publish',
-            'posts_per_page' => -1,
-            'orderby' => 'date',
-            'order' => 'DESC'
-        ];
-
-        $args = wp_parse_args($args, $defaults);
-        
-        $query = new \WP_Query($args);
-        
-        return $query->posts;
-    }
-
-    /**
-     * Get course by ID
-     * 
-     * @param int $course_id Course ID
-     * @return WP_Post|null Course post or null
-     */
-    public function getById(int $course_id): ?WP_Post
-    {
-        $course = get_post($course_id);
-        
-        if (!$course || $course->post_type !== PostTypes::COURSE) {
-            return null;
+        if ($course_id_or_post instanceof \WP_Post) {
+            $this->post = $course_id_or_post;
+            $this->id = $course_id_or_post->ID;
+        } else {
+            $this->id = (int) $course_id_or_post;
+            if ($this->id > 0) {
+                $this->post = get_post($this->id);
+            }
         }
-
-        return $course;
+        
+        if ($this->post) {
+            $this->loadMeta();
+        }
     }
-
+    
+    /**
+     * Load course meta data
+     * 
+     * @return void
+     */
+    private function loadMeta(): void
+    {
+        if (!$this->post) {
+            return;
+        }
+        
+        $meta = get_post_meta($this->id);
+        foreach ($meta as $key => $values) {
+            if (is_array($values) && !empty($values)) {
+                $this->meta[$key] = $values[0]; // Get first value
+            }
+        }
+    }
+    
+    /**
+     * Check if course exists
+     * 
+     * @return bool
+     */
+    public function exists(): bool
+    {
+        return $this->post !== null && $this->post->post_type === PostTypes::COURSE;
+    }
+    
+    /**
+     * Get course ID
+     * 
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+    
+    /**
+     * Get course title
+     * 
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->post ? $this->post->post_title : '';
+    }
+    
+    /**
+     * Get course description/content
+     * 
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->post ? $this->post->post_content : '';
+    }
+    
+    /**
+     * Get course excerpt
+     * 
+     * @return string
+     */
+    public function getExcerpt(): string
+    {
+        return $this->post ? $this->post->post_excerpt : '';
+    }
+    
+    /**
+     * Get course slug
+     * 
+     * @return string
+     */
+    public function getSlug(): string
+    {
+        return $this->post ? $this->post->post_name : '';
+    }
+    
+    /**
+     * Get course status
+     * 
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->post ? $this->post->post_status : '';
+    }
+    
+    /**
+     * Get course author ID
+     * 
+     * @return int
+     */
+    public function getAuthorId(): int
+    {
+        return $this->post ? $this->post->post_author : 0;
+    }
+    
+    /**
+     * Get course author name
+     * 
+     * @return string
+     */
+    public function getAuthorName(): string
+    {
+        if (!$this->post) {
+            return '';
+        }
+        
+        $author = get_userdata($this->post->post_author);
+        return $author ? $author->display_name : '';
+    }
+    
+    /**
+     * Get course date
+     * 
+     * @param string $format
+     * @return string
+     */
+    public function getDate(string $format = 'Y-m-d H:i:s'): string
+    {
+        return $this->post ? get_the_date($format, $this->post) : '';
+    }
+    
+    /**
+     * Get course modified date
+     * 
+     * @param string $format
+     * @return string
+     */
+    public function getModifiedDate(string $format = 'Y-m-d H:i:s'): string
+    {
+        return $this->post ? get_the_modified_date($format, $this->post) : '';
+    }
+    
+    /**
+     * Get course permalink
+     * 
+     * @return string
+     */
+    public function getPermalink(): string
+    {
+        return $this->post ? get_permalink($this->post) : '';
+    }
+    
+    /**
+     * Get course edit link
+     * 
+     * @return string
+     */
+    public function getEditLink(): string
+    {
+        if (!$this->post) {
+            return '';
+        }
+        
+        $edit_link = get_edit_post_link($this->post);
+        return $edit_link ? $edit_link : '';
+    }
+    
+    /**
+     * Get course preview link
+     * 
+     * @return string
+     */
+    public function getPreviewLink(): string
+    {
+        if (!$this->post) {
+            return '';
+        }
+        
+        $preview_link = get_preview_post_link($this->post);
+        return $preview_link ? $preview_link : '';
+    }
+    
+    /**
+     * Get course thumbnail URL
+     * 
+     * @param string $size
+     * @return string
+     */
+    public function getThumbnailUrl(string $size = 'medium'): string
+    {
+        if (!$this->post) {
+            return '';
+        }
+        
+        $thumbnail_id = get_post_thumbnail_id($this->post);
+        if ($thumbnail_id) {
+            $image = wp_get_attachment_image_src($thumbnail_id, $size);
+            return $image ? $image[0] : '';
+        }
+        
+        return '';
+    }
+    
+    /**
+     * Get course thumbnail HTML
+     * 
+     * @param string $size
+     * @param array $attr
+     * @return string
+     */
+    public function getThumbnailHtml(string $size = 'medium', array $attr = []): string
+    {
+        if (!$this->post) {
+            return '';
+        }
+        
+        return get_the_post_thumbnail($this->post, $size, $attr);
+    }
+    
+    /**
+     * Get course meta value
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getMeta(string $key, $default = '')
+    {
+        return $this->meta[$key] ?? $default;
+    }
+    
+    /**
+     * Set course meta value
+     * 
+     * @param string $key
+     * @param mixed $value
+     * @return bool
+     */
+    public function setMeta(string $key, $value): bool
+    {
+        if (!$this->post) {
+            return false;
+        }
+        
+        $result = update_post_meta($this->id, $key, $value);
+        if ($result !== false) {
+            $this->meta[$key] = $value;
+        }
+        
+        return $result !== false;
+    }
+    
+    /**
+     * Delete course meta value
+     * 
+     * @param string $key
+     * @return bool
+     */
+    public function deleteMeta(string $key): bool
+    {
+        if (!$this->post) {
+            return false;
+        }
+        
+        $result = delete_post_meta($this->id, $key);
+        if ($result) {
+            unset($this->meta[$key]);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Get all course meta
+     * 
+     * @return array
+     */
+    public function getAllMeta(): array
+    {
+        return $this->meta;
+    }
+    
+    /**
+     * Magic method to handle dynamic getters for meta fields
+     * 
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        // Handle getter methods like getCoursePrice(), getTestField(), etc.
+        if (strpos($name, 'get') === 0) {
+            $field_name = lcfirst(substr($name, 3)); // Remove 'get' prefix
+            
+            // Special handling for title and description - get from post table
+            if ($field_name === 'title') {
+                return $this->getTitle();
+            }
+            
+            if ($field_name === 'description') {
+                return $this->getDescription();
+            }
+            
+            // All other fields get from meta table
+            return $this->getMeta($field_name, $arguments[0] ?? '');
+        }
+        
+        // Handle setter methods like setCoursePrice(), setTestField(), etc.
+        if (strpos($name, 'set') === 0) {
+            $field_name = lcfirst(substr($name, 3)); // Remove 'set' prefix
+            
+            // Special handling for title and description - update post table
+            if ($field_name === 'title') {
+                if (!$this->post) {
+                    return false;
+                }
+                $result = wp_update_post([
+                    'ID' => $this->id,
+                    'post_title' => $arguments[0] ?? ''
+                ]);
+                if (!is_wp_error($result)) {
+                    $this->post = get_post($this->id);
+                }
+                return !is_wp_error($result);
+            }
+            
+            if ($field_name === 'description') {
+                if (!$this->post) {
+                    return false;
+                }
+                $result = wp_update_post([
+                    'ID' => $this->id,
+                    'post_content' => $arguments[0] ?? ''
+                ]);
+                if (!is_wp_error($result)) {
+                    $this->post = get_post($this->id);
+                }
+                return !is_wp_error($result);
+            }
+            
+            // All other fields set in meta table
+            return $this->setMeta($field_name, $arguments[0] ?? '');
+        }
+        
+        throw new \BadMethodCallException("Method {$name} does not exist");
+    }
+    
+    /**
+     * Get course data as array
+     * 
+     * @return array
+     */
+    public function toArray(): array
+    {
+        if (!$this->post) {
+            return [];
+        }
+        
+        return [
+            'id' => $this->id,
+            'title' => $this->getTitle(),
+            'description' => $this->getDescription(),
+            'excerpt' => $this->getExcerpt(),
+            'slug' => $this->getSlug(),
+            'status' => $this->getStatus(),
+            'author_id' => $this->getAuthorId(),
+            'author_name' => $this->getAuthorName(),
+            'date' => $this->getDate(),
+            'modified_date' => $this->getModifiedDate(),
+            'permalink' => $this->getPermalink(),
+            'edit_link' => $this->getEditLink(),
+            'preview_link' => $this->getPreviewLink(),
+            'thumbnail_url' => $this->getThumbnailUrl(),
+            'meta' => $this->getAllMeta(),
+        ];
+    }
+    
+    /**
+     * Get course data as JSON
+     * 
+     * @return string
+     */
+    public function toJson(): string
+    {
+        return json_encode($this->toArray());
+    }
+    
     /**
      * Create a new course
      * 
-     * @param array $data Course data
-     * @return int|WP_Error Course ID or error
+     * @param array $data
+     * @return Course|null
      */
-    public function create(array $data)
+    public static function create(array $data): ?Course
     {
-        $defaults = [
-            'post_title' => '',
-            'post_content' => '',
-            'post_excerpt' => '',
-            'post_status' => 'draft',
+        $post_data = [
+            'post_title' => sanitize_text_field($data['title'] ?? 'New Course'),
+            'post_content' => wp_kses_post($data['description'] ?? ''),
+            'post_excerpt' => sanitize_textarea_field($data['excerpt'] ?? ''),
+            'post_name' => sanitize_title($data['slug'] ?? ''),
+            'post_status' => sanitize_text_field($data['status'] ?? 'draft'),
+            'post_type' => PostTypes::COURSE,
             'post_author' => get_current_user_id(),
-            'meta_input' => []
         ];
-
-        $data = wp_parse_args($data, $defaults);
         
-        // Set post type
-        $data['post_type'] = PostTypes::COURSE;
-        
-        // Create the course
-        $course_id = wp_insert_post($data);
+        $course_id = wp_insert_post($post_data);
         
         if (is_wp_error($course_id)) {
-            return $course_id;
+            return null;
         }
-
-        // Set default meta values
-        $this->setDefaultMeta($course_id);
         
-        return $course_id;
+        $course = new self($course_id);
+        
+        // Set meta fields
+        if (isset($data['meta']) && is_array($data['meta'])) {
+            foreach ($data['meta'] as $key => $value) {
+                $course->setMeta($key, $value);
+            }
+        }
+        
+        return $course;
     }
-
+    
     /**
-     * Update course
+     * Find course by ID
      * 
-     * @param int $course_id Course ID
-     * @param array $data Course data
-     * @return int|WP_Error Course ID or error
+     * @param int $course_id
+     * @return Course|null
      */
-    public function update(int $course_id, array $data)
+    public static function find(int $course_id): ?Course
     {
-        $data['ID'] = $course_id;
-        $data['post_type'] = PostTypes::COURSE;
-        
-        return wp_update_post($data);
+        $course = new self($course_id);
+        return $course->exists() ? $course : null;
     }
-
+    
+    /**
+     * Find course by slug
+     * 
+     * @param string $slug
+     * @return Course|null
+     */
+    public static function findBySlug(string $slug): ?Course
+    {
+        $post = get_page_by_path($slug, OBJECT, PostTypes::COURSE);
+        if (!$post) {
+            return null;
+        }
+        
+        $course = new self($post);
+        return $course->exists() ? $course : null;
+    }
+    
+    /**
+     * Get all courses
+     * 
+     * @param array $args
+     * @return Course[]
+     */
+    public static function all(array $args = []): array
+    {
+        $default_args = [
+            'post_type' => PostTypes::COURSE,
+            'post_status' => 'any',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        ];
+        
+        $args = wp_parse_args($args, $default_args);
+        $posts = get_posts($args);
+        
+        $courses = [];
+        foreach ($posts as $post) {
+            $courses[] = new self($post);
+        }
+        
+        return $courses;
+    }
+    
+    /**
+     * Get published courses
+     * 
+     * @param array $args
+     * @return Course[]
+     */
+    public static function published(array $args = []): array
+    {
+        $args['post_status'] = 'publish';
+        return self::all($args);
+    }
+    
+    /**
+     * Get draft courses
+     * 
+     * @param array $args
+     * @return Course[]
+     */
+    public static function drafts(array $args = []): array
+    {
+        $args['post_status'] = 'draft';
+        return self::all($args);
+    }
+    
+    /**
+     * Count courses
+     * 
+     * @param array $args
+     * @return int
+     */
+    public static function count(array $args = []): int
+    {
+        $default_args = [
+            'post_type' => PostTypes::COURSE,
+            'post_status' => 'any',
+        ];
+        
+        $args = wp_parse_args($args, $default_args);
+        $query = new \WP_Query($args);
+        
+        return $query->found_posts;
+    }
+    
     /**
      * Delete course
      * 
-     * @param int $course_id Course ID
-     * @return bool|WP_Error Success or error
+     * @return bool
      */
-    public function delete(int $course_id)
+    public function delete(): bool
     {
-        return wp_delete_post($course_id, true);
-    }
-
-    /**
-     * Get course meta
-     * 
-     * @param int $course_id Course ID
-     * @param string $key Meta key
-     * @param bool $single Whether to return a single value
-     * @return mixed Meta value
-     */
-    public function getMeta(int $course_id, string $key, bool $single = true)
-    {
-        return get_post_meta($course_id, $key, $single);
-    }
-
-    /**
-     * Set course meta
-     * 
-     * @param int $course_id Course ID
-     * @param string $key Meta key
-     * @param mixed $value Meta value
-     * @return int|bool Meta ID or false
-     */
-    public function setMeta(int $course_id, string $key, $value)
-    {
-        return update_post_meta($course_id, $key, $value);
-    }
-
-    /**
-     * Get course price
-     * 
-     * @param int $course_id Course ID
-     * @return float Course price
-     */
-    public function getPrice(int $course_id): float
-    {
-        $price = $this->getMeta($course_id, '_sikshya_course_price', true);
-        return (float) ($price ?: 0);
-    }
-
-    /**
-     * Set course price
-     * 
-     * @param int $course_id Course ID
-     * @param float $price Course price
-     * @return int|bool Meta ID or false
-     */
-    public function setPrice(int $course_id, float $price)
-    {
-        return $this->setMeta($course_id, '_sikshya_course_price', $price);
-    }
-
-    /**
-     * Get course duration
-     * 
-     * @param int $course_id Course ID
-     * @return int Course duration in minutes
-     */
-    public function getDuration(int $course_id): int
-    {
-        $duration = $this->getMeta($course_id, '_sikshya_course_duration', true);
-        return (int) ($duration ?: 0);
-    }
-
-    /**
-     * Set course duration
-     * 
-     * @param int $course_id Course ID
-     * @param int $duration Course duration in minutes
-     * @return int|bool Meta ID or false
-     */
-    public function setDuration(int $course_id, int $duration)
-    {
-        return $this->setMeta($course_id, '_sikshya_course_duration', $duration);
-    }
-
-    /**
-     * Get course difficulty
-     * 
-     * @param int $course_id Course ID
-     * @return string Course difficulty
-     */
-    public function getDifficulty(int $course_id): string
-    {
-        $difficulty = $this->getMeta($course_id, '_sikshya_course_difficulty', true);
-        return $difficulty ?: 'beginner';
-    }
-
-    /**
-     * Set course difficulty
-     * 
-     * @param int $course_id Course ID
-     * @param string $difficulty Course difficulty
-     * @return int|bool Meta ID or false
-     */
-    public function setDifficulty(int $course_id, string $difficulty)
-    {
-        return $this->setMeta($course_id, '_sikshya_course_difficulty', $difficulty);
-    }
-
-    /**
-     * Get course enrollment count
-     * 
-     * @param int $course_id Course ID
-     * @return int Enrollment count
-     */
-    public function getEnrollmentCount(int $course_id): int
-    {
-        $count = $this->getMeta($course_id, '_sikshya_enrollment_count', true);
-        return (int) ($count ?: 0);
-    }
-
-    /**
-     * Increment enrollment count
-     * 
-     * @param int $course_id Course ID
-     * @return int|bool Meta ID or false
-     */
-    public function incrementEnrollmentCount(int $course_id)
-    {
-        $current_count = $this->getEnrollmentCount($course_id);
-        return $this->setMeta($course_id, '_sikshya_enrollment_count', $current_count + 1);
-    }
-
-    /**
-     * Get course instructor
-     * 
-     * @param int $course_id Course ID
-     * @return int Instructor user ID
-     */
-    public function getInstructor(int $course_id): int
-    {
-        $instructor = $this->getMeta($course_id, '_sikshya_course_instructor', true);
-        return (int) ($instructor ?: get_post_field('post_author', $course_id));
-    }
-
-    /**
-     * Set course instructor
-     * 
-     * @param int $course_id Course ID
-     * @param int $instructor_id Instructor user ID
-     * @return int|bool Meta ID or false
-     */
-    public function setInstructor(int $course_id, int $instructor_id)
-    {
-        return $this->setMeta($course_id, '_sikshya_course_instructor', $instructor_id);
-    }
-
-    /**
-     * Get course categories
-     * 
-     * @param int $course_id Course ID
-     * @return array Course categories
-     */
-    public function getCategories(int $course_id): array
-    {
-        return wp_get_post_terms($course_id, 'sikshya_course_category', ['fields' => 'all']);
-    }
-
-    /**
-     * Set course categories
-     * 
-     * @param int $course_id Course ID
-     * @param array $category_ids Category IDs
-     * @return array|WP_Error Term IDs or error
-     */
-    public function setCategories(int $course_id, array $category_ids)
-    {
-        return wp_set_post_terms($course_id, $category_ids, 'sikshya_course_category');
-    }
-
-    /**
-     * Get course tags
-     * 
-     * @param int $course_id Course ID
-     * @return array Course tags
-     */
-    public function getTags(int $course_id): array
-    {
-        return wp_get_post_terms($course_id, 'sikshya_course_tag', ['fields' => 'all']);
-    }
-
-    /**
-     * Set course tags
-     * 
-     * @param int $course_id Course ID
-     * @param array $tag_ids Tag IDs
-     * @return array|WP_Error Term IDs or error
-     */
-    public function setTags(int $course_id, array $tag_ids)
-    {
-        return wp_set_post_terms($course_id, $tag_ids, 'sikshya_course_tag');
-    }
-
-    /**
-     * Check if course is free
-     * 
-     * @param int $course_id Course ID
-     * @return bool True if free
-     */
-    public function isFree(int $course_id): bool
-    {
-        return $this->getPrice($course_id) <= 0;
-    }
-
-    /**
-     * Check if course is published
-     * 
-     * @param int $course_id Course ID
-     * @return bool True if published
-     */
-    public function isPublished(int $course_id): bool
-    {
-        $course = $this->getById($course_id);
-        return $course && $course->post_status === 'publish';
-    }
-
-    /**
-     * Get course statistics
-     * 
-     * @param int $course_id Course ID
-     * @return array Course statistics
-     */
-    public function getStatistics(int $course_id): array
-    {
-        return [
-            'enrollment_count' => $this->getEnrollmentCount($course_id),
-            'completion_count' => $this->getCompletionCount($course_id),
-            'average_rating' => $this->getAverageRating($course_id),
-            'total_lessons' => $this->getTotalLessons($course_id),
-            'total_quizzes' => $this->getTotalQuizzes($course_id),
-        ];
-    }
-
-    /**
-     * Get completion count
-     * 
-     * @param int $course_id Course ID
-     * @return int Completion count
-     */
-    public function getCompletionCount(int $course_id): int
-    {
-        $count = $this->getMeta($course_id, '_sikshya_completion_count', true);
-        return (int) ($count ?: 0);
-    }
-
-    /**
-     * Get average rating
-     * 
-     * @param int $course_id Course ID
-     * @return float Average rating
-     */
-    public function getAverageRating(int $course_id): float
-    {
-        $rating = $this->getMeta($course_id, '_sikshya_average_rating', true);
-        return (float) ($rating ?: 0);
-    }
-
-    /**
-     * Get total lessons
-     * 
-     * @param int $course_id Course ID
-     * @return int Total lessons
-     */
-    public function getTotalLessons(int $course_id): int
-    {
-        $args = [
-            'post_type' => 'sikshya_lesson',
-            'post_status' => 'publish',
-            'posts_per_page' => -1,
-            'meta_query' => [
-                [
-                    'key' => '_sikshya_lesson_course',
-                    'value' => $course_id,
-                    'compare' => '='
-                ]
-            ]
-        ];
-
-        $query = new \WP_Query($args);
-        return $query->found_posts;
-    }
-
-    /**
-     * Get total quizzes
-     * 
-     * @param int $course_id Course ID
-     * @return int Total quizzes
-     */
-    public function getTotalQuizzes(int $course_id): int
-    {
-        $args = [
-            'post_type' => 'sikshya_quiz',
-            'post_status' => 'publish',
-            'posts_per_page' => -1,
-            'meta_query' => [
-                [
-                    'key' => '_sikshya_quiz_course',
-                    'value' => $course_id,
-                    'compare' => '='
-                ]
-            ]
-        ];
-
-        $query = new \WP_Query($args);
-        return $query->found_posts;
-    }
-
-    /**
-     * Set default meta values for new course
-     * 
-     * @param int $course_id Course ID
-     */
-    private function setDefaultMeta(int $course_id): void
-    {
-        $defaults = [
-            '_sikshya_course_price' => 0,
-            '_sikshya_course_duration' => 0,
-            '_sikshya_course_difficulty' => 'beginner',
-            '_sikshya_enrollment_count' => 0,
-            '_sikshya_completion_count' => 0,
-            '_sikshya_average_rating' => 0,
-            '_sikshya_course_instructor' => get_current_user_id(),
-        ];
-
-        foreach ($defaults as $key => $value) {
-            $this->setMeta($course_id, $key, $value);
+        if (!$this->post) {
+            return false;
         }
+        
+        $result = wp_delete_post($this->id, true);
+        if ($result) {
+            $this->post = null;
+            $this->meta = [];
+        }
+        
+        return $result !== false;
+    }
+    
+    /**
+     * Update course
+     * 
+     * @param array $data
+     * @return bool
+     */
+    public function update(array $data): bool
+    {
+        if (!$this->post) {
+            return false;
+        }
+        
+        $post_data = [
+            'ID' => $this->id,
+        ];
+        
+        if (isset($data['title'])) {
+            $post_data['post_title'] = sanitize_text_field($data['title']);
+        }
+        
+        if (isset($data['description'])) {
+            $post_data['post_content'] = wp_kses_post($data['description']);
+        }
+        
+        if (isset($data['excerpt'])) {
+            $post_data['post_excerpt'] = sanitize_textarea_field($data['excerpt']);
+        }
+        
+        if (isset($data['slug'])) {
+            $post_data['post_name'] = sanitize_title($data['slug']);
+        }
+        
+        if (isset($data['status'])) {
+            $post_data['post_status'] = sanitize_text_field($data['status']);
+        }
+        
+        $result = wp_update_post($post_data);
+        
+        if (is_wp_error($result)) {
+            return false;
+        }
+        
+        // Update meta fields
+        if (isset($data['meta']) && is_array($data['meta'])) {
+            foreach ($data['meta'] as $key => $value) {
+                $this->setMeta($key, $value);
+            }
+        }
+        
+        // Reload the post object
+        $this->post = get_post($this->id);
+        $this->loadMeta();
+        
+        return true;
     }
 } 

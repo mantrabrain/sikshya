@@ -143,6 +143,8 @@ class CourseAjax extends AjaxAbstract
         }
     }
 
+
+
     /**
      * Handle load course data AJAX request
      */

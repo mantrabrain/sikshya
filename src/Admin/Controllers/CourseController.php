@@ -11,6 +11,7 @@ namespace Sikshya\Admin\Controllers;
 use Sikshya\Admin\Views\BaseView;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\CourseService;
+use Sikshya\Models\Course;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -190,8 +191,16 @@ class CourseController extends BaseView
             // Get the active tab from URL parameter
             $active_tab = sanitize_text_field($_GET['tab'] ?? 'course');
             
-            // Get course ID from URL parameter
-            $course_id = (int) ($_GET['course_id'] ?? 0);
+            // Get course ID from URL parameter (support both 'course_id' and 'id')
+            $course_id = (int) ($_GET['course_id'] ?? $_GET['id'] ?? 0);
+            
+            // Load course data directly if course ID is present
+            $course_data = null;
+            if ($course_id > 0) {
+                error_log('Sikshya: Loading course data for ID: ' . $course_id);
+                $course_data = $this->loadCourseData($course_id);
+                error_log('Sikshya: Course data loaded: ' . print_r($course_data, true));
+            }
             
             // Enqueue course builder assets
             $this->enqueueCourseBuilderAssets();
@@ -201,6 +210,7 @@ class CourseController extends BaseView
                 'plugin' => $this->plugin,
                 'active_tab' => $active_tab,
                 'course_id' => $course_id,
+                'course_data' => $course_data,
             ]);
             
             error_log('Sikshya: Finished rendering course builder page');
@@ -208,6 +218,36 @@ class CourseController extends BaseView
             error_log('Sikshya CourseController Error: ' . $e->getMessage());
             error_log('Sikshya CourseController Stack: ' . $e->getTraceAsString());
             echo '<!-- Sikshya Course Builder Error: ' . esc_html($e->getMessage()) . ' -->';
+        }
+    }
+
+    /**
+     * Load course data for editing
+     * 
+     * @param int $course_id
+     * @return array|null
+     */
+    private function loadCourseData(int $course_id): ?array
+    {
+        try {
+            error_log('Sikshya: Attempting to load course with ID: ' . $course_id);
+            
+            // Use the new Course model
+            $course = Course::find($course_id);
+            
+            if (!$course || !$course->exists()) {
+                error_log('Sikshya: Course not found for ID: ' . $course_id);
+                return null;
+            }
+            
+            error_log('Sikshya: Course found - Title: ' . $course->getTitle());
+            
+            // Return course data as array
+            return $course->toArray();
+            
+        } catch (\Exception $e) {
+            error_log('Sikshya: Error loading course data: ' . $e->getMessage());
+            return null;
         }
     }
     

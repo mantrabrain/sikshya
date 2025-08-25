@@ -98,10 +98,18 @@
 
 .sikshya-header .sikshya-btn-secondary:hover {
     background: var(--sikshya-gray-50);
-    color: var(--sikshya-primary);
-    border-color: var(--sikshya-primary);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-md);
+}
+
+/* ===== EDITING INDICATOR ===== */
+.sikshya-editing-indicator {
+    color: #dc2626;
+    font-weight: 500;
+    font-size: 0.9em;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
 }
 
 /* Course Builder specific button styles */

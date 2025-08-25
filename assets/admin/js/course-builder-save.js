@@ -95,6 +95,16 @@
         handleSaveSuccess: function(response) {
             if (response.course_id) {
                 this.updateCourseIdInForm(response.course_id);
+                
+                // Update URL to use consistent course_id parameter
+                const currentUrl = new URL(window.location);
+                currentUrl.searchParams.set('course_id', response.course_id);
+                
+                // Remove the 'id' parameter if it exists to avoid confusion
+                currentUrl.searchParams.delete('id');
+                
+                // Update the URL without page reload
+                window.history.replaceState({}, '', currentUrl.toString());
             }
             
             this.showNotification('success', 'Course saved successfully!');
@@ -454,19 +464,30 @@
             
             // Check if this is the first time saving (no course ID in URL)
             const urlParams = new URLSearchParams(window.location.search);
-            const currentCourseId = urlParams.get('id');
+            const currentCourseId = urlParams.get('course_id') || urlParams.get('id');
             
             if (response.course_id && !currentCourseId) {
                 // First time saving - reload page with course ID after 2 seconds
                 setTimeout(() => {
                     const newUrl = new URL(window.location);
-                    newUrl.searchParams.set('id', response.course_id);
+                    newUrl.searchParams.set('course_id', response.course_id);
+                    newUrl.searchParams.delete('id'); // Remove old 'id' parameter if it exists
                     newUrl.searchParams.set('tab', 'course');
                     window.location.href = newUrl.toString();
                 }, 2000);
             } else if (response.course_id) {
-                // Subsequent saves - just update the form
+                // Subsequent saves - just update the form and URL
                 this.updateCourseIdInForm(response.course_id);
+                
+                // Update URL to use consistent course_id parameter
+                const currentUrl = new URL(window.location);
+                currentUrl.searchParams.set('course_id', response.course_id);
+                
+                // Remove the 'id' parameter if it exists to avoid confusion
+                currentUrl.searchParams.delete('id');
+                
+                // Update the URL without page reload
+                window.history.replaceState({}, '', currentUrl.toString());
             }
         },
 

@@ -22,10 +22,24 @@ try {
 
 $active_tab = $data['active_tab'] ?? '';
 $course_id = $data['course_id'] ?? '';
+$course_data = $data['course_data'] ?? null;
+
+// Create Course model instance if course_id is provided
+$course_model = null;
+if ($course_id > 0) {
+    $course_model = \Sikshya\Models\Course::find($course_id);
+}
 
 // Get default active tab if not set
 if (empty($active_tab) && $course_builder_manager) {
     $active_tab = $course_builder_manager->getFirstTabId();
+}
+
+// Update course status if course data exists
+if ($course_data && isset($course_data['status'])) {
+    $course_status = $course_data['status'];
+} else {
+    $course_status = 'draft';
 }
 ?>
 
@@ -35,13 +49,20 @@ if (empty($active_tab) && $course_builder_manager) {
         <?php wp_nonce_field('sikshya_course_builder_nonce', 'sikshya_course_builder_nonce'); ?>
         <input type="hidden" name="action" value="sikshya_save_course" />
         <input type="hidden" name="course_id" value="<?php echo esc_attr($course_id); ?>" />
-        <input type="hidden" name="course_status" value="draft" id="course-status-field" />
+        <input type="hidden" name="course_status" value="<?php echo esc_attr($course_status); ?>" id="course-status-field" />
         
         <div class="sikshya-header">
             <div class="sikshya-header-title">
                 <h1>
                     <i class="fas fa-graduation-cap"></i>
-                    <?php _e('Course Builder', 'sikshya'); ?>
+                    <?php if ($course_data && isset($course_data['title']) && !empty($course_data['title'])): ?>
+                        <?php echo esc_html($course_data['title']); ?>
+                        <?php if ($course_data && isset($course_data['id']) && $course_data['id'] > 0): ?>
+                            <span class="sikshya-editing-indicator"><?php _e('(Editing...)', 'sikshya'); ?></span>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <?php _e('Course Builder', 'sikshya'); ?>
+                    <?php endif; ?>
                 </h1>
                 <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
             </div>
@@ -226,10 +247,41 @@ if (empty($active_tab) && $course_builder_manager) {
 window.sikshyaCourseBuilder = {
     activeTab: '<?php echo esc_js($active_tab); ?>',
     courseId: '<?php echo esc_js($course_id); ?>',
+    <?php if ($course_data): ?>
+    courseData: <?php echo json_encode($course_data); ?>,
+    <?php endif; ?>
     <?php if ($course_builder_manager): ?>
     tabFields: <?php echo json_encode($course_builder_manager->getTabFieldsForJs()); ?>,
     <?php endif; ?>
     ajaxUrl: '<?php echo admin_url('admin-ajax.php'); ?>',
     nonce: '<?php echo wp_create_nonce('sikshya_course_builder_nonce'); ?>'
 };
+
+// Debug: Log course data
+console.log('Sikshya: Course ID from PHP:', '<?php echo esc_js($course_id); ?>');
+console.log('Sikshya: Course data from PHP:', <?php echo $course_data ? json_encode($course_data) : 'null'; ?>);
+console.log('Sikshya: Window sikshyaCourseBuilder:', window.sikshyaCourseBuilder);
+
+// Example of how to use the Course model in PHP:
+// <?php if ($course_model): ?>
+//     <p>Course Title: <?php echo esc_html($course_model->getTitle()); ?></p>
+//     <p>Course Price: <?php echo esc_html($course_model->getCoursePrice()); ?></p>
+//     <p>Course Duration: <?php echo esc_html($course_model->getDuration()); ?></p>
+//     <p>Course Difficulty: <?php echo esc_html($course_model->getDifficulty()); ?></p>
+//     <p>Test Field: <?php echo esc_html($course_model->getTestField()); ?></p>
+// <?php endif; ?>
+
+// Debug: Check form field values after page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        console.log('Sikshya: Form field values after page load:');
+        console.log('Sikshya: Title field:', document.querySelector('input[name="title"]')?.value);
+        console.log('Sikshya: Description field:', document.querySelector('textarea[name="description"]')?.value);
+        console.log('Sikshya: Short description field:', document.querySelector('input[name="short_description"]')?.value);
+        console.log('Sikshya: Category field:', document.querySelector('select[name="category"]')?.value);
+        console.log('Sikshya: Difficulty field:', document.querySelector('select[name="difficulty"]')?.value);
+        console.log('Sikshya: Duration field:', document.querySelector('input[name="duration"]')?.value);
+        console.log('Sikshya: Language field:', document.querySelector('select[name="language"]')?.value);
+    }, 1000);
+});
 </script>

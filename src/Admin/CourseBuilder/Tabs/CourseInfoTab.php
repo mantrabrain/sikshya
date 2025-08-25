@@ -9,6 +9,7 @@
 namespace Sikshya\Admin\CourseBuilder\Tabs;
 
 use Sikshya\Admin\CourseBuilder\Core\AbstractTab;
+use Sikshya\Models\Course;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -167,6 +168,7 @@ class CourseInfoTab extends AbstractTab
      */
     protected function renderContent(array $data): string
     {
+        error_log('Sikshya CourseInfoTab: Rendering content with data: ' . print_r($data, true));
         ob_start();
         ?>
         <div class="sikshya-section sikshya-section-modern">
@@ -370,23 +372,36 @@ class CourseInfoTab extends AbstractTab
      */
     public function save(array $data, int $course_id): bool
     {
+        // Use the new Course model
+        $course = Course::find($course_id);
+        
+        if (!$course || !$course->exists()) {
+            return false;
+        }
+        
         $success = true;
+        
+        // Prepare update data
+        $update_data = [];
         
         // Save title and description to post
         if (!empty($data['title'])) {
-            $post_data = [
-                'ID' => $course_id,
-                'post_title' => sanitize_text_field($data['title']),
-                'post_content' => wp_kses_post($data['description'] ?? ''),
-            ];
-            
-            $result = wp_update_post($post_data);
-            if (is_wp_error($result)) {
+            $update_data['title'] = sanitize_text_field($data['title']);
+        }
+        
+        if (!empty($data['description'])) {
+            $update_data['description'] = wp_kses_post($data['description']);
+        }
+        
+        // Update post data
+        if (!empty($update_data)) {
+            $result = $course->update($update_data);
+            if (!$result) {
                 $success = false;
             }
         }
         
-        // Save other fields to meta
+        // Save other fields to meta using the Course model's magic setters
         $fields = $this->getFields();
         foreach ($fields as $field_id => $field_config) {
             // Skip title and description as they're saved to post
@@ -397,10 +412,11 @@ class CourseInfoTab extends AbstractTab
             $value = $data[$field_id] ?? '';
             $value = $this->sanitizeField($field_id, $value, $field_config);
             
-            $meta_key = '_sikshya_' . $field_id;
-            $result = update_post_meta($course_id, $meta_key, $value);
+            // Use the Course model's magic setter for meta fields
+            $method_name = 'set' . ucfirst($field_id);
+            $result = $course->$method_name($value); // This will save to meta table
             
-            if ($result === false) {
+            if (!$result) {
                 $success = false;
             }
         }
@@ -416,13 +432,24 @@ class CourseInfoTab extends AbstractTab
      */
     public function load(int $course_id): array
     {
-        $post = get_post($course_id);
+        error_log('Sikshya CourseInfoTab: Loading data for course ID: ' . $course_id);
+        
+        // Use the new Course model
+        $course = Course::find($course_id);
+        
+        if (!$course || !$course->exists()) {
+            error_log('Sikshya CourseInfoTab: Course not found for ID: ' . $course_id);
+            return [];
+        }
+        
         $data = [
-            'title' => $post ? $post->post_title : '',
-            'description' => $post ? $post->post_content : '',
+            'title' => $course->getTitle(), // From post table
+            'description' => $course->getDescription(), // From post table
         ];
         
-        // Load other fields from meta
+        error_log('Sikshya CourseInfoTab: Post data loaded - Title: ' . $data['title'] . ', Description: ' . substr($data['description'], 0, 50) . '...');
+        
+        // Load other fields from meta using the Course model's magic getters
         $fields = $this->getFields();
         foreach ($fields as $field_id => $field_config) {
             // Skip title and description as they're loaded from post
@@ -430,8 +457,9 @@ class CourseInfoTab extends AbstractTab
                 continue;
             }
             
-            $meta_key = '_sikshya_' . $field_id;
-            $value = get_post_meta($course_id, $meta_key, true);
+            // Use the Course model's magic getter for meta fields
+            $method_name = 'get' . ucfirst($field_id);
+            $value = $course->$method_name(); // This will get from meta table
             
             // Set default value if empty
             if (empty($value) && isset($field_config['default'])) {
@@ -441,6 +469,7 @@ class CourseInfoTab extends AbstractTab
             $data[$field_id] = $value;
         }
         
+        error_log('Sikshya CourseInfoTab: Final data array: ' . print_r($data, true));
         return $data;
     }
 }
