@@ -4952,11 +4952,48 @@ body .sikshya-modal-overlay {
     border-color: #dc3545;
 }
 
+.sikshya-form-row.has-error input,
+.sikshya-form-row.has-error textarea,
+.sikshya-form-row.has-error select {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 1px #dc3545 !important;
+}
+
+.sikshya-form-row.has-error input:focus,
+.sikshya-form-row.has-error textarea:focus,
+.sikshya-form-row.has-error select:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+}
+
 .sikshya-field-error {
     color: #dc3545;
     font-size: 12px;
     margin-top: 4px;
     font-weight: 500;
+    display: block;
+    padding: 4px 8px;
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid #dc3545;
+}
+
+/* Error highlight animation */
+.sikshya-error-highlight {
+    animation: sikshya-error-pulse 0.6s ease-in-out;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3) !important;
+}
+
+@keyframes sikshya-error-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
 }
 
 /* Loading Overlay */

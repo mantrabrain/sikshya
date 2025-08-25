@@ -8,31 +8,26 @@
 (function($) {
     'use strict';
 
-    console.log('CourseBuilderSave script loaded!');
-
     // Course Builder Save Handler
     window.SikshyaCourseBuilderSave = {
         /**
          * Initialize the course builder
          */
         init: function() {
-            console.log('CourseBuilderSave initializing...');
-            console.log('sikshya_ajax object:', window.sikshya_ajax);
-            this.bindEvents();
-            this.loadExistingData();
-            
-            // Test AJAX call
-            // this.testAjax();
+            // Wait for DOM to be ready and form to be loaded
+            $(document).ready(() => {
+                // Wait a bit more for dynamic content to load
+                setTimeout(() => {
+                    this.bindEvents();
+                    this.loadExistingData();
+                }, 500);
+            });
         },
 
         /**
          * Bind event handlers
          */
         bindEvents: function() {
-            console.log('CourseBuilderSave: Binding events...');
-            console.log('CourseBuilderSave: Looking for save buttons...');
-            console.log('CourseBuilderSave: #save-draft-btn exists:', $('#save-draft-btn').length);
-            console.log('CourseBuilderSave: #sidebar-save-draft-btn exists:', $('#sidebar-save-draft-btn').length);
             // Prevent ALL form submissions - we handle everything via AJAX
             $(document).on('submit', '#sikshya-course-builder-form', function(e) {
                 e.preventDefault();
@@ -60,69 +55,38 @@
             $(document).on('click', '.sikshya-nav-link', this.handleTabSwitch.bind(this));
         },
 
-        /**
-         * Test AJAX functionality
-         */
-        testAjax: function() {
-            console.log('CourseBuilderSave: Testing AJAX...');
-            if (typeof sikshya_ajax !== 'undefined') {
-                $.ajax({
-                    url: sikshya_ajax.ajax_url,
-                    type: 'POST',
-                    data: {
-                        action: 'sikshya_test_ajax',
-                        nonce: sikshya_ajax.nonce
-                    },
-                    success: function(response) {
-                        console.log('CourseBuilderSave: Test AJAX success:', response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('CourseBuilderSave: Test AJAX error:', error);
-                    }
-                });
-            } else {
-                console.error('CourseBuilderSave: sikshya_ajax not available');
-            }
-        },
 
-        /**
-         * Get field value based on type
-         */
-        getFieldValue: function(field) {
-            const type = field.attr('type');
-            
-            if (type === 'checkbox') {
-                return field.is(':checked') ? '1' : '0';
-            } else if (type === 'radio') {
-                return field.filter(':checked').val() || '';
-            } else {
-                return field.val() || '';
-            }
-        },
+
+
 
 
 
 
 
         /**
-         * Collect form data
+         * Collect form data using FormData API
          */
         collectFormData: function() {
-            const formData = {};
-            const form = $('#sikshya-course-builder-form');
+            const form = document.getElementById('sikshya-course-builder-form');
             
-            // Collect all form fields
-            form.find('input, select, textarea').each(function() {
-                const field = $(this);
-                const name = field.attr('name');
-                
-                if (name) {
-                    const value = this.getFieldValue(field);
-                    formData[name] = value;
+            if (!form) {
+                console.error('Form not found!');
+                return {};
+            }
+            
+            // Use FormData to automatically collect all form fields
+            const formData = new FormData(form);
+            const data = {};
+            
+            // Convert FormData to plain object
+            for (let [key, value] of formData.entries()) {
+                // Skip nonce and action fields
+                if (key !== 'sikshya_course_builder_nonce' && key !== 'action') {
+                    data[key] = value;
                 }
-            }.bind(this));
+            }
             
-            return formData;
+            return data;
         },
 
         /**
@@ -324,7 +288,6 @@
          * Handle Save Draft button click
          */
         handleSaveDraft: function(e) {
-            console.log('CourseBuilderSave: handleSaveDraft called!');
             e.preventDefault();
             e.stopPropagation();
             
@@ -341,8 +304,8 @@
             statusField.val('draft');
             
             // Show loading state
-            const originalText = submitButton.text();
-            submitButton.prop('disabled', true).text('Saving Draft...');
+            const originalHtml = submitButton.html();
+            submitButton.prop('disabled', true).html('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>Saving Draft...');
             
             // Collect form data
             const formData = this.collectFormData();
@@ -350,7 +313,7 @@
             
             // Save data
             this.saveData(formData, function(success, response) {
-                submitButton.prop('disabled', false).text(originalText);
+                submitButton.prop('disabled', false).html(originalHtml);
                 
                 if (success) {
                     this.handleSaveSuccess(response);
@@ -388,8 +351,8 @@
             statusField.val('published');
             
             // Show loading state
-            const originalText = submitButton.text();
-            submitButton.prop('disabled', true).text('Publishing...');
+            const originalHtml = submitButton.html();
+            submitButton.prop('disabled', true).html('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>Publishing...');
             
             // Collect form data
             const formData = this.collectFormData();
@@ -397,7 +360,7 @@
             
             // Save data
             this.saveData(formData, function(success, response) {
-                submitButton.prop('disabled', false).text(originalText);
+                submitButton.prop('disabled', false).html(originalHtml);
                 
                 if (success) {
                     this.handleSaveSuccess(response);
@@ -408,46 +371,74 @@
         },
 
         /**
-         * Save data via AJAX
+         * Save data via form submission
          */
         saveData: function(formData, callback) {
-            console.log('saveData method called with:', formData);
-            console.log('sikshya_ajax available:', typeof sikshya_ajax !== 'undefined');
-            if (typeof sikshya_ajax !== 'undefined') {
-                console.log('sikshya_ajax object:', sikshya_ajax);
+            const form = document.getElementById('sikshya-course-builder-form');
+            
+            if (!form) {
+                callback(false, { message: 'Form not found' });
+                return;
             }
             
-            const ajaxData = {
-                action: 'sikshya_save_course_builder',
-                nonce: sikshya_ajax.nonce,
-                data: formData,
-                course_status: formData.course_status || 'draft'
-            };
+            // Create a temporary form for submission
+            const tempForm = document.createElement('form');
+            tempForm.method = 'POST';
+            tempForm.action = sikshya_ajax.ajax_url;
+            tempForm.style.display = 'none';
             
-            console.log('Sending AJAX request to save course:', {
-                url: sikshya_ajax.ajax_url,
-                action: 'sikshya_save_course_builder',
-                nonce: sikshya_ajax.nonce,
-                data: formData
-            });
+            // Add action and nonce
+            const actionField = document.createElement('input');
+            actionField.type = 'hidden';
+            actionField.name = 'action';
+            actionField.value = 'sikshya_save_course_builder';
+            tempForm.appendChild(actionField);
             
-            console.log('Full AJAX data being sent:', ajaxData);
+            const nonceField = document.createElement('input');
+            nonceField.type = 'hidden';
+            nonceField.name = 'nonce';
+            nonceField.value = sikshya_ajax.nonce;
+            tempForm.appendChild(nonceField);
             
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: ajaxData,
-                success: function(response) {
-                    if (response.success) {
-                        callback(true, response.data);
-                    } else {
-                        callback(false, response.data);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX Error:', error);
-                    callback(false, { message: 'Network error occurred' });
+            // Add all form data as hidden fields
+            for (let [key, value] of Object.entries(formData)) {
+                const field = document.createElement('input');
+                field.type = 'hidden';
+                field.name = key;
+                field.value = value;
+                tempForm.appendChild(field);
+            }
+            
+            // Add course status
+            const statusField = document.createElement('input');
+            statusField.type = 'hidden';
+            statusField.name = 'course_status';
+            statusField.value = formData.course_status || 'draft';
+            tempForm.appendChild(statusField);
+            
+            // Append form to body and submit
+            document.body.appendChild(tempForm);
+            
+            // Use fetch to submit the form and handle response
+            fetch(sikshya_ajax.ajax_url, {
+                method: 'POST',
+                body: new FormData(tempForm)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove temporary form
+                document.body.removeChild(tempForm);
+                
+                if (data.success) {
+                    callback(true, data.data);
+                } else {
+                    callback(false, data.data);
                 }
+            })
+            .catch(error => {
+                // Remove temporary form
+                document.body.removeChild(tempForm);
+                callback(false, { message: 'Network error occurred' });
             });
         },
 
@@ -483,7 +474,75 @@
          * Handle save error
          */
         handleSaveError: function(response) {
-            this.showNotification('error', response.message || 'Failed to save course');
+            // Clear previous field errors
+            $('.sikshya-field-error').remove();
+            $('.sikshya-form-row').removeClass('has-error');
+            
+            // Handle validation errors
+            if (response.course || response.pricing) {
+                let errorMessages = [];
+                let firstErrorField = null;
+                let firstErrorTab = null;
+                
+                // Process course validation errors
+                if (response.course) {
+                    Object.keys(response.course).forEach(function(field) {
+                        const errorMessage = response.course[field];
+                        const fieldElement = $(`[name="${field}"]`);
+                        
+                        if (fieldElement.length) {
+                            const formRow = fieldElement.closest('.sikshya-form-row');
+                            formRow.addClass('has-error');
+                            formRow.append(`<div class="sikshya-field-error">${errorMessage}</div>`);
+                            
+                            // Track first error field and its tab
+                            if (!firstErrorField) {
+                                firstErrorField = fieldElement;
+                                firstErrorTab = this.getFieldTab(fieldElement);
+                            }
+                        }
+                        
+                        errorMessages.push(errorMessage);
+                    }.bind(this));
+                }
+                
+                // Process pricing validation errors
+                if (response.pricing) {
+                    Object.keys(response.pricing).forEach(function(field) {
+                        const errorMessage = response.pricing[field];
+                        const fieldElement = $(`[name="${field}"]`);
+                        
+                        if (fieldElement.length) {
+                            const formRow = fieldElement.closest('.sikshya-form-row');
+                            formRow.addClass('has-error');
+                            formRow.append(`<div class="sikshya-field-error">${errorMessage}</div>`);
+                            
+                            // Track first error field and its tab
+                            if (!firstErrorField) {
+                                firstErrorField = fieldElement;
+                                firstErrorTab = this.getFieldTab(fieldElement);
+                            }
+                        }
+                        
+                        errorMessages.push(errorMessage);
+                    }.bind(this));
+                }
+                
+                // Show the first error message in notification
+                if (errorMessages.length > 0) {
+                    this.showNotification('error', errorMessages[0]);
+                } else {
+                    this.showNotification('error', response.message || 'Validation failed');
+                }
+                
+                // Switch to error tab and focus on first error field
+                if (firstErrorTab && firstErrorField) {
+                    this.switchToTabAndFocus(firstErrorTab, firstErrorField);
+                }
+            } else {
+                // Handle general errors
+                this.showNotification('error', response.message || 'Failed to save course');
+            }
         },
 
         /**
@@ -499,16 +558,70 @@
             const url = new URL(window.location);
             url.searchParams.set('course_id', courseId);
             window.history.pushState({}, '', url);
+        },
+
+        /**
+         * Get the tab ID for a field
+         */
+        getFieldTab: function(fieldElement) {
+            // Find which tab contains this field
+            const tabContent = fieldElement.closest('.sikshya-tab-content');
+            if (tabContent.length) {
+                return tabContent.attr('id');
+            }
+            return null;
+        },
+
+        /**
+         * Switch to a specific tab and focus on a field
+         */
+        switchToTabAndFocus: function(tabId, fieldElement) {
+            // Switch to the tab
+            this.switchTab(tabId);
+            
+            // Wait a bit for the tab switch animation to complete
+            setTimeout(() => {
+                // Scroll to the field
+                $('html, body').animate({
+                    scrollTop: fieldElement.offset().top - 100
+                }, 500);
+                
+                // Focus on the field
+                fieldElement.focus();
+                
+                // Add a highlight effect
+                fieldElement.addClass('sikshya-error-highlight');
+                setTimeout(() => {
+                    fieldElement.removeClass('sikshya-error-highlight');
+                }, 2000);
+            }, 300);
+        },
+
+        /**
+         * Switch to a specific tab
+         */
+        switchTab: function(tabId) {
+            // Hide all tab contents
+            $('.sikshya-tab-content').removeClass('active');
+            
+            // Show the target tab content
+            $(`#${tabId}`).addClass('active');
+            
+            // Update navigation links
+            $('.sikshya-nav-link').removeClass('active');
+            $(`.sikshya-nav-link[data-tab="${tabId}"]`).addClass('active');
+            
+            // Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabId);
+            window.history.pushState({}, '', url);
         }
     };
 
     // Initialize when document is ready
     $(document).ready(function() {
-        console.log('CourseBuilderSave: Document ready, initializing...');
         if (window.SikshyaCourseBuilderSave) {
             window.SikshyaCourseBuilderSave.init();
-        } else {
-            console.error('CourseBuilderSave: SikshyaCourseBuilderSave object not found!');
         }
     });
 

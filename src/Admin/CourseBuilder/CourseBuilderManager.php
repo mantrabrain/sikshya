@@ -195,17 +195,12 @@ class CourseBuilderManager
         
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
-            $tab_data = $data[$tab_id] ?? [];
             
-            // Validate tab data
-            $tab_errors = $tab->validate($tab_data);
-            if (!empty($tab_errors)) {
-                $errors[$tab_id] = $tab_errors;
-                continue;
-            }
+            // For flat data structure, pass all data to each tab
+            // Each tab will save only its own fields based on field definitions
             
             // Save tab data
-            $success = $tab->save($tab_data, $course_id);
+            $success = $tab->save($data, $course_id);
             if (!$success) {
                 $errors[$tab_id] = [__('Failed to save tab data.', 'sikshya')];
             }
@@ -246,9 +241,10 @@ class CourseBuilderManager
         
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
-            $tab_data = $data[$tab_id] ?? [];
             
-            $tab_errors = $tab->validate($tab_data);
+            // For flat data structure, pass all data to each tab for validation
+            // Each tab will validate only its own fields based on field definitions
+            $tab_errors = $tab->validate($data);
             if (!empty($tab_errors)) {
                 $errors[$tab_id] = $tab_errors;
             }
