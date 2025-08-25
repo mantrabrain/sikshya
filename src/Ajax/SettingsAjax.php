@@ -22,11 +22,8 @@ class SettingsAjax extends AjaxAbstract
      */
     protected function initHooks(): void
     {
-        error_log('Sikshya: SettingsAjax initHooks called');
-        
         // Settings AJAX handlers
         add_action('wp_ajax_sikshya_save_settings', [$this, 'handleSaveSettings']);
-        error_log('Sikshya: sikshya_save_settings action registered');
         add_action('wp_ajax_sikshya_load_settings_tab', [$this, 'handleLoadSettingsTab']);
         add_action('wp_ajax_sikshya_reset_settings', [$this, 'handleResetSettings']);
         add_action('wp_ajax_sikshya_export_settings', [$this, 'handleExportSettings']);
@@ -38,9 +35,6 @@ class SettingsAjax extends AjaxAbstract
      */
     public function handleSaveSettings(): void
     {
-        error_log('Sikshya: handleSaveSettings method called');
-        error_log('Sikshya: POST data: ' . print_r($_POST, true));
-        
         try {
             if (!$this->verifyNonce('sikshya_settings_nonce')) {
                 $this->sendError('Invalid nonce');
@@ -53,15 +47,44 @@ class SettingsAjax extends AjaxAbstract
             }
 
             $tab = sanitize_text_field($this->getPostData('tab', ''));
-            $data = $this->getPostData('data', []);
             
             if (empty($tab)) {
                 $this->sendError('Tab is required');
                 return;
             }
             
-            // Get settings manager
+            // Get settings manager first to access configuration
             $settings_manager = $this->plugin->getService('settings');
+            
+            // Get the settings configuration for this tab to identify checkbox fields
+            $tab_settings = $settings_manager->getTabSettings($tab);
+            $checkbox_fields = [];
+            
+            // Extract checkbox field names from the settings configuration
+            foreach ($tab_settings as $section) {
+                if (isset($section['fields']) && is_array($section['fields'])) {
+                    foreach ($section['fields'] as $field) {
+                        if (isset($field['key']) && isset($field['type']) && $field['type'] === 'checkbox') {
+                            $checkbox_fields[] = $field['key'];
+                        }
+                    }
+                }
+            }
+            
+            // Get all form data except action, nonce, and tab
+            $data = [];
+            foreach ($_POST as $key => $value) {
+                if (!in_array($key, ['action', 'nonce', 'tab', '_wp_http_referer'])) {
+                    $data[$key] = $value;
+                }
+            }
+            
+            // Handle unchecked checkboxes - set them to '0' if not present in POST data
+            foreach ($checkbox_fields as $checkbox_field) {
+                if (!isset($data[$checkbox_field])) {
+                    $data[$checkbox_field] = '0';
+                }
+            }
             
             // Save settings for the specific tab
             $result = $settings_manager->saveTabSettings($tab, $data);
@@ -104,10 +127,10 @@ class SettingsAjax extends AjaxAbstract
             // Get settings manager
             $settings_manager = $this->plugin->getService('settings');
             
-            // Get settings for the specific tab
-            $settings = $settings_manager->getTabSettings($tab);
+            // Render settings as HTML content
+            $content = $settings_manager->renderTabSettings($tab);
             
-            $this->sendSuccess($settings);
+            $this->sendSuccess(['content' => $content]);
             
         } catch (\Exception $e) {
             $this->logError('Load settings tab error', $e);
@@ -121,7 +144,7 @@ class SettingsAjax extends AjaxAbstract
     public function handleResetSettings(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_settings')) {
+            if (!$this->verifyNonce('sikshya_settings_nonce')) {
                 $this->sendError('Invalid nonce');
                 return;
             }
@@ -164,7 +187,7 @@ class SettingsAjax extends AjaxAbstract
     public function handleExportSettings(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_settings')) {
+            if (!$this->verifyNonce('sikshya_settings_nonce')) {
                 $this->sendError('Invalid nonce');
                 return;
             }
@@ -206,7 +229,7 @@ class SettingsAjax extends AjaxAbstract
     public function handleImportSettings(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_settings')) {
+            if (!$this->verifyNonce('sikshya_settings_nonce')) {
                 $this->sendError('Invalid nonce');
                 return;
             }

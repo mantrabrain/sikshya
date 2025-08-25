@@ -78,14 +78,14 @@ abstract class AjaxAbstract
     {
         $response = [
             'success' => true,
-            'data' => $data
+            'data' => $data ?? []
         ];
         
         if (!empty($message)) {
-            $response['message'] = $message;
+            $response['data']['message'] = $message;
         }
         
-        wp_send_json_success($response);
+        wp_send_json($response);
     }
     
     /**
@@ -99,14 +99,14 @@ abstract class AjaxAbstract
     {
         $response = [
             'success' => false,
-            'message' => $message
+            'data' => ['message' => $message]
         ];
         
         if ($data !== null) {
-            $response['data'] = $data;
+            $response['data'] = array_merge($response['data'], is_array($data) ? $data : ['data' => $data]);
         }
         
-        wp_send_json_error($response);
+        wp_send_json($response);
     }
     
     /**

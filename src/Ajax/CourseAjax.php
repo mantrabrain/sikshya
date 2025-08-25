@@ -24,12 +24,18 @@ class CourseAjax extends AjaxAbstract
      */
     protected function initHooks(): void
     {
-        echo '<h1>Herllo World</h1>';
-        error_log('Sikshya: CourseAjax initHooks called');
+        
         
         // Course builder AJAX handlers
         add_action('wp_ajax_sikshya_save_course_builder', [$this, 'handleSaveCourseBuilder']);
         error_log('Sikshya: sikshya_save_course_builder action registered');
+        
+        // Test if action is actually registered
+        if (has_action('wp_ajax_sikshya_save_course_builder')) {
+            error_log('Sikshya: sikshya_save_course_builder action is properly registered');
+        } else {
+            error_log('Sikshya: ERROR - sikshya_save_course_builder action is NOT registered');
+        }
         add_action('wp_ajax_sikshya_load_course_data', [$this, 'handleLoadCourseData']);
         add_action('wp_ajax_sikshya_save_chapter_order', [$this, 'handleSaveChapterOrder']);
         add_action('wp_ajax_sikshya_save_lesson_order', [$this, 'handleSaveLessonOrder']);
@@ -52,6 +58,28 @@ class CourseAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_load_form_template', [$this, 'handleLoadFormTemplate']);
         add_action('wp_ajax_sikshya_create_chapter', [$this, 'handleCreateChapter']);
         add_action('wp_ajax_sikshya_create_content', [$this, 'handleCreateContent']);
+        
+        // Test AJAX action
+        add_action('wp_ajax_sikshya_test_ajax', [$this, 'handleTestAjax']);
+        add_action('wp_ajax_sikshya_simple_test', [$this, 'handleSimpleTest']);
+    }
+    
+    /**
+     * Test AJAX handler
+     */
+    public function handleTestAjax(): void
+    {
+        error_log('Sikshya: Test AJAX handler called');
+        wp_send_json_success(['message' => 'Test AJAX working!']);
+    }
+    
+    /**
+     * Simple test AJAX handler
+     */
+    public function handleSimpleTest(): void
+    {
+        error_log('Sikshya: Simple test AJAX handler called');
+        wp_die('Simple test working!');
     }
 
     /**
@@ -59,7 +87,6 @@ class CourseAjax extends AjaxAbstract
      */
     public function handleSaveCourseBuilder(): void
     {
-        die('die');
         error_log('Sikshya: handleSaveCourseBuilder method called');
         error_log('Sikshya: POST data: ' . print_r($_POST, true));
         

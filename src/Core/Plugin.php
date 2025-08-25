@@ -111,13 +111,18 @@ final class Plugin
             // Course service
             $this->services['course'] = new \Sikshya\Services\CourseService();
 
+            // Settings service
+            $this->services['settings'] = new \Sikshya\Admin\Settings\SettingsManager($this);
+
             // WordPress integration services
             $this->services['assets'] = new AssetService($this);
             $this->services['postTypes'] = new PostTypeService($this);
             $this->services['taxonomies'] = new TaxonomyService($this);
             
-            // AJAX manager
-            $this->services['ajax'] = new AjaxManager($this);
+                                // AJAX manager
+                    error_log('Sikshya: Initializing AjaxManager');
+                    $this->services['ajax'] = new AjaxManager($this);
+                    error_log('Sikshya: AjaxManager initialized successfully');
         } catch (\Exception $e) {
             error_log('Sikshya Plugin Error: ' . $e->getMessage());
             error_log('Sikshya Plugin Error Stack: ' . $e->getTraceAsString());

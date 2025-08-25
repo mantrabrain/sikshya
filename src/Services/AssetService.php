@@ -207,7 +207,7 @@ class AssetService
         ]);
 
         // Localize settings script if on settings page
-        if (strpos($screen->id, 'sikshya-settings') !== false) {
+        if (strpos($screen->id, 'sikshya-settings') !== false || strpos($screen->id, 'sikshya-lms_page_sikshya-settings') !== false) {
             wp_localize_script('sikshya-settings', 'sikshya_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('sikshya_settings_nonce'),

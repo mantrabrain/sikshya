@@ -99,7 +99,9 @@ class SettingsManager
      */
     public function getSetting(string $key, $default = '')
     {
-        return get_option('_sikshya_' . $key, $default);
+        $option_name = '_sikshya_' . $key;
+        $value = get_option($option_name, $default);
+        return $value;
     }
 
     /**
@@ -153,6 +155,169 @@ class SettingsManager
                 $success = false;
             }
         }
+        return $success;
+    }
+
+    /**
+     * Save settings for a specific tab
+     *
+     * @param string $tab
+     * @param array $data
+     * @return bool
+     */
+    public function saveTabSettings(string $tab, array $data): bool
+    {
+        error_log('Sikshya SettingsManager - saveTabSettings called for tab: ' . $tab);
+        error_log('Sikshya SettingsManager - Data to save: ' . print_r($data, true));
+        
+        // Get the settings configuration for this tab
+        $tab_settings = $this->getTabSettings($tab);
+        if (empty($tab_settings)) {
+            error_log('Sikshya SettingsManager - No settings configuration found for tab: ' . $tab);
+            return false;
+        }
+        
+        // Extract field names from the settings configuration
+        $field_names = [];
+        foreach ($tab_settings as $section) {
+            if (isset($section['fields']) && is_array($section['fields'])) {
+                foreach ($section['fields'] as $field) {
+                    if (isset($field['key'])) {
+                        $field_names[] = $field['key'];
+                    }
+                }
+            }
+        }
+        
+        error_log('Sikshya SettingsManager - Field names from config: ' . print_r($field_names, true));
+        
+        // Filter data to only include fields that are in the configuration
+        $settings_to_save = [];
+        foreach ($data as $key => $value) {
+            if (in_array($key, $field_names)) {
+                $settings_to_save[$key] = $value;
+            }
+        }
+        
+        error_log('Sikshya SettingsManager - Settings to save: ' . print_r($settings_to_save, true));
+        
+        // Save the settings
+        return $this->saveSettings($settings_to_save);
+    }
+
+    /**
+     * Reset settings for a specific tab
+     *
+     * @param string $tab
+     * @return bool
+     */
+    public function resetTabSettings(string $tab): bool
+    {
+        $tab_settings = $this->getTabSettings($tab);
+        if (empty($tab_settings)) {
+            return false;
+        }
+        
+        $success = true;
+        foreach ($tab_settings as $section) {
+            if (isset($section['fields']) && is_array($section['fields'])) {
+                foreach ($section['fields'] as $field) {
+                    if (isset($field['key'])) {
+                        $default = $field['default'] ?? '';
+                        if (!$this->saveSetting($field['key'], $default)) {
+                            $success = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $success;
+    }
+
+    /**
+     * Reset all settings to defaults
+     *
+     * @return bool
+     */
+    public function resetAllSettings(): bool
+    {
+        $all_settings = $this->getAllSettings();
+        $success = true;
+        
+        foreach ($all_settings as $tab => $tab_settings) {
+            if (!$this->resetTabSettings($tab)) {
+                $success = false;
+            }
+        }
+        
+        return $success;
+    }
+
+    /**
+     * Export settings for a specific tab
+     *
+     * @param string $tab
+     * @return array
+     */
+    public function exportTabSettings(string $tab): array
+    {
+        $tab_settings = $this->getTabSettings($tab);
+        $export_data = [];
+        
+        foreach ($tab_settings as $section) {
+            if (isset($section['fields']) && is_array($section['fields'])) {
+                foreach ($section['fields'] as $field) {
+                    if (isset($field['key'])) {
+                        $export_data[$field['key']] = $this->getSetting($field['key'], $field['default'] ?? '');
+                    }
+                }
+            }
+        }
+        
+        return $export_data;
+    }
+
+    /**
+     * Export all settings
+     *
+     * @return array
+     */
+    public function exportAllSettings(): array
+    {
+        $all_settings = $this->getAllSettings();
+        $export_data = [];
+        
+        foreach ($all_settings as $tab => $tab_settings) {
+            $export_data[$tab] = $this->exportTabSettings($tab);
+        }
+        
+        return $export_data;
+    }
+
+    /**
+     * Import settings
+     *
+     * @param array $data
+     * @param bool $overwrite
+     * @return bool
+     */
+    public function importSettings(array $data, bool $overwrite = false): bool
+    {
+        $success = true;
+        
+        foreach ($data as $tab => $tab_data) {
+            if (is_array($tab_data)) {
+                foreach ($tab_data as $key => $value) {
+                    if ($overwrite || $this->getSetting($key) === '') {
+                        if (!$this->saveSetting($key, $value)) {
+                            $success = false;
+                        }
+                    }
+                }
+            }
+        }
+        
         return $success;
     }
 
@@ -302,6 +467,45 @@ class SettingsManager
                 if (isset($field['max'])) {
                     $output .= ' max="' . esc_attr($field['max']) . '"';
                 }
+                $output .= '>' . "\n";
+                break;
+                
+            case 'email':
+                $output .= '                <input type="email" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= ' value="' . esc_attr($current_value) . '"';
+                if (!empty($placeholder)) {
+                    $output .= ' placeholder="' . esc_attr($placeholder) . '"';
+                }
+                $output .= '>' . "\n";
+                break;
+                
+            case 'password':
+                $output .= '                <input type="password" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= ' value="' . esc_attr($current_value) . '"';
+                if (!empty($placeholder)) {
+                    $output .= ' placeholder="' . esc_attr($placeholder) . '"';
+                }
+                $output .= '>' . "\n";
+                break;
+                
+            case 'url':
+                $output .= '                <input type="url" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= ' value="' . esc_attr($current_value) . '"';
+                if (!empty($placeholder)) {
+                    $output .= ' placeholder="' . esc_attr($placeholder) . '"';
+                }
+                $output .= '>' . "\n";
+                break;
+                
+            case 'color':
+                $output .= '                <input type="color" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= ' value="' . esc_attr($current_value) . '"';
+                $output .= '>' . "\n";
+                break;
+                
+            case 'datetime-local':
+                $output .= '                <input type="datetime-local" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
+                $output .= ' value="' . esc_attr($current_value) . '"';
                 $output .= '>' . "\n";
                 break;
                 
