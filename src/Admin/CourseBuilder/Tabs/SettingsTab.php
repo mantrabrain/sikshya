@@ -146,17 +146,58 @@ class SettingsTab extends AbstractTab
                 'placeholder' => __('Enter SEO title for search engines', 'sikshya'),
                 'description' => __('Custom title for search engine optimization', 'sikshya'),
             ],
-            'seo_description' => [
+            'meta_description' => [
                 'type' => 'textarea',
-                'label' => __('SEO Description', 'sikshya'),
-                'placeholder' => __('Enter SEO description for search engines', 'sikshya'),
+                'label' => __('Meta Description', 'sikshya'),
+                'placeholder' => __('Enter meta description for search engines', 'sikshya'),
                 'description' => __('Custom description for search engine optimization', 'sikshya'),
             ],
-            'seo_keywords' => [
+            'focus_keywords' => [
                 'type' => 'text',
-                'label' => __('SEO Keywords', 'sikshya'),
+                'label' => __('Focus Keywords', 'sikshya'),
                 'placeholder' => __('keyword1, keyword2, keyword3', 'sikshya'),
                 'description' => __('Comma-separated keywords for SEO', 'sikshya'),
+            ],
+            'enable_progress_tracking' => [
+                'type' => 'checkbox',
+                'label' => __('Enable Progress Tracking', 'sikshya'),
+                'default' => '1',
+                'description' => __('Track student progress through the course', 'sikshya'),
+            ],
+            'course_expiry_type' => [
+                'type' => 'select',
+                'label' => __('Course Expiry Type', 'sikshya'),
+                'options' => [
+                    'never' => __('Never Expires', 'sikshya'),
+                    'days' => __('Expires After Days', 'sikshya'),
+                    'date' => __('Expires On Date', 'sikshya'),
+                ],
+                'default' => 'never',
+                'description' => __('Set when the course access expires', 'sikshya'),
+            ],
+            'expiry_date' => [
+                'type' => 'date',
+                'label' => __('Expiry Date', 'sikshya'),
+                'description' => __('Date when course access expires', 'sikshya'),
+            ],
+            'access_duration' => [
+                'type' => 'number',
+                'label' => __('Access Duration (Days)', 'sikshya'),
+                'placeholder' => '30',
+                'min' => 1,
+                'description' => __('Number of days students have access', 'sikshya'),
+            ],
+            'notify_enrollment' => [
+                'type' => 'checkbox',
+                'label' => __('Notify on Enrollment', 'sikshya'),
+                'default' => '1',
+                'description' => __('Send notification when students enroll', 'sikshya'),
+            ],
+            'send_welcome_email' => [
+                'type' => 'checkbox',
+                'label' => __('Send Welcome Email', 'sikshya'),
+                'default' => '1',
+                'description' => __('Send welcome email to new students', 'sikshya'),
             ],
         ];
     }

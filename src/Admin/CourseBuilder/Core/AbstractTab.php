@@ -192,6 +192,9 @@ abstract class AbstractTab implements TabInterface
                 $options = $field_config['options'] ?? [];
                 return in_array($value, array_keys($options)) ? $value : '';
                 
+            case 'date':
+                return sanitize_text_field($value);
+                
             default:
                 return sanitize_text_field($value);
         }
@@ -320,6 +323,15 @@ abstract class AbstractTab implements TabInterface
                     $min,
                     $max,
                     $step,
+                    $required
+                );
+                break;
+                
+            case 'date':
+                $field_html = sprintf(
+                    '<input type="date" name="%s" value="%s" %s>',
+                    esc_attr($field_id),
+                    esc_attr($value),
                     $required
                 );
                 break;
