@@ -694,6 +694,10 @@
     margin-top: 6px;
     padding-top: 6px;
     border-top: 1px solid #f3f4f6;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .sikshya-table tbody tr:hover .row-actions {
@@ -701,11 +705,8 @@
 }
 
 .row-actions span {
-    margin-right: 12px;
-}
-
-.row-actions span:last-child {
-    margin-right: 0;
+    display: inline-flex;
+    align-items: center;
 }
 
 .row-actions a {
@@ -717,6 +718,7 @@
     padding: 2px 4px;
     border-radius: 4px;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .row-actions a:hover {
