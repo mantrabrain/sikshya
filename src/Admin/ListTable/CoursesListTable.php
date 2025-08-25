@@ -422,6 +422,12 @@ class CoursesListTable extends AbstractListTable
         $title = $item->post_title;
         $edit_url = admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->ID);
         
+        // Get course details
+        $lessons = $item->meta['course_lessons'] ?? 0;
+        $quizzes = $item->meta['course_quizzes'] ?? 0;
+        $assignments = $item->meta['course_assignments'] ?? 0;
+        $duration = $item->meta['course_duration'] ?? 0;
+        
         $actions = [
             'edit' => sprintf('<a href="%s">%s</a>', esc_url($edit_url), __('Edit', 'sikshya')),
             'view' => sprintf('<a href="#" onclick="return false;">%s</a>', __('View', 'sikshya')),
@@ -429,11 +435,26 @@ class CoursesListTable extends AbstractListTable
 
         $row_actions = $this->row_actions($actions);
         
-        $output = sprintf(
+        $output = '<div class="sikshya-course-title-wrapper">';
+        $output .= '<div class="sikshya-course-thumbnail">';
+        $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>';
+        $output .= '</div>';
+        $output .= '<div class="sikshya-course-content">';
+        $output .= sprintf(
             '<strong><a href="%s" class="row-title">%s</a></strong>',
             esc_url($edit_url),
             esc_html($title)
         );
+        
+        $output .= '<div class="sikshya-course-details">';
+        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>' . esc_html($lessons) . ' Lessons</span>';
+        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' . esc_html($quizzes) . ' Quizzes</span>';
+        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>' . esc_html($assignments) . ' Assignments</span>';
+        $output .= '<span class="sikshya-course-stat"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' . esc_html($duration) . 'h Duration</span>';
+        $output .= '</div>';
+        $output .= '</div>';
+        $output .= '</div>';
         
         $output .= $row_actions;
         
@@ -450,7 +471,15 @@ class CoursesListTable extends AbstractListTable
     {
         $instructor_name = $item->meta['course_instructor'] ?? __('Unknown', 'sikshya');
         
-        return esc_html($instructor_name);
+        return sprintf(
+            '<div class="sikshya-instructor">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>%s</span>
+            </div>',
+            esc_html($instructor_name)
+        );
     }
 
     /**
@@ -469,9 +498,14 @@ class CoursesListTable extends AbstractListTable
             'pending' => __('Pending Review', 'sikshya'),
         ];
 
+        $status_class = 'sikshya-status-' . $status;
         $status_text = $status_labels[$status] ?? $status;
 
-        return esc_html($status_text);
+        return sprintf(
+            '<span class="sikshya-status %s">%s</span>',
+            esc_attr($status_class),
+            esc_html($status_text)
+        );
     }
 
     /**
@@ -484,7 +518,10 @@ class CoursesListTable extends AbstractListTable
     {
         $enrollments = $item->meta['course_enrollments'] ?? 0;
         
-        return number_format($enrollments);
+        return sprintf(
+            '<a href="#">%d</a>',
+            $enrollments
+        );
     }
 
     /**
@@ -498,10 +535,19 @@ class CoursesListTable extends AbstractListTable
         $categories = $item->meta['course_categories'] ?? [];
         
         if (empty($categories)) {
-            return '—';
+            return '<span class="sikshya-no-categories">—</span>';
         }
         
-        return esc_html(implode(', ', $categories));
+        $output = '<div class="sikshya-categories">';
+        foreach ($categories as $category) {
+            $output .= sprintf(
+                '<span class="sikshya-category-tag">%s</span>',
+                esc_html($category)
+            );
+        }
+        $output .= '</div>';
+        
+        return $output;
     }
 
     public function column_rating($item): string
@@ -509,10 +555,37 @@ class CoursesListTable extends AbstractListTable
         $rating = $item->meta['course_rating'] ?? 0;
         
         if ($rating == 0) {
-            return '—';
+            return '<span class="sikshya-no-rating">—</span>';
         }
         
-        return number_format($rating, 1);
+        $stars = '';
+        $full_stars = floor($rating);
+        $has_half_star = ($rating - $full_stars) >= 0.5;
+        
+        // Full stars
+        for ($i = 0; $i < $full_stars; $i++) {
+            $stars .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>';
+        }
+        
+        // Half star
+        if ($has_half_star) {
+            $stars .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><defs><linearGradient id="half-star"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" fill="url(#half-star)"></path></svg>';
+        }
+        
+        // Empty stars
+        $empty_stars = 5 - $full_stars - ($has_half_star ? 1 : 0);
+        for ($i = 0; $i < $empty_stars; $i++) {
+            $stars .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>';
+        }
+        
+        return sprintf(
+            '<div class="sikshya-rating">
+                <div class="sikshya-stars">%s</div>
+                <span class="sikshya-rating-text">(%s)</span>
+            </div>',
+            $stars,
+            number_format($rating, 1)
+        );
     }
 
     public function column_price($item): string
@@ -520,10 +593,12 @@ class CoursesListTable extends AbstractListTable
         $price = $item->meta['course_price'] ?? '0.00';
         
         if ($price === '0.00' || empty($price)) {
-            return 'Free';
+            return '<span class="sikshya-price-free">FREE</span>';
         }
 
-        return '$' . number_format($price, 2);
+        $formatted_price = '$' . number_format($price, 2);
+        
+        return '<span class="sikshya-price-paid">' . esc_html($formatted_price) . '</span>';
     }
 
     /**

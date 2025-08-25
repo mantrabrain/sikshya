@@ -416,14 +416,14 @@
 
 /* Table Body */
 .sikshya-table tbody tr {
-    transition: all var(--sikshya-transition-normal);
-    border-bottom: 1px solid var(--sikshya-gray-100);
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .sikshya-table tbody tr:hover {
-    background: var(--sikshya-gray-50);
+    background: #f8fafc;
     transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .sikshya-table tbody tr:last-child {
@@ -431,10 +431,11 @@
 }
 
 .sikshya-table tbody td {
-    padding: var(--sikshya-space-4) var(--sikshya-space-6);
+    padding: 16px 20px;
     vertical-align: middle;
-    border-bottom: 1px solid var(--sikshya-gray-100);
-    color: var(--sikshya-gray-700);
+    border-bottom: 1px solid #f1f5f9;
+    color: #374151;
+    line-height: 1.5;
 }
 
 /* ===== COURSE TITLE LINKS ===== */
@@ -539,23 +540,25 @@
 .sikshya-course-title-wrapper {
     display: flex;
     align-items: flex-start;
-    gap: var(--sikshya-space-3);
+    gap: 12px;
 }
 
 .sikshya-course-thumbnail {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    background: var(--sikshya-gray-100);
-    border-radius: var(--sikshya-radius-md);
+    width: 48px;
+    height: 48px;
+    background: #f8fafc;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--sikshya-gray-200);
+    border: 1px solid #e2e8f0;
 }
 
 .sikshya-course-thumbnail svg {
-    color: var(--sikshya-gray-500);
+    color: #64748b;
+    width: 24px;
+    height: 24px;
 }
 
 .sikshya-course-content {
@@ -567,41 +570,48 @@
 .sikshya-course-details {
     display: flex;
     align-items: center;
-    gap: var(--sikshya-space-3);
-    margin-top: var(--sikshya-space-2);
-    font-size: var(--sikshya-text-xs);
-    color: var(--sikshya-gray-600);
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.4;
 }
 
 .sikshya-course-stat {
     display: inline-flex;
     align-items: center;
-    gap: var(--sikshya-space-1);
-    color: var(--sikshya-gray-500);
+    gap: 6px;
+    color: #64748b;
+    font-weight: 500;
+    padding: 4px 8px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 12px;
 }
 
 .sikshya-course-stat svg {
-    width: 12px;
-    height: 12px;
-    color: var(--sikshya-gray-400);
+    width: 14px;
+    height: 14px;
+    color: #64748b;
 }
 
 /* ===== CATEGORIES ===== */
 .sikshya-categories {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sikshya-space-1);
+    gap: 6px;
 }
 
 .sikshya-category-tag {
     display: inline-block;
-    padding: var(--sikshya-space-1) var(--sikshya-space-2);
-    background: var(--sikshya-primary-bg);
-    color: var(--sikshya-primary);
-    border-radius: var(--sikshya-radius-sm);
-    font-size: var(--sikshya-text-xs);
-    font-weight: var(--sikshya-font-medium);
+    padding: 4px 10px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
+    border: 1px solid #bfdbfe;
 }
 
 .sikshya-no-categories {
@@ -613,37 +623,40 @@
 .sikshya-instructor {
     display: flex;
     align-items: center;
-    gap: var(--sikshya-space-2);
-    color: var(--sikshya-gray-700);
+    gap: 8px;
+    color: #374151;
+    font-weight: 500;
 }
 
 .sikshya-instructor svg {
     width: 16px;
     height: 16px;
-    color: var(--sikshya-gray-500);
+    color: #6b7280;
 }
 
 /* ===== RATING ===== */
 .sikshya-rating {
     display: flex;
     align-items: center;
-    gap: var(--sikshya-space-2);
+    gap: 8px;
 }
 
 .sikshya-stars {
     display: flex;
     align-items: center;
-    gap: 1px;
+    gap: 2px;
 }
 
 .sikshya-stars svg {
-    color: #fbbf24;
+    color: #f59e0b;
+    width: 14px;
+    height: 14px;
 }
 
 .sikshya-rating-text {
-    font-size: var(--sikshya-text-xs);
-    color: var(--sikshya-gray-600);
-    font-weight: var(--sikshya-font-medium);
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
 }
 
 .sikshya-no-rating {
@@ -653,23 +666,29 @@
 
 /* ===== PRICE ===== */
 .sikshya-price-free {
-    color: var(--sikshya-primary);
-    font-weight: var(--sikshya-font-semibold);
-    font-size: var(--sikshya-text-sm);
+    color: #059669;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 4px 8px;
+    background: #d1fae5;
+    border-radius: 6px;
+    border: 1px solid #a7f3d0;
 }
 
 .sikshya-price-paid {
-    color: var(--sikshya-success);
-    font-weight: var(--sikshya-font-semibold);
-    font-size: var(--sikshya-text-sm);
+    color: #059669;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 /* ===== ROW ACTIONS ===== */
 .row-actions {
     visibility: hidden;
     font-size: 13px;
-    color: #666;
-    margin-top: 4px;
+    color: #6b7280;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #f3f4f6;
 }
 
 .sikshya-table tbody tr:hover .row-actions {
@@ -677,7 +696,7 @@
 }
 
 .row-actions span {
-    margin-right: 8px;
+    margin-right: 12px;
 }
 
 .row-actions span:last-child {
@@ -685,16 +704,19 @@
 }
 
 .row-actions a {
-    color: #0073aa;
+    color: #6b7280;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
 }
 
 .row-actions a:hover {
-    color: #00a0d2;
-    text-decoration: underline;
+    color: #374151;
+    background: #f9fafb;
 }
 
 .row-actions a svg {
@@ -704,11 +726,12 @@
 }
 
 .row-actions .delete a {
-    color: #a00;
+    color: #dc2626;
 }
 
 .row-actions .delete a:hover {
-    color: #dc3232;
+    color: #b91c1c;
+    background: #fef2f2;
 }
 
 /* ===== BULK ACTIONS ===== */
