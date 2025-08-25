@@ -46,7 +46,6 @@ class CoursesListTable extends AbstractListTable
                 'categories' => __('Categories', 'sikshya'),
                 'instructor' => __('Instructor', 'sikshya'),
                 'price' => __('Price', 'sikshya'),
-                'enrollments' => __('Students', 'sikshya'),
                 'rating' => __('Rating', 'sikshya'),
                 'status' => __('Status', 'sikshya'),
                 'created' => __('Date', 'sikshya'),
@@ -55,7 +54,6 @@ class CoursesListTable extends AbstractListTable
                 'title' => ['title', true],
                 'instructor' => ['instructor', false],
                 'status' => ['status', false],
-                'enrollments' => ['enrollments', false],
                 'price' => ['price', false],
                 'created' => ['created', false],
             ],
@@ -151,6 +149,7 @@ class CoursesListTable extends AbstractListTable
                 'post_date' => '2025-01-15 10:30:00',
                 'meta' => [
                     'course_price' => '89.99',
+                    'course_original_price' => '129.99',
                     'course_lessons' => 45,
                     'course_quizzes' => 12,
                     'course_assignments' => 8,
@@ -158,7 +157,7 @@ class CoursesListTable extends AbstractListTable
                     'course_enrollments' => 1245,
                     'course_rating' => 4.8,
                     'course_categories' => ['Development', 'JavaScript'],
-                    'course_instructor' => 'John Smith'
+                    'course_instructor' => 'John Smith, Mike Wilson'
                 ]
             ],
             (object) [
@@ -169,6 +168,7 @@ class CoursesListTable extends AbstractListTable
                 'post_date' => '2025-01-10 14:15:00',
                 'meta' => [
                     'course_price' => '79.99',
+                    'course_original_price' => '99.99',
                     'course_lessons' => 38,
                     'course_quizzes' => 10,
                     'course_assignments' => 15,
@@ -176,7 +176,7 @@ class CoursesListTable extends AbstractListTable
                     'course_enrollments' => 892,
                     'course_rating' => 4.6,
                     'course_categories' => ['Design', 'UI/UX'],
-                    'course_instructor' => 'Sarah Johnson'
+                    'course_instructor' => 'Sarah Johnson, Emma Wilson'
                 ]
             ],
             (object) [
@@ -384,8 +384,6 @@ class CoursesListTable extends AbstractListTable
                 return $this->column_instructor($item);
             case 'status':
                 return $this->column_status($item);
-            case 'enrollments':
-                return $this->column_enrollments($item);
             case 'price':
                 return $this->column_price($item);
             case 'rating':
@@ -448,6 +446,9 @@ class CoursesListTable extends AbstractListTable
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
         
+        // Get student count
+        $student_count = $item->meta['course_enrollments'] ?? 0;
+        
         $output = '<div class="sikshya-course-title-wrapper">';
         $output .= '<div class="sikshya-course-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -458,6 +459,10 @@ class CoursesListTable extends AbstractListTable
             '<strong><a href="%s" class="row-title">%s</a></strong>',
             esc_url($edit_url),
             esc_html($title)
+        );
+        $output .= sprintf(
+            '<div class="sikshya-student-count">%s students</div>',
+            esc_html($student_count)
         );
         $output .= '</div>';
         $output .= '</div>';
@@ -475,17 +480,26 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_instructor($item): string
     {
-        $instructor_name = $item->meta['course_instructor'] ?? __('Unknown', 'sikshya');
+        $instructor_names = $item->meta['course_instructor'] ?? __('Unknown', 'sikshya');
         
-        return sprintf(
-            '<div class="sikshya-instructor">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                <span>%s</span>
-            </div>',
-            esc_html($instructor_name)
-        );
+        // Split multiple instructors by comma
+        $instructors = array_map('trim', explode(',', $instructor_names));
+        
+        $output = '<div class="sikshya-instructors">';
+        foreach ($instructors as $instructor) {
+            $output .= sprintf(
+                '<div class="sikshya-instructor">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span>%s</span>
+                </div>',
+                esc_html($instructor)
+            );
+        }
+        $output .= '</div>';
+        
+        return $output;
     }
 
     /**
@@ -508,7 +522,7 @@ class CoursesListTable extends AbstractListTable
         $status_text = $status_labels[$status] ?? $status;
 
         return sprintf(
-            '<span class="sikshya-status %s">%s</span>',
+            '<span class="sikshya-status-badge %s">%s</span>',
             esc_attr($status_class),
             esc_html($status_text)
         );
@@ -573,12 +587,27 @@ class CoursesListTable extends AbstractListTable
     public function column_price($item): string
     {
         $price = $item->meta['course_price'] ?? '0.00';
+        $original_price = $item->meta['course_original_price'] ?? null;
         
         if ($price === '0.00' || empty($price)) {
             return '<span class="sikshya-price-free">FREE</span>';
         }
 
         $formatted_price = '$' . number_format($price, 2);
+        
+        if ($original_price && $original_price > $price) {
+            $formatted_original = '$' . number_format($original_price, 2);
+            $discount_percent = round((($original_price - $price) / $original_price) * 100);
+            
+            return sprintf(
+                '<div class="sikshya-price-discounted">
+                    <div class="sikshya-price-current">%s</div>
+                    <div class="sikshya-price-original">%s</div>
+                </div>',
+                esc_html($formatted_price),
+                esc_html($formatted_original)
+            );
+        }
         
         return '<span class="sikshya-price-paid">' . esc_html($formatted_price) . '</span>';
     }
