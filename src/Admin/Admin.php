@@ -221,6 +221,12 @@ class Admin
     {
         // Initialize admin-specific functionality
         do_action('sikshya_admin_init', $this);
+        
+        // Hook into admin_enqueue_scripts early to dequeue WordPress core styles
+        add_action('admin_enqueue_scripts', [$this, 'dequeueWordPressCoreStylesEarly'], 1);
+        
+        // Filter to remove styles from chunked loading
+        add_filter('print_styles_array', [$this, 'filterChunkedStyles'], 10, 1);
     }
 
     /**
@@ -283,6 +289,11 @@ class Admin
             $this->controllers['course']->enqueueCourseBuilderAssets();
         }
 
+        // Enqueue page-specific assets
+        if ($screen) {
+            $this->enqueuePageSpecificAssets($screen);
+        }
+
         // Enqueue settings assets only on settings page
         if ($screen && $screen->id === 'sikshya-lms_page_sikshya-settings') {
             error_log('Sikshya: Enqueuing settings assets for screen: ' . $screen->id);
@@ -338,20 +349,103 @@ class Admin
     }
 
     /**
+     * Dequeue WordPress core styles that interfere with our custom design
+     */
+    private function dequeueWordPressCoreStyles(): void
+    {
+        // Dequeue WordPress core form and button styles
+        wp_dequeue_style('forms');
+        wp_dequeue_style('buttons');
+        wp_dequeue_style('wp-admin');
+        wp_dequeue_style('dashicons');
+        
+        // Dequeue WordPress core scripts that might interfere
+        wp_dequeue_script('admin-bar');
+        wp_dequeue_script('wp-embed');
+    }
+
+
+
+    /**
+     * Filter chunked styles to remove WordPress core styles on our pages
+     */
+    public function filterChunkedStyles($styles): array
+    {
+        $screen = get_current_screen();
+        
+        // Only filter on specific Sikshya list table pages
+        if ($screen && in_array($screen->id, [
+            'sikshya-lms_page_sikshya-courses',
+            'sikshya-lms_page_sikshya-lessons',
+            'sikshya-lms_page_sikshya-quizzes'
+        ])) {
+            // Remove WordPress core styles from the chunked loading
+            $styles = array_filter($styles, function($style) {
+                return !in_array($style, ['forms', 'buttons', 'list-tables']);
+            });
+        }
+        
+        return $styles;
+    }
+
+    /**
+     * Dequeue WordPress core styles early in the process
+     */
+    public function dequeueWordPressCoreStylesEarly(): void
+    {
+        $screen = get_current_screen();
+        
+        // Only dequeue on specific Sikshya list table pages
+        if ($screen && in_array($screen->id, [
+            'sikshya-lms_page_sikshya-courses',
+            'sikshya-lms_page_sikshya-lessons',
+            'sikshya-lms_page_sikshya-quizzes'
+        ])) {
+            // Dequeue WordPress core styles that interfere with our custom design
+            wp_dequeue_style('list-tables');
+            wp_dequeue_style('forms');
+            wp_dequeue_style('buttons');
+        }
+    }
+
+    /**
      * Enqueue page-specific assets
      */
     private function enqueuePageSpecificAssets($screen): void
     {
+        error_log('Sikshya: enqueuePageSpecificAssets called with screen ID: ' . $screen->id);
+        
         switch ($screen->id) {
-            case 'sikshya_page_sikshya-courses':
-                wp_enqueue_script('sikshya-course-manager');
-                wp_enqueue_style('sikshya-course-manager');
+            case 'sikshya-lms_page_sikshya-courses':
+                // Enqueue list table assets for courses page
+                wp_enqueue_style(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
+                    ['sikshya-admin'],
+                    SIKSHYA_VERSION
+                );
+                
+                wp_enqueue_script(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
+                    ['jquery', 'sikshya-admin'],
+                    SIKSHYA_VERSION,
+                    true
+                );
+
+                // Localize list table script
+                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
+                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
+                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
+                ]);
                 break;
-            case 'sikshya_page_sikshya-lessons':
+            case 'sikshya-lms_page_sikshya-lessons':
                 wp_enqueue_script('sikshya-lesson-manager');
                 wp_enqueue_style('sikshya-lesson-manager');
                 break;
-            case 'sikshya_page_sikshya-quizzes':
+            case 'sikshya-lms_page_sikshya-quizzes':
                 wp_enqueue_script('sikshya-quiz-manager');
                 wp_enqueue_style('sikshya-quiz-manager');
                 break;

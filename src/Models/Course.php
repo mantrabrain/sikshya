@@ -3,6 +3,7 @@
 namespace Sikshya\Models;
 
 use WP_Post;
+use Sikshya\Constants\PostTypes;
 
 /**
  * Course Model
@@ -30,7 +31,7 @@ class Course
     public function getAll(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'date',
@@ -54,7 +55,7 @@ class Course
     {
         $course = get_post($course_id);
         
-        if (!$course || $course->post_type !== 'sikshya_course') {
+        if (!$course || $course->post_type !== PostTypes::COURSE) {
             return null;
         }
 
@@ -81,7 +82,7 @@ class Course
         $data = wp_parse_args($data, $defaults);
         
         // Set post type
-        $data['post_type'] = 'sikshya_course';
+        $data['post_type'] = PostTypes::COURSE;
         
         // Create the course
         $course_id = wp_insert_post($data);
@@ -106,7 +107,7 @@ class Course
     public function update(int $course_id, array $data)
     {
         $data['ID'] = $course_id;
-        $data['post_type'] = 'sikshya_course';
+        $data['post_type'] = PostTypes::COURSE;
         
         return wp_update_post($data);
     }

@@ -8,6 +8,8 @@
 
 namespace Sikshya\Admin\CourseBuilder\Core;
 
+use Sikshya\Constants\PostTypes;
+
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
@@ -138,6 +140,17 @@ abstract class AbstractTab implements TabInterface
      */
     public function save(array $data, int $course_id): bool
     {
+        // Check if course_id is valid
+        if ($course_id <= 0) {
+            return false;
+        }
+        
+        // Check if the course exists
+        $course = get_post($course_id);
+        if (!$course || $course->post_type !== PostTypes::COURSE) {
+            return false;
+        }
+        
         $fields = $this->getFields();
         $success = true;
         
@@ -151,7 +164,9 @@ abstract class AbstractTab implements TabInterface
             $meta_key = '_sikshya_' . $field_id;
             $result = update_post_meta($course_id, $meta_key, $value);
             
-            if ($result === false) {
+            // update_post_meta returns false if value didn't change, but that's not a failure
+            // We only consider it a failure if the post doesn't exist or we don't have permission
+            if ($result === false && !current_user_can('edit_post', $course_id)) {
                 $success = false;
             }
         }

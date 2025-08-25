@@ -9,6 +9,7 @@
 namespace Sikshya\Ajax;
 
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
+use Sikshya\Constants\PostTypes;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -104,7 +105,7 @@ class CourseAjax extends AjaxAbstract
                 $post_data = [
                     'post_title' => $data['title'] ?? 'New Course',
                     'post_content' => $data['description'] ?? '',
-                    'post_type' => 'sikshya_course',
+                    'post_type' => PostTypes::COURSE,
                     'post_status' => $course_status,
                 ];
                 

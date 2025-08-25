@@ -201,6 +201,7 @@ class CourseBuilderManager
             
             // Save tab data
             $success = $tab->save($data, $course_id);
+            
             if (!$success) {
                 $errors[$tab_id] = [__('Failed to save tab data.', 'sikshya')];
             }
