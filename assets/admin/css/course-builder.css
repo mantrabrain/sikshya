@@ -11,6 +11,8 @@
     overflow: hidden;
     font-family: var(--sikshya-font-family);
     min-height: 100vh;
+    /* Prevent layout shifts during load */
+    contain: layout style;
 }
 
 .sikshya-header {
@@ -45,6 +47,34 @@
 .sikshya-header h1 i {
     font-size: var(--sikshya-text-lg);
     color: var(--sikshya-primary);
+}
+
+.sikshya-header-course-info {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-3);
+    margin-left: var(--sikshya-space-4);
+}
+
+.sikshya-course-title-display {
+    background: var(--sikshya-gray-100);
+    color: var(--sikshya-gray-700);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-semibold);
+    padding: var(--sikshya-space-2) var(--sikshya-space-4);
+    border-radius: var(--sikshya-radius-md);
+    border: 1px solid var(--sikshya-gray-200);
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sikshya-editing-text {
+    color: var(--sikshya-gray-500);
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-normal);
+    font-style: italic;
 }
 
 .sikshya-version {
@@ -151,6 +181,8 @@
     flex: 1;
     background: var(--sikshya-white);
     position: relative;
+    /* Prevent layout shifts during content loading */
+    contain: layout style;
 }
 
 .sikshya-tab-nav-item {
@@ -620,7 +652,13 @@
     border-radius: var(--sikshya-radius-lg);
     padding: var(--sikshya-space-8);
     box-shadow: var(--sikshya-shadow-sm);
-    transition: var(--sikshya-transition-normal);
+    /* Optimize transitions to prevent flickering */
+    transition: box-shadow 0.2s ease-in-out;
+    /* Ensure stable rendering */
+    transform: translateZ(0);
+    will-change: box-shadow;
+    /* Prevent layout shifts */
+    contain: layout style paint;
 }
 
 .sikshya-section-modern:hover {
@@ -679,6 +717,32 @@
 /* Course Builder Specific Form Styles */
 .sikshya-form-row {
     margin-bottom: var(--sikshya-space-5);
+    /* Prevent layout shifts */
+    contain: layout style;
+}
+
+/* Media Row - Side by side layout for media uploads */
+.sikshya-media-row {
+    display: flex;
+    gap: var(--sikshya-space-6);
+    margin-bottom: var(--sikshya-space-5);
+}
+
+.sikshya-media-row .sikshya-form-row {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Responsive design for media row */
+@media (max-width: 768px) {
+    .sikshya-media-row {
+        flex-direction: column;
+        gap: var(--sikshya-space-4);
+    }
+    
+    .sikshya-media-row .sikshya-form-row {
+        margin-bottom: var(--sikshya-space-4);
+    }
 }
 
 .sikshya-form-row label {
@@ -700,8 +764,12 @@
     border-radius: var(--sikshya-radius-md);
     font-size: var(--sikshya-text-sm);
     line-height: var(--sikshya-leading-normal);
-    transition: var(--sikshya-transition-colors);
+    /* Optimize transitions to prevent flickering */
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     background: var(--sikshya-white);
+    /* Ensure stable rendering */
+    transform: translateZ(0);
+    will-change: border-color, box-shadow;
 }
 
 .sikshya-form-row input:focus,

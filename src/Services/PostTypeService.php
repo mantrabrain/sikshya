@@ -3,6 +3,7 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\PostTypes;
 
 /**
  * Post Type Management Service
@@ -76,7 +77,7 @@ class PostTypeService
             'show_in_rest' => true,
         ];
 
-        register_post_type('sikshya_course', $args);
+        register_post_type(PostTypes::COURSE, $args);
     }
 
     /**
@@ -115,7 +116,7 @@ class PostTypeService
             'show_in_rest' => true,
         ];
 
-        register_post_type('sikshya_lesson', $args);
+        register_post_type(PostTypes::LESSON, $args);
     }
 
     /**
@@ -154,7 +155,7 @@ class PostTypeService
             'show_in_rest' => true,
         ];
 
-        register_post_type('sikshya_quiz', $args);
+        register_post_type(PostTypes::QUIZ, $args);
     }
 
     /**
@@ -193,7 +194,7 @@ class PostTypeService
             'show_in_rest' => true,
         ];
 
-        register_post_type('sikshya_assignment', $args);
+        register_post_type(PostTypes::ASSIGNMENT, $args);
     }
 
     /**

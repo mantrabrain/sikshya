@@ -295,15 +295,27 @@ class Course
     public function setMeta(string $key, $value): bool
     {
         if (!$this->post) {
+            error_log('Sikshya Course Model: setMeta failed - no post object for key: ' . $key);
             return false;
         }
         
-        $result = update_post_meta($this->id, $key, $value);
-        if ($result !== false) {
-            $this->meta[$key] = $value;
-        }
+        error_log('Sikshya Course Model: setMeta called for key: ' . $key . ' with value: ' . print_r($value, true));
         
-        return $result !== false;
+        $result = update_post_meta($this->id, $key, $value);
+        error_log('Sikshya Course Model: update_post_meta result for key ' . $key . ': ' . var_export($result, true));
+        
+        // update_post_meta can return false if the value is the same as existing value
+        // or if there's an actual error. We need to check if the meta was actually set
+        $current_value = get_post_meta($this->id, $key, true);
+        
+        if ($result !== false || $current_value == $value) {
+            $this->meta[$key] = $value;
+            error_log('Sikshya Course Model: Meta updated successfully for key: ' . $key);
+            return true;
+        } else {
+            error_log('Sikshya Course Model: Meta update failed for key: ' . $key);
+            return false;
+        }
     }
     
     /**

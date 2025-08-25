@@ -13,16 +13,19 @@ if (!defined('ABSPATH')) {
 
 // Initialize the course builder manager
 try {
+    error_log('Sikshya Template: Creating CourseBuilderManager...');
     $course_builder_manager = new \Sikshya\Admin\CourseBuilder\CourseBuilderManager($this->plugin);
+    error_log('Sikshya Template: CourseBuilderManager created successfully');
 } catch (Exception $e) {
     error_log('Sikshya Course Builder Error: ' . $e->getMessage());
     // Fallback to static content if dynamic system fails
     $course_builder_manager = null;
 }
 
-$active_tab = $data['active_tab'] ?? '';
-$course_id = $data['course_id'] ?? '';
-$course_data = $data['course_data'] ?? null;
+// The variables are already extracted by BaseView::includeTemplate()
+// $active_tab, $course_id, $course_data are now available as individual variables
+
+error_log('Sikshya Template: Data received - active_tab: ' . ($active_tab ?? 'NOT SET') . ', course_id: ' . ($course_id ?? 'NOT SET') . ', course_data: ' . ($course_data ? 'SET' : 'NULL'));
 
 // Create Course model instance if course_id is provided
 $course_model = null;
@@ -55,16 +58,17 @@ if ($course_data && isset($course_data['status'])) {
             <div class="sikshya-header-title">
                 <h1>
                     <i class="fas fa-graduation-cap"></i>
-                    <?php if ($course_data && isset($course_data['title']) && !empty($course_data['title'])): ?>
-                        <?php echo esc_html($course_data['title']); ?>
-                        <?php if ($course_data && isset($course_data['id']) && $course_data['id'] > 0): ?>
-                            <span class="sikshya-editing-indicator"><?php _e('(Editing...)', 'sikshya'); ?></span>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <?php _e('Course Builder', 'sikshya'); ?>
-                    <?php endif; ?>
+                    <?php _e('Course Builder', 'sikshya'); ?>
                 </h1>
-                <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+                <div class="sikshya-header-course-info">
+                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+                    <?php if ($course_data && isset($course_data['title']) && !empty($course_data['title'])): ?>
+                        <span class="sikshya-course-title-display"><?php echo esc_html($course_data['title']); ?></span>
+                        <?php if ($course_data && isset($course_data['id']) && $course_data['id'] > 0): ?>
+                            <span class="sikshya-editing-text"><?php _e('editing', 'sikshya'); ?></span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
             <div class="sikshya-header-actions">
                 <button type="button" class="sikshya-btn sikshya-btn-secondary" id="preview-course-btn">
@@ -202,7 +206,10 @@ if ($course_data && isset($course_data['status'])) {
 
             <!-- Tab Content -->
             <?php if ($course_builder_manager): ?>
-                <?php echo $course_builder_manager->renderTabContent($active_tab, intval($course_id)); ?>
+                <?php 
+                error_log('Sikshya Template: About to call renderTabContent with course_id: ' . $course_id);
+                echo $course_builder_manager->renderTabContent($active_tab, intval($course_id)); 
+                ?>
             <?php else: ?>
                 <!-- Fallback static content -->
                 <div class="sikshya-content">

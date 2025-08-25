@@ -19,7 +19,6 @@
                 // Wait a bit more for dynamic content to load
                 setTimeout(() => {
                     this.bindEvents();
-                    this.loadExistingData();
                 }, 500);
             });
         },
@@ -117,65 +116,7 @@
             this.showNotification('error', response.message || 'Failed to save course');
         },
 
-        /**
-         * Load existing course data
-         */
-        loadExistingData: function() {
-            const courseId = window.sikshyaCourseBuilder ? window.sikshyaCourseBuilder.courseId : null;
-            
-            if (courseId && courseId > 0) {
-                this.loadCourseData(courseId);
-            }
-        },
 
-        /**
-         * Load course data via AJAX
-         */
-        loadCourseData: function(courseId) {
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_load_course_data',
-                    nonce: sikshya_ajax.nonce,
-                    course_id: courseId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        this.populateFormData(response.data);
-                    }
-                }.bind(this)
-            });
-        },
-
-        /**
-         * Populate form with existing data
-         */
-        populateFormData: function(data) {
-            const form = $('#sikshya-course-builder-form');
-            
-            Object.keys(data).forEach(function(fieldName) {
-                const field = form.find(`[name="${fieldName}"]`);
-                if (field.length) {
-                    this.setFieldValue(field, data[fieldName]);
-                }
-            }.bind(this));
-        },
-
-        /**
-         * Set field value based on type
-         */
-        setFieldValue: function(field, value) {
-            const type = field.attr('type');
-            
-            if (type === 'checkbox') {
-                field.prop('checked', value === '1' || value === true);
-            } else if (type === 'radio') {
-                field.filter(`[value="${value}"]`).prop('checked', true);
-            } else {
-                field.val(value);
-            }
-        },
 
         /**
          * Handle tab switching

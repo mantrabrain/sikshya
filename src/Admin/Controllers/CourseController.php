@@ -193,6 +193,7 @@ class CourseController extends BaseView
             
             // Get course ID from URL parameter (support both 'course_id' and 'id')
             $course_id = (int) ($_GET['course_id'] ?? $_GET['id'] ?? 0);
+            error_log('Sikshya: URL parameters - course_id: ' . ($_GET['course_id'] ?? 'NOT SET') . ', id: ' . ($_GET['id'] ?? 'NOT SET') . ', final course_id: ' . $course_id);
             
             // Load course data directly if course ID is present
             $course_data = null;
@@ -206,6 +207,7 @@ class CourseController extends BaseView
             $this->enqueueCourseBuilderAssets();
             
             // Render the dynamic course builder template
+            error_log('Sikshya: Rendering template with course_id: ' . $course_id . ', course_data: ' . ($course_data ? 'SET' : 'NULL'));
             $this->render('course-builder-dynamic', [
                 'plugin' => $this->plugin,
                 'active_tab' => $active_tab,

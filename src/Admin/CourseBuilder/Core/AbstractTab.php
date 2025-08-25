@@ -351,6 +351,11 @@ abstract class AbstractTab implements TabInterface
                 );
                 break;
                 
+            case 'media_upload':
+                $media_type = $field_config['media_type'] ?? 'image';
+                $field_html = $this->renderMediaUploadField($field_id, $field_config, $value, $media_type);
+                break;
+                
             default:
                 $field_html = sprintf(
                     '<input type="%s" name="%s" value="%s" placeholder="%s" %s>',
@@ -371,5 +376,59 @@ abstract class AbstractTab implements TabInterface
             $required ? '<span class="required">*</span>' : '',
             $field_html
         );
+    }
+    
+    /**
+     * Render a media upload field
+     * 
+     * @param string $field_id
+     * @param array $field_config
+     * @param mixed $value
+     * @param string $media_type
+     * @return string
+     */
+    protected function renderMediaUploadField(string $field_id, array $field_config, $value, string $media_type): string
+    {
+        $label = $field_config['label'] ?? $field_id;
+        $description = $field_config['description'] ?? '';
+        $required = !empty($field_config['required']) ? 'required' : '';
+        
+        // Determine icon and placeholder text based on media type
+        if ($media_type === 'video') {
+            $icon = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>';
+            $placeholder_text = __('No video selected', 'sikshya');
+            $button_text = __('Upload Trailer Video', 'sikshya');
+        } else {
+            $icon = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>';
+            $placeholder_text = __('No image selected', 'sikshya');
+            $button_text = __('Upload Featured Image', 'sikshya');
+        }
+        
+        ob_start();
+        ?>
+        <div class="sikshya-media-upload">
+            <div class="sikshya-media-preview" id="<?php echo esc_attr($field_id); ?>_preview">
+                <div class="sikshya-media-placeholder">
+                    <?php echo $icon; ?>
+                    <span><?php echo esc_html($placeholder_text); ?></span>
+                </div>
+            </div>
+            <input type="hidden" name="<?php echo esc_attr($field_id); ?>" id="<?php echo esc_attr($field_id); ?>" value="<?php echo esc_attr($value); ?>">
+            <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-media-btn" onclick="openMediaUpload('<?php echo esc_attr($field_id); ?>')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                </svg>
+                <?php echo esc_html($button_text); ?>
+            </button>
+            <?php if (!empty($description)): ?>
+                <p class="sikshya-help-text"><?php echo esc_html($description); ?></p>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 }

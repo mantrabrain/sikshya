@@ -29,7 +29,7 @@ class CourseAjax extends AjaxAbstract
         
         // Course builder AJAX handlers
         add_action('wp_ajax_sikshya_save_course_builder', [$this, 'handleSaveCourseBuilder']);
-        add_action('wp_ajax_sikshya_load_course_data', [$this, 'handleLoadCourseData']);
+
         add_action('wp_ajax_sikshya_save_chapter_order', [$this, 'handleSaveChapterOrder']);
         add_action('wp_ajax_sikshya_save_lesson_order', [$this, 'handleSaveLessonOrder']);
         add_action('wp_ajax_sikshya_save_content_type', [$this, 'handleSaveContentType']);
@@ -145,42 +145,7 @@ class CourseAjax extends AjaxAbstract
 
 
 
-    /**
-     * Handle load course data AJAX request
-     */
-    public function handleLoadCourseData(): void
-    {
-        try {
-            if (!$this->verifyNonce('sikshya_course_builder')) {
-                $this->sendError('Invalid nonce');
-                return;
-            }
-            
-            if (!$this->checkCapability()) {
-                $this->sendError('Insufficient permissions');
-                return;
-            }
 
-            $course_id = intval($this->getPostData('course_id', 0));
-            
-            if ($course_id === 0) {
-                $this->sendError('Invalid course ID');
-                return;
-            }
-            
-            // Initialize course builder manager
-            $course_builder_manager = new CourseBuilderManager($this->plugin);
-            
-            // Load all tab data
-            $data = $course_builder_manager->loadAllTabs($course_id);
-            
-            $this->sendSuccess($data);
-            
-        } catch (\Exception $e) {
-            $this->logError('Load course data error', $e);
-            $this->sendError('Failed to load course data: ' . $e->getMessage());
-        }
-    }
 
     /**
      * Handle course list AJAX request

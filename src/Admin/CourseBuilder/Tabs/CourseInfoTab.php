@@ -146,16 +146,18 @@ class CourseInfoTab extends AbstractTab
                 'description' => __('Primary language of instruction', 'sikshya'),
             ],
             'featured_image' => [
-                'type' => 'url',
-                'label' => __('Featured Image URL', 'sikshya'),
-                'placeholder' => __('https://example.com/image.jpg', 'sikshya'),
-                'description' => __('URL for the course featured image', 'sikshya'),
+                'type' => 'media_upload',
+                'label' => __('Course Featured Image', 'sikshya'),
+                'description' => __('Recommended: 1200x675px (16:9 ratio)', 'sikshya'),
+                'media_type' => 'image',
+                'layout' => 'media_row',
             ],
             'video_url' => [
-                'type' => 'url',
-                'label' => __('Preview Video URL', 'sikshya'),
-                'placeholder' => __('https://youtube.com/watch?v=...', 'sikshya'),
-                'description' => __('URL for course preview video (YouTube, Vimeo, etc.)', 'sikshya'),
+                'type' => 'media_upload',
+                'label' => __('Course Trailer Video', 'sikshya'),
+                'description' => __('Optional promotional video for your course', 'sikshya'),
+                'media_type' => 'video',
+                'layout' => 'media_row',
             ],
         ];
     }
@@ -169,6 +171,8 @@ class CourseInfoTab extends AbstractTab
     protected function renderContent(array $data): string
     {
         error_log('Sikshya CourseInfoTab: Rendering content with data: ' . print_r($data, true));
+        error_log('Sikshya CourseInfoTab: Title from data: ' . ($data['title'] ?? 'NOT SET'));
+        error_log('Sikshya CourseInfoTab: Description from data: ' . ($data['description'] ?? 'NOT SET'));
         ob_start();
         ?>
         <div class="sikshya-section sikshya-section-modern">
@@ -196,20 +200,43 @@ class CourseInfoTab extends AbstractTab
                         <span class="sikshya-permalink-base"><?php echo esc_url(home_url('/courses/')); ?></span>
                         <span class="sikshya-permalink-slug" id="permalink-slug"><?php echo esc_html($data['slug'] ?? ''); ?></span>
                     </div>
-                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" id="edit-permalink-btn" onclick="togglePermalinkEdit()">
-                        <?php _e('Edit', 'sikshya'); ?>
-                    </button>
-                    <div class="sikshya-permalink-edit" id="permalink-edit" style="display: none;">
-                        <input type="text" name="slug" id="permalink-input" value="<?php echo esc_attr($data['slug'] ?? ''); ?>" placeholder="<?php _e('course-slug', 'sikshya'); ?>">
-                        <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-sm" onclick="savePermalink()">
-                            <?php _e('OK', 'sikshya'); ?>
+                    <?php if (empty($data['slug']) || !isset($data['id'])): ?>
+                        <!-- New course - slug is auto-generated and editable -->
+                        <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" id="edit-permalink-btn" onclick="togglePermalinkEdit()">
+                            <?php _e('Edit', 'sikshya'); ?>
                         </button>
-                        <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" onclick="cancelPermalinkEdit()">
-                            <?php _e('Cancel', 'sikshya'); ?>
+                        <div class="sikshya-permalink-edit" id="permalink-edit" style="display: none;">
+                            <input type="text" name="slug" id="permalink-input" value="<?php echo esc_attr($data['slug'] ?? ''); ?>" placeholder="<?php _e('course-slug', 'sikshya'); ?>">
+                            <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-sm" onclick="savePermalink()">
+                                <?php _e('OK', 'sikshya'); ?>
+                            </button>
+                            <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" onclick="cancelPermalinkEdit()">
+                                <?php _e('Cancel', 'sikshya'); ?>
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <!-- Existing course - slug is read-only unless explicitly edited -->
+                        <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" id="edit-permalink-btn" onclick="togglePermalinkEdit()" title="<?php _e('Click to edit permalink', 'sikshya'); ?>">
+                            <?php _e('Edit', 'sikshya'); ?>
                         </button>
-                    </div>
+                        <div class="sikshya-permalink-edit" id="permalink-edit" style="display: none;">
+                            <input type="text" name="slug" id="permalink-input" value="<?php echo esc_attr($data['slug'] ?? ''); ?>" placeholder="<?php _e('course-slug', 'sikshya'); ?>">
+                            <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-sm" onclick="savePermalink()">
+                                <?php _e('OK', 'sikshya'); ?>
+                            </button>
+                            <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-btn-sm" onclick="cancelPermalinkEdit()">
+                                <?php _e('Cancel', 'sikshya'); ?>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <p class="sikshya-help-text"><?php _e('The URL-friendly version of your course title', 'sikshya'); ?></p>
+                <p class="sikshya-help-text">
+                    <?php if (empty($data['slug']) || !isset($data['id'])): ?>
+                        <?php _e('The URL-friendly version of your course title. Auto-generated from the title.', 'sikshya'); ?>
+                    <?php else: ?>
+                        <?php _e('The URL-friendly version of your course title. Click Edit to modify.', 'sikshya'); ?>
+                    <?php endif; ?>
+                </p>
             </div>
             
             <div class="sikshya-form-row">
@@ -281,48 +308,14 @@ class CourseInfoTab extends AbstractTab
                 </div>
             </div>
             
-            <div class="sikshya-form-row">
-                <label><?php _e('Course Featured Image', 'sikshya'); ?></label>
-                <div class="sikshya-media-upload">
-                    <div class="sikshya-media-preview" id="featured_image_preview">
-                        <div class="sikshya-media-placeholder">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            <span><?php _e('No image selected', 'sikshya'); ?></span>
+            <div class="sikshya-media-row">
+                <?php foreach ($this->getFields() as $field_id => $field_config): ?>
+                    <?php if (in_array($field_id, ['featured_image', 'video_url'])): ?>
+                        <div class="sikshya-form-row">
+                            <?php echo $this->renderField($field_id, $field_config, $data[$field_id] ?? ''); ?>
                         </div>
-                    </div>
-                    <input type="hidden" name="featured_image" id="featured_image" value="<?php echo esc_attr($data['featured_image'] ?? ''); ?>">
-                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-media-btn" onclick="openMediaUpload('featured_image')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                        </svg>
-                        <?php _e('Upload Featured Image', 'sikshya'); ?>
-                    </button>
-                    <p class="sikshya-help-text"><?php _e('Recommended: 1200x675px (16:9 ratio)', 'sikshya'); ?></p>
-                </div>
-            </div>
-            
-            <div class="sikshya-form-row">
-                <label><?php _e('Course Trailer Video', 'sikshya'); ?></label>
-                <div class="sikshya-media-upload">
-                    <div class="sikshya-media-preview" id="trailer_video_preview">
-                        <div class="sikshya-media-placeholder">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                            </svg>
-                            <span><?php _e('No video selected', 'sikshya'); ?></span>
-                        </div>
-                    </div>
-                    <input type="hidden" name="trailer_video" id="trailer_video" value="<?php echo esc_attr($data['trailer_video'] ?? ''); ?>">
-                    <button type="button" class="sikshya-btn sikshya-btn-outline sikshya-media-btn" onclick="openMediaUpload('trailer_video')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                        </svg>
-                        <?php _e('Upload Trailer Video', 'sikshya'); ?>
-                    </button>
-                    <p class="sikshya-help-text"><?php _e('Optional promotional video for your course', 'sikshya'); ?></p>
-                </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -372,53 +365,82 @@ class CourseInfoTab extends AbstractTab
      */
     public function save(array $data, int $course_id): bool
     {
+        error_log('Sikshya CourseInfoTab: Starting save for course ID: ' . $course_id);
+        error_log('Sikshya CourseInfoTab: Data to save: ' . print_r($data, true));
+        
         // Use the new Course model
         $course = Course::find($course_id);
         
         if (!$course || !$course->exists()) {
+            error_log('Sikshya CourseInfoTab: Course not found or does not exist for ID: ' . $course_id);
             return false;
         }
         
         $success = true;
+        $errors = [];
         
         // Prepare update data
         $update_data = [];
         
-        // Save title and description to post
+        // Save title, description, and slug to post
         if (!empty($data['title'])) {
             $update_data['title'] = sanitize_text_field($data['title']);
+            error_log('Sikshya CourseInfoTab: Title to save: ' . $update_data['title']);
         }
         
         if (!empty($data['description'])) {
             $update_data['description'] = wp_kses_post($data['description']);
+            error_log('Sikshya CourseInfoTab: Description to save: ' . substr($update_data['description'], 0, 100) . '...');
+        }
+        
+        if (!empty($data['slug'])) {
+            $update_data['slug'] = sanitize_title($data['slug']);
+            error_log('Sikshya CourseInfoTab: Slug to save: ' . $update_data['slug']);
         }
         
         // Update post data
         if (!empty($update_data)) {
+            error_log('Sikshya CourseInfoTab: Updating post data: ' . print_r($update_data, true));
             $result = $course->update($update_data);
             if (!$result) {
+                error_log('Sikshya CourseInfoTab: Failed to update post data');
                 $success = false;
+                $errors[] = 'Failed to update post data (title, description, slug)';
+            } else {
+                error_log('Sikshya CourseInfoTab: Post data updated successfully');
             }
         }
         
         // Save other fields to meta using the Course model's magic setters
         $fields = $this->getFields();
         foreach ($fields as $field_id => $field_config) {
-            // Skip title and description as they're saved to post
-            if (in_array($field_id, ['title', 'description'])) {
+            // Skip title, description, and slug as they're saved to post
+            if (in_array($field_id, ['title', 'description', 'slug'])) {
                 continue;
             }
             
             $value = $data[$field_id] ?? '';
             $value = $this->sanitizeField($field_id, $value, $field_config);
             
+            error_log('Sikshya CourseInfoTab: Saving field ' . $field_id . ' with value: ' . $value);
+            
             // Use the Course model's magic setter for meta fields
             $method_name = 'set' . ucfirst($field_id);
             $result = $course->$method_name($value); // This will save to meta table
             
             if (!$result) {
+                error_log('Sikshya CourseInfoTab: Failed to save field: ' . $field_id);
                 $success = false;
+                $errors[] = 'Failed to save field: ' . $field_id;
+            } else {
+                error_log('Sikshya CourseInfoTab: Successfully saved field: ' . $field_id);
             }
+        }
+        
+        if (!$success) {
+            error_log('Sikshya CourseInfoTab: Save failed with errors: ' . implode(', ', $errors));
+        } else {
+            error_log('Sikshya CourseInfoTab: Save completed successfully');
         }
         
         return $success;
@@ -442,9 +464,13 @@ class CourseInfoTab extends AbstractTab
             return [];
         }
         
+        // Course found successfully
+        
         $data = [
             'title' => $course->getTitle(), // From post table
             'description' => $course->getDescription(), // From post table
+            'slug' => $course->getSlug(), // From post table
+            'id' => $course->getId(), // From post table
         ];
         
         error_log('Sikshya CourseInfoTab: Post data loaded - Title: ' . $data['title'] . ', Description: ' . substr($data['description'], 0, 50) . '...');

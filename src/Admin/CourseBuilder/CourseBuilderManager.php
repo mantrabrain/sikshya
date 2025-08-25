@@ -164,6 +164,8 @@ class CourseBuilderManager
         $tabs = $this->getAllTabs();
         $active_tab = $active_tab ?: $this->getFirstTabId();
         
+        error_log('Sikshya CourseBuilderManager: renderTabContent called with course_id: ' . $course_id);
+        
         ob_start();
         ?>
         <div class="sikshya-content">
@@ -174,7 +176,11 @@ class CourseBuilderManager
                     error_log('Sikshya: Loading data for tab: ' . $tab->getId() . ' with course_id: ' . $course_id);
                     $data = $tab->load($course_id);
                     error_log('Sikshya: Tab ' . $tab->getId() . ' data: ' . print_r($data, true));
+                } else {
+                    error_log('Sikshya: No course_id provided, using empty data array for tab: ' . $tab->getId());
+                    $data = [];
                 }
+                error_log('Sikshya: About to render tab ' . $tab->getId() . ' with data: ' . print_r($data, true));
                 echo $tab->render($data, $active_tab);
                 ?>
             <?php endforeach; ?>
@@ -192,11 +198,13 @@ class CourseBuilderManager
      */
     public function saveAllTabs(array $data, int $course_id): array
     {
+        error_log('Sikshya CourseBuilderManager: Starting saveAllTabs for course ID: ' . $course_id);
         $errors = [];
         $tabs = $this->getAllTabs();
         
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
+            error_log('Sikshya CourseBuilderManager: Saving tab: ' . $tab_id);
             
             // For flat data structure, pass all data to each tab
             // Each tab will save only its own fields based on field definitions
@@ -205,8 +213,17 @@ class CourseBuilderManager
             $success = $tab->save($data, $course_id);
             
             if (!$success) {
-                $errors[$tab_id] = [__('Failed to save tab data.', 'sikshya')];
+                error_log('Sikshya CourseBuilderManager: Failed to save tab: ' . $tab_id);
+                $errors[$tab_id] = [sprintf(__('Failed to save %s tab data.', 'sikshya'), $tab->getTitle())];
+            } else {
+                error_log('Sikshya CourseBuilderManager: Successfully saved tab: ' . $tab_id);
             }
+        }
+        
+        if (!empty($errors)) {
+            error_log('Sikshya CourseBuilderManager: SaveAllTabs completed with errors: ' . print_r($errors, true));
+        } else {
+            error_log('Sikshya CourseBuilderManager: SaveAllTabs completed successfully');
         }
         
         return $errors;
