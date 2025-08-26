@@ -15,49 +15,48 @@ class InstructorsListTable extends AbstractListTable
      */
     public function __construct($plugin = null)
     {
-        parent::__construct($plugin, [
+        $config = [
             'singular' => 'instructor',
             'plural' => 'instructors',
             'ajax' => false,
-        ]);
-
-        $this->setColumns([
-            'cb' => '<input type="checkbox" />',
-            'name' => __('INSTRUCTOR NAME', 'sikshya'),
-            'email' => __('EMAIL', 'sikshya'),
-            'courses' => __('COURSES', 'sikshya'),
-            'students' => __('STUDENTS', 'sikshya'),
-            'rating' => __('RATING', 'sikshya'),
-            'status' => __('STATUS', 'sikshya'),
-            'joined' => __('JOINED DATE', 'sikshya'),
-        ]);
-
-        $this->setSortableColumns([
-            'name' => ['name', true],
-            'email' => ['email', false],
-            'courses' => ['courses', false],
-            'students' => ['students', false],
-            'rating' => ['rating', false],
-            'status' => ['status', false],
-            'joined' => ['joined', false],
-        ]);
-
-        $this->setBulkActions([
-            'delete' => __('Delete', 'sikshya'),
-            'activate' => __('Activate', 'sikshya'),
-            'deactivate' => __('Deactivate', 'sikshya'),
-        ]);
-
-        $this->setFilters([
-            'status' => [
-                'label' => __('All Statuses', 'sikshya'),
-                'options' => [
-                    'active' => __('Active', 'sikshya'),
-                    'inactive' => __('Inactive', 'sikshya'),
-                    'pending' => __('Pending', 'sikshya'),
+            'columns' => [
+                'cb' => '<input type="checkbox" />',
+                'name' => __('INSTRUCTOR NAME', 'sikshya'),
+                'email' => __('EMAIL', 'sikshya'),
+                'courses' => __('COURSES', 'sikshya'),
+                'students' => __('STUDENTS', 'sikshya'),
+                'rating' => __('RATING', 'sikshya'),
+                'status' => __('STATUS', 'sikshya'),
+                'joined' => __('JOINED DATE', 'sikshya'),
+            ],
+            'sortable_columns' => [
+                'name' => ['name', true],
+                'email' => ['email', false],
+                'courses' => ['courses', false],
+                'students' => ['students', false],
+                'rating' => ['rating', false],
+                'status' => ['status', false],
+                'joined' => ['joined', false],
+            ],
+            'bulk_actions' => [
+                'delete' => __('Delete', 'sikshya'),
+                'activate' => __('Activate', 'sikshya'),
+                'deactivate' => __('Deactivate', 'sikshya'),
+            ],
+            'filters' => [
+                'status' => [
+                    'label' => __('All Statuses', 'sikshya'),
+                    'options' => [
+                        'active' => __('Active', 'sikshya'),
+                        'inactive' => __('Inactive', 'sikshya'),
+                        'pending' => __('Pending', 'sikshya'),
+                    ],
                 ],
             ],
-        ]);
+            'empty_message' => __('No instructors found. Create your first instructor to get started.', 'sikshya'),
+        ];
+
+        parent::__construct($plugin, $config);
     }
 
     /**
