@@ -3,13 +3,15 @@
 namespace Sikshya\Admin;
 
 use Sikshya\Core\Plugin;
-use Sikshya\Admin\Controllers\DashboardController;
 use Sikshya\Admin\Controllers\CourseController;
 use Sikshya\Admin\Controllers\LessonController;
 use Sikshya\Admin\Controllers\QuizController;
-use Sikshya\Admin\Controllers\UserController;
+use Sikshya\Admin\Controllers\StudentController;
+use Sikshya\Admin\Controllers\InstructorController;
 use Sikshya\Admin\Controllers\ReportController;
+use Sikshya\Admin\Controllers\ToolsController;
 use Sikshya\Admin\Controllers\SettingController;
+use Sikshya\Constants\AdminPages;
 
 /**
  * Admin Management Class
@@ -59,6 +61,7 @@ class Admin
         $this->controllers['instructor'] = new \Sikshya\Admin\Controllers\InstructorController($this->plugin);
         $this->controllers['report'] = new \Sikshya\Admin\Controllers\ReportController($this->plugin);
         $this->controllers['setting'] = new \Sikshya\Admin\Controllers\SettingController($this->plugin);
+        $this->controllers['tools'] = new \Sikshya\Admin\Controllers\ToolsController($this->plugin);
         error_log('Sikshya: Admin controllers initialized');
     }
 
@@ -119,7 +122,7 @@ class Admin
             __('Courses', 'sikshya'),
             __('Courses', 'sikshya'),
             'edit_posts',
-            'sikshya-courses',
+            AdminPages::COURSES,
             [$this, 'renderCoursesPage']
         );
 
@@ -129,7 +132,7 @@ class Admin
             __('Add Course', 'sikshya'),
             __('Add Course', 'sikshya'),
             'edit_posts',
-            'sikshya-add-course',
+            AdminPages::ADD_COURSE,
             [$this, 'renderAddCoursePage']
         );
 
@@ -139,7 +142,7 @@ class Admin
             __('Lessons', 'sikshya'),
             __('Lessons', 'sikshya'),
             'edit_posts',
-            'sikshya-lessons',
+            AdminPages::LESSONS,
             [$this, 'renderLessonsPage']
         );
 
@@ -149,7 +152,7 @@ class Admin
             __('Quizzes', 'sikshya'),
             __('Quizzes', 'sikshya'),
             'edit_posts',
-            'sikshya-quizzes',
+            AdminPages::QUIZZES,
             [$this, 'renderQuizzesPage']
         );
 
@@ -159,7 +162,7 @@ class Admin
             __('Students', 'sikshya'),
             __('Students', 'sikshya'),
             'edit_posts',
-            'sikshya-students',
+            AdminPages::STUDENTS,
             [$this, 'renderStudentsPage']
         );
 
@@ -169,7 +172,7 @@ class Admin
             __('Instructors', 'sikshya'),
             __('Instructors', 'sikshya'),
             'edit_posts',
-            'sikshya-instructors',
+            AdminPages::INSTRUCTORS,
             [$this, 'renderInstructorsPage']
         );
 
@@ -179,7 +182,7 @@ class Admin
             __('Reports', 'sikshya'),
             __('Reports', 'sikshya'),
             'edit_posts',
-            'sikshya-reports',
+            AdminPages::REPORTS,
             [$this, 'renderReportsPage']
         );
 
@@ -189,7 +192,7 @@ class Admin
             __('Settings', 'sikshya'),
             __('Settings', 'sikshya'),
             'manage_options',
-            'sikshya-settings',
+            AdminPages::SETTINGS,
             [$this, 'renderSettingsPage']
         );
 
@@ -199,8 +202,8 @@ class Admin
             __('Tools', 'sikshya'),
             __('Tools', 'sikshya'),
             'manage_options',
-            'sikshya-tools',
-            [$this->controllers['setting'], 'tools']
+            AdminPages::TOOLS,
+            [$this->controllers['tools'], 'tools']
         );
 
         // Help submenu
@@ -209,8 +212,8 @@ class Admin
             __('Help & Support', 'sikshya'),
             __('Help & Support', 'sikshya'),
             'manage_options',
-            'sikshya-help',
-            [$this->controllers['setting'], 'help']
+            AdminPages::HELP,
+            [$this->controllers['tools'], 'help']
         );
     }
 
@@ -254,45 +257,7 @@ class Admin
             '6.0.0'
         );
 
-        // Enqueue admin styles
-        wp_enqueue_style(
-            'sikshya-admin',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/css/admin.css',
-            [],
-            SIKSHYA_VERSION
-        );
-
-        // Enqueue jQuery first
-        wp_enqueue_script('jquery');
-
-        // Enqueue admin scripts
-        wp_enqueue_script(
-            'sikshya-admin',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/js/admin.js',
-            ['jquery'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Localize script with AJAX data
-        wp_localize_script(
-            'sikshya-admin',
-            'sikshya_ajax',
-            [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('sikshya_course_builder'),
-            ]
-        );
-
-        // Enqueue course builder assets on specific pages
-        if ($screen && in_array($screen->id, ['sikshya_page_sikshya-add-course'])) {
-            $this->controllers['course']->enqueueCourseBuilderAssets();
-        }
-
-        // Enqueue page-specific assets
-        if ($screen) {
-            $this->enqueuePageSpecificAssets($screen);
-        }
+    
 
         // Enqueue settings assets only on settings page
         if ($screen && $screen->id === 'sikshya-lms_page_sikshya-settings') {
@@ -405,151 +370,6 @@ class Admin
             wp_dequeue_style('list-tables');
             wp_dequeue_style('forms');
             wp_dequeue_style('buttons');
-        }
-    }
-
-    /**
-     * Enqueue page-specific assets
-     */
-    private function enqueuePageSpecificAssets($screen): void
-    {
-        error_log('Sikshya: enqueuePageSpecificAssets called with screen ID: ' . $screen->id);
-        
-        switch ($screen->id) {
-            case 'sikshya-lms_page_sikshya-courses':
-                // Enqueue list table assets for courses page
-                wp_enqueue_style(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
-                    ['sikshya-admin'],
-                    SIKSHYA_VERSION
-                );
-                
-                wp_enqueue_script(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
-                    ['jquery', 'sikshya-admin'],
-                    SIKSHYA_VERSION,
-                    true
-                );
-
-                // Localize list table script
-                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
-                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
-                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
-                ]);
-                break;
-            case 'sikshya-lms_page_sikshya-lessons':
-                // Enqueue list table assets for lessons page
-                wp_enqueue_style(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
-                    ['sikshya-admin'],
-                    SIKSHYA_VERSION
-                );
-                
-                wp_enqueue_script(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
-                    ['jquery', 'sikshya-admin'],
-                    SIKSHYA_VERSION,
-                    true
-                );
-
-                // Localize list table script
-                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
-                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
-                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
-                ]);
-                break;
-            case 'sikshya-lms_page_sikshya-quizzes':
-                // Enqueue list table assets for quizzes page
-                wp_enqueue_style(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
-                    ['sikshya-admin'],
-                    SIKSHYA_VERSION
-                );
-                
-                wp_enqueue_script(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
-                    ['jquery', 'sikshya-admin'],
-                    SIKSHYA_VERSION,
-                    true
-                );
-
-                // Localize list table script
-                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
-                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
-                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
-                ]);
-                break;
-            case 'sikshya-lms_page_sikshya-students':
-                // Enqueue list table assets for students page
-                wp_enqueue_style(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
-                    ['sikshya-admin'],
-                    SIKSHYA_VERSION
-                );
-                
-                wp_enqueue_script(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
-                    ['jquery', 'sikshya-admin'],
-                    SIKSHYA_VERSION,
-                    true
-                );
-
-                // Localize list table script
-                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
-                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
-                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
-                ]);
-                break;
-            case 'sikshya-lms_page_sikshya-instructors':
-                // Enqueue list table assets for instructors page
-                wp_enqueue_style(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
-                    ['sikshya-admin'],
-                    SIKSHYA_VERSION
-                );
-                
-                wp_enqueue_script(
-                    'sikshya-admin-list-table',
-                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
-                    ['jquery', 'sikshya-admin'],
-                    SIKSHYA_VERSION,
-                    true
-                );
-
-                // Localize list table script
-                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
-                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
-                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
-                ]);
-                break;
-            case 'sikshya_page_sikshya-reports':
-                wp_enqueue_script('sikshya-charts');
-                wp_enqueue_script('sikshya-reports');
-                wp_enqueue_style('sikshya-reports');
-                break;
-            case 'sikshya_page_sikshya-settings':
-                wp_enqueue_script('sikshya-settings');
-                wp_enqueue_style('sikshya-settings');
-                break;
         }
     }
 

@@ -6,7 +6,6 @@ use Sikshya\Admin\Admin;
 use Sikshya\Frontend\Frontend;
 use Sikshya\Api\Api;
 use Sikshya\Database\Database;
-use Sikshya\Services\AssetService;
 use Sikshya\Services\PostTypeService;
 use Sikshya\Services\TaxonomyService;
 use Sikshya\Services\CacheService;
@@ -15,6 +14,8 @@ use Sikshya\Services\SecurityService;
 use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CourseService;
 use Sikshya\Ajax\AjaxManager;
+use Sikshya\Services\FrontendAssetsService;
+use Sikshya\Services\AdminAssetsService;
 
 /**
  * Main Plugin Class
@@ -115,7 +116,8 @@ final class Plugin
             $this->services['settings'] = new \Sikshya\Admin\Settings\SettingsManager($this);
 
             // WordPress integration services
-            $this->services['assets'] = new AssetService($this);
+            $this->services['frontendAssets'] = new FrontendAssetsService($this);
+            $this->services['adminAssets'] = new AdminAssetsService($this);
             $this->services['postTypes'] = new PostTypeService($this);
             $this->services['taxonomies'] = new TaxonomyService($this);
             
@@ -164,7 +166,8 @@ final class Plugin
         $this->services['taxonomies']->register();
 
         // Initialize assets
-        $this->services['assets']->init();
+        $this->services['frontendAssets']->init();
+        $this->services['adminAssets']->init();
 
         // Hook into WordPress
         do_action('sikshya_init', $this);
@@ -191,7 +194,7 @@ final class Plugin
      */
     public function onEnqueueScripts(): void
     {
-        $this->services['assets']->enqueueFrontendAssets();
+        $this->services['frontendAssets']->enqueueFrontendAssets();
     }
 
     /**
@@ -199,7 +202,7 @@ final class Plugin
      */
     public function onAdminEnqueueScripts(): void
     {
-        $this->services['assets']->enqueueAdminAssets();
+        $this->services['adminAssets']->enqueueAdminAssets();
     }
 
 

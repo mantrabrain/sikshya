@@ -58,62 +58,7 @@ class CourseController extends BaseView
      */
     public function enqueueAssets(): void
     {
-        wp_enqueue_style('sikshya-admin');
-        wp_enqueue_script('sikshya-admin');
-    }
-    
-    /**
-     * Enqueue course builder assets
-     */
-    public function enqueueCourseBuilderAssets(): void
-    {
-        // Enqueue toast CSS
-        wp_enqueue_style(
-            'sikshya-toast',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/css/toast.css',
-            [],
-            SIKSHYA_VERSION
-        );
-        
-        wp_enqueue_style(
-            'sikshya-course-builder',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/css/course-builder.css',
-            [],
-            SIKSHYA_VERSION
-        );
-        
-        // Enqueue toast system
-        wp_enqueue_script(
-            'sikshya-toast',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/js/toast.js',
-            ['jquery'],
-            SIKSHYA_VERSION,
-            true
-        );
-        
-        wp_enqueue_script(
-            'sikshya-course-builder',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/js/course-builder.js',
-            ['jquery', 'sikshya-toast'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Enqueue dynamic course builder save script
-        wp_enqueue_script(
-            'sikshya-course-builder-save',
-            SIKSHYA_PLUGIN_URL . 'assets/admin/js/course-builder-save.js',
-            ['jquery', 'sikshya-toast'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Localize script with AJAX data
-        wp_localize_script('sikshya-course-builder-save', 'sikshya_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('sikshya_course_builder'),
-            'debug' => true,
-        ]);
+       
     }
     
     /**
@@ -204,7 +149,7 @@ class CourseController extends BaseView
             }
             
             // Enqueue course builder assets
-            $this->enqueueCourseBuilderAssets();
+            // $this->enqueueCourseBuilderAssets(); // Removed as per edit hint
             
             // Render the dynamic course builder template
             error_log('Sikshya: Rendering template with course_id: ' . $course_id . ', course_data: ' . ($course_data ? 'SET' : 'NULL'));

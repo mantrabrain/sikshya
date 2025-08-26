@@ -1,0 +1,516 @@
+/**
+ * Reports Page Styles
+ *
+ * @package Sikshya
+ * @since 1.0.0
+ */
+
+/* Stats Grid Layout */
+.sikshya-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.sikshya-stat-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sikshya-stat-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+}
+
+.sikshya-stat-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.sikshya-stat-primary {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.sikshya-stat-success {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.sikshya-stat-warning {
+    background: #fef3c7;
+    color: #f59e0b;
+}
+
+.sikshya-stat-info {
+    background: #f0f9ff;
+    color: #0ea5e9;
+}
+
+.sikshya-stat-content {
+    flex: 1;
+}
+
+.sikshya-stat-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+    line-height: 1;
+}
+
+.sikshya-stat-label {
+    color: #6b7280;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sikshya-stat-change {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.sikshya-stat-positive {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.sikshya-stat-negative {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Chart Controls */
+.sikshya-chart-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sikshya-btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+.sikshya-btn.active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+}
+
+/* Chart Container */
+.sikshya-chart-container {
+    position: relative;
+    height: 400px;
+    margin-top: 1rem;
+}
+
+/* Top Courses */
+.sikshya-top-courses {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sikshya-course-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sikshya-course-item:hover {
+    background: #fff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: #d1d5db;
+}
+
+.sikshya-course-rank {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.sikshya-course-item:nth-child(1) .sikshya-course-rank {
+    background: #fbbf24;
+}
+
+.sikshya-course-item:nth-child(2) .sikshya-course-rank {
+    background: #9ca3af;
+}
+
+.sikshya-course-item:nth-child(3) .sikshya-course-rank {
+    background: #d97706;
+}
+
+.sikshya-course-info {
+    flex: 1;
+}
+
+.sikshya-course-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.sikshya-course-info p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.sikshya-course-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.sikshya-course-stat {
+    text-align: center;
+}
+
+.sikshya-stat-number {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.sikshya-stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Demographics */
+.sikshya-demographics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.sikshya-demographic-chart {
+    text-align: center;
+}
+
+.sikshya-demographic-chart h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 1rem 0;
+}
+
+.sikshya-demographic-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sikshya-demographic-stats h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 1rem 0;
+}
+
+.sikshya-insight-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.sikshya-insight-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    border-radius: 6px;
+    color: #3b82f6;
+}
+
+.sikshya-insight-content h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.sikshya-insight-content p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+/* Date Filter */
+.sikshya-date-filter {
+    position: relative;
+}
+
+.sikshya-date-filter select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    color: #374151;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+}
+
+.sikshya-date-filter select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Button Styles */
+.sikshya-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.sikshya-btn-primary {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.sikshya-btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.sikshya-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.sikshya-btn-secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+/* Content Card Enhancements */
+.sikshya-content-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.sikshya-content-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.sikshya-content-card-header-left {
+    flex: 1;
+}
+
+.sikshya-content-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.sikshya-content-card-subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.sikshya-content-card-body {
+    padding: 1.5rem;
+}
+
+/* SVG Icons */
+.sikshya-content-card-title svg {
+    color: #6b7280;
+}
+
+/* Header Actions */
+.sikshya-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .sikshya-demographics-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sikshya-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .sikshya-demographics-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .sikshya-course-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .sikshya-course-stats {
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .sikshya-chart-controls {
+        flex-wrap: wrap;
+    }
+    
+    .sikshya-chart-container {
+        height: 300px;
+    }
+    
+    .sikshya-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .sikshya-stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sikshya-course-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .sikshya-insight-item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Chart.js Customizations */
+.sikshya-chart-container canvas {
+    max-height: 400px;
+}
+
+/* Loading States */
+.sikshya-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.sikshya-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hover Effects */
+.sikshya-stat-card:hover .sikshya-stat-icon {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.sikshya-course-item:hover .sikshya-course-rank {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Chart Legend Customization */
+.sikshya-chart-container .chartjs-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.sikshya-chart-container .chartjs-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.sikshya-chart-container .chartjs-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}

@@ -1,0 +1,428 @@
+/**
+ * Help & Support Page Styles
+ *
+ * @package Sikshya
+ * @since 1.0.0
+ */
+
+/* Help Grid Layout */
+.sikshya-help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.sikshya-help-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sikshya-help-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: #d1d5db;
+    transform: translateY(-2px);
+}
+
+.sikshya-help-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border-radius: 8px;
+    color: #3b82f6;
+}
+
+.sikshya-help-content {
+    flex: 1;
+}
+
+.sikshya-help-content h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.sikshya-help-content p {
+    color: #6b7280;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+/* Documentation Grid */
+.sikshya-docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.sikshya-doc-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sikshya-doc-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: #d1d5db;
+}
+
+.sikshya-doc-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f9ff;
+    border-radius: 6px;
+    color: #0ea5e9;
+}
+
+.sikshya-doc-content {
+    flex: 1;
+}
+
+.sikshya-doc-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.sikshya-doc-content p {
+    color: #6b7280;
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.sikshya-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+}
+
+.sikshya-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+/* Support Grid */
+.sikshya-support-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.sikshya-support-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sikshya-support-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: #d1d5db;
+}
+
+.sikshya-support-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0fdf4;
+    border-radius: 8px;
+    color: #10b981;
+}
+
+.sikshya-support-content {
+    flex: 1;
+}
+
+.sikshya-support-content h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.sikshya-support-content p {
+    color: #6b7280;
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+/* System Status */
+.sikshya-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sikshya-status-operational {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.sikshya-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.sikshya-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.sikshya-status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.sikshya-status-label {
+    font-weight: 500;
+    color: #374151;
+}
+
+.sikshya-status-value {
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.sikshya-status-operational {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.sikshya-status-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+/* Button Styles */
+.sikshya-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.sikshya-btn-primary {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.sikshya-btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.sikshya-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.sikshya-btn-secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+/* Content Card Enhancements */
+.sikshya-content-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.sikshya-content-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.sikshya-content-card-header-left {
+    flex: 1;
+}
+
+.sikshya-content-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.sikshya-content-card-subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.sikshya-content-card-body {
+    padding: 1.5rem;
+}
+
+/* SVG Icons */
+.sikshya-content-card-title svg {
+    color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-help-grid,
+    .sikshya-docs-grid,
+    .sikshya-support-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .sikshya-status-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .sikshya-help-item,
+    .sikshya-doc-item,
+    .sikshya-support-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sikshya-help-icon,
+    .sikshya-doc-icon,
+    .sikshya-support-icon {
+        align-self: center;
+    }
+    
+    .sikshya-status-item {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}
+
+/* Header Actions */
+.sikshya-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Icon Variations */
+.sikshya-help-icon.help {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.sikshya-help-icon.docs {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.sikshya-help-icon.support {
+    background: #f0fdf4;
+    color: #10b981;
+}
+
+.sikshya-help-icon.status {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Hover Effects */
+.sikshya-help-item:hover .sikshya-help-icon,
+.sikshya-doc-item:hover .sikshya-doc-icon,
+.sikshya-support-item:hover .sikshya-support-icon {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Loading States */
+.sikshya-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.sikshya-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

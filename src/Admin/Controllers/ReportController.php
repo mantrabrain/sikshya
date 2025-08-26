@@ -5,20 +5,21 @@ namespace Sikshya\Admin\Controllers;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CacheService;
+use Sikshya\Admin\Views\BaseView;
 
 /**
  * Report Controller
  *
  * @package Sikshya\Admin\Controllers
  */
-class ReportController
+class ReportController extends BaseView
 {
     /**
      * Plugin instance
      *
      * @var Plugin
      */
-    private Plugin $plugin;
+    protected Plugin $plugin;
 
     /**
      * Analytics service
@@ -59,36 +60,35 @@ class ReportController
      */
     public function index(): void
     {
-        $report_type = $_GET['type'] ?? 'overview';
+        $this->data = [
+            'page_title' => __('Reports', 'sikshya'),
+            'page_description' => __('Analytics and insights for your LMS', 'sikshya'),
+        ];
         
-        switch ($report_type) {
-            case 'enrollments':
-                $this->enrollmentReport();
-                break;
-            case 'revenue':
-                $this->revenueReport();
-                break;
-            case 'courses':
-                $this->courseReport();
-                break;
-            case 'students':
-                $this->studentReport();
-                break;
-            case 'instructors':
-                $this->instructorReport();
-                break;
-            case 'quizzes':
-                $this->quizReport();
-                break;
-            case 'certificates':
-                $this->certificateReport();
-                break;
-            case 'analytics':
-                $this->analyticsReport();
-                break;
-            default:
-                $this->overviewReport();
-        }
+        $this->render('reports');
+    }
+
+    /**
+     * Render reports page
+     */
+    public function renderReportsPage(): void
+    {
+        $this->data = [
+            'page_title' => __('Reports', 'sikshya'),
+            'page_description' => __('Analytics and insights for your LMS', 'sikshya'),
+        ];
+        
+        $this->render('reports');
+    }
+
+    /**
+     * Enqueue assets
+     */
+    public function enqueueAssets(): void
+    {
+        wp_enqueue_style('sikshya-reports');
+        wp_enqueue_script('sikshya-reports');
+        wp_enqueue_script('sikshya-charts');
     }
 
     /**

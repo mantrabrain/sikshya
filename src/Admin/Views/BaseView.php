@@ -67,10 +67,10 @@ abstract class BaseView
     {
         try {
             error_log('Sikshya BaseView: Starting render for template: ' . $template);
-            error_log('Sikshya BaseView: Data passed to render - active_tab: ' . ($data['active_tab'] ?? 'NOT SET') . ', course_id: ' . ($data['course_id'] ?? 'NOT SET') . ', course_data: ' . ($data['course_data'] ? 'SET' : 'NULL'));
+            error_log('Sikshya BaseView: Data passed to render - active_tab: ' . ($data['active_tab'] ?? 'NOT SET') . ', course_id: ' . ($data['course_id'] ?? 'NOT SET') . ', course_data: ' . (isset($data['course_data']) ? 'SET' : 'NULL'));
             
             $this->setData($data);
-            error_log('Sikshya BaseView: Data after setData - active_tab: ' . ($this->data['active_tab'] ?? 'NOT SET') . ', course_id: ' . ($this->data['course_id'] ?? 'NOT SET') . ', course_data: ' . ($this->data['course_data'] ? 'SET' : 'NULL'));
+            error_log('Sikshya BaseView: Data after setData - active_tab: ' . ($this->data['active_tab'] ?? 'NOT SET') . ', course_id: ' . ($this->data['course_id'] ?? 'NOT SET') . ', course_data: ' . (isset($this->data['course_data']) ? 'SET' : 'NULL'));
             $this->includeTemplate($template);
             
             error_log('Sikshya BaseView: Finished render for template: ' . $template);
@@ -123,7 +123,7 @@ abstract class BaseView
         
         if (file_exists($template_path)) {
             try {
-                error_log('Sikshya BaseView: About to extract data - active_tab: ' . ($this->data['active_tab'] ?? 'NOT SET') . ', course_id: ' . ($this->data['course_id'] ?? 'NOT SET') . ', course_data: ' . ($this->data['course_data'] ? 'SET' : 'NULL'));
+                error_log('Sikshya BaseView: About to extract data - active_tab: ' . ($this->data['active_tab'] ?? 'NOT SET') . ', course_id: ' . ($this->data['course_id'] ?? 'NOT SET') . ', course_data: ' . (isset($this->data['course_data']) ? 'SET' : 'NULL'));
                 extract($this->data);
                 error_log('Sikshya BaseView: After extract - active_tab: ' . (isset($active_tab) ? $active_tab : 'NOT SET') . ', course_id: ' . (isset($course_id) ? $course_id : 'NOT SET') . ', course_data: ' . (isset($course_data) ? 'SET' : 'NULL'));
                 include $template_path;
