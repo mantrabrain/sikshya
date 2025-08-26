@@ -336,3 +336,331 @@
     transform: scale(1.1);
     transition: all 0.2s ease;
 }
+
+/* Data Management Grid */
+.sikshya-data-management-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+/* Data Section */
+.sikshya-data-section {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.sikshya-data-section:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Data Section Header */
+.sikshya-data-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.sikshya-data-section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sikshya-export-icon {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.sikshya-import-icon {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.sikshya-data-section-content {
+    flex: 1;
+}
+
+.sikshya-data-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.sikshya-data-section-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Form Groups */
+.sikshya-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.sikshya-form-label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.sikshya-select-lg {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+}
+
+.sikshya-select-lg:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Checkbox Group */
+.sikshya-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sikshya-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.sikshya-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.sikshya-checkbox-mark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    position: relative;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.sikshya-checkbox input[type="checkbox"]:checked + .sikshya-checkbox-mark {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.sikshya-checkbox input[type="checkbox"]:checked + .sikshya-checkbox-mark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* File Upload Area */
+.sikshya-file-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    background: #f9fafb;
+}
+
+.sikshya-file-upload-area:hover,
+.sikshya-file-upload-over {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.sikshya-file-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sikshya-file-upload-icon {
+    color: #6b7280;
+}
+
+.sikshya-file-upload-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.sikshya-file-upload-subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Buttons */
+.sikshya-btn-lg {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+}
+
+.sikshya-btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.sikshya-btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.sikshya-btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.sikshya-btn-success:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.sikshya-btn-success:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.sikshya-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.sikshya-btn-secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sikshya-data-management-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .sikshya-data-section {
+        padding: 1rem;
+    }
+    
+    .sikshya-data-section-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sikshya-file-upload-area {
+        padding: 1.5rem;
+    }
+}
+
+/* Loading States */
+.sikshya-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: #6b7280;
+}
+
+.sikshya-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success/Error States */
+.sikshya-upload-success {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.sikshya-upload-error {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+/* File Input Styling */
+.sikshya-file-input {
+    display: none;
+}
+
+/* Enhanced Select Styling */
+.sikshya-select option {
+    padding: 0.5rem;
+}
+
+/* Hover Effects */
+.sikshya-data-section:hover .sikshya-data-section-icon {
+    transform: scale(1.05);
+}
+
+.sikshya-checkbox:hover .sikshya-checkbox-mark {
+    border-color: #3b82f6;
+}
+
+/* Focus States */
+.sikshya-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sikshya-checkbox input[type="checkbox"]:focus + .sikshya-checkbox-mark {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}

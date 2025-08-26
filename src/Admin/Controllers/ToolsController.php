@@ -63,7 +63,10 @@ class ToolsController extends BaseView
      */
     public function handleAjax(): void
     {
+        error_log('Sikshya ToolsController: handleAjax called');
+        
         $action = sanitize_text_field($_POST['action_type'] ?? '');
+        error_log('Sikshya ToolsController: action_type = ' . $action);
         
         switch ($action) {
             case 'clear_cache':
@@ -79,9 +82,11 @@ class ToolsController extends BaseView
                 $this->resetSettings();
                 break;
             case 'system_info':
+                error_log('Sikshya ToolsController: Calling getSystemInfo');
                 $this->getSystemInfo();
                 break;
             default:
+                error_log('Sikshya ToolsController: Invalid action = ' . $action);
                 wp_send_json_error(['message' => __('Invalid action', 'sikshya')]);
         }
     }
@@ -162,6 +167,8 @@ class ToolsController extends BaseView
      */
     private function getSystemInfo(): void
     {
+        error_log('Sikshya ToolsController: getSystemInfo called');
+        
         global $wpdb;
         
         $system_info = [
@@ -175,7 +182,9 @@ class ToolsController extends BaseView
             'post_max_size' => ini_get('post_max_size'),
         ];
         
-        wp_send_json_success(['data' => $system_info]);
+        error_log('Sikshya ToolsController: system_info = ' . print_r($system_info, true));
+        
+        wp_send_json_success($system_info);
     }
 
     /**

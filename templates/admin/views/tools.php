@@ -70,45 +70,185 @@ $page_description = $this->data['page_description'] ?? __('Manage and maintain y
                 </div>
             </div>
             <div class="sikshya-content-card-body">
-                <div class="sikshya-tools-grid">
+                <div class="sikshya-data-management-grid">
                     <!-- Export Section -->
-                    <div class="sikshya-tool-section">
-                        <h4><?php esc_html_e('Export Data', 'sikshya'); ?></h4>
-                        <p><?php esc_html_e('Export your courses, students, and instructors data', 'sikshya'); ?></p>
+                    <div class="sikshya-data-section sikshya-export-section">
+                        <div class="sikshya-data-section-header">
+                            <div class="sikshya-data-section-icon sikshya-export-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="sikshya-data-section-content">
+                                <h4 class="sikshya-data-section-title"><?php esc_html_e('Export Data', 'sikshya'); ?></h4>
+                                <p class="sikshya-data-section-description"><?php esc_html_e('Download your courses, students, and instructors data in various formats', 'sikshya'); ?></p>
+                            </div>
+                        </div>
                         
                         <div class="sikshya-export-options">
                             <div class="sikshya-form-group">
-                                <label for="export-type"><?php esc_html_e('Select data type:', 'sikshya'); ?></label>
-                                <select id="export-type" class="sikshya-select">
-                                    <option value="courses"><?php esc_html_e('Courses', 'sikshya'); ?></option>
-                                    <option value="students"><?php esc_html_e('Students', 'sikshya'); ?></option>
-                                    <option value="instructors"><?php esc_html_e('Instructors', 'sikshya'); ?></option>
+                                <label for="export-type" class="sikshya-form-label"><?php esc_html_e('Data Type', 'sikshya'); ?></label>
+                                <select id="export-type" class="sikshya-select sikshya-select-lg">
+                                    <option value="courses">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                        </svg>
+                                        <?php esc_html_e('Courses', 'sikshya'); ?>
+                                    </option>
+                                    <option value="students">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                        </svg>
+                                        <?php esc_html_e('Students', 'sikshya'); ?>
+                                    </option>
+                                    <option value="instructors">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        <?php esc_html_e('Instructors', 'sikshya'); ?>
+                                    </option>
                                 </select>
                             </div>
-                            <button type="button" class="sikshya-btn sikshya-btn-primary" id="export-data">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            
+                            <div class="sikshya-form-group">
+                                <label for="export-format" class="sikshya-form-label"><?php esc_html_e('Format', 'sikshya'); ?></label>
+                                <select id="export-format" class="sikshya-select sikshya-select-lg">
+                                    <option value="csv">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <?php esc_html_e('CSV', 'sikshya'); ?>
+                                    </option>
+                                    <option value="json">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <?php esc_html_e('JSON', 'sikshya'); ?>
+                                    </option>
+                                    <option value="excel">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <?php esc_html_e('Excel', 'sikshya'); ?>
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="sikshya-form-group">
+                                <label class="sikshya-form-label"><?php esc_html_e('Include', 'sikshya'); ?></label>
+                                <div class="sikshya-checkbox-group">
+                                    <label class="sikshya-checkbox">
+                                        <input type="checkbox" id="include-meta" checked>
+                                        <span class="sikshya-checkbox-mark"></span>
+                                        <?php esc_html_e('Meta Data', 'sikshya'); ?>
+                                    </label>
+                                    <label class="sikshya-checkbox">
+                                        <input type="checkbox" id="include-settings" checked>
+                                        <span class="sikshya-checkbox-mark"></span>
+                                        <?php esc_html_e('Settings', 'sikshya'); ?>
+                                    </label>
+                                    <label class="sikshya-checkbox">
+                                        <input type="checkbox" id="include-media">
+                                        <span class="sikshya-checkbox-mark"></span>
+                                        <?php esc_html_e('Media Files', 'sikshya'); ?>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-btn-lg" id="export-data">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
-                                <?php esc_html_e('Export', 'sikshya'); ?>
+                                <?php esc_html_e('Export Data', 'sikshya'); ?>
                             </button>
                         </div>
                     </div>
 
                     <!-- Import Section -->
-                    <div class="sikshya-tool-section">
-                        <h4><?php esc_html_e('Import Data', 'sikshya'); ?></h4>
-                        <p><?php esc_html_e('Import data from CSV or JSON files', 'sikshya'); ?></p>
-                        
-                        <div class="sikshya-import-options">
-                            <div class="sikshya-form-group">
-                                <label for="import-file"><?php esc_html_e('Select file:', 'sikshya'); ?></label>
-                                <input type="file" id="import-file" class="sikshya-file-input" accept=".csv,.json">
-                            </div>
-                            <button type="button" class="sikshya-btn sikshya-btn-secondary" id="import-data">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <div class="sikshya-data-section sikshya-import-section">
+                        <div class="sikshya-data-section-header">
+                            <div class="sikshya-data-section-icon sikshya-import-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                 </svg>
-                                <?php esc_html_e('Import', 'sikshya'); ?>
+                            </div>
+                            <div class="sikshya-data-section-content">
+                                <h4 class="sikshya-data-section-title"><?php esc_html_e('Import Data', 'sikshya'); ?></h4>
+                                <p class="sikshya-data-section-description"><?php esc_html_e('Import data from CSV, JSON, or Excel files', 'sikshya'); ?></p>
+                            </div>
+                        </div>
+                        
+                        <div class="sikshya-import-options">
+                            <div class="sikshya-file-upload-area" id="file-upload-area">
+                                <div class="sikshya-file-upload-content">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="sikshya-file-upload-icon">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <h5 class="sikshya-file-upload-title"><?php esc_html_e('Drop files here or click to upload', 'sikshya'); ?></h5>
+                                    <p class="sikshya-file-upload-subtitle"><?php esc_html_e('Supports CSV, JSON, Excel files up to 10MB', 'sikshya'); ?></p>
+                                    <input type="file" id="import-file" class="sikshya-file-input" accept=".csv,.json,.xlsx,.xls" style="display: none;">
+                                    <button type="button" class="sikshya-btn sikshya-btn-secondary" id="browse-files">
+                                        <?php esc_html_e('Browse Files', 'sikshya'); ?>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="sikshya-form-group">
+                                <label for="import-type" class="sikshya-form-label"><?php esc_html_e('Import Type', 'sikshya'); ?></label>
+                                <select id="import-type" class="sikshya-select sikshya-select-lg">
+                                    <option value="auto">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        <?php esc_html_e('Auto Detect', 'sikshya'); ?>
+                                    </option>
+                                    <option value="courses">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                        </svg>
+                                        <?php esc_html_e('Courses', 'sikshya'); ?>
+                                    </option>
+                                    <option value="students">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                        </svg>
+                                        <?php esc_html_e('Students', 'sikshya'); ?>
+                                    </option>
+                                    <option value="instructors">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        <?php esc_html_e('Instructors', 'sikshya'); ?>
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="sikshya-form-group">
+                                <label class="sikshya-form-label"><?php esc_html_e('Import Options', 'sikshya'); ?></label>
+                                <div class="sikshya-checkbox-group">
+                                    <label class="sikshya-checkbox">
+                                        <input type="checkbox" id="overwrite-existing" checked>
+                                        <span class="sikshya-checkbox-mark"></span>
+                                        <?php esc_html_e('Overwrite Existing', 'sikshya'); ?>
+                                    </label>
+                                    <label class="sikshya-checkbox">
+                                        <input type="checkbox" id="skip-duplicates">
+                                        <span class="sikshya-checkbox-mark"></span>
+                                        <?php esc_html_e('Skip Duplicates', 'sikshya'); ?>
+                                    </label>
+                                    <label class="sikshya-checkbox">
+                                        <input type="checkbox" id="validate-data" checked>
+                                        <span class="sikshya-checkbox-mark"></span>
+                                        <?php esc_html_e('Validate Data', 'sikshya'); ?>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="sikshya-btn sikshya-btn-success sikshya-btn-lg" id="import-data" disabled>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <?php esc_html_e('Import Data', 'sikshya'); ?>
                             </button>
                         </div>
                     </div>
@@ -174,14 +314,24 @@ jQuery(document).ready(function($) {
     // Export data
     $('#export-data').on('click', function() {
         const exportType = $('#export-type').val();
-        exportData(exportType);
+        const exportFormat = $('#export-format').val();
+        const includeMeta = $('#include-meta').is(':checked');
+        const includeSettings = $('#include-settings').is(':checked');
+        const includeMedia = $('#include-media').is(':checked');
+
+        exportData(exportType, exportFormat, includeMeta, includeSettings, includeMedia);
     });
     
     // Import data
     $('#import-data').on('click', function() {
         const fileInput = $('#import-file')[0];
         if (fileInput.files.length > 0) {
-            importData(fileInput.files[0]);
+            const importType = $('#import-type').val();
+            const overwriteExisting = $('#overwrite-existing').is(':checked');
+            const skipDuplicates = $('#skip-duplicates').is(':checked');
+            const validateData = $('#validate-data').is(':checked');
+
+            importData(fileInput.files[0], importType, overwriteExisting, skipDuplicates, validateData);
         } else {
             alert('<?php esc_html_e('Please select a file to import', 'sikshya'); ?>');
         }
@@ -199,6 +349,31 @@ jQuery(document).ready(function($) {
         if (confirm('<?php esc_html_e('Are you sure you want to reset all settings? This action cannot be undone.', 'sikshya'); ?>')) {
             resetSettings();
         }
+    });
+
+    // File upload area functionality
+    $('#file-upload-area').on('dragover', function(e) {
+        e.preventDefault();
+        $(this).addClass('sikshya-file-upload-over');
+    });
+
+    $('#file-upload-area').on('dragleave', function(e) {
+        e.preventDefault();
+        $(this).removeClass('sikshya-file-upload-over');
+    });
+
+    $('#file-upload-area').on('drop', function(e) {
+        e.preventDefault();
+        $(this).removeClass('sikshya-file-upload-over');
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            $('#import-file').val(files[0].name); // Display file name
+            $('#import-data').prop('disabled', false); // Enable import button
+        }
+    });
+
+    $('#browse-files').on('click', function() {
+        $('#import-file').click();
     });
     
     function loadSystemInfo() {
@@ -265,16 +440,22 @@ jQuery(document).ready(function($) {
         $('#system-info').html(html);
     }
     
-    function exportData(type) {
+    function exportData(type, format, includeMeta, includeSettings, includeMedia) {
+        const data = {
+            action: 'sikshya_tools_action',
+            action_type: 'export_data',
+            export_type: type,
+            export_format: format,
+            include_meta: includeMeta,
+            include_settings: includeSettings,
+            include_media: includeMedia,
+            nonce: '<?php echo wp_create_nonce('sikshya_tools_nonce'); ?>'
+        };
+
         $.ajax({
             url: ajaxurl,
             type: 'POST',
-            data: {
-                action: 'sikshya_tools_action',
-                action_type: 'export_data',
-                export_type: type,
-                nonce: '<?php echo wp_create_nonce('sikshya_tools_nonce'); ?>'
-            },
+            data: data,
             success: function(response) {
                 if (response.success) {
                     // Create and download file
@@ -296,24 +477,31 @@ jQuery(document).ready(function($) {
         });
     }
     
-    function importData(file) {
+    function importData(file, importType, overwriteExisting, skipDuplicates, validateData) {
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const data = JSON.parse(e.target.result);
+                const importOptions = {
+                    action: 'sikshya_tools_action',
+                    action_type: 'import_data',
+                    file_data: e.target.result,
+                    import_type: importType,
+                    overwrite_existing: overwriteExisting,
+                    skip_duplicates: skipDuplicates,
+                    validate_data: validateData,
+                    nonce: '<?php echo wp_create_nonce('sikshya_tools_nonce'); ?>'
+                };
+
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
-                    data: {
-                        action: 'sikshya_tools_action',
-                        action_type: 'import_data',
-                        file_data: e.target.result,
-                        nonce: '<?php echo wp_create_nonce('sikshya_tools_nonce'); ?>'
-                    },
+                    data: importOptions,
                     success: function(response) {
                         if (response.success) {
                             alert('<?php esc_html_e('Data imported successfully', 'sikshya'); ?>');
                             $('#import-file').val('');
+                            $('#import-data').prop('disabled', true); // Disable import button after successful import
                         } else {
                             alert(response.data.message || '<?php esc_html_e('Import failed', 'sikshya'); ?>');
                         }

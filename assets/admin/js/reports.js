@@ -10,10 +10,42 @@
 
     const SikshyaReports = {
         charts: {},
+        initialized: false,
+        initTimeout: null,
+        creatingCharts: false,
+        initRetryCount: 0,
+        maxRetries: 3,
         
         init: function() {
+            console.log('SikshyaReports.init() called, retry count:', this.initRetryCount);
+            
+            // Prevent infinite retries
+            if (this.initRetryCount >= this.maxRetries) {
+                console.error('Maximum retry count reached, stopping initialization');
+                return;
+            }
+            
+            // Clear any existing timeout
+            if (this.initTimeout) {
+                clearTimeout(this.initTimeout);
+            }
+            
+            // Prevent multiple initializations
+            if (this.initialized) {
+                console.log('SikshyaReports already initialized, skipping');
+                return;
+            }
+            
+            this.initRetryCount++;
+            console.log('Initializing SikshyaReports');
             this.bindEvents();
-            this.initCharts();
+            
+            // Use timeout to ensure DOM is ready and prevent rapid re-initialization
+            this.initTimeout = setTimeout(() => {
+                this.initCharts();
+                this.initialized = true;
+                console.log('SikshyaReports initialization complete');
+            }, 100);
         },
 
         bindEvents: function() {
@@ -23,44 +55,82 @@
         },
 
         initCharts: function() {
+            console.log('initCharts called');
+            
             if (typeof Chart === 'undefined') {
                 console.warn('Chart.js is not loaded. Charts will not be displayed.');
                 return;
             }
 
+            // Prevent concurrent chart creation
+            if (this.creatingCharts) {
+                console.log('Charts are already being created, skipping');
+                return;
+            }
+
+            // Only initialize charts if they haven't been initialized yet
+            if (this.charts.initialized) {
+                console.log('Charts already initialized, skipping');
+                return;
+            }
+
+            this.creatingCharts = true;
+            console.log('Destroying existing charts and initializing new ones');
+            
             // Destroy existing charts before creating new ones
             this.destroyCharts();
 
             this.initEnrollmentChart();
             this.initAgeChart();
             this.initGeoChart();
+            
+            // Mark charts as initialized
+            this.charts.initialized = true;
+            this.creatingCharts = false;
+            console.log('Charts initialization complete');
         },
 
         destroyCharts: function() {
             // Destroy existing charts to prevent canvas reuse errors
             Object.keys(this.charts).forEach(key => {
-                if (this.charts[key] && typeof this.charts[key].destroy === 'function') {
+                if (key !== 'initialized' && this.charts[key] && typeof this.charts[key].destroy === 'function') {
                     this.charts[key].destroy();
                 }
             });
-            this.charts = {};
+            this.charts = { initialized: false };
         },
 
         initEnrollmentChart: function() {
             const ctx = document.getElementById('enrollment-chart');
-            if (!ctx) return;
-
-            // Destroy any existing chart on this canvas
-            if (this.charts.enrollment) {
-                this.charts.enrollment.destroy();
+            if (!ctx) {
+                console.log('Enrollment chart canvas not found');
+                return;
             }
-            
-            // Also check if Chart.js has any existing chart on this canvas
+
+            // Check if chart is already initialized and not destroyed
+            if (this.charts.enrollment && !this.charts.enrollment._destroyed) {
+                console.log('Enrollment chart already exists and not destroyed, skipping');
+                return;
+            }
+
+            // Check if there's already a Chart.js instance on this canvas
             const existingChart = Chart.getChart(ctx);
             if (existingChart) {
+                console.log('Destroying existing Chart.js instance on enrollment-chart canvas');
                 existingChart.destroy();
             }
 
+            // Destroy our stored chart instance if it exists
+            if (this.charts.enrollment && typeof this.charts.enrollment.destroy === 'function') {
+                console.log('Destroying our stored enrollment chart instance');
+                this.charts.enrollment.destroy();
+            }
+
+            // Set a fixed height on the canvas to prevent infinite growth
+            ctx.style.height = '300px';
+            ctx.style.maxHeight = '300px';
+
+            console.log('Creating new enrollment chart');
             this.charts.enrollment = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -132,19 +202,35 @@
 
         initAgeChart: function() {
             const ctx = document.getElementById('age-chart');
-            if (!ctx) return;
-
-            // Destroy any existing chart on this canvas
-            if (this.charts.age) {
-                this.charts.age.destroy();
+            if (!ctx) {
+                console.log('Age chart canvas not found');
+                return;
             }
-            
-            // Also check if Chart.js has any existing chart on this canvas
+
+            // Check if chart is already initialized and not destroyed
+            if (this.charts.age && !this.charts.age._destroyed) {
+                console.log('Age chart already exists and not destroyed, skipping');
+                return;
+            }
+
+            // Check if there's already a Chart.js instance on this canvas
             const existingChart = Chart.getChart(ctx);
             if (existingChart) {
+                console.log('Destroying existing Chart.js instance on age-chart canvas');
                 existingChart.destroy();
             }
 
+            // Destroy our stored chart instance if it exists
+            if (this.charts.age && typeof this.charts.age.destroy === 'function') {
+                console.log('Destroying our stored age chart instance');
+                this.charts.age.destroy();
+            }
+
+            // Set a fixed height on the canvas to prevent infinite growth
+            ctx.style.height = '300px';
+            ctx.style.maxHeight = '300px';
+
+            console.log('Creating new age chart');
             this.charts.age = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -194,19 +280,35 @@
 
         initGeoChart: function() {
             const ctx = document.getElementById('geo-chart');
-            if (!ctx) return;
-
-            // Destroy any existing chart on this canvas
-            if (this.charts.geo) {
-                this.charts.geo.destroy();
+            if (!ctx) {
+                console.log('Geo chart canvas not found');
+                return;
             }
-            
-            // Also check if Chart.js has any existing chart on this canvas
+
+            // Check if chart is already initialized and not destroyed
+            if (this.charts.geo && !this.charts.geo._destroyed) {
+                console.log('Geo chart already exists and not destroyed, skipping');
+                return;
+            }
+
+            // Check if there's already a Chart.js instance on this canvas
             const existingChart = Chart.getChart(ctx);
             if (existingChart) {
+                console.log('Destroying existing Chart.js instance on geo-chart canvas');
                 existingChart.destroy();
             }
 
+            // Destroy our stored chart instance if it exists
+            if (this.charts.geo && typeof this.charts.geo.destroy === 'function') {
+                console.log('Destroying our stored geo chart instance');
+                this.charts.geo.destroy();
+            }
+
+            // Set a fixed height on the canvas to prevent infinite growth
+            ctx.style.height = '300px';
+            ctx.style.maxHeight = '300px';
+
+            console.log('Creating new geo chart');
             this.charts.geo = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -510,7 +612,13 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
+        // Prevent multiple initializations
+        if (window.sikshyaReportsInitialized) {
+            return;
+        }
+        
         SikshyaReports.init();
+        window.sikshyaReportsInitialized = true;
     });
 
     // Make it globally available for debugging

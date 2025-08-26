@@ -42,52 +42,75 @@
                     nonce: sikshya_ajax.nonce
                 },
                 success: function(response) {
+                    console.log('System info response:', response);
                     if (response.success) {
-                        this.displaySystemInfo(response.data);
+                        this.displaySystemInfo(response);
                     } else {
+                        console.error('System info error:', response);
                         this.showError('Failed to load system information');
                     }
                 }.bind(this),
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', {xhr, status, error});
                     this.showError('Failed to load system information');
                 }.bind(this)
             });
         },
 
-        displaySystemInfo: function(data) {
+        displaySystemInfo: function(response) {
+            console.log('Display system info called with:', response);
+            
+            // Extract data from response
+            const data = response.data || response;
+            console.log('Extracted data:', data);
+            
+            // Add fallback values to prevent undefined
+            const systemInfo = {
+                wordpress_version: data.wordpress_version || 'Unknown',
+                php_version: data.php_version || 'Unknown',
+                mysql_version: data.mysql_version || 'Unknown',
+                sikshya_version: data.sikshya_version || 'Unknown',
+                memory_limit: data.memory_limit || 'Unknown',
+                max_execution_time: data.max_execution_time || 'Unknown',
+                upload_max_filesize: data.upload_max_filesize || 'Unknown',
+                post_max_size: data.post_max_size || 'Unknown'
+            };
+            
+            console.log('Processed system info:', systemInfo);
+
             const html = `
                 <div class="sikshya-system-info-grid">
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">WordPress Version:</span>
-                        <span class="sikshya-info-value">${data.wordpress_version}</span>
+                        <span class="sikshya-info-value">${systemInfo.wordpress_version}</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">PHP Version:</span>
-                        <span class="sikshya-info-value">${data.php_version}</span>
+                        <span class="sikshya-info-value">${systemInfo.php_version}</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">MySQL Version:</span>
-                        <span class="sikshya-info-value">${data.mysql_version}</span>
+                        <span class="sikshya-info-value">${systemInfo.mysql_version}</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">Sikshya Version:</span>
-                        <span class="sikshya-info-value">${data.sikshya_version}</span>
+                        <span class="sikshya-info-value">${systemInfo.sikshya_version}</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">Memory Limit:</span>
-                        <span class="sikshya-info-value">${data.memory_limit}</span>
+                        <span class="sikshya-info-value">${systemInfo.memory_limit}</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">Max Execution Time:</span>
-                        <span class="sikshya-info-value">${data.max_execution_time}s</span>
+                        <span class="sikshya-info-value">${systemInfo.max_execution_time}s</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">Upload Max Filesize:</span>
-                        <span class="sikshya-info-value">${data.upload_max_filesize}</span>
+                        <span class="sikshya-info-value">${systemInfo.upload_max_filesize}</span>
                     </div>
                     <div class="sikshya-info-item">
                         <span class="sikshya-info-label">Post Max Size:</span>
-                        <span class="sikshya-info-value">${data.post_max_size}</span>
+                        <span class="sikshya-info-value">${systemInfo.post_max_size}</span>
                     </div>
                 </div>
             `;
