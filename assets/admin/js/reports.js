@@ -28,14 +28,38 @@
                 return;
             }
 
+            // Destroy existing charts before creating new ones
+            this.destroyCharts();
+
             this.initEnrollmentChart();
             this.initAgeChart();
             this.initGeoChart();
         },
 
+        destroyCharts: function() {
+            // Destroy existing charts to prevent canvas reuse errors
+            Object.keys(this.charts).forEach(key => {
+                if (this.charts[key] && typeof this.charts[key].destroy === 'function') {
+                    this.charts[key].destroy();
+                }
+            });
+            this.charts = {};
+        },
+
         initEnrollmentChart: function() {
             const ctx = document.getElementById('enrollment-chart');
             if (!ctx) return;
+
+            // Destroy any existing chart on this canvas
+            if (this.charts.enrollment) {
+                this.charts.enrollment.destroy();
+            }
+            
+            // Also check if Chart.js has any existing chart on this canvas
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
 
             this.charts.enrollment = new Chart(ctx, {
                 type: 'line',
@@ -110,6 +134,17 @@
             const ctx = document.getElementById('age-chart');
             if (!ctx) return;
 
+            // Destroy any existing chart on this canvas
+            if (this.charts.age) {
+                this.charts.age.destroy();
+            }
+            
+            // Also check if Chart.js has any existing chart on this canvas
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
             this.charts.age = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -160,6 +195,17 @@
         initGeoChart: function() {
             const ctx = document.getElementById('geo-chart');
             if (!ctx) return;
+
+            // Destroy any existing chart on this canvas
+            if (this.charts.geo) {
+                this.charts.geo.destroy();
+            }
+            
+            // Also check if Chart.js has any existing chart on this canvas
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
 
             this.charts.geo = new Chart(ctx, {
                 type: 'doughnut',

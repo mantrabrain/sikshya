@@ -848,8 +848,11 @@ class Admin
      */
     private function renderStatsWidget(): string
     {
+        $course_counts = wp_count_posts('sikshya_course');
+        $total_courses = isset($course_counts->publish) ? $course_counts->publish : 0;
+        
         $stats = [
-            'total_courses' => wp_count_posts('sikshya_course')->publish,
+            'total_courses' => $total_courses,
             'total_students' => count_users()['total_users'],
             'total_revenue' => '$0.00',
             'active_enrollments' => 0,
