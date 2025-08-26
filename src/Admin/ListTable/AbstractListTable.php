@@ -792,8 +792,14 @@ abstract class AbstractListTable extends \WP_List_Table
      */
     protected function display_column_content($column_key, $item): void
     {
-        // Call the child class's column_default method
-        echo $this->column_default($item, $column_key);
+        // Try to call the specific column method first
+        $method_name = 'column' . ucfirst($column_key);
+        if (method_exists($this, $method_name)) {
+            echo $this->$method_name($item);
+        } else {
+            // Fall back to column_default
+            echo $this->column_default($item, $column_key);
+        }
     }
 
     /**

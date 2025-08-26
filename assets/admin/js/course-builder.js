@@ -344,11 +344,16 @@ function saveChapter() {
         return;
     }
     
+    // Get course ID from the form
+    const courseIdField = document.querySelector('input[name="course_id"]');
+    const courseId = courseIdField ? parseInt(courseIdField.value) || 0 : 0;
+    
     sikshyaAjax('sikshya_create_chapter', {
         title: title,
         description: description,
         duration: duration,
-        order: order
+        order: order,
+        course_id: courseId
     }, function(data) {
         console.log('Chapter creation response data:', data);
         
@@ -909,71 +914,68 @@ function saveContent(contentType) {
         }
     }
     
-    console.log('Sending AJAX request with title:', formData.title); // Debug log
-    console.log('Adding to chapter:', currentChapterId); // Debug log
-    
-    console.log('Sending AJAX request with content type:', contentType); // Debug log
-    sikshyaAjax('sikshya_create_content', {
-        type: contentType,
-        title: formData.title,
-        description: formData.description || '',
-        duration: formData.duration || ''
-    }, function(data) {
-        console.log('Content created successfully:', data); // Debug log
-        console.log('HTML received:', data.html); // Debug log
-        console.log('Content type sent:', contentType); // Debug log
-        
-        // Add content to current chapter
-        addContentToChapterContent(data.html, data.content_id);
-        
-        // Close modal
-        closeModal(document.querySelector('.sikshya-modal-overlay'));
-        
-        // Update progress
-        updateProgress();
-        
-        lessonCount++;
-    });
+    // Use the save handler from course-builder-save.js
+    if (window.SikshyaCourseBuilderSave) {
+        window.SikshyaCourseBuilderSave.saveContent(contentType, formData, function(success, response) {
+            if (success) {
+                // Close modal
+                closeModal(document.querySelector('.sikshya-modal-overlay'));
+                
+                // Update progress
+                updateProgress();
+                
+                lessonCount++;
+            } else {
+                console.error('Failed to save content:', response);
+                alert('Failed to save content. Please try again.');
+            }
+        });
+    } else {
+        console.error('SikshyaCourseBuilderSave not available');
+        alert('Save handler not available. Please refresh the page.');
+    }
 }
 
 function createDefaultChapterAndAddContent(contentType, formData) {
+    // Get course ID from the form
+    const courseIdField = document.querySelector('input[name="course_id"]');
+    const courseId = courseIdField ? parseInt(courseIdField.value) || 0 : 0;
+    
     // Create a default chapter first
     const defaultChapterData = {
         title: 'Chapter 1',
         description: 'Introduction to the course',
         duration: '',
-        order: 1
+        order: 1,
+        course_id: courseId
     };
     
     sikshyaAjax('sikshya_create_chapter', defaultChapterData, function(data) {
         console.log('Default chapter created:', data);
         
-        // Add chapter to curriculum
-        addChapterToCurriculum(data.html, data.chapter_id);
-        
         // Set as current chapter
         currentChapterId = data.chapter_id;
         
-        // Now create the content
-        sikshyaAjax('sikshya_create_content', {
-            type: contentType,
-            title: formData.title,
-            description: formData.description || '',
-            duration: formData.duration || ''
-        }, function(contentData) {
-            console.log('Content created in default chapter:', contentData);
-            
-            // Add content to the new chapter
-            addContentToChapterContent(contentData.html, contentData.content_id);
-            
-            // Close modal
-            closeModal(document.querySelector('.sikshya-modal-overlay'));
-            
-            // Update progress
-            updateProgress();
-            
-            lessonCount++;
-        });
+        // Now create the content using the save handler
+        if (window.SikshyaCourseBuilderSave) {
+            window.SikshyaCourseBuilderSave.saveContent(contentType, formData, function(success, response) {
+                if (success) {
+                    // Close modal
+                    closeModal(document.querySelector('.sikshya-modal-overlay'));
+                    
+                    // Update progress
+                    updateProgress();
+                    
+                    lessonCount++;
+                } else {
+                    console.error('Failed to save content:', response);
+                    alert('Failed to save content. Please try again.');
+                }
+            });
+        } else {
+            console.error('SikshyaCourseBuilderSave not available');
+            alert('Save handler not available. Please refresh the page.');
+        }
     });
 }
 
@@ -998,6 +1000,29 @@ function getFormData(contentType) {
                        document.getElementById(contentType + '-description')?.value || '';
     data.duration = document.getElementById(contentType + '-lesson-duration')?.value || 
                     document.getElementById(contentType + '-duration')?.value || '';
+    
+    // Get additional fields based on content type
+    if (contentType === 'text') {
+        data.content = document.getElementById('text-lesson-content')?.value || '';
+        data.objectives = document.getElementById('text-lesson-objectives')?.value || '';
+        data.takeaways = document.getElementById('text-lesson-takeaways')?.value || '';
+        data.resources = document.getElementById('text-lesson-resources')?.value || '';
+        data.difficulty = document.getElementById('text-lesson-difficulty')?.value || 'beginner';
+        data.completion = document.getElementById('text-lesson-completion')?.value || 'yes';
+        data.comments = document.getElementById('text-lesson-comments')?.value || 'yes';
+        data.progress = document.getElementById('text-lesson-progress')?.value || 'yes';
+        data.print = document.getElementById('text-lesson-print')?.value || 'yes';
+        data.prerequisites = document.getElementById('text-lesson-prerequisites')?.value || '';
+        data.tags = document.getElementById('text-lesson-tags')?.value || '';
+        data.seo = document.getElementById('text-lesson-seo')?.value || '';
+        data.format = document.getElementById('text-lesson-format')?.value || 'article';
+        data.reading_level = document.getElementById('text-lesson-reading-level')?.value || 'basic';
+        data.word_count = document.getElementById('text-lesson-word-count')?.value || '';
+        data.language = document.getElementById('text-lesson-language')?.value || 'en';
+        data.toc = document.getElementById('text-lesson-toc')?.value || 'auto';
+        data.search = document.getElementById('text-lesson-search')?.value || 'yes';
+        data.related = document.getElementById('text-lesson-related')?.value || '';
+    }
     
     console.log('Form data extracted:', data); // Debug log
     

@@ -51,6 +51,8 @@ class CourseAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_load_form_template', [$this, 'handleLoadFormTemplate']);
         add_action('wp_ajax_sikshya_create_chapter', [$this, 'handleCreateChapter']);
         add_action('wp_ajax_sikshya_create_content', [$this, 'handleCreateContent']);
+        add_action('wp_ajax_sikshya_link_content_to_chapter', [$this, 'handleLinkContentToChapter']);
+        add_action('wp_ajax_sikshya_load_curriculum', [$this, 'handleLoadCurriculum']);
         
 
     }
@@ -372,10 +374,18 @@ class CourseAjax extends AjaxAbstract
             }
             
             $modal_type = sanitize_text_field($this->getPostData('modal_type', ''));
+            $chapter_order = intval($this->getPostData('chapter_order', 1));
             
-            // Return modal template HTML
-            $template = $this->getModalTemplate($modal_type);
-            $this->sendSuccess(['template' => $template]);
+            // Load specific modal template based on type
+            if ($modal_type === 'chapter') {
+                $template = $this->loadChapterModalTemplate($chapter_order);
+            } elseif ($modal_type === 'content-type') {
+                $template = $this->loadContentTypeModalTemplate();
+            } else {
+                $template = $this->getModalTemplate($modal_type);
+            }
+            
+            $this->sendSuccess(['html' => $template]);
             
         } catch (\Exception $e) {
             $this->logError('Load modal template error', $e);
@@ -394,11 +404,11 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
             
-            $form_type = sanitize_text_field($this->getPostData('form_type', ''));
+            $content_type = sanitize_text_field($this->getPostData('content_type', ''));
             
             // Return form template HTML
-            $template = $this->getFormTemplate($form_type);
-            $this->sendSuccess(['template' => $template]);
+            $template = $this->getContentTypeForm($content_type);
+            $this->sendSuccess(['html' => $template]);
             
         } catch (\Exception $e) {
             $this->logError('Load form template error', $e);
@@ -422,8 +432,18 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
 
-            $data = $this->getPostData('data', []);
-            $course_id = intval($data['course_id'] ?? 0);
+            $title = sanitize_text_field($this->getPostData('title', ''));
+            $description = wp_kses_post($this->getPostData('description', ''));
+            $duration = sanitize_text_field($this->getPostData('duration', ''));
+            $order = intval($this->getPostData('order', 1));
+            
+            if (empty($title)) {
+                $this->sendError('Chapter title is required');
+                return;
+            }
+            
+            // Get course ID from URL or session
+            $course_id = $this->getCourseIdFromContext();
             
             if ($course_id === 0) {
                 $this->sendError('Invalid course ID');
@@ -432,8 +452,8 @@ class CourseAjax extends AjaxAbstract
             
             // Create chapter post
             $chapter_id = wp_insert_post([
-                'post_title' => sanitize_text_field($data['title'] ?? 'New Chapter'),
-                'post_content' => wp_kses_post($data['description'] ?? ''),
+                'post_title' => $title,
+                'post_content' => $description,
                 'post_type' => 'sikshya_chapter',
                 'post_status' => 'publish',
                 'post_parent' => $course_id,
@@ -444,7 +464,19 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
             
-            $this->sendSuccess(['chapter_id' => $chapter_id], 'Chapter created successfully');
+            // Save additional meta
+            if (!empty($duration)) {
+                update_post_meta($chapter_id, '_sikshya_duration', $duration);
+            }
+            update_post_meta($chapter_id, '_sikshya_order', $order);
+            
+            // Generate chapter HTML
+            $chapter_html = $this->generateChapterHTML($chapter_id, $title, $description, $duration, $order);
+            
+            $this->sendSuccess([
+                'chapter_id' => $chapter_id,
+                'html' => $chapter_html
+            ], 'Chapter created successfully');
             
         } catch (\Exception $e) {
             $this->logError('Create chapter error', $e);
@@ -468,25 +500,25 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
 
-            $data = $this->getPostData('data', []);
-            $chapter_id = intval($data['chapter_id'] ?? 0);
-            $content_type = sanitize_text_field($data['content_type'] ?? 'lesson');
+            $title = sanitize_text_field($this->getPostData('title', ''));
+            $description = wp_kses_post($this->getPostData('description', ''));
+            $duration = sanitize_text_field($this->getPostData('duration', ''));
+            $content_type = sanitize_text_field($this->getPostData('type', 'lesson'));
             
-            if ($chapter_id === 0) {
-                $this->sendError('Invalid chapter ID');
+            if (empty($title)) {
+                $this->sendError('Content title is required');
                 return;
             }
             
             // Determine post type based on content type
             $post_type = 'sikshya_' . $content_type;
             
-            // Create content post
+            // Create content post (no parent - content is independent)
             $content_id = wp_insert_post([
-                'post_title' => sanitize_text_field($data['title'] ?? 'New ' . ucfirst($content_type)),
-                'post_content' => wp_kses_post($data['description'] ?? ''),
+                'post_title' => $title,
+                'post_content' => $description,
                 'post_type' => $post_type,
                 'post_status' => 'publish',
-                'post_parent' => $chapter_id,
             ]);
             
             if (is_wp_error($content_id)) {
@@ -494,7 +526,23 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
             
-            $this->sendSuccess(['content_id' => $content_id], ucfirst($content_type) . ' created successfully');
+            // Save additional meta
+            if (!empty($duration)) {
+                update_post_meta($content_id, '_sikshya_duration', $duration);
+            }
+            
+            // Save content type specific meta
+            if ($content_type === 'text') {
+                $this->saveTextLessonMeta($content_id);
+            }
+            
+            // Generate content HTML
+            $content_html = $this->generateContentHTML($content_id, $title, $description, $duration, $content_type);
+            
+            $this->sendSuccess([
+                'content_id' => $content_id,
+                'html' => $content_html
+            ], ucfirst($content_type) . ' created successfully');
             
         } catch (\Exception $e) {
             $this->logError('Create content error', $e);
@@ -772,6 +820,42 @@ class CourseAjax extends AjaxAbstract
     }
 
     /**
+     * Load chapter modal template
+     * 
+     * @param int $chapter_order
+     * @return string
+     */
+    private function loadChapterModalTemplate(int $chapter_order): string
+    {
+        ob_start();
+        
+        // Set up template variables
+        $args = [
+            'chapter_order' => $chapter_order
+        ];
+        
+        // Include the chapter modal template
+        include SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/modal-chapter.php';
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Load content type modal template
+     * 
+     * @return string
+     */
+    private function loadContentTypeModalTemplate(): string
+    {
+        ob_start();
+        
+        // Include the content type modal template
+        include SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/modal-content-type.php';
+        
+        return ob_get_clean();
+    }
+
+    /**
      * Get modal template HTML
      * 
      * @param string $modal_type
@@ -835,6 +919,28 @@ class CourseAjax extends AjaxAbstract
      */
     private function getContentTypeForm(string $content_type, array $data = []): string
     {
+        // Map content types to template files
+        $template_map = [
+            'text' => 'text-lesson.php',
+            'video' => 'video-lesson.php',
+            'audio' => 'audio-lesson.php',
+            'quiz' => 'quiz.php',
+            'assignment' => 'assignment.php'
+        ];
+        
+        $template_file = $template_map[$content_type] ?? 'text-lesson.php';
+        $template_path = SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/forms/' . $template_file;
+        
+        if (file_exists($template_path)) {
+            // Extract data for template
+            extract($data);
+            
+            ob_start();
+            include $template_path;
+            return ob_get_clean();
+        }
+        
+        // Fallback to basic form if template doesn't exist
         $title = $data['title'] ?? '';
         $description = $data['description'] ?? '';
         
@@ -856,6 +962,568 @@ class CourseAjax extends AjaxAbstract
         </form>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Save text lesson specific meta data
+     * 
+     * @param int $content_id
+     */
+    private function saveTextLessonMeta(int $content_id): void
+    {
+        $meta_fields = [
+            'content' => 'wp_kses_post',
+            'objectives' => 'wp_kses_post',
+            'takeaways' => 'wp_kses_post',
+            'resources' => 'wp_kses_post',
+            'difficulty' => 'sanitize_text_field',
+            'completion' => 'sanitize_text_field',
+            'comments' => 'sanitize_text_field',
+            'progress' => 'sanitize_text_field',
+            'print' => 'sanitize_text_field',
+            'prerequisites' => 'wp_kses_post',
+            'tags' => 'sanitize_text_field',
+            'seo' => 'wp_kses_post',
+            'format' => 'sanitize_text_field',
+            'reading_level' => 'sanitize_text_field',
+            'word_count' => 'intval',
+            'language' => 'sanitize_text_field',
+            'toc' => 'sanitize_text_field',
+            'search' => 'sanitize_text_field',
+            'related' => 'sanitize_text_field'
+        ];
+        
+        foreach ($meta_fields as $field => $sanitize_function) {
+            $value = $this->getPostData($field, '');
+            if (!empty($value)) {
+                $sanitized_value = $sanitize_function($value);
+                update_post_meta($content_id, '_sikshya_' . $field, $sanitized_value);
+            }
+        }
+    }
+
+    /**
+     * Get course ID from context (URL or session)
+     * 
+     * @return int
+     */
+    private function getCourseIdFromContext(): int
+    {
+        // Try to get from POST data first (for AJAX requests)
+        $course_id = intval($this->getPostData('course_id', 0));
+        
+        if ($course_id > 0) {
+            return $course_id;
+        }
+        
+        // Try to get from URL parameter
+        $course_id = intval($_GET['course_id'] ?? 0);
+        
+        if ($course_id > 0) {
+            return $course_id;
+        }
+        
+        // Try to get from session or other context
+        // For now, return 0 if not found
+        return 0;
+    }
+
+    /**
+     * Generate chapter HTML for curriculum
+     * 
+     * @param int $chapter_id
+     * @param string $title
+     * @param string $description
+     * @param string $duration
+     * @param int $order
+     * @return string
+     */
+    private function generateChapterHTML(int $chapter_id, string $title, string $description, string $duration, int $order): string
+    {
+        ob_start();
+        ?>
+        <div class="sikshya-chapter-card" id="chapter-<?php echo esc_attr($chapter_id); ?>" 
+             data-chapter-id="chapter-<?php echo esc_attr($chapter_id); ?>"
+             data-description="<?php echo esc_attr($description); ?>"
+             data-duration="<?php echo esc_attr($duration); ?>"
+             data-order="<?php echo esc_attr($order); ?>">
+            
+            <div class="sikshya-chapter-header" onclick="toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')">
+                <div class="sikshya-chapter-controls">
+                    <div class="sikshya-chapter-checkbox">
+                        <input type="checkbox" id="chapter-<?php echo esc_attr($chapter_id); ?>" class="sikshya-checkbox">
+                        <label for="chapter-<?php echo esc_attr($chapter_id); ?>"></label>
+                    </div>
+                    <div class="sikshya-chapter-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <div class="sikshya-chapter-number">
+                        <?php echo esc_html($order); ?>
+                    </div>
+                </div>
+                
+                <div class="sikshya-chapter-info">
+                    <div class="sikshya-chapter-main">
+                        <h4 class="sikshya-chapter-title"><?php echo esc_html($title); ?></h4>
+                        <?php if (!empty($description)): ?>
+                            <p class="sikshya-chapter-description"><?php echo esc_html($description); ?></p>
+                        <?php endif; ?>
+                        <div class="sikshya-chapter-content-summary">
+                            <div class="sikshya-chapter-meta">
+                                <span class="sikshya-chapter-lessons">
+                                    <span class="lesson-count">0</span> lessons
+                                </span>
+                                <span class="sikshya-chapter-quizzes">
+                                    <span class="quiz-count">0</span> quizzes
+                                </span>
+                                <span class="sikshya-chapter-assignments">
+                                    <span class="assignment-count">0</span> assignments
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sikshya-chapter-actions">
+                    <button class="sikshya-btn-icon" onclick="event.stopPropagation(); editChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Edit Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon" onclick="event.stopPropagation(); deleteChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Delete Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="event.stopPropagation(); toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Toggle Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sikshya-chapter-content" id="content-chapter-<?php echo esc_attr($chapter_id); ?>">
+                <div class="sikshya-chapter-content-inner">
+                    <div class="sikshya-lesson-list">
+                        <div class="sikshya-chapter-empty">
+                            <div class="sikshya-chapter-empty-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                            </div>
+                            <h4>No Lessons Yet</h4>
+                            <p>Add your first lesson to this chapter</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Add More Content -->
+                    <div class="sikshya-add-lesson">
+                        <button class="sikshya-add-lesson-btn" onclick="addContent('chapter-<?php echo esc_attr($chapter_id); ?>')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Content
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Generate content HTML for curriculum
+     * 
+     * @param int $content_id
+     * @param string $title
+     * @param string $description
+     * @param string $duration
+     * @param string $content_type
+     * @return string
+     */
+    private function generateContentHTML(int $content_id, string $title, string $description, string $duration, string $content_type): string
+    {
+        ob_start();
+        ?>
+        <div class="sikshya-content-item" id="content-<?php echo esc_attr($content_id); ?>" data-content-id="<?php echo esc_attr($content_id); ?>" data-content-type="<?php echo esc_attr($content_type); ?>">
+            <div class="sikshya-content-header">
+                <div class="sikshya-content-controls">
+                    <div class="sikshya-content-checkbox">
+                        <input type="checkbox" id="content-<?php echo esc_attr($content_id); ?>" class="sikshya-checkbox">
+                        <label for="content-<?php echo esc_attr($content_id); ?>"></label>
+                    </div>
+                    <div class="sikshya-content-icon">
+                        <?php echo $this->getContentTypeIcon($content_type); ?>
+                    </div>
+                </div>
+                
+                <div class="sikshya-content-info">
+                    <div class="sikshya-content-main">
+                        <h5 class="sikshya-content-title"><?php echo esc_html($title); ?></h5>
+                        <?php if (!empty($description)): ?>
+                            <p class="sikshya-content-description"><?php echo esc_html($description); ?></p>
+                        <?php endif; ?>
+                        <?php if (!empty($duration)): ?>
+                            <span class="sikshya-content-duration"><?php echo esc_html($duration); ?> min</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="sikshya-content-actions">
+                    <button class="sikshya-btn-icon" onclick="editContent(<?php echo esc_attr($content_id); ?>)" title="Edit Content">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon" onclick="deleteContent(<?php echo esc_attr($content_id); ?>)" title="Delete Content">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Link content to chapter
+     * 
+     * @param int $content_id
+     * @param int $chapter_id
+     * @return bool
+     */
+    private function linkContentToChapter(int $content_id, int $chapter_id): bool
+    {
+        // Store content_id in chapter meta
+        $chapter_contents = get_post_meta($chapter_id, '_sikshya_contents', true);
+        if (!is_array($chapter_contents)) {
+            $chapter_contents = [];
+        }
+        
+        $chapter_contents[] = $content_id;
+        
+        $result = update_post_meta($chapter_id, '_sikshya_contents', $chapter_contents);
+        
+        // Also store chapter_id in course meta (if we have course_id)
+        $course_id = get_post_field('post_parent', $chapter_id);
+        if ($course_id) {
+            $course_chapters = get_post_meta($course_id, '_sikshya_chapters', true);
+            if (!is_array($course_chapters)) {
+                $course_chapters = [];
+            }
+            
+            // Add chapter if not already in list
+            if (!in_array($chapter_id, $course_chapters)) {
+                $course_chapters[] = $chapter_id;
+                update_post_meta($course_id, '_sikshya_chapters', $course_chapters);
+            }
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Handle link content to chapter
+     */
+    public function handleLinkContentToChapter(): void
+    {
+        try {
+            if (!$this->verifyNonce('sikshya_course_builder')) {
+                $this->sendError('Invalid nonce');
+                return;
+            }
+            
+            if (!$this->checkCapability()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
+            $content_id = intval($this->getPostData('content_id', 0));
+            $chapter_id = intval($this->getPostData('chapter_id', 0));
+            
+            if ($content_id === 0 || $chapter_id === 0) {
+                $this->sendError('Invalid content or chapter ID');
+                return;
+            }
+            
+            // Link content to chapter
+            $result = $this->linkContentToChapter($content_id, $chapter_id);
+            
+            if ($result) {
+                $this->sendSuccess([], 'Content linked to chapter successfully');
+            } else {
+                $this->sendError('Failed to link content to chapter');
+            }
+            
+        } catch (\Exception $e) {
+            $this->logError('Link content to chapter error', $e);
+            $this->sendError('Failed to link content to chapter: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Generate complete curriculum HTML
+     * 
+     * @param int $course_id
+     * @return string
+     */
+    private function generateCurriculumHTML(int $course_id): string
+    {
+        // Get all chapters for this course
+        $chapters = get_posts([
+            'post_type' => 'sikshya_chapter',
+            'post_parent' => $course_id,
+            'post_status' => 'publish',
+            'numberposts' => -1,
+            'orderby' => 'meta_value_num',
+            'meta_key' => '_sikshya_order',
+            'order' => 'ASC'
+        ]);
+        
+        if (empty($chapters)) {
+            // Return empty state
+            ob_start();
+            ?>
+            <div class="sikshya-curriculum-empty-state" id="curriculum-empty-state">
+                <div class="sikshya-empty-header">
+                    <div class="sikshya-empty-content">
+                        <div class="sikshya-empty-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                        </div>
+                        <div class="sikshya-empty-text">
+                            <h3>Create Your First Chapter</h3>
+                            <p>Start building your course curriculum with organized chapters and lessons.</p>
+                        </div>
+                    </div>
+                    <div class="sikshya-empty-actions">
+                        <button class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            Add Chapter
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php
+            return ob_get_clean();
+        }
+        
+        ob_start();
+        ?>
+        <div class="sikshya-curriculum-items" id="curriculum-items">
+            <?php
+            foreach ($chapters as $chapter) {
+                $chapter_id = $chapter->ID;
+                $chapter_title = $chapter->post_title;
+                $chapter_description = $chapter->post_content;
+                $chapter_order = get_post_meta($chapter_id, '_sikshya_order', true) ?: 1;
+                $chapter_duration = get_post_meta($chapter_id, '_sikshya_duration', true);
+                
+                // Get content counts
+                $chapter_contents = get_post_meta($chapter_id, '_sikshya_contents', true);
+                $lesson_count = 0;
+                $quiz_count = 0;
+                $assignment_count = 0;
+                
+                if (is_array($chapter_contents)) {
+                    foreach ($chapter_contents as $content_id) {
+                        $content_post_type = get_post_type($content_id);
+                        switch ($content_post_type) {
+                            case 'sikshya_lesson':
+                                $lesson_count++;
+                                break;
+                            case 'sikshya_quiz':
+                                $quiz_count++;
+                                break;
+                            case 'sikshya_assignment':
+                                $assignment_count++;
+                                break;
+                        }
+                    }
+                }
+                
+                // Generate chapter HTML with content counts
+                echo $this->generateChapterHTMLWithContent($chapter_id, $chapter_title, $chapter_description, $chapter_duration, $chapter_order, $lesson_count, $quiz_count, $assignment_count, $chapter_contents);
+            }
+            ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Generate chapter HTML with content counts
+     * 
+     * @param int $chapter_id
+     * @param string $title
+     * @param string $description
+     * @param string $duration
+     * @param int $order
+     * @param int $lesson_count
+     * @param int $quiz_count
+     * @param int $assignment_count
+     * @param array $chapter_contents
+     * @return string
+     */
+    private function generateChapterHTMLWithContent(int $chapter_id, string $title, string $description, string $duration, int $order, int $lesson_count, int $quiz_count, int $assignment_count, array $chapter_contents): string
+    {
+        ob_start();
+        ?>
+        <div class="sikshya-chapter-card" id="chapter-<?php echo esc_attr($chapter_id); ?>" 
+             data-chapter-id="chapter-<?php echo esc_attr($chapter_id); ?>"
+             data-description="<?php echo esc_attr($description); ?>"
+             data-duration="<?php echo esc_attr($duration); ?>"
+             data-order="<?php echo esc_attr($order); ?>" draggable="true">
+            
+            <div class="sikshya-chapter-header" onclick="toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')">
+                <div class="sikshya-sortable-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="8" cy="6" r="1.5"></circle>
+                        <circle cx="16" cy="6" r="1.5"></circle>
+                        <circle cx="8" cy="12" r="1.5"></circle>
+                        <circle cx="16" cy="12" r="1.5"></circle>
+                        <circle cx="8" cy="18" r="1.5"></circle>
+                        <circle cx="16" cy="18" r="1.5"></circle>
+                    </svg>
+                </div>
+                <div class="sikshya-chapter-controls">
+                    <div class="sikshya-chapter-checkbox">
+                        <input type="checkbox" id="chapter-<?php echo esc_attr($chapter_id); ?>" class="sikshya-checkbox">
+                        <label for="chapter-<?php echo esc_attr($chapter_id); ?>"></label>
+                    </div>
+                    <div class="sikshya-chapter-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <div class="sikshya-chapter-number"><?php echo esc_html($order); ?></div>
+                </div>
+                
+                <div class="sikshya-chapter-info">
+                    <div class="sikshya-chapter-main">
+                        <h4 class="sikshya-chapter-title"><?php echo esc_html($title); ?></h4>
+                        <?php if (!empty($description)): ?>
+                            <p class="sikshya-chapter-description"><?php echo esc_html($description); ?></p>
+                        <?php endif; ?>
+                        <div class="sikshya-chapter-content-summary">
+                            <div class="sikshya-chapter-meta">
+                                <span class="sikshya-chapter-lessons"><span class="lesson-count"><?php echo esc_html($lesson_count); ?></span> lessons</span>
+                                <span class="sikshya-chapter-quizzes"><span class="quiz-count"><?php echo esc_html($quiz_count); ?></span> quizzes</span>
+                                <span class="sikshya-chapter-assignments"><span class="assignment-count"><?php echo esc_html($assignment_count); ?></span> assignments</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sikshya-chapter-actions">
+                    <button class="sikshya-btn-icon" onclick="event.stopPropagation(); editChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Edit Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon" onclick="event.stopPropagation(); deleteChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Delete Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                    <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="event.stopPropagation(); toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Toggle Chapter">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sikshya-chapter-content" id="content-chapter-<?php echo esc_attr($chapter_id); ?>">
+                <div class="sikshya-chapter-content-inner">
+                    <div class="sikshya-lesson-list">
+                        <?php if ($lesson_count + $quiz_count + $assignment_count === 0): ?>
+                            <div class="sikshya-chapter-empty">
+                                <div class="sikshya-chapter-empty-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                </div>
+                                <h4>No Lessons Yet</h4>
+                                <p>Add your first lesson to this chapter</p>
+                            </div>
+                        <?php else: ?>
+                            <?php
+                            // Display content items
+                            if (is_array($chapter_contents)) {
+                                foreach ($chapter_contents as $content_id) {
+                                    $content_post = get_post($content_id);
+                                    if ($content_post) {
+                                        $content_title = $content_post->post_title;
+                                        $content_description = $content_post->post_content;
+                                        $content_duration = get_post_meta($content_id, '_sikshya_duration', true);
+                                        $content_type = str_replace('sikshya_', '', $content_post->post_type);
+                                        
+                                        echo $this->generateContentHTML($content_id, $content_title, $content_description, $content_duration, $content_type);
+                                    }
+                                }
+                            }
+                            ?>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Add More Content -->
+                    <div class="sikshya-add-lesson">
+                        <button class="sikshya-add-lesson-btn" onclick="addContent('chapter-<?php echo esc_attr($chapter_id); ?>')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Content
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Handle load curriculum
+     */
+    public function handleLoadCurriculum(): void
+    {
+        try {
+            if (!$this->verifyNonce('sikshya_course_builder')) {
+                $this->sendError('Invalid nonce');
+                return;
+            }
+            
+            if (!$this->checkCapability()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
+            $course_id = $this->getCourseIdFromContext();
+            
+            if ($course_id === 0) {
+                $this->sendError('Invalid course ID');
+                return;
+            }
+            
+            // Load complete curriculum structure
+            $curriculum_html = $this->generateCurriculumHTML($course_id);
+            
+            $this->sendSuccess(['html' => $curriculum_html], 'Curriculum loaded successfully');
+            
+        } catch (\Exception $e) {
+            $this->logError('Load curriculum error', $e);
+            $this->sendError('Failed to load curriculum: ' . $e->getMessage());
+        }
     }
 
     /**

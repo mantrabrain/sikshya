@@ -442,12 +442,104 @@ class Admin
                 ]);
                 break;
             case 'sikshya-lms_page_sikshya-lessons':
-                wp_enqueue_script('sikshya-lesson-manager');
-                wp_enqueue_style('sikshya-lesson-manager');
+                // Enqueue list table assets for lessons page
+                wp_enqueue_style(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
+                    ['sikshya-admin'],
+                    SIKSHYA_VERSION
+                );
+                
+                wp_enqueue_script(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
+                    ['jquery', 'sikshya-admin'],
+                    SIKSHYA_VERSION,
+                    true
+                );
+
+                // Localize list table script
+                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
+                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
+                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
+                ]);
                 break;
             case 'sikshya-lms_page_sikshya-quizzes':
-                wp_enqueue_script('sikshya-quiz-manager');
-                wp_enqueue_style('sikshya-quiz-manager');
+                // Enqueue list table assets for quizzes page
+                wp_enqueue_style(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
+                    ['sikshya-admin'],
+                    SIKSHYA_VERSION
+                );
+                
+                wp_enqueue_script(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
+                    ['jquery', 'sikshya-admin'],
+                    SIKSHYA_VERSION,
+                    true
+                );
+
+                // Localize list table script
+                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
+                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
+                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
+                ]);
+                break;
+            case 'sikshya-lms_page_sikshya-students':
+                // Enqueue list table assets for students page
+                wp_enqueue_style(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
+                    ['sikshya-admin'],
+                    SIKSHYA_VERSION
+                );
+                
+                wp_enqueue_script(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
+                    ['jquery', 'sikshya-admin'],
+                    SIKSHYA_VERSION,
+                    true
+                );
+
+                // Localize list table script
+                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
+                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
+                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
+                ]);
+                break;
+            case 'sikshya-lms_page_sikshya-instructors':
+                // Enqueue list table assets for instructors page
+                wp_enqueue_style(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/css/list-table.css'),
+                    ['sikshya-admin'],
+                    SIKSHYA_VERSION
+                );
+                
+                wp_enqueue_script(
+                    'sikshya-admin-list-table',
+                    $this->plugin->getAssetUrl('admin/js/list-table.js'),
+                    ['jquery', 'sikshya-admin'],
+                    SIKSHYA_VERSION,
+                    true
+                );
+
+                // Localize list table script
+                wp_localize_script('sikshya-admin-list-table', 'sikshya_list_table', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
+                    'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
+                    'error_message' => __('An error occurred. Please try again.', 'sikshya'),
+                ]);
                 break;
             case 'sikshya_page_sikshya-reports':
                 wp_enqueue_script('sikshya-charts');

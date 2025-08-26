@@ -1441,3 +1441,396 @@
     border: 1px solid var(--sikshya-gray-200);
     margin: 0;
 }
+
+/* ===== LESSONS TABLE SPECIFIC STYLES ===== */
+/* Fix alignment for lesson title wrapper */
+.sikshya-lesson-title-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-3) !important;
+}
+
+.sikshya-lesson-thumbnail {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: var(--sikshya-gray-100) !important;
+    border-radius: var(--sikshya-radius-lg) !important;
+    color: var(--sikshya-gray-600) !important;
+}
+
+.sikshya-lesson-content {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.sikshya-lesson-content .row-title {
+    display: block !important;
+    font-weight: var(--sikshya-font-semibold) !important;
+    color: var(--sikshya-primary) !important;
+    text-decoration: none !important;
+    margin-bottom: var(--sikshya-space-1) !important;
+}
+
+.sikshya-lesson-content .row-title:hover {
+    color: var(--sikshya-gray-900) !important;
+    text-decoration: none !important;
+}
+
+.sikshya-lesson-duration {
+    font-size: var(--sikshya-text-sm) !important;
+    color: var(--sikshya-gray-500) !important;
+    font-weight: var(--sikshya-font-normal) !important;
+}
+
+/* Fix alignment for course info */
+.sikshya-course-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-course-info svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-course-info a {
+    color: var(--sikshya-gray-700) !important;
+    text-decoration: none !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+.sikshya-course-info a:hover {
+    color: var(--sikshya-primary) !important;
+    text-decoration: none !important;
+}
+
+/* Fix alignment for lesson type */
+.sikshya-lesson-type {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-lesson-type svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-lesson-type span {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+/* Fix alignment for duration wrapper */
+.sikshya-duration-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-duration-wrapper svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-duration-wrapper .sikshya-duration {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+/* Fix alignment for instructors */
+.sikshya-instructors {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--sikshya-space-1) !important;
+}
+
+.sikshya-instructor {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-instructor svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-instructor span {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+/* Remove borders from links */
+.sikshya-list-table-container a {
+    text-decoration: none !important;
+    border: none !important;
+}
+
+.sikshya-list-table-container a:hover {
+    text-decoration: none !important;
+    border: none !important;
+}
+
+/* Status badge styling */
+.sikshya-status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: var(--sikshya-space-1) var(--sikshya-space-3) !important;
+    border-radius: var(--sikshya-radius-full) !important;
+    font-size: var(--sikshya-text-xs) !important;
+    font-weight: var(--sikshya-font-semibold) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border: none !important;
+}
+
+.sikshya-status-badge.sikshya-status-publish {
+    background: var(--sikshya-success-bg) !important;
+    color: var(--sikshya-success) !important;
+}
+
+.sikshya-status-badge.sikshya-status-draft {
+    background: var(--sikshya-warning-bg) !important;
+    color: var(--sikshya-warning) !important;
+}
+
+.sikshya-status-badge.sikshya-status-pending {
+    background: var(--sikshya-info-bg) !important;
+    color: var(--sikshya-info) !important;
+}
+
+.sikshya-status-badge.sikshya-status-private {
+    background: var(--sikshya-gray-100) !important;
+    color: var(--sikshya-gray-600) !important;
+}
+
+/* ===== QUIZZES TABLE SPECIFIC STYLES ===== */
+.sikshya-quiz-title-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-3) !important;
+}
+
+.sikshya-quiz-thumbnail {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: var(--sikshya-gray-100) !important;
+    border-radius: var(--sikshya-radius-lg) !important;
+    color: var(--sikshya-gray-600) !important;
+}
+
+.sikshya-quiz-content {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.sikshya-quiz-content .row-title {
+    display: block !important;
+    font-weight: var(--sikshya-font-semibold) !important;
+    color: var(--sikshya-primary) !important;
+    text-decoration: none !important;
+    margin-bottom: var(--sikshya-space-1) !important;
+}
+
+.sikshya-quiz-content .row-title:hover {
+    color: var(--sikshya-gray-900) !important;
+    text-decoration: none !important;
+}
+
+.sikshya-questions-count {
+    font-size: var(--sikshya-text-sm) !important;
+    color: var(--sikshya-gray-500) !important;
+    font-weight: var(--sikshya-font-normal) !important;
+}
+
+.sikshya-quiz-type {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-quiz-type svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-quiz-type span {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+/* ===== STUDENTS TABLE SPECIFIC STYLES ===== */
+.sikshya-student-title-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-3) !important;
+}
+
+.sikshya-student-thumbnail {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: var(--sikshya-gray-100) !important;
+    border-radius: var(--sikshya-radius-lg) !important;
+    color: var(--sikshya-gray-600) !important;
+}
+
+.sikshya-student-content {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.sikshya-student-content .row-title {
+    display: block !important;
+    font-weight: var(--sikshya-font-semibold) !important;
+    color: var(--sikshya-primary) !important;
+    text-decoration: none !important;
+    margin-bottom: var(--sikshya-space-1) !important;
+}
+
+.sikshya-student-content .row-title:hover {
+    color: var(--sikshya-gray-900) !important;
+    text-decoration: none !important;
+}
+
+.sikshya-student-email {
+    font-size: var(--sikshya-text-sm) !important;
+    color: var(--sikshya-gray-500) !important;
+    font-weight: var(--sikshya-font-normal) !important;
+}
+
+.sikshya-courses-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-courses-info svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-courses-info span {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+.sikshya-progress-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-progress-wrapper svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-progress-wrapper .sikshya-progress {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+/* ===== INSTRUCTORS TABLE SPECIFIC STYLES ===== */
+.sikshya-instructor-title-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-3) !important;
+}
+
+.sikshya-instructor-thumbnail {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: var(--sikshya-gray-100) !important;
+    border-radius: var(--sikshya-radius-lg) !important;
+    color: var(--sikshya-gray-600) !important;
+}
+
+.sikshya-instructor-content {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.sikshya-instructor-content .row-title {
+    display: block !important;
+    font-weight: var(--sikshya-font-semibold) !important;
+    color: var(--sikshya-primary) !important;
+    text-decoration: none !important;
+    margin-bottom: var(--sikshya-space-1) !important;
+}
+
+.sikshya-instructor-content .row-title:hover {
+    color: var(--sikshya-gray-900) !important;
+    text-decoration: none !important;
+}
+
+.sikshya-instructor-email {
+    font-size: var(--sikshya-text-sm) !important;
+    color: var(--sikshya-gray-500) !important;
+    font-weight: var(--sikshya-font-normal) !important;
+}
+
+.sikshya-students-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-students-info svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-gray-500) !important;
+}
+
+.sikshya-students-info span {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+.sikshya-rating-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--sikshya-space-2) !important;
+}
+
+.sikshya-rating-wrapper svg {
+    flex-shrink: 0 !important;
+    color: var(--sikshya-warning) !important;
+}
+
+.sikshya-rating-wrapper .sikshya-rating {
+    color: var(--sikshya-gray-700) !important;
+    font-weight: var(--sikshya-font-medium) !important;
+}
+
+/* ===== STATUS BADGE COLORS FOR STUDENTS & INSTRUCTORS ===== */
+.sikshya-status-badge.sikshya-status-active {
+    background: var(--sikshya-success-bg) !important;
+    color: var(--sikshya-success) !important;
+}
+
+.sikshya-status-badge.sikshya-status-inactive {
+    background: var(--sikshya-gray-100) !important;
+    color: var(--sikshya-gray-600) !important;
+}
+
+.sikshya-status-badge.sikshya-status-pending {
+    background: var(--sikshya-info-bg) !important;
+    color: var(--sikshya-info) !important;
+}

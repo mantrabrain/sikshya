@@ -4,6 +4,7 @@ namespace Sikshya\Admin\Controllers;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\DataTable;
+use Sikshya\Admin\ListTable\InstructorsListTable;
 
 /**
  * Instructor Controller
@@ -45,125 +46,59 @@ class InstructorController
      */
     public function renderInstructorsPage(): void
     {
-        $dataTable = new DataTable($this->plugin, [
-            'id' => 'sikshya-instructors-table',
-            'title' => __('Instructors', 'sikshya'),
-            'description' => __('Manage your instructors', 'sikshya'),
-        ]);
+        // Create and prepare the list table
+        $list_table = new InstructorsListTable($this->plugin);
+        $list_table->prepare_items();
+        
+        // Render the page with proper Sikshya design
+        ?>
+        <div class="sikshya-dashboard">
+            <!-- Header -->
+            <div class="sikshya-header">
+                <div class="sikshya-header-title">
+                    <h1>
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <?php _e('Instructors', 'sikshya'); ?>
+                    </h1>
+                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+                </div>
+                <div class="sikshya-header-actions">
+                    <a href="<?php echo admin_url('admin.php?page=sikshya-add-course'); ?>" class="sikshya-btn sikshya-btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <?php _e('Add New Instructor', 'sikshya'); ?>
+                    </a>
+                </div>
+            </div>
 
-        // Add columns
-        $dataTable->addColumn('id', [
-            'title' => __('ID', 'sikshya'),
-            'sortable' => true,
-            'width' => '80px',
-        ]);
-
-        $dataTable->addColumn('name', [
-            'title' => __('Name', 'sikshya'),
-            'sortable' => true,
-            'searchable' => true,
-        ]);
-
-        $dataTable->addColumn('email', [
-            'title' => __('Email', 'sikshya'),
-            'sortable' => true,
-            'searchable' => true,
-        ]);
-
-        $dataTable->addColumn('courses_created', [
-            'title' => __('Courses Created', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('total_students', [
-            'title' => __('Total Students', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('rating', [
-            'title' => __('Rating', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('earnings', [
-            'title' => __('Total Earnings', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('joined_date', [
-            'title' => __('Joined Date', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('status', [
-            'title' => __('Status', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        // Add actions
-        $dataTable->addAction('view', [
-            'title' => __('View', 'sikshya'),
-            'url' => admin_url('admin.php?page=sikshya-view-instructor&id={id}'),
-            'class' => 'button button-small',
-        ]);
-
-        $dataTable->addAction('edit', [
-            'title' => __('Edit', 'sikshya'),
-            'url' => admin_url('admin.php?page=sikshya-edit-instructor&id={id}'),
-            'class' => 'button button-small',
-        ]);
-
-        $dataTable->addAction('delete', [
-            'title' => __('Delete', 'sikshya'),
-            'url' => '#',
-            'class' => 'button button-small button-link-delete',
-            'onclick' => 'sikshya.deleteInstructor({id})',
-        ]);
-
-        // Add bulk actions
-        $dataTable->addBulkAction('delete', [
-            'title' => __('Delete Selected', 'sikshya'),
-            'action' => 'sikshya_bulk_delete_instructors',
-        ]);
-
-        $dataTable->addBulkAction('approve', [
-            'title' => __('Approve Selected', 'sikshya'),
-            'action' => 'sikshya_bulk_approve_instructors',
-        ]);
-
-        $dataTable->addBulkAction('reject', [
-            'title' => __('Reject Selected', 'sikshya'),
-            'action' => 'sikshya_bulk_reject_instructors',
-        ]);
-
-        // Set filters
-        $dataTable->setFilters([
-            'status' => [
-                'type' => 'select',
-                'title' => __('Status', 'sikshya'),
-                'options' => [
-                    '' => __('All Statuses', 'sikshya'),
-                    'approved' => __('Approved', 'sikshya'),
-                    'pending' => __('Pending', 'sikshya'),
-                    'rejected' => __('Rejected', 'sikshya'),
-                    'suspended' => __('Suspended', 'sikshya'),
-                ],
-            ],
-            'rating' => [
-                'type' => 'select',
-                'title' => __('Rating', 'sikshya'),
-                'options' => [
-                    '' => __('All Ratings', 'sikshya'),
-                    '5' => __('5 Stars', 'sikshya'),
-                    '4' => __('4+ Stars', 'sikshya'),
-                    '3' => __('3+ Stars', 'sikshya'),
-                    '2' => __('2+ Stars', 'sikshya'),
-                    '1' => __('1+ Stars', 'sikshya'),
-                ],
-            ],
-        ]);
-
-        echo $dataTable->renderTable();
+            <div class="sikshya-main-content">
+                <div class="sikshya-content-card">
+                    <div class="sikshya-content-card-header">
+                        <div class="sikshya-content-card-header-left">
+                            <h3 class="sikshya-content-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <?php _e('Manage Instructors', 'sikshya'); ?>
+                            </h3>
+                            <p class="sikshya-content-card-subtitle"><?php _e('View and manage your course instructors', 'sikshya'); ?></p>
+                        </div>
+                        <div class="sikshya-content-card-header-right">
+                            <?php $this->display_status_filter_tabs(); ?>
+                        </div>
+                    </div>
+                    <div class="sikshya-content-card-body">
+                        <form method="post">
+                            <?php
+                            $list_table->display();
+                            ?>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
     }
 
     /**
@@ -267,5 +202,117 @@ class InstructorController
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
         }
+    }
+
+    /**
+     * Display status filter tabs
+     * 
+     * @return void
+     */
+    private function display_status_filter_tabs(): void
+    {
+        $current_status = $_GET['post_status'] ?? 'all';
+        $base_url = remove_query_arg(['post_status', 'paged']);
+        
+        $status_counts = $this->get_status_counts();
+        
+        echo '<ul class="subsubsub">';
+        
+        // All tab
+        $all_count = array_sum($status_counts);
+        $all_class = ($current_status === 'all') ? 'current' : '';
+        $all_url = $base_url;
+        echo '<li class="all">';
+        echo '<a href="' . esc_url($all_url) . '" class="' . esc_attr($all_class) . '"' . ($all_class ? ' aria-current="page"' : '') . '>';
+        echo esc_html__('All', 'sikshya') . ' <span class="count">(' . esc_html($all_count) . ')</span>';
+        echo '</a> |</li>';
+        
+        // Approved tab
+        if (isset($status_counts['approved'])) {
+            $approved_class = ($current_status === 'approved') ? 'current' : '';
+            $approved_url = add_query_arg('post_status', 'approved', $base_url);
+            echo '<li class="approved">';
+            echo '<a href="' . esc_url($approved_url) . '" class="' . esc_attr($approved_class) . '">';
+            echo esc_html__('Approved', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['approved']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        // Pending tab
+        if (isset($status_counts['pending'])) {
+            $pending_class = ($current_status === 'pending') ? 'current' : '';
+            $pending_url = add_query_arg('post_status', 'pending', $base_url);
+            echo '<li class="pending">';
+            echo '<a href="' . esc_url($pending_url) . '" class="' . esc_attr($pending_class) . '">';
+            echo esc_html__('Pending', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['pending']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        // Rejected tab
+        if (isset($status_counts['rejected'])) {
+            $rejected_class = ($current_status === 'rejected') ? 'current' : '';
+            $rejected_url = add_query_arg('post_status', 'rejected', $base_url);
+            echo '<li class="rejected">';
+            echo '<a href="' . esc_url($rejected_url) . '" class="' . esc_attr($rejected_class) . '">';
+            echo esc_html__('Rejected', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['rejected']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        // Suspended tab
+        if (isset($status_counts['suspended'])) {
+            $suspended_class = ($current_status === 'suspended') ? 'current' : '';
+            $suspended_url = add_query_arg('post_status', 'suspended', $base_url);
+            echo '<li class="suspended">';
+            echo '<a href="' . esc_url($suspended_url) . '" class="' . esc_attr($suspended_class) . '">';
+            echo esc_html__('Suspended', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['suspended']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        echo '</ul>';
+    }
+
+    /**
+     * Get status counts for filter tabs
+     *
+     * @return array
+     */
+    private function get_status_counts(): array
+    {
+        // For demo purposes, return dummy counts
+        return [
+            'all' => 8,
+            'approved' => 5,
+            'pending' => 2,
+            'rejected' => 1,
+            'suspended' => 0,
+        ];
+        
+        // TODO: Implement actual status counting
+        /*
+        global $wpdb;
+        
+        $counts = [
+            'all' => 0,
+            'approved' => 0,
+            'pending' => 0,
+            'rejected' => 0,
+            'suspended' => 0,
+        ];
+        
+        $results = $wpdb->get_results("
+            SELECT um_status.meta_value as status, COUNT(*) as count
+            FROM {$wpdb->users} u
+            LEFT JOIN {$wpdb->usermeta} um_status ON u.ID = um_status.user_id AND um_status.meta_key = '_sikshya_instructor_status'
+            WHERE u.ID IN (SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = '{$wpdb->prefix}capabilities' AND meta_value LIKE '%instructor%')
+            GROUP BY um_status.meta_value
+        ");
+        
+        foreach ($results as $result) {
+            $status = $result->status ?: 'pending';
+            $counts[$status] = $result->count;
+            $counts['all'] += $result->count;
+        }
+        
+        return $counts;
+        */
     }
 } 

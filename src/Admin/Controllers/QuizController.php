@@ -5,6 +5,7 @@ namespace Sikshya\Admin\Controllers;
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\DataTable;
 use Sikshya\Admin\Views\FormBuilder;
+use Sikshya\Admin\ListTable\QuizzesListTable;
 
 /**
  * Quiz Controller
@@ -46,106 +47,59 @@ class QuizController
      */
     public function renderQuizzesPage(): void
     {
-        $dataTable = new DataTable($this->plugin, [
-            'id' => 'sikshya-quizzes-table',
-            'title' => __('Quizzes', 'sikshya'),
-            'description' => __('Manage your quizzes', 'sikshya'),
-        ]);
+        // Create and prepare the list table
+        $list_table = new QuizzesListTable($this->plugin);
+        $list_table->prepare_items();
+        
+        // Render the page with proper Sikshya design
+        ?>
+        <div class="sikshya-dashboard">
+            <!-- Header -->
+            <div class="sikshya-header">
+                <div class="sikshya-header-title">
+                    <h1>
+                        <i class="fas fa-question-circle"></i>
+                        <?php _e('Quizzes', 'sikshya'); ?>
+                    </h1>
+                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+                </div>
+                <div class="sikshya-header-actions">
+                    <a href="<?php echo admin_url('admin.php?page=sikshya-add-course'); ?>" class="sikshya-btn sikshya-btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <?php _e('Add New Quiz', 'sikshya'); ?>
+                    </a>
+                </div>
+            </div>
 
-        // Add columns
-        $dataTable->addColumn('id', [
-            'title' => __('ID', 'sikshya'),
-            'sortable' => true,
-            'width' => '80px',
-        ]);
-
-        $dataTable->addColumn('title', [
-            'title' => __('Title', 'sikshya'),
-            'sortable' => true,
-            'searchable' => true,
-        ]);
-
-        $dataTable->addColumn('course', [
-            'title' => __('Course', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('questions', [
-            'title' => __('Questions', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('time_limit', [
-            'title' => __('Time Limit', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('passing_score', [
-            'title' => __('Passing Score', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('attempts', [
-            'title' => __('Attempts', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        $dataTable->addColumn('status', [
-            'title' => __('Status', 'sikshya'),
-            'sortable' => true,
-        ]);
-
-        // Add actions
-        $dataTable->addAction('edit', [
-            'title' => __('Edit', 'sikshya'),
-            'url' => admin_url('admin.php?page=sikshya-edit-quiz&id={id}'),
-            'class' => 'button button-small',
-        ]);
-
-        $dataTable->addAction('questions', [
-            'title' => __('Questions', 'sikshya'),
-            'url' => admin_url('admin.php?page=sikshya-quiz-questions&id={id}'),
-            'class' => 'button button-small',
-        ]);
-
-        $dataTable->addAction('delete', [
-            'title' => __('Delete', 'sikshya'),
-            'url' => '#',
-            'class' => 'button button-small button-link-delete',
-            'onclick' => 'sikshya.deleteQuiz({id})',
-        ]);
-
-        // Add bulk actions
-        $dataTable->addBulkAction('delete', [
-            'title' => __('Delete Selected', 'sikshya'),
-            'action' => 'sikshya_bulk_delete_quizzes',
-        ]);
-
-        $dataTable->addBulkAction('publish', [
-            'title' => __('Publish Selected', 'sikshya'),
-            'action' => 'sikshya_bulk_publish_quizzes',
-        ]);
-
-        // Set filters
-        $dataTable->setFilters([
-            'status' => [
-                'type' => 'select',
-                'title' => __('Status', 'sikshya'),
-                'options' => [
-                    '' => __('All Statuses', 'sikshya'),
-                    'draft' => __('Draft', 'sikshya'),
-                    'publish' => __('Published', 'sikshya'),
-                    'private' => __('Private', 'sikshya'),
-                ],
-            ],
-            'course' => [
-                'type' => 'select',
-                'title' => __('Course', 'sikshya'),
-                'options' => $this->getCoursesList(),
-            ],
-        ]);
-
-        echo $dataTable->renderTable();
+            <div class="sikshya-main-content">
+                <div class="sikshya-content-card">
+                    <div class="sikshya-content-card-header">
+                        <div class="sikshya-content-card-header-left">
+                            <h3 class="sikshya-content-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <?php _e('Manage Quizzes', 'sikshya'); ?>
+                            </h3>
+                            <p class="sikshya-content-card-subtitle"><?php _e('Create, edit, and manage your quizzes', 'sikshya'); ?></p>
+                        </div>
+                        <div class="sikshya-content-card-header-right">
+                            <?php $this->display_status_filter_tabs(); ?>
+                        </div>
+                    </div>
+                    <div class="sikshya-content-card-body">
+                        <form method="post">
+                            <?php
+                            $list_table->display();
+                            ?>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
     }
 
     /**
@@ -228,6 +182,116 @@ class QuizController
         ]);
 
         echo $formBuilder->renderForm();
+    }
+
+    /**
+     * Display status filter tabs
+     * 
+     * @return void
+     */
+    private function display_status_filter_tabs(): void
+    {
+        $current_status = $_GET['post_status'] ?? 'all';
+        $base_url = remove_query_arg(['post_status', 'paged']);
+        
+        $status_counts = $this->get_status_counts();
+        
+        echo '<ul class="subsubsub">';
+        
+        // All tab
+        $all_count = array_sum($status_counts);
+        $all_class = ($current_status === 'all') ? 'current' : '';
+        $all_url = $base_url;
+        echo '<li class="all">';
+        echo '<a href="' . esc_url($all_url) . '" class="' . esc_attr($all_class) . '"' . ($all_class ? ' aria-current="page"' : '') . '>';
+        echo esc_html__('All', 'sikshya') . ' <span class="count">(' . esc_html($all_count) . ')</span>';
+        echo '</a> |</li>';
+        
+        // Published tab
+        if (isset($status_counts['publish'])) {
+            $publish_class = ($current_status === 'publish') ? 'current' : '';
+            $publish_url = add_query_arg('post_status', 'publish', $base_url);
+            echo '<li class="publish">';
+            echo '<a href="' . esc_url($publish_url) . '" class="' . esc_attr($publish_class) . '">';
+            echo esc_html__('Published', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['publish']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        // Draft tab
+        if (isset($status_counts['draft'])) {
+            $draft_class = ($current_status === 'draft') ? 'current' : '';
+            $draft_url = add_query_arg('post_status', 'draft', $base_url);
+            echo '<li class="draft">';
+            echo '<a href="' . esc_url($draft_url) . '" class="' . esc_attr($draft_class) . '">';
+            echo esc_html__('Draft', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['draft']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        // Pending tab
+        if (isset($status_counts['pending'])) {
+            $pending_class = ($current_status === 'pending') ? 'current' : '';
+            $pending_url = add_query_arg('post_status', 'pending', $base_url);
+            echo '<li class="pending">';
+            echo '<a href="' . esc_url($pending_url) . '" class="' . esc_attr($pending_class) . '">';
+            echo esc_html__('Pending Review', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['pending']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        // Private tab
+        if (isset($status_counts['private'])) {
+            $private_class = ($current_status === 'private') ? 'current' : '';
+            $private_url = add_query_arg('post_status', 'private', $base_url);
+            echo '<li class="private">';
+            echo '<a href="' . esc_url($private_url) . '" class="' . esc_attr($private_class) . '">';
+            echo esc_html__('Private', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['private']) . ')</span>';
+            echo '</a> |</li>';
+        }
+        
+        echo '</ul>';
+    }
+
+    /**
+     * Get status counts for filter tabs
+     *
+     * @return array
+     */
+    private function get_status_counts(): array
+    {
+        // For demo purposes, return dummy counts
+        return [
+            'all' => 8,
+            'publish' => 5,
+            'draft' => 2,
+            'pending' => 1,
+            'private' => 0,
+        ];
+        
+        // TODO: Implement actual status counting
+        /*
+        global $wpdb;
+        
+        $counts = [
+            'all' => 0,
+            'publish' => 0,
+            'draft' => 0,
+            'pending' => 0,
+            'private' => 0,
+        ];
+        
+        $results = $wpdb->get_results("
+            SELECT post_status, COUNT(*) as count
+            FROM {$wpdb->posts}
+            WHERE post_type = 'sik_quiz'
+            GROUP BY post_status
+        ");
+        
+        foreach ($results as $result) {
+            $counts[$result->post_status] = $result->count;
+            $counts['all'] += $result->count;
+        }
+        
+        return $counts;
+        */
     }
 
     /**

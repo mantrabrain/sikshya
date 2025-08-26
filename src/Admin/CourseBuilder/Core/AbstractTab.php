@@ -163,15 +163,15 @@ abstract class AbstractTab implements TabInterface
                 
                 // Sanitize the value using field configuration
                 $sanitized_value = $this->sanitizeField($field_id, $value, $field_config);
-                
-                // Save to post meta with _sikshya_ prefix
-                $meta_key = '_sikshya_' . $field_id;
+            
+            // Save to post meta with _sikshya_ prefix
+            $meta_key = '_sikshya_' . $field_id;
                 $result = update_post_meta($course_id, $meta_key, $sanitized_value);
-                
+            
                 // update_post_meta returns false if value didn't change, but that's not a failure
                 // We only consider it a failure if the post doesn't exist or we don't have permission
                 if ($result === false && !current_user_can('edit_post', $course_id)) {
-                    $success = false;
+                $success = false;
                 }
             }
         }
@@ -238,15 +238,15 @@ abstract class AbstractTab implements TabInterface
             $section_fields = $section_config['fields'] ?? [];
             
             foreach ($section_fields as $field_id => $field_config) {
-                $meta_key = '_sikshya_' . $field_id;
-                $value = get_post_meta($course_id, $meta_key, true);
-                
-                // Set default value if empty
-                if (empty($value) && isset($field_config['default'])) {
-                    $value = $field_config['default'];
-                }
-                
-                $data[$field_id] = $value;
+            $meta_key = '_sikshya_' . $field_id;
+            $value = get_post_meta($course_id, $meta_key, true);
+            
+            // Set default value if empty
+            if (empty($value) && isset($field_config['default'])) {
+                $value = $field_config['default'];
+            }
+            
+            $data[$field_id] = $value;
             }
         }
         
@@ -577,7 +577,7 @@ abstract class AbstractTab implements TabInterface
                 </div>',
                 $field_html,
                 $description_html
-            );
+                );
         }
         
         return sprintf(

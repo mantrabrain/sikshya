@@ -89,6 +89,151 @@
         },
 
         /**
+         * Save content (lesson, quiz, assignment)
+         */
+        saveContent: function(contentType, formData, callback) {
+            const self = this;
+            
+            // Create content first
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'sikshya_create_content',
+                    nonce: sikshya_ajax.nonce,
+                    type: contentType,
+                    title: formData.title,
+                    description: formData.description || '',
+                    duration: formData.duration || ''
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Content created successfully:', response);
+                        
+                        // Link content to chapter
+                        self.linkContentToChapter(response.data.content_id, function(success, linkResponse) {
+                            if (success) {
+                                // Reload curriculum to show updated content
+                                self.reloadCurriculum(function(reloadSuccess, reloadResponse) {
+                                    if (callback) callback(reloadSuccess, reloadResponse);
+                                });
+                            } else {
+                                if (callback) callback(false, linkResponse);
+                            }
+                        });
+                    } else {
+                        console.error('Failed to create content:', response);
+                        if (callback) callback(false, response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error creating content:', error);
+                    if (callback) callback(false, { message: 'Network error creating content' });
+                }
+            });
+        },
+
+        /**
+         * Link content to chapter
+         */
+        linkContentToChapter: function(contentId, callback) {
+            const self = this;
+            
+            // Get current chapter ID
+            const currentChapterId = this.getCurrentChapterId();
+            
+            if (!currentChapterId) {
+                console.error('No chapter selected for content');
+                if (callback) callback(false, { message: 'No chapter selected' });
+                return;
+            }
+            
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'sikshya_link_content_to_chapter',
+                    nonce: sikshya_ajax.nonce,
+                    content_id: contentId,
+                    chapter_id: currentChapterId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Content linked to chapter successfully:', response);
+                        if (callback) callback(true, response);
+                    } else {
+                        console.error('Failed to link content to chapter:', response);
+                        if (callback) callback(false, response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error linking content:', error);
+                    if (callback) callback(false, { message: 'Network error linking content' });
+                }
+            });
+        },
+
+        /**
+         * Get current chapter ID
+         */
+        getCurrentChapterId: function() {
+            // Try to get from global variable
+            if (window.currentChapterId) {
+                return window.currentChapterId;
+            }
+            
+            // Try to get from active chapter
+            const activeChapter = document.querySelector('.sikshya-chapter-card.active');
+            if (activeChapter) {
+                return activeChapter.id;
+            }
+            
+            // Try to get first chapter
+            const firstChapter = document.querySelector('.sikshya-chapter-card');
+            if (firstChapter) {
+                return firstChapter.id;
+            }
+            
+            return null;
+        },
+
+        /**
+         * Reload curriculum via AJAX
+         */
+        reloadCurriculum: function(callback) {
+            const self = this;
+            
+            $.ajax({
+                url: sikshya_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'sikshya_load_curriculum',
+                    nonce: sikshya_ajax.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Curriculum reloaded successfully:', response);
+                        
+                        // Replace the curriculum content
+                        const curriculumContainer = document.querySelector('.sikshya-curriculum-builder');
+                        if (curriculumContainer) {
+                            curriculumContainer.innerHTML = response.data.html;
+                        }
+                        
+                        if (callback) callback(true, response);
+                    } else {
+                        console.error('Failed to reload curriculum:', response);
+                        if (callback) callback(false, response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error reloading curriculum:', error);
+                    if (callback) callback(false, { message: 'Network error reloading curriculum' });
+                }
+            });
+        },
+
+        /**
          * Handle successful save
          */
         handleSaveSuccess: function(response) {
