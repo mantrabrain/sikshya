@@ -3618,9 +3618,6 @@ body .sikshya-modal-overlay {
 
 /* Curriculum Builder Container */
 .sikshya-curriculum-builder {
-    background: var(--sikshya-white);
-    border-radius: var(--sikshya-radius-xl);
-    box-shadow: var(--sikshya-shadow-sm);
     overflow: hidden;
     margin-bottom: var(--sikshya-space-8);
 }
@@ -3789,7 +3786,7 @@ body .sikshya-modal-overlay {
 ======================================== */
 
 .sikshya-curriculum-items {
-    background: #ffffff;
+    background: transparent;
     min-height: 200px;
     position: relative;
     transition: all 0.3s ease;
@@ -3907,14 +3904,11 @@ body .sikshya-modal-overlay {
     transform: scale(1.05);
 }
 
-.sikshya-chapter-card:last-child {
-    margin-bottom: 0;
-}
+
 
 .sikshya-chapter-card:hover {
     background: #ffffff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
     border-color: #d1d5db;
 }
 

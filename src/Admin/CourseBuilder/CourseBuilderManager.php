@@ -180,6 +180,10 @@ class CourseBuilderManager
                     error_log('Sikshya: No course_id provided, using empty data array for tab: ' . $tab->getId());
                     $data = [];
                 }
+                
+                // Add course_id to data array for tabs that need it
+                $data['course_id'] = $course_id;
+                
                 error_log('Sikshya: About to render tab ' . $tab->getId() . ' with data: ' . print_r($data, true));
                 echo $tab->render($data, $active_tab);
                 ?>

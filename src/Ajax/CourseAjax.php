@@ -53,6 +53,8 @@ class CourseAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_create_content', [$this, 'handleCreateContent']);
         add_action('wp_ajax_sikshya_link_content_to_chapter', [$this, 'handleLinkContentToChapter']);
         add_action('wp_ajax_sikshya_load_curriculum', [$this, 'handleLoadCurriculum']);
+        add_action('wp_ajax_sikshya_load_chapter_data', [$this, 'handleLoadChapterData']);
+        add_action('wp_ajax_sikshya_update_chapter', [$this, 'handleUpdateChapter']);
         
 
     }
@@ -379,6 +381,8 @@ class CourseAjax extends AjaxAbstract
             // Load specific modal template based on type
             if ($modal_type === 'chapter') {
                 $template = $this->loadChapterModalTemplate($chapter_order);
+            } elseif ($modal_type === 'edit-chapter') {
+                $template = $this->loadEditChapterModalTemplate();
             } elseif ($modal_type === 'content-type') {
                 $template = $this->loadContentTypeModalTemplate();
             } else {
@@ -454,7 +458,7 @@ class CourseAjax extends AjaxAbstract
             $chapter_id = wp_insert_post([
                 'post_title' => $title,
                 'post_content' => $description,
-                'post_type' => 'sikshya_chapter',
+                'post_type' => PostTypes::CHAPTER,
                 'post_status' => 'publish',
                 'post_parent' => $course_id,
             ]);
@@ -511,7 +515,23 @@ class CourseAjax extends AjaxAbstract
             }
             
             // Determine post type based on content type
-            $post_type = 'sikshya_' . $content_type;
+            $post_type = 'sik_' . $content_type;
+            
+            // Map content types to PostTypes constants
+            switch ($content_type) {
+                case 'lesson':
+                    $post_type = PostTypes::LESSON;
+                    break;
+                case 'quiz':
+                    $post_type = PostTypes::QUIZ;
+                    break;
+                case 'assignment':
+                    $post_type = PostTypes::ASSIGNMENT;
+                    break;
+                default:
+                    $post_type = PostTypes::LESSON; // Default to lesson
+                    break;
+            }
             
             // Create content post (no parent - content is independent)
             $content_id = wp_insert_post([
@@ -841,6 +861,74 @@ class CourseAjax extends AjaxAbstract
     }
 
     /**
+     * Load edit chapter modal template
+     * 
+     * @return string
+     */
+    private function loadEditChapterModalTemplate(): string
+    {
+        ob_start();
+        ?>
+        <div class="sikshya-modal-overlay">
+            <div class="sikshya-modal">
+                <div class="sikshya-modal-header">
+                    <div class="sikshya-modal-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit Chapter
+                    </div>
+                    <div class="sikshya-modal-subtitle">Update your chapter information</div>
+                    <button type="button" class="sikshya-modal-close" onclick="closeModal(this.closest('.sikshya-modal-overlay'))">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="sikshya-modal-body">
+                    <form class="sikshya-form">
+                        <input type="hidden" name="chapter_id" value="">
+                        
+                        <div class="sikshya-form-group">
+                            <label for="title" class="sikshya-form-label">Chapter Title *</label>
+                            <input type="text" id="title" name="title" class="sikshya-form-input" placeholder="Enter chapter title" required>
+                        </div>
+                        
+                        <div class="sikshya-form-group">
+                            <label for="description" class="sikshya-form-label">Description</label>
+                            <textarea id="description" name="description" class="sikshya-form-textarea" rows="3" placeholder="Enter chapter description"></textarea>
+                        </div>
+                        
+                        <div class="sikshya-form-row">
+                            <div class="sikshya-form-group">
+                                <label for="duration" class="sikshya-form-label">Duration (hours)</label>
+                                <input type="number" id="duration" name="duration" class="sikshya-form-input" min="0" step="0.5" placeholder="0">
+                            </div>
+                            
+                            <div class="sikshya-form-group">
+                                <label for="order" class="sikshya-form-label">Order</label>
+                                <input type="number" id="order" name="order" class="sikshya-form-input" min="1" placeholder="1">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="sikshya-modal-footer">
+                    <button type="button" class="sikshya-btn sikshya-btn-secondary" onclick="closeModal(this.closest('.sikshya-modal-overlay'))">
+                        Cancel
+                    </button>
+                    <button type="button" class="sikshya-btn sikshya-btn-primary">
+                        Update Chapter
+                    </button>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
      * Load content type modal template
      * 
      * @return string
@@ -1012,19 +1100,26 @@ class CourseAjax extends AjaxAbstract
         // Try to get from POST data first (for AJAX requests)
         $course_id = intval($this->getPostData('course_id', 0));
         
+        error_log('Sikshya: getCourseIdFromContext - POST course_id: ' . $course_id);
+        
         if ($course_id > 0) {
+            error_log('Sikshya: getCourseIdFromContext - returning POST course_id: ' . $course_id);
             return $course_id;
         }
         
         // Try to get from URL parameter
         $course_id = intval($_GET['course_id'] ?? 0);
         
+        error_log('Sikshya: getCourseIdFromContext - GET course_id: ' . $course_id);
+        
         if ($course_id > 0) {
+            error_log('Sikshya: getCourseIdFromContext - returning GET course_id: ' . $course_id);
             return $course_id;
         }
         
         // Try to get from session or other context
         // For now, return 0 if not found
+        error_log('Sikshya: getCourseIdFromContext - no course_id found, returning 0');
         return 0;
     }
 
@@ -1275,9 +1370,11 @@ class CourseAjax extends AjaxAbstract
      */
     private function generateCurriculumHTML(int $course_id): string
     {
+        error_log('Sikshya: generateCurriculumHTML called for course_id: ' . $course_id);
+        
         // Get all chapters for this course
         $chapters = get_posts([
-            'post_type' => 'sikshya_chapter',
+            'post_type' => PostTypes::CHAPTER,
             'post_parent' => $course_id,
             'post_status' => 'publish',
             'numberposts' => -1,
@@ -1286,7 +1383,10 @@ class CourseAjax extends AjaxAbstract
             'order' => 'ASC'
         ]);
         
+        error_log('Sikshya: Found ' . count($chapters) . ' chapters for course_id: ' . $course_id);
+        
         if (empty($chapters)) {
+            error_log('Sikshya: No chapters found, returning empty state');
             // Return empty state
             ob_start();
             ?>
@@ -1317,6 +1417,8 @@ class CourseAjax extends AjaxAbstract
             return ob_get_clean();
         }
         
+        error_log('Sikshya: Generating curriculum HTML for ' . count($chapters) . ' chapters');
+        
         ob_start();
         ?>
         <div class="sikshya-curriculum-items" id="curriculum-items">
@@ -1328,28 +1430,36 @@ class CourseAjax extends AjaxAbstract
                 $chapter_order = get_post_meta($chapter_id, '_sikshya_order', true) ?: 1;
                 $chapter_duration = get_post_meta($chapter_id, '_sikshya_duration', true);
                 
+                error_log('Sikshya: Processing chapter: ' . $chapter_id . ' - ' . $chapter_title);
+                
                 // Get content counts
                 $chapter_contents = get_post_meta($chapter_id, '_sikshya_contents', true);
+                
+                // Ensure chapter_contents is always an array
+                if (!is_array($chapter_contents)) {
+                    $chapter_contents = [];
+                }
+                
                 $lesson_count = 0;
                 $quiz_count = 0;
                 $assignment_count = 0;
                 
-                if (is_array($chapter_contents)) {
-                    foreach ($chapter_contents as $content_id) {
-                        $content_post_type = get_post_type($content_id);
-                        switch ($content_post_type) {
-                            case 'sikshya_lesson':
-                                $lesson_count++;
-                                break;
-                            case 'sikshya_quiz':
-                                $quiz_count++;
-                                break;
-                            case 'sikshya_assignment':
-                                $assignment_count++;
-                                break;
-                        }
+                foreach ($chapter_contents as $content_id) {
+                    $content_post_type = get_post_type($content_id);
+                    switch ($content_post_type) {
+                        case PostTypes::LESSON:
+                            $lesson_count++;
+                            break;
+                        case PostTypes::QUIZ:
+                            $quiz_count++;
+                            break;
+                        case PostTypes::ASSIGNMENT:
+                            $assignment_count++;
+                            break;
                     }
                 }
+                
+                error_log('Sikshya: Chapter ' . $chapter_id . ' has ' . $lesson_count . ' lessons, ' . $quiz_count . ' quizzes, ' . $assignment_count . ' assignments');
                 
                 // Generate chapter HTML with content counts
                 echo $this->generateChapterHTMLWithContent($chapter_id, $chapter_title, $chapter_description, $chapter_duration, $chapter_order, $lesson_count, $quiz_count, $assignment_count, $chapter_contents);
@@ -1357,7 +1467,9 @@ class CourseAjax extends AjaxAbstract
             ?>
         </div>
         <?php
-        return ob_get_clean();
+        $html = ob_get_clean();
+        error_log('Sikshya: Generated curriculum HTML length: ' . strlen($html));
+        return $html;
     }
 
     /**
@@ -1466,7 +1578,7 @@ class CourseAjax extends AjaxAbstract
                                         $content_title = $content_post->post_title;
                                         $content_description = $content_post->post_content;
                                         $content_duration = get_post_meta($content_id, '_sikshya_duration', true);
-                                        $content_type = str_replace('sikshya_', '', $content_post->post_type);
+                                        $content_type = str_replace('sik_', '', $content_post->post_type);
                                         
                                         echo $this->generateContentHTML($content_id, $content_title, $content_description, $content_duration, $content_type);
                                     }
@@ -1510,6 +1622,8 @@ class CourseAjax extends AjaxAbstract
 
             $course_id = $this->getCourseIdFromContext();
             
+            error_log('Sikshya: Loading curriculum for course_id: ' . $course_id);
+            
             if ($course_id === 0) {
                 $this->sendError('Invalid course ID');
                 return;
@@ -1518,11 +1632,133 @@ class CourseAjax extends AjaxAbstract
             // Load complete curriculum structure
             $curriculum_html = $this->generateCurriculumHTML($course_id);
             
+            error_log('Sikshya: Generated curriculum HTML length: ' . strlen($curriculum_html));
+            
             $this->sendSuccess(['html' => $curriculum_html], 'Curriculum loaded successfully');
             
         } catch (\Exception $e) {
             $this->logError('Load curriculum error', $e);
             $this->sendError('Failed to load curriculum: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle load chapter data
+     */
+    public function handleLoadChapterData(): void
+    {
+        try {
+            if (!$this->verifyNonce('sikshya_course_builder')) {
+                wp_send_json_error(['message' => 'Invalid nonce']);
+                return;
+            }
+            
+            if (!$this->checkCapability()) {
+                wp_send_json_error(['message' => 'Insufficient permissions']);
+                return;
+            }
+
+            $chapter_id = intval($this->getPostData('chapter_id', 0));
+            
+            error_log('Sikshya: handleLoadChapterData called with chapter_id: ' . $chapter_id);
+            
+            if ($chapter_id <= 0) {
+                error_log('Sikshya: Invalid chapter ID: ' . $chapter_id);
+                wp_send_json_error(['message' => 'Invalid chapter ID']);
+                return;
+            }
+        
+        // Get chapter data
+        $chapter = get_post($chapter_id);
+        error_log('Sikshya: Chapter post retrieved: ' . ($chapter ? 'YES' : 'NO'));
+        
+        if (!$chapter || $chapter->post_type !== PostTypes::CHAPTER) {
+            error_log('Sikshya: Chapter not found or wrong post type. Post type: ' . ($chapter ? $chapter->post_type : 'NULL'));
+            wp_send_json_error(['message' => 'Chapter not found']);
+            return;
+        }
+        
+        // Get chapter meta data
+        $duration = get_post_meta($chapter_id, '_sikshya_duration', true);
+        $order = get_post_meta($chapter_id, '_sikshya_order', true);
+        
+        error_log('Sikshya: Chapter meta data - duration: ' . $duration . ', order: ' . $order);
+        
+        $chapter_data = [
+            'id' => $chapter_id,
+            'title' => $chapter->post_title,
+            'description' => $chapter->post_content,
+            'duration' => $duration ?: '',
+            'order' => $order ?: 1,
+        ];
+        
+        error_log('Sikshya: Chapter data prepared: ' . print_r($chapter_data, true));
+        
+        $this->sendSuccess($chapter_data);
+        
+        } catch (\Exception $e) {
+            $this->logError('Load chapter data error', $e);
+            $this->sendError('Failed to load chapter data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle update chapter
+     */
+    public function handleUpdateChapter(): void
+    {
+        try {
+            if (!$this->verifyNonce('sikshya_course_builder')) {
+                $this->sendError('Invalid nonce');
+                return;
+            }
+            
+            if (!$this->checkCapability()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
+            $chapter_id = intval($this->getPostData('chapter_id', 0));
+            $title = sanitize_text_field($this->getPostData('title', ''));
+            $description = sanitize_textarea_field($this->getPostData('description', ''));
+            $duration = sanitize_text_field($this->getPostData('duration', ''));
+            $order = intval($this->getPostData('order', 1));
+            
+            if ($chapter_id <= 0) {
+                $this->sendError('Invalid chapter ID');
+                return;
+            }
+            
+            if (empty($title)) {
+                $this->sendError('Chapter title is required');
+                return;
+            }
+            
+            // Update chapter post
+            $update_result = wp_update_post([
+                'ID' => $chapter_id,
+                'post_title' => $title,
+                'post_content' => $description,
+                'post_type' => PostTypes::CHAPTER,
+            ]);
+            
+            if (is_wp_error($update_result)) {
+                $this->sendError('Failed to update chapter: ' . $update_result->get_error_message());
+                return;
+            }
+            
+            // Update meta fields
+            update_post_meta($chapter_id, '_sikshya_duration', $duration);
+            update_post_meta($chapter_id, '_sikshya_order', $order);
+            
+            $this->sendSuccess([
+                'message' => 'Chapter updated successfully',
+                'chapter_id' => $chapter_id
+            ]);
+            
+        } catch (\Exception $e) {
+            $this->logError('Update chapter error', $e);
+            $this->sendError('Failed to update chapter: ' . $e->getMessage());
         }
     }
 
@@ -1535,7 +1771,7 @@ class CourseAjax extends AjaxAbstract
     private function getContentTypeIcon(string $content_type): string
     {
         $icons = [
-            'lesson' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>',
+            'lesson' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253"/></svg>',
             'quiz' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
             'assignment' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
         ];

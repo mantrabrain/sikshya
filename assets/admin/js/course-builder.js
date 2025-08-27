@@ -348,6 +348,57 @@ function saveChapter() {
     const courseIdField = document.querySelector('input[name="course_id"]');
     const courseId = courseIdField ? parseInt(courseIdField.value) || 0 : 0;
     
+    console.log('Sikshya: saveChapter called with courseId:', courseId);
+    
+    // If course_id is 0, we need to save the course first
+    if (courseId === 0) {
+        console.log('Sikshya: Course ID is 0, saving course first...');
+        
+        // Get basic course data from the form
+        const courseTitle = document.querySelector('input[name="title"]')?.value || 'New Course';
+        const courseDescription = document.querySelector('textarea[name="description"]')?.value || '';
+        
+        console.log('Sikshya: Course data to save:', { title: courseTitle, description: courseDescription });
+        
+        // Save course as draft first
+        sikshyaAjax('sikshya_course_builder_save', {
+            title: courseTitle,
+            description: courseDescription,
+            course_id: 0,
+            course_status: 'draft'
+        }, function(data) {
+            console.log('Sikshya: Course save response:', data);
+            
+            if (data && data.course_id) {
+                console.log('Sikshya: Course saved successfully with ID:', data.course_id);
+                
+                // Update the course_id in the form
+                if (courseIdField) {
+                    courseIdField.value = data.course_id;
+                }
+                
+                // Update URL to include course_id
+                const url = new URL(window.location);
+                url.searchParams.set('course_id', data.course_id);
+                window.history.replaceState({}, '', url.toString());
+                
+                // Now create the chapter with the new course_id
+                createChapterWithCourseId(data.course_id, title, description, duration, order);
+            } else {
+                console.error('Sikshya: Failed to save course:', data);
+                alert('Failed to save course. Please try again.');
+            }
+        });
+    } else {
+        console.log('Sikshya: Course already exists, creating chapter directly with courseId:', courseId);
+        // Course already exists, create chapter directly
+        createChapterWithCourseId(courseId, title, description, duration, order);
+    }
+}
+
+function createChapterWithCourseId(courseId, title, description, duration, order) {
+    console.log('Sikshya: Creating chapter with courseId:', courseId, 'title:', title);
+    
     sikshyaAjax('sikshya_create_chapter', {
         title: title,
         description: description,
@@ -355,7 +406,7 @@ function saveChapter() {
         order: order,
         course_id: courseId
     }, function(data) {
-        console.log('Chapter creation response data:', data);
+        console.log('Sikshya: Chapter creation response data:', data);
         
         if (data && data.html && data.chapter_id) {
             // Add chapter to curriculum
@@ -373,7 +424,7 @@ function saveChapter() {
             document.getElementById('chapter-duration').value = '';
             document.getElementById('chapter-order').value = chapterCount + 2;
         } else {
-            console.error('Failed to create chapter:', data);
+            console.error('Sikshya: Failed to create chapter:', data);
             alert('Failed to create chapter. Please try again.');
         }
     });
@@ -386,7 +437,30 @@ function addChapterToCurriculum(html, chapterId) {
     // Hide empty state and show existing curriculum structure
     showCurriculumItems();
     
-    const curriculumItems = document.getElementById('curriculum-items');
+    // Try to find curriculum items container
+    let curriculumItems = document.getElementById('curriculum-items');
+    
+    // If curriculum-items doesn't exist, we need to create it
+    if (!curriculumItems) {
+        console.log('Curriculum items container not found, creating it...');
+        
+        // Find the curriculum builder container
+        const curriculumBuilder = document.querySelector('.sikshya-curriculum-builder');
+        if (curriculumBuilder) {
+            // Create the curriculum-items container
+            curriculumItems = document.createElement('div');
+            curriculumItems.id = 'curriculum-items';
+            curriculumItems.className = 'sikshya-curriculum-items';
+            
+            // Insert it into the curriculum builder
+            curriculumBuilder.appendChild(curriculumItems);
+            console.log('Created curriculum-items container');
+        } else {
+            console.error('Curriculum builder container not found!');
+            return;
+        }
+    }
+    
     console.log('Curriculum items container:', curriculumItems);
     
     if (curriculumItems) {
@@ -434,30 +508,9 @@ function addChapterToCurriculum(html, chapterId) {
             
             // Add mouse down event to test responsiveness
             newChapter.addEventListener('mousedown', function(e) {
-                console.log('Mouse down on new chapter');
-                if (e.target.closest('.sikshya-sortable-icon')) {
-                    console.log('Mouse down on sortable icon of new chapter');
-                }
+                console.log('Chapter mousedown event triggered:', e.target);
             });
-            
-            // Also add a click handler to test if the element is responsive
-            newChapter.addEventListener('click', function(e) {
-                if (e.target.closest('.sikshya-sortable-icon')) {
-                    console.log('Sortable icon clicked on new chapter');
-                }
-            });
-        } else {
-            console.error('Could not find the newly added chapter!');
         }
-        
-        // Test draggable status after a short delay
-        setTimeout(() => {
-            const allChapters = document.querySelectorAll('.sikshya-chapter-card');
-            console.log('Total chapters after adding:', allChapters.length);
-            allChapters.forEach((chapter, index) => {
-                console.log(`Chapter ${index + 1} (${chapter.id}) draggable:`, chapter.draggable);
-            });
-        }, 500);
     } else {
         console.error('Curriculum items container not found!');
     }
@@ -592,87 +645,158 @@ function toggleChapter(chapterId) {
 
 
 function editChapter(chapterId) {
-    const chapter = document.getElementById(chapterId);
-    const titleElement = chapter.querySelector('.sikshya-chapter-title');
-    const currentTitle = titleElement.textContent.trim();
-    const currentDescription = chapter.dataset.description || '';
-    const currentDuration = chapter.dataset.duration || '';
-    const currentOrder = chapter.dataset.order || '';
+    console.log('editChapter called with chapterId:', chapterId);
     
-    // Load chapter edit modal
-    sikshyaAjax('sikshya_load_modal_template', {
-        modal_type: 'chapter',
-        chapter_order: currentOrder || chapterCount + 1
+    // Extract the numeric ID from the chapter ID (e.g., "chapter-123" -> 123)
+    const numericId = chapterId.replace('chapter-', '');
+    console.log('Numeric chapter ID:', numericId);
+    
+    // Load chapter data via AJAX
+    sikshyaAjax('sikshya_load_chapter_data', {
+        chapter_id: numericId
     }, function(data) {
-        document.body.insertAdjacentHTML('beforeend', data.html);
-        const modal = document.querySelector('.sikshya-modal-overlay');
-        openModal(modal);
+        console.log('Chapter data loaded:', data);
         
-        // Populate form with current data
-        setTimeout(() => {
-            document.getElementById('chapter-title').value = currentTitle;
-            document.getElementById('chapter-description').value = currentDescription;
-            document.getElementById('chapter-duration').value = currentDuration;
-            document.getElementById('chapter-order').value = currentOrder;
+        if (data && data.success) {
+            const chapterData = data.data;
+            console.log('Chapter data object:', chapterData);
+            console.log('Chapter title:', chapterData.title);
+            console.log('Chapter description:', chapterData.description);
+            console.log('Chapter duration:', chapterData.duration);
+            console.log('Chapter order:', chapterData.order);
             
-            // Update modal title and button
-            const modalTitle = modal.querySelector('.sikshya-modal-title');
-            modalTitle.innerHTML = '<i class="fas fa-edit"></i> Edit Chapter';
-            
-            const modalSubtitle = modal.querySelector('.sikshya-modal-subtitle');
-            modalSubtitle.textContent = 'Update your chapter information';
-            
-            const saveButton = modal.querySelector('.sikshya-modal-footer .sikshya-btn-primary');
-            saveButton.textContent = 'Update Chapter';
-            saveButton.onclick = function() { updateChapter(chapterId); };
-        }, 100);
+            // Load the edit modal template
+            sikshyaAjax('sikshya_load_modal_template', {
+                modal_type: 'edit-chapter'
+            }, function(modalData) {
+                console.log('Modal template loaded:', modalData);
+                
+                if (modalData && modalData.html) {
+                    // Insert modal HTML
+                    document.body.insertAdjacentHTML('beforeend', modalData.html);
+                    
+                    // Get the modal
+                    const modal = document.querySelector('.sikshya-modal-overlay');
+                    console.log('Modal element found:', modal);
+                    
+                    if (modal) {
+                        // Add a small delay to ensure modal is fully rendered
+                        setTimeout(() => {
+                            // Populate form fields with chapter data
+                            const titleField = modal.querySelector('input[name="title"]');
+                            const descriptionField = modal.querySelector('textarea[name="description"]');
+                            const durationField = modal.querySelector('input[name="duration"]');
+                            const orderField = modal.querySelector('input[name="order"]');
+                            
+                            console.log('Form fields found:', {
+                                titleField: titleField,
+                                descriptionField: descriptionField,
+                                durationField: durationField,
+                                orderField: orderField
+                            });
+                            
+                            if (titleField) {
+                                titleField.value = chapterData.title || '';
+                                console.log('Title field populated with:', titleField.value);
+                            }
+                            if (descriptionField) {
+                                descriptionField.value = chapterData.description || '';
+                                console.log('Description field populated with:', descriptionField.value);
+                            }
+                            if (durationField) {
+                                durationField.value = chapterData.duration || '';
+                                console.log('Duration field populated with:', durationField.value);
+                            }
+                            if (orderField) {
+                                orderField.value = chapterData.order || '';
+                                console.log('Order field populated with:', orderField.value);
+                            }
+                            
+                            // Store chapter ID for save operation
+                            const chapterIdField = modal.querySelector('input[name="chapter_id"]');
+                            if (chapterIdField) {
+                                chapterIdField.value = numericId;
+                                console.log('Chapter ID field populated with:', chapterIdField.value);
+                            }
+                            
+                            // Set up save button handler
+                            const saveButton = modal.querySelector('.sikshya-btn-primary');
+                            if (saveButton) {
+                                saveButton.onclick = function() {
+                                    updateChapter(numericId);
+                                };
+                                console.log('Save button handler set up');
+                            } else {
+                                console.error('Save button not found in modal');
+                            }
+                        }, 100); // 100ms delay
+                        
+                        // Open the modal
+                        openModal(modal);
+                        console.log('Modal opened successfully');
+                    } else {
+                        console.error('Modal element not found after insertion');
+                    }
+                } else {
+                    console.error('Failed to load edit chapter modal template:', modalData);
+                }
+            });
+        } else {
+            console.error('Failed to load chapter data:', data);
+            alert('Failed to load chapter data. Please try again.');
+        }
     });
 }
 
 function updateChapter(chapterId) {
-    const title = document.getElementById('chapter-title').value;
-    const description = document.getElementById('chapter-description').value;
-    const duration = document.getElementById('chapter-duration').value;
-    const order = document.getElementById('chapter-order').value;
+    console.log('updateChapter called with chapterId:', chapterId);
+    
+    // Get form data from the modal
+    const modal = document.querySelector('.sikshya-modal-overlay');
+    if (!modal) {
+        console.error('Modal not found');
+        return;
+    }
+    
+    const title = modal.querySelector('input[name="title"]')?.value?.trim();
+    const description = modal.querySelector('textarea[name="description"]')?.value?.trim();
+    const duration = modal.querySelector('input[name="duration"]')?.value?.trim();
+    const order = modal.querySelector('input[name="order"]')?.value?.trim();
+    
+    console.log('Form data:', { title, description, duration, order });
     
     if (!title) {
         alert('Please enter a chapter title.');
         return;
     }
     
-    // Update the chapter in the DOM
-    const chapter = document.getElementById(chapterId);
-    const titleElement = chapter.querySelector('.sikshya-chapter-title');
-    
-    // Update title (keep the icon)
-    const icon = titleElement.querySelector('i');
-    titleElement.innerHTML = icon.outerHTML + ' ' + title;
-    
-    // Update data attributes
-    chapter.dataset.description = description;
-    chapter.dataset.duration = duration;
-    chapter.dataset.order = order;
-    
-    // Update duration display
-    const infoElement = chapter.querySelector('.sikshya-chapter-info');
-    const durationSpan = infoElement.querySelector('span:last-child');
-    if (duration) {
-        if (durationSpan) {
-            durationSpan.textContent = duration + ' hours';
+    // Send update request via AJAX
+    sikshyaAjax('sikshya_update_chapter', {
+        chapter_id: chapterId,
+        title: title,
+        description: description,
+        duration: duration,
+        order: order
+    }, function(data) {
+        console.log('Chapter update response:', data);
+        
+        if (data && data.success) {
+            // Close modal
+            closeModal(modal);
+            
+            // Reload the curriculum tab to show updated data
+            const curriculumTab = document.querySelector('[data-tab="curriculum"]');
+            if (curriculumTab) {
+                curriculumTab.click();
+            }
+            
+            // Show success message
+            alert('Chapter updated successfully!');
         } else {
-            const newDurationSpan = document.createElement('span');
-            newDurationSpan.textContent = duration + ' hours';
-            infoElement.appendChild(newDurationSpan);
+            console.error('Failed to update chapter:', data);
+            alert('Failed to update chapter. Please try again.');
         }
-    } else if (durationSpan) {
-        durationSpan.remove();
-    }
-    
-    // Close modal
-    closeModal(document.querySelector('.sikshya-modal-overlay'));
-    
-    // Show success message
-    alert('Chapter updated successfully!');
+    });
 }
 
 function deleteChapter(chapterId) {
@@ -941,6 +1065,46 @@ function createDefaultChapterAndAddContent(contentType, formData) {
     const courseIdField = document.querySelector('input[name="course_id"]');
     const courseId = courseIdField ? parseInt(courseIdField.value) || 0 : 0;
     
+    // If course_id is 0, we need to save the course first
+    if (courseId === 0) {
+        // Get basic course data from the form
+        const courseTitle = document.querySelector('input[name="title"]')?.value || 'New Course';
+        const courseDescription = document.querySelector('textarea[name="description"]')?.value || '';
+        
+        // Save course as draft first
+        sikshyaAjax('sikshya_course_builder_save', {
+            title: courseTitle,
+            description: courseDescription,
+            course_id: 0,
+            course_status: 'draft'
+        }, function(data) {
+            console.log('Course save response:', data);
+            
+            if (data && data.course_id) {
+                // Update the course_id in the form
+                if (courseIdField) {
+                    courseIdField.value = data.course_id;
+                }
+                
+                // Update URL to include course_id
+                const url = new URL(window.location);
+                url.searchParams.set('course_id', data.course_id);
+                window.history.replaceState({}, '', url.toString());
+                
+                // Now create the default chapter and content with the new course_id
+                createDefaultChapterAndContentWithCourseId(data.course_id, contentType, formData);
+            } else {
+                console.error('Failed to save course:', data);
+                alert('Failed to save course. Please try again.');
+            }
+        });
+    } else {
+        // Course already exists, create default chapter and content directly
+        createDefaultChapterAndContentWithCourseId(courseId, contentType, formData);
+    }
+}
+
+function createDefaultChapterAndContentWithCourseId(courseId, contentType, formData) {
     // Create a default chapter first
     const defaultChapterData = {
         title: 'Chapter 1',
@@ -1369,7 +1533,7 @@ function showCurriculumItems() {
     console.log('Showing curriculum items...');
     
     const emptyState = document.getElementById('curriculum-empty-state');
-    const curriculumItems = document.getElementById('curriculum-items');
+    let curriculumItems = document.getElementById('curriculum-items');
     const bulkActions = document.getElementById('bulk-actions');
     
     console.log('Empty state element:', emptyState);
@@ -1379,6 +1543,20 @@ function showCurriculumItems() {
         emptyState.style.display = 'none';
         console.log('Hidden empty state');
     }
+    
+    // If curriculum-items doesn't exist, create it
+    if (!curriculumItems) {
+        console.log('Curriculum items container not found, creating it...');
+        const curriculumBuilder = document.querySelector('.sikshya-curriculum-builder');
+        if (curriculumBuilder) {
+            curriculumItems = document.createElement('div');
+            curriculumItems.id = 'curriculum-items';
+            curriculumItems.className = 'sikshya-curriculum-items';
+            curriculumBuilder.appendChild(curriculumItems);
+            console.log('Created curriculum-items container');
+        }
+    }
+    
     if (curriculumItems) {
         curriculumItems.style.display = 'block';
         console.log('Showed curriculum items');
@@ -2811,6 +2989,9 @@ document.addEventListener('DOMContentLoaded', function() {
     addSortableIconsToChapters();
     initializeChapterSorting();
     
+    // Load curriculum if course_id exists
+            initializeCurriculumOnPageLoad();
+    
     // Add global drag event debugging
     document.addEventListener('dragstart', function(e) {
         console.log('Global drag start detected:', e.target);
@@ -2859,9 +3040,41 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Sikshya: Course data loaded directly in PHP template');
 });
 
-
-
-
+// Initialize curriculum functionality on page load
+function initializeCurriculumOnPageLoad() {
+    console.log('Sikshya: Initializing curriculum functionality...');
+    
+    // Check if we have chapters or empty state
+    const curriculumItems = document.getElementById('curriculum-items');
+    if (curriculumItems) {
+        // We have chapters, update chapter count
+        const chapters = document.querySelectorAll('.sikshya-chapter-card');
+        chapterCount = chapters.length;
+        console.log('Sikshya: Found chapters:', chapterCount);
+        
+        // Initialize chapter functionality
+        addSortableIconsToChapters();
+        initializeChapterSorting();
+        updateChapterNumbers();
+    } else {
+        // We have empty state, ensure curriculum-items container exists for future chapters
+        console.log('Sikshya: Empty curriculum state, ensuring container structure');
+        
+        const curriculumContainer = document.querySelector('.sikshya-curriculum-builder');
+        if (curriculumContainer) {
+            // Create curriculum-items container if it doesn't exist
+            let curriculumItems = document.getElementById('curriculum-items');
+            if (!curriculumItems) {
+                curriculumItems = document.createElement('div');
+                curriculumItems.id = 'curriculum-items';
+                curriculumItems.className = 'sikshya-curriculum-items';
+                curriculumItems.style.display = 'none'; // Hidden initially
+                curriculumContainer.appendChild(curriculumItems);
+                console.log('Sikshya: Created curriculum-items container for future chapters');
+            }
+        }
+    }
+}
 
 // Populate form with course data
 function populateCourseForm(courseData) {
