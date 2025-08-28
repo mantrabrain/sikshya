@@ -249,7 +249,7 @@ if (!defined('ABSPATH')) {
                 </div>
 
                 <div class="sikshya-form-section">
-                    <h4 class="sikshya-form-section-title">Advanced Options</h4>
+                    <h4 class="sikshya-form-section-title">Additional Settings</h4>
                     
                     <div class="sikshya-form-grid-2">
                         <div class="sikshya-form-row-small">

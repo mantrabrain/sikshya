@@ -233,7 +233,7 @@ class LessonController
     }
 
     /**
-     * Render content type selection popup
+     * Render content type selection page
      */
     private function renderContentTypeSelectionPopup(): void
     {
@@ -243,7 +243,9 @@ class LessonController
             <div class="sikshya-header">
                 <div class="sikshya-header-title">
                     <h1>
-                        <i class="fas fa-plus"></i>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
                         <?php _e('Add New Lesson', 'sikshya'); ?>
                     </h1>
                     <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
@@ -263,7 +265,7 @@ class LessonController
                     <div class="sikshya-content-card-header">
                         <div class="sikshya-content-card-header-left">
                             <h3 class="sikshya-content-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                                 <?php _e('Choose Content Type', 'sikshya'); ?>
@@ -274,8 +276,8 @@ class LessonController
                     <div class="sikshya-content-card-body">
                         <div class="sikshya-content-type-grid">
                             <!-- Text Lesson -->
-                            <div class="sikshya-content-type-card" onclick="showLessonForm('text')">
-                                <div class="sikshya-content-type-icon sikshya-content-type-text">
+                            <div class="sikshya-content-type-card sikshya-content-type-text" data-content-type="text">
+                                <div class="sikshya-content-type-icon">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
@@ -287,8 +289,8 @@ class LessonController
                             </div>
 
                             <!-- Video Lesson -->
-                            <div class="sikshya-content-type-card" onclick="showLessonForm('video')">
-                                <div class="sikshya-content-type-icon sikshya-content-type-video">
+                            <div class="sikshya-content-type-card sikshya-content-type-video" data-content-type="video">
+                                <div class="sikshya-content-type-icon">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
@@ -300,8 +302,8 @@ class LessonController
                             </div>
 
                             <!-- Audio Lesson -->
-                            <div class="sikshya-content-type-card" onclick="showLessonForm('audio')">
-                                <div class="sikshya-content-type-icon sikshya-content-type-audio">
+                            <div class="sikshya-content-type-card sikshya-content-type-audio" data-content-type="audio">
+                                <div class="sikshya-content-type-icon">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                                     </svg>
@@ -313,8 +315,8 @@ class LessonController
                             </div>
 
                             <!-- Quiz -->
-                            <div class="sikshya-content-type-card" onclick="showLessonForm('quiz')">
-                                <div class="sikshya-content-type-icon sikshya-content-type-quiz">
+                            <div class="sikshya-content-type-card sikshya-content-type-quiz" data-content-type="quiz">
+                                <div class="sikshya-content-type-icon">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
@@ -326,8 +328,8 @@ class LessonController
                             </div>
 
                             <!-- Assignment -->
-                            <div class="sikshya-content-type-card" onclick="showLessonForm('assignment')">
-                                <div class="sikshya-content-type-icon sikshya-content-type-assignment">
+                            <div class="sikshya-content-type-card sikshya-content-type-assignment" data-content-type="assignment">
+                                <div class="sikshya-content-type-icon">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                     </svg>
@@ -342,8 +344,6 @@ class LessonController
                 </div>
             </div>
         </div>
-
-
         <?php
     }
 
@@ -370,7 +370,7 @@ class LessonController
             <div class="sikshya-header">
                 <div class="sikshya-header-title">
                     <h1>
-                        <i class="fas fa-plus"></i>
+                        <?php echo $this->getContentTypeIcon($type); ?>
                         <?php echo esc_html(ucfirst($type)); ?> <?php _e('Lesson', 'sikshya'); ?>
                     </h1>
                     <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
@@ -402,65 +402,9 @@ class LessonController
                             <input type="hidden" name="action" value="sikshya_save_lesson">
                             <input type="hidden" name="content_type" value="<?php echo esc_attr($type); ?>">
                             
-                            <?php if (file_exists($template_path)): ?>
-                                <?php include $template_path; ?>
-                            <?php else: ?>
-                                <!-- Fallback form if template doesn't exist -->
-                                <div class="sikshya-form-section">
-                                    <h4 class="sikshya-form-section-title"><?php _e('Basic Information', 'sikshya'); ?></h4>
-                                    
-                                    <div class="sikshya-form-row-small">
-                                        <label><?php echo esc_html(ucfirst($type)); ?> <?php _e('Title', 'sikshya'); ?> *</label>
-                                        <input type="text" id="<?php echo esc_attr($type); ?>-lesson-title" name="title" placeholder="<?php _e('Enter', 'sikshya'); ?> <?php echo esc_attr($type); ?> <?php _e('title', 'sikshya'); ?>" required>
-                                    </div>
-                                    
-                                    <div class="sikshya-form-row-small">
-                                        <label><?php _e('Description', 'sikshya'); ?></label>
-                                        <textarea id="<?php echo esc_attr($type); ?>-lesson-description" name="description" placeholder="<?php _e('Brief description of this', 'sikshya'); ?> <?php echo esc_attr($type); ?> <?php _e('lesson', 'sikshya'); ?>"></textarea>
-                                    </div>
-                                    
-                                    <div class="sikshya-form-grid-2">
-                                        <div class="sikshya-form-row-small">
-                                            <label><?php _e('Duration (minutes)', 'sikshya'); ?></label>
-                                            <input type="number" id="<?php echo esc_attr($type); ?>-lesson-duration" name="duration" placeholder="15" min="1">
-                                        </div>
-                                        
-                                        <div class="sikshya-form-row-small">
-                                            <label><?php _e('Difficulty Level', 'sikshya'); ?></label>
-                                            <select id="<?php echo esc_attr($type); ?>-lesson-difficulty" name="difficulty">
-                                                <option value="beginner"><?php _e('Beginner', 'sikshya'); ?></option>
-                                                <option value="intermediate"><?php _e('Intermediate', 'sikshya'); ?></option>
-                                                <option value="advanced"><?php _e('Advanced', 'sikshya'); ?></option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
+                            <?php include $template_path; ?>
                             
-                            <!-- Course Selection -->
-                            <div class="sikshya-form-section">
-                                <h4 class="sikshya-form-section-title"><?php _e('Course Assignment', 'sikshya'); ?></h4>
-                                
-                                <div class="sikshya-form-row-small">
-                                    <label><?php _e('Select Course', 'sikshya'); ?> *</label>
-                                    <select name="course_id" required>
-                                        <option value=""><?php _e('Choose a course', 'sikshya'); ?></option>
-                                        <?php
-                                        $courses = get_posts([
-                                            'post_type' => 'sikshya_course',
-                                            'post_status' => 'publish',
-                                            'numberposts' => -1,
-                                            'orderby' => 'title',
-                                            'order' => 'ASC'
-                                        ]);
-                                        
-                                        foreach ($courses as $course) {
-                                            echo '<option value="' . esc_attr($course->ID) . '">' . esc_html($course->post_title) . '</option>';
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
-                            </div>
+
                             
                             <!-- Form Actions -->
                             <div class="sikshya-form-actions">

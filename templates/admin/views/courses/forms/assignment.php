@@ -259,14 +259,7 @@ if (!defined('ABSPATH')) {
     </div>
 </div>
 
-<button class="sikshya-form-toggle" onclick="toggleAdvancedForm(this)">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-    </svg>
-    Advanced Options
-</button>
 
-<div class="sikshya-form-advanced">
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Prerequisites</label>
@@ -337,5 +330,4 @@ if (!defined('ABSPATH')) {
                 <option value="no">No</option>
             </select>
         </div>
-    </div>
-</div> 
+    </div> 
