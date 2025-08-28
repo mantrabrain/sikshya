@@ -6,6 +6,7 @@ use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\DataTable;
 use Sikshya\Admin\Views\FormBuilder;
 use Sikshya\Services\LessonService;
+use Sikshya\Constants\AdminPages;
 
 /**
  * Lesson Controller
@@ -48,6 +49,8 @@ class LessonController
         add_action('wp_ajax_sikshya_lesson_list', [$this, 'handleLessonList']);
         add_action('wp_ajax_sikshya_lesson_save', [$this, 'handleLessonSave']);
         add_action('wp_ajax_sikshya_lesson_delete', [$this, 'handleLessonDelete']);
+        add_action('wp_ajax_sikshya_get_lesson_form', [$this, 'handleGetLessonForm']);
+        add_action('wp_ajax_sikshya_load_lesson_modal_template', [$this, 'handleLoadLessonModalTemplate']);
     }
 
     /**
@@ -72,12 +75,12 @@ class LessonController
                     <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
                 </div>
                 <div class="sikshya-header-actions">
-                    <a href="<?php echo admin_url('admin.php?page=sikshya-add-course'); ?>" class="sikshya-btn sikshya-btn-primary">
+                    <button type="button" class="sikshya-btn sikshya-btn-primary sikshya-add-lesson-btn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
                         <?php _e('Add New Lesson', 'sikshya'); ?>
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -104,6 +107,24 @@ class LessonController
                             ?>
                         </form>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Type Selection Modal -->
+        <div id="content-type-modal" class="sikshya-modal" style="display: none;">
+            <div class="sikshya-modal-overlay"></div>
+            <div class="sikshya-modal-content">
+                <div class="sikshya-modal-header">
+                    <h3 id="modal-title"><?php _e('Add New Content', 'sikshya'); ?></h3>
+                    <button type="button" class="sikshya-modal-close" onclick="closeLessonModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="sikshya-modal-body" id="modal-body">
+                    <!-- Form content will be loaded here -->
                 </div>
             </div>
         </div>
@@ -199,80 +220,266 @@ class LessonController
      */
     public function renderAddLessonPage(): void
     {
-        $formBuilder = new FormBuilder($this->plugin, [
-            'id' => 'sikshya-add-lesson-form',
-            'title' => __('Add New Lesson', 'sikshya'),
-            'description' => __('Create a new lesson for your course', 'sikshya'),
-            'action' => admin_url('admin-ajax.php'),
-        ]);
+        // Check if type parameter is provided
+        $type = $_GET['type'] ?? '';
+        
+        if (empty($type)) {
+            // Show content type selection popup
+            $this->renderContentTypeSelectionPopup();
+        } else {
+            // Show specific form based on type
+            $this->renderAddLessonForm($type);
+        }
+    }
 
-        // Add form fields
-        $formBuilder->addFields([
-            'title' => [
-                'type' => 'text',
-                'label' => __('Lesson Title', 'sikshya'),
-                'required' => true,
-                'placeholder' => __('Enter lesson title', 'sikshya'),
-                'help' => __('The title of your lesson', 'sikshya'),
-            ],
-            'course_id' => [
-                'type' => 'select',
-                'label' => __('Course', 'sikshya'),
-                'required' => true,
-                'options' => $this->getCoursesList(),
-                'help' => __('Select the course this lesson belongs to', 'sikshya'),
-            ],
-            'content' => [
-                'type' => 'wysiwyg',
-                'label' => __('Lesson Content', 'sikshya'),
-                'required' => true,
-                'help' => __('The main content of your lesson', 'sikshya'),
-            ],
-            'type' => [
-                'type' => 'select',
-                'label' => __('Lesson Type', 'sikshya'),
-                'required' => true,
-                'options' => [
-                    'text' => __('Text', 'sikshya'),
-                    'video' => __('Video', 'sikshya'),
-                    'audio' => __('Audio', 'sikshya'),
-                    'file' => __('File', 'sikshya'),
-                    'quiz' => __('Quiz', 'sikshya'),
-                ],
-                'default' => 'text',
-                'help' => __('The type of lesson content', 'sikshya'),
-            ],
-            'media_url' => [
-                'type' => 'url',
-                'label' => __('Media URL', 'sikshya'),
-                'help' => __('URL for video, audio, or file (optional)', 'sikshya'),
-            ],
-            'duration' => [
-                'type' => 'number',
-                'label' => __('Duration (minutes)', 'sikshya'),
-                'min' => '0',
-                'help' => __('Estimated lesson duration in minutes', 'sikshya'),
-            ],
-            'order' => [
-                'type' => 'number',
-                'label' => __('Order', 'sikshya'),
-                'min' => '0',
-                'help' => __('Lesson order within the course', 'sikshya'),
-            ],
-            'status' => [
-                'type' => 'select',
-                'label' => __('Status', 'sikshya'),
-                'options' => [
-                    'draft' => __('Draft', 'sikshya'),
-                    'publish' => __('Published', 'sikshya'),
-                    'private' => __('Private', 'sikshya'),
-                ],
-                'default' => 'draft',
-                'help' => __('Lesson publication status', 'sikshya'),
-            ],
-        ]);
+    /**
+     * Render content type selection popup
+     */
+    private function renderContentTypeSelectionPopup(): void
+    {
+        ?>
+        <div class="sikshya-dashboard">
+            <!-- Header -->
+            <div class="sikshya-header">
+                <div class="sikshya-header-title">
+                    <h1>
+                        <i class="fas fa-plus"></i>
+                        <?php _e('Add New Lesson', 'sikshya'); ?>
+                    </h1>
+                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+                </div>
+                <div class="sikshya-header-actions">
+                    <a href="<?php echo admin_url('admin.php?page=' . AdminPages::LESSONS); ?>" class="sikshya-btn sikshya-btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        <?php _e('Back to Lessons', 'sikshya'); ?>
+                    </a>
+                </div>
+            </div>
 
-        echo $formBuilder->renderForm();
+            <div class="sikshya-main-content">
+                <div class="sikshya-content-card">
+                    <div class="sikshya-content-card-header">
+                        <div class="sikshya-content-card-header-left">
+                            <h3 class="sikshya-content-card-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <?php _e('Choose Content Type', 'sikshya'); ?>
+                            </h3>
+                            <p class="sikshya-content-card-subtitle"><?php _e('Choose the type of content you want to add to your course.', 'sikshya'); ?></p>
+                        </div>
+                    </div>
+                    <div class="sikshya-content-card-body">
+                        <div class="sikshya-content-type-grid">
+                            <!-- Text Lesson -->
+                            <div class="sikshya-content-type-card" onclick="showLessonForm('text')">
+                                <div class="sikshya-content-type-icon sikshya-content-type-text">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-content-type-content">
+                                    <h4><?php _e('Text Lesson', 'sikshya'); ?></h4>
+                                    <p><?php _e('Rich text content with images and formatting.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+
+                            <!-- Video Lesson -->
+                            <div class="sikshya-content-type-card" onclick="showLessonForm('video')">
+                                <div class="sikshya-content-type-icon sikshya-content-type-video">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-content-type-content">
+                                    <h4><?php _e('Video Lesson', 'sikshya'); ?></h4>
+                                    <p><?php _e('Upload video files with descriptions.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+
+                            <!-- Audio Lesson -->
+                            <div class="sikshya-content-type-card" onclick="showLessonForm('audio')">
+                                <div class="sikshya-content-type-icon sikshya-content-type-audio">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-content-type-content">
+                                    <h4><?php _e('Audio Lesson', 'sikshya'); ?></h4>
+                                    <p><?php _e('Audio files with transcripts.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+
+                            <!-- Quiz -->
+                            <div class="sikshya-content-type-card" onclick="showLessonForm('quiz')">
+                                <div class="sikshya-content-type-icon sikshya-content-type-quiz">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-content-type-content">
+                                    <h4><?php _e('Quiz', 'sikshya'); ?></h4>
+                                    <p><?php _e('Interactive assessments and tests.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+
+                            <!-- Assignment -->
+                            <div class="sikshya-content-type-card" onclick="showLessonForm('assignment')">
+                                <div class="sikshya-content-type-icon sikshya-content-type-assignment">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                </div>
+                                <div class="sikshya-content-type-content">
+                                    <h4><?php _e('Assignment', 'sikshya'); ?></h4>
+                                    <p><?php _e('Student submissions and projects.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <?php
+    }
+
+    /**
+     * Render add lesson form based on content type
+     */
+    public function renderAddLessonForm(string $type): void
+    {
+        // Map content types to template files
+        $template_map = [
+            'text' => 'text-lesson.php',
+            'video' => 'video-lesson.php',
+            'audio' => 'audio-lesson.php',
+            'quiz' => 'quiz.php',
+            'assignment' => 'assignment.php'
+        ];
+        
+        $template_file = $template_map[$type] ?? 'text-lesson.php';
+        $template_path = SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/forms/' . $template_file;
+        
+        ?>
+        <div class="sikshya-dashboard">
+            <!-- Header -->
+            <div class="sikshya-header">
+                <div class="sikshya-header-title">
+                    <h1>
+                        <i class="fas fa-plus"></i>
+                        <?php echo esc_html(ucfirst($type)); ?> <?php _e('Lesson', 'sikshya'); ?>
+                    </h1>
+                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
+                </div>
+                <div class="sikshya-header-actions">
+                    <a href="<?php echo admin_url('admin.php?page=' . AdminPages::ADD_LESSON); ?>" class="sikshya-btn sikshya-btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        <?php _e('Back to Content Types', 'sikshya'); ?>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sikshya-main-content">
+                <div class="sikshya-content-card">
+                    <div class="sikshya-content-card-header">
+                        <div class="sikshya-content-card-header-left">
+                            <h3 class="sikshya-content-card-title">
+                                <?php echo $this->getContentTypeIcon($type); ?>
+                                <?php echo esc_html(ucfirst($type)); ?> <?php _e('Lesson Form', 'sikshya'); ?>
+                            </h3>
+                            <p class="sikshya-content-card-subtitle"><?php _e('Create a new', 'sikshya'); ?> <?php echo esc_html($type); ?> <?php _e('lesson for your course', 'sikshya'); ?></p>
+                        </div>
+                    </div>
+                    <div class="sikshya-content-card-body">
+                        <form class="sikshya-lesson-form" data-content-type="<?php echo esc_attr($type); ?>">
+                            <?php wp_nonce_field('sikshya_lesson_nonce', 'sikshya_lesson_nonce'); ?>
+                            <input type="hidden" name="action" value="sikshya_save_lesson">
+                            <input type="hidden" name="content_type" value="<?php echo esc_attr($type); ?>">
+                            
+                            <?php if (file_exists($template_path)): ?>
+                                <?php include $template_path; ?>
+                            <?php else: ?>
+                                <!-- Fallback form if template doesn't exist -->
+                                <div class="sikshya-form-section">
+                                    <h4 class="sikshya-form-section-title"><?php _e('Basic Information', 'sikshya'); ?></h4>
+                                    
+                                    <div class="sikshya-form-row-small">
+                                        <label><?php echo esc_html(ucfirst($type)); ?> <?php _e('Title', 'sikshya'); ?> *</label>
+                                        <input type="text" id="<?php echo esc_attr($type); ?>-lesson-title" name="title" placeholder="<?php _e('Enter', 'sikshya'); ?> <?php echo esc_attr($type); ?> <?php _e('title', 'sikshya'); ?>" required>
+                                    </div>
+                                    
+                                    <div class="sikshya-form-row-small">
+                                        <label><?php _e('Description', 'sikshya'); ?></label>
+                                        <textarea id="<?php echo esc_attr($type); ?>-lesson-description" name="description" placeholder="<?php _e('Brief description of this', 'sikshya'); ?> <?php echo esc_attr($type); ?> <?php _e('lesson', 'sikshya'); ?>"></textarea>
+                                    </div>
+                                    
+                                    <div class="sikshya-form-grid-2">
+                                        <div class="sikshya-form-row-small">
+                                            <label><?php _e('Duration (minutes)', 'sikshya'); ?></label>
+                                            <input type="number" id="<?php echo esc_attr($type); ?>-lesson-duration" name="duration" placeholder="15" min="1">
+                                        </div>
+                                        
+                                        <div class="sikshya-form-row-small">
+                                            <label><?php _e('Difficulty Level', 'sikshya'); ?></label>
+                                            <select id="<?php echo esc_attr($type); ?>-lesson-difficulty" name="difficulty">
+                                                <option value="beginner"><?php _e('Beginner', 'sikshya'); ?></option>
+                                                <option value="intermediate"><?php _e('Intermediate', 'sikshya'); ?></option>
+                                                <option value="advanced"><?php _e('Advanced', 'sikshya'); ?></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Course Selection -->
+                            <div class="sikshya-form-section">
+                                <h4 class="sikshya-form-section-title"><?php _e('Course Assignment', 'sikshya'); ?></h4>
+                                
+                                <div class="sikshya-form-row-small">
+                                    <label><?php _e('Select Course', 'sikshya'); ?> *</label>
+                                    <select name="course_id" required>
+                                        <option value=""><?php _e('Choose a course', 'sikshya'); ?></option>
+                                        <?php
+                                        $courses = get_posts([
+                                            'post_type' => 'sikshya_course',
+                                            'post_status' => 'publish',
+                                            'numberposts' => -1,
+                                            'orderby' => 'title',
+                                            'order' => 'ASC'
+                                        ]);
+                                        
+                                        foreach ($courses as $course) {
+                                            echo '<option value="' . esc_attr($course->ID) . '">' . esc_html($course->post_title) . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Form Actions -->
+                            <div class="sikshya-form-actions">
+                                <button type="submit" class="sikshya-btn sikshya-btn-primary">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <?php _e('Save Lesson', 'sikshya'); ?>
+                                </button>
+                                <a href="<?php echo admin_url('admin.php?page=' . AdminPages::LESSONS); ?>" class="sikshya-btn sikshya-btn-secondary">
+                                    <?php _e('Cancel', 'sikshya'); ?>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
     }
 
     /**
@@ -349,6 +556,115 @@ class LessonController
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
         }
+    }
+
+    /**
+     * Handle AJAX request to get lesson form content
+     */
+    public function handleGetLessonForm(): void
+    {
+        check_ajax_referer('sikshya_lesson_form_nonce', 'nonce');
+
+        $content_type = sanitize_text_field($_POST['content_type'] ?? 'text');
+        $template_map = [
+            'text' => 'text-lesson.php',
+            'video' => 'video-lesson.php',
+            'audio' => 'audio-lesson.php',
+            'quiz' => 'quiz.php',
+            'assignment' => 'assignment.php'
+        ];
+
+        $template_file = $template_map[$content_type] ?? 'text-lesson.php';
+        $template_path = SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/forms/' . $template_file;
+
+        if (file_exists($template_path)) {
+            ob_start();
+            include $template_path;
+            $html = ob_get_clean();
+            wp_send_json_success(['html' => $html]);
+        } else {
+            wp_send_json_error(__('Form template not found.', 'sikshya'));
+        }
+    }
+
+    /**
+     * Handle load lesson modal template AJAX request
+     */
+    public function handleLoadLessonModalTemplate(): void
+    {
+        try {
+            if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_lesson')) {
+                wp_send_json_error('Invalid nonce');
+                return;
+            }
+            
+            $modal_type = sanitize_text_field($_POST['modal_type'] ?? '');
+            
+            // Load specific modal template based on type
+            if ($modal_type === 'content-type') {
+                $template = $this->loadLessonContentTypeModalTemplate();
+            } else {
+                $template = $this->getLessonModalTemplate($modal_type);
+            }
+            
+            wp_send_json_success(['html' => $template]);
+            
+        } catch (\Exception $e) {
+            wp_send_json_error('Failed to load modal template: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Load lesson content type modal template
+     */
+    private function loadLessonContentTypeModalTemplate(): string
+    {
+        ob_start();
+        
+        // Include the lesson content type modal template
+        include SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/modal-content-type.php';
+        
+        return ob_get_clean();
+    }
+
+    /**
+     * Get lesson modal template HTML
+     */
+    private function getLessonModalTemplate(string $modal_type): string
+    {
+        ob_start();
+        ?>
+        <div class="sikshya-modal sikshya-modal-<?php echo esc_attr($modal_type); ?>">
+            <div class="sikshya-modal-header">
+                <h3 class="sikshya-modal-title"><?php echo esc_html(ucfirst($modal_type)); ?></h3>
+                <button type="button" class="sikshya-modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="sikshya-modal-body">
+                <!-- Modal content will be loaded here -->
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Get content type icon
+     */
+    private function getContentTypeIcon(string $type): string
+    {
+        $icons = [
+            'text' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
+            'video' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>',
+            'audio' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>',
+            'quiz' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            'assignment' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>'
+        ];
+        
+        return $icons[$type] ?? $icons['text'];
     }
 
     /**

@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
     
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
-            <label>Estimated Reading Time (minutes)</label>
+            <label>Estimated Reading  Time (minutes)</label>
             <input type="number" id="text-lesson-duration" placeholder="15" min="1">
         </div>
         

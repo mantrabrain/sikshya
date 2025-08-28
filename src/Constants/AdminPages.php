@@ -13,6 +13,7 @@ class AdminPages
     const DASHBOARD = 'sikshya';
     const COURSES = 'sikshya-courses';
     const LESSONS = 'sikshya-lessons';
+    const ADD_LESSON = 'sikshya-add-lesson';
     const QUIZZES = 'sikshya-quizzes';
     const STUDENTS = 'sikshya-students';
     const INSTRUCTORS = 'sikshya-instructors';

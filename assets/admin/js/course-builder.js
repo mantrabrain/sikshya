@@ -136,7 +136,47 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.log('Sikshya: No course data available');
     }
+
+    // Initialize content type modal event handlers
+    initializeContentTypeModalHandlers();
 });
+
+// Initialize content type modal event handlers
+function initializeContentTypeModalHandlers() {
+    // Handle content type card clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.sikshya-content-type')) {
+            e.preventDefault();
+            const contentType = e.target.closest('.sikshya-content-type').getAttribute('data-content-type');
+            if (contentType) {
+                selectContentType(contentType);
+            }
+        }
+    });
+
+    // Handle modal close button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.sikshya-modal-close')) {
+            e.preventDefault();
+            closeModal(e.target.closest('.sikshya-modal-close'));
+        }
+    });
+
+    // Handle modal footer button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.sikshya-modal-footer .sikshya-btn-secondary')) {
+            e.preventDefault();
+            closeModal(e.target.closest('.sikshya-modal-close'));
+        }
+        
+        if (e.target.closest('.sikshya-modal-footer .sikshya-btn-primary')) {
+            e.preventDefault();
+            if (!e.target.closest('.sikshya-btn-primary').disabled) {
+                proceedToContentForm();
+            }
+        }
+    });
+}
 
 // Pricing toggle
 function togglePricing(select) {

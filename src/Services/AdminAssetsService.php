@@ -149,6 +149,38 @@ class AdminAssetsService
             true
         );
         
+        // Register lessons assets
+        wp_register_style(
+            'sikshya-lessons',
+            $this->plugin->getAssetUrl('admin/css/lessons.css'),
+            ['sikshya-admin'],
+            SIKSHYA_VERSION
+        );
+        
+        wp_register_script(
+            'sikshya-lessons',
+            $this->plugin->getAssetUrl('admin/js/lessons.js'),
+            ['jquery', 'sikshya-admin'],
+            SIKSHYA_VERSION,
+            true
+        );
+
+        // Register modal assets
+        wp_register_style(
+            'sikshya-modal',
+            $this->plugin->getAssetUrl('admin/css/modal.css'),
+            ['sikshya-admin'],
+            SIKSHYA_VERSION
+        );
+        
+        wp_register_script(
+            'sikshya-modal',
+            $this->plugin->getAssetUrl('admin/js/modal.js'),
+            ['jquery', 'sikshya-admin'],
+            SIKSHYA_VERSION,
+            true
+        );
+        
         // Register Chart.js
         wp_register_script(
             'sikshya-charts',
@@ -249,6 +281,24 @@ class AdminAssetsService
                 'nonce' => wp_create_nonce('sikshya_list_table_nonce'),
                 'confirm_delete_message' => __('Are you sure you want to delete this item?', 'sikshya'),
                 'error_message' => __('An error occurred. Please try again.', 'sikshya'),
+            ]);
+        }
+        
+        // Lessons assets for lesson pages
+        if (strpos($screen->id, AdminPages::LESSONS) !== false || strpos($screen->id, AdminPages::ADD_LESSON) !== false) {
+            wp_enqueue_style('sikshya-lessons');
+            wp_enqueue_script('sikshya-lessons');
+            
+            // Enqueue modal assets for lessons
+            wp_enqueue_style('sikshya-modal');
+            wp_enqueue_script('sikshya-modal');
+            
+            // Localize lessons script
+            wp_localize_script('sikshya-lessons', 'sikshya_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('sikshya_lesson'),
+                'admin_url' => admin_url(),
+                'add_lesson_page' => AdminPages::ADD_LESSON,
             ]);
         }
 

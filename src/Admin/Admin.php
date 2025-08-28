@@ -146,6 +146,16 @@ class Admin
             [$this, 'renderLessonsPage']
         );
 
+        // Add Lesson submenu (hidden from menu)
+        add_submenu_page(
+            'sikshya',
+            __('Add New Lesson', 'sikshya'),
+            __('Add New Lesson', 'sikshya'),
+            'edit_posts',
+            AdminPages::ADD_LESSON,
+            [$this, 'renderAddLessonPage']
+        );
+
         // Quizzes submenu
         add_submenu_page(
             'sikshya',
@@ -781,6 +791,18 @@ class Admin
         }
 
         $this->controllers['lesson']->renderLessonsPage();
+    }
+
+    /**
+     * Render add lesson page
+     */
+    public function renderAddLessonPage(): void
+    {
+        if (!current_user_can('edit_posts')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        $this->controllers['lesson']->renderAddLessonPage();
     }
 
     /**
