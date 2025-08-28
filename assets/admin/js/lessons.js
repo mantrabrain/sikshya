@@ -55,12 +55,21 @@
             SikshyaModal.close();
         });
 
-        // Handle lesson content type selection
-        $(document).on('click', '.sikshya-content-type', function(e) {
+        // Handle lesson content type selection (modal)
+        $(document).on('click', '.sikshya-modal .sikshya-content-type', function(e) {
             e.preventDefault();
             const contentType = $(this).data('content-type');
             if (contentType) {
                 selectContentType(contentType);
+            }
+        });
+
+        // Handle page content type selection (direct page)
+        $(document).on('click', '.sikshya-content-card-body .sikshya-content-type', function(e) {
+            e.preventDefault();
+            const contentType = $(this).data('content-type');
+            if (contentType) {
+                proceedToContentFormPage(contentType);
             }
         });
 
@@ -135,6 +144,22 @@
                         
                         // Redirect to add lesson page with selected content type
                         const addLessonUrl = sikshya_ajax.admin_url + 'admin.php?page=' + sikshya_ajax.add_lesson_page + '&type=' + currentContentType;
+                        window.location.href = addLessonUrl;
+                    }
+
+                    /**
+                     * Proceed to content form page (direct page flow)
+                     */
+                    window.proceedToContentFormPage = function(contentType) {
+                        console.log('proceedToContentFormPage called with contentType:', contentType);
+                        
+                        if (!contentType) {
+                            console.error('No content type provided');
+                            return;
+                        }
+                        
+                        // Redirect to add lesson page with selected content type
+                        const addLessonUrl = sikshya_ajax.admin_url + 'admin.php?page=' + sikshya_ajax.add_lesson_page + '&type=' + contentType;
                         window.location.href = addLessonUrl;
                     }
 

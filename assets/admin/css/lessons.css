@@ -1,198 +1,293 @@
 /* Import Sikshya Design System */
 @import url('./design-system.css');
 
-/* Modal styles from course-builder.css */
-.sikshya-modal-full {
-    width: 100%;
-    max-width: 800px;
+/* ========================================
+   MODAL CONTENT STYLES
+======================================== */
+
+.sikshya-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+    font-size: 16px;
 }
 
-.sikshya-modal {
-    width: 100%;
-    max-width: 600px;
-}
-
-/* Modal header and footer styles from course-builder.css */
-.sikshya-modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 32px 0;
-    border-bottom: 1px solid var(--sikshya-border-color);
-    margin-bottom: 0;
-}
-
-.sikshya-modal-header-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex: 1;
-}
-
-.sikshya-modal-title-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sikshya-modal-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: var(--sikshya-primary-color);
-    border-radius: 8px;
-    color: white;
-}
-
-.sikshya-modal-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.sikshya-modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--sikshya-text-primary);
+/* Modal form styles */
+.sikshya-modal .sikshya-lesson-form {
     margin: 0;
 }
 
-.sikshya-modal-subtitle {
-    font-size: 14px;
-    color: var(--sikshya-text-secondary);
-    margin: 4px 0 0 0;
-}
-
-.sikshya-modal-close {
-    background: none;
-    border: none;
-    color: var(--sikshya-text-secondary);
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
-
-.sikshya-modal-close:hover {
-    background: var(--sikshya-bg-hover);
-    color: var(--sikshya-text-primary);
-}
-
-.sikshya-modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 0 32px 24px;
-    border-top: 1px solid var(--sikshya-border-color);
-    margin-top: 0;
-}
-
-/* General button styles from course-builder.css */
-.sikshya-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: var(--sikshya-bg-secondary);
-    color: var(--sikshya-text-primary);
-}
-
-.sikshya-btn-primary {
-    background: var(--sikshya-primary-color);
-    color: white;
-    border-color: var(--sikshya-primary-color);
-}
-
-.sikshya-btn-primary:hover {
-    background: var(--sikshya-primary-hover);
-    border-color: var(--sikshya-primary-hover);
-}
-
-.sikshya-btn-secondary {
-    background: var(--sikshya-bg-secondary);
-    color: var(--sikshya-text-primary);
-    border-color: var(--sikshya-border-color);
-}
-
-.sikshya-btn-secondary:hover {
-    background: var(--sikshya-bg-hover);
-    border-color: var(--sikshya-border-hover);
-}
-
-.sikshya-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Modal body padding from course-builder.css */
-.sikshya-modal-body {
-    padding: 24px 32px;
-}
-
-/* Modal overlay styles from course-builder.css */
-body.sikshya-modal-open {
-    overflow: hidden;
-}
-
-.sikshya-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
+.sikshya-modal .sikshya-form-section {
+    margin-bottom: 24px;
     padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
 }
 
-body .sikshya-modal-overlay {
-    display: none;
+.sikshya-modal .sikshya-form-actions {
+    margin-top: 24px;
+    padding: 20px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
 }
 
-.sikshya-modal-overlay.active {
-    display: flex !important;
-    opacity: 1 !important;
+/* ========================================
+   CONTENT TYPE SELECTION PAGE
+======================================== */
+
+/* Page-based content type grid (different from modal) */
+.sikshya-content-card-body .sikshya-content-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
 }
 
-.sikshya-modal-overlay.show {
-    display: flex !important;
-    opacity: 1 !important;
+.sikshya-content-card-body .sikshya-content-type {
+    background: #ffffff;
+    border: 2px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 32px 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Override modal.css styles */
+.sikshya-content-card-body .sikshya-content-type:hover {
+    border-color: var(--sikshya-primary);
+    background: #f8f9ff;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.sikshya-content-card-body .sikshya-content-type-icon {
+    margin-bottom: 16px;
+}
+
+.sikshya-content-card-body .sikshya-content-type-title {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.sikshya-content-card-body .sikshya-content-type-desc {
+    font-size: 14px;
+    color: #7f8c8d;
+    line-height: 1.5;
+}
+
+/* Legacy grid styles (keeping for backward compatibility) */
+.sikshya-content-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+/* ========================================
+   MODAL CONTENT TYPE STYLES
+======================================== */
+
+/* Content Type Selection - EXACT SAME AS CURRICULUM */
+.sikshya-content-types {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.sikshya-content-type {
+    background: #f8f9fa;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.sikshya-content-type:hover {
+    border-color: var(--sikshya-primary);
+    background: #ecf0f1;
+    transform: translateY(-2px);
+}
+
+.sikshya-content-type.selected {
+    border-color: var(--sikshya-primary);
+    background: var(--sikshya-primary);
+    color: white;
+}
+
+.sikshya-content-type-icon {
+    font-size: 32px;
+    color: #3498db;
+}
+
+.sikshya-content-type.selected .sikshya-content-type-icon {
+    color: white;
+}
+
+.sikshya-content-type-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.sikshya-content-type-desc {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.sikshya-content-type.selected .sikshya-content-type-desc {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Content Type Specific Styles */
+.sikshya-content-type-text .sikshya-content-type-icon {
+    color: #e74c3c;
+}
+
+.sikshya-content-type-video .sikshya-content-type-icon {
+    color: #e67e22;
+}
+
+.sikshya-content-type-audio .sikshya-content-type-icon {
+    color: #f39c12;
+}
+
+.sikshya-content-type-quiz .sikshya-content-type-icon {
+    color: #9b59b6;
+}
+
+.sikshya-content-type-assignment .sikshya-content-type-icon {
+    color: #27ae60;
+}
+
+.sikshya-content-type.selected .sikshya-content-type-text .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-video .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-audio .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-quiz .sikshya-content-type-icon,
+.sikshya-content-type.selected .sikshya-content-type-assignment .sikshya-content-type-icon {
+    color: white;
+}
+
+/* Hide Quiz card on lesson popup and page */
+.sikshya-content-type-quiz {
+    display: none !important;
+}
+
+
+
+
+
+/* ========================================
+   MODAL OVERLAY & WIDTH STYLES (SAME AS CURRICULUM)
+======================================== */
+
+/* Prevent body scrolling when modal is open */
+body.sikshya-modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Ensure modal overlay covers everything */
 .sikshya-modal-overlay {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-    display: none !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     z-index: 999999 !important;
-    padding: 20px !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+/* Override any WordPress admin styles that might interfere */
+body .sikshya-modal-overlay {
+    position: fixed !important;
+    z-index: 999999 !important;
+    display: flex !important;
+}
+
+/* Content Type Modal - Smaller width for better UX */
+.sikshya-modal-full {
+    max-width: 800px !important;
+    width: 90% !important;
+}
+
+.sikshya-modal-full .sikshya-modal-body {
+    max-height: calc(70vh - 140px);
+    overflow-y: auto;
+}
+
+/* Ensure modal is above everything - EXACT SAME AS CURRICULUM */
+.sikshya-modal {
+    position: relative !important;
+    z-index: 1000000 !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    max-width: 600px !important;
+    width: 90% !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    transform: scale(0.9) !important;
+    transition: transform 0.3s ease !important;
+    margin: 20px !important;
+}
+
+.sikshya-modal-overlay.active,
+.sikshya-modal-overlay.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+.sikshya-modal-overlay.active .sikshya-modal,
+.sikshya-modal-overlay.show .sikshya-modal {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+}
+
+/* Ensure modal content is scrollable if needed - EXACT SAME AS CURRICULUM */
+.sikshya-modal-body {
+    max-height: calc(90vh - 140px); /* Account for header and footer */
+    overflow-y: auto;
+    padding: 0 24px 24px 24px;
+}
+
+/* ========================================
+   MODAL HEADER & FOOTER STYLES (SAME AS CURRICULUM)
+   OVERRIDE MODAL.CSS STYLES
+======================================== */
+
+/* Override modal.css styles with curriculum styles */
+.sikshya-modal-overlay {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
 }
 
 .sikshya-modal {
-    background: white !important;
     border-radius: 12px !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    max-width: 600px !important;
+    transform: scale(0.9) !important;
+    transition: transform 0.3s ease !important;
+    margin: 20px !important;
 }
 
 .sikshya-modal-overlay.show .sikshya-modal {
@@ -200,27 +295,71 @@ body .sikshya-modal-overlay {
     opacity: 1 !important;
 }
 
-/* Header and footer styles with !important */
+/* Button Styles (Same as Curriculum) */
+.sikshya-btn {
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-semibold);
+    padding: var(--sikshya-space-3) var(--sikshya-space-5);
+    border-radius: var(--sikshya-radius-md);
+    transition: var(--sikshya-transition-normal);
+    border: 1px solid var(--sikshya-gray-300);
+    box-shadow: var(--sikshya-shadow-sm);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+}
+
+.sikshya-btn-primary {
+    background: var(--sikshya-primary);
+    color: var(--sikshya-white);
+    border-color: var(--sikshya-primary);
+}
+
+.sikshya-btn-primary:hover:not(:disabled) {
+    background: var(--sikshya-primary-hover);
+    border-color: var(--sikshya-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--sikshya-shadow-md);
+}
+
+.sikshya-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: var(--sikshya-shadow-sm);
+}
+
+.sikshya-btn-secondary {
+    background: var(--sikshya-white);
+    color: var(--sikshya-gray-700);
+    border-color: var(--sikshya-gray-400);
+}
+
+.sikshya-btn-secondary:hover {
+    background: var(--sikshya-gray-50);
+}
+
+/* EXACT HEADER & FOOTER STYLES FROM CURRICULUM - WITH IMPORTANT OVERRIDES */
 .sikshya-modal-header {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 24px 32px 0 !important;
-    border-bottom: 1px solid var(--sikshya-border-color) !important;
+    padding: var(--sikshya-space-6) !important;
+    background: var(--sikshya-gray-50) !important;
+    border-bottom: 1px solid var(--sikshya-gray-200) !important;
     margin-bottom: 0 !important;
+    position: relative !important;
 }
 
 .sikshya-modal-header-content {
     display: flex !important;
-    align-items: center !important;
-    gap: 16px !important;
-    flex: 1 !important;
+    flex-direction: column !important;
+    gap: var(--sikshya-space-2) !important;
 }
 
 .sikshya-modal-title-wrapper {
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: var(--sikshya-space-3) !important;
 }
 
 .sikshya-modal-icon {
@@ -229,270 +368,345 @@ body .sikshya-modal-overlay {
     justify-content: center !important;
     width: 40px !important;
     height: 40px !important;
-    background: var(--sikshya-primary-color) !important;
-    border-radius: 8px !important;
-    color: white !important;
+    background: var(--sikshya-primary-bg) !important;
+    border-radius: var(--sikshya-radius-lg) !important;
+    color: var(--sikshya-primary) !important;
+    flex-shrink: 0 !important;
 }
 
 .sikshya-modal-icon svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 24px !important;
+    height: 24px !important;
 }
 
 .sikshya-modal-title {
-    font-size: 18px !important;
-    font-weight: 600 !important;
-    color: var(--sikshya-text-primary) !important;
+    font-size: var(--sikshya-text-xl) !important;
+    font-weight: var(--sikshya-font-semibold) !important;
+    color: var(--sikshya-gray-800) !important;
     margin: 0 !important;
 }
 
 .sikshya-modal-subtitle {
-    font-size: 14px !important;
-    color: var(--sikshya-text-secondary) !important;
-    margin: 4px 0 0 0 !important;
+    color: var(--sikshya-gray-500) !important;
+    font-size: var(--sikshya-text-sm) !important;
+    margin: 0 !important;
+    line-height: var(--sikshya-leading-normal) !important;
 }
 
 .sikshya-modal-close {
+    position: absolute !important;
+    top: var(--sikshya-space-5) !important;
+    right: var(--sikshya-space-5) !important;
     background: none !important;
     border: none !important;
-    color: var(--sikshya-text-secondary) !important;
+    color: var(--sikshya-gray-400) !important;
     cursor: pointer !important;
-    padding: 8px !important;
-    border-radius: 6px !important;
-    transition: all 0.2s ease !important;
+    padding: var(--sikshya-space-2) !important;
+    border-radius: var(--sikshya-radius-md) !important;
+    transition: var(--sikshya-transition-colors) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .sikshya-modal-close:hover {
-    background: var(--sikshya-bg-hover) !important;
-    color: var(--sikshya-text-primary) !important;
+    background: var(--sikshya-gray-100) !important;
+    color: var(--sikshya-gray-600) !important;
 }
 
 .sikshya-modal-footer {
+    padding: var(--sikshya-space-4) var(--sikshya-space-6) !important;
+    background: var(--sikshya-gray-50) !important;
+    border-top: 1px solid var(--sikshya-gray-200) !important;
     display: flex !important;
-    align-items: center !important;
     justify-content: flex-end !important;
-    gap: 12px !important;
-    padding: 0 32px 24px !important;
-    border-top: 1px solid var(--sikshya-border-color) !important;
-    margin-top: 0 !important;
+    gap: var(--sikshya-space-3) !important;
 }
 
-/* Hide quiz card */
-.sikshya-content-type-quiz {
-    display: none !important;
+/* Responsive modal sizing for content type forms */
+@media (max-width: 1200px) {
+    .sikshya-modal-full {
+        max-width: 700px !important;
+    }
 }
 
-/* Remove margin from content type icon */
-.sikshya-content-type-icon {
+@media (max-width: 768px) {
+    .sikshya-modal-full {
+        max-width: 95% !important;
+        width: 95% !important;
+    }
+}
+
+/* ========================================
+   LESSON FORM STYLES
+======================================== */
+
+.sikshya-lesson-form {
+    max-width: 100%;
+}
+
+.sikshya-lesson-form .sikshya-form-section {
+    margin-bottom: 32px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.sikshya-lesson-form .sikshya-form-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sikshya-lesson-form .sikshya-form-section-title svg {
+    color: var(--sikshya-primary);
+}
+
+.sikshya-lesson-form .sikshya-form-row-small {
+    margin-bottom: 20px;
+}
+
+.sikshya-lesson-form .sikshya-form-row-small:last-child {
     margin-bottom: 0;
 }
 
-/* Content Type Selection Page Styles */
-.sikshya-content-type-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    padding: 24px 0;
-}
-
-.sikshya-content-type-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 32px 24px;
-    background: white;
-    border: 2px solid var(--sikshya-border-color);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.sikshya-content-type-card:hover {
-    border-color: var(--sikshya-primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.sikshya-content-type-card.selected {
-    border-color: var(--sikshya-primary-color);
-    background: var(--sikshya-primary-bg);
-}
-
-.sikshya-content-type-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    transition: all 0.3s ease;
-}
-
-.sikshya-content-type-text .sikshya-content-type-icon {
-    background: #E3F2FD;
-    color: #1976D2;
-}
-
-.sikshya-content-type-video .sikshya-content-type-icon {
-    background: #F3E5F5;
-    color: #7B1FA2;
-}
-
-.sikshya-content-type-audio .sikshya-content-type-icon {
-    background: #E8F5E8;
-    color: #388E3C;
-}
-
-.sikshya-content-type-quiz .sikshya-content-type-icon {
-    background: #FFF3E0;
-    color: #F57C00;
-}
-
-.sikshya-content-type-assignment .sikshya-content-type-icon {
-    background: #FCE4EC;
-    color: #C2185B;
-}
-
-.sikshya-content-type-card:hover .sikshya-content-type-icon {
-    transform: scale(1.1);
-}
-
-.sikshya-content-type-content h4 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--sikshya-text-primary);
-    margin: 0 0 8px 0;
-}
-
-.sikshya-content-type-content p {
+.sikshya-lesson-form .sikshya-form-row-small label {
+    display: block;
     font-size: 14px;
-    color: var(--sikshya-text-secondary);
-    margin: 0;
-    line-height: 1.5;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
 }
 
-/* Responsive adjustments */
+.sikshya-lesson-form .sikshya-form-row-small input,
+.sikshya-lesson-form .sikshya-form-row-small select,
+.sikshya-lesson-form .sikshya-form-row-small textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #111827;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.sikshya-lesson-form .sikshya-form-row-small input:focus,
+.sikshya-lesson-form .sikshya-form-row-small select:focus,
+.sikshya-lesson-form .sikshya-form-row-small textarea:focus {
+    outline: none;
+    border-color: var(--sikshya-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sikshya-lesson-form .sikshya-form-row-small textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.sikshya-lesson-form .sikshya-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.sikshya-lesson-form .sikshya-form-row-small small {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* Upload Areas */
+.sikshya-lesson-form .sikshya-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f9fafb;
+}
+
+.sikshya-lesson-form .sikshya-upload-area:hover {
+    border-color: var(--sikshya-primary);
+    background: #f0f9ff;
+}
+
+.sikshya-lesson-form .sikshya-upload-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.sikshya-lesson-form .sikshya-upload-area:hover .sikshya-upload-icon {
+    color: var(--sikshya-primary);
+}
+
+.sikshya-lesson-form .sikshya-upload-area strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.sikshya-lesson-form .sikshya-upload-area small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Form Actions */
+.sikshya-lesson-form .sikshya-form-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 24px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-top: 32px;
+}
+
+.sikshya-lesson-form .sikshya-form-actions .sikshya-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.sikshya-lesson-form .sikshya-form-actions .sikshya-btn-primary {
+    background: var(--sikshya-primary);
+    color: white;
+}
+
+.sikshya-lesson-form .sikshya-form-actions .sikshya-btn-primary:hover {
+    background: var(--sikshya-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.sikshya-lesson-form .sikshya-form-actions .sikshya-btn-secondary {
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.sikshya-lesson-form .sikshya-form-actions .sikshya-btn-secondary:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* Progress Bar */
+.sikshya-lesson-form .sikshya-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 12px 0 8px;
+}
+
+.sikshya-lesson-form .sikshya-progress-fill {
+    height: 100%;
+    background: var(--sikshya-primary);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .sikshya-content-type-grid {
         grid-template-columns: 1fr;
         gap: 16px;
     }
     
-    .sikshya-content-type-card {
-        padding: 24px 16px;
+    .sikshya-lesson-form .sikshya-form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
     
-    .sikshya-content-type-icon {
-        width: 48px;
-        height: 48px;
+    .sikshya-lesson-form .sikshya-form-actions {
+        flex-direction: column;
+        align-items: stretch;
     }
     
-    .sikshya-content-type-content h4 {
-        font-size: 16px;
-    }
-    
-    .sikshya-content-type-content p {
-        font-size: 13px;
+    .sikshya-lesson-form .sikshya-form-actions .sikshya-btn {
+        justify-content: center;
     }
 }
 
-/* Dashboard Layout Styles */
-.sikshya-dashboard {
-    min-height: 100vh;
-    background: var(--sikshya-bg-primary);
+/* ========================================
+   FORM VALIDATION STYLES
+======================================== */
+
+.sikshya-lesson-form .sikshya-form-row-small.error input,
+.sikshya-lesson-form .sikshya-form-row-small.error select,
+.sikshya-lesson-form .sikshya-form-row-small.error textarea {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-.sikshya-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 32px;
-    background: white;
-    border-bottom: 1px solid var(--sikshya-border-color);
-    margin-bottom: 24px;
-}
-
-.sikshya-header-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sikshya-header-title h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--sikshya-text-primary);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sikshya-header-title svg {
-    color: var(--sikshya-primary-color);
-}
-
-.sikshya-version {
-    background: var(--sikshya-primary-color);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
+.sikshya-lesson-form .sikshya-form-row-small.error .error-message {
+    color: #ef4444;
     font-size: 12px;
-    font-weight: 500;
+    margin-top: 4px;
 }
 
-.sikshya-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.sikshya-lesson-form .sikshya-form-row-small.success input,
+.sikshya-lesson-form .sikshya-form-row-small.success select,
+.sikshya-lesson-form .sikshya-form-row-small.success textarea {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-.sikshya-main-content {
-    padding: 0 32px 32px;
+/* ========================================
+   LOADING STATES
+======================================== */
+
+.sikshya-lesson-form.loading {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
-.sikshya-content-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    overflow: hidden;
+.sikshya-lesson-form.loading .sikshya-form-actions .sikshya-btn-primary {
+    position: relative;
+    color: transparent;
 }
 
-.sikshya-content-card-header {
-    padding: 24px 32px;
-    border-bottom: 1px solid var(--sikshya-border-color);
+.sikshya-lesson-form.loading .sikshya-form-actions .sikshya-btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-.sikshya-content-card-header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.sikshya-content-card-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--sikshya-text-primary);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sikshya-content-card-title svg {
-    color: var(--sikshya-primary-color);
-}
-
-.sikshya-content-card-subtitle {
-    font-size: 14px;
-    color: var(--sikshya-text-secondary);
-    margin: 0;
-}
-
-.sikshya-content-card-body {
-    padding: 32px;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
