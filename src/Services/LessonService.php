@@ -34,11 +34,127 @@ class LessonService
             throw new \InvalidArgumentException('Course ID is required');
         }
 
+        // Validate content type
+        $valid_types = ['text', 'video', 'audio', 'assignment', 'quiz'];
+        if (!empty($data['type']) && !in_array($data['type'], $valid_types)) {
+            throw new \InvalidArgumentException('Invalid lesson type');
+        }
+
         // Set default values
         $data['status'] = $data['status'] ?? 'draft';
         $data['author_id'] = $data['author_id'] ?? get_current_user_id();
+        $data['type'] = $data['type'] ?? 'text';
+
+        // Validate content type specific fields
+        $this->validateContentTypeFields($data);
 
         return $this->lessonRepository->create($data);
+    }
+
+    /**
+     * Validate content type specific fields
+     * 
+     * @param array $data
+     * @return void
+     */
+    private function validateContentTypeFields(array $data): void
+    {
+        $type = $data['type'] ?? 'text';
+
+        switch ($type) {
+            case 'text':
+                $this->validateTextLessonFields($data);
+                break;
+            case 'video':
+                $this->validateVideoLessonFields($data);
+                break;
+            case 'audio':
+                $this->validateAudioLessonFields($data);
+                break;
+            case 'assignment':
+                $this->validateAssignmentFields($data);
+                break;
+            case 'quiz':
+                $this->validateQuizFields($data);
+                break;
+        }
+    }
+
+    /**
+     * Validate text lesson fields
+     * 
+     * @param array $data
+     * @return void
+     */
+    private function validateTextLessonFields(array $data): void
+    {
+        if (empty($data['content'])) {
+            throw new \InvalidArgumentException('Lesson content is required for text lessons');
+        }
+    }
+
+    /**
+     * Validate video lesson fields
+     * 
+     * @param array $data
+     * @return void
+     */
+    private function validateVideoLessonFields(array $data): void
+    {
+        $video_source = $data['video_source'] ?? 'upload';
+        
+        if ($video_source === 'upload' && empty($data['video_file'])) {
+            throw new \InvalidArgumentException('Video file is required for upload source');
+        }
+        
+        if ($video_source === 'youtube' && empty($data['video_url'])) {
+            throw new \InvalidArgumentException('Video URL is required for YouTube source');
+        }
+    }
+
+    /**
+     * Validate audio lesson fields
+     * 
+     * @param array $data
+     * @return void
+     */
+    private function validateAudioLessonFields(array $data): void
+    {
+        $audio_source = $data['audio_source'] ?? 'upload';
+        
+        if ($audio_source === 'upload' && empty($data['audio_file'])) {
+            throw new \InvalidArgumentException('Audio file is required for upload source');
+        }
+        
+        if ($audio_source === 'spotify' && empty($data['audio_url'])) {
+            throw new \InvalidArgumentException('Audio URL is required for Spotify source');
+        }
+    }
+
+    /**
+     * Validate assignment fields
+     * 
+     * @param array $data
+     * @return void
+     */
+    private function validateAssignmentFields(array $data): void
+    {
+        if (empty($data['instructions'])) {
+            throw new \InvalidArgumentException('Assignment instructions are required');
+        }
+    }
+
+    /**
+     * Validate quiz fields
+     * 
+     * @param array $data
+     * @return void
+     */
+    private function validateQuizFields(array $data): void
+    {
+        if (empty($data['content'])) {
+            throw new \InvalidArgumentException('Quiz description is required');
+        }
     }
 
     public function updateLesson(int $id, array $data): bool

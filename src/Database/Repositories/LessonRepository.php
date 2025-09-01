@@ -250,6 +250,165 @@ class LessonRepository
         if (isset($data['is_free'])) {
             update_post_meta($post_id, '_sikshya_is_free', (bool) $data['is_free']);
         }
+
+        // Content type specific meta fields
+        $this->setContentTypeMetaFields($post_id, $data);
+    }
+
+    /**
+     * Set content type specific meta fields
+     * 
+     * @param int $post_id
+     * @param array $data
+     * @return void
+     */
+    private function setContentTypeMetaFields(int $post_id, array $data): void
+    {
+        $content_type = $data['type'] ?? 'text';
+
+        switch ($content_type) {
+            case 'text':
+                $this->setTextLessonMeta($post_id, $data);
+                break;
+            case 'video':
+                $this->setVideoLessonMeta($post_id, $data);
+                break;
+            case 'audio':
+                $this->setAudioLessonMeta($post_id, $data);
+                break;
+            case 'assignment':
+                $this->setAssignmentMeta($post_id, $data);
+                break;
+            case 'quiz':
+                $this->setQuizMeta($post_id, $data);
+                break;
+        }
+    }
+
+    /**
+     * Set text lesson specific meta fields
+     * 
+     * @param int $post_id
+     * @param array $data
+     * @return void
+     */
+    private function setTextLessonMeta(int $post_id, array $data): void
+    {
+        $meta_fields = [
+            'difficulty', 'objectives', 'takeaways', 'resources', 'completion',
+            'comments', 'progress', 'print', 'prerequisites', 'tags', 'seo',
+            'format', 'reading_level', 'word_count', 'language', 'toc', 'search', 'related'
+        ];
+
+        foreach ($meta_fields as $field) {
+            if (isset($data[$field])) {
+                $value = $data[$field];
+                if (is_array($value)) {
+                    $value = wp_json_encode($value);
+                }
+                update_post_meta($post_id, '_sikshya_' . $field, $value);
+            }
+        }
+    }
+
+    /**
+     * Set video lesson specific meta fields
+     * 
+     * @param int $post_id
+     * @param array $data
+     * @return void
+     */
+    private function setVideoLessonMeta(int $post_id, array $data): void
+    {
+        $meta_fields = [
+            'difficulty', 'video_source', 'video_url', 'video_file', 'video_quality',
+            'autoplay', 'show_controls', 'allow_download', 'transcript', 'subtitles'
+        ];
+
+        foreach ($meta_fields as $field) {
+            if (isset($data[$field])) {
+                $value = $data[$field];
+                if (is_array($value)) {
+                    $value = wp_json_encode($value);
+                }
+                update_post_meta($post_id, '_sikshya_' . $field, $value);
+            }
+        }
+    }
+
+    /**
+     * Set audio lesson specific meta fields
+     * 
+     * @param int $post_id
+     * @param array $data
+     * @return void
+     */
+    private function setAudioLessonMeta(int $post_id, array $data): void
+    {
+        $meta_fields = [
+            'difficulty', 'audio_source', 'audio_url', 'audio_file', 'audio_quality',
+            'autoplay', 'show_controls', 'allow_download', 'transcript'
+        ];
+
+        foreach ($meta_fields as $field) {
+            if (isset($data[$field])) {
+                $value = $data[$field];
+                if (is_array($value)) {
+                    $value = wp_json_encode($value);
+                }
+                update_post_meta($post_id, '_sikshya_' . $field, $value);
+            }
+        }
+    }
+
+    /**
+     * Set assignment specific meta fields
+     * 
+     * @param int $post_id
+     * @param array $data
+     * @return void
+     */
+    private function setAssignmentMeta(int $post_id, array $data): void
+    {
+        $meta_fields = [
+            'difficulty', 'instructions', 'objectives', 'criteria', 'submission_type',
+            'file_types', 'max_file_size', 'due_date', 'points', 'attempts'
+        ];
+
+        foreach ($meta_fields as $field) {
+            if (isset($data[$field])) {
+                $value = $data[$field];
+                if (is_array($value)) {
+                    $value = wp_json_encode($value);
+                }
+                update_post_meta($post_id, '_sikshya_' . $field, $value);
+            }
+        }
+    }
+
+    /**
+     * Set quiz specific meta fields
+     * 
+     * @param int $post_id
+     * @param array $data
+     * @return void
+     */
+    private function setQuizMeta(int $post_id, array $data): void
+    {
+        $meta_fields = [
+            'difficulty', 'time_limit', 'passing_score', 'attempts',
+            'randomize_questions', 'show_results', 'show_correct_answers'
+        ];
+
+        foreach ($meta_fields as $field) {
+            if (isset($data[$field])) {
+                $value = $data[$field];
+                if (is_array($value)) {
+                    $value = wp_json_encode($value);
+                }
+                update_post_meta($post_id, '_sikshya_' . $field, $value);
+            }
+        }
     }
 
     public function getMeta(int $post_id, string $key, bool $single = true)

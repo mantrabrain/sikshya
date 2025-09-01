@@ -342,6 +342,9 @@
         // Show loading message
         showNotification('Saving lesson...', 'info');
         
+        // Add content type to form data
+        formData.append('content_type', contentType);
+        
         $.ajax({
             url: sikshya_ajax.ajax_url,
             type: 'POST',
@@ -352,7 +355,7 @@
                 $form.removeClass('loading');
                 
                 if (response.success) {
-                    showNotification('Lesson saved successfully!', 'success');
+                    showNotification(response.data.message || 'Lesson saved successfully!', 'success');
                     
                     // Close modal and redirect after a short delay
                     setTimeout(function() {

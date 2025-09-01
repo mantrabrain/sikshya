@@ -55,6 +55,10 @@ class AjaxManager
         $this->handlers['course'] = new CourseAjax($this->plugin);
         error_log('Sikshya: CourseAjax handler created');
         
+        // Lesson AJAX handler
+        $this->handlers['lesson'] = new \Sikshya\Ajax\LessonAjax($this->plugin);
+        error_log('Sikshya: LessonAjax handler created');
+        
         // Settings AJAX handler
         $this->handlers['settings'] = new SettingsAjax($this->plugin);
         error_log('Sikshya: SettingsAjax handler created');

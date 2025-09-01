@@ -17,18 +17,38 @@ if (!defined('ABSPATH')) {
     
     <div class="sikshya-form-row-small">
         <label>Lesson Title *</label>
-        <input type="text" id="text-lesson-title" placeholder="Enter lesson title" required>
+        <input type="text" id="text-lesson-title" name="title" placeholder="Enter lesson title" required>
+    </div>
+    
+    <div class="sikshya-form-row-small">
+        <label>Course *</label>
+        <select id="text-lesson-course" name="course_id" required>
+            <option value="">Select Course</option>
+            <?php
+            $courses = get_posts([
+                'post_type' => 'sikshya_course',
+                'post_status' => 'publish',
+                'posts_per_page' => -1,
+                'orderby' => 'title',
+                'order' => 'ASC'
+            ]);
+            
+            foreach ($courses as $course) {
+                echo '<option value="' . esc_attr($course->ID) . '">' . esc_html($course->post_title) . '</option>';
+            }
+            ?>
+        </select>
     </div>
     
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Estimated Reading  Time (minutes)</label>
-            <input type="number" id="text-lesson-duration" placeholder="15" min="1">
+            <input type="number" id="text-lesson-duration" name="duration" placeholder="15" min="1">
         </div>
         
         <div class="sikshya-form-row-small">
             <label>Difficulty Level</label>
-            <select id="text-lesson-difficulty">
+            <select id="text-lesson-difficulty" name="difficulty">
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
@@ -42,18 +62,18 @@ if (!defined('ABSPATH')) {
     
     <div class="sikshya-form-row-small">
         <label>Lesson Content *</label>
-        <textarea id="text-lesson-content" placeholder="Enter your lesson content here..." required style="min-height: 400px;"></textarea>
+        <textarea id="text-lesson-content" name="content" placeholder="Enter your lesson content here..." required style="min-height: 400px;"></textarea>
         <small>You can use HTML formatting for rich text content</small>
     </div>
     
     <div class="sikshya-form-row-small">
         <label>Learning Objectives</label>
-        <textarea id="text-lesson-objectives" placeholder="What will students learn from this lesson? (One objective per line)"></textarea>
+        <textarea id="text-lesson-objectives" name="objectives" placeholder="What will students learn from this lesson? (One objective per line)"></textarea>
     </div>
     
     <div class="sikshya-form-row-small">
         <label>Key Takeaways</label>
-        <textarea id="text-lesson-takeaways" placeholder="Main points students should remember from this lesson"></textarea>
+        <textarea id="text-lesson-takeaways" name="takeaways" placeholder="Main points students should remember from this lesson"></textarea>
     </div>
 </div>
 
@@ -76,7 +96,7 @@ if (!defined('ABSPATH')) {
     
     <div class="sikshya-form-row-small">
         <label>Additional Resources</label>
-        <textarea id="text-lesson-resources" placeholder="Links to additional resources, downloads, external readings, etc."></textarea>
+        <textarea id="text-lesson-resources" name="resources" placeholder="Links to additional resources, downloads, external readings, etc."></textarea>
     </div>
     
     <div class="sikshya-form-row-small">
@@ -100,7 +120,7 @@ if (!defined('ABSPATH')) {
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Require Completion</label>
-            <select id="text-lesson-completion">
+            <select id="text-lesson-completion" name="completion">
                 <option value="yes">Yes (Mark as read)</option>
                 <option value="no">No</option>
             </select>
@@ -108,7 +128,7 @@ if (!defined('ABSPATH')) {
         
         <div class="sikshya-form-row-small">
             <label>Allow Comments</label>
-            <select id="text-lesson-comments">
+            <select id="text-lesson-comments" name="comments">
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
@@ -118,7 +138,7 @@ if (!defined('ABSPATH')) {
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Show Progress</label>
-            <select id="text-lesson-progress">
+            <select id="text-lesson-progress" name="progress">
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
@@ -126,7 +146,7 @@ if (!defined('ABSPATH')) {
         
         <div class="sikshya-form-row-small">
             <label>Print Friendly</label>
-            <select id="text-lesson-print">
+            <select id="text-lesson-print" name="print">
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
@@ -138,24 +158,24 @@ if (!defined('ABSPATH')) {
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Prerequisites</label>
-            <textarea id="text-lesson-prerequisites" placeholder="What should students know before this lesson?"></textarea>
+            <textarea id="text-lesson-prerequisites" name="prerequisites" placeholder="What should students know before this lesson?"></textarea>
         </div>
         
         <div class="sikshya-form-row-small">
             <label>Tags</label>
-            <input type="text" id="text-lesson-tags" placeholder="Enter tags separated by commas">
+            <input type="text" id="text-lesson-tags" name="tags" placeholder="Enter tags separated by commas">
         </div>
     </div>
     
     <div class="sikshya-form-row-small">
         <label>SEO Description</label>
-        <textarea id="text-lesson-seo" placeholder="SEO-friendly description for search engines"></textarea>
+        <textarea id="text-lesson-seo" name="seo" placeholder="SEO-friendly description for search engines"></textarea>
     </div>
     
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Lesson Format</label>
-            <select id="text-lesson-format">
+            <select id="text-lesson-format" name="format">
                 <option value="article">Article</option>
                 <option value="tutorial">Tutorial</option>
                 <option value="guide">Guide</option>
@@ -166,7 +186,7 @@ if (!defined('ABSPATH')) {
         
         <div class="sikshya-form-row-small">
             <label>Reading Level</label>
-            <select id="text-lesson-reading-level">
+            <select id="text-lesson-reading-level" name="reading_level">
                 <option value="basic">Basic</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
@@ -178,12 +198,12 @@ if (!defined('ABSPATH')) {
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Estimated Word Count</label>
-            <input type="number" id="text-lesson-word-count" placeholder="1000" min="1">
+            <input type="number" id="text-lesson-word-count" name="word_count" placeholder="1000" min="1">
         </div>
         
         <div class="sikshya-form-row-small">
             <label>Language</label>
-            <select id="text-lesson-language">
+            <select id="text-lesson-language" name="language">
                 <option value="en">English</option>
                 <option value="es">Spanish</option>
                 <option value="fr">French</option>
@@ -201,7 +221,7 @@ if (!defined('ABSPATH')) {
     <div class="sikshya-form-grid-2">
         <div class="sikshya-form-row-small">
             <label>Include Table of Contents</label>
-            <select id="text-lesson-toc">
+            <select id="text-lesson-toc" name="toc">
                 <option value="auto">Auto-generate</option>
                 <option value="manual">Manual</option>
                 <option value="no">No</option>
@@ -210,7 +230,7 @@ if (!defined('ABSPATH')) {
         
         <div class="sikshya-form-row-small">
             <label>Enable Search</label>
-            <select id="text-lesson-search">
+            <select id="text-lesson-search" name="search">
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
@@ -219,5 +239,5 @@ if (!defined('ABSPATH')) {
     
     <div class="sikshya-form-row-small">
         <label>Related Lessons</label>
-        <textarea id="text-lesson-related" placeholder="Enter lesson IDs or titles of related lessons"></textarea>
+        <textarea id="text-lesson-related" name="related" placeholder="Enter lesson IDs or titles of related lessons"></textarea>
     </div> 
