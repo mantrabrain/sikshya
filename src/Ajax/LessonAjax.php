@@ -651,3 +651,4 @@ class LessonAjax extends AjaxAbstract
         }
     }
 }
+
