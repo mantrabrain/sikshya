@@ -12,7 +12,29 @@
     // Initialize when document is ready
     $(document).ready(function() {
         initLessonForms();
+        initLessonTabs();
     });
+
+    /**
+     * Initialize lesson tabs functionality
+     */
+    function initLessonTabs() {
+        // Handle tab button clicks
+        $(document).on('click', '.sikshya-tab-btn', function(e) {
+            e.preventDefault();
+            
+            const $btn = $(this);
+            const tabId = $btn.data('tab');
+            
+            // Remove active class from all buttons and panels
+            $('.sikshya-tab-btn').removeClass('active');
+            $('.sikshya-tab-panel').removeClass('active');
+            
+            // Add active class to clicked button and corresponding panel
+            $btn.addClass('active');
+            $('#' + tabId).addClass('active');
+        });
+    }
 
     /**
      * Initialize lesson forms
@@ -40,12 +62,15 @@
             showContentTypeSelection();
         });
 
-        // Handle content type card clicks
+        // Handle content type card clicks (single lesson page context)
         $(document).on('click', '.sikshya-content-type-card', function(e) {
             e.preventDefault();
             const contentType = $(this).data('content-type');
             if (contentType) {
-                showLessonForm(contentType);
+                // Redirect to lesson form page
+                const url = new URL(window.location.href);
+                url.searchParams.set('type', contentType);
+                window.location.href = url.toString();
             }
         });
 
@@ -73,9 +98,16 @@
             }
         });
 
-        // Handle lesson modal continue button
+        // Handle lesson modal continue button (only for standalone lesson creation)
         $(document).on('click', '.sikshya-modal-footer .sikshya-btn-primary', function(e) {
             e.preventDefault();
+            
+            // Check if we're in course builder context - if so, let course-builder.js handle it
+            if (window.location.href.includes('sikshya-add-course') || 
+                document.querySelector('.sikshya-course-builder')) {
+                return; // Let course-builder.js handle this
+            }
+            
             if (!$(this).prop('disabled')) {
                 proceedToContentForm();
             }

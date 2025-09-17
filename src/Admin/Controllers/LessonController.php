@@ -385,9 +385,17 @@ class LessonController
                             </h3>
                             <p class="sikshya-content-card-subtitle"><?php _e('Create a new', 'sikshya'); ?> <?php echo esc_html($type); ?> <?php _e('lesson for your course', 'sikshya'); ?></p>
                         </div>
+                        <div class="sikshya-content-card-header-right">
+                            <button type="submit" form="sikshya-lesson-form" class="sikshya-btn sikshya-btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <?php _e('Save Lesson', 'sikshya'); ?>
+                            </button>
+                        </div>
                     </div>
                     <div class="sikshya-content-card-body">
-                        <form class="sikshya-lesson-form" data-content-type="<?php echo esc_attr($type); ?>">
+                        <form id="sikshya-lesson-form" class="sikshya-lesson-form" data-content-type="<?php echo esc_attr($type); ?>">
                             <?php wp_nonce_field('sikshya_lesson_nonce', 'sikshya_lesson_nonce'); ?>
                             <input type="hidden" name="action" value="sikshya_save_lesson">
                             <input type="hidden" name="content_type" value="<?php echo esc_attr($type); ?>">

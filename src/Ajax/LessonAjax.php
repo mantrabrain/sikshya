@@ -60,7 +60,7 @@ class LessonAjax extends AjaxAbstract
      * 
      * @return void
      */
-    private function initHooks(): void
+    protected function initHooks(): void
     {
         // Lesson CRUD operations
         add_action('wp_ajax_sikshya_save_lesson', [$this, 'handleSaveLesson']);

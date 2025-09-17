@@ -316,10 +316,36 @@ class AdminAssetsService
                 SIKSHYA_VERSION
             );
 
+            // Enqueue lessons CSS for lesson forms in course builder
+            wp_enqueue_style(
+                'sikshya-lessons',
+                $this->plugin->getAssetUrl('admin/css/lessons.css'),
+                ['sikshya-course-builder'],
+                SIKSHYA_VERSION
+            );
+
             wp_enqueue_script(
                 'sikshya-course-builder',
                 $this->plugin->getAssetUrl('admin/js/course-builder.js'),
                 ['jquery', 'sikshya-admin'],
+                SIKSHYA_VERSION,
+                true
+            );
+
+            // Enqueue modal JavaScript for lesson forms
+            wp_enqueue_script(
+                'sikshya-modal',
+                $this->plugin->getAssetUrl('admin/js/modal.js'),
+                ['jquery'],
+                SIKSHYA_VERSION,
+                true
+            );
+
+            // Enqueue lessons JavaScript for lesson forms in course builder
+            wp_enqueue_script(
+                'sikshya-lessons',
+                $this->plugin->getAssetUrl('admin/js/lessons.js'),
+                ['jquery', 'sikshya-course-builder', 'sikshya-modal'],
                 SIKSHYA_VERSION,
                 true
             );

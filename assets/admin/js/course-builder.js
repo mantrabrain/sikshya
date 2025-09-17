@@ -143,7 +143,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize content type modal event handlers
 function initializeContentTypeModalHandlers() {
-    // Handle content type card clicks
+    // Handle content type card clicks (course builder specific)
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.sikshya-content-type-card')) {
+            e.preventDefault();
+            e.stopPropagation(); // Prevent lessons.js handler from firing
+            const contentType = e.target.closest('.sikshya-content-type-card').getAttribute('data-content-type');
+            if (contentType) {
+                // Show content type selection modal in course builder context
+                showContentTypeSelectionModal();
+            }
+        }
+    });
+
+    // Handle content type selection in modal
     document.addEventListener('click', function(e) {
         if (e.target.closest('.sikshya-content-type')) {
             e.preventDefault();
@@ -171,8 +184,19 @@ function initializeContentTypeModalHandlers() {
         
         if (e.target.closest('.sikshya-modal-footer .sikshya-btn-primary')) {
             e.preventDefault();
-            if (!e.target.closest('.sikshya-btn-primary').disabled) {
-                proceedToContentForm();
+            e.stopPropagation(); // Prevent lessons.js handler from firing
+            
+            const button = e.target.closest('.sikshya-btn-primary');
+            if (!button.disabled) {
+                // Get selected content type
+                const selectedType = document.querySelector('.sikshya-content-type.selected');
+                if (selectedType) {
+                    const contentType = selectedType.getAttribute('data-content-type');
+                    if (contentType) {
+                        // Load form in modal instead of redirecting
+                        showContentFormModal(contentType);
+                    }
+                }
             }
         }
     });
@@ -865,6 +889,11 @@ function showContentTypeModal() {
     });
 }
 
+// Alias for course builder context
+function showContentTypeSelectionModal() {
+    showContentTypeModal();
+}
+
 function selectContentType(type) {
     console.log('selectContentType called with type:', type); // Debug log
     
@@ -963,7 +992,7 @@ function showFullWidthModal(contentType) {
         const contentTypeInfo = getContentTypeInfo(contentType);
         
         modal.innerHTML = `
-            <div class="sikshya-modal sikshya-modal-full">
+            <div class="sikshya-modal sikshya-modal-lesson-form">
                 <div class="sikshya-modal-header">
                     <button class="sikshya-modal-close" onclick="closeModal(this)">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
