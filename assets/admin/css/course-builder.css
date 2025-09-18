@@ -3506,6 +3506,116 @@ body .sikshya-modal-overlay {
 
 
 
+/* Bulk Actions Toolbar */
+.sikshya-bulk-actions-toolbar {
+    display: flex; /* Always visible */
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: var(--sikshya-radius-lg);
+    padding: var(--sikshya-space-4);
+    margin-bottom: var(--sikshya-space-4);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 10;
+}
+
+.sikshya-bulk-actions-left {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-4);
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-select-all-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+    margin-left: 40px; /* Align with chapter checkboxes */
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-select-all-checkbox label {
+    font-weight: var(--sikshya-font-medium);
+    color: var(--sikshya-text-primary);
+    cursor: pointer;
+    margin: 0;
+    font-size: var(--sikshya-text-sm);
+}
+
+.sikshya-selected-count {
+    font-weight: var(--sikshya-font-semibold);
+    color: var(--sikshya-text-primary);
+    font-size: var(--sikshya-text-sm);
+}
+
+.sikshya-bulk-actions-right {
+    display: flex;
+    align-items: center;
+    gap: var(--sikshya-space-2);
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-btn {
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-btn-danger {
+    background: #dc3545 !important;
+    color: #ffffff !important;
+    border: 1px solid #dc3545 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+    font-weight: 500 !important;
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-btn-danger:hover {
+    background: #c82333 !important;
+    border-color: #bd2130 !important;
+    opacity: 1 !important;
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-btn-danger:disabled {
+    background: #6c757d !important;
+    color: #ffffff !important;
+    border-color: #6c757d !important;
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-btn-secondary {
+    background: #ffffff !important;
+    color: #6c757d !important;
+    border-color: #dee2e6 !important;
+}
+
+.sikshya-bulk-actions-toolbar .sikshya-btn-secondary:hover {
+    background: #e9ecef !important;
+    border-color: #adb5bd !important;
+    color: #495057 !important;
+}
+
+
+/* Selected item states */
+.sikshya-chapter-card.sikshya-selected,
+.sikshya-lesson-item.sikshya-selected {
+    border-color: var(--sikshya-primary);
+    background: rgba(var(--sikshya-primary-rgb), 0.05);
+    box-shadow: 0 0 0 2px rgba(var(--sikshya-primary-rgb), 0.2);
+}
+
+.sikshya-chapter-card.sikshya-selected .sikshya-chapter-header,
+.sikshya-lesson-item.sikshya-selected {
+    background: rgba(var(--sikshya-primary-rgb), 0.08);
+}
+
 /* Curriculum Actions */
 .sikshya-curriculum-actions {
     display: flex;

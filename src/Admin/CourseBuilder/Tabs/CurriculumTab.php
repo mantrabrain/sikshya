@@ -112,10 +112,35 @@ class CurriculumTab extends AbstractTab
         
         ob_start();
         ?>
+        
+        <!-- Bulk Actions Toolbar (Always visible at top) -->
+        <div class="sikshya-bulk-actions-toolbar" id="bulk-actions-toolbar">
+            <div class="sikshya-bulk-actions-left">
+                <div class="sikshya-select-all-checkbox">
+                    <input type="checkbox" id="select-all-chapters" class="sikshya-checkbox sikshya-select-all">
+                    <label for="select-all-chapters">Select All Chapters</label>
+                </div>
+                <span class="sikshya-selected-count">
+                    <span id="selected-count">0</span> items selected
+                </span>
+            </div>
+            <div class="sikshya-bulk-actions-right">
+                <button class="sikshya-btn sikshya-btn-danger sikshya-btn-sm" id="bulk-delete-btn" data-action="bulk-delete">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete Selected
+                </button>
+                <button class="sikshya-btn sikshya-btn-secondary sikshya-btn-sm" data-action="clear-selection">
+                    Clear Selection
+                </button>
+            </div>
+        </div>
+        
         <div class="sikshya-curriculum-builder">
             <?php echo $curriculum_html; ?>
         </div>
-        
+
         <!-- Curriculum Actions -->
         <div class="sikshya-curriculum-actions">
             <button class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
@@ -133,6 +158,7 @@ class CurriculumTab extends AbstractTab
                 </svg>
                 <?php _e('Load Sample Chapter', 'sikshya'); ?>
             </button>
+            
             
             <div class="sikshya-action-divider"></div>
             
@@ -295,7 +321,7 @@ class CurriculumTab extends AbstractTab
              data-duration="<?php echo esc_attr($duration); ?>"
              data-order="<?php echo esc_attr($order); ?>" draggable="true">
             
-            <div class="sikshya-chapter-header" onclick="toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')">
+            <div class="sikshya-chapter-header">
                 <div class="sikshya-sortable-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <circle cx="8" cy="6" r="1.5"></circle>
@@ -343,7 +369,7 @@ class CurriculumTab extends AbstractTab
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
                     </button>
-                    <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="event.stopPropagation(); toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Toggle Chapter">
+                    <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="toggleChapter('chapter-<?php echo esc_attr($chapter_id); ?>')" title="Toggle Chapter">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>

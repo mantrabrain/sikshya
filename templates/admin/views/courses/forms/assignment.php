@@ -58,25 +58,6 @@ if (!defined('ABSPATH')) {
                     <input type="text" id="assignment-lesson-title" name="title" placeholder="Enter assignment title" required>
                 </div>
                 
-                <div class="sikshya-form-row-small">
-                    <label>Course *</label>
-                    <select id="assignment-lesson-course" name="course_id" required>
-                        <option value="">Select Course</option>
-                        <?php
-                        $courses = get_posts([
-                            'post_type' => 'sikshya_course',
-                            'post_status' => 'publish',
-                            'posts_per_page' => -1,
-                            'orderby' => 'title',
-                            'order' => 'ASC'
-                        ]);
-                        
-                        foreach ($courses as $course) {
-                            echo '<option value="' . esc_attr($course->ID) . '">' . esc_html($course->post_title) . '</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
                 
                 <div class="sikshya-form-row-small">
                     <label>Description</label>

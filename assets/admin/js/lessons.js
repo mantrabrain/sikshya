@@ -370,6 +370,11 @@
         const contentType = $form.data('content-type');
         const formData = new FormData($form[0]);
         
+        // Check if we're in course builder context
+        const isCourseBuilder = $form.closest('.sikshya-modal-overlay').length > 0 && 
+                               (window.location.href.includes('sikshya-add-course') || 
+                                document.querySelector('.sikshya-course-builder'));
+        
         // Add loading state
         $form.addClass('loading');
         
@@ -389,13 +394,21 @@
                 $form.removeClass('loading');
                 
                 if (response.success) {
+                    const lessonId = response.data.lesson_id;
+                    const lessonTitle = response.data.lesson_title || 'Lesson';
+                    
                     showNotification(response.data.message || 'Lesson saved successfully!', 'success');
                     
-                    // Close modal and redirect after a short delay
-                    setTimeout(function() {
-                        closeCustomModal();
-                        window.location.href = sikshya_ajax.admin_url + 'admin.php?page=sikshya-lessons';
-                    }, 1500);
+                    if (isCourseBuilder && lessonId) {
+                        // Course builder context: Add lesson to chapter
+                        handleCourseBuilderLessonSave(lessonId, lessonTitle, contentType);
+                    } else {
+                        // Standalone lesson creation: Redirect to lessons page
+                        setTimeout(function() {
+                            closeCustomModal();
+                            window.location.href = sikshya_ajax.admin_url + 'admin.php?page=sikshya-lessons';
+                        }, 1500);
+                    }
                 } else {
                     showNotification(response.data.message || 'Error saving lesson', 'error');
                 }
@@ -406,6 +419,28 @@
                 console.error('Lesson save error:', error);
             }
         });
+    }
+
+    /**
+     * Handle lesson save in course builder context
+     */
+    function handleCourseBuilderLessonSave(lessonId, lessonTitle, contentType) {
+        // Close the lesson form modal
+        closeCustomModal();
+        
+        // Trigger custom event to notify course builder
+        const event = new CustomEvent('sikshya:lessonSaved', {
+            detail: {
+                lessonId: lessonId,
+                lessonTitle: lessonTitle,
+                contentType: contentType
+            }
+        });
+        
+        document.dispatchEvent(event);
+        
+        // Show success message
+        showNotification('Lesson added to chapter successfully!', 'success');
     }
 
     /**

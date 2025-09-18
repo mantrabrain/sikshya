@@ -139,6 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize content type modal event handlers
     initializeContentTypeModalHandlers();
+    
+    // Initialize bulk selection functionality
+    initializeBulkSelection();
+    
 });
 
 // Initialize content type modal event handlers
@@ -399,7 +403,6 @@ function showChapterModal() {
 
 function saveChapter() {
     const title = document.getElementById('chapter-title').value;
-    const description = document.getElementById('chapter-description').value;
     const duration = document.getElementById('chapter-duration').value;
     const order = document.getElementById('chapter-order').value;
     
@@ -447,7 +450,7 @@ function saveChapter() {
                 window.history.replaceState({}, '', url.toString());
                 
                 // Now create the chapter with the new course_id
-                createChapterWithCourseId(data.course_id, title, description, duration, order);
+                createChapterWithCourseId(data.course_id, title, duration, order);
             } else {
                 console.error('Sikshya: Failed to save course:', data);
                 alert('Failed to save course. Please try again.');
@@ -456,16 +459,15 @@ function saveChapter() {
     } else {
         console.log('Sikshya: Course already exists, creating chapter directly with courseId:', courseId);
         // Course already exists, create chapter directly
-        createChapterWithCourseId(courseId, title, description, duration, order);
+        createChapterWithCourseId(courseId, title, duration, order);
     }
 }
 
-function createChapterWithCourseId(courseId, title, description, duration, order) {
+function createChapterWithCourseId(courseId, title, duration, order) {
     console.log('Sikshya: Creating chapter with courseId:', courseId, 'title:', title);
     
     sikshyaAjax('sikshya_create_chapter', {
         title: title,
-        description: description,
         duration: duration,
         order: order,
         course_id: courseId
@@ -644,41 +646,13 @@ function deleteSelectedChapters() {
     const selectedChapters = document.querySelectorAll('.sikshya-chapter-card .sikshya-checkbox:checked');
     
     if (selectedChapters.length === 0) {
-        alert('Please select chapters to delete.');
+        sikshyaAlert('Please select chapters to delete.', 'warning');
         return;
     }
     
-    if (confirm('Are you sure you want to delete ' + selectedChapters.length + ' chapter(s)? This action cannot be undone.')) {
-        selectedChapters.forEach(checkbox => {
-            const chapterCard = checkbox.closest('.sikshya-chapter-card');
-            if (chapterCard) {
-                chapterCard.remove();
-            }
-        });
-        
-        // Update chapter numbers
-        updateChapterNumbers();
-        
-        // Reset bulk selection
-        const selectAllBtn = document.getElementById('select-all-btn');
-        const deleteSelectedBtn = document.getElementById('delete-selected-btn');
-        
-        selectAllBtn.innerHTML = 
-            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>' +
-            '</svg>' +
-            'Select All';
-        deleteSelectedBtn.style.display = 'none';
-        
-        // Check if no chapters left
-        const remainingChapters = document.querySelectorAll('.sikshya-chapter-card');
-        if (remainingChapters.length === 0) {
-            showEmptyState();
-        } else {
-            // Update chapter numbers
-            updateChapterNumbers();
-        }
-    }
+    // This function is now handled by the bulk delete system
+    // which uses the same beautiful alert with option blocks
+    bulkDeleteSelected();
 }
 
 function toggleChapter(chapterId) {
@@ -725,7 +699,6 @@ function editChapter(chapterId) {
             const chapterData = data.data;
             console.log('Chapter data object:', chapterData);
             console.log('Chapter title:', chapterData.title);
-            console.log('Chapter description:', chapterData.description);
             console.log('Chapter duration:', chapterData.duration);
             console.log('Chapter order:', chapterData.order);
             
@@ -740,12 +713,12 @@ function editChapter(chapterId) {
                     document.body.insertAdjacentHTML('beforeend', modalData.html);
                     
                     // Get the modal
-                    const modal = document.querySelector('.sikshya-modal-overlay');
+        const modal = document.querySelector('.sikshya-modal-overlay');
                     console.log('Modal element found:', modal);
-                    
+        
                     if (modal) {
                         // Add a small delay to ensure modal is fully rendered
-                        setTimeout(() => {
+        setTimeout(() => {
                             // Populate form fields with chapter data
                             const titleField = modal.querySelector('input[name="title"]');
                             const descriptionField = modal.querySelector('textarea[name="description"]');
@@ -762,10 +735,6 @@ function editChapter(chapterId) {
                             if (titleField) {
                                 titleField.value = chapterData.title || '';
                                 console.log('Title field populated with:', titleField.value);
-                            }
-                            if (descriptionField) {
-                                descriptionField.value = chapterData.description || '';
-                                console.log('Description field populated with:', descriptionField.value);
                             }
                             if (durationField) {
                                 durationField.value = chapterData.duration || '';
@@ -823,11 +792,10 @@ function updateChapter(chapterId) {
     }
     
     const title = modal.querySelector('input[name="title"]')?.value?.trim();
-    const description = modal.querySelector('textarea[name="description"]')?.value?.trim();
     const duration = modal.querySelector('input[name="duration"]')?.value?.trim();
     const order = modal.querySelector('input[name="order"]')?.value?.trim();
     
-    console.log('Form data:', { title, description, duration, order });
+    console.log('Form data:', { title, duration, order });
     
     if (!title) {
         alert('Please enter a chapter title.');
@@ -838,14 +806,13 @@ function updateChapter(chapterId) {
     sikshyaAjax('sikshya_update_chapter', {
         chapter_id: chapterId,
         title: title,
-        description: description,
         duration: duration,
         order: order
     }, function(data) {
         console.log('Chapter update response:', data);
         
         if (data && data.success) {
-            // Close modal
+    // Close modal
             closeModal(modal);
             
             // Reload the curriculum tab to show updated data
@@ -853,9 +820,9 @@ function updateChapter(chapterId) {
             if (curriculumTab) {
                 curriculumTab.click();
             }
-            
-            // Show success message
-            alert('Chapter updated successfully!');
+    
+    // Show success message
+    alert('Chapter updated successfully!');
         } else {
             console.error('Failed to update chapter:', data);
             alert('Failed to update chapter. Please try again.');
@@ -864,8 +831,102 @@ function updateChapter(chapterId) {
 }
 
 function deleteChapter(chapterId) {
-    if (confirm('Are you sure you want to delete this chapter and all its content?')) {
-        const chapter = document.getElementById(chapterId);
+    // Get chapter info for the message
+    const chapterElement = document.getElementById(chapterId);
+    const chapterTitle = chapterElement ? chapterElement.querySelector('.sikshya-chapter-title')?.textContent || 'this chapter' : 'this chapter';
+    
+    const message = `You are about to delete <strong>${chapterTitle}</strong>.<br><br>Choose deletion option:`;
+    
+    // Create custom confirmation with clickable option blocks
+    const customHTML = `
+        <div class="sikshya-delete-options">
+            <div class="sikshya-delete-option" data-option="chapter-only">
+                <input type="radio" name="delete-option" value="chapter-only" checked>
+                <div class="sikshya-delete-option-title">Delete Chapter Only</div>
+                <div class="sikshya-delete-option-description">Move all content to the next chapter. If no next chapter exists, content will be moved to the previous chapter.</div>
+            </div>
+            
+            <div class="sikshya-delete-option selected" data-option="chapter-content">
+                <input type="radio" name="delete-option" value="chapter-content">
+                <div class="sikshya-delete-option-title">Delete Chapter + All Content</div>
+                <div class="sikshya-delete-option-description">Permanently delete the chapter and all its content. This action cannot be undone.</div>
+            </div>
+        </div>
+    `;
+    
+    // Store chapter ID for later use
+    window.pendingChapterDelete = {
+        chapterId: chapterId
+    };
+    
+    // Show custom confirmation
+    SikshyaAlert.show({
+        type: 'confirm',
+        title: 'Delete Chapter',
+        message: message + customHTML,
+        showCloseButton: false,
+        className: 'chapter-delete-confirmation',
+        buttons: [
+            {
+                text: 'Cancel',
+                type: 'secondary',
+                action: 'cancel'
+            },
+            {
+                text: 'Delete Chapter',
+                type: 'danger',
+                action: 'confirm',
+                callback: function() {
+                    confirmIndividualChapterDeletion();
+                    return true;
+                }
+            }
+        ]
+    });
+    
+    // Add event listeners for clickable option blocks
+    setTimeout(() => {
+        const optionBlocks = document.querySelectorAll('.sikshya-delete-option');
+        optionBlocks.forEach(block => {
+            block.addEventListener('click', function() {
+                // Remove selected class from all options
+                optionBlocks.forEach(opt => opt.classList.remove('selected'));
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                
+                // Update the radio button
+                const radio = this.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                }
+            });
+        });
+    }, 100);
+}
+
+/**
+ * Confirm individual chapter deletion based on selected option
+ */
+function confirmIndividualChapterDeletion() {
+    const selectedOption = document.querySelector('input[name="delete-option"]:checked');
+    const deleteContent = selectedOption ? selectedOption.value === 'chapter-content' : true;
+    
+    if (!window.pendingChapterDelete) {
+        sikshyaAlert('Error: Chapter deletion data not found.', 'error');
+        return;
+    }
+    
+    const chapterId = window.pendingChapterDelete.chapterId;
+    const chapter = document.getElementById(chapterId);
+    
+    if (!chapter) {
+        sikshyaAlert('Error: Chapter not found.', 'error');
+        return;
+    }
+    
+    if (deleteContent) {
+        // Delete chapter and all content
         chapter.remove();
         chapterCount--;
         
@@ -875,7 +936,42 @@ function deleteChapter(chapterId) {
             showEmptyState();
         }
         updateProgress();
+        
+        sikshyaAlert('Chapter and all content deleted successfully.', 'success');
+    } else {
+        // Delete chapter only - move content to next/previous chapter
+        const nextChapter = chapter.nextElementSibling;
+        const previousChapter = chapter.previousElementSibling;
+        const targetChapter = nextChapter || previousChapter;
+        
+        if (targetChapter) {
+            // Move all lessons to target chapter
+            const lessons = chapter.querySelectorAll('.sikshya-lesson-item');
+            const targetLessonsContainer = targetChapter.querySelector('.sikshya-chapter-lessons');
+            
+            if (targetLessonsContainer) {
+                lessons.forEach(lesson => {
+                    targetLessonsContainer.appendChild(lesson);
+                });
+            }
+        }
+        
+        // Remove the chapter
+        chapter.remove();
+        chapterCount--;
+        
+        // Show empty state if no chapters
+        const curriculumItems = document.getElementById('curriculum-items');
+        if (curriculumItems && curriculumItems.children.length === 0) {
+            showEmptyState();
+        }
+        updateProgress();
+        
+        sikshyaAlert('Chapter deleted successfully. Content moved to adjacent chapter.', 'success');
     }
+    
+    // Clear pending data
+    window.pendingChapterDelete = null;
 }
 
 // Content Management
@@ -1034,6 +1130,31 @@ function showFullWidthModal(contentType) {
 function initializeLessonFormTabs(modalElement) {
     console.log('Initializing lesson form tabs for modal:', modalElement); // Debug log
     
+    // Set course_id automatically for lesson forms in course builder
+    const courseId = window.sikshyaCourseBuilder?.courseId;
+    if (courseId) {
+        // Add hidden course_id field to all lesson forms
+        const lessonForms = modalElement.querySelectorAll('form');
+        lessonForms.forEach(form => {
+            // Check if course_id field already exists
+            let courseIdField = form.querySelector('input[name="course_id"]');
+            if (!courseIdField) {
+                // Create hidden course_id field
+                courseIdField = document.createElement('input');
+                courseIdField.type = 'hidden';
+                courseIdField.name = 'course_id';
+                courseIdField.value = courseId;
+                form.appendChild(courseIdField);
+            } else {
+                // Update existing course_id field
+                courseIdField.value = courseId;
+            }
+        });
+        
+        // Listen for lesson save events from lessons.js
+        initializeLessonEventListener();
+    }
+    
     // Handle tab button clicks
     modalElement.addEventListener('click', function(e) {
         if (e.target.closest('.sikshya-tab-btn')) {
@@ -1159,18 +1280,18 @@ function saveContent(contentType) {
     if (window.SikshyaCourseBuilderSave) {
         window.SikshyaCourseBuilderSave.saveContent(contentType, formData, function(success, response) {
             if (success) {
-                // Close modal
-                closeModal(document.querySelector('.sikshya-modal-overlay'));
-                
-                // Update progress
-                updateProgress();
-                
-                lessonCount++;
+        // Close modal
+        closeModal(document.querySelector('.sikshya-modal-overlay'));
+        
+        // Update progress
+        updateProgress();
+        
+        lessonCount++;
             } else {
                 console.error('Failed to save content:', response);
                 alert('Failed to save content. Please try again.');
             }
-        });
+    });
     } else {
         console.error('SikshyaCourseBuilderSave not available');
         alert('Save handler not available. Please refresh the page.');
@@ -1241,18 +1362,18 @@ function createDefaultChapterAndContentWithCourseId(courseId, contentType, formD
         if (window.SikshyaCourseBuilderSave) {
             window.SikshyaCourseBuilderSave.saveContent(contentType, formData, function(success, response) {
                 if (success) {
-                    // Close modal
-                    closeModal(document.querySelector('.sikshya-modal-overlay'));
-                    
-                    // Update progress
-                    updateProgress();
-                    
-                    lessonCount++;
+            // Close modal
+            closeModal(document.querySelector('.sikshya-modal-overlay'));
+            
+            // Update progress
+            updateProgress();
+            
+            lessonCount++;
                 } else {
                     console.error('Failed to save content:', response);
                     alert('Failed to save content. Please try again.');
                 }
-            });
+        });
         } else {
             console.error('SikshyaCourseBuilderSave not available');
             alert('Save handler not available. Please refresh the page.');
@@ -1803,7 +1924,6 @@ function collectCurriculumData() {
         const chapterData = {
             id: chapter.getAttribute('data-chapter-id'),
             title: chapter.querySelector('.sikshya-chapter-title')?.textContent || '',
-            description: chapter.getAttribute('data-description') || '',
             order: chapterIndex + 1,
             lessons: []
         };
@@ -3173,7 +3293,7 @@ function initializeCurriculumOnPageLoad() {
         addSortableIconsToChapters();
         initializeChapterSorting();
         updateChapterNumbers();
-    } else {
+                } else {
         // We have empty state, ensure curriculum-items container exists for future chapters
         console.log('Sikshya: Empty curriculum state, ensuring container structure');
         
@@ -3609,3 +3729,379 @@ function showDragSuccessFeedback() {
 }
 
 // Quiz builder initialization is now handled in the main DOMContentLoaded listener above 
+
+// ========================================
+// BULK SELECTION AND DELETION FUNCTIONALITY
+// ========================================
+
+/**
+ * Initialize bulk selection functionality
+ */
+function initializeBulkSelection() {
+    // Handle checkbox changes
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('sikshya-checkbox')) {
+            updateBulkSelection();
+        }
+    });
+    
+    // Handle select all functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('sikshya-select-all')) {
+            toggleSelectAll();
+        }
+    });
+    
+    // Handle bulk action buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action]')) {
+            const button = e.target.closest('[data-action]');
+            const action = button.dataset.action;
+            
+            switch(action) {
+                case 'bulk-delete':
+                    e.preventDefault();
+                    bulkDeleteSelected();
+                    break;
+                case 'clear-selection':
+                    e.preventDefault();
+                    clearBulkSelection();
+                    break;
+            }
+        }
+    });
+}
+
+/**
+ * Update bulk selection state
+ */
+function updateBulkSelection() {
+    const checkboxes = document.querySelectorAll('.sikshya-checkbox:not(.sikshya-select-all)');
+    const checkedBoxes = document.querySelectorAll('.sikshya-checkbox:checked:not(.sikshya-select-all)');
+    const selectedCount = document.getElementById('selected-count');
+    const selectAllCheckbox = document.getElementById('select-all-chapters');
+    
+    
+    // Update select all checkbox state
+    if (selectAllCheckbox && checkboxes.length > 0) {
+        if (checkedBoxes.length === checkboxes.length) {
+            selectAllCheckbox.checked = true;
+            selectAllCheckbox.indeterminate = false;
+        } else if (checkedBoxes.length > 0) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = true;
+        } else {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        }
+    }
+    
+    // Update selected count
+    if (selectedCount) {
+        selectedCount.textContent = checkedBoxes.length;
+    }
+    
+    // Update individual item selection states
+    checkboxes.forEach(checkbox => {
+        const item = checkbox.closest('.sikshya-chapter-card, .sikshya-lesson-item');
+        if (item) {
+            if (checkbox.checked) {
+                item.classList.add('sikshya-selected');
+            } else {
+                item.classList.remove('sikshya-selected');
+            }
+        }
+    });
+}
+
+/**
+ * Clear all bulk selections
+ */
+function clearBulkSelection() {
+    const checkboxes = document.querySelectorAll('.sikshya-checkbox:checked');
+    const selectAllCheckbox = document.getElementById('select-all-chapters');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    }
+    
+    updateBulkSelection();
+}
+
+/**
+ * Toggle select all functionality
+ */
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.sikshya-checkbox:not(.sikshya-select-all)');
+    const selectAllCheckbox = document.getElementById('select-all-chapters');
+    
+    if (selectAllCheckbox) {
+        const shouldSelectAll = selectAllCheckbox.checked;
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = shouldSelectAll;
+        });
+        
+        updateBulkSelection();
+    }
+}
+
+/**
+ * Bulk delete selected items
+ */
+function bulkDeleteSelected() {
+    const checkedBoxes = document.querySelectorAll('.sikshya-checkbox:checked');
+    
+        if (checkedBoxes.length === 0) {
+            sikshyaAlert('Please select items to delete.', 'warning');
+            return;
+        }
+    
+    // Check if any chapters are selected
+    const chapterItems = Array.from(checkedBoxes).filter(checkbox => 
+        checkbox.closest('.sikshya-chapter-card')
+    );
+    
+    if (chapterItems.length > 0) {
+        // Show enhanced confirmation for chapters
+        showChapterDeleteConfirmation(chapterItems, checkedBoxes);
+            } else {
+                // Regular confirmation for lessons only
+                const message = `Are you sure you want to delete ${checkedBoxes.length} lessons? This action cannot be undone.`;
+                
+                sikshyaConfirm(message, {
+                    title: 'Delete Lessons',
+                    confirmText: 'Delete',
+                    cancelText: 'Cancel',
+                    confirmType: 'danger'
+                }).then(result => {
+                    if (result.action === 'confirm') {
+                        const itemsToDelete = [];
+                        
+                        checkedBoxes.forEach(checkbox => {
+                            const item = checkbox.closest('.sikshya-lesson-item');
+                            if (item) {
+                                const itemId = item.getAttribute('data-lesson-id');
+                                itemsToDelete.push({
+                                    id: itemId,
+                                    type: 'lesson',
+                                    element: item
+                                });
+                            }
+                        });
+                        
+                        deleteBulkItems(itemsToDelete);
+                    }
+                });
+            }
+}
+
+/**
+ * Show chapter deletion confirmation with options
+ */
+function showChapterDeleteConfirmation(chapterItems, allCheckedBoxes) {
+    const chapterCount = chapterItems.length;
+    const lessonCount = allCheckedBoxes.length - chapterCount;
+    
+    const message = `You are about to delete <strong>${chapterCount} chapter${chapterCount > 1 ? 's' : ''}</strong>${lessonCount > 0 ? ` and <strong>${lessonCount} lesson${lessonCount > 1 ? 's' : ''}</strong>` : ''}.<br><br>Choose deletion option:`;
+    
+            // Create custom confirmation with clickable option blocks
+            const customHTML = `
+                <div class="sikshya-delete-options">
+                    <div class="sikshya-delete-option" data-option="chapter-only">
+                        <input type="radio" name="delete-option" value="chapter-only" checked>
+                        <div class="sikshya-delete-option-title">Delete Chapter Only</div>
+                        <div class="sikshya-delete-option-description">Move all content to the next chapter. If no next chapter exists, content will be moved to the previous chapter.</div>
+                    </div>
+                    
+                    <div class="sikshya-delete-option selected" data-option="chapter-content">
+                        <input type="radio" name="delete-option" value="chapter-content">
+                        <div class="sikshya-delete-option-title">Delete Chapter + All Content</div>
+                        <div class="sikshya-delete-option-description">Permanently delete the chapter and all its content. This action cannot be undone.</div>
+                    </div>
+                </div>
+            `;
+    
+    // Store selected items for later use
+    window.pendingBulkDelete = {
+        chapterItems: chapterItems,
+        allCheckedBoxes: allCheckedBoxes
+    };
+    
+            // Show custom confirmation
+            SikshyaAlert.show({
+                type: 'confirm',
+                title: 'Delete Chapters',
+                message: message + customHTML,
+                showCloseButton: false,
+                className: 'chapter-delete-confirmation',
+                buttons: [
+                    {
+                        text: 'Cancel',
+                        type: 'secondary',
+                        action: 'cancel'
+                    },
+                    {
+                        text: 'Delete Selected',
+                        type: 'danger',
+                        action: 'confirm',
+                        callback: function() {
+                            confirmChapterDeletion();
+                            return true;
+                        }
+                    }
+                ]
+            });
+            
+            // Add event listeners for clickable option blocks
+            setTimeout(() => {
+                const optionBlocks = document.querySelectorAll('.sikshya-delete-option');
+                optionBlocks.forEach(block => {
+                    block.addEventListener('click', function() {
+                        // Remove selected class from all options
+                        optionBlocks.forEach(opt => opt.classList.remove('selected'));
+                        
+                        // Add selected class to clicked option
+                        this.classList.add('selected');
+                        
+                        // Update the radio button
+                        const radio = this.querySelector('input[type="radio"]');
+                        if (radio) {
+                            radio.checked = true;
+                        }
+                    });
+                });
+            }, 100);
+}
+
+
+/**
+ * Confirm chapter deletion based on selected option
+ */
+function confirmChapterDeletion() {
+    const selectedOption = document.querySelector('input[name="delete-option"]:checked');
+    if (!selectedOption) return;
+    
+    const { chapterItems, allCheckedBoxes } = window.pendingBulkDelete;
+    
+    // Prepare items to delete
+    const itemsToDelete = [];
+    
+    // Add chapters
+    chapterItems.forEach(checkbox => {
+        const item = checkbox.closest('.sikshya-chapter-card');
+        if (item) {
+            const itemId = item.getAttribute('data-chapter-id');
+            itemsToDelete.push({
+                id: itemId,
+                type: 'chapter',
+                element: item,
+                deleteContent: selectedOption.value === 'chapter-content'
+            });
+        }
+    });
+    
+    // Add lessons if any
+    const lessonItems = Array.from(allCheckedBoxes).filter(checkbox => 
+        checkbox.closest('.sikshya-lesson-item')
+    );
+    
+    lessonItems.forEach(checkbox => {
+        const item = checkbox.closest('.sikshya-lesson-item');
+        if (item) {
+            const itemId = item.getAttribute('data-lesson-id');
+            itemsToDelete.push({
+                id: itemId,
+                type: 'lesson',
+                element: item
+            });
+        }
+    });
+    
+    // Delete items via AJAX
+    deleteBulkItems(itemsToDelete);
+    
+    // Clean up
+    delete window.pendingBulkDelete;
+}
+
+/**
+ * Delete bulk items via AJAX
+ */
+function deleteBulkItems(items) {
+    const chaptersToDelete = items.filter(item => item.type === 'chapter').map(item => item.id);
+    const lessonsToDelete = items.filter(item => item.type === 'lesson').map(item => item.id);
+    
+    // Show loading state
+    const deleteBtn = document.getElementById('bulk-delete-btn');
+    if (deleteBtn) {
+        const originalText = deleteBtn.innerHTML;
+        deleteBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Deleting...';
+        deleteBtn.disabled = true;
+    }
+    
+    // Prepare data
+    const data = {
+        action: 'sikshya_bulk_delete_items',
+        chapters: chaptersToDelete,
+        lessons: lessonsToDelete,
+        nonce: sikshyaAjax.nonce || ''
+    };
+    
+    // Send AJAX request
+    sikshyaAjax('sikshya_bulk_delete_items', data, function(response) {
+        if (response.success) {
+            // Remove items from DOM
+            items.forEach(item => {
+                item.element.remove();
+            });
+            
+            // Clear selection
+            clearBulkSelection();
+            
+                    // Show success message
+                    sikshyaAlert(`${items.length} items deleted successfully.`, 'success');
+            
+            // Update curriculum counts
+            updateCurriculumCounts();
+        } else {
+            sikshyaAlert('Error deleting items: ' + (response.data || 'Unknown error'), 'error');
+        }
+    }, function(error) {
+        sikshyaAlert('Error deleting items: ' + error, 'error');
+    }, function() {
+        // Restore button state
+        if (deleteBtn) {
+            deleteBtn.innerHTML = originalText;
+            deleteBtn.disabled = false;
+        }
+    });
+}
+
+/**
+ * Update curriculum counts after deletion
+ */
+function updateCurriculumCounts() {
+    // Update chapter numbers
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    chapters.forEach((chapter, index) => {
+        const numberElement = chapter.querySelector('.sikshya-chapter-number');
+        if (numberElement) {
+            numberElement.textContent = index + 1;
+        }
+    });
+    
+    // Update lesson counts in chapters
+    chapters.forEach(chapter => {
+        const lessonCount = chapter.querySelectorAll('.sikshya-lesson-item').length;
+        const lessonCountElement = chapter.querySelector('.lesson-count');
+        if (lessonCountElement) {
+            lessonCountElement.textContent = lessonCount;
+        }
+    });
+}

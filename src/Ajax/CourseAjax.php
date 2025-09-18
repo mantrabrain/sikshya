@@ -55,6 +55,7 @@ class CourseAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_load_curriculum', [$this, 'handleLoadCurriculum']);
         add_action('wp_ajax_sikshya_load_chapter_data', [$this, 'handleLoadChapterData']);
         add_action('wp_ajax_sikshya_update_chapter', [$this, 'handleUpdateChapter']);
+        add_action('wp_ajax_sikshya_bulk_delete_items', [$this, 'handleBulkDeleteItems']);
         
 
     }
@@ -893,11 +894,6 @@ class CourseAjax extends AjaxAbstract
                         <div class="sikshya-form-group">
                             <label for="title" class="sikshya-form-label">Chapter Title *</label>
                             <input type="text" id="title" name="title" class="sikshya-form-input" placeholder="Enter chapter title" required>
-                        </div>
-                        
-                        <div class="sikshya-form-group">
-                            <label for="description" class="sikshya-form-label">Description</label>
-                            <textarea id="description" name="description" class="sikshya-form-textarea" rows="3" placeholder="Enter chapter description"></textarea>
                         </div>
                         
                         <div class="sikshya-form-row">
@@ -1777,5 +1773,60 @@ class CourseAjax extends AjaxAbstract
         ];
         
         return $icons[$content_type] ?? $icons['lesson'];
+    }
+
+    /**
+     * Handle bulk delete items AJAX request
+     */
+    public function handleBulkDeleteItems()
+    {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_ajax_nonce')) {
+            wp_send_json_error('Invalid nonce');
+            return;
+        }
+
+        // Check user capabilities
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('Insufficient permissions');
+            return;
+        }
+
+        $chapters = $_POST['chapters'] ?? [];
+        $lessons = $_POST['lessons'] ?? [];
+        
+        $deleted_count = 0;
+        $errors = [];
+
+        // Delete chapters
+        foreach ($chapters as $chapter_id) {
+            if (wp_delete_post($chapter_id, true)) {
+                $deleted_count++;
+            } else {
+                $errors[] = "Failed to delete chapter ID: $chapter_id";
+            }
+        }
+
+        // Delete lessons
+        foreach ($lessons as $lesson_id) {
+            if (wp_delete_post($lesson_id, true)) {
+                $deleted_count++;
+            } else {
+                $errors[] = "Failed to delete lesson ID: $lesson_id";
+            }
+        }
+
+        if (!empty($errors)) {
+            wp_send_json_error([
+                'message' => 'Some items could not be deleted',
+                'errors' => $errors,
+                'deleted_count' => $deleted_count
+            ]);
+        } else {
+            wp_send_json_success([
+                'message' => "Successfully deleted $deleted_count items",
+                'deleted_count' => $deleted_count
+            ]);
+        }
     }
 }

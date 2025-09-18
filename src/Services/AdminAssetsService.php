@@ -332,21 +332,37 @@ class AdminAssetsService
                 true
             );
 
-            // Enqueue centralized modal system
-            wp_enqueue_style(
-                'sikshya-modal',
-                $this->plugin->getAssetUrl('admin/css/modal.css'),
-                ['sikshya-admin'],
-                SIKSHYA_VERSION
-            );
+        // Enqueue centralized modal system
+        wp_enqueue_style(
+            'sikshya-modal',
+            $this->plugin->getAssetUrl('admin/css/modal.css'),
+            ['sikshya-admin'],
+            SIKSHYA_VERSION
+        );
 
-            wp_enqueue_script(
-                'sikshya-modal',
-                $this->plugin->getAssetUrl('admin/js/modal.js'),
-                ['jquery'],
-                SIKSHYA_VERSION,
-                true
-            );
+        wp_enqueue_script(
+            'sikshya-modal',
+            $this->plugin->getAssetUrl('admin/js/modal.js'),
+            ['jquery'],
+            SIKSHYA_VERSION,
+            true
+        );
+
+        // Enqueue alert system
+        wp_enqueue_style(
+            'sikshya-alert-system',
+            $this->plugin->getAssetUrl('admin/css/alert-system.css'),
+            ['sikshya-admin'],
+            SIKSHYA_VERSION
+        );
+
+        wp_enqueue_script(
+            'sikshya-alert-system',
+            $this->plugin->getAssetUrl('admin/js/alert-system.js'),
+            ['jquery'],
+            SIKSHYA_VERSION,
+            true
+        );
 
             // Enqueue lessons JavaScript for lesson forms in course builder
             wp_enqueue_script(

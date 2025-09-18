@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
         
         <div class="sikshya-form-row">
             <label>Detailed Description *</label>
-            <textarea name="description" placeholder="Detailed description of what students will learn, course benefits, and outcomes" required></textarea>
+            <textarea name="description" placeholder="Detailed description of what students will learn, course benefits, and outcomes"></textarea>
         </div>
         
         <div class="sikshya-form-grid">
@@ -70,7 +70,7 @@ if (!defined('ABSPATH')) {
         <div class="sikshya-form-grid">
             <div class="sikshya-form-row">
                 <label>Estimated Duration (hours)</label>
-                <input type="number" name="duration" placeholder="10" min="1" step="0.5">
+                <input type="number" name="duration" placeholder="10" min="0.5" step="0.5" value="0">
             </div>
             
             <div class="sikshya-form-row">

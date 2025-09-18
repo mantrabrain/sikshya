@@ -74,13 +74,13 @@ if (!defined('ABSPATH')) {
         <div class="sikshya-form-grid">
             <div class="sikshya-form-row">
                 <label>Maximum Students</label>
-                <input type="number" name="max_students" placeholder="100" min="1">
+                <input type="number" name="max_students" placeholder="100" min="1" value="0">
                 <p class="sikshya-help-text">Leave empty for unlimited enrollment</p>
             </div>
             
             <div class="sikshya-form-row">
                 <label>Course Duration (Days)</label>
-                <input type="number" name="course_duration" placeholder="90" min="1">
+                <input type="number" name="course_duration" placeholder="90" min="1" value="0">
                 <p class="sikshya-help-text">How long students have access</p>
             </div>
         </div>
@@ -188,7 +188,7 @@ if (!defined('ABSPATH')) {
             
             <div class="sikshya-form-row">
                 <label>Drip Interval (Days)</label>
-                <input type="number" name="drip_interval" placeholder="7" min="1">
+                <input type="number" name="drip_interval" placeholder="7" min="1" value="0">
             </div>
         </div>
     </div>

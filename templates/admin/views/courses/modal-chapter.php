@@ -43,11 +43,6 @@ $chapter_order = $args['chapter_order'] ?? 1;
                     <input type="text" id="chapter-title" placeholder="Enter chapter title" required>
                 </div>
                 
-                <div class="sikshya-form-row-small">
-                    <label>Description</label>
-                    <textarea id="chapter-description" placeholder="Brief description of this chapter"></textarea>
-                </div>
-                
                 <div class="sikshya-form-grid-2">
                     <div class="sikshya-form-row-small">
                         <label>Estimated Duration (hours)</label>

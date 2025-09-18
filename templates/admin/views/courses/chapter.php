@@ -29,7 +29,7 @@ error_log('Sikshya Template - Chapter Description: ' . $chapter_description);
      data-duration="<?php echo esc_attr($chapter_duration); ?>"
      data-order="<?php echo esc_attr($chapter_order); ?>">
     
-    <div class="sikshya-chapter-header" onclick="toggleChapter('<?php echo esc_attr($chapter_id); ?>')">
+    <div class="sikshya-chapter-header">
         <div class="sikshya-chapter-controls">
             <div class="sikshya-chapter-checkbox">
                 <input type="checkbox" id="chapter-<?php echo esc_attr($chapter_id); ?>" class="sikshya-checkbox">
@@ -78,7 +78,7 @@ error_log('Sikshya Template - Chapter Description: ' . $chapter_description);
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
             </button>
-            <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="event.stopPropagation(); toggleChapter('<?php echo esc_attr($chapter_id); ?>')" title="Toggle Chapter">
+            <button class="sikshya-btn-icon sikshya-chapter-toggle" onclick="toggleChapter('<?php echo esc_attr($chapter_id); ?>')" title="Toggle Chapter">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                 </svg>
