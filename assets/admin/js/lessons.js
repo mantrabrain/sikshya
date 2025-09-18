@@ -21,6 +21,13 @@
     function initLessonTabs() {
         // Handle tab button clicks
         $(document).on('click', '.sikshya-tab-btn', function(e) {
+            // Check if we're in course builder context - if so, let course-builder.js handle it
+            if (window.location.href.includes('sikshya-add-course') || 
+                document.querySelector('.sikshya-course-builder') ||
+                e.target.closest('.sikshya-modal-overlay')) {
+                return; // Let course-builder.js handle this
+            }
+            
             e.preventDefault();
             
             const $btn = $(this);
@@ -74,11 +81,6 @@
             }
         });
 
-        // Handle modal close button clicks
-        $(document).on('click', '.sikshya-modal-close', function(e) {
-            e.preventDefault();
-            SikshyaModal.close();
-        });
 
         // Handle lesson content type selection (modal)
         $(document).on('click', '.sikshya-modal .sikshya-content-type', function(e) {

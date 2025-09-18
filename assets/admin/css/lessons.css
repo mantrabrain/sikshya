@@ -32,76 +32,102 @@
     display: flex;
     gap: 0;
     min-height: 600px;
-    background: #ffffff;
+    background: #f5f7fa;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* Left Sidebar */
 .sikshya-tabs-sidebar {
-    width: 280px;
-    background: #f8f9fa;
-    border-right: 1px solid #e1e8ed;
+    width: 260px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
     flex-shrink: 0;
+    border-radius: 12px;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
 }
 
 .sikshya-tabs-nav {
-    padding: 24px 0;
+    padding: 20px 0;
 }
 
 .sikshya-tab-btn {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
-    padding: 16px 24px;
+    padding: 12px 20px;
+    margin: 2px 0;
     border: none;
     background: transparent;
     color: #6b7280;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+    border-radius: 0 6px 6px 0;
+    position: relative;
 }
 
 .sikshya-tab-btn:hover {
-    background: #e9ecef;
+    background: transparent;
     color: #374151;
+    transform: none;
 }
 
 .sikshya-tab-btn.active {
-    background: #ffffff;
+    background: transparent;
     color: var(--sikshya-primary);
-    border-left-color: var(--sikshya-primary);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+    box-shadow: none;
+    border-left: 2px solid var(--sikshya-primary);
+    transform: none;
+}
+
+.sikshya-tab-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--sikshya-primary);
+    border-radius: 0 1px 1px 0;
 }
 
 .sikshya-tab-btn svg {
     flex-shrink: 0;
-    opacity: 0.7;
+    width: 18px;
+    height: 18px;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.sikshya-tab-btn:hover svg {
+    opacity: 0.8;
 }
 
 .sikshya-tab-btn.active svg {
     opacity: 1;
+    color: var(--sikshya-primary);
 }
 
 .sikshya-tab-btn span {
     flex: 1;
+    line-height: 1.4;
 }
 
 /* Right Content Area */
 .sikshya-tabs-content {
     flex: 1;
-    background: #ffffff;
+
     overflow-y: auto;
 }
 
 .sikshya-tab-panel {
     display: none;
-    padding: 32px;
+    padding: 32px 32px 32px 32px;
     min-height: 100%;
 }
 
@@ -140,27 +166,35 @@
     .sikshya-tabs-sidebar {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid #e1e8ed;
+        border-bottom: 1px solid #e5e7eb;
     }
     
     .sikshya-tabs-nav {
         display: flex;
-        padding: 16px 24px;
+        padding: 16px 20px;
         overflow-x: auto;
-        gap: 8px;
+        gap: 6px;
     }
     
     .sikshya-tab-btn {
         flex-shrink: 0;
-        padding: 12px 16px;
+        padding: 10px 16px;
+        margin: 0;
+        border-radius: 6px;
+        font-size: 12px;
+        transform: none;
         border-left: none;
-        border-bottom: 3px solid transparent;
+        border-bottom: 2px solid transparent;
         white-space: nowrap;
     }
     
     .sikshya-tab-btn.active {
         border-left: none;
         border-bottom-color: var(--sikshya-primary);
+    }
+    
+    .sikshya-tab-btn.active::before {
+        display: none;
     }
     
     .sikshya-tab-panel {
@@ -364,8 +398,8 @@
     color: white;
 }
 
-/* Hide Quiz card on lesson popup and page */
-.sikshya-content-type-quiz {
+/* Hide Quiz card only on standalone lesson creation page */
+.sikshya-lesson-form-tabs .sikshya-content-type-quiz {
     display: none !important;
 }
 
@@ -373,277 +407,6 @@
 
 
 
-/* ========================================
-   MODAL OVERLAY & WIDTH STYLES (SAME AS CURRICULUM)
-======================================== */
-
-/* Prevent body scrolling when modal is open */
-body.sikshya-modal-open {
-    overflow: hidden !important;
-    position: fixed !important;
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* Ensure modal overlay covers everything */
-.sikshya-modal-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background: rgba(0, 0, 0, 0.6) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 999999 !important;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-}
-
-/* Override any WordPress admin styles that might interfere */
-body .sikshya-modal-overlay {
-    position: fixed !important;
-    z-index: 999999 !important;
-    display: flex !important;
-}
-
-/* Content Type Modal - Smaller width for better UX */
-.sikshya-modal-full {
-    max-width: 800px !important;
-    width: 90% !important;
-}
-
-.sikshya-modal-full .sikshya-modal-body {
-    max-height: calc(70vh - 140px);
-    overflow-y: auto;
-}
-
-/* Lesson Form Modal - Extra wide for form content */
-.sikshya-modal-lesson-form {
-    max-width: 1200px !important;
-    width: 95% !important;
-}
-
-.sikshya-modal-lesson-form .sikshya-modal-body {
-    max-height: calc(85vh - 140px);
-    overflow-y: auto;
-}
-
-/* Ensure modal is above everything - EXACT SAME AS CURRICULUM */
-.sikshya-modal {
-    position: relative !important;
-    z-index: 1000000 !important;
-    background: white !important;
-    border-radius: 12px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
-    max-width: 600px;
-    width: 90% !important;
-    max-height: 90vh !important;
-    overflow-y: auto !important;
-    transform: scale(0.9) !important;
-    transition: transform 0.3s ease !important;
-    margin: 20px !important;
-}
-
-.sikshya-modal-overlay.active,
-.sikshya-modal-overlay.show {
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: flex !important;
-}
-
-.sikshya-modal-overlay.active .sikshya-modal,
-.sikshya-modal-overlay.show .sikshya-modal {
-    transform: scale(1) !important;
-    opacity: 1 !important;
-}
-
-/* Ensure modal content is scrollable if needed - EXACT SAME AS CURRICULUM */
-.sikshya-modal-body {
-    max-height: calc(90vh - 140px); /* Account for header and footer */
-    overflow-y: auto;
-}
-
-/* ========================================
-   MODAL HEADER & FOOTER STYLES (SAME AS CURRICULUM)
-   OVERRIDE MODAL.CSS STYLES
-======================================== */
-
-/* Override modal.css styles with curriculum styles */
-.sikshya-modal-overlay {
-    background: rgba(0, 0, 0, 0.6) !important;
-    backdrop-filter: blur(2px) !important;
-    -webkit-backdrop-filter: blur(2px) !important;
-}
-
-.sikshya-modal {
-    border-radius: 12px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
-    max-width: 600px;
-    transform: scale(0.9) !important;
-    transition: transform 0.3s ease !important;
-    margin: 20px !important;
-}
-
-.sikshya-modal-overlay.show .sikshya-modal {
-    transform: scale(1) !important;
-    opacity: 1 !important;
-}
-
-/* Button Styles (Same as Curriculum) */
-.sikshya-btn {
-    font-size: var(--sikshya-text-sm);
-    font-weight: var(--sikshya-font-semibold);
-    padding: var(--sikshya-space-3) var(--sikshya-space-5);
-    border-radius: var(--sikshya-radius-md);
-    transition: var(--sikshya-transition-normal);
-    border: 1px solid var(--sikshya-gray-300);
-    box-shadow: var(--sikshya-shadow-sm);
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sikshya-space-2);
-}
-
-.sikshya-btn-primary {
-    background: var(--sikshya-primary);
-    color: var(--sikshya-white);
-    border-color: var(--sikshya-primary);
-}
-
-.sikshya-btn-primary:hover:not(:disabled) {
-    background: var(--sikshya-primary-hover);
-    border-color: var(--sikshya-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--sikshya-shadow-md);
-}
-
-.sikshya-btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: var(--sikshya-shadow-sm);
-}
-
-.sikshya-btn-secondary {
-    background: var(--sikshya-white);
-    color: var(--sikshya-gray-700);
-    border-color: var(--sikshya-gray-400);
-}
-
-.sikshya-btn-secondary:hover {
-    background: var(--sikshya-gray-50);
-}
-
-/* EXACT HEADER & FOOTER STYLES FROM CURRICULUM - WITH IMPORTANT OVERRIDES */
-.sikshya-modal-header {
-    padding: var(--sikshya-space-6) !important;
-    background: var(--sikshya-gray-50) !important;
-    border-bottom: 1px solid var(--sikshya-gray-200) !important;
-    margin-bottom: 0 !important;
-    position: relative !important;
-}
-
-.sikshya-modal-header-content {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: var(--sikshya-space-2) !important;
-}
-
-.sikshya-modal-title-wrapper {
-    display: flex !important;
-    align-items: center !important;
-    gap: var(--sikshya-space-3) !important;
-}
-
-.sikshya-modal-icon {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 40px !important;
-    height: 40px !important;
-    background: var(--sikshya-primary-bg) !important;
-    border-radius: var(--sikshya-radius-lg) !important;
-    color: var(--sikshya-primary) !important;
-    flex-shrink: 0 !important;
-}
-
-.sikshya-modal-icon svg {
-    width: 24px !important;
-    height: 24px !important;
-}
-
-.sikshya-modal-title {
-    font-size: var(--sikshya-text-xl) !important;
-    font-weight: var(--sikshya-font-semibold) !important;
-    color: var(--sikshya-gray-800) !important;
-    margin: 0 !important;
-}
-
-.sikshya-modal-subtitle {
-    color: var(--sikshya-gray-500) !important;
-    font-size: var(--sikshya-text-sm) !important;
-    margin: 0 !important;
-    line-height: var(--sikshya-leading-normal) !important;
-}
-
-.sikshya-modal-close {
-    position: absolute !important;
-    top: var(--sikshya-space-5) !important;
-    right: var(--sikshya-space-5) !important;
-    background: none !important;
-    border: none !important;
-    color: var(--sikshya-gray-400) !important;
-    cursor: pointer !important;
-    padding: var(--sikshya-space-2) !important;
-    border-radius: var(--sikshya-radius-md) !important;
-    transition: var(--sikshya-transition-colors) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-.sikshya-modal-close:hover {
-    background: var(--sikshya-gray-100) !important;
-    color: var(--sikshya-gray-600) !important;
-}
-
-.sikshya-modal-footer {
-    padding: var(--sikshya-space-4) var(--sikshya-space-6) !important;
-    background: var(--sikshya-gray-50) !important;
-    border-top: 1px solid var(--sikshya-gray-200) !important;
-    display: flex !important;
-    justify-content: flex-end !important;
-    gap: var(--sikshya-space-3) !important;
-}
-
-/* Responsive modal sizing for content type forms */
-@media (max-width: 1200px) {
-    .sikshya-modal-full {
-        max-width: 700px !important;
-    }
-    
-    .sikshya-modal-lesson-form {
-        max-width: 1000px !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .sikshya-modal-full {
-        max-width: 95% !important;
-        width: 95% !important;
-    }
-    
-    .sikshya-modal-lesson-form {
-        max-width: 95% !important;
-        width: 95% !important;
-    }
-}
 
 /* ========================================
    LESSON FORM STYLES

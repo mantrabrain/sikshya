@@ -992,7 +992,7 @@ function showFullWidthModal(contentType) {
         const contentTypeInfo = getContentTypeInfo(contentType);
         
         modal.innerHTML = `
-            <div class="sikshya-modal sikshya-modal-lesson-form">
+            <div class="sikshya-modal sikshya-modal-extra-large">
                 <div class="sikshya-modal-header">
                     <button class="sikshya-modal-close" onclick="closeModal(this)">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1023,7 +1023,55 @@ function showFullWidthModal(contentType) {
         document.body.appendChild(modal);
         openModal(modal);
         
+        // Initialize tab functionality for lesson forms
+        initializeLessonFormTabs(modal);
+        
         console.log('Modal created and opened for:', contentType); // Debug log
+    });
+}
+
+// Initialize lesson form tabs
+function initializeLessonFormTabs(modalElement) {
+    console.log('Initializing lesson form tabs for modal:', modalElement); // Debug log
+    
+    // Handle tab button clicks
+    modalElement.addEventListener('click', function(e) {
+        if (e.target.closest('.sikshya-tab-btn')) {
+            console.log('Tab button clicked in course builder modal'); // Debug log
+            e.preventDefault();
+            e.stopPropagation(); // Prevent event bubbling
+            
+            const tabBtn = e.target.closest('.sikshya-tab-btn');
+            const tabId = tabBtn.getAttribute('data-tab');
+            
+            console.log('Tab ID:', tabId); // Debug log
+            
+            if (tabId) {
+                // Remove active class from all tabs
+                modalElement.querySelectorAll('.sikshya-tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                tabBtn.classList.add('active');
+                
+                // Hide all tab panels
+                modalElement.querySelectorAll('.sikshya-tab-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+                
+                // Show selected tab panel using ID (matching lessons.js approach)
+                const targetPanel = modalElement.querySelector('#' + tabId);
+                console.log('Target panel found:', targetPanel); // Debug log
+                
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                    console.log('Added active class to panel:', tabId); // Debug log
+                } else {
+                    console.error('Target panel not found for ID:', tabId); // Debug log
+                }
+            }
+        }
     });
 }
 

@@ -332,7 +332,14 @@ class AdminAssetsService
                 true
             );
 
-            // Enqueue modal JavaScript for lesson forms
+            // Enqueue centralized modal system
+            wp_enqueue_style(
+                'sikshya-modal',
+                $this->plugin->getAssetUrl('admin/css/modal.css'),
+                ['sikshya-admin'],
+                SIKSHYA_VERSION
+            );
+
             wp_enqueue_script(
                 'sikshya-modal',
                 $this->plugin->getAssetUrl('admin/js/modal.js'),

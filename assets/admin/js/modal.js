@@ -1,179 +1,195 @@
 /**
- * Sikshya Custom Modal System
- * Replaces browser alerts with custom confirmation modals
+ * Sikshya Modal System
+ * Centralized modal functionality for all Sikshya components
  */
-(function($) {
-    'use strict';
-    
-    window.SikshyaModal = {
+
+// Global modal object
+window.SikshyaModal = {
+    /**
+     * Open a modal
+     */
+    open: function(modalElement) {
+        if (!modalElement) {
+            console.error('SikshyaModal: No modal element provided');
+            return;
+        }
+
+        // Add active class
+        modalElement.classList.add('active', 'show');
         
-        /**
-         * Initialize the modal system
-         */
-        init: function() {
-            this.createModalContainer();
-            this.bindEvents();
-        },
+        // Prevent body scroll
+        document.body.classList.add('sikshya-modal-open');
+        
+        // Focus management
+        const focusableElements = modalElement.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+        }
+    },
 
-        /**
-         * Create modal container if it doesn't exist
-         */
-        createModalContainer: function() {
-            if (!document.getElementById('sikshya-modal-container')) {
-                const container = document.createElement('div');
-                container.id = 'sikshya-modal-container';
-                document.body.appendChild(container);
-            }
-        },
+    /**
+     * Close a modal
+     */
+    close: function(modalElement) {
+        if (!modalElement) {
+            // Find active modal
+            modalElement = document.querySelector('.sikshya-modal-overlay.active');
+        }
 
-        /**
-         * Bind modal events
-         */
-        bindEvents: function() {
-            // Close modal on overlay click
-            $(document).on('click', '.sikshya-modal-overlay', function(e) {
-                if (e.target === this) {
-                    SikshyaModal.close();
-                }
-            });
-
-            // Close modal on escape key
-            $(document).on('keydown', function(e) {
-                if (e.key === 'Escape' && $('.sikshya-modal-overlay').is(':visible')) {
-                    SikshyaModal.close();
-                }
-            });
-
-            // Handle modal button clicks
-            $(document).on('click', '.sikshya-modal-btn', function(e) {
-                e.preventDefault();
-                const action = $(this).data('action');
-                const callback = $(this).data('callback');
-                
-                console.log('SikshyaModal: Button clicked - action:', action, 'callback:', callback);
-                
-                if (action === 'confirm' && callback) {
-                    // Execute the callback function
-                    if (typeof window[callback] === 'function') {
-                        console.log('SikshyaModal: Executing callback function:', callback);
-                        window[callback]();
-                    } else {
-                        console.error('SikshyaModal: Callback function not found:', callback);
-                    }
-                }
-                
-                SikshyaModal.close();
-            });
-        },
-
-        /**
-         * Show confirmation modal
-         * 
-         * @param {Object} options - Modal options
-         * @param {string} options.title - Modal title
-         * @param {string} options.message - Modal message
-         * @param {string} options.warning - Warning text (optional)
-         * @param {string} options.confirmText - Confirm button text
-         * @param {string} options.cancelText - Cancel button text
-         * @param {string} options.confirmCallback - Function name to call on confirm
-         * @param {string} options.type - Modal type (danger, warning, info)
-         */
-        confirm: function(options) {
-            const defaults = {
-                title: 'Confirm Action',
-                message: 'Are you sure you want to proceed?',
-                warning: '',
-                confirmText: 'Confirm',
-                cancelText: 'Cancel',
-                confirmCallback: '',
-                type: 'danger'
-            };
-
-            const config = { ...defaults, ...options };
+        if (modalElement) {
+            // Remove active class
+            modalElement.classList.remove('active', 'show');
             
-            // Create modal HTML
-            const modalHtml = `
-                <div class="sikshya-modal-overlay">
-                    <div class="sikshya-modal">
-                        <div class="sikshya-modal-header">
-                            <h3 class="sikshya-modal-title">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                ${config.title}
-                            </h3>
-                        </div>
-                        <div class="sikshya-modal-body">
-                            <p class="sikshya-modal-message">${config.message}</p>
-                            ${config.warning ? `
-                                <div class="sikshya-modal-warning">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    <p class="sikshya-modal-warning-text">${config.warning}</p>
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div class="sikshya-modal-footer">
-                            <button type="button" class="sikshya-modal-btn sikshya-modal-btn-secondary" data-action="cancel">
-                                ${config.cancelText}
-                            </button>
-                            <button type="button" class="sikshya-modal-btn sikshya-modal-btn-${config.type}" data-action="confirm" data-callback="${config.confirmCallback}">
-                                ${config.confirmText}
-                            </button>
-                        </div>
+            // Allow body scroll
+            document.body.classList.remove('sikshya-modal-open');
+        }
+    },
+
+    /**
+     * Show confirmation modal
+     */
+    confirm: function(options) {
+        const {
+            title = 'Confirm',
+            message = 'Are you sure?',
+            confirmText = 'Yes',
+            cancelText = 'Cancel',
+            onConfirm = null,
+            onCancel = null
+        } = options;
+
+        const modalHtml = `
+            <div class="sikshya-modal-overlay">
+                <div class="sikshya-modal sikshya-modal-small">
+                    <div class="sikshya-modal-header">
+                        <h3 class="sikshya-modal-title">${title}</h3>
+                        <button class="sikshya-modal-close" onclick="SikshyaModal.close()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="sikshya-modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="sikshya-modal-footer">
+                        <button class="sikshya-btn sikshya-btn-secondary" onclick="SikshyaModal.close()">
+                            ${cancelText}
+                        </button>
+                        <button class="sikshya-btn sikshya-btn-primary" onclick="SikshyaModal.confirmAction()">
+                            ${confirmText}
+                        </button>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
 
-            // Remove existing modal
-            $('.sikshya-modal-overlay').remove();
-            
-            // Add new modal
-            $('#sikshya-modal-container').html(modalHtml);
-            
-            // Show modal with animation
-            setTimeout(() => {
-                $('.sikshya-modal-overlay').addClass('show');
-            }, 10);
-        },
+        // Store callbacks
+        window.sikshyaModalConfirmCallback = onConfirm;
+        window.sikshyaModalCancelCallback = onCancel;
 
-        /**
-         * Close modal
-         */
-        close: function() {
-            $('.sikshya-modal-overlay').removeClass('show');
-            setTimeout(() => {
-                $('.sikshya-modal-overlay').remove();
-            }, 300);
-        },
+        // Add modal to DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Open modal
+        const modal = document.querySelector('.sikshya-modal-overlay:last-child');
+        this.open(modal);
+    },
 
-        /**
-         * Show info modal
-         */
-        info: function(title, message) {
-            this.confirm({
-                title: title,
-                message: message,
-                confirmText: 'OK',
-                type: 'info',
-                confirmCallback: 'SikshyaModal.close'
-            });
-        },
-
-        /**
-         * Show warning modal
-         */
-        warning: function(title, message) {
-            this.confirm({
-                title: title,
-                message: message,
-                confirmText: 'OK',
-                type: 'warning',
-                confirmCallback: 'SikshyaModal.close'
-            });
+    /**
+     * Confirm action callback
+     */
+    confirmAction: function() {
+        if (window.sikshyaModalConfirmCallback) {
+            window.sikshyaModalConfirmCallback();
         }
-    };
+        this.close();
+    },
 
-    // Initialize modal system when document is ready
-    $(document).ready(function() {
+    /**
+     * Show alert modal
+     */
+    alert: function(options) {
+        const {
+            title = 'Alert',
+            message = '',
+            buttonText = 'OK',
+            onClose = null
+        } = options;
+
+        const modalHtml = `
+            <div class="sikshya-modal-overlay">
+                <div class="sikshya-modal sikshya-modal-small">
+                    <div class="sikshya-modal-header">
+                        <h3 class="sikshya-modal-title">${title}</h3>
+                        <button class="sikshya-modal-close" onclick="SikshyaModal.close()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="sikshya-modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="sikshya-modal-footer">
+                        <button class="sikshya-btn sikshya-btn-primary" onclick="SikshyaModal.close()">
+                            ${buttonText}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Store callback
+        window.sikshyaModalAlertCallback = onClose;
+
+        // Add modal to DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Open modal
+        const modal = document.querySelector('.sikshya-modal-overlay:last-child');
+        this.open(modal);
+    },
+
+    /**
+     * Initialize modal system
+     */
+    init: function() {
+        // Handle modal close button clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.sikshya-modal-close')) {
+                e.preventDefault();
+                const modal = e.target.closest('.sikshya-modal-overlay');
+                SikshyaModal.close(modal);
+            }
+        });
+
+        // Handle modal overlay clicks (close on outside click)
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('sikshya-modal-overlay')) {
+                SikshyaModal.close(e.target);
+            }
+        });
+
+        // Handle escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.sikshya-modal-overlay.active');
+                if (activeModal) {
+                    SikshyaModal.close(activeModal);
+                }
+            }
+        });
+    }
+};
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
         SikshyaModal.init();
     });
-
-})(jQuery);
+} else {
+    SikshyaModal.init();
+}
