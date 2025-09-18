@@ -180,11 +180,11 @@ class CourseAjax extends AjaxAbstract
             }
 
             $courses = get_posts(array_merge($args, [
-                'post_type' => 'sikshya_course',
+                'post_type' => PostTypes::COURSE,
                 'post_status' => 'any'
             ]));
             
-            $total = wp_count_posts('sikshya_course');
+            $total = wp_count_posts(PostTypes::COURSE);
 
             $this->sendSuccess([
                 'items' => $courses,
@@ -216,7 +216,7 @@ class CourseAjax extends AjaxAbstract
                 $result = wp_update_post(array_merge($data, ['ID' => $course_id]));
                 $message = 'Course updated successfully';
             } else {
-                $course_id = wp_insert_post(array_merge($data, ['post_type' => 'sikshya_course']));
+                $course_id = wp_insert_post(array_merge($data, ['post_type' => PostTypes::COURSE]));
                 $result = $course_id > 0;
                 $message = 'Course created successfully';
             }
@@ -371,7 +371,7 @@ class CourseAjax extends AjaxAbstract
     public function handleLoadModalTemplate(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_course_builder')) {
+            if (!$this->verifyNonce('sikshya_course_builder_nonce', 'sikshya_course_builder_nonce')) {
                 $this->sendError('Invalid nonce');
                 return;
             }
@@ -1325,7 +1325,7 @@ class CourseAjax extends AjaxAbstract
     public function handleLinkContentToChapter(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_course_builder')) {
+            if (!$this->verifyNonce('sikshya_course_builder_nonce', 'sikshya_course_builder_nonce')) {
                 $this->sendError('Invalid nonce');
                 return;
             }

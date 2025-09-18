@@ -3,6 +3,8 @@
 namespace Sikshya\Frontend;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\PostTypes;
+use Sikshya\Constants\Taxonomies;
 use Sikshya\Frontend\Controllers\CourseController;
 use Sikshya\Frontend\Controllers\LessonController;
 use Sikshya\Frontend\Controllers\QuizController;
@@ -136,7 +138,7 @@ class Frontend
      */
     private function enqueuePageSpecificAssets(): void
     {
-        if (is_singular('sikshya_course')) {
+        if (is_singular(PostTypes::COURSE)) {
             wp_enqueue_script('sikshya-course-viewer');
             wp_enqueue_style('sikshya-course-viewer');
         }
@@ -167,7 +169,7 @@ class Frontend
      */
     public function addFrontendMeta(): void
     {
-        if (is_singular('sikshya_course')) {
+        if (is_singular(PostTypes::COURSE)) {
             $course_id = get_the_ID();
             $course = get_post($course_id);
             
@@ -248,7 +250,7 @@ class Frontend
     public function loadCustomTemplates(string $template): string
     {
         // Load custom templates for Sikshya post types
-        if (is_singular('sikshya_course')) {
+        if (is_singular(PostTypes::COURSE)) {
             $custom_template = $this->plugin->getTemplatePath('single-course.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
@@ -269,14 +271,14 @@ class Frontend
             }
         }
 
-        if (is_tax('sikshya_course_category')) {
+        if (is_tax(Taxonomies::COURSE_CATEGORY)) {
             $custom_template = $this->plugin->getTemplatePath('taxonomy-course-category.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
-        if (is_tax('sikshya_course_tag')) {
+        if (is_tax(Taxonomies::COURSE_TAG)) {
             $custom_template = $this->plugin->getTemplatePath('taxonomy-course-tag.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
@@ -293,7 +295,7 @@ class Frontend
     {
         $classes = [];
 
-        if (is_singular('sikshya_course')) {
+        if (is_singular(PostTypes::COURSE)) {
             $classes[] = 'sikshya-course-page';
         }
 

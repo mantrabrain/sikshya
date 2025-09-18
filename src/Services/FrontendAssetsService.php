@@ -3,6 +3,7 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\Taxonomies;
 
 /**
  * Frontend Asset Management Service
@@ -50,6 +51,16 @@ class FrontendAssetsService
             [],
             SIKSHYA_VERSION
         );
+
+        // Course Category CSS - only on course category pages
+        if (is_tax(Taxonomies::COURSE_CATEGORY)) {
+            wp_enqueue_style(
+                'sikshya-course-category',
+                $this->plugin->getAssetUrl('frontend/css/course-category.css'),
+                ['sikshya-frontend'],
+                SIKSHYA_VERSION
+            );
+        }
 
         // Main JavaScript
         wp_enqueue_script(

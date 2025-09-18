@@ -149,6 +149,22 @@ class AdminAssetsService
             true
         );
         
+        // Register categories assets
+        wp_register_style(
+            'sikshya-categories',
+            $this->plugin->getAssetUrl('admin/css/categories.css'),
+            ['sikshya-admin'],
+            SIKSHYA_VERSION
+        );
+        
+        wp_register_script(
+            'sikshya-categories',
+            $this->plugin->getAssetUrl('admin/js/categories.js'),
+            ['jquery', 'sikshya-admin'],
+            SIKSHYA_VERSION,
+            true
+        );
+        
         // Register lessons assets
         wp_register_style(
             'sikshya-lessons',
@@ -284,6 +300,20 @@ class AdminAssetsService
             ]);
         }
         
+        // Categories assets for categories page
+        if (strpos($screen->id, AdminPages::COURSE_CATEGORIES) !== false) {
+            // Enqueue dashboard styles for consistent header styling
+            wp_enqueue_style('sikshya-dashboard');
+            wp_enqueue_style('sikshya-categories');
+            wp_enqueue_script('sikshya-categories');
+            
+            // Localize categories script
+            wp_localize_script('sikshya-categories', 'sikshyaAdmin', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('sikshya_admin_nonce'),
+            ]);
+        }
+
         // Lessons assets for lesson pages
         if (strpos($screen->id, AdminPages::LESSONS) !== false || strpos($screen->id, AdminPages::ADD_LESSON) !== false) {
             wp_enqueue_style('sikshya-lessons');
@@ -383,7 +413,7 @@ class AdminAssetsService
             // Localize course builder script
             wp_localize_script('sikshya-course-builder-save', 'sikshya_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('sikshya_course_builder'),
+                'nonce' => wp_create_nonce('sikshya_course_builder_nonce'),
                 'plugin_url' => $this->plugin->getPluginUrl(),
                 'debug' => true,
             ]);

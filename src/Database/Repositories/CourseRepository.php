@@ -3,13 +3,14 @@
 namespace Sikshya\Database\Repositories;
 
 use WP_Query;
+use Sikshya\Constants\PostTypes;
 
 class CourseRepository
 {
     public function findAll(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'date',
@@ -25,13 +26,13 @@ class CourseRepository
     public function findById(int $id): ?object
     {
         $post = get_post($id);
-        return ($post && $post->post_type === 'sikshya_course') ? $post : null;
+        return ($post && $post->post_type === PostTypes::COURSE) ? $post : null;
     }
 
     public function create(array $data): int
     {
         $post_data = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_title' => sanitize_text_field($data['title'] ?? ''),
             'post_content' => wp_kses_post($data['content'] ?? ''),
             'post_excerpt' => sanitize_textarea_field($data['excerpt'] ?? ''),
@@ -82,7 +83,7 @@ class CourseRepository
     public function findByInstructor(int $instructor_id, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'author' => $instructor_id,
@@ -99,7 +100,7 @@ class CourseRepository
     public function findByStatus(string $status, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => $status,
             'posts_per_page' => -1,
             'orderby' => 'date',
@@ -115,7 +116,7 @@ class CourseRepository
     public function search(string $search_term, array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             's' => $search_term,
@@ -131,7 +132,7 @@ class CourseRepository
     public function getFeatured(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => 6,
             'meta_query' => [
@@ -154,7 +155,7 @@ class CourseRepository
     public function getPopular(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => 6,
             'meta_key' => '_sikshya_enrollment_count',

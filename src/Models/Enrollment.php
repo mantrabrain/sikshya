@@ -2,6 +2,8 @@
 
 namespace Sikshya\Models;
 
+use Sikshya\Constants\PostTypes;
+
 /**
  * Enrollment Model
  * 
@@ -234,7 +236,7 @@ class Enrollment
         
         // Check if course exists
         $course = get_post($course_id);
-        if (!$course || $course->post_type !== 'sikshya_course') {
+        if (!$course || $course->post_type !== PostTypes::COURSE) {
             return new \WP_Error('invalid_course', __('Invalid course', 'sikshya'));
         }
         

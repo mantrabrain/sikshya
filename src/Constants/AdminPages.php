@@ -24,4 +24,5 @@ class AdminPages
     
     // Sub pages
     const ADD_COURSE = 'sikshya-add-course';
+    const COURSE_CATEGORIES = 'sikshya-course-categories';
 }

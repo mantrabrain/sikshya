@@ -19,7 +19,7 @@ function sikshyaAjax(action, data, callback) {
     
     const ajaxData = {
         action: action,
-        nonce: sikshya_ajax.nonce,
+        sikshya_course_builder_nonce: sikshya_ajax.nonce,
         ...data
     };
 
@@ -1124,6 +1124,130 @@ function showFullWidthModal(contentType) {
         
         console.log('Modal created and opened for:', contentType); // Debug log
     });
+}
+
+/**
+ * Initialize lesson event listener for course builder
+ */
+function initializeLessonEventListener() {
+    // Listen for lesson save events from lessons.js
+    document.addEventListener('sikshya:lessonSaved', function(event) {
+        const { lessonId, lessonTitle, contentType } = event.detail;
+        
+        // Get the current chapter (the one that was being edited when lesson was created)
+        const currentChapter = getCurrentChapter();
+        if (currentChapter) {
+            // Add lesson to the current chapter
+            addLessonToChapter(currentChapter, lessonId, lessonTitle, contentType);
+        } else {
+            console.error('No current chapter found to add lesson to');
+        }
+    });
+}
+
+/**
+ * Get the current chapter being edited
+ */
+function getCurrentChapter() {
+    // Find the chapter that was being edited when the lesson modal was opened
+    // This could be the last clicked chapter or a stored reference
+    const lastClickedChapter = document.querySelector('.sikshya-chapter-card.editing');
+    if (lastClickedChapter) {
+        return lastClickedChapter;
+    }
+    
+    // Fallback: find the first chapter or create a default one
+    const firstChapter = document.querySelector('.sikshya-chapter-card');
+    if (firstChapter) {
+        return firstChapter;
+    }
+    
+    return null;
+}
+
+/**
+ * Add lesson to chapter
+ */
+function addLessonToChapter(chapterElement, lessonId, lessonTitle, contentType) {
+    const lessonsContainer = chapterElement.querySelector('.sikshya-chapter-lessons');
+    if (!lessonsContainer) {
+        console.error('No lessons container found in chapter');
+        return;
+    }
+    
+    // Create lesson element
+    const lessonElement = createLessonElement(lessonId, lessonTitle, contentType);
+    
+    // Add lesson to container
+    lessonsContainer.appendChild(lessonElement);
+    
+    // Update chapter lesson count
+    updateChapterLessonCount(chapterElement);
+    
+    // Make lesson draggable
+    makeLessonDraggable(lessonElement);
+    
+    console.log('Lesson added to chapter:', lessonTitle);
+}
+
+/**
+ * Create lesson element
+ */
+function createLessonElement(lessonId, lessonTitle, contentType) {
+    const contentTypeIcons = {
+        'text': 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+        'video': 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
+        'audio': 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3',
+        'assignment': 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+        'quiz': 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z'
+    };
+    
+    const icon = contentTypeIcons[contentType] || contentTypeIcons['text'];
+    
+    const lessonElement = document.createElement('div');
+    lessonElement.className = 'sikshya-lesson-item';
+    lessonElement.setAttribute('data-lesson-id', lessonId);
+    lessonElement.setAttribute('data-content-type', contentType);
+    lessonElement.innerHTML = `
+        <div class="sikshya-lesson-content">
+            <div class="sikshya-lesson-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${icon}"/>
+                </svg>
+            </div>
+            <div class="sikshya-lesson-info">
+                <div class="sikshya-lesson-title">${lessonTitle}</div>
+                <div class="sikshya-lesson-meta">
+                    <span class="sikshya-lesson-type">${contentType.charAt(0).toUpperCase() + contentType.slice(1)}</span>
+                </div>
+            </div>
+        </div>
+        <div class="sikshya-lesson-actions">
+            <button class="sikshya-btn sikshya-btn-sm sikshya-btn-secondary" onclick="editLesson(${lessonId})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+            </button>
+            <button class="sikshya-btn sikshya-btn-sm sikshya-btn-danger" onclick="deleteLesson(${lessonId})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </div>
+    `;
+    
+    return lessonElement;
+}
+
+/**
+ * Update chapter lesson count
+ */
+function updateChapterLessonCount(chapterElement) {
+    const lessonCountElement = chapterElement.querySelector('.sikshya-chapter-lesson-count');
+    if (lessonCountElement) {
+        const lessons = chapterElement.querySelectorAll('.sikshya-lesson-item');
+        lessonCountElement.textContent = lessons.length;
+    }
 }
 
 // Initialize lesson form tabs

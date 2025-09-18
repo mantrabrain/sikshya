@@ -3,6 +3,7 @@
 namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\PostTypes;
 
 /**
  * Frontend Enrollment Controller
@@ -47,7 +48,7 @@ class EnrollmentController
         }
 
         $course = get_post($course_id);
-        if (!$course || $course->post_type !== 'sikshya_course') {
+        if (!$course || $course->post_type !== PostTypes::COURSE) {
             wp_redirect(home_url());
             exit;
         }

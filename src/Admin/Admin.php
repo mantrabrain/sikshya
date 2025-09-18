@@ -4,6 +4,7 @@ namespace Sikshya\Admin;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Controllers\CourseController;
+use Sikshya\Admin\Controllers\CourseCategoriesController;
 use Sikshya\Admin\Controllers\LessonController;
 use Sikshya\Admin\Controllers\QuizController;
 use Sikshya\Admin\Controllers\StudentController;
@@ -12,6 +13,8 @@ use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\Controllers\ToolsController;
 use Sikshya\Admin\Controllers\SettingController;
 use Sikshya\Constants\AdminPages;
+use Sikshya\Constants\PostTypes;
+use Sikshya\Constants\Taxonomies;
 
 /**
  * Admin Management Class
@@ -55,6 +58,7 @@ class Admin
     {
         error_log('Sikshya: Admin initControllers called');
         $this->controllers['course'] = new \Sikshya\Admin\Controllers\CourseController($this->plugin);
+        $this->controllers['course_categories'] = new \Sikshya\Admin\Controllers\CourseCategoriesController($this->plugin);
         $this->controllers['lesson'] = new \Sikshya\Admin\Controllers\LessonController($this->plugin);
         $this->controllers['quiz'] = new \Sikshya\Admin\Controllers\QuizController($this->plugin);
         $this->controllers['student'] = new \Sikshya\Admin\Controllers\StudentController($this->plugin);
@@ -74,6 +78,7 @@ class Admin
         add_action('admin_init', [$this, 'initAdmin']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('wp_ajax_sikshya_admin_action', [$this, 'handleAjaxRequest']);
+        add_action('wp_ajax_sikshya_categories_action', [$this, 'handleCategoriesAjaxRequest']);
         add_action('admin_notices', [$this, 'displayAdminNotices']);
         add_action('admin_footer', [$this, 'addAdminFooter']);
         
@@ -134,6 +139,16 @@ class Admin
             'edit_posts',
             AdminPages::ADD_COURSE,
             [$this, 'renderAddCoursePage']
+        );
+
+        // Course Categories submenu
+        add_submenu_page(
+            'sikshya',
+            __('Categories', 'sikshya'),
+            __('Categories', 'sikshya'),
+            'manage_categories',
+            AdminPages::COURSE_CATEGORIES,
+            [$this, 'renderCourseCategoriesPage']
         );
 
         // Lessons submenu
@@ -407,6 +422,14 @@ class Admin
         } else {
             wp_send_json_error(__('Invalid controller.', 'sikshya'));
         }
+    }
+
+    /**
+     * Handle categories AJAX requests
+     */
+    public function handleCategoriesAjaxRequest(): void
+    {
+        $this->controllers['course_categories']->handleAjaxRequest();
     }
 
     /**
@@ -779,6 +802,18 @@ class Admin
             }
             wp_die('Error rendering Add Course Page: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Render course categories page
+     */
+    public function renderCourseCategoriesPage(): void
+    {
+        if (!current_user_can('manage_categories')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        $this->controllers['course_categories']->renderCourseCategoriesPage();
     }
 
     /**

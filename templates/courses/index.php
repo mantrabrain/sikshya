@@ -17,7 +17,7 @@ get_header(); ?>
                 
                 <!-- Search Form -->
                 <form class="sikshya-search-form" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-                    <input type="hidden" name="post_type" value="sikshya_course">
+                    <input type="hidden" name="post_type" value="<?php echo esc_attr(PostTypes::COURSE); ?>">
                     <div class="sikshya-search-input-group">
                         <input type="text" name="s" placeholder="<?php _e('Search courses...', 'sikshya'); ?>" value="<?php echo esc_attr(get_search_query()); ?>" class="sikshya-search-input">
                         <button type="submit" class="sikshya-search-button">

@@ -11,6 +11,7 @@
 namespace Sikshya\Admin\ListTable;
 
 use Sikshya\Constants\PostTypes;
+use Sikshya\Constants\Taxonomies;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -101,11 +102,6 @@ class CoursesListTable extends AbstractListTable
      */
     protected function get_items(): array
     {
-        // For demo purposes, return dummy data
-        return $this->getDummyData();
-        
-        // Original code (commented out for demo)
-        /*
         $args = [
             'post_type' => PostTypes::COURSE,
             'post_status' => $this->getStatusFilter(),
@@ -130,7 +126,6 @@ class CoursesListTable extends AbstractListTable
 
         $query = new \WP_Query($args);
         return $query->posts;
-        */
     }
 
     /**
@@ -335,11 +330,6 @@ class CoursesListTable extends AbstractListTable
      */
     protected function get_total_items(): int
     {
-        // For demo purposes, return count of dummy data
-        return count($this->getDummyData());
-        
-        // Original code (commented out for demo)
-        /*
         $args = [
             'post_type' => PostTypes::COURSE,
             'post_status' => $this->getStatusFilter(),
@@ -361,7 +351,6 @@ class CoursesListTable extends AbstractListTable
 
         $query = new \WP_Query($args);
         return $query->found_posts;
-        */
     }
 
     /**
@@ -447,7 +436,7 @@ class CoursesListTable extends AbstractListTable
         $row_actions .= '</div>';
         
         // Get student count
-        $student_count = $item->meta['course_enrollments'] ?? 0;
+        $student_count = get_post_meta($item->ID, 'course_enrollments', true) ?: 0;
         
         $output = '<div class="sikshya-course-title-wrapper">';
         $output .= '<div class="sikshya-course-thumbnail">';
@@ -480,23 +469,24 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_instructor($item): string
     {
-        $instructor_names = $item->meta['course_instructor'] ?? __('Unknown', 'sikshya');
+        // Get the author of the course
+        $author_id = $item->post_author;
+        $author = get_userdata($author_id);
         
-        // Split multiple instructors by comma
-        $instructors = array_map('trim', explode(',', $instructor_names));
+        if (!$author) {
+            return '<span class="sikshya-no-instructor">—</span>';
+        }
         
         $output = '<div class="sikshya-instructors">';
-        foreach ($instructors as $instructor) {
-            $output .= sprintf(
-                '<div class="sikshya-instructor">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    <span>%s</span>
-                </div>',
-                esc_html($instructor)
-            );
-        }
+        $output .= sprintf(
+            '<div class="sikshya-instructor">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>%s</span>
+            </div>',
+            esc_html($author->display_name)
+        );
         $output .= '</div>';
         
         return $output;
@@ -536,7 +526,7 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_enrollments($item): string
     {
-        $enrollments = $item->meta['course_enrollments'] ?? 0;
+        $enrollments = get_post_meta($item->ID, 'course_enrollments', true) ?: 0;
         
         return sprintf(
             '<a href="#">%d</a>',
@@ -552,9 +542,9 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_categories($item): string
     {
-        $categories = $item->meta['course_categories'] ?? [];
+        $categories = get_the_terms($item->ID, Taxonomies::COURSE_CATEGORY);
         
-        if (empty($categories)) {
+        if (empty($categories) || is_wp_error($categories)) {
             return '<span class="sikshya-no-categories">—</span>';
         }
         
@@ -562,7 +552,7 @@ class CoursesListTable extends AbstractListTable
         foreach ($categories as $category) {
             $output .= sprintf(
                 '<span class="sikshya-category-tag">%s</span>',
-                esc_html($category)
+                esc_html($category->name)
             );
         }
         $output .= '</div>';
@@ -572,7 +562,7 @@ class CoursesListTable extends AbstractListTable
 
     public function column_rating($item): string
     {
-        $rating = $item->meta['course_rating'] ?? 0;
+        $rating = get_post_meta($item->ID, 'course_rating', true) ?: 0;
         
         if ($rating == 0) {
             return '<span class="sikshya-no-rating">—</span>';
@@ -586,8 +576,8 @@ class CoursesListTable extends AbstractListTable
 
     public function column_price($item): string
     {
-        $price = $item->meta['course_price'] ?? '0.00';
-        $original_price = $item->meta['course_original_price'] ?? null;
+        $price = get_post_meta($item->ID, 'course_price', true) ?: '0.00';
+        $original_price = get_post_meta($item->ID, 'course_original_price', true) ?: null;
         
         if ($price === '0.00' || empty($price)) {
             return '<span class="sikshya-price-free">FREE</span>';
@@ -620,7 +610,7 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_lessons($item): string
     {
-        $lessons_count = $item->meta['course_lessons'] ?? 0;
+        $lessons_count = get_post_meta($item->ID, 'course_lessons', true) ?: 0;
         
         return sprintf(
             '<a href="#">%d</a>',

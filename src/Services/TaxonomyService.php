@@ -3,6 +3,8 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\PostTypes;
+use Sikshya\Constants\Taxonomies;
 
 /**
  * Taxonomy Management Service
@@ -69,7 +71,7 @@ class TaxonomyService
             'show_in_rest' => true,
         ];
 
-        register_taxonomy('sikshya_course_category', ['sikshya_course'], $args);
+        register_taxonomy(Taxonomies::COURSE_CATEGORY, [PostTypes::COURSE], $args);
     }
 
     /**
@@ -99,7 +101,7 @@ class TaxonomyService
             'show_in_rest' => true,
         ];
 
-        register_taxonomy('sikshya_course_tag', ['sikshya_course'], $args);
+        register_taxonomy(Taxonomies::COURSE_TAG, [PostTypes::COURSE], $args);
     }
 
     /**
@@ -129,7 +131,7 @@ class TaxonomyService
             'show_in_rest' => true,
         ];
 
-        register_taxonomy('sikshya_difficulty', ['sikshya_course', 'sikshya_lesson'], $args);
+        register_taxonomy(Taxonomies::DIFFICULTY, [PostTypes::COURSE, PostTypes::LESSON], $args);
     }
 
     /**

@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 // Get courses
 $args = array(
-    'post_type' => 'sikshya_course',
+    'post_type' => PostTypes::COURSE,
     'post_status' => 'publish',
     'posts_per_page' => 12,
     'paged' => get_query_var('paged') ? get_query_var('paged') : 1,

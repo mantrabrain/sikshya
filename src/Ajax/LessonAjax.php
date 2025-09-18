@@ -141,8 +141,10 @@ class LessonAjax extends AjaxAbstract
             $data = $this->getTextLessonData();
             $lesson_id = $this->saveLessonData($data, 'text');
             
+            $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
+                'lesson_title' => $lesson_title,
                 'message' => 'Text lesson saved successfully'
             ]);
             
@@ -163,8 +165,10 @@ class LessonAjax extends AjaxAbstract
             $data = $this->getVideoLessonData();
             $lesson_id = $this->saveLessonData($data, 'video');
             
+            $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
+                'lesson_title' => $lesson_title,
                 'message' => 'Video lesson saved successfully'
             ]);
             
@@ -185,8 +189,10 @@ class LessonAjax extends AjaxAbstract
             $data = $this->getAudioLessonData();
             $lesson_id = $this->saveLessonData($data, 'audio');
             
+            $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
+                'lesson_title' => $lesson_title,
                 'message' => 'Audio lesson saved successfully'
             ]);
             
@@ -207,8 +213,10 @@ class LessonAjax extends AjaxAbstract
             $data = $this->getAssignmentData();
             $lesson_id = $this->saveLessonData($data, 'assignment');
             
+            $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
+                'lesson_title' => $lesson_title,
                 'message' => 'Assignment saved successfully'
             ]);
             
@@ -229,8 +237,10 @@ class LessonAjax extends AjaxAbstract
             $data = $this->getQuizData();
             $lesson_id = $this->saveLessonData($data, 'quiz');
             
+            $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
+                'lesson_title' => $lesson_title,
                 'message' => 'Quiz saved successfully'
             ]);
             

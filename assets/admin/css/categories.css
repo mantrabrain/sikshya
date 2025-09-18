@@ -1,0 +1,442 @@
+/* Course Categories Page Styles - WordPress Style Layout */
+
+/* Main Layout - WordPress Style */
+.sikshya-main-content {
+    padding: var(--sikshya-space-10);
+    background: var(--sikshya-white);
+    position: relative;
+}
+
+.sikshya-categories-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* Left Sidebar - Form */
+.sikshya-categories-sidebar {
+    flex: 0 0 320px;
+    position: sticky;
+    top: 20px;
+}
+
+.sikshya-sidebar-card {
+    background: #fff;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sikshya-sidebar-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e1e5e9;
+    padding: 16px 20px;
+}
+
+.sikshya-sidebar-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+.sikshya-sidebar-body {
+    padding: 20px;
+}
+
+/* Right Content - Table */
+.sikshya-categories-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.sikshya-categories-table-card {
+    background: #fff;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sikshya-table-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e1e5e9;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sikshya-table-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+.sikshya-table-count {
+    font-size: 13px;
+    color: #718096;
+    background: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.sikshya-table-content {
+    padding: 0;
+}
+
+/* Table Styles */
+.sikshya-categories-table {
+    width: 100%;
+}
+
+.sikshya-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.sikshya-table thead {
+    background: #f8fafc;
+}
+
+.sikshya-table th {
+    padding: 12px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e1e5e9;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sikshya-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+}
+
+.sikshya-table-row:hover {
+    background: #f8fafc;
+}
+
+.sikshya-table-row:last-child td {
+    border-bottom: none;
+}
+
+/* Table Columns */
+.sikshya-table-col-name {
+    width: 30%;
+}
+
+.sikshya-table-col-description {
+    width: 40%;
+}
+
+.sikshya-table-col-count {
+    width: 15%;
+    text-align: center;
+}
+
+.sikshya-table-col-actions {
+    width: 15%;
+    text-align: right;
+}
+
+/* Category Name Cell */
+.sikshya-category-name-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sikshya-category-name-cell strong {
+    font-weight: 600;
+    color: #1a202c;
+    font-size: 14px;
+}
+
+.sikshya-category-slug {
+    font-size: 11px;
+    color: #718096;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    display: inline-block;
+    width: fit-content;
+}
+
+/* Category Description */
+.sikshya-category-description {
+    color: #4a5568;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.sikshya-category-description.sikshya-no-description {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+/* Course Count */
+.sikshya-course-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e2e8f0;
+    color: #4a5568;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    min-width: 24px;
+    height: 24px;
+}
+
+/* Table Actions */
+.sikshya-table-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+/* Form Styles */
+.sikshya-form-group {
+    margin-bottom: 20px;
+}
+
+.sikshya-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sikshya-required {
+    color: #e53e3e;
+}
+
+.sikshya-form-input,
+.sikshya-form-textarea,
+.sikshya-form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.sikshya-form-input:focus,
+.sikshya-form-textarea:focus,
+.sikshya-form-select:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.sikshya-form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.sikshya-form-select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+.sikshya-form-help {
+    display: block;
+    font-size: 12px;
+    color: #718096;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.sikshya-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e5e9;
+}
+
+/* Button Styles */
+.sikshya-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.sikshya-btn-primary {
+    background: #3182ce;
+    color: #fff;
+}
+
+.sikshya-btn-primary:hover {
+    background: #2c5aa0;
+}
+
+/* Header-style button for form actions */
+.sikshya-btn-header-style {
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-semibold);
+    padding: var(--sikshya-space-3) var(--sikshya-space-5);
+    border-radius: var(--sikshya-radius-md);
+    transition: var(--sikshya-transition-normal);
+    border: 1px solid var(--sikshya-gray-300);
+    box-shadow: var(--sikshya-shadow-sm);
+    background: var(--sikshya-primary);
+    color: var(--sikshya-white);
+    border-color: var(--sikshya-primary);
+}
+
+.sikshya-btn-header-style:hover {
+    background: var(--sikshya-primary-hover);
+    border-color: var(--sikshya-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--sikshya-shadow-md);
+}
+
+.sikshya-btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.sikshya-btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.sikshya-btn-danger {
+    background: #e53e3e;
+    color: #fff;
+}
+
+.sikshya-btn-danger:hover {
+    background: #c53030;
+}
+
+.sikshya-btn-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.sikshya-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Empty State */
+.sikshya-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+}
+
+.sikshya-empty-state-icon {
+    margin-bottom: 16px;
+}
+
+.sikshya-empty-state-icon svg {
+    color: #cbd5e0;
+}
+
+.sikshya-empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0 0 8px 0;
+}
+
+.sikshya-empty-state p {
+    color: #718096;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .sikshya-categories-layout {
+        flex-direction: column;
+    }
+    
+    .sikshya-categories-sidebar {
+        flex: none;
+        position: static;
+        margin-bottom: 24px;
+    }
+    
+    .sikshya-categories-main {
+        flex: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .sikshya-categories-layout {
+        gap: 16px;
+    }
+    
+    .sikshya-sidebar-body {
+        padding: 16px;
+    }
+    
+    .sikshya-table-header {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .sikshya-table th,
+    .sikshya-table td {
+        padding: 12px 16px;
+    }
+    
+    .sikshya-table-col-description {
+        display: none;
+    }
+    
+    .sikshya-table-col-name {
+        width: 50%;
+    }
+    
+    .sikshya-table-col-count {
+        width: 25%;
+    }
+    
+    .sikshya-table-col-actions {
+        width: 25%;
+    }
+    
+    .sikshya-form-actions {
+        flex-direction: column;
+    }
+    
+    .sikshya-btn {
+        justify-content: center;
+    }
+}
