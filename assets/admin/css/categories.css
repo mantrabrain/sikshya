@@ -128,12 +128,17 @@
 }
 
 /* Table Columns */
+.sikshya-table-col-image {
+    width: 80px;
+    text-align: center;
+}
+
 .sikshya-table-col-name {
-    width: 30%;
+    width: 25%;
 }
 
 .sikshya-table-col-description {
-    width: 40%;
+    width: 35%;
 }
 
 .sikshya-table-col-count {
@@ -142,7 +147,7 @@
 }
 
 .sikshya-table-col-actions {
-    width: 15%;
+    width: 20%;
     text-align: right;
 }
 
@@ -168,6 +173,44 @@
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     display: inline-block;
     width: fit-content;
+}
+
+.sikshya-category-parent {
+    font-size: 11px;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+    width: fit-content;
+    margin-top: 2px;
+}
+
+/* Category Image */
+.sikshya-category-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sikshya-category-thumbnail {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+}
+
+.sikshya-category-no-image {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    color: #a0aec0;
 }
 
 /* Category Description */
@@ -257,6 +300,83 @@
     background-repeat: no-repeat;
     background-size: 16px;
     padding-right: 32px;
+}
+
+/* Upload Area */
+.sikshya-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 24px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f9fafb;
+}
+
+.sikshya-upload-area:hover {
+    border-color: #3182ce;
+    background: #f0f9ff;
+}
+
+.sikshya-upload-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.sikshya-upload-area:hover .sikshya-upload-icon {
+    color: #3182ce;
+}
+
+.sikshya-upload-area strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.sikshya-upload-area small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Image Preview */
+.sikshya-image-preview {
+    position: relative;
+    margin-top: 12px;
+    display: inline-block;
+}
+
+.sikshya-image-preview img {
+    max-width: 120px;
+    max-height: 80px;
+    border-radius: 6px;
+    border: 1px solid #e1e5e9;
+}
+
+.sikshya-remove-image {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: #e53e3e;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.sikshya-remove-image:hover {
+    background: #c53030;
+    transform: scale(1.1);
 }
 
 .sikshya-form-help {

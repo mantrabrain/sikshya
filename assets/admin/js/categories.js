@@ -34,6 +34,21 @@
             
             // Save on Enter key press
             $(document).on('keydown', '#sikshya-category-form input, #sikshya-category-form textarea, #sikshya-category-form select', this.handleEnterKey.bind(this));
+            
+            // Image upload handling
+            $(document).on('click', '#sikshya-category-image-upload', this.handleImageUploadClick.bind(this));
+            $(document).on('click', '#sikshya-remove-category-image', this.handleImageRemove.bind(this));
+            
+            console.log('Categories JS initialized');
+            console.log('WordPress object available:', typeof wp !== 'undefined');
+            console.log('WordPress media available:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined');
+            
+            // Ensure media library is ready
+            if (typeof wp !== 'undefined' && wp.media) {
+                console.log('WordPress media library is ready');
+            } else {
+                console.warn('WordPress media library not ready, will retry on click');
+            }
         },
 
         showEditForm: function(e) {
@@ -43,6 +58,8 @@
             const categoryName = $btn.data('category-name');
             const categoryDescription = $btn.data('category-description');
             const categorySlug = $btn.data('category-slug');
+            const categoryParent = $btn.data('category-parent');
+            const categoryImage = $btn.data('category-image');
 
             this.isEditMode = true;
             this.currentCategoryId = categoryId;
@@ -52,6 +69,21 @@
             $('#sikshya-category-name').val(categoryName);
             $('#sikshya-category-description').val(categoryDescription);
             $('#sikshya-category-slug').val(categorySlug);
+            $('#sikshya-category-parent').val(categoryParent || 0);
+            $('#sikshya-category-image').val(categoryImage || '');
+            
+            // Handle image preview
+            if (categoryImage) {
+                // Get image URL from attachment ID
+                const imageUrl = wp.media.attachment(categoryImage).get('url');
+                if (imageUrl) {
+                    this.showImagePreview(imageUrl);
+                } else {
+                    this.hideImagePreview();
+                }
+            } else {
+                this.hideImagePreview();
+            }
             
             // Update form title and button
             this.updateFormTitle('Edit Category');
@@ -173,7 +205,9 @@
                 term_id: $('#sikshya-category-term-id').val(),
                 name: $('#sikshya-category-name').val().trim(),
                 description: $('#sikshya-category-description').val().trim(),
-                slug: $('#sikshya-category-slug').val().trim()
+                slug: $('#sikshya-category-slug').val().trim(),
+                parent: $('#sikshya-category-parent').val(),
+                image: $('#sikshya-category-image').val()
             };
         },
 
@@ -224,6 +258,89 @@
         resetForm: function() {
             $('#sikshya-category-form')[0].reset();
             $('#sikshya-category-term-id').val('');
+            $('#sikshya-category-image').val('');
+            this.hideImagePreview();
+        },
+
+        showImagePreview: function(imageUrl) {
+            $('#sikshya-category-image-preview-img').attr('src', imageUrl);
+            $('#sikshya-category-image-preview').show();
+            $('#sikshya-category-image-upload').hide();
+        },
+
+        hideImagePreview: function() {
+            $('#sikshya-category-image-preview').hide();
+            $('#sikshya-category-image-upload').show();
+        },
+
+        handleImageUploadClick: function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Image upload clicked');
+            
+            // Check if WordPress media library is available
+            if (typeof wp === 'undefined') {
+                console.error('WordPress object not available');
+                this.showError('WordPress object is not available');
+                return;
+            }
+            
+            if (!wp.media) {
+                console.error('WordPress media library not available');
+                this.showError('WordPress media library is not available');
+                return;
+            }
+            
+            console.log('Creating media frame...');
+            
+            // Create media frame
+            const mediaFrame = wp.media({
+                title: 'Select Category Image',
+                button: {
+                    text: 'Use This Image'
+                },
+                multiple: false,
+                library: {
+                    type: 'image'
+                }
+            });
+            
+            // Handle selection
+            mediaFrame.on('select', () => {
+                console.log('Image selected');
+                const attachment = mediaFrame.state().get('selection').first().toJSON();
+                if (attachment) {
+                    console.log('Attachment data:', attachment);
+                    this.showImagePreview(attachment.url);
+                    $('#sikshya-category-image').val(attachment.id);
+                }
+            });
+            
+            // Handle close
+            mediaFrame.on('close', () => {
+                console.log('Media frame closed');
+            });
+            
+            // Handle open
+            mediaFrame.on('open', () => {
+                console.log('Media frame opened');
+            });
+            
+            // Open media frame
+            console.log('Opening media frame...');
+            try {
+                mediaFrame.open();
+            } catch (error) {
+                console.error('Error opening media frame:', error);
+                this.showError('Error opening media library: ' + error.message);
+            }
+        },
+
+        handleImageRemove: function(e) {
+            e.preventDefault();
+            $('#sikshya-category-image').val('');
+            this.hideImagePreview();
         },
 
         updateFormTitle: function(title) {

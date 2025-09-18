@@ -160,7 +160,7 @@ class AdminAssetsService
         wp_register_script(
             'sikshya-categories',
             $this->plugin->getAssetUrl('admin/js/categories.js'),
-            ['jquery', 'sikshya-admin'],
+            ['jquery', 'sikshya-admin', 'wp-media'],
             SIKSHYA_VERSION,
             true
         );
@@ -302,6 +302,9 @@ class AdminAssetsService
         
         // Categories assets for categories page
         if (strpos($screen->id, AdminPages::COURSE_CATEGORIES) !== false) {
+            // Enqueue WordPress media library
+            wp_enqueue_media();
+            
             // Enqueue dashboard styles for consistent header styling
             wp_enqueue_style('sikshya-dashboard');
             wp_enqueue_style('sikshya-categories');

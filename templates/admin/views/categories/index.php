@@ -10,6 +10,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+use Sikshya\Constants\Taxonomies;
+
 $categories = $data['categories'] ?? [];
 $category_stats = $data['category_stats'] ?? [];
 $taxonomy = $data['taxonomy'] ?? '';
@@ -89,27 +91,24 @@ $post_type = $data['post_type'] ?? '';
                                 <label for="sikshya-category-image" class="sikshya-form-label">
                                     <?php _e('Feature Image', 'sikshya'); ?>
                                 </label>
-                                <div class="sikshya-image-upload">
-                                    <div class="sikshya-image-preview" id="sikshya-category-image-preview" style="display: none;">
-                                        <img id="sikshya-category-image-preview-img" src="" alt="">
-                                        <button type="button" class="sikshya-remove-image" id="sikshya-remove-category-image">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="sikshya-image-upload-placeholder" id="sikshya-category-image-placeholder">
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                            <polyline points="21,15 16,10 5,21"></polyline>
+                                <div class="sikshya-upload-area" id="sikshya-category-image-upload">
+                                    <div class="sikshya-upload-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-                                        <p><?php _e('Click to upload image', 'sikshya'); ?></p>
-                                        <small><?php _e('Recommended: 300x200px', 'sikshya'); ?></small>
                                     </div>
+                                    <strong><?php _e('Select Image', 'sikshya'); ?></strong>
+                                    <small><?php _e('Click to open WordPress Media Library', 'sikshya'); ?></small>
                                     <input type="hidden" id="sikshya-category-image" name="image" value="">
-                                    <input type="file" id="sikshya-category-image-input" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="sikshya-image-preview" id="sikshya-category-image-preview" style="display: none;">
+                                    <img id="sikshya-category-image-preview-img" src="" alt="">
+                                    <button type="button" class="sikshya-remove-image" id="sikshya-remove-category-image">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                             
@@ -158,6 +157,7 @@ $post_type = $data['post_type'] ?? '';
                                 <table class="sikshya-table">
                                     <thead>
                                         <tr>
+                                            <th class="sikshya-table-col-image"><?php _e('Image', 'sikshya'); ?></th>
                                             <th class="sikshya-table-col-name"><?php _e('Name', 'sikshya'); ?></th>
                                             <th class="sikshya-table-col-description"><?php _e('Description', 'sikshya'); ?></th>
                                             <th class="sikshya-table-col-count"><?php _e('Courses', 'sikshya'); ?></th>
@@ -166,11 +166,40 @@ $post_type = $data['post_type'] ?? '';
                                     </thead>
                                     <tbody>
                                         <?php foreach ($categories as $category): ?>
+                                            <?php 
+                                            $category_image_id = get_term_meta($category->term_id, 'category_image', true);
+                                            $category_image_url = '';
+                                            if (!empty($category_image_id)) {
+                                                $category_image_url = wp_get_attachment_image_url($category_image_id, 'thumbnail');
+                                            }
+                                            $category_parent = get_term_meta($category->term_id, 'parent', true);
+                                            ?>
                                             <tr class="sikshya-table-row" data-category-id="<?php echo esc_attr($category->term_id); ?>">
+                                                <td class="sikshya-table-col-image">
+                                                    <div class="sikshya-category-image">
+                                                        <?php if (!empty($category_image_url)): ?>
+                                                            <img src="<?php echo esc_url($category_image_url); ?>" alt="<?php echo esc_attr($category->name); ?>" class="sikshya-category-thumbnail">
+                                                        <?php else: ?>
+                                                            <div class="sikshya-category-no-image">
+                                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                                    <polyline points="21,15 16,10 5,21"></polyline>
+                                                                </svg>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </td>
                                                 <td class="sikshya-table-col-name">
                                                     <div class="sikshya-category-name-cell">
                                                         <strong><?php echo esc_html($category->name); ?></strong>
                                                         <span class="sikshya-category-slug"><?php echo esc_html($category->slug); ?></span>
+                                                        <?php if (!empty($category_parent) && $category_parent != 0): ?>
+                                                            <?php $parent_category = get_term($category_parent, Taxonomies::COURSE_CATEGORY); ?>
+                                                            <?php if ($parent_category && !is_wp_error($parent_category)): ?>
+                                                                <span class="sikshya-category-parent"><?php printf(__('Child of: %s', 'sikshya'), esc_html($parent_category->name)); ?></span>
+                                                            <?php endif; ?>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
                                                 <td class="sikshya-table-col-description">
@@ -192,11 +221,20 @@ $post_type = $data['post_type'] ?? '';
                                                 </td>
                                                 <td class="sikshya-table-col-actions">
                                                     <div class="sikshya-table-actions">
+                                                        <a href="<?php echo get_term_link($category); ?>" class="sikshya-btn sikshya-btn-sm sikshya-btn-secondary" 
+                                                           target="_blank" title="<?php _e('View Category', 'sikshya'); ?>">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                <circle cx="12" cy="12" r="3"></circle>
+                                                            </svg>
+                                                        </a>
                                                         <button type="button" class="sikshya-btn sikshya-btn-sm sikshya-btn-secondary sikshya-edit-category" 
                                                                 data-category-id="<?php echo esc_attr($category->term_id); ?>"
                                                                 data-category-name="<?php echo esc_attr($category->name); ?>"
                                                                 data-category-description="<?php echo esc_attr($category->description); ?>"
                                                                 data-category-slug="<?php echo esc_attr($category->slug); ?>"
+                                                                data-category-parent="<?php echo esc_attr($category->parent); ?>"
+                                                                data-category-image="<?php echo esc_attr($category_image_id); ?>"
                                                                 title="<?php _e('Edit Category', 'sikshya'); ?>">
                                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
