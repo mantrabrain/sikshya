@@ -10,6 +10,7 @@
         currentCategoryId: null,
 
         init: function() {
+            alert('its not working at all ');
             this.bindEvents();
         },
 
@@ -35,20 +36,14 @@
             // Save on Enter key press
             $(document).on('keydown', '#sikshya-category-form input, #sikshya-category-form textarea, #sikshya-category-form select', this.handleEnterKey.bind(this));
             
-            // Image upload handling
+            alert('binding');
+            // Image upload handling - use document delegation only
             $(document).on('click', '#sikshya-category-image-upload', this.handleImageUploadClick.bind(this));
             $(document).on('click', '#sikshya-remove-category-image', this.handleImageRemove.bind(this));
             
             console.log('Categories JS initialized');
             console.log('WordPress object available:', typeof wp !== 'undefined');
             console.log('WordPress media available:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined');
-            
-            // Ensure media library is ready
-            if (typeof wp !== 'undefined' && wp.media) {
-                console.log('WordPress media library is ready');
-            } else {
-                console.warn('WordPress media library not ready, will retry on click');
-            }
         },
 
         showEditForm: function(e) {
@@ -274,10 +269,11 @@
         },
 
         handleImageUploadClick: function(e) {
+            alert('Image upload clicked - event triggered!');
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('Image upload clicked');
+            console.log('Image upload clicked - event triggered!');
             
             // Check if WordPress media library is available
             if (typeof wp === 'undefined') {
@@ -315,16 +311,6 @@
                     this.showImagePreview(attachment.url);
                     $('#sikshya-category-image').val(attachment.id);
                 }
-            });
-            
-            // Handle close
-            mediaFrame.on('close', () => {
-                console.log('Media frame closed');
-            });
-            
-            // Handle open
-            mediaFrame.on('open', () => {
-                console.log('Media frame opened');
             });
             
             // Open media frame
@@ -391,11 +377,39 @@
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
+        },
+
+        // Test function to debug media library
+        testMediaLibrary: function() {
+            console.log('Testing media library...');
+            console.log('WordPress object:', typeof wp !== 'undefined' ? 'Available' : 'Not available');
+            console.log('WordPress media:', typeof wp !== 'undefined' && wp.media ? 'Available' : 'Not available');
+            
+            if (typeof wp !== 'undefined' && wp.media) {
+                console.log('Creating test media frame...');
+                const mediaFrame = wp.media({
+                    title: 'Test Media Library',
+                    button: {
+                        text: 'Use This Image'
+                    },
+                    multiple: false
+                });
+                
+                mediaFrame.on('select', () => {
+                    console.log('Test: Image selected');
+                });
+                
+                mediaFrame.open();
+            } else {
+                console.error('Media library not available for testing');
+            }
         }
     };
 
     // Initialize when document is ready
     $(document).ready(function() {
+        console.log('Document ready - initializing categories');
+        alert('Categories JS is loading!'); // Test if script loads
         CategoriesManager.init();
     });
 

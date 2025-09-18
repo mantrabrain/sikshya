@@ -311,6 +311,9 @@
     cursor: pointer;
     transition: all 0.2s ease;
     background: #f9fafb;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
 }
 
 .sikshya-upload-area:hover {
