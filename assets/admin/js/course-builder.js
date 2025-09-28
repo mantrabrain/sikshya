@@ -221,7 +221,7 @@ function toggleBulkMode() {
     isBulkMode = !isBulkMode;
     selectedItems.clear();
     
-    const bulkActions = document.getElementById('bulk-actions');
+    const bulkActions = document.getElementById('bulk-actions-toolbar');
     const curriculumContent = document.getElementById('curriculum-content');
     
     if (isBulkMode) {
@@ -1896,7 +1896,7 @@ function showCurriculumItems() {
     
     const emptyState = document.getElementById('curriculum-empty-state');
     let curriculumItems = document.getElementById('curriculum-items');
-    const bulkActions = document.getElementById('bulk-actions');
+    const bulkActions = document.getElementById('bulk-actions-toolbar');
     
     console.log('Empty state element:', emptyState);
     console.log('Curriculum items element:', curriculumItems);
@@ -1934,7 +1934,7 @@ function showCurriculumItems() {
 function showEmptyState() {
     const emptyState = document.getElementById('curriculum-empty-state');
     const curriculumItems = document.getElementById('curriculum-items');
-    const bulkActions = document.getElementById('bulk-actions');
+    const bulkActions = document.getElementById('bulk-actions-toolbar');
     
     if (emptyState) {
         emptyState.style.display = 'block';
@@ -3413,6 +3413,9 @@ function initializeCurriculumOnPageLoad() {
         chapterCount = chapters.length;
         console.log('Sikshya: Found chapters:', chapterCount);
         
+        // Show curriculum items and bulk actions
+        showCurriculumItems();
+        
         // Initialize chapter functionality
         addSortableIconsToChapters();
         initializeChapterSorting();
@@ -3434,6 +3437,9 @@ function initializeCurriculumOnPageLoad() {
                 console.log('Sikshya: Created curriculum-items container for future chapters');
             }
         }
+        
+        // Show empty state and hide bulk actions
+        showEmptyState();
     }
 }
 

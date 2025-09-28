@@ -214,21 +214,14 @@ class AdminAssetsService
     {
         $screen = get_current_screen();
         
-        // Debug: Log that this method is being called
-        error_log('AdminAssetsService::enqueueAdminAssets() called');
-        
         // Check if we're on a Sikshya admin page
         if (!$screen) {
-            error_log('No screen object available');
             return;
         }
         
         if (strpos($screen->id, 'sikshya') === false && strpos($screen->base, 'sikshya') === false) {
-            error_log('Not a Sikshya page - exiting');
             return;
         }
-        
-        error_log('Sikshya page detected - continuing with asset enqueuing');
        
          // Settings CSS - only load on settings page
         if (strpos($screen->id, AdminPages::SETTINGS) !== false) {
@@ -307,22 +300,8 @@ class AdminAssetsService
             ]);
         }
         
-        // Debug: Log all screen information
-        error_log('Current screen ID: ' . $screen->id);
-        error_log('Current screen base: ' . $screen->base);
-        error_log('Looking for: ' . AdminPages::COURSE_CATEGORIES);
-        error_log('Current URL: ' . $_SERVER['REQUEST_URI']);
-        
-        // Categories assets for categories page - try multiple detection methods
-        $is_categories_page = (
-            strpos($screen->id, AdminPages::COURSE_CATEGORIES) !== false ||
-            strpos($screen->base, AdminPages::COURSE_CATEGORIES) !== false ||
-            (isset($_GET['page']) && $_GET['page'] === AdminPages::COURSE_CATEGORIES)
-        );
-        
-        if ($is_categories_page) {
-            // Debug: Log screen ID
-            error_log('Categories page detected. Screen ID: ' . $screen->id);
+        // Categories assets for categories page
+        if (strpos($screen->id, AdminPages::COURSE_CATEGORIES) !== false) {
             
             // Enqueue WordPress media library and related scripts
             wp_enqueue_media();
@@ -343,22 +322,6 @@ class AdminAssetsService
                 'nonce' => wp_create_nonce('sikshya_admin_nonce'),
             ]);
             
-            error_log('Categories script enqueued: ' . $this->plugin->getAssetUrl('admin/js/categories.js'));
-            error_log('Categories assets enqueued successfully');
-        } else {
-            error_log('Categories page NOT detected. Screen ID: ' . $screen->id);
-            
-            // Temporary fallback: enqueue on all Sikshya pages for testing
-            if (strpos($screen->id, 'sikshya') !== false || strpos($screen->base, 'sikshya') !== false) {
-                error_log('Fallback: Enqueuing categories assets on Sikshya page');
-                wp_enqueue_media();
-                wp_enqueue_style('sikshya-categories');
-                wp_enqueue_script('sikshya-categories');
-                wp_localize_script('sikshya-categories', 'sikshyaAdmin', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('sikshya_admin_nonce'),
-                ]);
-            }
         }
 
         // Lessons assets for lesson pages

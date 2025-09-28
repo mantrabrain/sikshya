@@ -3508,7 +3508,7 @@ body .sikshya-modal-overlay {
 
 /* Bulk Actions Toolbar */
 .sikshya-bulk-actions-toolbar {
-    display: flex; /* Always visible */
+    display: none; /* Hidden by default, shown when content exists */
     align-items: center;
     justify-content: space-between;
     background: #f8f9fa;

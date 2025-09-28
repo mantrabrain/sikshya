@@ -63,6 +63,10 @@ class AjaxManager
         $this->handlers['settings'] = new SettingsAjax($this->plugin);
         error_log('Sikshya: SettingsAjax handler created');
         
+        // Categories AJAX handler
+        $this->handlers['categories'] = new CategoriesAjax();
+        error_log('Sikshya: CategoriesAjax handler created');
+        
         // Allow other plugins to register additional handlers
         do_action('sikshya_register_ajax_handlers', $this->plugin, $this);
         

@@ -10,7 +10,6 @@
         currentCategoryId: null,
 
         init: function() {
-            alert('its not working at all ');
             this.bindEvents();
         },
 
@@ -36,14 +35,9 @@
             // Save on Enter key press
             $(document).on('keydown', '#sikshya-category-form input, #sikshya-category-form textarea, #sikshya-category-form select', this.handleEnterKey.bind(this));
             
-            alert('binding');
-            // Image upload handling - use document delegation only
+            // Image upload handling
             $(document).on('click', '#sikshya-category-image-upload', this.handleImageUploadClick.bind(this));
             $(document).on('click', '#sikshya-remove-category-image', this.handleImageRemove.bind(this));
-            
-            console.log('Categories JS initialized');
-            console.log('WordPress object available:', typeof wp !== 'undefined');
-            console.log('WordPress media available:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined');
         },
 
         showEditForm: function(e) {
@@ -140,10 +134,8 @@
 
             this.setLoading(true);
             
-            const action = this.isEditMode ? 'updateCategory' : 'createCategory';
             const ajaxData = {
-                action: 'sikshya_categories_action',
-                sub_action: action,
+                action: 'sikshya_save_category',
                 nonce: sikshyaAdmin.nonce,
                 ...formData
             };
@@ -171,8 +163,7 @@
 
         deleteCategory: function(categoryId) {
             const ajaxData = {
-                action: 'sikshya_categories_action',
-                sub_action: 'deleteCategory',
+                action: 'sikshya_delete_category',
                 nonce: sikshyaAdmin.nonce,
                 term_id: categoryId
             };
@@ -269,26 +260,14 @@
         },
 
         handleImageUploadClick: function(e) {
-            alert('Image upload clicked - event triggered!');
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('Image upload clicked - event triggered!');
-            
             // Check if WordPress media library is available
-            if (typeof wp === 'undefined') {
-                console.error('WordPress object not available');
-                this.showError('WordPress object is not available');
-                return;
-            }
-            
-            if (!wp.media) {
-                console.error('WordPress media library not available');
+            if (typeof wp === 'undefined' || !wp.media) {
                 this.showError('WordPress media library is not available');
                 return;
             }
-            
-            console.log('Creating media frame...');
             
             // Create media frame
             const mediaFrame = wp.media({
@@ -304,23 +283,15 @@
             
             // Handle selection
             mediaFrame.on('select', () => {
-                console.log('Image selected');
                 const attachment = mediaFrame.state().get('selection').first().toJSON();
                 if (attachment) {
-                    console.log('Attachment data:', attachment);
                     this.showImagePreview(attachment.url);
                     $('#sikshya-category-image').val(attachment.id);
                 }
             });
             
             // Open media frame
-            console.log('Opening media frame...');
-            try {
-                mediaFrame.open();
-            } catch (error) {
-                console.error('Error opening media frame:', error);
-                this.showError('Error opening media library: ' + error.message);
-            }
+            mediaFrame.open();
         },
 
         handleImageRemove: function(e) {
@@ -408,8 +379,6 @@
 
     // Initialize when document is ready
     $(document).ready(function() {
-        console.log('Document ready - initializing categories');
-        alert('Categories JS is loading!'); // Test if script loads
         CategoriesManager.init();
     });
 
