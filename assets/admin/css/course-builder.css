@@ -619,6 +619,8 @@
     padding: var(--sikshya-space-10);
     background: #f5f7fa;
     overflow-y: auto;
+    max-height: calc(100vh - 80px); /* Account for header height */
+    height: calc(100vh - 80px); /* Set explicit height for scrolling */
 }
 
 .sikshya-tab-content {
@@ -1914,6 +1916,8 @@ body .sikshya-modal-overlay {
     .sikshya-content {
         padding: 20px;
         background: #f5f7fa;
+        max-height: calc(100vh - 60px); /* Smaller header on mobile */
+        height: calc(100vh - 60px);
     }
 
     .sikshya-section {
@@ -3602,13 +3606,34 @@ body .sikshya-modal-overlay {
     color: #495057 !important;
 }
 
+/* Toggle expand/collapse button specific styling */
+.sikshya-bulk-actions-toolbar [data-action="toggle-expand-collapse"] {
+    background: #f8f9fa !important;
+    color: #495057 !important;
+    border-color: #dee2e6 !important;
+    font-weight: 500 !important;
+}
+
+.sikshya-bulk-actions-toolbar [data-action="toggle-expand-collapse"]:hover {
+    background: #e9ecef !important;
+    border-color: #adb5bd !important;
+    color: #212529 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 
 /* Selected item states */
 .sikshya-chapter-card.sikshya-selected,
 .sikshya-lesson-item.sikshya-selected {
     border-color: var(--sikshya-primary);
+}
+
+/* Chapter expanded state */
+.sikshya-chapter-card.sikshya-chapter-expanded {
+    border-color: var(--sikshya-primary);
+    box-shadow: 0 0 0 1px var(--sikshya-primary);
     background: rgba(var(--sikshya-primary-rgb), 0.05);
-    box-shadow: 0 0 0 2px rgba(var(--sikshya-primary-rgb), 0.2);
 }
 
 .sikshya-chapter-card.sikshya-selected .sikshya-chapter-header,
@@ -4647,86 +4672,7 @@ body .sikshya-modal-overlay {
 
 
 
-/* ========================================
-   STEP 9: EMPTY STATE - VISUALLY APPEALING DESIGN
-======================================== */
 
-.sikshya-chapter-empty {
-    text-align: center;
-    padding: 60px 32px;
-    color: #6b7280;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 16px;
-    border: 2px dashed #cbd5e1;
-    margin: 24px 0;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.sikshya-chapter-empty::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.03) 0%, transparent 70%);
-    animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(180deg); }
-}
-
-.sikshya-chapter-empty-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 24px;
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-    position: relative;
-    z-index: 2;
-    transition: all 0.3s ease;
-}
-
-.sikshya-chapter-empty-icon svg {
-    width: 36px;
-    height: 36px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-}
-
-.sikshya-chapter-empty:hover .sikshya-chapter-empty-icon {
-    transform: scale(1.05) rotate(5deg);
-    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
-}
-
-.sikshya-chapter-empty h4 {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 12px 0;
-    position: relative;
-    z-index: 2;
-    letter-spacing: -0.025em;
-}
-
-.sikshya-chapter-empty p {
-    font-size: 16px;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.6;
-    position: relative;
-    z-index: 2;
-    font-weight: 500;
-}
 
 /* ========================================
    STEP 10: ADD CONTENT BUTTON - VISUALLY APPEALING CTA
@@ -4941,11 +4887,6 @@ body .sikshya-modal-overlay {
     /* Keep default colors for proper contrast */
 }
 
-/* Chapter Icon in Empty States - Keep white for colored backgrounds */
-.sikshya-empty-icon svg[data-chapter-icon="true"],
-.sikshya-chapter-empty-icon svg[data-chapter-icon="true"] {
-    /* Keep default white color for colored backgrounds */
-}
 
 /* Chapter Content Container */
 .sikshya-chapter-content-inner {

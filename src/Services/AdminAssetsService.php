@@ -412,6 +412,14 @@ class AdminAssetsService
                 SIKSHYA_VERSION,
                 true
             );
+            
+            // Localize lessons script for course builder context
+            wp_localize_script('sikshya-lessons', 'sikshya_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('sikshya_lesson'),
+                'admin_url' => admin_url(),
+                'add_lesson_page' => AdminPages::ADD_LESSON,
+            ]);
 
             // Enqueue toast assets for course builder
             wp_enqueue_style('sikshya-toast');
@@ -421,9 +429,9 @@ class AdminAssetsService
             wp_enqueue_script('sikshya-course-builder-save');
 
             // Localize course builder script
-            wp_localize_script('sikshya-course-builder-save', 'sikshya_ajax', [
+            wp_localize_script('sikshya-course-builder-save', 'sikshya_course_builder_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('sikshya_course_builder_nonce'),
+                'nonce' => wp_create_nonce('sikshya_course_builder'),
                 'plugin_url' => $this->plugin->getPluginUrl(),
                 'debug' => true,
             ]);

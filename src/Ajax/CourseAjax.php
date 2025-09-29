@@ -371,7 +371,7 @@ class CourseAjax extends AjaxAbstract
     public function handleLoadModalTemplate(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_course_builder_nonce', 'sikshya_course_builder_nonce')) {
+            if (!$this->verifyNonce('sikshya_course_builder')) {
                 $this->sendError('Invalid nonce');
                 return;
             }
@@ -404,18 +404,25 @@ class CourseAjax extends AjaxAbstract
     public function handleLoadFormTemplate(): void
     {
         try {
+            error_log('Sikshya: handleLoadFormTemplate called');
+            error_log('Sikshya: POST data: ' . print_r($_POST, true));
+            
             if (!$this->verifyNonce('sikshya_course_builder')) {
+                error_log('Sikshya: Invalid nonce in handleLoadFormTemplate');
                 $this->sendError('Invalid nonce');
                 return;
             }
             
             $content_type = sanitize_text_field($this->getPostData('content_type', ''));
+            error_log('Sikshya: Content type: ' . $content_type);
             
             // Return form template HTML
             $template = $this->getContentTypeForm($content_type);
+            error_log('Sikshya: Template length: ' . strlen($template));
             $this->sendSuccess(['html' => $template]);
             
         } catch (\Exception $e) {
+            error_log('Sikshya: Load form template error: ' . $e->getMessage());
             $this->logError('Load form template error', $e);
             $this->sendError('Failed to load form template: ' . $e->getMessage());
         }
@@ -456,6 +463,15 @@ class CourseAjax extends AjaxAbstract
             }
             
             // Create chapter post
+            error_log('Sikshya: Creating chapter with data: ' . print_r([
+                'title' => $title,
+                'description' => $description,
+                'duration' => $duration,
+                'order' => $order,
+                'course_id' => $course_id,
+                'post_type' => PostTypes::CHAPTER
+            ], true));
+            
             $chapter_id = wp_insert_post([
                 'post_title' => $title,
                 'post_content' => $description,
@@ -464,8 +480,11 @@ class CourseAjax extends AjaxAbstract
                 'post_parent' => $course_id,
             ]);
             
+            error_log('Sikshya: Chapter creation result: ' . print_r($chapter_id, true));
+            
             if (is_wp_error($chapter_id)) {
-                $this->sendError('Failed to create chapter');
+                error_log('Sikshya: Chapter creation error: ' . $chapter_id->get_error_message());
+                $this->sendError('Failed to create chapter: ' . $chapter_id->get_error_message());
                 return;
             }
             
@@ -1199,15 +1218,6 @@ class CourseAjax extends AjaxAbstract
             <div class="sikshya-chapter-content" id="content-chapter-<?php echo esc_attr($chapter_id); ?>">
                 <div class="sikshya-chapter-content-inner">
                     <div class="sikshya-lesson-list">
-                        <div class="sikshya-chapter-empty">
-                            <div class="sikshya-chapter-empty-icon">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                </svg>
-                            </div>
-                            <h4>No Lessons Yet</h4>
-                            <p>Add your first lesson to this chapter</p>
-                        </div>
                     </div>
                     
                     <!-- Add More Content -->
@@ -1325,7 +1335,7 @@ class CourseAjax extends AjaxAbstract
     public function handleLinkContentToChapter(): void
     {
         try {
-            if (!$this->verifyNonce('sikshya_course_builder_nonce', 'sikshya_course_builder_nonce')) {
+            if (!$this->verifyNonce('sikshya_course_builder')) {
                 $this->sendError('Invalid nonce');
                 return;
             }
@@ -1554,17 +1564,7 @@ class CourseAjax extends AjaxAbstract
             <div class="sikshya-chapter-content" id="content-chapter-<?php echo esc_attr($chapter_id); ?>">
                 <div class="sikshya-chapter-content-inner">
                     <div class="sikshya-lesson-list">
-                        <?php if ($lesson_count + $quiz_count + $assignment_count === 0): ?>
-                            <div class="sikshya-chapter-empty">
-                                <div class="sikshya-chapter-empty-icon">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                    </svg>
-                                </div>
-                                <h4>No Lessons Yet</h4>
-                                <p>Add your first lesson to this chapter</p>
-                            </div>
-                        <?php else: ?>
+                        <?php if ($lesson_count + $quiz_count + $assignment_count > 0): ?>
                             <?php
                             // Display content items
                             if (is_array($chapter_contents)) {
@@ -1781,7 +1781,7 @@ class CourseAjax extends AjaxAbstract
     public function handleBulkDeleteItems()
     {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_ajax_nonce')) {
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'sikshya_course_builder')) {
             wp_send_json_error('Invalid nonce');
             return;
         }
@@ -1795,11 +1795,34 @@ class CourseAjax extends AjaxAbstract
         $chapters = $_POST['chapters'] ?? [];
         $lessons = $_POST['lessons'] ?? [];
         
+        // Debug logging
+        error_log('Sikshya: Bulk delete - Chapters: ' . print_r($chapters, true));
+        error_log('Sikshya: Bulk delete - Lessons: ' . print_r($lessons, true));
+        
         $deleted_count = 0;
         $errors = [];
 
         // Delete chapters
         foreach ($chapters as $chapter_id) {
+            // Validate chapter ID
+            if (!is_numeric($chapter_id) || $chapter_id <= 0) {
+                $errors[] = "Invalid chapter ID: $chapter_id";
+                continue;
+            }
+            
+            // Check if post exists
+            $post = get_post($chapter_id);
+            if (!$post) {
+                $errors[] = "Chapter ID $chapter_id does not exist";
+                continue;
+            }
+            
+            // Check if it's actually a chapter post type
+            if ($post->post_type !== PostTypes::CHAPTER) {
+                $errors[] = "Post ID $chapter_id is not a chapter (type: {$post->post_type})";
+                continue;
+            }
+            
             if (wp_delete_post($chapter_id, true)) {
                 $deleted_count++;
             } else {
@@ -1809,6 +1832,25 @@ class CourseAjax extends AjaxAbstract
 
         // Delete lessons
         foreach ($lessons as $lesson_id) {
+            // Validate lesson ID
+            if (!is_numeric($lesson_id) || $lesson_id <= 0) {
+                $errors[] = "Invalid lesson ID: $lesson_id";
+                continue;
+            }
+            
+            // Check if post exists
+            $post = get_post($lesson_id);
+            if (!$post) {
+                $errors[] = "Lesson ID $lesson_id does not exist";
+                continue;
+            }
+            
+            // Check if it's actually a lesson post type
+            if ($post->post_type !== PostTypes::LESSON) {
+                $errors[] = "Post ID $lesson_id is not a lesson (type: {$post->post_type})";
+                continue;
+            }
+            
             if (wp_delete_post($lesson_id, true)) {
                 $deleted_count++;
             } else {

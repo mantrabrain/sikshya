@@ -10,30 +10,33 @@ let isBulkMode = false;
 
 // AJAX helper function
 function sikshyaAjax(action, data, callback) {
-    // Check if sikshya_ajax is available
-    if (typeof sikshya_ajax === 'undefined') {
-        console.error('Sikshya: sikshya_ajax object is not defined!');
+    // Check if sikshya_course_builder_ajax is available
+    if (typeof sikshya_course_builder_ajax === 'undefined') {
+        console.error('Sikshya: sikshya_course_builder_ajax object is not defined!');
         alert('Sikshya AJAX configuration is missing. Please refresh the page.');
         return;
     }
     
     const ajaxData = {
         action: action,
-        sikshya_course_builder_nonce: sikshya_ajax.nonce,
+        nonce: sikshya_course_builder_ajax.nonce,
         ...data
     };
 
     console.log('Sikshya AJAX Request:', {
         action: action,
         data: ajaxData,
-        url: sikshya_ajax.ajax_url
+        url: sikshya_course_builder_ajax.ajax_url
     });
 
-    jQuery.post(sikshya_ajax.ajax_url, ajaxData, function(response) {
+    jQuery.post(sikshya_course_builder_ajax.ajax_url, ajaxData, function(response) {
         console.log('Sikshya AJAX Raw Response:', response);
+        console.log('Sikshya AJAX Response Success:', response.success);
+        console.log('Sikshya AJAX Response Data:', response.data);
         
         if (response.success) {
-            callback(response.data);
+            console.log('Sikshya AJAX: Calling success callback');
+            callback(response);
         } else {
             console.error('Sikshya AJAX Error:', response.data);
             alert('Error: ' + response.data);
@@ -389,15 +392,24 @@ function showChapterModal() {
     sikshyaAjax('sikshya_load_modal_template', {
         modal_type: 'chapter',
         chapter_order: chapterCount + 1
-    }, function(data) {
-        document.body.insertAdjacentHTML('beforeend', data.html);
-        const modal = document.querySelector('.sikshya-modal-overlay');
+    }, function(response) {
+        console.log('Sikshya: Modal HTML received:', response.data.html);
+        document.body.insertAdjacentHTML('beforeend', response.data.html);
         
-        if (modal) {
-        openModal(modal);
-        } else {
-            console.error('Modal not found after loading template');
-        }
+        // Wait a moment for DOM to update
+        setTimeout(() => {
+            const modal = document.querySelector('.sikshya-modal-overlay');
+            console.log('Sikshya: Modal element found:', modal);
+            
+            if (modal) {
+                openModal(modal);
+            } else {
+                console.error('Modal not found after loading template');
+                // Try alternative selectors
+                const altModal = document.querySelector('.sikshya-modal');
+                console.log('Sikshya: Alternative modal selector:', altModal);
+            }
+        }, 10);
     });
 }
 
@@ -471,26 +483,31 @@ function createChapterWithCourseId(courseId, title, duration, order) {
         duration: duration,
         order: order,
         course_id: courseId
-    }, function(data) {
-        console.log('Sikshya: Chapter creation response data:', data);
+    }, function(response) {
+        console.log('Sikshya: Chapter creation response:', response);
         
-        if (data && data.html && data.chapter_id) {
+        if (response && response.data && response.data.html && response.data.chapter_id) {
+            // Clear form before closing modal
+            const titleField = document.getElementById('chapter-title');
+            const descriptionField = document.getElementById('chapter-description');
+            const durationField = document.getElementById('chapter-duration');
+            const orderField = document.getElementById('chapter-order');
+            
+            if (titleField) titleField.value = '';
+            if (descriptionField) descriptionField.value = '';
+            if (durationField) durationField.value = '';
+            if (orderField) orderField.value = chapterCount + 2;
+            
             // Add chapter to curriculum
-            addChapterToCurriculum(data.html, data.chapter_id);
+            addChapterToCurriculum(response.data.html, response.data.chapter_id);
             
             // Close modal
             closeModal(document.querySelector('.sikshya-modal-overlay'));
             
             // Update progress
             updateProgress();
-            
-            // Clear form
-            document.getElementById('chapter-title').value = '';
-            document.getElementById('chapter-description').value = '';
-            document.getElementById('chapter-duration').value = '';
-            document.getElementById('chapter-order').value = chapterCount + 2;
         } else {
-            console.error('Sikshya: Failed to create chapter:', data);
+            console.error('Sikshya: Failed to create chapter:', response);
             alert('Failed to create chapter. Please try again.');
         }
     });
@@ -1073,12 +1090,25 @@ function showContentFormModal(contentType) {
 
 function showFullWidthModal(contentType) {
     console.log('Loading form for content type:', contentType); // Debug log
+    console.log('Sikshya: About to call sikshyaAjax with action: sikshya_load_form_template');
+    console.log('Sikshya: Course builder AJAX object:', sikshya_course_builder_ajax);
+    
+    // Check if sikshyaAjax function exists
+    if (typeof sikshyaAjax !== 'function') {
+        console.error('Sikshya: sikshyaAjax function not found!');
+        alert('Sikshya AJAX function not available. Please refresh the page.');
+        return;
+    }
+    
+    console.log('Sikshya: Calling sikshyaAjax...');
     
     sikshyaAjax('sikshya_load_form_template', {
         content_type: contentType
-    }, function(data) {
-        console.log('Form template loaded successfully:', data); // Debug log
-        console.log('HTML content length:', data.html ? data.html.length : 0); // Debug log
+    }, function(response) {
+        console.log('Sikshya: AJAX success callback called');
+        console.log('Form template response:', response); // Debug log
+        console.log('Response data:', response.data); // Debug log
+        console.log('HTML content length:', response.data.html ? response.data.html.length : 0); // Debug log
         
         // Create modal wrapper with improved design
         const modal = document.createElement('div');
@@ -1106,7 +1136,7 @@ function showFullWidthModal(contentType) {
                     </div>
                 </div>
                 <div class="sikshya-modal-body">
-                    ${data.html || '<p>No form content loaded</p>'}
+                    ${response.data.html || '<p>No form content loaded</p>'}
                 </div>
                 <div class="sikshya-modal-footer">
                     <button class="sikshya-btn sikshya-btn-secondary" onclick="closeModal(this)">Cancel</button>
@@ -1579,11 +1609,6 @@ function addContentToChapterContent(html, contentId) {
         return;
     }
     
-    // Remove empty state if it exists
-    const emptyState = contentInner.querySelector('.sikshya-chapter-empty');
-    if (emptyState) {
-        emptyState.remove();
-    }
     
     // Find the lesson list container
     const lessonList = contentInner.querySelector('.sikshya-lesson-list');
@@ -1644,16 +1669,6 @@ function updateChapterInfo(chapterId) {
     // Update chapter content summary in header
     updateChapterContentSummary(chapter, lessonCount, quizCount, assignmentCount);
     
-    // Show/hide empty state
-    const emptyState = chapter.querySelector('.sikshya-chapter-empty');
-    const contentInner = chapter.querySelector('.sikshya-chapter-content-inner');
-    const lessonList = contentInner ? contentInner.querySelector('.sikshya-lesson-list') : null;
-    
-    if (lessonList && lessonList.children.length > 0) {
-        if (emptyState) emptyState.style.display = 'none';
-    } else {
-        if (emptyState) emptyState.style.display = 'block';
-    }
 }
 
 function updateChapterContentSummary(chapter, lessonCount, quizCount, assignmentCount) {
@@ -1684,16 +1699,6 @@ function updateChapterContentSummary(chapter, lessonCount, quizCount, assignment
         `;
     }
     
-    // Show/hide empty state
-    const emptyState = chapter.querySelector('.sikshya-chapter-empty');
-    const contentInner = chapter.querySelector('.sikshya-chapter-content-inner');
-    const lessonList = contentInner ? contentInner.querySelector('.sikshya-lesson-list') : null;
-    
-    if (lessonList && lessonList.children.length > 0) {
-        if (emptyState) emptyState.style.display = 'none';
-    } else {
-        if (emptyState) emptyState.style.display = 'block';
-    }
     
     console.log('Chapter updated:', { lessonCount, quizCount, assignmentCount, totalContent });
 }
@@ -1859,15 +1864,6 @@ function deleteContent(button) {
         // Show empty state if no content in chapter
         const chapterContent = document.getElementById('content-' + chapterId);
         const contentInner = chapterContent.querySelector('.sikshya-chapter-content-inner');
-        if (contentInner.children.length === 0) {
-            contentInner.innerHTML = `
-                <div class="sikshya-chapter-empty">
-                    <i class="fas fa-plus-circle"></i>
-                    <h4>No content yet</h4>
-                    <p>Add your first content item to this chapter</p>
-                </div>
-            `;
-        }
     }
 }
 
@@ -3897,6 +3893,10 @@ function initializeBulkSelection() {
                     e.preventDefault();
                     clearBulkSelection();
                     break;
+                case 'toggle-expand-collapse':
+                    e.preventDefault();
+                    toggleExpandCollapseAll();
+                    break;
             }
         }
     });
@@ -3961,6 +3961,74 @@ function clearBulkSelection() {
     }
     
     updateBulkSelection();
+}
+
+/**
+ * Toggle expand/collapse all chapters
+ */
+function toggleExpandCollapseAll() {
+    const chapters = document.querySelectorAll('.sikshya-chapter-card');
+    const button = document.getElementById('expand-collapse-btn');
+    const buttonText = document.getElementById('expand-collapse-text');
+    const buttonIcon = button.querySelector('svg');
+    
+    // Check if any chapters are currently expanded (using CSS classes, not inline styles)
+    const hasExpandedChapters = Array.from(chapters).some(chapter => {
+        const header = chapter.querySelector('.sikshya-chapter-header');
+        return header && header.classList.contains('expanded');
+    });
+    
+    if (hasExpandedChapters) {
+        // Collapse all chapters
+        chapters.forEach(chapter => {
+            const header = chapter.querySelector('.sikshya-chapter-header');
+            const content = chapter.querySelector('.sikshya-chapter-content');
+            const toggleBtn = chapter.querySelector('.sikshya-chapter-toggle');
+            const toggleIcon = chapter.querySelector('.sikshya-chapter-toggle svg');
+            
+            if (header && content && toggleBtn && toggleIcon) {
+                // Remove expanded classes
+                header.classList.remove('expanded');
+                content.classList.remove('expanded');
+                toggleBtn.classList.remove('expanded');
+                
+                // Update toggle icon to point down (collapsed state)
+                toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>';
+                
+                // Remove expanded class for styling
+                chapter.classList.remove('sikshya-chapter-expanded');
+            }
+        });
+        
+        // Update button to show "Expand All"
+        buttonText.textContent = 'Expand All';
+        buttonIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>';
+    } else {
+        // Expand all chapters
+        chapters.forEach(chapter => {
+            const header = chapter.querySelector('.sikshya-chapter-header');
+            const content = chapter.querySelector('.sikshya-chapter-content');
+            const toggleBtn = chapter.querySelector('.sikshya-chapter-toggle');
+            const toggleIcon = chapter.querySelector('.sikshya-chapter-toggle svg');
+            
+            if (header && content && toggleBtn && toggleIcon) {
+                // Add expanded classes
+                header.classList.add('expanded');
+                content.classList.add('expanded');
+                toggleBtn.classList.add('expanded');
+                
+                // Update toggle icon to point up (expanded state)
+                toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>';
+                
+                // Add expanded class for styling
+                chapter.classList.add('sikshya-chapter-expanded');
+            }
+        });
+        
+        // Update button to show "Collapse All"
+        buttonText.textContent = 'Collapse All';
+        buttonIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.5 3.5M15 9V4.5M15 9h4.5M15 9l5.5-5.5M9 15v4.5M9 15H4.5M9 15l-5.5 5.5M15 15v4.5M15 15h4.5M15 15l5.5 5.5"/>';
+    }
 }
 
 /**
@@ -4127,8 +4195,10 @@ function confirmChapterDeletion() {
         const item = checkbox.closest('.sikshya-chapter-card');
         if (item) {
             const itemId = item.getAttribute('data-chapter-id');
+            // Extract numeric ID from "chapter-{id}" format
+            const numericId = itemId.replace('chapter-', '');
             itemsToDelete.push({
-                id: itemId,
+                id: numericId,
                 type: 'chapter',
                 element: item,
                 deleteContent: selectedOption.value === 'chapter-content'
@@ -4144,7 +4214,7 @@ function confirmChapterDeletion() {
     lessonItems.forEach(checkbox => {
         const item = checkbox.closest('.sikshya-lesson-item');
         if (item) {
-            const itemId = item.getAttribute('data-lesson-id');
+            const itemId = item.getAttribute('data-content-id');
             itemsToDelete.push({
                 id: itemId,
                 type: 'lesson',
@@ -4169,8 +4239,9 @@ function deleteBulkItems(items) {
     
     // Show loading state
     const deleteBtn = document.getElementById('bulk-delete-btn');
+    let originalText = '';
     if (deleteBtn) {
-        const originalText = deleteBtn.innerHTML;
+        originalText = deleteBtn.innerHTML;
         deleteBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Deleting...';
         deleteBtn.disabled = true;
     }
@@ -4180,35 +4251,55 @@ function deleteBulkItems(items) {
         action: 'sikshya_bulk_delete_items',
         chapters: chaptersToDelete,
         lessons: lessonsToDelete,
-        nonce: sikshyaAjax.nonce || ''
+        nonce: sikshya_course_builder_ajax.nonce || ''
     };
+    
+    console.log('Sikshya: Bulk delete request data:', data);
     
     // Send AJAX request
     sikshyaAjax('sikshya_bulk_delete_items', data, function(response) {
+        console.log('Sikshya: Bulk delete response:', response);
+        
+        // Restore button state immediately
+        if (deleteBtn && originalText) {
+            deleteBtn.innerHTML = originalText;
+            deleteBtn.disabled = false;
+        }
+        
         if (response.success) {
             // Remove items from DOM
             items.forEach(item => {
-                item.element.remove();
+                if (item.element && item.element.parentNode) {
+                    item.element.remove();
+                }
             });
             
             // Clear selection
             clearBulkSelection();
             
-                    // Show success message
-                    sikshyaAlert(`${items.length} items deleted successfully.`, 'success');
+            // Check if all chapters are deleted and show empty state
+            const curriculumItems = document.getElementById('curriculum-items');
+            if (curriculumItems && curriculumItems.children.length === 0) {
+                showEmptyState();
+            }
+            
+            // Show success message
+            const deletedCount = response.data && response.data.deleted_count ? response.data.deleted_count : items.length;
+            sikshyaAlert(`${deletedCount} items deleted successfully.`, 'success');
             
             // Update curriculum counts
             updateCurriculumCounts();
         } else {
-            sikshyaAlert('Error deleting items: ' + (response.data || 'Unknown error'), 'error');
-        }
-    }, function(error) {
-        sikshyaAlert('Error deleting items: ' + error, 'error');
-    }, function() {
-        // Restore button state
-        if (deleteBtn) {
-            deleteBtn.innerHTML = originalText;
-            deleteBtn.disabled = false;
+            // Display detailed error message
+            let errorMessage = 'Error deleting items: ';
+            if (response.data && response.data.message) {
+                errorMessage += response.data.message;
+            } else if (response.data && response.data.errors && response.data.errors.length > 0) {
+                errorMessage += response.data.errors.join(', ');
+            } else {
+                errorMessage += 'Unknown error';
+            }
+            sikshyaAlert(errorMessage, 'error');
         }
     });
 }
