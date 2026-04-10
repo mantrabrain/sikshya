@@ -5,7 +5,8 @@ import { useAsyncData } from './useAsyncData';
 export type WpUserCollectionQuery = {
   roleSlug: string;
   search: string;
-  orderby: 'name' | 'registered_date';
+  /** WordPress REST `orderby` (e.g. `name`, `registered_date`, `id`, `email`, `slug`). */
+  orderby: string;
   order: 'asc' | 'desc';
   page?: number;
   perPage?: number;

@@ -20,7 +20,7 @@ type Props = {
   contextHint: string;
   searchPlaceholder: string;
   sortFieldOptions: SortFieldOption[];
-  defaultSortField: 'name' | 'registered_date';
+  defaultSortField: string;
   columns: Column<WpRestUser>[];
   emptyMessage: string;
   skeletonHeaders?: string[];
@@ -50,7 +50,7 @@ export function UserEntityListView({
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
   const [page, setPage] = useState(1);
-  const [orderby, setOrderby] = useState<'name' | 'registered_date'>(defaultSortField);
+  const [orderby, setOrderby] = useState(defaultSortField);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
@@ -142,6 +142,18 @@ export function UserEntityListView({
 
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
 
+  const onSortColumn = useCallback(
+    (key: string) => {
+      if (key === orderby) {
+        setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setOrderby(key);
+        setOrder('asc');
+      }
+    },
+    [orderby]
+  );
+
   const columnPicker =
     columnPickerStorageKey && pickable.length > 0 ? (
       <ColumnVisibilityMenu columns={pickable.map((c) => ({ id: c.id, label: c.header || 'Column' }))} visibility={pickerVisibility} onChange={onColumnToggle} />
@@ -163,7 +175,7 @@ export function UserEntityListView({
         searchPlaceholder={searchPlaceholder}
         sortField={orderby}
         sortFieldOptions={sortFieldOptions}
-        onSortFieldChange={(v) => setOrderby(v as 'name' | 'registered_date')}
+        onSortFieldChange={setOrderby}
         sortOrder={order}
         onSortOrderToggle={onSortOrderToggle}
         trailing={columnPicker}
@@ -188,14 +200,26 @@ export function UserEntityListView({
         <DataTableSkeleton headers={skeletonHeaders} rows={8} />
       ) : (
         <>
+          <ListPaginationBar
+            placement="top"
+            page={page}
+            total={listQuery.data?.total ?? null}
+            totalPages={listQuery.data?.totalPages ?? null}
+            perPage={DEFAULT_LIST_PER_PAGE}
+            onPageChange={setPage}
+            disabled={listQuery.loading}
+          />
           <DataTable
             columns={visibleColumns}
             rows={rows}
             rowKey={(r) => r.id}
             emptyContent={emptyContent}
             wrapInCard={false}
+            sortState={{ orderby, order }}
+            onSortColumn={onSortColumn}
           />
           <ListPaginationBar
+            placement="bottom"
             page={page}
             total={listQuery.data?.total ?? null}
             totalPages={listQuery.data?.totalPages ?? null}

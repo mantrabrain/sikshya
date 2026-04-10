@@ -1,16 +1,13 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { EntityListView, StatusBadge } from '../components/shared/list';
-import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
-import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
 import { courseMetaString, coursePriceLabel, embeddedAuthorName } from '../lib/courseListMeta';
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { embeddedTermNames } from '../lib/wpPostTerms';
-import { wpPostStatusRowActions } from '../lib/wpPostStatusRowActions';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
 
@@ -18,23 +15,59 @@ function stripTags(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
 }
 
+function featuredThumbSrc(r: WpPost): string | null {
+  const url = r._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+  return typeof url === 'string' && url.length > 0 ? url : null;
+}
+
+function excerptPlain(r: WpPost): string {
+  const raw = r.excerpt?.rendered;
+  if (!raw) {
+    return '';
+  }
+  return stripTags(raw).replace(/\s+/g, ' ').trim();
+}
+
 const COURSE_CAT_TAX = 'sikshya_course_category';
 
 export function CoursesPage(props: { config: SikshyaReactConfig; title: string; restBase: string }) {
   const { config, title, restBase } = props;
   const [createOpen, setCreateOpen] = useState(false);
-  const { confirm } = useSikshyaDialog();
-  const refreshListRef = useRef<(() => Promise<void>) | null>(null);
-
-  const onListReady = useCallback((api: { refresh: () => Promise<void> }) => {
-    refreshListRef.current = api.refresh;
-  }, []);
 
   const columns: Column<WpPost>[] = useMemo(
     () => [
       {
+        id: 'id',
+        header: 'ID',
+        sortKey: 'id',
+        alwaysVisible: true,
+        cellClassName: 'whitespace-nowrap tabular-nums text-slate-600 dark:text-slate-400',
+        render: (r) => r.id,
+      },
+      {
+        id: 'thumb',
+        header: '',
+        columnPickerLabel: 'Image',
+        alwaysVisible: true,
+        headerClassName: 'w-16',
+        cellClassName: 'w-16',
+        render: (r) => {
+          const src = featuredThumbSrc(r);
+          return (
+            <div className="flex h-12 w-14 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-800">
+              {src ? (
+                <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">—</span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
         id: 'title',
         header: 'Course',
+        sortKey: 'title',
         render: (r) => (
           <div className="max-w-md">
             <a
@@ -64,6 +97,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
       {
         id: 'author',
         header: 'Author',
+        sortKey: 'author',
         defaultHidden: true,
         cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
         render: (r) => embeddedAuthorName(r),
@@ -88,8 +122,26 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         render: (r) => courseMetaString(r, '_sikshya_course_level', '_sikshya_difficulty'),
       },
       {
+        id: 'excerpt',
+        header: 'Excerpt',
+        defaultHidden: true,
+        cellClassName: 'max-w-xs text-slate-600 dark:text-slate-400',
+        render: (r) => {
+          const t = excerptPlain(r);
+          return t ? <span className="line-clamp-2">{t}</span> : '—';
+        },
+      },
+      {
+        id: 'date',
+        header: 'Published',
+        sortKey: 'date',
+        cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+        render: (r) => formatPostDate(r.date),
+      },
+      {
         id: 'modified',
         header: 'Updated',
+        sortKey: 'modified',
         cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
         render: (r) => formatPostDate(r.modified || r.date),
       },
@@ -98,38 +150,8 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         header: 'Status',
         render: (r) => <StatusBadge status={r.status} />,
       },
-      {
-        id: 'actions',
-        header: '',
-        alwaysVisible: true,
-        headerClassName: 'w-14 text-right',
-        cellClassName: 'text-right',
-        render: (r) => {
-          const label = stripTags(r.title.rendered) || 'Course';
-          const refresh = () => refreshListRef.current?.() ?? Promise.resolve();
-          const base: Parameters<typeof RowActionsMenu>[0]['items'] = [
-            {
-              key: 'builder',
-              label: 'Edit in builder',
-              href: appViewHref(config, 'add-course', { course_id: String(r.id) }),
-            },
-            ...(r.link && r.link !== '#'
-              ? [
-                  {
-                    key: 'view',
-                    label: 'View on site',
-                    href: r.link,
-                    external: true as const,
-                  },
-                ]
-              : []),
-          ];
-          const statusItems = wpPostStatusRowActions(restBase, r, refresh, confirm);
-          return <RowActionsMenu ariaLabel={`Actions for ${label}`} items={[...base, ...statusItems]} />;
-        },
-      },
     ],
-    [config, restBase, confirm]
+    [config]
   );
 
   return (
@@ -154,11 +176,21 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
           { value: 'title', label: 'Title' },
           { value: 'date', label: 'Published' },
           { value: 'modified', label: 'Last modified' },
+          { value: 'id', label: 'ID' },
+          { value: 'author', label: 'Author' },
         ]}
         defaultSortField="title"
         columnPickerStorageKey="course"
         collectionQueryExtras={{ embed: '1' }}
-        onListReady={onListReady}
+        postRowActions={{
+          buildLeadingItems: (r) => [
+            {
+              key: 'builder',
+              label: 'Edit in builder',
+              href: appViewHref(config, 'add-course', { course_id: String(r.id) }),
+            },
+          ],
+        }}
         columns={columns}
         emptyMessage="No courses match your filters. Try clearing search or choosing another status."
         emptyStateTitle="No courses found"
@@ -166,7 +198,17 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         emptyStateAction={
           <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new course</ButtonPrimary>
         }
-        skeletonHeaders={['Course', 'Categories', 'Price', 'Level', 'Updated', 'Status', '']}
+        skeletonHeaders={[
+          'ID',
+          '',
+          'Course',
+          'Categories',
+          'Price',
+          'Level',
+          'Published',
+          'Updated',
+          'Status',
+        ]}
       />
     </AppShell>
   );

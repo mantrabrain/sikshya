@@ -1173,18 +1173,49 @@ class SettingsManager
                         'type' => 'select',
                         'label' => __('Primary Payment Gateway', 'sikshya'),
                         'description' => __(
-                            'Primary gateway preference. Native cart/checkout currently implements Stripe and PayPal only; Razorpay, Mollie, and manual are reserved for future releases.',
+                            'Default preference for integrations. Checkout always lists offline payment (when enabled) first, then Stripe and PayPal when configured.',
                             'sikshya'
                         ),
-                        'default' => '',
+                        'default' => 'offline',
                         'options' => [
                             '' => __('Select Gateway', 'sikshya'),
+                            'offline' => __('Offline / manual', 'sikshya'),
                             'stripe' => __('Stripe', 'sikshya'),
                             'paypal' => __('PayPal', 'sikshya'),
                             'razorpay' => __('Razorpay', 'sikshya'),
                             'mollie' => __('Mollie', 'sikshya'),
-                            'manual' => __('Manual Payment', 'sikshya')
+                            'manual' => __('Manual Payment (legacy label)', 'sikshya')
                         ]
+                    ],
+                    [
+                        'key' => 'enable_offline_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable offline / manual payment at checkout', 'sikshya'),
+                        'description' => __(
+                            'Shows “Offline payment” on checkout (no API keys). Use instructions below for bank details or invoicing.',
+                            'sikshya'
+                        ),
+                        'default' => true
+                    ],
+                    [
+                        'key' => 'offline_payment_instructions',
+                        'type' => 'textarea',
+                        'label' => __('Offline payment instructions', 'sikshya'),
+                        'description' => __(
+                            'Shown on the order page while payment is awaiting confirmation (e.g. bank name, IBAN, reference to use). Basic HTML allowed.',
+                            'sikshya'
+                        ),
+                        'default' => ''
+                    ],
+                    [
+                        'key' => 'offline_payment_auto_fulfill',
+                        'type' => 'checkbox',
+                        'label' => __('Auto-enroll after offline checkout', 'sikshya'),
+                        'description' => __(
+                            'When enabled, learners are enrolled immediately after choosing offline payment (honor system). When disabled, orders stay on hold until an administrator marks them paid under Sikshya → Orders.',
+                            'sikshya'
+                        ),
+                        'default' => false
                     ],
                     [
                         'key' => 'enable_test_mode',
@@ -1937,7 +1968,7 @@ class SettingsManager
                         'key' => 'permalink_order',
                         'type' => 'text',
                         'label' => __('Order / receipt permalink', 'sikshya'),
-                        'description' => __('Slug for viewing an order receipt (order_id is passed in the query string).', 'sikshya'),
+                        'description' => __('Slug for viewing an order receipt. The URL uses a private order_key (32-character hex token), not the numeric database ID.', 'sikshya'),
                         'default' => $defaults['permalink_order'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,

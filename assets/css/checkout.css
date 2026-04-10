@@ -1,0 +1,411 @@
+/**
+ * Checkout virtual page — design system + layout with order summary sidebar.
+ *
+ * Depends on: public-design-system.css, frontend.css.
+ * Loaded only when {@see \Sikshya\Frontend\Public\PublicPageUrls::isCurrentVirtualPage('checkout')}.
+ *
+ * @package Sikshya
+ */
+
+.sikshya-checkout-page.sik-f-scope.sikshya-public {
+  padding-top: 0;
+  background-color: var(--sikshya-white);
+  min-height: 100%;
+}
+
+.sikshya-checkout-page__masthead {
+  background: var(--sik-f-surface-muted);
+  border-bottom: 1px solid var(--sik-f-border);
+  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
+}
+
+.sikshya-checkout-page__masthead-inner {
+  width: 100%;
+  max-width: 70rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+}
+
+.sikshya-checkout-page__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  font-size: var(--sikshya-font-size-sm);
+  margin-bottom: var(--sikshya-spacing-4);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-page__breadcrumb a {
+  color: var(--sik-f-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-checkout-page__breadcrumb a:hover,
+.sikshya-checkout-page__breadcrumb a:focus-visible {
+  color: var(--sikshya-primary);
+}
+
+.sikshya-checkout-page__breadcrumb-current {
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-page__bc-sep {
+  color: var(--sikshya-gray-400);
+  user-select: none;
+}
+
+.sikshya-checkout-page__title {
+  margin: 0;
+  font-size: clamp(1.375rem, 2vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-page__lead {
+  margin: var(--sikshya-spacing-2) 0 0;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+  line-height: 1.5;
+  max-width: 40rem;
+}
+
+.sikshya-checkout-page__body {
+  width: 100%;
+  max-width: 70rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-bottom: var(--sikshya-spacing-16);
+}
+
+.sikshya-checkout-page__empty {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: clamp(var(--sikshya-spacing-8), 5vw, var(--sikshya-spacing-10));
+  text-align: center;
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  background: var(--sik-f-surface);
+  box-shadow: var(--sik-f-shadow-panel);
+}
+
+.sikshya-checkout-page__empty-text {
+  margin: 0 0 var(--sikshya-spacing-6);
+  color: var(--sik-f-text-muted);
+  font-size: var(--sikshya-font-size-base);
+}
+
+.sikshya-checkout-page__empty .sikshya-btn {
+  min-height: 2.75rem;
+}
+
+.sikshya-checkout-page__empty .sikshya-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--sikshya-white), 0 0 0 4px var(--sikshya-primary-light);
+}
+
+/* Two columns: payment (main) | order summary (sidebar, right on desktop) */
+.sikshya-checkout-page__layout {
+  display: grid;
+  gap: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10));
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-checkout-page__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 20rem);
+  }
+}
+
+.sikshya-checkout-page__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-6));
+}
+
+.sikshya-checkout-page__sidebar {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-checkout-page__sidebar {
+    position: sticky;
+    top: max(1rem, env(safe-area-inset-top));
+    z-index: var(--sikshya-z-sticky);
+  }
+}
+
+.sikshya-checkout-page__panel {
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  background: var(--sik-f-surface);
+  box-shadow: var(--sik-f-shadow-panel);
+  padding: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-6));
+}
+
+.sikshya-checkout-page__panel-title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-page__panel-intro {
+  margin: 0 0 var(--sikshya-spacing-5);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+  line-height: 1.5;
+}
+
+.sikshya-checkout-page__account-dl {
+  margin: 0 0 var(--sikshya-spacing-4);
+  padding: 0;
+}
+
+.sikshya-checkout-page__account-row {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--sikshya-spacing-3);
+  align-items: baseline;
+  padding: var(--sikshya-spacing-2) 0;
+  border-bottom: 1px solid var(--sikshya-gray-100);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-checkout-page__account-row:first-child {
+  padding-top: 0;
+}
+
+.sikshya-checkout-page__account-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sikshya-checkout-page__account-row dt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-page__account-row dd {
+  margin: 0;
+  font-weight: 500;
+  color: var(--sik-f-text-heading);
+  word-break: break-word;
+}
+
+.sikshya-checkout-page__account-note {
+  margin: 0;
+  font-size: var(--sikshya-font-size-xs);
+  line-height: 1.5;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-page__coupon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-3);
+  align-items: stretch;
+}
+
+.sikshya-checkout-page__coupon-input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0 var(--sikshya-spacing-3);
+  font-size: var(--sikshya-font-size-sm);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-lg);
+  background: var(--sik-f-surface);
+  color: var(--sik-f-text);
+}
+
+.sikshya-checkout-page__coupon-input:focus {
+  outline: none;
+  border-color: var(--sikshya-primary);
+  box-shadow: 0 0 0 1px var(--sikshya-primary-light);
+}
+
+.sikshya-checkout-page__coupon-apply {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+}
+
+.sikshya-checkout-gateways {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-3);
+}
+
+@media (min-width: 480px) {
+  .sikshya-checkout-gateways {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+
+.sikshya-checkout-page__gateway-btn {
+  min-height: 2.75rem;
+  justify-content: center;
+}
+
+.sikshya-checkout-page__gateway-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--sikshya-white), 0 0 0 4px var(--sikshya-primary-light);
+}
+
+.sikshya-checkout-gateways__notice {
+  margin: 0;
+  flex: 1 1 100%;
+  padding: var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.5;
+  color: var(--sik-f-text-muted);
+  background: var(--sik-f-surface-muted);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-lg);
+}
+
+.sikshya-checkout-status {
+  margin: var(--sikshya-spacing-5) 0 0;
+  min-height: 1.25rem;
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 500;
+  color: var(--sik-f-text);
+}
+
+/* Order summary (sidebar) */
+.sikshya-checkout-page__summary {
+  padding: var(--sikshya-spacing-5);
+  box-shadow: var(--sikshya-shadow-sm);
+}
+
+.sikshya-checkout-page__summary-head {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-page__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--sik-f-border);
+}
+
+.sikshya-checkout-page__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  padding: var(--sikshya-spacing-3) 0;
+  border-bottom: 1px solid var(--sikshya-gray-100);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-checkout-page__line-title {
+  flex: 1 1 8rem;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+  line-height: 1.4;
+}
+
+.sikshya-checkout-page__line-price {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sik-f-text);
+}
+
+.sikshya-checkout-page__summary-totals {
+  margin-top: var(--sikshya-spacing-4);
+  padding-top: var(--sikshya-spacing-4);
+  border-top: 1px solid var(--sik-f-border);
+}
+
+.sikshya-checkout-page__summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  margin-bottom: var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text);
+}
+
+.sikshya-checkout-page__summary-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.sikshya-checkout-page__summary-row--discount {
+  color: var(--sikshya-primary);
+  font-weight: 600;
+}
+
+.sikshya-checkout-page__summary-row--discount[hidden] {
+  display: none !important;
+}
+
+.sikshya-checkout-page__total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  margin-top: var(--sikshya-spacing-4);
+  padding-top: var(--sikshya-spacing-4);
+  border-top: 2px solid var(--sik-f-border);
+}
+
+.sikshya-checkout-page__total-label {
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-page__total-value {
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-page__edit-cart {
+  display: inline-block;
+  margin-top: var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sikshya-primary);
+  text-decoration: none;
+}
+
+.sikshya-checkout-page__edit-cart:hover,
+.sikshya-checkout-page__edit-cart:focus-visible {
+  text-decoration: underline;
+}
+
+@media print {
+  .sikshya-checkout-gateways,
+  .sikshya-checkout-status {
+    display: none;
+  }
+}

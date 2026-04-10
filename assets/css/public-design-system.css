@@ -1,0 +1,212 @@
+/**
+ * Sikshya public design system — tokens + reusable primitives.
+ *
+ * Load as `sikshya-public-ds` before `frontend.css` and page-specific CSS
+ * (e.g. single-course.css). Use `sik-f-*` classes for new UI; existing
+ * `sikshya-*` classes remain for backward compatibility.
+ *
+ * @package Sikshya
+ */
+
+:root {
+  /* Brand */
+  --sikshya-primary: #6366f1;
+  --sikshya-primary-dark: #4f46e5;
+  --sikshya-primary-light: #818cf8;
+  --sikshya-secondary: #f59e0b;
+  --sikshya-secondary-dark: #d97706;
+  --sikshya-success: #10b981;
+  --sikshya-warning: #f59e0b;
+  --sikshya-error: #ef4444;
+  --sikshya-info: #3b82f6;
+
+  /* Neutrals */
+  --sikshya-white: #ffffff;
+  --sikshya-gray-50: #f9fafb;
+  --sikshya-gray-100: #f3f4f6;
+  --sikshya-gray-200: #e5e7eb;
+  --sikshya-gray-300: #d1d5db;
+  --sikshya-gray-400: #9ca3af;
+  --sikshya-gray-500: #6b7280;
+  --sikshya-gray-600: #4b5563;
+  --sikshya-gray-700: #374151;
+  --sikshya-gray-800: #1f2937;
+  --sikshya-gray-900: #111827;
+
+  /* Typography */
+  --sikshya-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --sikshya-font-size-xs: 0.75rem;
+  --sikshya-font-size-sm: 0.875rem;
+  --sikshya-font-size-base: 1rem;
+  --sikshya-font-size-lg: 1.125rem;
+  --sikshya-font-size-xl: 1.25rem;
+  --sikshya-font-size-2xl: 1.5rem;
+  --sikshya-font-size-3xl: 1.875rem;
+  --sikshya-font-size-4xl: 2.25rem;
+
+  /* Spacing scale */
+  --sikshya-spacing-1: 0.25rem;
+  --sikshya-spacing-2: 0.5rem;
+  --sikshya-spacing-3: 0.75rem;
+  --sikshya-spacing-4: 1rem;
+  --sikshya-spacing-5: 1.25rem;
+  --sikshya-spacing-6: 1.5rem;
+  --sikshya-spacing-8: 2rem;
+  --sikshya-spacing-10: 2.5rem;
+  --sikshya-spacing-12: 3rem;
+  --sikshya-spacing-16: 4rem;
+  --sikshya-spacing-20: 5rem;
+
+  /* Radius */
+  --sikshya-radius-sm: 0.25rem;
+  --sikshya-radius: 0.375rem;
+  --sikshya-radius-md: 0.5rem;
+  --sikshya-radius-lg: 0.75rem;
+  --sikshya-radius-xl: 1rem;
+  --sikshya-radius-2xl: 1.5rem;
+
+  /* Shadows */
+  --sikshya-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --sikshya-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --sikshya-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --sikshya-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --sikshya-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Motion */
+  --sikshya-transition: all 0.2s ease-in-out;
+  --sikshya-transition-fast: all 0.15s ease-in-out;
+  --sikshya-transition-slow: all 0.3s ease-in-out;
+
+  /* Z-index */
+  --sikshya-z-dropdown: 1000;
+  --sikshya-z-sticky: 1020;
+  --sikshya-z-fixed: 1030;
+  --sikshya-z-modal-backdrop: 1040;
+  --sikshya-z-modal: 1050;
+  --sikshya-z-popover: 1060;
+  --sikshya-z-tooltip: 1070;
+
+  /* Semantic aliases (use in new components) */
+  --sik-f-surface: var(--sikshya-white);
+  --sik-f-surface-muted: var(--sikshya-gray-50);
+  --sik-f-surface-subtle: var(--sikshya-gray-100);
+  --sik-f-border: var(--sikshya-gray-200);
+  --sik-f-border-strong: var(--sikshya-gray-300);
+  --sik-f-text: var(--sikshya-gray-800);
+  --sik-f-text-muted: var(--sikshya-gray-600);
+  --sik-f-text-heading: var(--sikshya-gray-900);
+  --sik-f-radius-panel: var(--sikshya-radius-xl);
+  --sik-f-shadow-panel: var(--sikshya-shadow-sm);
+  --sik-f-focus-ring: 0 0 0 2px var(--sikshya-white), 0 0 0 4px var(--sikshya-primary-light);
+}
+
+/* Public LMS pages stay light for readability and parity with the admin UI.
+ * (No prefers-color-scheme inversion — avoids black/dark full-page backgrounds.) */
+
+/* -------------------------------------------------------------------------
+   Primitives — stack, card, headings, badges (public templates)
+   ------------------------------------------------------------------------- */
+
+.sik-f-scope {
+  font-family: var(--sikshya-font-family);
+  color: var(--sik-f-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sik-f-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-4);
+}
+
+.sik-f-stack--sm {
+  gap: var(--sikshya-spacing-2);
+}
+
+.sik-f-stack--lg {
+  gap: var(--sikshya-spacing-6);
+}
+
+.sik-f-card {
+  background: var(--sik-f-surface);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  box-shadow: var(--sik-f-shadow-panel);
+}
+
+.sik-f-card--flush {
+  box-shadow: none;
+}
+
+.sik-f-page-eyebrow {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sik-f-text-muted);
+}
+
+.sik-f-page-title {
+  margin: 0;
+  font-size: var(--sikshya-font-size-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--sik-f-text-heading);
+}
+
+.sik-f-section-title {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--sik-f-text-heading);
+}
+
+.sik-f-section-title--sm {
+  font-size: var(--sikshya-font-size-lg);
+}
+
+.sik-f-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  line-height: 1.3;
+  border-radius: var(--sikshya-radius-md);
+  border: 1px solid var(--sik-f-border);
+  background: var(--sik-f-surface-muted);
+  color: var(--sik-f-text);
+}
+
+.sik-f-badge--primary {
+  border-color: transparent;
+  background: rgb(99 102 241 / 0.12);
+  color: var(--sikshya-primary-dark);
+}
+
+.sik-f-muted {
+  color: var(--sik-f-text-muted);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sik-f-divider {
+  height: 1px;
+  margin: var(--sikshya-spacing-4) 0;
+  background: var(--sik-f-border);
+  border: 0;
+}
+
+.sikshya-screen-reader-text {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

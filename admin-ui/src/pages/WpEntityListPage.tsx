@@ -1,22 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { EntityListView, StatusBadge } from '../components/shared/list';
-import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary, LinkButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
-import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { formatPostDate } from '../lib/formatPostDate';
-import { wpPostStatusRowActions } from '../lib/wpPostStatusRowActions';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
 import { getWpApi } from '../api';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { NavIcon } from '../components/NavIcon';
-
-function stripTags(html: string): string {
-  return html.replace(/<[^>]*>/g, '').trim();
-}
 
 function certificatePreviewSrc(r: WpPost): string | null {
   const url = r._embedded?.['wp:featuredmedia']?.[0]?.source_url;
@@ -116,11 +109,6 @@ export function WpEntityListPage(props: {
   const isQuestionList = restBase === 'sik_question';
   const isChapterList = restBase === 'sik_chapter';
   const isAssignmentList = restBase === 'sik_assignment';
-  const { confirm } = useSikshyaDialog();
-  const refreshListRef = useRef<(() => Promise<void>) | null>(null);
-  const onListReady = useCallback((api: { refresh: () => Promise<void> }) => {
-    refreshListRef.current = api.refresh;
-  }, []);
   const [addLessonOpen, setAddLessonOpen] = useState(false);
   const [addLessonBusy, setAddLessonBusy] = useState(false);
   const [addLessonError, setAddLessonError] = useState<unknown>(null);
@@ -152,6 +140,7 @@ export function WpEntityListPage(props: {
       const titleCol: Column<WpPost> = {
         id: 'title',
         header: 'Title',
+        sortKey: 'title',
         render: (r) => {
           const meta = r.meta as Record<string, unknown> | undefined;
           const orient = meta
@@ -202,6 +191,23 @@ export function WpEntityListPage(props: {
           '—'
         );
 
+      const idCol: Column<WpPost> = {
+        id: 'id',
+        header: 'ID',
+        sortKey: 'id',
+        alwaysVisible: true,
+        cellClassName: 'whitespace-nowrap tabular-nums text-slate-600 dark:text-slate-400',
+        render: (r) => r.id,
+      };
+
+      const dateCol: Column<WpPost> = {
+        id: 'date',
+        header: 'Published',
+        sortKey: 'date',
+        cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+        render: (r) => formatPostDate(r.date),
+      };
+
       const detailCols: Column<WpPost>[] = [];
       if (isLessonList) {
         detailCols.push(
@@ -229,6 +235,27 @@ export function WpEntityListPage(props: {
             defaultHidden: true,
             cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
             render: (r) => String((r.meta as Record<string, unknown> | undefined)?._sikshya_lesson_duration || '—'),
+          },
+          {
+            id: 'video_url',
+            header: 'Video URL',
+            defaultHidden: true,
+            cellClassName: 'max-w-[14rem]',
+            render: (r) => {
+              const u = String((r.meta as Record<string, unknown> | undefined)?._sikshya_lesson_video_url || '');
+              return u ? (
+                <a
+                  href={u}
+                  className="truncate text-brand-600 hover:underline dark:text-brand-400"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  {u}
+                </a>
+              ) : (
+                '—'
+              );
+            },
           }
         );
       } else if (isQuizList) {
@@ -335,6 +362,7 @@ export function WpEntityListPage(props: {
         {
           id: 'modified',
           header: 'Updated',
+          sortKey: 'modified',
           cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
           render: (r) => formatPostDate(r.modified || r.date),
         },
@@ -343,40 +371,26 @@ export function WpEntityListPage(props: {
           header: 'Status',
           render: (r) => <StatusBadge status={r.status} />,
         },
-        {
-          id: 'actions',
-          header: '',
-          alwaysVisible: true,
-          headerClassName: 'w-14 text-right',
-          cellClassName: 'text-right',
-          render: (r) => {
-            const label = stripTags(r.title.rendered) || 'Item';
-            const refresh = () => refreshListRef.current?.() ?? Promise.resolve();
-            const base: Parameters<typeof RowActionsMenu>[0]['items'] = [
-              { key: 'edit', label: 'Edit', href: editHref(r.id) },
-              ...(r.link && r.link !== '#'
-                ? [{ key: 'view', label: 'View', href: r.link, external: true as const }]
-                : []),
-            ];
-            const statusItems = wpPostStatusRowActions(restBase, r, refresh, confirm);
-            return <RowActionsMenu ariaLabel={`Actions for ${label}`} items={[...base, ...statusItems]} />;
-          },
-        },
       ];
 
-      return isCertificateList ? [previewCol, titleCol, ...rest] : [titleCol, ...rest];
+      return isCertificateList
+        ? [idCol, previewCol, titleCol, dateCol, ...rest]
+        : [idCol, titleCol, dateCol, ...rest];
     },
-    [
-      config,
-      restBase,
-      isLessonList,
-      isCertificateList,
-      isQuizList,
-      isQuestionList,
-      isChapterList,
-      isAssignmentList,
-      confirm,
-    ]
+    [config, restBase, isLessonList, isCertificateList, isQuizList, isQuestionList, isChapterList, isAssignmentList]
+  );
+
+  const postRowActions = useMemo(
+    () => ({
+      buildLeadingItems: (r: WpPost) => [
+        {
+          key: 'edit',
+          label: 'Edit',
+          href: appViewHref(config, 'edit-content', { post_type: restBase, post_id: String(r.id) }),
+        },
+      ],
+    }),
+    [config, restBase]
   );
 
   const searchPh = `Search ${title.toLowerCase()}…`;
@@ -449,13 +463,14 @@ export function WpEntityListPage(props: {
         searchPlaceholder={searchPh}
         sortFieldOptions={[
           { value: 'title', label: 'Title' },
-          { value: 'date', label: 'Date' },
+          { value: 'date', label: 'Published' },
           { value: 'modified', label: 'Modified' },
+          { value: 'id', label: 'ID' },
         ]}
         defaultSortField="title"
         columnPickerStorageKey={pickerKey}
-        collectionQueryExtras={isCertificateList ? { embed: '1' } : undefined}
-        onListReady={onListReady}
+        collectionQueryExtras={{ embed: '1' }}
+        postRowActions={postRowActions}
         columns={columns}
         emptyMessage="No items match your filters."
         emptyStateTitle="No items found"
@@ -475,7 +490,13 @@ export function WpEntityListPage(props: {
           )
         }
         skeletonHeaders={
-          isCertificateList ? ['Preview', 'Title', 'Updated', 'Status', ''] : ['Title', 'Updated', 'Status', '']
+          isCertificateList
+            ? ['ID', 'Preview', 'Title', 'Published', 'Updated', 'Status']
+            : isLessonList
+              ? ['ID', 'Title', 'Published', 'Course', 'Type', 'Updated', 'Status']
+              : isQuizList
+                ? ['ID', 'Title', 'Published', 'Course', 'Pass %', 'Updated', 'Status']
+                : ['ID', 'Title', 'Published', 'Updated', 'Status']
         }
       />
     </AppShell>

@@ -11,11 +11,15 @@ namespace Sikshya\Api;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\ReactAdminConfig;
+use Sikshya\Commerce\OrderFulfillmentService;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Services\CategoryService;
 use Sikshya\Services\CourseBuilderService;
 use Sikshya\Services\CourseCurriculumActions;
+use Sikshya\Database\Repositories\OrderRepository;
+use Sikshya\Database\Repositories\PaymentRepository;
+use Sikshya\Services\CourseService;
 use Sikshya\Services\CurriculumService;
 use Sikshya\Services\SampleDataImporter;
 use Sikshya\Admin\Settings\SettingsManager;
@@ -378,6 +382,14 @@ class AdminRestRoutes
                         'maximum' => 100,
                     ],
                 ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/orders/(?P<id>\d+)/mark-paid', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'markAdminOrderPaid'],
+                'permission_callback' => [$this, 'permissionAdmin'],
             ],
         ]);
 
@@ -1645,6 +1657,7 @@ class AdminRestRoutes
                 'total' => isset($row->total) ? (float) $row->total : 0.0,
                 'gateway' => (string) $row->gateway,
                 'gateway_intent_id' => (string) ($row->gateway_intent_id ?? ''),
+                'public_token' => (string) ($row->public_token ?? ''),
                 'created_at' => (string) ($row->created_at ?? ''),
                 'payer_name' => (string) ($row->payer_name ?? ''),
                 'payer_email' => (string) ($row->payer_email ?? ''),
@@ -1664,6 +1677,60 @@ class AdminRestRoutes
                 'page' => $page,
                 'per_page' => $per_page,
             ],
+            200
+        );
+    }
+
+    /**
+     * Fulfill a pending / on-hold order (offline payments after manual verification).
+     */
+    public function markAdminOrderPaid(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request['id'];
+        $repo = new OrderRepository();
+        $order = $repo->findById($id);
+        if (!$order) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Order not found.', 'sikshya')],
+                404
+            );
+        }
+
+        if ((string) $order->status === 'paid') {
+            return new WP_REST_Response(
+                ['ok' => true, 'message' => __('Order is already marked paid.', 'sikshya')],
+                200
+            );
+        }
+
+        if (!in_array((string) $order->status, ['pending', 'on-hold'], true)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('This order cannot be marked paid from its current status.', 'sikshya')],
+                400
+            );
+        }
+
+        $gw = (string) $order->gateway;
+        if ($gw !== 'offline' && $gw !== '') {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Only offline (or unset gateway) orders can be marked paid here. Use the payment provider for Stripe or PayPal.', 'sikshya')],
+                400
+            );
+        }
+
+        $course = $this->plugin->getService('course');
+        if (!$course instanceof CourseService) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Course service unavailable.', 'sikshya')],
+                500
+            );
+        }
+
+        $fulfill = new OrderFulfillmentService($repo, new PaymentRepository(), $course);
+        $fulfill->fulfillPaidOrder($id);
+
+        return new WP_REST_Response(
+            ['ok' => true, 'message' => __('Order marked paid and enrollments created.', 'sikshya')],
             200
         );
     }

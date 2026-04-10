@@ -183,7 +183,7 @@ class Activator
         // Payment settings
         $payment_settings = [
             'enable_payments' => false,
-            'payment_methods' => ['stripe', 'paypal'],
+            'payment_methods' => ['offline', 'stripe', 'paypal'],
             'test_mode' => true,
             'currency' => 'USD',
         ];

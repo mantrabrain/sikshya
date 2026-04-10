@@ -389,3 +389,47 @@ function sikshya_get_course_curriculum_public(int $course_id): array
 {
     return \Sikshya\Services\PublicCurriculumService::getCourseCurriculum($course_id);
 }
+
+/**
+ * Learner-facing label for curriculum line items (lessons, quizzes, assignments).
+ */
+function sikshya_public_content_type_label(string $post_type): string
+{
+    switch ($post_type) {
+        case 'sik_lesson':
+            return __('Lesson', 'sikshya');
+        case 'sik_quiz':
+            return __('Quiz', 'sikshya');
+        case 'sik_assignment':
+            return __('Assignment', 'sikshya');
+        default:
+            return __('Content', 'sikshya');
+    }
+}
+
+/**
+ * Inline SVG icon for curriculum line items (lesson, quiz, assignment, other).
+ *
+ * Markup is fixed paths only; safe to print in templates.
+ *
+ * @param string $post_type Post type slug (e.g. sik_lesson).
+ * @return string SVG element HTML.
+ */
+function sikshya_public_content_type_icon_html(string $post_type): string
+{
+    $attrs = 'class="sikshya-course-lp__type-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
+
+    switch ($post_type) {
+        case 'sik_lesson':
+            return '<svg ' . $attrs . '><path d="M8 5v14l11-7L8 5z" fill="currentColor"/></svg>';
+
+        case 'sik_quiz':
+            return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2" fill="none"/><path d="M8 9h8M8 13h6M8 17h4" fill="none"/></svg>';
+
+        case 'sik_assignment':
+            return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/></svg>';
+
+        default:
+            return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="none"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>';
+    }
+}

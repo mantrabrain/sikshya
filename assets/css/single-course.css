@@ -1,0 +1,804 @@
+/**
+ * Single course template — clean public UI (loads only on singular course).
+ *
+ * Depends on: public-design-system.css, frontend.css (shared buttons, .sikshya-public).
+ *
+ * @package Sikshya
+ */
+
+/* -------------------------------------------------------------------------
+   Page shell
+   ------------------------------------------------------------------------- */
+
+.sikshya-single-course.sikshya-course-lp.sik-f-scope.sikshya-public {
+  padding-top: 0;
+  background-color: var(--sikshya-white);
+  min-height: 100%;
+}
+
+.sikshya-container--course {
+  width: 100%;
+  max-width: 70rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+}
+
+/* -------------------------------------------------------------------------
+   Masthead (light, editorial — not a dark marketing band)
+   ------------------------------------------------------------------------- */
+
+.sikshya-course-lp__masthead {
+  background: var(--sik-f-surface-muted);
+  border-bottom: 1px solid var(--sik-f-border);
+  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
+}
+
+.sikshya-course-lp__masthead-inner {
+  max-width: 70rem;
+}
+
+.sikshya-course-lp__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  font-size: var(--sikshya-font-size-sm);
+  margin-bottom: var(--sikshya-spacing-4);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__breadcrumb a {
+  color: var(--sik-f-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-course-lp__breadcrumb a:hover,
+.sikshya-course-lp__breadcrumb a:focus-visible {
+  color: var(--sikshya-primary);
+}
+
+.sikshya-course-lp__breadcrumb span:not(.sikshya-course-lp__bc-sep) {
+  color: var(--sik-f-text-muted);
+  font-weight: 500;
+}
+
+.sikshya-course-lp__bc-sep {
+  color: var(--sikshya-gray-400);
+  user-select: none;
+  font-weight: 400;
+}
+
+.sikshya-course-lp__title {
+  margin: 0 0 var(--sikshya-spacing-3);
+  font-size: clamp(1.375rem, 2.2vw, 2rem);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--sik-f-text-heading);
+  max-width: 48rem;
+}
+
+.sikshya-course-lp__subtitle {
+  margin: 0 0 var(--sikshya-spacing-5);
+  font-size: var(--sikshya-font-size-base);
+  line-height: 1.55;
+  color: var(--sik-f-text-muted);
+  max-width: 42rem;
+}
+
+.sikshya-course-lp__stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sikshya-spacing-3) var(--sikshya-spacing-5);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__stat {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.sikshya-course-lp__stat strong {
+  color: var(--sik-f-text-heading);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------------------------
+   Flash messages
+   ------------------------------------------------------------------------- */
+
+.sikshya-course-lp .sikshya-cart-flash {
+  margin-bottom: var(--sikshya-spacing-5);
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-lg);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 500;
+}
+
+.sikshya-cart-flash--success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.sikshya-cart-flash--info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.sikshya-cart-flash--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* -------------------------------------------------------------------------
+   Two-column layout
+   ------------------------------------------------------------------------- */
+
+.sikshya-course-lp__layout {
+  display: grid;
+  gap: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10));
+  align-items: start;
+  padding-bottom: var(--sikshya-spacing-16);
+}
+
+@media (min-width: 1024px) {
+  .sikshya-course-lp__layout {
+    grid-template-columns: minmax(0, 1fr) min(100%, 20rem);
+    gap: var(--sikshya-spacing-10);
+  }
+}
+
+.sikshya-course-lp__main {
+  min-width: 0;
+}
+
+.sikshya-course-lp__sidebar {
+  min-width: 0;
+}
+
+@media (max-width: 1023px) {
+  .sikshya-course-lp__sidebar {
+    order: -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sikshya-course-lp__sidebar {
+    position: sticky;
+    top: max(1rem, env(safe-area-inset-top));
+    z-index: var(--sikshya-z-sticky);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Purchase card
+   ------------------------------------------------------------------------- */
+
+.sikshya-course-lp__card.sik-f-card {
+  overflow: hidden;
+  box-shadow: var(--sikshya-shadow-sm);
+}
+
+.sikshya-course-lp__preview {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--sikshya-gray-100);
+}
+
+.sikshya-course-lp__preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sikshya-course-lp__preview-link {
+  display: block;
+  position: relative;
+  height: 100%;
+  outline: none;
+}
+
+.sikshya-course-lp__preview-link:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--sikshya-primary);
+}
+
+.sikshya-course-lp__preview-link:hover .sikshya-course-lp__play,
+.sikshya-course-lp__preview-link:focus-visible .sikshya-course-lp__play {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.sikshya-course-lp__preview-static {
+  display: block;
+  height: 100%;
+}
+
+.sikshya-course-lp__preview-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 10rem;
+  background: linear-gradient(145deg, var(--sikshya-gray-100) 0%, var(--sikshya-gray-200) 100%);
+}
+
+.sikshya-course-lp__preview-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 8rem;
+  padding: var(--sikshya-spacing-4);
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-heading);
+  text-decoration: none;
+  background: var(--sik-f-surface-subtle);
+  border-bottom: 1px solid var(--sik-f-border);
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-course-lp__preview-fallback:hover,
+.sikshya-course-lp__preview-fallback:focus-visible {
+  background: var(--sikshya-gray-200);
+  color: var(--sikshya-primary-dark);
+}
+
+.sikshya-course-lp__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--sikshya-white);
+  box-shadow: var(--sikshya-shadow-md);
+  transition: transform 0.15s ease;
+}
+
+.sikshya-course-lp__play::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-40%, -50%);
+  border-style: solid;
+  border-width: 0.5rem 0 0.5rem 0.85rem;
+  border-color: transparent transparent transparent var(--sikshya-gray-800);
+}
+
+.sikshya-course-lp__buy {
+  padding: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-5));
+}
+
+.sikshya-course-lp__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  margin-bottom: var(--sikshya-spacing-4);
+}
+
+.sikshya-course-lp__price {
+  font-size: var(--sikshya-font-size-2xl);
+  font-weight: 700;
+  color: var(--sik-f-text-heading);
+  letter-spacing: -0.02em;
+}
+
+.sikshya-course-lp__price .sikshya-price-original {
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 500;
+  color: var(--sik-f-text-muted);
+  text-decoration: line-through;
+  margin-right: 0.35rem;
+}
+
+.sikshya-course-lp__badge-off {
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--sikshya-radius-md);
+}
+
+.sikshya-course-lp__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-course-lp__form {
+  margin: 0;
+}
+
+.sikshya-course-lp__btn-full {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  min-height: 2.75rem;
+}
+
+.sikshya-course-lp .sikshya-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--sikshya-white), 0 0 0 4px var(--sikshya-primary-light);
+}
+
+.sikshya-course-lp__sub-link {
+  display: block;
+  text-align: center;
+  margin-top: var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sikshya-primary);
+  text-decoration: none;
+}
+
+.sikshya-course-lp__sub-link:hover,
+.sikshya-course-lp__sub-link:focus-visible {
+  text-decoration: underline;
+}
+
+.sikshya-course-lp__guarantee {
+  margin: var(--sikshya-spacing-4) 0 0;
+  font-size: var(--sikshya-font-size-xs);
+  color: var(--sik-f-text-muted);
+  text-align: center;
+  line-height: 1.45;
+}
+
+.sikshya-course-lp__sidebar-includes {
+  margin-top: var(--sikshya-spacing-5);
+  padding-top: var(--sikshya-spacing-4);
+  border-top: 1px solid var(--sik-f-border);
+}
+
+.sikshya-course-lp__includes-title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sik-f-text-muted);
+}
+
+/* -------------------------------------------------------------------------
+   Main column — sections
+   ------------------------------------------------------------------------- */
+
+.sikshya-course-lp__heading {
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 600;
+  margin: 0 0 var(--sikshya-spacing-4);
+  color: var(--sik-f-text-heading);
+  letter-spacing: -0.01em;
+}
+
+.sikshya-course-lp__heading--sm {
+  font-size: var(--sikshya-font-size-base);
+  font-weight: 600;
+}
+
+.sikshya-course-lp__panel {
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-8));
+  padding: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-6));
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  background: var(--sik-f-surface);
+  box-shadow: var(--sik-f-shadow-panel);
+}
+
+.sikshya-course-lp__learn {
+  border-left: 3px solid var(--sikshya-primary-light);
+}
+
+.sikshya-course-lp__learn-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sikshya-spacing-3) var(--sikshya-spacing-8);
+}
+
+@media (min-width: 640px) {
+  .sikshya-course-lp__learn-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.sikshya-course-lp__learn-item {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.5;
+  color: var(--sik-f-text);
+}
+
+.sikshya-course-lp__learn-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--sikshya-primary);
+}
+
+.sikshya-course-lp__tags {
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-8));
+}
+
+.sikshya-course-lp__tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-course-lp__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--sikshya-radius-md);
+  border: 1px solid var(--sik-f-border);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  color: var(--sik-f-text);
+  background: var(--sik-f-surface-muted);
+}
+
+.sikshya-course-lp__checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sikshya-course-lp__checklist li {
+  position: relative;
+  padding-left: 1.35rem;
+  margin-bottom: var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.45;
+  color: var(--sik-f-text);
+}
+
+.sikshya-course-lp__checklist li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45rem;
+  width: 0.4rem;
+  height: 0.65rem;
+  border: solid var(--sikshya-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.sikshya-course-lp__checklist--compact li {
+  margin-bottom: 0.35rem;
+}
+
+.sikshya-course-lp__curriculum-head {
+  margin-bottom: var(--sikshya-spacing-4);
+}
+
+.sikshya-course-lp__curriculum-meta {
+  margin: 0;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+  line-height: 1.5;
+}
+
+.sikshya-course-lp__curriculum-meta-sep {
+  margin: 0 0.35rem;
+  color: var(--sikshya-gray-400);
+}
+
+.sikshya-course-lp__accordion {
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-lg);
+  overflow: hidden;
+  background: var(--sik-f-surface);
+}
+
+.sikshya-course-lp__chapter {
+  border-bottom: 1px solid var(--sik-f-border);
+}
+
+.sikshya-course-lp__chapter:last-child {
+  border-bottom: none;
+}
+
+.sikshya-course-lp__chapter-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  font-weight: 600;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-heading);
+  background: var(--sik-f-surface-muted);
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-course-lp__chapter-summary:hover {
+  background: var(--sik-f-surface-subtle);
+}
+
+.sikshya-course-lp__chapter-summary:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--sikshya-primary-light);
+}
+
+.sikshya-course-lp__chapter-summary::-webkit-details-marker,
+.sikshya-course-lp__chapter-summary::marker {
+  display: none;
+}
+
+.sikshya-course-lp__chapter-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--sik-f-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.sikshya-course-lp__chevron-svg {
+  display: block;
+}
+
+details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-chevron {
+  transform: rotate(180deg);
+}
+
+.sikshya-course-lp__chapter-row {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  min-width: 0;
+}
+
+.sikshya-course-lp__chapter-title {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.sikshya-course-lp__chapter-count {
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__outline {
+  margin: 0;
+  padding: 0 var(--sikshya-spacing-3) var(--sikshya-spacing-3);
+  list-style: none;
+  background: var(--sik-f-surface);
+}
+
+@media (min-width: 640px) {
+  .sikshya-course-lp__outline {
+    padding-left: var(--sikshya-spacing-4);
+    padding-right: var(--sikshya-spacing-4);
+  }
+}
+
+.sikshya-course-lp__outline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: var(--sikshya-spacing-2) 0;
+  border-bottom: 1px solid var(--sikshya-gray-100);
+}
+
+.sikshya-course-lp__outline-item:last-child {
+  border-bottom: none;
+}
+
+.sikshya-course-lp__outline-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__outline-icon .sikshya-course-lp__type-svg {
+  display: block;
+}
+
+.sikshya-course-lp__outline-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sikshya-course-lp__outline-link,
+.sikshya-course-lp__outline-locked {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+}
+
+.sikshya-course-lp__outline-link:hover .sikshya-course-lp__outline-title,
+.sikshya-course-lp__outline-link:focus-visible .sikshya-course-lp__outline-title {
+  color: var(--sikshya-primary);
+}
+
+.sikshya-course-lp__outline-item:has(.sikshya-course-lp__outline-link:hover) .sikshya-course-lp__outline-icon,
+.sikshya-course-lp__outline-item:has(.sikshya-course-lp__outline-link:focus-visible) .sikshya-course-lp__outline-icon {
+  color: var(--sikshya-primary);
+}
+
+.sikshya-course-lp__outline-title {
+  font-weight: 600;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text);
+}
+
+.sikshya-course-lp__outline-locked .sikshya-course-lp__outline-title {
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__outline-type {
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__empty {
+  margin: 0;
+  padding: 0 var(--sikshya-spacing-4) var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__audience {
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text);
+}
+
+.sikshya-course-lp__prose {
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-course-lp__instructor-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-4);
+  align-items: flex-start;
+}
+
+@media (min-width: 480px) {
+  .sikshya-course-lp__instructor-card {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.sikshya-course-lp__instructor-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--sik-f-border);
+}
+
+@media (min-width: 480px) {
+  .sikshya-course-lp__instructor-avatar {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+}
+
+.sikshya-course-lp__instructor-name {
+  display: inline-block;
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 600;
+  color: var(--sikshya-primary);
+  text-decoration: none;
+  margin-bottom: var(--sikshya-spacing-2);
+}
+
+.sikshya-course-lp__instructor-name:hover,
+.sikshya-course-lp__instructor-name:focus-visible {
+  text-decoration: underline;
+}
+
+span.sikshya-course-lp__instructor-name {
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-course-lp__instructor-bio {
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-course-lp__faq-item {
+  border-bottom: 1px solid var(--sik-f-border);
+}
+
+.sikshya-course-lp__faq-item:last-child {
+  border-bottom: none;
+}
+
+.sikshya-course-lp__faq-q {
+  cursor: pointer;
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  font-weight: 600;
+  font-size: var(--sikshya-font-size-sm);
+  list-style: none;
+  color: var(--sik-f-text-heading);
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-course-lp__faq-q:hover {
+  background: var(--sik-f-surface-muted);
+}
+
+.sikshya-course-lp__faq-q:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--sikshya-primary-light);
+}
+
+.sikshya-course-lp__faq-q::-webkit-details-marker {
+  display: none;
+}
+
+.sikshya-course-lp__faq-a {
+  padding: 0 var(--sikshya-spacing-4) var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text);
+}
+
+/* -------------------------------------------------------------------------
+   Print
+   ------------------------------------------------------------------------- */
+
+@media print {
+  .sikshya-course-lp__sidebar {
+    display: none;
+  }
+
+  .sikshya-course-lp__panel,
+  .sikshya-course-lp__card {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}

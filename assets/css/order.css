@@ -1,0 +1,350 @@
+/**
+ * Order / receipt virtual page — aligned with cart + checkout public UI.
+ *
+ * Depends on: public-design-system.css, frontend.css.
+ * Loaded only when {@see \Sikshya\Frontend\Public\PublicPageUrls::isCurrentVirtualPage('order')}.
+ *
+ * @package Sikshya
+ */
+
+.sikshya-order-page.sik-f-scope.sikshya-public {
+  padding-top: 0;
+  background-color: var(--sikshya-white);
+  min-height: 100%;
+}
+
+.sikshya-order-page__masthead {
+  background: var(--sik-f-surface-muted);
+  border-bottom: 1px solid var(--sik-f-border);
+  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
+}
+
+.sikshya-order-page__masthead-inner {
+  width: 100%;
+  max-width: 70rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+}
+
+.sikshya-order-page__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  font-size: var(--sikshya-font-size-sm);
+  margin-bottom: var(--sikshya-spacing-4);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-order-page__breadcrumb a {
+  color: var(--sik-f-text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-order-page__breadcrumb a:hover,
+.sikshya-order-page__breadcrumb a:focus-visible {
+  color: var(--sikshya-primary);
+}
+
+.sikshya-order-page__breadcrumb-current {
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-order-page__bc-sep {
+  color: var(--sikshya-gray-400);
+  user-select: none;
+}
+
+.sikshya-order-page__title {
+  margin: 0;
+  font-size: clamp(1.375rem, 2vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-order-page__lead {
+  margin: var(--sikshya-spacing-2) 0 0;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-muted);
+  line-height: 1.5;
+  max-width: 42rem;
+}
+
+.sikshya-order-page__body {
+  width: 100%;
+  max-width: 70rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-bottom: var(--sikshya-spacing-16);
+}
+
+.sikshya-order-page__error {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: clamp(var(--sikshya-spacing-8), 5vw, var(--sikshya-spacing-10));
+  text-align: center;
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  background: var(--sik-f-surface);
+  box-shadow: var(--sik-f-shadow-panel);
+}
+
+.sikshya-order-page__error-text {
+  margin: 0 0 var(--sikshya-spacing-6);
+  color: var(--sik-f-text-muted);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.5;
+}
+
+.sikshya-order-page__layout {
+  display: grid;
+  gap: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10));
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-order-page__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 20rem);
+  }
+}
+
+.sikshya-order-page__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-6));
+}
+
+.sikshya-order-page__sidebar {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-order-page__sidebar {
+    position: sticky;
+    top: max(1rem, env(safe-area-inset-top));
+    z-index: var(--sikshya-z-sticky);
+  }
+}
+
+.sikshya-order-page__panel {
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  background: var(--sik-f-surface);
+  box-shadow: var(--sik-f-shadow-panel);
+  padding: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-6));
+}
+
+.sikshya-order-page__panel-title {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-order-page__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--sik-f-border);
+}
+
+.sikshya-order-page__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  padding: var(--sikshya-spacing-3) 0;
+  border-bottom: 1px solid var(--sikshya-gray-100);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-order-page__line-title {
+  flex: 1 1 10rem;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+  line-height: 1.4;
+}
+
+.sikshya-order-page__line-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sikshya-order-page__line-title a:hover,
+.sikshya-order-page__line-title a:focus-visible {
+  color: var(--sikshya-primary);
+  text-decoration: underline;
+}
+
+.sikshya-order-page__line-price {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sik-f-text);
+}
+
+.sikshya-order-page__offline {
+  border-left: 4px solid var(--sikshya-primary);
+  background: var(--sik-f-surface-muted);
+  border-radius: var(--sikshya-radius-lg);
+  padding: var(--sikshya-spacing-5);
+}
+
+.sikshya-order-page__offline-title {
+  margin: 0 0 var(--sikshya-spacing-3);
+  font-size: var(--sikshya-font-size-base);
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-order-page__offline-body {
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.6;
+  color: var(--sik-f-text);
+}
+
+.sikshya-order-page__offline-body :first-child {
+  margin-top: 0;
+}
+
+.sikshya-order-page__offline-body :last-child {
+  margin-bottom: 0;
+}
+
+.sikshya-order-page__summary {
+  padding: var(--sikshya-spacing-5);
+  box-shadow: var(--sikshya-shadow-sm);
+}
+
+.sikshya-order-page__summary-head {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-order-page__summary-meta {
+  display: grid;
+  gap: var(--sikshya-spacing-3);
+  margin-bottom: var(--sikshya-spacing-5);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-order-page__summary-row--subtotal {
+  margin-bottom: var(--sikshya-spacing-1);
+}
+
+.sikshya-order-page__summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-order-page__summary-label {
+  margin: 0;
+  color: var(--sik-f-text-muted);
+  font-weight: 500;
+}
+
+.sikshya-order-page__summary-value {
+  margin: 0;
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+  text-align: right;
+}
+
+.sikshya-order-page__badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+.sikshya-order-page__badge--paid {
+  background: color-mix(in srgb, var(--sikshya-primary) 12%, transparent);
+  color: var(--sikshya-primary);
+  border: 1px solid color-mix(in srgb, var(--sikshya-primary) 35%, transparent);
+}
+
+.sikshya-order-page__badge--hold,
+.sikshya-order-page__badge--pending {
+  background: var(--sik-f-surface-muted);
+  color: var(--sik-f-text-heading);
+  border: 1px solid var(--sik-f-border);
+}
+
+.sikshya-order-page__total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  padding-top: var(--sikshya-spacing-4);
+  margin-top: var(--sikshya-spacing-2);
+  border-top: 2px solid var(--sik-f-border);
+}
+
+.sikshya-order-page__total-label {
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-order-page__total-value {
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-order-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-3);
+  margin-top: var(--sikshya-spacing-5);
+}
+
+.sikshya-order-page__actions .sikshya-btn {
+  min-height: 2.75rem;
+  justify-content: center;
+}
+
+.sikshya-order-page__actions .sikshya-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--sikshya-white), 0 0 0 4px var(--sikshya-primary-light);
+}
+
+.sikshya-order-page__discount-note {
+  margin: var(--sikshya-spacing-2) 0 0;
+  font-size: var(--sikshya-font-size-xs);
+  color: var(--sikshya-primary);
+  font-weight: 600;
+}
+
+@media print {
+  .sikshya-order-page__actions {
+    display: none;
+  }
+}

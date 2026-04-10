@@ -8,6 +8,7 @@ use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
+use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\CourseService;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -44,6 +45,14 @@ class CheckoutRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/checkout/quote', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'createQuote'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+            ],
+        ]);
+
         register_rest_route($namespace, '/checkout/confirm', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -75,10 +84,11 @@ class CheckoutRestRoutes
             : [];
         $course_id = isset($params['course_id']) ? (int) $params['course_id'] : 0;
         $gateway = isset($params['gateway']) ? sanitize_key((string) $params['gateway']) : '';
-        $coupon = isset($params['coupon_code']) ? (string) $params['coupon_code'] : '';
+        $coupon = isset($params['coupon_code']) ? trim(sanitize_text_field((string) $params['coupon_code'])) : '';
 
         $has_courses = $course_ids !== [] || $course_id > 0;
-        if (!$has_courses || ($gateway !== 'stripe' && $gateway !== 'paypal')) {
+        $allowed_gateways = ['stripe', 'paypal', 'offline'];
+        if (!$has_courses || !in_array($gateway, $allowed_gateways, true)) {
             return new WP_REST_Response(
                 ['ok' => false, 'code' => 'invalid_params', 'message' => __('Invalid parameters.', 'sikshya')],
                 400
@@ -95,6 +105,17 @@ class CheckoutRestRoutes
                 $order = $checkout->createPendingOrder($uid, $course_id, $coupon);
             }
             $gateway_payload = $checkout->startGatewaySession($order['order_id'], $gateway);
+
+            if ($gateway === 'offline') {
+                $oid = (int) $order['order_id'];
+                $total = (float) $order['total'];
+                if ($checkout->isOfflineAutoFulfillEnabled() || $total <= 0.00001) {
+                    $this->fulfillmentService()->fulfillPaidOrder($oid);
+                } else {
+                    (new OrderRepository())->updateOrder($oid, ['status' => 'on-hold']);
+                }
+                $gateway_payload['redirect_url'] = PublicPageUrls::orderView((string) ($order['public_token'] ?? ''));
+            }
         } catch (\Exception $e) {
             return new WP_REST_Response(
                 ['ok' => false, 'code' => 'checkout_error', 'message' => $e->getMessage()],
@@ -108,6 +129,7 @@ class CheckoutRestRoutes
                 'data' => array_merge(
                     [
                         'order_id' => $order['order_id'],
+                        'public_token' => $order['public_token'] ?? '',
                         'total' => $order['total'],
                         'currency' => $order['currency'],
                         'gateway' => $gateway,
@@ -117,6 +139,42 @@ class CheckoutRestRoutes
             ],
             200
         );
+    }
+
+    /**
+     * Preview subtotal / discount / total without creating an order (checkout UI).
+     */
+    public function createQuote(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $course_ids = isset($params['course_ids']) && is_array($params['course_ids'])
+            ? array_values(array_filter(array_map('intval', $params['course_ids'])))
+            : [];
+        $coupon = isset($params['coupon_code']) ? trim(sanitize_text_field((string) $params['coupon_code'])) : '';
+
+        if ($course_ids === []) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_params', 'message' => __('Invalid parameters.', 'sikshya')],
+                400
+            );
+        }
+
+        $uid = get_current_user_id();
+
+        try {
+            $quote = $this->checkoutService()->quoteTotalsForCourses($uid, $course_ids, $coupon);
+        } catch (\Exception $e) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'quote_error', 'message' => $e->getMessage()],
+                400
+            );
+        }
+
+        return new WP_REST_Response(['ok' => true, 'data' => $quote], 200);
     }
 
     public function confirm(WP_REST_Request $request): WP_REST_Response

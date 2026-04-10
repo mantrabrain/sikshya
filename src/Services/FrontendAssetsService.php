@@ -3,7 +3,9 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
+use Sikshya\Frontend\Public\PublicPageUrls;
 
 /**
  * Frontend Asset Management Service
@@ -44,13 +46,59 @@ class FrontendAssetsService
      */
     public function enqueueFrontendAssets(): void
     {
-        // Main CSS
+        if (PublicPageUrls::isCurrentVirtualPage('account')) {
+            return;
+        }
+
         wp_enqueue_style(
-            'sikshya-frontend',
-            $this->plugin->getAssetUrl('css/frontend.css'),
+            'sikshya-public-ds',
+            $this->plugin->getAssetUrl('css/public-design-system.css'),
             [],
             SIKSHYA_VERSION
         );
+
+        wp_enqueue_style(
+            'sikshya-frontend',
+            $this->plugin->getAssetUrl('css/frontend.css'),
+            ['sikshya-public-ds'],
+            SIKSHYA_VERSION
+        );
+
+        if (is_singular(PostTypes::COURSE)) {
+            wp_enqueue_style(
+                'sikshya-single-course',
+                $this->plugin->getAssetUrl('css/single-course.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                SIKSHYA_VERSION
+            );
+        }
+
+        if (PublicPageUrls::isCurrentVirtualPage('cart')) {
+            wp_enqueue_style(
+                'sikshya-cart',
+                $this->plugin->getAssetUrl('css/cart.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                SIKSHYA_VERSION
+            );
+        }
+
+        if (PublicPageUrls::isCurrentVirtualPage('checkout')) {
+            wp_enqueue_style(
+                'sikshya-checkout',
+                $this->plugin->getAssetUrl('css/checkout.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                SIKSHYA_VERSION
+            );
+        }
+
+        if (PublicPageUrls::isCurrentVirtualPage('order')) {
+            wp_enqueue_style(
+                'sikshya-order',
+                $this->plugin->getAssetUrl('css/order.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                SIKSHYA_VERSION
+            );
+        }
 
         // Course Category CSS - only on course category pages
         if (is_tax(Taxonomies::COURSE_CATEGORY)) {

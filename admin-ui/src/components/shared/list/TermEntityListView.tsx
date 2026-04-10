@@ -163,6 +163,18 @@ export function TermEntityListView({
 
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
 
+  const onSortColumn = useCallback(
+    (key: string) => {
+      if (key === orderby) {
+        setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setOrderby(key as 'name' | 'count');
+        setOrder('asc');
+      }
+    },
+    [orderby]
+  );
+
   const columnPicker =
     columnPickerStorageKey && pickable.length > 0 ? (
       <ColumnVisibilityMenu columns={pickable.map((c) => ({ id: c.id, label: c.header || 'Column' }))} visibility={pickerVisibility} onChange={onColumnToggle} />
@@ -215,15 +227,29 @@ export function TermEntityListView({
         <DataTableSkeleton headers={skeletonHeaders} rows={8} />
       ) : (
         <>
+          {!showMockRows ? (
+            <ListPaginationBar
+              placement="top"
+              page={page}
+              total={listQuery.data?.total ?? null}
+              totalPages={listQuery.data?.totalPages ?? null}
+              perPage={DEFAULT_LIST_PER_PAGE}
+              onPageChange={setPage}
+              disabled={listQuery.loading}
+            />
+          ) : null}
           <DataTable
             columns={visibleColumns}
             rows={rows}
             rowKey={(r) => r.id}
             emptyContent={emptyContent}
             wrapInCard={false}
+            sortState={{ orderby, order }}
+            onSortColumn={onSortColumn}
           />
           {!showMockRows ? (
             <ListPaginationBar
+              placement="bottom"
               page={page}
               total={listQuery.data?.total ?? null}
               totalPages={listQuery.data?.totalPages ?? null}

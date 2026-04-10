@@ -6,7 +6,8 @@ import { DataTable } from '../components/shared/DataTable';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from '../components/shared/list/ListSearchToolbar';
-import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
+import { InlineRowActions } from '../components/shared/list/InlineRowActions';
+import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from '../components/shared/list/ListPaginationBar';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -52,15 +53,21 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
   const [orderby, setOrderby] = useState<'name' | 'count'>('name');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [listNonce, setListNonce] = useState(0);
+  const [page, setPage] = useState(1);
 
   const bumpList = useCallback(() => setListNonce((n) => n + 1), []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, orderby, order, listNonce]);
 
   const listQuery = useWpTermCollection({
     taxonomyRestBase: TAXONOMY,
     search: debouncedSearch,
     orderby,
     order,
-    perPage: 100,
+    page,
+    perPage: DEFAULT_LIST_PER_PAGE,
     refreshNonce: listNonce,
   });
 
@@ -188,8 +195,16 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
   const columns: Column<WpTerm>[] = useMemo(
     () => [
       {
+        id: 'id',
+        header: 'ID',
+        alwaysVisible: true,
+        cellClassName: 'whitespace-nowrap tabular-nums text-slate-600 dark:text-slate-400',
+        render: (t) => t.id,
+      },
+      {
         id: 'name',
         header: 'Category',
+        sortKey: 'name',
         render: (t) => (
           <div className="max-w-md">
             <button
@@ -207,64 +222,57 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
               {t.name}
             </button>
             <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{t.slug}</div>
+            <InlineRowActions
+              ariaLabel={`Actions for ${t.name}`}
+              items={[
+                {
+                  key: 'edit',
+                  label: 'Edit in form',
+                  onClick: () => {
+                    setSelectedId(t.id);
+                    setSaveOk(null);
+                  },
+                },
+                {
+                  key: 'delete',
+                  label: 'Delete',
+                  danger: true,
+                  onClick: () =>
+                    void (async () => {
+                      const ok = await confirm({
+                        title: 'Delete category?',
+                        message: `Delete category “${t.name}”?`,
+                        variant: 'danger',
+                        confirmLabel: 'Delete',
+                      });
+                      if (!ok) {
+                        return;
+                      }
+                      try {
+                        await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.courseCategory(t.id));
+                        if (selectedId === t.id) {
+                          startNew();
+                        }
+                        bumpList();
+                      } catch (e) {
+                        await alertDialog({
+                          title: 'Could not delete category',
+                          message: getErrorSummary(e),
+                        });
+                      }
+                    })(),
+                },
+              ]}
+            />
           </div>
         ),
       },
       {
         id: 'count',
         header: 'Courses',
+        sortKey: 'count',
         cellClassName: 'tabular-nums text-slate-600 dark:text-slate-400',
         render: (t) => (typeof t.count === 'number' ? t.count : '—'),
-      },
-      {
-        id: 'actions',
-        header: '',
-        alwaysVisible: true,
-        headerClassName: 'w-14 text-right',
-        cellClassName: 'text-right',
-        render: (t) => (
-          <RowActionsMenu
-            ariaLabel={`Actions for ${t.name}`}
-            items={[
-              {
-                key: 'edit',
-                label: 'Edit in form',
-                onClick: () => {
-                  setSelectedId(t.id);
-                  setSaveOk(null);
-                },
-              },
-              {
-                key: 'delete',
-                label: 'Delete',
-                danger: true,
-                onClick: async () => {
-                  const ok = await confirm({
-                    title: 'Delete category?',
-                    message: `Delete category “${t.name}”?`,
-                    variant: 'danger',
-                    confirmLabel: 'Delete',
-                  });
-                  if (!ok) {
-                    return;
-                  }
-                  try {
-                    await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.courseCategory(t.id));
-                    if (selectedId === t.id) {
-                      startNew();
-                    }
-                    bumpList();
-                  } catch (e) {
-                    await alertDialog({
-                      title: 'Could not delete category',
-                      message: getErrorSummary(e),
-                    });
-                  }
-                },
-              },
-            ]}
-          />
-        ),
       },
     ],
     [selectedId, bumpList, startNew, confirm, alertDialog]
@@ -278,6 +286,18 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
   );
 
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+
+  const onSortColumn = useCallback(
+    (key: string) => {
+      if (key === orderby) {
+        setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+      } else if (key === 'name' || key === 'count') {
+        setOrderby(key);
+        setOrder('asc');
+      }
+    },
+    [orderby]
+  );
 
   return (
     <AppShell
@@ -434,15 +454,37 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
                 <ApiErrorPanel error={listQuery.error} onRetry={listQuery.refetch} title="Could not load categories" />
               </div>
             ) : listQuery.loading ? (
-              <DataTableSkeleton headers={['Category', 'Courses', '']} rows={8} />
+              <DataTableSkeleton headers={['ID', 'Category', 'Courses']} rows={8} />
             ) : (
-              <DataTable
-                columns={columns}
-                rows={rows}
-                rowKey={(r) => r.id}
-                emptyContent={emptyContent}
-                wrapInCard={false}
-              />
+              <>
+                <ListPaginationBar
+                  placement="top"
+                  page={page}
+                  total={listQuery.data?.total ?? null}
+                  totalPages={listQuery.data?.totalPages ?? null}
+                  perPage={DEFAULT_LIST_PER_PAGE}
+                  onPageChange={setPage}
+                  disabled={listQuery.loading}
+                />
+                <DataTable
+                  columns={columns}
+                  rows={rows}
+                  rowKey={(r) => r.id}
+                  emptyContent={emptyContent}
+                  wrapInCard={false}
+                  sortState={{ orderby, order }}
+                  onSortColumn={onSortColumn}
+                />
+                <ListPaginationBar
+                  placement="bottom"
+                  page={page}
+                  total={listQuery.data?.total ?? null}
+                  totalPages={listQuery.data?.totalPages ?? null}
+                  perPage={DEFAULT_LIST_PER_PAGE}
+                  onPageChange={setPage}
+                  disabled={listQuery.loading}
+                />
+              </>
             )}
           </ListPanel>
         </section>

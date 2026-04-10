@@ -21,6 +21,24 @@ class OrderRepository
     }
 
     /**
+     * 32 hex chars (128-bit) — opaque public order link; never sequential IDs in URLs.
+     */
+    public static function generatePublicToken(): string
+    {
+        return bin2hex(random_bytes(16));
+    }
+
+    /**
+     * Normalize token from query string; returns empty if invalid.
+     */
+    public static function sanitizePublicToken(string $token): string
+    {
+        $t = strtolower(preg_replace('/[^a-f0-9]/', '', $token));
+
+        return strlen($t) === 32 ? $t : '';
+    }
+
+    /**
      * @param array<string, mixed> $order
      */
     public function createOrder(array $order): int
@@ -41,23 +59,34 @@ class OrderRepository
         ];
         $order = wp_parse_args($order, $defaults);
 
-        $wpdb->insert(
-            $this->orders,
-            [
-                'user_id' => (int) $order['user_id'],
-                'status' => sanitize_key((string) $order['status']),
-                'currency' => strtoupper(sanitize_text_field((string) $order['currency'])),
-                'subtotal' => (float) $order['subtotal'],
-                'discount_total' => (float) $order['discount_total'],
-                'total' => (float) $order['total'],
-                'gateway' => sanitize_key((string) $order['gateway']),
-                'gateway_intent_id' => $order['gateway_intent_id'] ? sanitize_text_field((string) $order['gateway_intent_id']) : null,
-                'coupon_id' => $order['coupon_id'] ? (int) $order['coupon_id'] : null,
-                'meta' => $order['meta'] !== null ? wp_json_encode($order['meta']) : null,
-            ]
-        );
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $public_token = self::generatePublicToken();
+            $wpdb->insert(
+                $this->orders,
+                [
+                    'user_id' => (int) $order['user_id'],
+                    'status' => sanitize_key((string) $order['status']),
+                    'currency' => strtoupper(sanitize_text_field((string) $order['currency'])),
+                    'subtotal' => (float) $order['subtotal'],
+                    'discount_total' => (float) $order['discount_total'],
+                    'total' => (float) $order['total'],
+                    'gateway' => sanitize_key((string) $order['gateway']),
+                    'gateway_intent_id' => $order['gateway_intent_id'] ? sanitize_text_field((string) $order['gateway_intent_id']) : null,
+                    'public_token' => $public_token,
+                    'coupon_id' => $order['coupon_id'] ? (int) $order['coupon_id'] : null,
+                    'meta' => $order['meta'] !== null ? wp_json_encode($order['meta']) : null,
+                ]
+            );
+            $new_id = (int) $wpdb->insert_id;
+            if ($new_id > 0) {
+                return $new_id;
+            }
+            if (stripos((string) $wpdb->last_error, 'duplicate') === false) {
+                break;
+            }
+        }
 
-        return (int) $wpdb->insert_id;
+        return 0;
     }
 
     public function addOrderItem(int $order_id, int $course_id, int $quantity, float $unit_price, float $line_total): int
@@ -119,7 +148,7 @@ class OrderRepository
     {
         global $wpdb;
 
-        $allowed = ['status', 'gateway_intent_id', 'meta', 'total', 'discount_total', 'subtotal'];
+        $allowed = ['status', 'gateway', 'gateway_intent_id', 'public_token', 'meta', 'total', 'discount_total', 'subtotal'];
         $data = [];
         foreach ($allowed as $key) {
             if (!array_key_exists($key, $patch)) {
@@ -133,6 +162,11 @@ class OrderRepository
                 $data['meta'] = $val;
             } elseif (in_array($key, ['total', 'discount_total', 'subtotal'], true)) {
                 $data[$key] = (float) $val;
+            } elseif ($key === 'gateway') {
+                $data['gateway'] = sanitize_key((string) $val);
+            } elseif ($key === 'public_token') {
+                $tok = self::sanitizePublicToken((string) $val);
+                $data['public_token'] = $tok !== '' ? $tok : null;
             } else {
                 $data[$key] = sanitize_text_field((string) $val);
             }
@@ -215,5 +249,54 @@ class OrderRepository
         }
 
         return $row;
+    }
+
+    /**
+     * Resolve order for the receipt URL (must match logged-in user).
+     */
+    public function findByPublicTokenForUser(string $token, int $user_id): ?object
+    {
+        global $wpdb;
+
+        $clean = self::sanitizePublicToken($token);
+        if ($clean === '' || $user_id <= 0 || !$this->tableExists()) {
+            return null;
+        }
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->orders} WHERE public_token = %s AND user_id = %d LIMIT 1",
+                $clean,
+                $user_id
+            )
+        );
+
+        return $row ?: null;
+    }
+
+    /**
+     * Ensure a row has {@see public_token} (migrations + legacy rows).
+     */
+    public function ensurePublicToken(int $order_id): string
+    {
+        $row = $this->findById($order_id);
+        if (!$row) {
+            return '';
+        }
+
+        $existing = isset($row->public_token) ? (string) $row->public_token : '';
+        $clean = self::sanitizePublicToken($existing);
+        if ($clean !== '') {
+            return $clean;
+        }
+
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $new = self::generatePublicToken();
+            if ($this->updateOrder($order_id, ['public_token' => $new])) {
+                return self::sanitizePublicToken($new);
+            }
+        }
+
+        return '';
     }
 }

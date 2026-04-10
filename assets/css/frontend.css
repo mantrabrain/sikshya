@@ -1,103 +1,7 @@
 /**
- * Sikshya LMS Frontend Styles
- * Modern, responsive design with dark mode support
+ * Sikshya LMS Frontend — catalog, cart, learn, quiz, and shared layouts.
+ * Design tokens: public-design-system.css (handle: sikshya-public-ds).
  */
-
-:root {
-  /* Colors */
-  --sikshya-primary: #6366f1;
-  --sikshya-primary-dark: #4f46e5;
-  --sikshya-primary-light: #818cf8;
-  --sikshya-secondary: #f59e0b;
-  --sikshya-secondary-dark: #d97706;
-  --sikshya-success: #10b981;
-  --sikshya-warning: #f59e0b;
-  --sikshya-error: #ef4444;
-  --sikshya-info: #3b82f6;
-
-  /* Neutral Colors */
-  --sikshya-white: #ffffff;
-  --sikshya-gray-50: #f9fafb;
-  --sikshya-gray-100: #f3f4f6;
-  --sikshya-gray-200: #e5e7eb;
-  --sikshya-gray-300: #d1d5db;
-  --sikshya-gray-400: #9ca3af;
-  --sikshya-gray-500: #6b7280;
-  --sikshya-gray-600: #4b5563;
-  --sikshya-gray-700: #374151;
-  --sikshya-gray-800: #1f2937;
-  --sikshya-gray-900: #111827;
-
-  /* Typography */
-  --sikshya-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --sikshya-font-size-xs: 0.75rem;
-  --sikshya-font-size-sm: 0.875rem;
-  --sikshya-font-size-base: 1rem;
-  --sikshya-font-size-lg: 1.125rem;
-  --sikshya-font-size-xl: 1.25rem;
-  --sikshya-font-size-2xl: 1.5rem;
-  --sikshya-font-size-3xl: 1.875rem;
-  --sikshya-font-size-4xl: 2.25rem;
-
-  /* Spacing */
-  --sikshya-spacing-1: 0.25rem;
-  --sikshya-spacing-2: 0.5rem;
-  --sikshya-spacing-3: 0.75rem;
-  --sikshya-spacing-4: 1rem;
-  --sikshya-spacing-5: 1.25rem;
-  --sikshya-spacing-6: 1.5rem;
-  --sikshya-spacing-8: 2rem;
-  --sikshya-spacing-10: 2.5rem;
-  --sikshya-spacing-12: 3rem;
-  --sikshya-spacing-16: 4rem;
-  --sikshya-spacing-20: 5rem;
-
-  /* Border Radius */
-  --sikshya-radius-sm: 0.25rem;
-  --sikshya-radius: 0.375rem;
-  --sikshya-radius-md: 0.5rem;
-  --sikshya-radius-lg: 0.75rem;
-  --sikshya-radius-xl: 1rem;
-  --sikshya-radius-2xl: 1.5rem;
-
-  /* Shadows */
-  --sikshya-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --sikshya-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --sikshya-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --sikshya-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --sikshya-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-  /* Transitions */
-  --sikshya-transition: all 0.2s ease-in-out;
-  --sikshya-transition-fast: all 0.15s ease-in-out;
-  --sikshya-transition-slow: all 0.3s ease-in-out;
-
-  /* Z-index */
-  --sikshya-z-dropdown: 1000;
-  --sikshya-z-sticky: 1020;
-  --sikshya-z-fixed: 1030;
-  --sikshya-z-modal-backdrop: 1040;
-  --sikshya-z-modal: 1050;
-  --sikshya-z-popover: 1060;
-  --sikshya-z-tooltip: 1070;
-}
-
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --sikshya-white: #111827;
-    --sikshya-gray-50: #1f2937;
-    --sikshya-gray-100: #374151;
-    --sikshya-gray-200: #4b5563;
-    --sikshya-gray-300: #6b7280;
-    --sikshya-gray-400: #9ca3af;
-    --sikshya-gray-500: #d1d5db;
-    --sikshya-gray-600: #e5e7eb;
-    --sikshya-gray-700: #f3f4f6;
-    --sikshya-gray-800: #f9fafb;
-    --sikshya-gray-900: #ffffff;
-  }
-}
 
 /* Base Styles */
 .sikshya-course-catalog {
@@ -953,20 +857,10 @@
   line-height: 1.65;
 }
 
-.sikshya-cart-lines,
 .sikshya-account-list {
   list-style: none;
   padding: 0;
   margin: 0 0 var(--sikshya-spacing-6);
-}
-
-.sikshya-cart-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sikshya-spacing-3);
-  padding: var(--sikshya-spacing-3) 0;
-  border-bottom: 1px solid var(--sikshya-gray-200);
 }
 
 .sikshya-inline-form {
@@ -1252,21 +1146,6 @@
   border-radius: var(--sikshya-radius-xl);
   border: 1px dashed var(--sikshya-gray-300);
   background: var(--sikshya-gray-50);
-}
-
-/* Checkout */
-.sikshya-checkout-gateways {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sikshya-spacing-3);
-  margin-top: var(--sikshya-spacing-4);
-}
-
-.sikshya-checkout-gateways__notice {
-  margin: 0;
-  font-size: var(--sikshya-font-size-sm);
-  color: var(--sikshya-gray-600);
-  max-width: 32rem;
 }
 
 /* Quiz (learner) */

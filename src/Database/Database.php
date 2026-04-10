@@ -14,7 +14,7 @@ class Database
     /**
      * Bump when schema or migrations change (incremental upgrades via maybeUpgrade).
      */
-    public const SCHEMA_VERSION = '1.3.0';
+    public const SCHEMA_VERSION = '1.4.0';
 
     /**
      * Plugin instance
@@ -240,6 +240,11 @@ class Database
         if (version_compare((string) $current, '1.3.0', '<')) {
             $this->migrateTo130();
             update_option('sikshya_db_version', '1.3.0');
+            $current = '1.3.0';
+        }
+        if (version_compare((string) $current, '1.4.0', '<')) {
+            $this->migrateTo140();
+            update_option('sikshya_db_version', '1.4.0');
         }
     }
 
@@ -263,6 +268,23 @@ class Database
     private function migrateTo130(): void
     {
         // Hook point for future additive migrations.
+    }
+
+    private function migrateTo140(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($this->getOrdersCreateSql());
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'sikshya_orders';
+        $repo = new \Sikshya\Database\Repositories\OrderRepository();
+        $ids = $wpdb->get_col("SELECT id FROM {$table} WHERE public_token IS NULL OR public_token = ''");
+        if (!is_array($ids)) {
+            return;
+        }
+        foreach ($ids as $id) {
+            $repo->ensurePublicToken((int) $id);
+        }
     }
 
     private function getEnrollmentsCreateSql(): string
@@ -356,6 +378,7 @@ class Database
             total decimal(12,2) NOT NULL DEFAULT 0.00,
             gateway varchar(32) NOT NULL DEFAULT '',
             gateway_intent_id varchar(255) NULL,
+            public_token varchar(32) NULL,
             coupon_id bigint(20) NULL,
             meta longtext NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -363,7 +386,8 @@ class Database
             PRIMARY KEY (id),
             KEY user_id (user_id),
             KEY status (status),
-            KEY gateway_intent_id (gateway_intent_id)
+            KEY gateway_intent_id (gateway_intent_id),
+            UNIQUE KEY public_token (public_token)
         ) $charset_collate;";
     }
 

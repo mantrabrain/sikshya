@@ -32,7 +32,7 @@ final class PublicCurriculumService
                 continue;
             }
             $chapter = get_post($ch_id);
-            if (!$chapter || $chapter->post_type !== PostTypes::CHAPTER) {
+            if (!$chapter || $chapter->post_type !== PostTypes::CHAPTER || $chapter->post_status !== 'publish') {
                 continue;
             }
             $raw = get_post_meta($ch_id, '_sikshya_contents', true);

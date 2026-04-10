@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { getSikshyaApi, getErrorSummary, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
@@ -39,10 +39,22 @@ type ListResponse = {
   table_missing?: boolean;
 };
 
+function canMarkOrderPaid(r: OrderRow): boolean {
+  if (r.status === 'paid') {
+    return false;
+  }
+  if (r.status !== 'pending' && r.status !== 'on-hold') {
+    return false;
+  }
+  const gw = (r.gateway || '').toLowerCase();
+  return gw === 'offline' || gw === '';
+}
+
 export function OrdersPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const [page, setPage] = useState(1);
+  const [markBusyId, setMarkBusyId] = useState<number | null>(null);
 
   const loader = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), per_page: '30' });
@@ -64,7 +76,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string })
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
       title={title}
-      subtitle="Normalized checkout orders (Stripe, PayPal) before and after fulfillment."
+      subtitle="Checkout orders: Stripe, PayPal, and offline (manual) — mark offline orders paid after you receive payment."
       pageActions={
         <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
           Refresh
@@ -103,6 +115,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string })
                     <th className="px-5 py-3.5">Total</th>
                     <th className="px-5 py-3.5">Gateway</th>
                     <th className="px-5 py-3.5">Status</th>
+                    <th className="px-5 py-3.5">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -154,6 +167,33 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string })
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={r.status} />
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {canMarkOrderPaid(r) ? (
+                          <button
+                            type="button"
+                            disabled={markBusyId === r.id || loading}
+                            onClick={async () => {
+                              setMarkBusyId(r.id);
+                              try {
+                                await getSikshyaApi().post<{ ok?: boolean; message?: string }>(
+                                  SIKSHYA_ENDPOINTS.admin.ordersMarkPaid(r.id),
+                                  {}
+                                );
+                                await refetch();
+                              } catch (err) {
+                                window.alert(getErrorSummary(err));
+                              } finally {
+                                setMarkBusyId(null);
+                              }
+                            }}
+                            className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/40"
+                          >
+                            {markBusyId === r.id ? 'Marking…' : 'Mark paid'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}

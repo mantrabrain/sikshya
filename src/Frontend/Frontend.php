@@ -4,6 +4,7 @@ namespace Sikshya\Frontend;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
+use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\CartFormHandler;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Frontend\Controllers\CourseController;
@@ -71,9 +72,11 @@ class Frontend
     private function initHooks(): void
     {
         add_action('wp_enqueue_scripts', [$this, 'enqueueFrontendAssets']);
+        add_action('wp', [$this, 'maybeConfigureAccountShellPage']);
         add_action('wp_head', [$this, 'addFrontendMeta']);
         add_action('wp_footer', [$this, 'addFrontendFooter']);
-        add_action('template_redirect', [CartFormHandler::class, 'maybeHandle'], 5);
+        // Run on init (before template output) so redirects/cookies are not broken by theme notices.
+        add_action('init', [CartFormHandler::class, 'maybeHandle'], 20);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
         add_action('wp', [$this, 'initFrontend']);
         add_filter('template_include', [$this, 'loadCustomTemplates'], 99);
@@ -90,17 +93,100 @@ class Frontend
     }
 
     /**
+     * Standalone account shell: no shared Sikshya frontend CSS/JS (template loads account-shell.css only).
+     */
+    public function maybeConfigureAccountShellPage(): void
+    {
+        if (!PublicPageUrls::isCurrentVirtualPage('account')) {
+            return;
+        }
+
+        add_filter('show_admin_bar', '__return_false');
+        add_action('wp_enqueue_scripts', [$this, 'dequeueAllAssetsForAccountShell'], PHP_INT_MAX - 1);
+    }
+
+    /**
+     * Remove theme and third-party enqueues on the standalone account page (template does not call wp_head).
+     */
+    public function dequeueAllAssetsForAccountShell(): void
+    {
+        if (!PublicPageUrls::isCurrentVirtualPage('account')) {
+            return;
+        }
+
+        global $wp_styles, $wp_scripts;
+
+        if ($wp_styles instanceof \WP_Styles) {
+            foreach ((array) $wp_styles->queue as $handle) {
+                wp_dequeue_style($handle);
+            }
+        }
+
+        if ($wp_scripts instanceof \WP_Scripts) {
+            foreach ((array) $wp_scripts->queue as $handle) {
+                wp_dequeue_script($handle);
+            }
+        }
+    }
+
+    /**
      * Enqueue frontend assets
      */
     public function enqueueFrontendAssets(): void
     {
-        // Enqueue frontend styles
+        if (PublicPageUrls::isCurrentVirtualPage('account')) {
+            return;
+        }
+
         wp_enqueue_style(
-            'sikshya-frontend',
-            $this->plugin->getAssetUrl('css/frontend.css'),
+            'sikshya-public-ds',
+            $this->plugin->getAssetUrl('css/public-design-system.css'),
             [],
             $this->plugin->version
         );
+
+        wp_enqueue_style(
+            'sikshya-frontend',
+            $this->plugin->getAssetUrl('css/frontend.css'),
+            ['sikshya-public-ds'],
+            $this->plugin->version
+        );
+
+        if (is_singular(PostTypes::COURSE)) {
+            wp_enqueue_style(
+                'sikshya-single-course',
+                $this->plugin->getAssetUrl('css/single-course.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                $this->plugin->version
+            );
+        }
+
+        if (PublicPageUrls::isCurrentVirtualPage('cart')) {
+            wp_enqueue_style(
+                'sikshya-cart',
+                $this->plugin->getAssetUrl('css/cart.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                $this->plugin->version
+            );
+        }
+
+        if (PublicPageUrls::isCurrentVirtualPage('checkout')) {
+            wp_enqueue_style(
+                'sikshya-checkout',
+                $this->plugin->getAssetUrl('css/checkout.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                $this->plugin->version
+            );
+        }
+
+        if (PublicPageUrls::isCurrentVirtualPage('order')) {
+            wp_enqueue_style(
+                'sikshya-order',
+                $this->plugin->getAssetUrl('css/order.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                $this->plugin->version
+            );
+        }
 
         // Enqueue frontend scripts
         wp_enqueue_script(
@@ -165,6 +251,25 @@ class Frontend
                 ['sikshya-frontend'],
                 $this->plugin->version,
                 true
+            );
+            wp_localize_script(
+                'sikshya-checkout-page',
+                'sikshyaCheckout',
+                [
+                    'i18n' => [
+                        'noCourses' => __('No courses in checkout.', 'sikshya'),
+                        'startingCheckout' => __('Starting checkout…', 'sikshya'),
+                        'checkoutFailed' => __('Checkout failed.', 'sikshya'),
+                        'quoteFailed' => __('Could not update totals.', 'sikshya'),
+                        'networkError' => __('Network error. Please try again.', 'sikshya'),
+                        'updatingTotals' => __('Updating totals…', 'sikshya'),
+                        'stripeSessionReady' => __(
+                            'Payment session ready. Your site should confirm the Stripe PaymentIntent on return (see Sikshya checkout docs).',
+                            'sikshya'
+                        ),
+                        'checkoutStarted' => __('Checkout started.', 'sikshya'),
+                    ],
+                ]
             );
         }
 
@@ -252,6 +357,24 @@ class Frontend
      */
     public function handleTemplateRedirect(): void
     {
+        if (PublicPageUrls::isCurrentVirtualPage('order')) {
+            $legacy_id = isset($_GET['order_id']) ? (int) $_GET['order_id'] : 0;
+            $has_key = isset($_GET['order_key']) && OrderRepository::sanitizePublicToken(
+                sanitize_text_field(wp_unslash((string) $_GET['order_key']))
+            ) !== '';
+            if ($legacy_id > 0 && !$has_key && is_user_logged_in()) {
+                $repo = new OrderRepository();
+                $row = $repo->findByIdForUser($legacy_id, get_current_user_id());
+                if ($row) {
+                    $tok = $repo->ensurePublicToken((int) $row->id);
+                    if ($tok !== '') {
+                        wp_safe_redirect(PublicPageUrls::orderView($tok), 301);
+                        exit;
+                    }
+                }
+            }
+        }
+
         // Handle custom page templates
         if (is_page('sikshya-dashboard')) {
             $this->controllers['user']->dashboard();

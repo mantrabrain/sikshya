@@ -18,8 +18,17 @@ import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 import { ListEmptyState } from './ListEmptyState';
 import { ListPanel } from './ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from './ListSearchToolbar';
+import type { RowActionItem } from './RowActionsMenu';
 import { StatusCountPills, type StatusPillDef } from './StatusCountPills';
 import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
+import { WpPostInlineRowActions } from './WpPostInlineRowActions';
+
+export type EntityListPostRowActions = {
+  /** Column id to attach inline actions under (default `title`). */
+  titleColumnId?: string;
+  buildLeadingItems: (row: WpPost) => RowActionItem[];
+  buildViewHref?: (row: WpPost) => string | null | undefined;
+};
 
 const DEFAULT_PILLS: StatusPillDef[] = [
   { id: 'any', label: 'All' },
@@ -30,6 +39,20 @@ const DEFAULT_PILLS: StatusPillDef[] = [
   { id: 'private', label: 'Private' },
   { id: 'trash', label: 'Trash' },
 ];
+
+function columnMenuLabel(c: Column<WpPost>): string {
+  if (typeof c.header === 'string' && c.header.trim() !== '') {
+    return c.header;
+  }
+  return c.columnPickerLabel ?? c.id;
+}
+
+function skeletonHeaderText(c: Column<WpPost>): string {
+  if (typeof c.header === 'string' && c.header.trim() !== '') {
+    return c.header;
+  }
+  return c.columnPickerLabel || '\u00a0';
+}
 
 type Props = {
   restBase: string;
@@ -56,6 +79,8 @@ type Props = {
   bulkDeleteEnabled?: boolean;
   /** Called when the list query is ready so parents can refresh after row actions (stable callback recommended). */
   onListReady?: (api: { refresh: () => Promise<void> }) => void;
+  /** WordPress-style row actions under the title; also drops a trailing `actions` column if present. */
+  postRowActions?: EntityListPostRowActions;
 };
 
 /**
@@ -78,6 +103,7 @@ export function EntityListView({
   emptyStateAction,
   bulkDeleteEnabled = true,
   onListReady,
+  postRowActions,
 }: Props) {
   const { confirm } = useSikshyaDialog();
   const [search, setSearch] = useState('');
@@ -92,23 +118,12 @@ export function EntityListView({
   const [bulkError, setBulkError] = useState<unknown>(null);
   const headerSelectRef = useRef<HTMLInputElement>(null);
 
-  const pickable = useMemo(() => columns.filter((c) => !c.alwaysVisible), [columns]);
+  const sourceColumns = useMemo(
+    () => (postRowActions ? columns.filter((c) => c.id !== 'actions') : columns),
+    [columns, postRowActions]
+  );
 
   const [colVis, setColVis] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (!columnPickerStorageKey || pickable.length === 0) {
-      setColVis({});
-      return;
-    }
-    const key = columnVisibilityStorageKey(columnPickerStorageKey);
-    setColVis(
-      loadColumnVisibility(
-        key,
-        pickable.map((c) => ({ id: c.id, defaultHidden: c.defaultHidden }))
-      )
-    );
-  }, [columnPickerStorageKey, pickable]);
 
   const onColumnToggle = useCallback(
     (id: string, next: boolean) => {
@@ -125,31 +140,6 @@ export function EntityListView({
     [columnPickerStorageKey]
   );
 
-  const pickerVisibility = useMemo(() => {
-    const o: Record<string, boolean> = {};
-    for (const c of pickable) {
-      const v = colVis[c.id];
-      o[c.id] = v === undefined ? !c.defaultHidden : v;
-    }
-    return o;
-  }, [pickable, colVis]);
-
-  const visibleColumns = useMemo(() => {
-    if (!columnPickerStorageKey) {
-      return columns;
-    }
-    return columns.filter((c) => {
-      if (c.alwaysVisible) {
-        return true;
-      }
-      const v = colVis[c.id];
-      if (v === undefined) {
-        return !c.defaultHidden;
-      }
-      return v;
-    });
-  }, [columns, columnPickerStorageKey, colVis]);
-
   const countsQuery = useWpPostStatusCounts(restBase);
   const listQuery = useWpPostCollection(restBase, {
     ...collectionQueryExtras,
@@ -164,6 +154,83 @@ export function EntityListView({
   const rows = listQuery.data?.data ?? [];
   const includeBulkCol = bulkDeleteEnabled;
   const trashMode = status === 'trash';
+
+  const refreshList = useCallback(async () => {
+    await listQuery.refetch();
+    await countsQuery.refetch();
+  }, [listQuery.refetch, countsQuery.refetch]);
+
+  const columnsWithTitleActions = useMemo(() => {
+    if (!postRowActions) {
+      return sourceColumns;
+    }
+    const tid = postRowActions.titleColumnId ?? 'title';
+    return sourceColumns.map((c) => {
+      if (c.id !== tid) {
+        return c;
+      }
+      const prev = c.render;
+      return {
+        ...c,
+        render: (r: WpPost) => (
+          <div className="min-w-0">
+            {prev(r)}
+            <WpPostInlineRowActions
+              restBase={restBase}
+              row={r}
+              refresh={refreshList}
+              confirm={confirm}
+              leadingItems={postRowActions.buildLeadingItems(r)}
+              viewHref={postRowActions.buildViewHref?.(r)}
+            />
+          </div>
+        ),
+      };
+    });
+  }, [sourceColumns, postRowActions, restBase, confirm, refreshList]);
+
+  const tableColumns = columnsWithTitleActions;
+
+  const pickable = useMemo(() => tableColumns.filter((c) => !c.alwaysVisible), [tableColumns]);
+
+  useEffect(() => {
+    if (!columnPickerStorageKey || pickable.length === 0) {
+      setColVis({});
+      return;
+    }
+    const key = columnVisibilityStorageKey(columnPickerStorageKey);
+    setColVis(
+      loadColumnVisibility(
+        key,
+        pickable.map((c) => ({ id: c.id, defaultHidden: c.defaultHidden }))
+      )
+    );
+  }, [columnPickerStorageKey, pickable]);
+
+  const pickerVisibility = useMemo(() => {
+    const o: Record<string, boolean> = {};
+    for (const c of pickable) {
+      const v = colVis[c.id];
+      o[c.id] = v === undefined ? !c.defaultHidden : v;
+    }
+    return o;
+  }, [pickable, colVis]);
+
+  const visibleColumns = useMemo(() => {
+    if (!columnPickerStorageKey) {
+      return tableColumns;
+    }
+    return tableColumns.filter((c) => {
+      if (c.alwaysVisible) {
+        return true;
+      }
+      const v = colVis[c.id];
+      if (v === undefined) {
+        return !c.defaultHidden;
+      }
+      return v;
+    });
+  }, [tableColumns, columnPickerStorageKey, colVis]);
 
   useEffect(() => {
     if (!onListReady) {
@@ -264,11 +331,9 @@ export function EntityListView({
   );
 
   const tableSkeletonHeaders = useMemo(() => {
-    const base = skeletonHeadersProp?.length
-      ? skeletonHeadersProp
-      : columns.map((c) => c.header || '\u00a0');
+    const base = skeletonHeadersProp?.length ? skeletonHeadersProp : sourceColumns.map(skeletonHeaderText);
     return includeBulkCol ? ['', ...base] : base;
-  }, [columns, skeletonHeadersProp, includeBulkCol]);
+  }, [sourceColumns, skeletonHeadersProp, includeBulkCol]);
 
   const onBulkApply = useCallback(async () => {
     if (!includeBulkCol || selectedIds.size === 0 || bulkActionValue === '') {
@@ -379,9 +444,25 @@ export function EntityListView({
 
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
 
+  const onSortColumn = useCallback(
+    (key: string) => {
+      if (key === orderby) {
+        setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setOrderby(key);
+        setOrder('asc');
+      }
+    },
+    [orderby]
+  );
+
   const columnPicker =
     columnPickerStorageKey && pickable.length > 0 ? (
-      <ColumnVisibilityMenu columns={pickable.map((c) => ({ id: c.id, label: c.header || 'Column' }))} visibility={pickerVisibility} onChange={onColumnToggle} />
+      <ColumnVisibilityMenu
+        columns={pickable.map((c) => ({ id: c.id, label: columnMenuLabel(c) }))}
+        visibility={pickerVisibility}
+        onChange={onColumnToggle}
+      />
     ) : null;
 
   const emptyContent = (
@@ -439,6 +520,15 @@ export function EntityListView({
         <DataTableSkeleton headers={tableSkeletonHeaders} rows={8} />
       ) : (
         <>
+          <ListPaginationBar
+            placement="top"
+            page={page}
+            total={listQuery.data?.total ?? null}
+            totalPages={listQuery.data?.totalPages ?? null}
+            perPage={DEFAULT_LIST_PER_PAGE}
+            onPageChange={setPage}
+            disabled={listQuery.loading}
+          />
           <DataTable
             columns={displayColumns}
             rows={rows}
@@ -448,8 +538,11 @@ export function EntityListView({
             getRowClassName={
               status === 'any' ? (r) => (r.status === 'trash' ? 'opacity-50 saturate-75' : undefined) : undefined
             }
+            sortState={{ orderby, order }}
+            onSortColumn={onSortColumn}
           />
           <ListPaginationBar
+            placement="bottom"
             page={page}
             total={listQuery.data?.total ?? null}
             totalPages={listQuery.data?.totalPages ?? null}

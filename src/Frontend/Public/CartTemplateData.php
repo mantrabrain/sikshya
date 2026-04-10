@@ -10,7 +10,7 @@ use Sikshya\Constants\PostTypes;
 final class CartTemplateData
 {
     /**
-     * @return array{lines: array<int, array{course_id: int, title: string, permalink: string, pricing: array}>, subtotal_hint: float, currency: string}
+     * @return array{lines: array<int, array{course_id: int, title: string, permalink: string, pricing: array}>, subtotal_hint: float, currency: string, urls: array{home: string, cart: string, checkout: string, courses: string}}
      */
     public static function build(): array
     {
@@ -42,6 +42,8 @@ final class CartTemplateData
                 'subtotal_hint' => round($subtotal, 2),
                 'currency' => $currency,
                 'urls' => [
+                    'home' => home_url('/'),
+                    'cart' => PublicPageUrls::url('cart'),
                     'checkout' => PublicPageUrls::url('checkout'),
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
                 ],

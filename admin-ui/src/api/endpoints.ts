@@ -31,6 +31,8 @@ export const SIKSHYA_ENDPOINTS = {
     payments: '/admin/payments',
     /** Checkout orders (normalized ledger). */
     orders: '/admin/orders',
+    ordersMarkPaid: (id: number) =>
+      `/admin/orders/${encodeURIComponent(String(id))}/mark-paid`,
     /** Coupon codes — GET list, POST create. */
     coupons: '/admin/coupons',
     /** Issued learner certificates. */

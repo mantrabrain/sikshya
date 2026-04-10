@@ -8,7 +8,7 @@ use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 
 /**
- * One-time checkout: Stripe PaymentIntent + PayPal order creation.
+ * One-time checkout: offline (manual), Stripe PaymentIntent, PayPal order creation.
  *
  * @package Sikshya\Commerce
  */
@@ -32,7 +32,7 @@ final class CheckoutService
     }
 
     /**
-     * @return array{order_id: int, subtotal: float, discount: float, total: float, currency: string}
+     * @return array{order_id: int, public_token: string, subtotal: float, discount: float, total: float, currency: string}
      */
     public function createPendingOrder(int $user_id, int $course_id, string $coupon_code = ''): array
     {
@@ -40,15 +40,15 @@ final class CheckoutService
     }
 
     /**
-     * One order with multiple course line items (cart checkout).
+     * Price lines + subtotal + optional coupon (no DB). Used for checkout quote UI.
      *
      * @param array<int, int> $course_ids
-     * @return array{order_id: int, subtotal: float, discount: float, total: float, currency: string}
+     * @return array{line_amounts: array<int, float>, subtotal: float, discount: float, total: float, currency: string, coupon_id: int|null}
      */
-    public function createPendingOrderForCourses(int $user_id, array $course_ids, string $coupon_code = ''): array
+    public function computePricingForCourses(array $course_ids, string $coupon_code = ''): array
     {
         $course_ids = array_values(array_unique(array_filter(array_map('intval', $course_ids))));
-        if ($user_id <= 0 || $course_ids === []) {
+        if ($course_ids === []) {
             throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
         }
 
@@ -70,6 +70,7 @@ final class CheckoutService
         $discount = 0.00;
         $total = $subtotal;
         $coupon_id = null;
+        $coupon_code = trim($coupon_code);
 
         if ($coupon_code !== '') {
             $coupon = $this->coupons->findActiveByCode($coupon_code);
@@ -81,6 +82,66 @@ final class CheckoutService
             }
         }
 
+        return [
+            'line_amounts' => $line_amounts,
+            'subtotal' => $subtotal,
+            'discount' => round((float) $discount, 2),
+            'total' => round((float) $total, 2),
+            'currency' => $currency,
+            'coupon_id' => $coupon_id,
+        ];
+    }
+
+    /**
+     * Cart totals preview (no order row). Same math as {@see createPendingOrderForCourses}.
+     *
+     * @param array<int, int> $course_ids
+     * @return array{subtotal: float, discount: float, total: float, currency: string, formatted: array{subtotal: string, discount: string, total: string}}
+     */
+    public function quoteTotalsForCourses(int $user_id, array $course_ids, string $coupon_code = ''): array
+    {
+        if ($user_id <= 0) {
+            throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
+        }
+
+        $p = $this->computePricingForCourses($course_ids, $coupon_code);
+        $cur = $p['currency'];
+
+        return [
+            'subtotal' => $p['subtotal'],
+            'discount' => $p['discount'],
+            'total' => $p['total'],
+            'currency' => $cur,
+            'formatted' => [
+                'subtotal' => number_format_i18n($p['subtotal'], 2) . ' ' . $cur,
+                'discount' => $p['discount'] > 0.00001
+                    ? '-' . number_format_i18n($p['discount'], 2) . ' ' . $cur
+                    : '',
+                'total' => number_format_i18n($p['total'], 2) . ' ' . $cur,
+            ],
+        ];
+    }
+
+    /**
+     * One order with multiple course line items (cart checkout).
+     *
+     * @param array<int, int> $course_ids
+     * @return array{order_id: int, public_token: string, subtotal: float, discount: float, total: float, currency: string}
+     */
+    public function createPendingOrderForCourses(int $user_id, array $course_ids, string $coupon_code = ''): array
+    {
+        if ($user_id <= 0) {
+            throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
+        }
+
+        $p = $this->computePricingForCourses($course_ids, $coupon_code);
+        $line_amounts = $p['line_amounts'];
+        $subtotal = $p['subtotal'];
+        $discount = $p['discount'];
+        $total = $p['total'];
+        $currency = $p['currency'];
+        $coupon_id = $p['coupon_id'];
+
         $order_id = $this->orders->createOrder(
             [
                 'user_id' => $user_id,
@@ -91,9 +152,13 @@ final class CheckoutService
                 'total' => $total,
                 'gateway' => '',
                 'coupon_id' => $coupon_id,
-                'meta' => ['course_ids' => $course_ids],
+                'meta' => ['course_ids' => array_keys($line_amounts)],
             ]
         );
+
+        if ($order_id <= 0) {
+            throw new \RuntimeException(__('Could not create order.', 'sikshya'));
+        }
 
         foreach ($line_amounts as $cid => $amt) {
             $this->orders->addOrderItem($order_id, $cid, 1, $amt, $amt);
@@ -104,8 +169,11 @@ final class CheckoutService
             $this->coupons->recordRedemption($coupon_id, $user_id, $order_id);
         }
 
+        $public_token = $this->orders->ensurePublicToken($order_id);
+
         return [
             'order_id' => $order_id,
+            'public_token' => $public_token,
             'subtotal' => $subtotal,
             'discount' => $discount,
             'total' => $total,
@@ -131,7 +199,33 @@ final class CheckoutService
     }
 
     /**
-     * @return array{client_secret?: string, payment_intent_id?: string, approval_url?: string, paypal_order_id?: string}
+     * Bank transfer / cash / invoice — no external API. Always available unless disabled in settings.
+     */
+    public function isOfflinePaymentEnabled(): bool
+    {
+        $v = $this->settings()->getSetting('enable_offline_payment', '1');
+
+        return $this->isTruthySetting($v);
+    }
+
+    /**
+     * When true, choosing offline immediately enrolls (honor system). When false, order stays on-hold until an admin marks it paid.
+     */
+    public function isOfflineAutoFulfillEnabled(): bool
+    {
+        return $this->isTruthySetting($this->settings()->getSetting('offline_payment_auto_fulfill', false));
+    }
+
+    /**
+     * @param mixed $v
+     */
+    private function isTruthySetting($v): bool
+    {
+        return $v === true || $v === 1 || $v === '1' || $v === 'true' || $v === 'yes' || $v === 'on';
+    }
+
+    /**
+     * @return array{client_secret?: string, payment_intent_id?: string, approval_url?: string, paypal_order_id?: string, offline?: bool}
      */
     public function startGatewaySession(int $order_id, string $gateway): array
     {
@@ -141,6 +235,19 @@ final class CheckoutService
         }
 
         $gateway = strtolower($gateway);
+
+        if ($gateway === 'offline') {
+            if (!$this->isOfflinePaymentEnabled()) {
+                throw new \RuntimeException(__('Offline payment is disabled.', 'sikshya'));
+            }
+            $this->orders->updateOrder($order_id, [
+                'gateway' => 'offline',
+                'gateway_intent_id' => 'offline-' . $order_id,
+            ]);
+
+            return ['offline' => true];
+        }
+
         $this->orders->updateOrder($order_id, ['gateway' => $gateway]);
 
         if ($gateway === 'stripe') {

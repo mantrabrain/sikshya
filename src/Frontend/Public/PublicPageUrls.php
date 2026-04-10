@@ -33,8 +33,16 @@ final class PublicPageUrls
         return add_query_arg('course_id', $course_id, self::url('learn'));
     }
 
-    public static function orderView(int $order_id): string
+    /**
+     * Receipt URL using opaque 32-char hex token (not sequential order ID).
+     */
+    public static function orderView(string $public_token): string
     {
-        return add_query_arg('order_id', $order_id, self::url('order'));
+        $t = \Sikshya\Database\Repositories\OrderRepository::sanitizePublicToken($public_token);
+        if ($t === '') {
+            return self::url('order');
+        }
+
+        return add_query_arg('order_key', $t, self::url('order'));
     }
 }

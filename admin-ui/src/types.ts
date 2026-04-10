@@ -77,6 +77,7 @@ export type TabFieldsMap = Record<string, Record<string, { section?: { title?: s
 export type WpPost = {
   id: number;
   title: { rendered: string };
+  excerpt?: { rendered?: string };
   slug?: string;
   status: string;
   link?: string;

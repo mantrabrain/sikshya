@@ -56,7 +56,23 @@ final class CartStorage
         $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
         $val = implode(',', $ids);
         $secure = is_ssl();
-        setcookie(self::cookieName(), $val, time() + DAY_IN_SECONDS * 30, COOKIEPATH ?: '/', COOKIE_DOMAIN, $secure, true);
+        $path = COOKIEPATH ?: '/';
+        $domain = (string) COOKIE_DOMAIN;
+        $expires = time() + DAY_IN_SECONDS * 30;
+
+        if (PHP_VERSION_ID >= 70300) {
+            setcookie(self::cookieName(), $val, [
+                'expires' => $expires,
+                'path' => $path,
+                'domain' => $domain !== '' ? $domain : '',
+                'secure' => $secure,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        } else {
+            setcookie(self::cookieName(), $val, $expires, $path, $domain, $secure, true);
+        }
+
         $_COOKIE[self::cookieName()] = $val;
     }
 
