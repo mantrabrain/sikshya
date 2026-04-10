@@ -82,7 +82,8 @@ export const WP_ENDPOINTS = {
     params: Record<string, string | number | boolean> = {}
   ) => {
     const q = new URLSearchParams({
-      per_page: '50',
+      per_page: '20',
+      page: '1',
       status: 'any',
       context: 'edit',
       ...Object.fromEntries(

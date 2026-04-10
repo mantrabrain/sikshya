@@ -9,6 +9,8 @@ export type WpPostCollectionQuery = {
   status: WpPostCollectionStatus;
   orderby: string;
   order: 'asc' | 'desc';
+  /** REST `page` (1-based). */
+  page?: number;
   perPage?: number;
   /** WordPress REST `_embed` (e.g. `1` loads embedded resources such as featured media). */
   embed?: string;
@@ -18,11 +20,12 @@ export type WpPostCollectionQuery = {
  * Fetches a WP `/wp/v2/{restBase}` collection with filters (used by entity list pages).
  */
 export function useWpPostCollection(restBase: string, query: WpPostCollectionQuery) {
-  const { search, status, orderby, order, perPage = 50, embed } = query;
+  const { search, status, orderby, order, page = 1, perPage = 20, embed } = query;
 
   return useAsyncData(async () => {
     const params: Record<string, string | number | boolean> = {
       per_page: perPage,
+      page,
       context: 'edit',
       orderby,
       order,
@@ -38,5 +41,5 @@ export function useWpPostCollection(restBase: string, query: WpPostCollectionQue
 
     const path = WP_ENDPOINTS.postTypeCollection(restBase, params);
     return getWpApi().getWithTotal<WpPost[]>(path);
-  }, [restBase, search, status, orderby, order, perPage, embed]);
+  }, [restBase, search, status, orderby, order, page, perPage, embed]);
 }

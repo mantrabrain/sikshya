@@ -19,6 +19,7 @@ import { ListEmptyState } from './ListEmptyState';
 import { ListPanel } from './ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from './ListSearchToolbar';
 import { StatusCountPills, type StatusPillDef } from './StatusCountPills';
+import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
 
 const DEFAULT_PILLS: StatusPillDef[] = [
   { id: 'any', label: 'All' },
@@ -82,6 +83,7 @@ export function EntityListView({
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
   const [status, setStatus] = useState<WpPostCollectionStatus>('any');
+  const [page, setPage] = useState(1);
   const [orderby, setOrderby] = useState(defaultSortField);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
@@ -150,12 +152,13 @@ export function EntityListView({
 
   const countsQuery = useWpPostStatusCounts(restBase);
   const listQuery = useWpPostCollection(restBase, {
+    ...collectionQueryExtras,
     search: debouncedSearch,
     status,
     orderby,
     order,
-    perPage: 50,
-    ...collectionQueryExtras,
+    page,
+    perPage: DEFAULT_LIST_PER_PAGE,
   });
 
   const rows = listQuery.data?.data ?? [];
@@ -175,6 +178,7 @@ export function EntityListView({
   }, [onListReady, listQuery.refetch, countsQuery.refetch]);
 
   useEffect(() => {
+    setPage(1);
     setSelectedIds(new Set());
     setBulkActionValue('');
     setBulkError(null);
@@ -373,14 +377,6 @@ export function EntityListView({
     countsQuery,
   ]);
 
-  const totalLine = useMemo(() => {
-    const t = listQuery.data?.total;
-    if (t == null) {
-      return null;
-    }
-    return `Showing ${rows.length} of ${t}`;
-  }, [listQuery.data?.total, rows.length]);
-
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
 
   const columnPicker =
@@ -435,12 +431,6 @@ export function EntityListView({
         </div>
       ) : null}
 
-      {totalLine ? (
-        <div className="border-b border-slate-100 px-4 py-2 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
-          {totalLine}
-        </div>
-      ) : null}
-
       {listQuery.error ? (
         <div className="p-4">
           <ApiErrorPanel error={listQuery.error} onRetry={listQuery.refetch} title="Could not load list" />
@@ -448,16 +438,26 @@ export function EntityListView({
       ) : listQuery.loading ? (
         <DataTableSkeleton headers={tableSkeletonHeaders} rows={8} />
       ) : (
-        <DataTable
-          columns={displayColumns}
-          rows={rows}
-          rowKey={(r) => r.id}
-          emptyContent={emptyContent}
-          wrapInCard={false}
-          getRowClassName={
-            status === 'any' ? (r) => (r.status === 'trash' ? 'opacity-50 saturate-75' : undefined) : undefined
-          }
-        />
+        <>
+          <DataTable
+            columns={displayColumns}
+            rows={rows}
+            rowKey={(r) => r.id}
+            emptyContent={emptyContent}
+            wrapInCard={false}
+            getRowClassName={
+              status === 'any' ? (r) => (r.status === 'trash' ? 'opacity-50 saturate-75' : undefined) : undefined
+            }
+          />
+          <ListPaginationBar
+            page={page}
+            total={listQuery.data?.total ?? null}
+            totalPages={listQuery.data?.totalPages ?? null}
+            perPage={DEFAULT_LIST_PER_PAGE}
+            onPageChange={setPage}
+            disabled={listQuery.loading}
+          />
+        </>
       )}
     </ListPanel>
   );

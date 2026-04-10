@@ -6,6 +6,7 @@ export { TermEntityListView } from './TermEntityListView';
 export { UserEntityListView } from './UserEntityListView';
 export { ListEmptyState } from './ListEmptyState';
 export { ListPanel } from './ListPanel';
+export { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
 export { ListSearchToolbar } from './ListSearchToolbar';
 export type { SortFieldOption } from './ListSearchToolbar';
 export { RowActionsMenu } from './RowActionsMenu';

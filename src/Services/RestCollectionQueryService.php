@@ -39,15 +39,31 @@ final class RestCollectionQueryService
      */
     public function includeTrashWhenStatusAny(array $args, WP_REST_Request $request): array
     {
-        if ($request->get_param('status') !== 'any') {
+        $raw = $request->get_param('status');
+        $wants_any = $raw === 'any' || (is_array($raw) && in_array('any', $raw, true));
+
+        if (!$wants_any) {
             return $args;
         }
 
         $ps = $args['post_status'] ?? null;
-        if (!is_array($ps)) {
+
+        /*
+         * REST passes `post_status` as the string `any` (or a single-element array).
+         * WP_Query then excludes statuses with `exclude_from_search` (including `trash`).
+         * Expand explicitly so "All" lists match wp-admin and include trashed posts.
+         */
+        if ($ps === 'any' || (is_array($ps) && count($ps) === 1 && (string) ($ps[0] ?? '') === 'any')) {
+            $statuses = array_keys(get_post_stati(['internal' => false]));
+            if (!in_array('trash', $statuses, true)) {
+                $statuses[] = 'trash';
+            }
+            $args['post_status'] = array_values(array_unique($statuses));
+
             return $args;
         }
-        if (!in_array('trash', $ps, true)) {
+
+        if (is_array($ps) && !in_array('trash', $ps, true)) {
             $args['post_status'][] = 'trash';
         }
 

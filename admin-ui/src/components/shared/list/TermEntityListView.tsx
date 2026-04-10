@@ -12,6 +12,7 @@ import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 import { ListEmptyState } from './ListEmptyState';
 import { ListPanel } from './ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from './ListSearchToolbar';
+import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
 
 type Props = {
   taxonomyRestBase: string;
@@ -56,8 +57,13 @@ export function TermEntityListView({
 }: Props) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
+  const [page, setPage] = useState(1);
   const [orderby, setOrderby] = useState<'name' | 'count'>(defaultSortField);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, orderby, order, taxonomyRestBase, listRefreshNonce]);
 
   const pickable = useMemo(() => columns.filter((c) => !c.alwaysVisible), [columns]);
   const [colVis, setColVis] = useState<Record<string, boolean>>({});
@@ -128,7 +134,8 @@ export function TermEntityListView({
     search: debouncedSearch,
     orderby,
     order,
-    perPage: 100,
+    page,
+    perPage: DEFAULT_LIST_PER_PAGE,
     refreshNonce: listRefreshNonce,
   });
 
@@ -207,13 +214,25 @@ export function TermEntityListView({
       ) : listQuery.loading ? (
         <DataTableSkeleton headers={skeletonHeaders} rows={8} />
       ) : (
-        <DataTable
-          columns={visibleColumns}
-          rows={rows}
-          rowKey={(r) => r.id}
-          emptyContent={emptyContent}
-          wrapInCard={false}
-        />
+        <>
+          <DataTable
+            columns={visibleColumns}
+            rows={rows}
+            rowKey={(r) => r.id}
+            emptyContent={emptyContent}
+            wrapInCard={false}
+          />
+          {!showMockRows ? (
+            <ListPaginationBar
+              page={page}
+              total={listQuery.data?.total ?? null}
+              totalPages={listQuery.data?.totalPages ?? null}
+              perPage={DEFAULT_LIST_PER_PAGE}
+              onPageChange={setPage}
+              disabled={listQuery.loading}
+            />
+          ) : null}
+        </>
       )}
     </ListPanel>
   );

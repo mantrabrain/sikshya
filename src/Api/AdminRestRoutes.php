@@ -489,8 +489,11 @@ class AdminRestRoutes
         $private = (int) ($c->private ?? 0);
         $trash = (int) ($c->trash ?? 0);
 
-        // "All" tab: include trash so counts match REST list when status=any (see RestCollectionQueryService).
-        $any = $publish + $draft + $pending + $future + $private + $trash;
+        // "All" tab: every status (incl. trash + custom statuses) to match expanded REST `status=any`.
+        $any = 0;
+        foreach ((array) $c as $n) {
+            $any += (int) $n;
+        }
 
         return new WP_REST_Response(
             [

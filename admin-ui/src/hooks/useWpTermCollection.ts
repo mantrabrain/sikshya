@@ -8,6 +8,7 @@ export type WpTermCollectionQuery = {
   search: string;
   orderby: 'name' | 'count';
   order: 'asc' | 'desc';
+  page?: number;
   perPage?: number;
   /** Increment to force refetch after creates/updates elsewhere. */
   refreshNonce?: number;
@@ -17,11 +18,12 @@ export type WpTermCollectionQuery = {
  * WordPress `/wp/v2/{taxonomyRestBase}` term collection.
  */
 export function useWpTermCollection(query: WpTermCollectionQuery) {
-  const { taxonomyRestBase, search, orderby, order, perPage = 100, refreshNonce = 0 } = query;
+  const { taxonomyRestBase, search, orderby, order, page = 1, perPage = 20, refreshNonce = 0 } = query;
 
   return useAsyncData(async () => {
     const params = new URLSearchParams({
       per_page: String(perPage),
+      page: String(page),
       orderby,
       order,
       hide_empty: 'false',
@@ -32,5 +34,5 @@ export function useWpTermCollection(query: WpTermCollectionQuery) {
     }
     const path = `/${taxonomyRestBase.replace(/^\//, '')}?${params.toString()}`;
     return getWpApi().getWithTotal<WpTerm[]>(path);
-  }, [taxonomyRestBase, search, orderby, order, perPage, refreshNonce]);
+  }, [taxonomyRestBase, search, orderby, order, page, perPage, refreshNonce]);
 }
