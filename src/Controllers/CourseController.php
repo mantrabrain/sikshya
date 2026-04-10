@@ -2,6 +2,8 @@
 
 namespace Sikshya\Controllers;
 
+use Sikshya\Admin\ReactAdminConfig;
+use Sikshya\Core\LegacyAjax;
 use Sikshya\Core\Plugin;
 use Sikshya\Models\Course;
 use Sikshya\Models\Lesson;
@@ -10,9 +12,9 @@ use Sikshya\Models\Enrollment;
 
 /**
  * Course Controller
- * 
+ *
  * Handles all course-related business logic and HTTP requests
- * 
+ *
  * @package Sikshya\Controllers
  */
 class CourseController
@@ -52,7 +54,7 @@ class CourseController
         $this->lessonModel = new Lesson();
         $this->quizModel = new Quiz();
         $this->enrollmentModel = new Enrollment();
-        
+
         $this->initHooks();
     }
 
@@ -64,22 +66,19 @@ class CourseController
         // Admin hooks
         add_action('admin_menu', [$this, 'addAdminMenu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
-        
-        // AJAX hooks
-        add_action('wp_ajax_sikshya_create_course', [$this, 'handleCreateCourse']);
-        add_action('wp_ajax_sikshya_update_course', [$this, 'handleUpdateCourse']);
-        add_action('wp_ajax_sikshya_delete_course', [$this, 'handleDeleteCourse']);
-        add_action('wp_ajax_sikshya_get_course', [$this, 'handleGetCourse']);
-        add_action('wp_ajax_sikshya_get_courses', [$this, 'handleGetCourses']);
-        add_action('wp_ajax_sikshya_duplicate_course', [$this, 'handleDuplicateCourse']);
-        
-        // Frontend hooks
-        add_action('wp_ajax_sikshya_enroll_course', [$this, 'handleEnrollCourse']);
-        add_action('wp_ajax_sikshya_unenroll_course', [$this, 'handleUnenrollCourse']);
-        add_action('wp_ajax_sikshya_get_course_progress', [$this, 'handleGetCourseProgress']);
-        
-        // REST API hooks
-        add_action('rest_api_init', [$this, 'registerRestRoutes']);
+
+        if (LegacyAjax::hooksEnabled()) {
+            add_action('wp_ajax_sikshya_create_course', [$this, 'handleCreateCourse']);
+            add_action('wp_ajax_sikshya_update_course', [$this, 'handleUpdateCourse']);
+            add_action('wp_ajax_sikshya_delete_course', [$this, 'handleDeleteCourse']);
+            add_action('wp_ajax_sikshya_get_course', [$this, 'handleGetCourse']);
+            add_action('wp_ajax_sikshya_get_courses', [$this, 'handleGetCourses']);
+            add_action('wp_ajax_sikshya_duplicate_course', [$this, 'handleDuplicateCourse']);
+
+            add_action('wp_ajax_sikshya_enroll_course', [$this, 'handleEnrollCourse']);
+            add_action('wp_ajax_sikshya_unenroll_course', [$this, 'handleUnenrollCourse']);
+            add_action('wp_ajax_sikshya_get_course_progress', [$this, 'handleGetCourseProgress']);
+        }
     }
 
     /**
@@ -103,7 +102,7 @@ class CourseController
     public function enqueueAdminAssets(): void
     {
         $screen = get_current_screen();
-        
+
         if (strpos($screen->id, 'sikshya-courses') !== false) {
             wp_enqueue_script(
                 'sikshya-courses-admin',
@@ -112,7 +111,7 @@ class CourseController
                 SIKSHYA_VERSION,
                 true
             );
-            
+
             wp_localize_script('sikshya-courses-admin', 'sikshya_courses', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('sikshya_courses_nonce'),
@@ -142,9 +141,9 @@ class CourseController
             check_ajax_referer('sikshya_courses_nonce', 'nonce');
 
             $data = $this->sanitizeCourseData($_POST);
-            
+
             $course_id = $this->courseModel->create($data);
-            
+
             if (is_wp_error($course_id)) {
                 wp_send_json_error($course_id->get_error_message());
                 return;
@@ -153,7 +152,10 @@ class CourseController
             wp_send_json_success([
                 'course_id' => $course_id,
                 'message' => __('Course created successfully', 'sikshya'),
-                'redirect_url' => admin_url('admin.php?page=sikshya-courses&action=edit&id=' . $course_id)
+                'redirect_url' => ReactAdminConfig::reactAppUrl('courses', [
+                    'action' => 'edit',
+                    'id' => (string) $course_id,
+                ])
             ]);
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
@@ -175,9 +177,9 @@ class CourseController
 
             $course_id = (int) $_POST['course_id'];
             $data = $this->sanitizeCourseData($_POST);
-            
+
             $result = $this->courseModel->update($course_id, $data);
-            
+
             if (is_wp_error($result)) {
                 wp_send_json_error($result->get_error_message());
                 return;
@@ -197,24 +199,43 @@ class CourseController
     public function handleDeleteCourse(): void
     {
         try {
-            if (!current_user_can('manage_options')) {
+            if (
+                !current_user_can('manage_sikshya')
+                && !current_user_can('edit_sikshya_courses')
+                && !current_user_can('edit_posts')
+            ) {
                 wp_send_json_error(__('Insufficient permissions', 'sikshya'));
                 return;
             }
 
-            check_ajax_referer('sikshya_courses_nonce', 'nonce');
+            $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash((string) $_POST['nonce'])) : '';
+            if (
+                !wp_verify_nonce($nonce, 'sikshya_courses_nonce')
+                && !wp_verify_nonce($nonce, 'sikshya_list_table_nonce')
+            ) {
+                wp_send_json_error(__('Invalid security token', 'sikshya'));
+                return;
+            }
 
-            $course_id = (int) $_POST['course_id'];
-            
-            $result = $this->courseModel->delete($course_id);
-            
-            if (is_wp_error($result)) {
-                wp_send_json_error($result->get_error_message());
+            $course_id = isset($_POST['course_id']) ? (int) $_POST['course_id'] : 0;
+            if ($course_id <= 0) {
+                wp_send_json_error(__('Invalid course ID', 'sikshya'));
+                return;
+            }
+
+            $course = Course::find($course_id);
+            if (!$course) {
+                wp_send_json_error(__('Course not found', 'sikshya'));
+                return;
+            }
+
+            if (!$course->delete()) {
+                wp_send_json_error(__('Failed to delete course', 'sikshya'));
                 return;
             }
 
             wp_send_json_success([
-                'message' => __('Course deleted successfully', 'sikshya')
+                'message' => __('Course deleted successfully', 'sikshya'),
             ]);
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
@@ -235,16 +256,16 @@ class CourseController
             check_ajax_referer('sikshya_courses_nonce', 'nonce');
 
             $course_id = (int) $_POST['course_id'];
-            
+
             $course = $this->courseModel->getById($course_id);
-            
+
             if (!$course) {
                 wp_send_json_error(__('Course not found', 'sikshya'));
                 return;
             }
 
             $course_data = $this->prepareCourseData($course);
-            
+
             wp_send_json_success($course_data);
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
@@ -283,7 +304,7 @@ class CourseController
 
             $courses = $this->courseModel->getAll($args);
             $total_courses = wp_count_posts('sikshya_course');
-            
+
             $courses_data = [];
             foreach ($courses as $course) {
                 $courses_data[] = $this->prepareCourseData($course);
@@ -317,9 +338,9 @@ class CourseController
             check_ajax_referer('sikshya_courses_nonce', 'nonce');
 
             $course_id = (int) $_POST['course_id'];
-            
+
             $course = $this->courseModel->getById($course_id);
-            
+
             if (!$course) {
                 wp_send_json_error(__('Course not found', 'sikshya'));
                 return;
@@ -335,7 +356,7 @@ class CourseController
             ];
 
             $new_course_id = $this->courseModel->create($duplicate_data);
-            
+
             if (is_wp_error($new_course_id)) {
                 wp_send_json_error($new_course_id->get_error_message());
                 return;
@@ -347,7 +368,10 @@ class CourseController
             wp_send_json_success([
                 'course_id' => $new_course_id,
                 'message' => __('Course duplicated successfully', 'sikshya'),
-                'redirect_url' => admin_url('admin.php?page=sikshya-courses&action=edit&id=' . $new_course_id)
+                'redirect_url' => ReactAdminConfig::reactAppUrl('courses', [
+                    'action' => 'edit',
+                    'id' => (string) $new_course_id,
+                ])
             ]);
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
@@ -369,7 +393,7 @@ class CourseController
 
             $course_id = (int) $_POST['course_id'];
             $user_id = get_current_user_id();
-            
+
             // Check if course exists
             $course = $this->courseModel->getById($course_id);
             if (!$course) {
@@ -385,7 +409,7 @@ class CourseController
 
             // Enroll the user
             $enrollment_id = $this->enrollmentModel->enroll($user_id, $course_id);
-            
+
             if (is_wp_error($enrollment_id)) {
                 wp_send_json_error($enrollment_id->get_error_message());
                 return;
@@ -418,9 +442,9 @@ class CourseController
 
             $course_id = (int) $_POST['course_id'];
             $user_id = get_current_user_id();
-            
+
             $result = $this->enrollmentModel->unenroll($user_id, $course_id);
-            
+
             if (is_wp_error($result)) {
                 wp_send_json_error($result->get_error_message());
                 return;
@@ -449,50 +473,13 @@ class CourseController
 
             $course_id = (int) $_POST['course_id'];
             $user_id = get_current_user_id();
-            
+
             $progress = $this->enrollmentModel->getProgress($user_id, $course_id);
-            
+
             wp_send_json_success($progress);
         } catch (\Exception $e) {
             wp_send_json_error($e->getMessage());
         }
-    }
-
-    /**
-     * Register REST API routes
-     */
-    public function registerRestRoutes(): void
-    {
-        register_rest_route('sikshya/v1', '/courses', [
-            [
-                'methods' => 'GET',
-                'callback' => [$this, 'getCoursesApi'],
-                'permission_callback' => [$this, 'getCoursesPermission'],
-            ],
-            [
-                'methods' => 'POST',
-                'callback' => [$this, 'createCourseApi'],
-                'permission_callback' => [$this, 'createCoursePermission'],
-            ]
-        ]);
-
-        register_rest_route('sikshya/v1', '/courses/(?P<id>\d+)', [
-            [
-                'methods' => 'GET',
-                'callback' => [$this, 'getCourseApi'],
-                'permission_callback' => [$this, 'getCoursePermission'],
-            ],
-            [
-                'methods' => 'PUT',
-                'callback' => [$this, 'updateCourseApi'],
-                'permission_callback' => [$this, 'updateCoursePermission'],
-            ],
-            [
-                'methods' => 'DELETE',
-                'callback' => [$this, 'deleteCourseApi'],
-                'permission_callback' => [$this, 'deleteCoursePermission'],
-            ]
-        ]);
     }
 
     /**
@@ -520,7 +507,7 @@ class CourseController
     private function prepareCourseData($course): array
     {
         $course_id = $course->ID;
-        
+
         return [
             'id' => $course_id,
             'title' => $course->post_title,
@@ -575,17 +562,4 @@ class CourseController
         }
     }
 
-    // REST API methods (implementations would go here)
-    public function getCoursesApi($request) { /* Implementation */ }
-    public function createCourseApi($request) { /* Implementation */ }
-    public function getCourseApi($request) { /* Implementation */ }
-    public function updateCourseApi($request) { /* Implementation */ }
-    public function deleteCourseApi($request) { /* Implementation */ }
-    
-    // Permission callbacks
-    public function getCoursesPermission() { return true; }
-    public function createCoursePermission() { return current_user_can('manage_options'); }
-    public function getCoursePermission() { return true; }
-    public function updateCoursePermission() { return current_user_can('manage_options'); }
-    public function deleteCoursePermission() { return current_user_can('manage_options'); }
-} 
+}

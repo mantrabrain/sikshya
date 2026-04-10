@@ -47,6 +47,8 @@ class TaxonomyService
      */
     public function registerCourseCategory(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Course Categories', 'sikshya'),
             'singular_name' => __('Course Category', 'sikshya'),
@@ -65,9 +67,10 @@ class TaxonomyService
             'hierarchical' => true,
             'labels' => $labels,
             'show_ui' => true,
+            'show_in_menu' => false,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => ['slug' => 'course-category'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_tax_course_category'], 'with_front' => false ],
             'show_in_rest' => true,
         ];
 
@@ -79,6 +82,8 @@ class TaxonomyService
      */
     public function registerCourseTag(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Course Tags', 'sikshya'),
             'singular_name' => __('Course Tag', 'sikshya'),
@@ -95,9 +100,10 @@ class TaxonomyService
             'hierarchical' => false,
             'labels' => $labels,
             'show_ui' => true,
+            'show_in_menu' => false,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => ['slug' => 'course-tag'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_tax_course_tag'], 'with_front' => false ],
             'show_in_rest' => true,
         ];
 
@@ -125,6 +131,7 @@ class TaxonomyService
             'hierarchical' => true,
             'labels' => $labels,
             'show_ui' => true,
+            'show_in_menu' => false,
             'show_admin_column' => true,
             'query_var' => true,
             'rewrite' => ['slug' => 'difficulty'],
@@ -155,13 +162,14 @@ class TaxonomyService
             'hierarchical' => true,
             'labels' => $labels,
             'show_ui' => true,
+            'show_in_menu' => false,
             'show_admin_column' => true,
             'query_var' => true,
             'rewrite' => ['slug' => 'lesson-type'],
             'show_in_rest' => true,
         ];
 
-        register_taxonomy('sikshya_lesson_type', ['sikshya_lesson'], $args);
+        register_taxonomy(Taxonomies::LESSON_TYPE, [PostTypes::LESSON], $args);
     }
 
     /**
@@ -185,13 +193,14 @@ class TaxonomyService
             'hierarchical' => true,
             'labels' => $labels,
             'show_ui' => true,
+            'show_in_menu' => false,
             'show_admin_column' => true,
             'query_var' => true,
             'rewrite' => ['slug' => 'question-type'],
             'show_in_rest' => true,
         ];
 
-        register_taxonomy('sikshya_question_type', ['sikshya_quiz'], $args);
+        register_taxonomy(Taxonomies::QUESTION_TYPE, [PostTypes::QUIZ], $args);
     }
 
     /**
@@ -210,7 +219,7 @@ class TaxonomyService
         ];
 
         $args = wp_parse_args($args, $default_args);
-        
+
         return get_terms([
             'taxonomy' => $taxonomy,
             'hide_empty' => $args['hide_empty'],
@@ -269,4 +278,4 @@ class TaxonomyService
     {
         return wp_delete_term($termId, $taxonomy);
     }
-} 
+}

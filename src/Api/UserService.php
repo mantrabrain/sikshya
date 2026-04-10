@@ -95,4 +95,4 @@ class UserService
             'meta' => get_user_meta($user->ID),
         ];
     }
-} 
+}

@@ -17,10 +17,14 @@ class CategoriesAjax
 {
     /**
      * Initialize AJAX handlers
+     *
+     * @param bool $register_hooks When false, REST-only mode (no wp_ajax_*).
      */
-    public function __construct()
+    public function __construct(bool $register_hooks = true)
     {
-        $this->initHooks();
+        if ($register_hooks && (!defined('SIKSHYA_LEGACY_AJAX') || SIKSHYA_LEGACY_AJAX)) {
+            $this->initHooks();
+        }
     }
 
     /**
@@ -74,22 +78,22 @@ class CategoriesAjax
             if ($term_id > 0) {
                 // Update existing category
                 $result = wp_update_term($term_id, Taxonomies::COURSE_CATEGORY, $term_data);
-                
+
                 if (is_wp_error($result)) {
                     wp_send_json_error(['message' => $result->get_error_message()]);
                     return;
                 }
-                
+
                 $term_id = $result['term_id'];
             } else {
                 // Create new category
                 $result = wp_insert_term($name, Taxonomies::COURSE_CATEGORY, $term_data);
-                
+
                 if (is_wp_error($result)) {
                     wp_send_json_error(['message' => $result->get_error_message()]);
                     return;
                 }
-                
+
                 $term_id = $result['term_id'];
             }
 
@@ -102,7 +106,7 @@ class CategoriesAjax
 
             // Get updated category data
             $category = get_term($term_id, Taxonomies::COURSE_CATEGORY);
-            
+
             if (is_wp_error($category)) {
                 wp_send_json_error(['message' => 'Failed to retrieve category data']);
                 return;
@@ -119,7 +123,6 @@ class CategoriesAjax
                     'image_id' => get_term_meta($category->term_id, 'category_image', true)
                 ]
             ]);
-
         } catch (Exception $e) {
             wp_send_json_error(['message' => 'An error occurred: ' . $e->getMessage()]);
         }
@@ -165,10 +168,8 @@ class CategoriesAjax
             wp_send_json_success([
                 'message' => "Category '{$category_name}' deleted successfully"
             ]);
-
         } catch (Exception $e) {
             wp_send_json_error(['message' => 'An error occurred: ' . $e->getMessage()]);
         }
     }
 }
-

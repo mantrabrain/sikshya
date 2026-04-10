@@ -6,9 +6,9 @@ use WP_Post;
 
 /**
  * Lesson Model
- * 
+ *
  * Handles all lesson-related data operations
- * 
+ *
  * @package Sikshya\Models
  */
 class Lesson
@@ -23,7 +23,7 @@ class Lesson
 
     /**
      * Get all lessons
-     * 
+     *
      * @param array $args Query arguments
      * @return array Array of lessons
      */
@@ -38,22 +38,22 @@ class Lesson
         ];
 
         $args = wp_parse_args($args, $defaults);
-        
+
         $query = new \WP_Query($args);
-        
+
         return $query->posts;
     }
 
     /**
      * Get lesson by ID
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return WP_Post|null Lesson post or null
      */
     public function getById(int $lesson_id): ?WP_Post
     {
         $lesson = get_post($lesson_id);
-        
+
         if (!$lesson || $lesson->post_type !== 'sikshya_lesson') {
             return null;
         }
@@ -63,7 +63,7 @@ class Lesson
 
     /**
      * Create a new lesson
-     * 
+     *
      * @param array $data Lesson data
      * @return int|WP_Error Lesson ID or error
      */
@@ -79,26 +79,26 @@ class Lesson
         ];
 
         $data = wp_parse_args($data, $defaults);
-        
+
         // Set post type
         $data['post_type'] = 'sikshya_lesson';
-        
+
         // Create the lesson
         $lesson_id = wp_insert_post($data);
-        
+
         if (is_wp_error($lesson_id)) {
             return $lesson_id;
         }
 
         // Set default meta values
         $this->setDefaultMeta($lesson_id);
-        
+
         return $lesson_id;
     }
 
     /**
      * Update lesson
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param array $data Lesson data
      * @return int|WP_Error Lesson ID or error
@@ -107,13 +107,13 @@ class Lesson
     {
         $data['ID'] = $lesson_id;
         $data['post_type'] = 'sikshya_lesson';
-        
+
         return wp_update_post($data);
     }
 
     /**
      * Delete lesson
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return bool|WP_Error Success or error
      */
@@ -124,7 +124,7 @@ class Lesson
 
     /**
      * Get lesson meta
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param string $key Meta key
      * @param bool $single Whether to return a single value
@@ -137,7 +137,7 @@ class Lesson
 
     /**
      * Set lesson meta
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param string $key Meta key
      * @param mixed $value Meta value
@@ -150,7 +150,7 @@ class Lesson
 
     /**
      * Get lesson course
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return int Course ID
      */
@@ -162,7 +162,7 @@ class Lesson
 
     /**
      * Set lesson course
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param int $course_id Course ID
      * @return int|bool Meta ID or false
@@ -174,7 +174,7 @@ class Lesson
 
     /**
      * Get lesson type
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return string Lesson type
      */
@@ -186,7 +186,7 @@ class Lesson
 
     /**
      * Set lesson type
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param string $type Lesson type
      * @return int|bool Meta ID or false
@@ -198,7 +198,7 @@ class Lesson
 
     /**
      * Get lesson duration
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return int Lesson duration in minutes
      */
@@ -210,7 +210,7 @@ class Lesson
 
     /**
      * Set lesson duration
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param int $duration Lesson duration in minutes
      * @return int|bool Meta ID or false
@@ -222,7 +222,7 @@ class Lesson
 
     /**
      * Get lesson order
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return int Lesson order
      */
@@ -234,7 +234,7 @@ class Lesson
 
     /**
      * Set lesson order
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param int $order Lesson order
      * @return int|bool Meta ID or false
@@ -246,7 +246,7 @@ class Lesson
 
     /**
      * Get lesson prerequisites
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return array Prerequisite lesson IDs
      */
@@ -258,7 +258,7 @@ class Lesson
 
     /**
      * Set lesson prerequisites
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param array $prerequisites Prerequisite lesson IDs
      * @return int|bool Meta ID or false
@@ -270,7 +270,7 @@ class Lesson
 
     /**
      * Get lesson attachments
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @return array Lesson attachments
      */
@@ -282,7 +282,7 @@ class Lesson
 
     /**
      * Set lesson attachments
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param array $attachments Lesson attachments
      * @return int|bool Meta ID or false
@@ -294,7 +294,7 @@ class Lesson
 
     /**
      * Get lessons by course
-     * 
+     *
      * @param int $course_id Course ID
      * @return array Lessons
      */
@@ -322,7 +322,7 @@ class Lesson
 
     /**
      * Check if lesson is completed by user
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param int $user_id User ID
      * @return bool True if completed
@@ -335,7 +335,7 @@ class Lesson
 
     /**
      * Mark lesson as completed
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param int $user_id User ID
      * @return bool Success
@@ -343,7 +343,7 @@ class Lesson
     public function markCompleted(int $lesson_id, int $user_id): bool
     {
         $completed = get_user_meta($user_id, '_sikshya_completed_lessons', true);
-        
+
         if (!is_array($completed)) {
             $completed = [];
         }
@@ -358,7 +358,7 @@ class Lesson
 
     /**
      * Mark lesson as incomplete
-     * 
+     *
      * @param int $lesson_id Lesson ID
      * @param int $user_id User ID
      * @return bool Success
@@ -366,7 +366,7 @@ class Lesson
     public function markIncomplete(int $lesson_id, int $user_id): bool
     {
         $completed = get_user_meta($user_id, '_sikshya_completed_lessons', true);
-        
+
         if (is_array($completed)) {
             $completed = array_diff($completed, [$lesson_id]);
             return update_user_meta($user_id, '_sikshya_completed_lessons', $completed);
@@ -377,7 +377,7 @@ class Lesson
 
     /**
      * Set default meta values for new lesson
-     * 
+     *
      * @param int $lesson_id Lesson ID
      */
     private function setDefaultMeta(int $lesson_id): void
@@ -395,4 +395,4 @@ class Lesson
             $this->setMeta($lesson_id, $key, $value);
         }
     }
-} 
+}

@@ -12,9 +12,12 @@ class CourseService
     private EnrollmentRepository $enrollmentRepository;
     private ProgressRepository $progressRepository;
 
-    public function __construct()
+    /**
+     * @param CourseRepository|null $courseRepository Shared instance from the plugin container when available.
+     */
+    public function __construct(?CourseRepository $courseRepository = null)
     {
-        $this->courseRepository = new CourseRepository();
+        $this->courseRepository = $courseRepository ?? new CourseRepository();
         $this->enrollmentRepository = new EnrollmentRepository();
         $this->progressRepository = new ProgressRepository();
     }
@@ -247,4 +250,4 @@ class CourseService
     {
         return $this->courseRepository->setMeta($course_id, '_sikshya_featured', $featured ? '1' : '0');
     }
-} 
+}

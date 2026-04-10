@@ -1,8 +1,5 @@
-/* Import Sikshya Design System */
+/* Design tokens + shared utilities (dashboard layout loads separately via sikshya-dashboard handle) */
 @import url('./design-system.css');
-
-/* Import Dashboard Styles */
-@import url('./dashboard.css');
 
 /* Sikshya LMS Admin Styles - Using Design System */
 

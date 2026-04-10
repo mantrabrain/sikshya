@@ -6,9 +6,9 @@ use WP_Post;
 
 /**
  * Quiz Model
- * 
+ *
  * Handles all quiz-related data operations
- * 
+ *
  * @package Sikshya\Models
  */
 class Quiz
@@ -23,7 +23,7 @@ class Quiz
 
     /**
      * Get all quizzes
-     * 
+     *
      * @param array $args Query arguments
      * @return array Array of quizzes
      */
@@ -38,22 +38,22 @@ class Quiz
         ];
 
         $args = wp_parse_args($args, $defaults);
-        
+
         $query = new \WP_Query($args);
-        
+
         return $query->posts;
     }
 
     /**
      * Get quiz by ID
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return WP_Post|null Quiz post or null
      */
     public function getById(int $quiz_id): ?WP_Post
     {
         $quiz = get_post($quiz_id);
-        
+
         if (!$quiz || $quiz->post_type !== 'sikshya_quiz') {
             return null;
         }
@@ -63,7 +63,7 @@ class Quiz
 
     /**
      * Create a new quiz
-     * 
+     *
      * @param array $data Quiz data
      * @return int|WP_Error Quiz ID or error
      */
@@ -79,26 +79,26 @@ class Quiz
         ];
 
         $data = wp_parse_args($data, $defaults);
-        
+
         // Set post type
         $data['post_type'] = 'sikshya_quiz';
-        
+
         // Create the quiz
         $quiz_id = wp_insert_post($data);
-        
+
         if (is_wp_error($quiz_id)) {
             return $quiz_id;
         }
 
         // Set default meta values
         $this->setDefaultMeta($quiz_id);
-        
+
         return $quiz_id;
     }
 
     /**
      * Update quiz
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param array $data Quiz data
      * @return int|WP_Error Quiz ID or error
@@ -107,13 +107,13 @@ class Quiz
     {
         $data['ID'] = $quiz_id;
         $data['post_type'] = 'sikshya_quiz';
-        
+
         return wp_update_post($data);
     }
 
     /**
      * Delete quiz
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return bool|WP_Error Success or error
      */
@@ -124,7 +124,7 @@ class Quiz
 
     /**
      * Get quiz meta
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param string $key Meta key
      * @param bool $single Whether to return a single value
@@ -137,7 +137,7 @@ class Quiz
 
     /**
      * Set quiz meta
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param string $key Meta key
      * @param mixed $value Meta value
@@ -150,7 +150,7 @@ class Quiz
 
     /**
      * Get quiz course
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return int Course ID
      */
@@ -162,7 +162,7 @@ class Quiz
 
     /**
      * Set quiz course
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $course_id Course ID
      * @return int|bool Meta ID or false
@@ -174,7 +174,7 @@ class Quiz
 
     /**
      * Get quiz duration
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return int Quiz duration in minutes
      */
@@ -186,7 +186,7 @@ class Quiz
 
     /**
      * Set quiz duration
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $duration Quiz duration in minutes
      * @return int|bool Meta ID or false
@@ -198,7 +198,7 @@ class Quiz
 
     /**
      * Get quiz attempts limit
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return int Attempts limit
      */
@@ -210,7 +210,7 @@ class Quiz
 
     /**
      * Set quiz attempts limit
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $attempts Attempts limit
      * @return int|bool Meta ID or false
@@ -222,7 +222,7 @@ class Quiz
 
     /**
      * Get quiz passing score
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return int Passing score percentage
      */
@@ -234,7 +234,7 @@ class Quiz
 
     /**
      * Set quiz passing score
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $score Passing score percentage
      * @return int|bool Meta ID or false
@@ -246,29 +246,29 @@ class Quiz
 
     /**
      * Get quiz questions
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return array Quiz questions
      */
     public function getQuestions(int $quiz_id): array
     {
         $questions = $this->getMeta($quiz_id, '_sikshya_quiz_questions', true);
-        
+
         if (!is_array($questions)) {
             return [];
         }
-        
+
         // Process questions to handle different types
         foreach ($questions as &$question) {
             $question = $this->processQuestionData($question);
         }
-        
+
         return $questions;
     }
 
     /**
      * Process question data based on type
-     * 
+     *
      * @param array $question
      * @return array
      */
@@ -276,28 +276,28 @@ class Quiz
     {
         $questionTypeService = new \Sikshya\Services\QuestionTypeService();
         $question_type = $question['question_type'] ?? 'multiple_choice';
-        
+
         // Decode options if they exist
         if (!empty($question['options'])) {
             $question['options'] = json_decode($question['options'], true) ?: [];
         } else {
             $question['options'] = [];
         }
-        
+
         // Decode correct answer if it exists
         if (!empty($question['correct_answer'])) {
             $question['correct_answer'] = json_decode($question['correct_answer'], true) ?: $question['correct_answer'];
         }
-        
+
         // Add question type metadata
         $question['type_info'] = $questionTypeService->getQuestionType($question_type);
-        
+
         return $question;
     }
 
     /**
      * Set quiz questions
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param array $questions Quiz questions
      * @return int|bool Meta ID or false
@@ -309,7 +309,7 @@ class Quiz
 
     /**
      * Get quiz settings
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @return array Quiz settings
      */
@@ -321,7 +321,7 @@ class Quiz
 
     /**
      * Set quiz settings
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param array $settings Quiz settings
      * @return int|bool Meta ID or false
@@ -333,7 +333,7 @@ class Quiz
 
     /**
      * Get quizzes by course
-     * 
+     *
      * @param int $course_id Course ID
      * @return array Quizzes
      */
@@ -360,7 +360,7 @@ class Quiz
 
     /**
      * Get user quiz attempts
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $user_id User ID
      * @return array Quiz attempts
@@ -373,7 +373,7 @@ class Quiz
 
     /**
      * Save user quiz attempt
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $user_id User ID
      * @param array $attempt_data Attempt data
@@ -382,20 +382,20 @@ class Quiz
     public function saveUserAttempt(int $quiz_id, int $user_id, array $attempt_data): bool
     {
         $attempts = $this->getUserAttempts($quiz_id, $user_id);
-        
+
         $attempt_data['id'] = count($attempts) + 1;
         $attempt_data['timestamp'] = current_time('mysql');
         $attempt_data['score'] = $this->calculateScore($quiz_id, $attempt_data['answers']);
         $attempt_data['passed'] = $attempt_data['score'] >= $this->getPassingScore($quiz_id);
-        
+
         $attempts[] = $attempt_data;
-        
+
         return update_user_meta($user_id, '_sikshya_quiz_attempts_' . $quiz_id, $attempts);
     }
 
     /**
      * Calculate quiz score
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param array $answers User answers
      * @return int Score percentage
@@ -435,7 +435,7 @@ class Quiz
 
     /**
      * Check if user answer is correct based on question type
-     * 
+     *
      * @param string $question_type
      * @param mixed $user_answer
      * @param mixed $correct_answer
@@ -473,7 +473,7 @@ class Quiz
 
     /**
      * Check if user can take quiz
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $user_id User ID
      * @return bool True if can take quiz
@@ -482,13 +482,13 @@ class Quiz
     {
         $attempts = $this->getUserAttempts($quiz_id, $user_id);
         $attempts_limit = $this->getAttemptsLimit($quiz_id);
-        
+
         return count($attempts) < $attempts_limit;
     }
 
     /**
      * Get user's best quiz score
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $user_id User ID
      * @return int Best score percentage
@@ -496,7 +496,7 @@ class Quiz
     public function getUserBestScore(int $quiz_id, int $user_id): int
     {
         $attempts = $this->getUserAttempts($quiz_id, $user_id);
-        
+
         if (empty($attempts)) {
             return 0;
         }
@@ -507,7 +507,7 @@ class Quiz
 
     /**
      * Check if user passed quiz
-     * 
+     *
      * @param int $quiz_id Quiz ID
      * @param int $user_id User ID
      * @return bool True if passed
@@ -516,13 +516,13 @@ class Quiz
     {
         $best_score = $this->getUserBestScore($quiz_id, $user_id);
         $passing_score = $this->getPassingScore($quiz_id);
-        
+
         return $best_score >= $passing_score;
     }
 
     /**
      * Set default meta values for new quiz
-     * 
+     *
      * @param int $quiz_id Quiz ID
      */
     private function setDefaultMeta(int $quiz_id): void
@@ -544,4 +544,4 @@ class Quiz
             $this->setMeta($quiz_id, $key, $value);
         }
     }
-} 
+}

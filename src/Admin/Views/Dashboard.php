@@ -83,7 +83,7 @@ class Dashboard extends BaseView
     public function renderDashboard(): string
     {
         $this->enqueueAssets();
-        
+
         return $this->renderToString('dashboard', [
             'config' => $this->config,
             'widgets' => $this->widgets,
@@ -120,4 +120,4 @@ class Dashboard extends BaseView
         wp_enqueue_style('sikshya-dashboard');
         wp_enqueue_script('sikshya-dashboard');
     }
-} 
+}

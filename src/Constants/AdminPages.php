@@ -21,7 +21,7 @@ class AdminPages
     const TOOLS = 'sikshya-tools';
     const HELP = 'sikshya-help';
     const SETTINGS = 'sikshya-settings';
-    
+
     // Sub pages
     const ADD_COURSE = 'sikshya-add-course';
     const COURSE_CATEGORIES = 'sikshya-course-categories';

@@ -88,4 +88,4 @@ class ProgressController
     {
         return $this->plugin->getService('progress')->getLessonProgress($lesson_id, $user_id);
     }
-} 
+}

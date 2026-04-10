@@ -39,6 +39,8 @@ class PostTypeService
         add_action('init', [$this, 'registerQuizPostType']);
         add_action('init', [$this, 'registerAssignmentPostType']);
         add_action('init', [$this, 'registerCertificatePostType']);
+        add_action('init', [$this, 'registerQuestionPostType']);
+        add_action('init', [$this, 'registerChapterPostType']);
     }
 
     /**
@@ -46,6 +48,8 @@ class PostTypeService
      */
     public function registerCoursePostType(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Courses', 'sikshya'),
             'singular_name' => __('Course', 'sikshya'),
@@ -65,14 +69,13 @@ class PostTypeService
             'public' => true,
             'publicly_queryable' => true,
             'show_ui' => true,
-            'show_in_menu' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
             'query_var' => true,
-            'rewrite' => ['slug' => 'course'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_base_course'], 'with_front' => false ],
             'capability_type' => 'post',
             'has_archive' => true,
             'hierarchical' => false,
-            'menu_position' => 5,
-            'menu_icon' => 'dashicons-welcome-learn-more',
             'supports' => ['title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
@@ -85,6 +88,8 @@ class PostTypeService
      */
     public function registerLessonPostType(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Lessons', 'sikshya'),
             'singular_name' => __('Lesson', 'sikshya'),
@@ -104,14 +109,13 @@ class PostTypeService
             'public' => true,
             'publicly_queryable' => true,
             'show_ui' => true,
-            'show_in_menu' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
             'query_var' => true,
-            'rewrite' => ['slug' => 'lesson'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_base_lesson'], 'with_front' => false ],
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'menu_position' => 6,
-            'menu_icon' => 'dashicons-book',
             'supports' => ['title', 'editor', 'thumbnail', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
@@ -124,6 +128,8 @@ class PostTypeService
      */
     public function registerQuizPostType(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Quizzes', 'sikshya'),
             'singular_name' => __('Quiz', 'sikshya'),
@@ -143,14 +149,13 @@ class PostTypeService
             'public' => true,
             'publicly_queryable' => true,
             'show_ui' => true,
-            'show_in_menu' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
             'query_var' => true,
-            'rewrite' => ['slug' => 'quiz'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_base_quiz'], 'with_front' => false ],
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'menu_position' => 7,
-            'menu_icon' => 'dashicons-clipboard',
             'supports' => ['title', 'editor', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
@@ -163,6 +168,8 @@ class PostTypeService
      */
     public function registerAssignmentPostType(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Assignments', 'sikshya'),
             'singular_name' => __('Assignment', 'sikshya'),
@@ -182,14 +189,13 @@ class PostTypeService
             'public' => true,
             'publicly_queryable' => true,
             'show_ui' => true,
-            'show_in_menu' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
             'query_var' => true,
-            'rewrite' => ['slug' => 'assignment'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_base_assignment'], 'with_front' => false ],
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'menu_position' => 8,
-            'menu_icon' => 'dashicons-portfolio',
             'supports' => ['title', 'editor', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
@@ -202,6 +208,8 @@ class PostTypeService
      */
     public function registerCertificatePostType(): void
     {
+        $rewrite = PermalinkService::get();
+
         $labels = [
             'name' => __('Certificates', 'sikshya'),
             'singular_name' => __('Certificate', 'sikshya'),
@@ -221,18 +229,91 @@ class PostTypeService
             'public' => true,
             'publicly_queryable' => true,
             'show_ui' => true,
-            'show_in_menu' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
             'query_var' => true,
-            'rewrite' => ['slug' => 'certificate'],
+            'rewrite' => [ 'slug' => $rewrite['rewrite_base_certificate'], 'with_front' => false ],
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'menu_position' => 9,
-            'menu_icon' => 'dashicons-awards',
             'supports' => ['title', 'editor', 'thumbnail', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
 
-        register_post_type('sikshya_certificate', $args);
+        register_post_type(PostTypes::CERTIFICATE, $args);
     }
-} 
+
+    /**
+     * Quiz questions (optional CPT; also used from quiz meta in builder).
+     */
+    public function registerQuestionPostType(): void
+    {
+        $labels = [
+            'name' => __('Questions', 'sikshya'),
+            'singular_name' => __('Question', 'sikshya'),
+            'menu_name' => __('Questions', 'sikshya'),
+            'add_new' => __('Add New Question', 'sikshya'),
+            'add_new_item' => __('Add New Question', 'sikshya'),
+            'edit_item' => __('Edit Question', 'sikshya'),
+            'new_item' => __('New Question', 'sikshya'),
+            'view_item' => __('View Question', 'sikshya'),
+            'search_items' => __('Search Questions', 'sikshya'),
+            'not_found' => __('No questions found', 'sikshya'),
+            'not_found_in_trash' => __('No questions found in trash', 'sikshya'),
+        ];
+
+        $args = [
+            'labels' => $labels,
+            'public' => false,
+            'publicly_queryable' => false,
+            'show_ui' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
+            'hierarchical' => false,
+            'supports' => ['title', 'editor', 'custom-fields'],
+            'has_archive' => false,
+            'rewrite' => false,
+            'capability_type' => 'post',
+            'show_in_rest' => true,
+        ];
+
+        register_post_type(PostTypes::QUESTION, $args);
+    }
+
+    /**
+     * Course chapters (curriculum organization).
+     */
+    public function registerChapterPostType(): void
+    {
+        $labels = [
+            'name' => __('Chapters', 'sikshya'),
+            'singular_name' => __('Chapter', 'sikshya'),
+            'menu_name' => __('Chapters', 'sikshya'),
+            'add_new' => __('Add New Chapter', 'sikshya'),
+            'add_new_item' => __('Add New Chapter', 'sikshya'),
+            'edit_item' => __('Edit Chapter', 'sikshya'),
+            'new_item' => __('New Chapter', 'sikshya'),
+            'view_item' => __('View Chapter', 'sikshya'),
+            'search_items' => __('Search Chapters', 'sikshya'),
+            'not_found' => __('No chapters found', 'sikshya'),
+            'not_found_in_trash' => __('No chapters found in trash', 'sikshya'),
+        ];
+
+        $args = [
+            'labels' => $labels,
+            'public' => false,
+            'publicly_queryable' => false,
+            'show_ui' => true,
+            'show_in_menu' => false,
+            'show_in_admin_bar' => false,
+            'hierarchical' => true,
+            'supports' => ['title', 'editor', 'custom-fields'],
+            'has_archive' => false,
+            'rewrite' => false,
+            'capability_type' => 'post',
+            'show_in_rest' => true,
+        ];
+
+        register_post_type(PostTypes::CHAPTER, $args);
+    }
+}

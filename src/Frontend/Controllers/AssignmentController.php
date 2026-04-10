@@ -95,4 +95,4 @@ class AssignmentController
         $feedback = $this->plugin->getService('assignment')->getAssignmentFeedback($assignment_id, $user_id);
         wp_send_json_success($feedback);
     }
-} 
+}

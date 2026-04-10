@@ -112,4 +112,4 @@ class CourseService
             'permalink' => get_permalink($post->ID),
         ];
     }
-} 
+}

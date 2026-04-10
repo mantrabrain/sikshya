@@ -4,9 +4,9 @@ namespace Sikshya\Core;
 
 /**
  * View Class
- * 
+ *
  * Handles template rendering and view management
- * 
+ *
  * @package Sikshya\Core
  */
 class View
@@ -26,7 +26,7 @@ class View
 
     /**
      * Render a template
-     * 
+     *
      * @param string $template Template path relative to templates directory
      * @param array $data Data to pass to template
      * @return void
@@ -34,7 +34,7 @@ class View
     public function render(string $template, array $data = []): void
     {
         $template_path = $this->plugin->getTemplatePath($template . '.php');
-        
+
         if (!file_exists($template_path)) {
             error_log("Template not found: {$template_path}");
             return;
@@ -51,7 +51,7 @@ class View
 
     /**
      * Render a template and return the output
-     * 
+     *
      * @param string $template Template path relative to templates directory
      * @param array $data Data to pass to template
      * @return string Rendered template
@@ -65,7 +65,7 @@ class View
 
     /**
      * Get template path
-     * 
+     *
      * @param string $template Template path relative to templates directory
      * @return string Full template path
      */
@@ -76,7 +76,7 @@ class View
 
     /**
      * Check if template exists
-     * 
+     *
      * @param string $template Template path relative to templates directory
      * @return bool True if template exists
      */
@@ -88,14 +88,14 @@ class View
 
     /**
      * Get all available templates
-     * 
+     *
      * @param string $directory Directory to search in
      * @return array Array of template files
      */
     public function getTemplates(string $directory = ''): array
     {
         $templates_dir = $this->plugin->getTemplatePath($directory);
-        
+
         if (!is_dir($templates_dir)) {
             return [];
         }
@@ -115,4 +115,4 @@ class View
 
         return $templates;
     }
-} 
+}

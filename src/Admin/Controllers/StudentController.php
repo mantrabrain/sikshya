@@ -2,8 +2,8 @@
 
 namespace Sikshya\Admin\Controllers;
 
+use Sikshya\Admin\ReactAdminView;
 use Sikshya\Core\Plugin;
-use Sikshya\Admin\Views\DataTable;
 use Sikshya\Admin\ListTable\StudentsListTable;
 
 /**
@@ -46,59 +46,7 @@ class StudentController
      */
     public function renderStudentsPage(): void
     {
-        // Create and prepare the list table
-        $list_table = new StudentsListTable($this->plugin);
-        $list_table->prepare_items();
-        
-        // Render the page with proper Sikshya design
-        ?>
-        <div class="sikshya-dashboard">
-            <!-- Header -->
-            <div class="sikshya-header">
-                <div class="sikshya-header-title">
-                    <h1>
-                        <i class="fas fa-users"></i>
-                        <?php _e('Students', 'sikshya'); ?>
-                    </h1>
-                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
-                </div>
-                <div class="sikshya-header-actions">
-                    <a href="<?php echo admin_url('admin.php?page=sikshya-add-course'); ?>" class="sikshya-btn sikshya-btn-primary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <?php _e('Add New Student', 'sikshya'); ?>
-                    </a>
-                </div>
-            </div>
-
-            <div class="sikshya-main-content">
-                <div class="sikshya-content-card">
-                    <div class="sikshya-content-card-header">
-                        <div class="sikshya-content-card-header-left">
-                            <h3 class="sikshya-content-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                </svg>
-                                <?php _e('Manage Students', 'sikshya'); ?>
-                            </h3>
-                            <p class="sikshya-content-card-subtitle"><?php _e('View and manage your enrolled students', 'sikshya'); ?></p>
-                        </div>
-                        <div class="sikshya-content-card-header-right">
-                            <?php $this->display_status_filter_tabs(); ?>
-                        </div>
-                    </div>
-                    <div class="sikshya-content-card-body">
-                        <form method="post">
-                            <?php
-                            $list_table->display();
-                            ?>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php
+        ReactAdminView::render('students', []);
     }
 
     /**
@@ -109,7 +57,7 @@ class StudentController
         check_ajax_referer('sikshya_nonce', 'nonce');
 
         $args = [
-            'role' => 'student',
+            'role' => 'sikshya_student',
             'number' => 20,
             'paged' => $_POST['page'] ?? 1,
         ];
@@ -119,7 +67,7 @@ class StudentController
 
         wp_send_json_success([
             'data' => $users,
-            'total' => $total['avail_roles']['student'] ?? 0,
+            'total' => $total['avail_roles']['sikshya_student'] ?? 0,
         ]);
     }
 
@@ -136,7 +84,7 @@ class StudentController
             'user_email' => sanitize_email($_POST['email'] ?? ''),
             'first_name' => sanitize_text_field($_POST['first_name'] ?? ''),
             'last_name' => sanitize_text_field($_POST['last_name'] ?? ''),
-            'role' => 'student',
+            'role' => 'sikshya_student',
         ];
 
         if (!empty($_POST['password'])) {
@@ -193,18 +141,18 @@ class StudentController
 
     /**
      * Display status filter tabs
-     * 
+     *
      * @return void
      */
     private function display_status_filter_tabs(): void
     {
         $current_status = $_GET['post_status'] ?? 'all';
         $base_url = remove_query_arg(['post_status', 'paged']);
-        
+
         $status_counts = $this->get_status_counts();
-        
+
         echo '<ul class="subsubsub">';
-        
+
         // All tab
         $all_count = array_sum($status_counts);
         $all_class = ($current_status === 'all') ? 'current' : '';
@@ -213,7 +161,7 @@ class StudentController
         echo '<a href="' . esc_url($all_url) . '" class="' . esc_attr($all_class) . '"' . ($all_class ? ' aria-current="page"' : '') . '>';
         echo esc_html__('All', 'sikshya') . ' <span class="count">(' . esc_html($all_count) . ')</span>';
         echo '</a> |</li>';
-        
+
         // Active tab
         if (isset($status_counts['active'])) {
             $active_class = ($current_status === 'active') ? 'current' : '';
@@ -223,7 +171,7 @@ class StudentController
             echo esc_html__('Active', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['active']) . ')</span>';
             echo '</a> |</li>';
         }
-        
+
         // Inactive tab
         if (isset($status_counts['inactive'])) {
             $inactive_class = ($current_status === 'inactive') ? 'current' : '';
@@ -233,7 +181,7 @@ class StudentController
             echo esc_html__('Inactive', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['inactive']) . ')</span>';
             echo '</a> |</li>';
         }
-        
+
         // Pending tab
         if (isset($status_counts['pending'])) {
             $pending_class = ($current_status === 'pending') ? 'current' : '';
@@ -243,7 +191,7 @@ class StudentController
             echo esc_html__('Pending', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['pending']) . ')</span>';
             echo '</a> |</li>';
         }
-        
+
         echo '</ul>';
     }
 
@@ -261,18 +209,18 @@ class StudentController
             'inactive' => 3,
             'pending' => 1,
         ];
-        
+
         // TODO: Implement actual status counting
         /*
         global $wpdb;
-        
+
         $counts = [
             'all' => 0,
             'active' => 0,
             'inactive' => 0,
             'pending' => 0,
         ];
-        
+
         $results = $wpdb->get_results("
             SELECT um_status.meta_value as status, COUNT(*) as count
             FROM {$wpdb->users} u
@@ -280,14 +228,14 @@ class StudentController
             WHERE u.ID IN (SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = '{$wpdb->prefix}capabilities' AND meta_value LIKE '%student%')
             GROUP BY um_status.meta_value
         ");
-        
+
         foreach ($results as $result) {
             $status = $result->status ?: 'active';
             $counts[$status] = $result->count;
             $counts['all'] += $result->count;
         }
-        
+
         return $counts;
         */
     }
-} 
+}

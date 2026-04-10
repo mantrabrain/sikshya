@@ -1,15 +1,16 @@
 <?php
+
 /**
  * Course AJAX Handler
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
 
 namespace Sikshya\Ajax;
 
-use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Services\CourseBuilderService;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -19,23 +20,33 @@ if (!defined('ABSPATH')) {
 class CourseAjax extends AjaxAbstract
 {
     /**
+     * Capability gate for course/course-builder AJAX.
+     */
+    private function assertCanManageCourses(): bool
+    {
+        return current_user_can('manage_sikshya') || current_user_can('edit_sikshya_courses');
+    }
+
+    /**
      * Initialize hooks
-     * 
+     *
      * @return void
      */
     protected function initHooks(): void
     {
-        
-        
+
+
         // Course builder AJAX handlers
         add_action('wp_ajax_sikshya_save_course_builder', [$this, 'handleSaveCourseBuilder']);
+        // Legacy / template hidden field name (course-builder.php, course-builder-dynamic.php).
+        add_action('wp_ajax_sikshya_save_course', [$this, 'handleSaveCourseBuilder']);
 
         add_action('wp_ajax_sikshya_save_chapter_order', [$this, 'handleSaveChapterOrder']);
         add_action('wp_ajax_sikshya_save_lesson_order', [$this, 'handleSaveLessonOrder']);
         add_action('wp_ajax_sikshya_save_content_type', [$this, 'handleSaveContentType']);
         add_action('wp_ajax_sikshya_load_content_type_form', [$this, 'handleLoadContentTypeForm']);
         add_action('wp_ajax_sikshya_validate_course_field', [$this, 'handleValidateCourseField']);
-        
+
         // Course management AJAX handlers
         add_action('wp_ajax_sikshya_course_list', [$this, 'handleCourseList']);
         add_action('wp_ajax_sikshya_course_save', [$this, 'handleCourseSave']);
@@ -43,7 +54,7 @@ class CourseAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_course_builder_save', [$this, 'handleCourseBuilderSave']);
         add_action('wp_ajax_sikshya_course_builder_publish', [$this, 'handleCourseBuilderPublish']);
         add_action('wp_ajax_sikshya_course_builder_preview', [$this, 'handleCourseBuilderPreview']);
-        
+
         // Template loading AJAX handlers
         add_action('wp_ajax_sikshya_load_chapter_template', [$this, 'handleLoadChapterTemplate']);
         add_action('wp_ajax_sikshya_load_content_template', [$this, 'handleLoadContentTemplate']);
@@ -56,10 +67,8 @@ class CourseAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_load_chapter_data', [$this, 'handleLoadChapterData']);
         add_action('wp_ajax_sikshya_update_chapter', [$this, 'handleUpdateChapter']);
         add_action('wp_ajax_sikshya_bulk_delete_items', [$this, 'handleBulkDeleteItems']);
-        
-
     }
-    
+
 
 
     /**
@@ -72,7 +81,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -81,67 +90,34 @@ class CourseAjax extends AjaxAbstract
             // Get all form data directly from $_POST (excluding action, nonce, and course_status)
             $data = [];
             foreach ($_POST as $key => $value) {
-                if (!in_array($key, ['action', 'nonce', 'course_status'])) {
+                if (!in_array($key, ['action', 'nonce', 'course_status'], true)) {
                     $data[$key] = $value;
                 }
             }
-            
-            $course_id = intval($data['course_id'] ?? 0);
+
             $course_status = sanitize_text_field($this->getPostData('course_status', 'draft'));
-            
-            // Initialize course builder manager
-            try {
-                $course_builder_manager = new CourseBuilderManager($this->plugin);
-            } catch (\Exception $e) {
-                $this->logError('Failed to instantiate CourseBuilderManager', $e);
+
+            $service = $this->plugin->getService('courseBuilder');
+            if (!$service instanceof CourseBuilderService) {
                 $this->sendError('Failed to initialize course builder');
                 return;
             }
-            
-            // Validate data
-            $errors = $course_builder_manager->validateAllTabs($data);
-            if (!empty($errors)) {
-                $this->sendError('Validation failed', $errors);
-                return;
-            }
-            
-            // Create course if it doesn't exist
-            if ($course_id === 0) {
-                $post_data = [
-                    'post_title' => $data['title'] ?? 'New Course',
-                    'post_content' => $data['description'] ?? '',
-                    'post_type' => PostTypes::COURSE,
-                    'post_status' => $course_status,
-                ];
-                
-                $course_id = wp_insert_post($post_data);
-                
-                if (is_wp_error($course_id)) {
-                    $this->sendError('Failed to create course');
-                    return;
+
+            $result = $service->save($data, $course_status);
+
+            if (empty($result['success'])) {
+                if (!empty($result['errors'])) {
+                    $this->sendError($result['message'] ?? 'Validation failed', $result['errors']);
+                } else {
+                    $this->sendError($result['message'] ?? 'Failed to save course');
                 }
-            } else {
-                // Update existing course status
-                wp_update_post([
-                    'ID' => $course_id,
-                    'post_status' => $course_status,
-                ]);
-            }
-            
-            // Save all tab data
-            $save_errors = $course_builder_manager->saveAllTabs($data, $course_id);
-            if (!empty($save_errors)) {
-                $this->sendError('Failed to save some data', $save_errors);
                 return;
             }
-            
-            $message = $course_status === 'published' ? 'Course published successfully!' : 'Course draft saved successfully!';
-            
-            $this->sendSuccess([
-                'course_id' => $course_id,
-                'status' => $course_status
-            ], $message);
-            
+
+            $this->sendSuccess(
+                $result['data'] ?? [],
+                $result['message'] ?? ''
+            );
         } catch (\Exception $e) {
             $this->logError('Save course builder error', $e);
             $this->sendError('Failed to save course: ' . $e->getMessage());
@@ -163,6 +139,11 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
 
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
             $page = intval($this->getPostData('page', 1));
             $per_page = intval($this->getPostData('per_page', 20));
             $search = sanitize_text_field($this->getPostData('search', ''));
@@ -176,14 +157,15 @@ class CourseAjax extends AjaxAbstract
 
             // Apply filters
             if (!empty($filters['status'])) {
-                $args['post_status'] = $filters['status'];
+                $status = sanitize_key($filters['status']);
+                $args['post_status'] = in_array($status, ['publish', 'draft', 'pending', 'private'], true) ? $status : 'any';
             }
 
             $courses = get_posts(array_merge($args, [
                 'post_type' => PostTypes::COURSE,
                 'post_status' => 'any'
             ]));
-            
+
             $total = wp_count_posts(PostTypes::COURSE);
 
             $this->sendSuccess([
@@ -191,7 +173,6 @@ class CourseAjax extends AjaxAbstract
                 'total' => $total->publish + $total->draft + $total->private,
                 'pages' => ceil(($total->publish + $total->draft + $total->private) / $per_page),
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Course list error', $e);
             $this->sendError('Failed to load course list: ' . $e->getMessage());
@@ -206,6 +187,11 @@ class CourseAjax extends AjaxAbstract
         try {
             if (!$this->verifyNonce('sikshya_course_builder')) {
                 $this->sendError('Invalid nonce');
+                return;
+            }
+
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
                 return;
             }
 
@@ -226,7 +212,6 @@ class CourseAjax extends AjaxAbstract
             } else {
                 $this->sendError('Failed to save course');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Course save error', $e);
             $this->sendError('Failed to save course: ' . $e->getMessage());
@@ -244,8 +229,13 @@ class CourseAjax extends AjaxAbstract
                 return;
             }
 
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
             $course_id = intval($this->getPostData('course_id', 0));
-            
+
             if ($course_id === 0) {
                 $this->sendError('Invalid course ID');
                 return;
@@ -258,7 +248,6 @@ class CourseAjax extends AjaxAbstract
             } else {
                 $this->sendError('Failed to delete course');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Course delete error', $e);
             $this->sendError('Failed to delete course: ' . $e->getMessage());
@@ -293,7 +282,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -301,7 +290,7 @@ class CourseAjax extends AjaxAbstract
 
             $data = $this->getPostData('data', []);
             $course_id = intval($data['course_id'] ?? 0);
-            
+
             // Generate preview URL
             if ($course_id > 0) {
                 $preview_url = get_preview_post_link($course_id);
@@ -312,9 +301,8 @@ class CourseAjax extends AjaxAbstract
                     'course_data' => base64_encode(json_encode($data))
                 ], home_url());
             }
-            
+
             $this->sendSuccess(['preview_url' => $preview_url]);
-            
         } catch (\Exception $e) {
             $this->logError('Course preview error', $e);
             $this->sendError('Failed to generate preview: ' . $e->getMessage());
@@ -331,11 +319,15 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
             // Return chapter template HTML
             $template = $this->getChapterTemplate();
             $this->sendSuccess(['template' => $template]);
-            
         } catch (\Exception $e) {
             $this->logError('Load chapter template error', $e);
             $this->sendError('Failed to load chapter template: ' . $e->getMessage());
@@ -352,13 +344,17 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
             $content_type = sanitize_text_field($this->getPostData('content_type', 'lesson'));
-            
+
             // Return content template HTML
             $template = $this->getContentTemplate($content_type);
             $this->sendSuccess(['template' => $template]);
-            
         } catch (\Exception $e) {
             $this->logError('Load content template error', $e);
             $this->sendError('Failed to load content template: ' . $e->getMessage());
@@ -375,10 +371,15 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
             $modal_type = sanitize_text_field($this->getPostData('modal_type', ''));
             $chapter_order = intval($this->getPostData('chapter_order', 1));
-            
+
             // Load specific modal template based on type
             if ($modal_type === 'chapter') {
                 $template = $this->loadChapterModalTemplate($chapter_order);
@@ -389,9 +390,8 @@ class CourseAjax extends AjaxAbstract
             } else {
                 $template = $this->getModalTemplate($modal_type);
             }
-            
+
             $this->sendSuccess(['html' => $template]);
-            
         } catch (\Exception $e) {
             $this->logError('Load modal template error', $e);
             $this->sendError('Failed to load modal template: ' . $e->getMessage());
@@ -406,21 +406,25 @@ class CourseAjax extends AjaxAbstract
         try {
             error_log('Sikshya: handleLoadFormTemplate called');
             error_log('Sikshya: POST data: ' . print_r($_POST, true));
-            
+
             if (!$this->verifyNonce('sikshya_course_builder')) {
                 error_log('Sikshya: Invalid nonce in handleLoadFormTemplate');
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
+            if (!$this->assertCanManageCourses()) {
+                $this->sendError('Insufficient permissions');
+                return;
+            }
+
             $content_type = sanitize_text_field($this->getPostData('content_type', ''));
             error_log('Sikshya: Content type: ' . $content_type);
-            
+
             // Return form template HTML
             $template = $this->getContentTypeForm($content_type);
             error_log('Sikshya: Template length: ' . strlen($template));
             $this->sendSuccess(['html' => $template]);
-            
         } catch (\Exception $e) {
             error_log('Sikshya: Load form template error: ' . $e->getMessage());
             $this->logError('Load form template error', $e);
@@ -438,7 +442,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -448,20 +452,20 @@ class CourseAjax extends AjaxAbstract
             $description = wp_kses_post($this->getPostData('description', ''));
             $duration = sanitize_text_field($this->getPostData('duration', ''));
             $order = intval($this->getPostData('order', 1));
-            
+
             if (empty($title)) {
                 $this->sendError('Chapter title is required');
                 return;
             }
-            
+
             // Get course ID from URL or session
             $course_id = $this->getCourseIdFromContext();
-            
+
             if ($course_id === 0) {
                 $this->sendError('Invalid course ID');
                 return;
             }
-            
+
             // Create chapter post
             error_log('Sikshya: Creating chapter with data: ' . print_r([
                 'title' => $title,
@@ -471,7 +475,7 @@ class CourseAjax extends AjaxAbstract
                 'course_id' => $course_id,
                 'post_type' => PostTypes::CHAPTER
             ], true));
-            
+
             $chapter_id = wp_insert_post([
                 'post_title' => $title,
                 'post_content' => $description,
@@ -479,29 +483,28 @@ class CourseAjax extends AjaxAbstract
                 'post_status' => 'publish',
                 'post_parent' => $course_id,
             ]);
-            
+
             error_log('Sikshya: Chapter creation result: ' . print_r($chapter_id, true));
-            
+
             if (is_wp_error($chapter_id)) {
                 error_log('Sikshya: Chapter creation error: ' . $chapter_id->get_error_message());
                 $this->sendError('Failed to create chapter: ' . $chapter_id->get_error_message());
                 return;
             }
-            
+
             // Save additional meta
             if (!empty($duration)) {
                 update_post_meta($chapter_id, '_sikshya_duration', $duration);
             }
             update_post_meta($chapter_id, '_sikshya_order', $order);
-            
+
             // Generate chapter HTML
             $chapter_html = $this->generateChapterHTML($chapter_id, $title, $description, $duration, $order);
-            
+
             $this->sendSuccess([
                 'chapter_id' => $chapter_id,
                 'html' => $chapter_html
             ], 'Chapter created successfully');
-            
         } catch (\Exception $e) {
             $this->logError('Create chapter error', $e);
             $this->sendError('Failed to create chapter: ' . $e->getMessage());
@@ -518,7 +521,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -528,15 +531,15 @@ class CourseAjax extends AjaxAbstract
             $description = wp_kses_post($this->getPostData('description', ''));
             $duration = sanitize_text_field($this->getPostData('duration', ''));
             $content_type = sanitize_text_field($this->getPostData('type', 'lesson'));
-            
+
             if (empty($title)) {
                 $this->sendError('Content title is required');
                 return;
             }
-            
+
             // Determine post type based on content type
             $post_type = 'sik_' . $content_type;
-            
+
             // Map content types to PostTypes constants
             switch ($content_type) {
                 case 'lesson':
@@ -552,7 +555,7 @@ class CourseAjax extends AjaxAbstract
                     $post_type = PostTypes::LESSON; // Default to lesson
                     break;
             }
-            
+
             // Create content post (no parent - content is independent)
             $content_id = wp_insert_post([
                 'post_title' => $title,
@@ -560,30 +563,29 @@ class CourseAjax extends AjaxAbstract
                 'post_type' => $post_type,
                 'post_status' => 'publish',
             ]);
-            
+
             if (is_wp_error($content_id)) {
                 $this->sendError('Failed to create ' . $content_type);
                 return;
             }
-            
+
             // Save additional meta
             if (!empty($duration)) {
                 update_post_meta($content_id, '_sikshya_duration', $duration);
             }
-            
+
             // Save content type specific meta
             if ($content_type === 'text') {
                 $this->saveTextLessonMeta($content_id);
             }
-            
+
             // Generate content HTML
             $content_html = $this->generateContentHTML($content_id, $title, $description, $duration, $content_type);
-            
+
             $this->sendSuccess([
                 'content_id' => $content_id,
                 'html' => $content_html
             ], ucfirst($content_type) . ' created successfully');
-            
         } catch (\Exception $e) {
             $this->logError('Create content error', $e);
             $this->sendError('Failed to create content: ' . $e->getMessage());
@@ -600,7 +602,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -608,17 +610,16 @@ class CourseAjax extends AjaxAbstract
 
             $course_id = intval($this->getPostData('course_id', 0));
             $chapter_order = $this->getPostData('chapter_order', []);
-            
+
             if ($course_id === 0) {
                 $this->sendError('Invalid course ID');
                 return;
             }
-            
+
             // Save chapter order
             update_post_meta($course_id, '_sikshya_chapter_order', $chapter_order);
-            
+
             $this->sendSuccess(null, 'Chapter order saved successfully');
-            
         } catch (\Exception $e) {
             $this->logError('Save chapter order error', $e);
             $this->sendError('Failed to save chapter order: ' . $e->getMessage());
@@ -635,7 +636,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -643,17 +644,16 @@ class CourseAjax extends AjaxAbstract
 
             $chapter_id = intval($this->getPostData('chapter_id', 0));
             $lesson_order = $this->getPostData('lesson_order', []);
-            
+
             if ($chapter_id === 0) {
                 $this->sendError('Invalid chapter ID');
                 return;
             }
-            
+
             // Save lesson order
             update_post_meta($chapter_id, '_sikshya_lesson_order', $lesson_order);
-            
+
             $this->sendSuccess(null, 'Lesson order saved successfully');
-            
         } catch (\Exception $e) {
             $this->logError('Save lesson order error', $e);
             $this->sendError('Failed to save lesson order: ' . $e->getMessage());
@@ -670,7 +670,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -678,26 +678,25 @@ class CourseAjax extends AjaxAbstract
 
             $item_id = intval($this->getPostData('item_id', 0));
             $data = $this->getPostData('data', []);
-            
+
             if ($item_id === 0) {
                 $this->sendError('Invalid item ID');
                 return;
             }
-            
+
             // Update content item
             $result = wp_update_post([
                 'ID' => $item_id,
                 'post_title' => sanitize_text_field($data['title'] ?? ''),
                 'post_content' => wp_kses_post($data['description'] ?? ''),
             ]);
-            
+
             if (is_wp_error($result)) {
                 $this->sendError('Failed to save content');
                 return;
             }
-            
+
             $this->sendSuccess(null, 'Content saved successfully');
-            
         } catch (\Exception $e) {
             $this->logError('Save content type error', $e);
             $this->sendError('Failed to save content: ' . $e->getMessage());
@@ -714,10 +713,10 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             $content_type = sanitize_text_field($this->getPostData('content_type', 'lesson'));
             $item_id = intval($this->getPostData('item_id', 0));
-            
+
             // Load content data if editing
             $data = [];
             if ($item_id > 0) {
@@ -729,11 +728,10 @@ class CourseAjax extends AjaxAbstract
                     ];
                 }
             }
-            
+
             // Return form HTML
             $form = $this->getContentTypeForm($content_type, $data);
             $this->sendSuccess(['form' => $form]);
-            
         } catch (\Exception $e) {
             $this->logError('Load content type form error', $e);
             $this->sendError('Failed to load form: ' . $e->getMessage());
@@ -750,13 +748,13 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             $field_name = sanitize_text_field($this->getPostData('field_name', ''));
             $field_value = $this->getPostData('field_value', '');
             $field_type = sanitize_text_field($this->getPostData('field_type', 'text'));
-            
+
             $errors = [];
-            
+
             // Validate based on field type
             switch ($field_type) {
                 case 'email':
@@ -764,28 +762,27 @@ class CourseAjax extends AjaxAbstract
                         $errors[] = 'Please enter a valid email address.';
                     }
                     break;
-                    
+
                 case 'url':
                     if (!empty($field_value) && !filter_var($field_value, FILTER_VALIDATE_URL)) {
                         $errors[] = 'Please enter a valid URL.';
                     }
                     break;
-                    
+
                 case 'number':
                     if (!empty($field_value) && !is_numeric($field_value)) {
                         $errors[] = 'Please enter a valid number.';
                     }
                     break;
-                    
+
                 case 'required':
                     if (empty($field_value)) {
                         $errors[] = 'This field is required.';
                     }
                     break;
             }
-            
+
             $this->sendSuccess(['errors' => $errors]);
-            
         } catch (\Exception $e) {
             $this->logError('Validate course field error', $e);
             $this->sendError('Failed to validate field: ' . $e->getMessage());
@@ -794,7 +791,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Get chapter template HTML
-     * 
+     *
      * @return string
      */
     private function getChapterTemplate(): string
@@ -830,7 +827,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Get content template HTML
-     * 
+     *
      * @param string $content_type
      * @return string
      */
@@ -838,7 +835,7 @@ class CourseAjax extends AjaxAbstract
     {
         $title = ucfirst($content_type);
         $icon = $this->getContentTypeIcon($content_type);
-        
+
         ob_start();
         ?>
         <div class="sikshya-content-item" data-content-type="<?php echo esc_attr($content_type); ?>">
@@ -861,28 +858,28 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Load chapter modal template
-     * 
+     *
      * @param int $chapter_order
      * @return string
      */
     private function loadChapterModalTemplate(int $chapter_order): string
     {
         ob_start();
-        
+
         // Set up template variables
         $args = [
             'chapter_order' => $chapter_order
         ];
-        
+
         // Include the chapter modal template
         include SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/modal-chapter.php';
-        
+
         return ob_get_clean();
     }
 
     /**
      * Load edit chapter modal template
-     * 
+     *
      * @return string
      */
     private function loadEditChapterModalTemplate(): string
@@ -945,22 +942,22 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Load content type modal template
-     * 
+     *
      * @return string
      */
     private function loadContentTypeModalTemplate(): string
     {
         ob_start();
-        
+
         // Include the content type modal template
         include SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/modal-content-type.php';
-        
+
         return ob_get_clean();
     }
 
     /**
      * Get modal template HTML
-     * 
+     *
      * @param string $modal_type
      * @return string
      */
@@ -987,7 +984,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Get form template HTML
-     * 
+     *
      * @param string $form_type
      * @return string
      */
@@ -1015,7 +1012,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Get content type form HTML
-     * 
+     *
      * @param string $content_type
      * @param array $data
      * @return string
@@ -1030,23 +1027,23 @@ class CourseAjax extends AjaxAbstract
             'quiz' => 'quiz.php',
             'assignment' => 'assignment.php'
         ];
-        
+
         $template_file = $template_map[$content_type] ?? 'text-lesson.php';
         $template_path = SIKSHYA_PLUGIN_DIR . 'templates/admin/views/courses/forms/' . $template_file;
-        
+
         if (file_exists($template_path)) {
             // Extract data for template
             extract($data);
-            
+
             ob_start();
             include $template_path;
             return ob_get_clean();
         }
-        
+
         // Fallback to basic form if template doesn't exist
         $title = $data['title'] ?? '';
         $description = $data['description'] ?? '';
-        
+
         ob_start();
         ?>
         <form class="sikshya-content-form" data-content-type="<?php echo esc_attr($content_type); ?>">
@@ -1069,7 +1066,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Save text lesson specific meta data
-     * 
+     *
      * @param int $content_id
      */
     private function saveTextLessonMeta(int $content_id): void
@@ -1095,7 +1092,7 @@ class CourseAjax extends AjaxAbstract
             'search' => 'sanitize_text_field',
             'related' => 'sanitize_text_field'
         ];
-        
+
         foreach ($meta_fields as $field => $sanitize_function) {
             $value = $this->getPostData($field, '');
             if (!empty($value)) {
@@ -1107,31 +1104,31 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Get course ID from context (URL or session)
-     * 
+     *
      * @return int
      */
     private function getCourseIdFromContext(): int
     {
         // Try to get from POST data first (for AJAX requests)
         $course_id = intval($this->getPostData('course_id', 0));
-        
+
         error_log('Sikshya: getCourseIdFromContext - POST course_id: ' . $course_id);
-        
+
         if ($course_id > 0) {
             error_log('Sikshya: getCourseIdFromContext - returning POST course_id: ' . $course_id);
             return $course_id;
         }
-        
+
         // Try to get from URL parameter
         $course_id = intval($_GET['course_id'] ?? 0);
-        
+
         error_log('Sikshya: getCourseIdFromContext - GET course_id: ' . $course_id);
-        
+
         if ($course_id > 0) {
             error_log('Sikshya: getCourseIdFromContext - returning GET course_id: ' . $course_id);
             return $course_id;
         }
-        
+
         // Try to get from session or other context
         // For now, return 0 if not found
         error_log('Sikshya: getCourseIdFromContext - no course_id found, returning 0');
@@ -1140,7 +1137,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Generate chapter HTML for curriculum
-     * 
+     *
      * @param int $chapter_id
      * @param string $title
      * @param string $description
@@ -1177,7 +1174,7 @@ class CourseAjax extends AjaxAbstract
                 <div class="sikshya-chapter-info">
                     <div class="sikshya-chapter-main">
                         <h4 class="sikshya-chapter-title"><?php echo esc_html($title); ?></h4>
-                        <?php if (!empty($description)): ?>
+                        <?php if (!empty($description)) : ?>
                             <p class="sikshya-chapter-description"><?php echo esc_html($description); ?></p>
                         <?php endif; ?>
                         <div class="sikshya-chapter-content-summary">
@@ -1238,7 +1235,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Generate content HTML for curriculum
-     * 
+     *
      * @param int $content_id
      * @param string $title
      * @param string $description
@@ -1265,10 +1262,10 @@ class CourseAjax extends AjaxAbstract
                 <div class="sikshya-content-info">
                     <div class="sikshya-content-main">
                         <h5 class="sikshya-content-title"><?php echo esc_html($title); ?></h5>
-                        <?php if (!empty($description)): ?>
+                        <?php if (!empty($description)) : ?>
                             <p class="sikshya-content-description"><?php echo esc_html($description); ?></p>
                         <?php endif; ?>
-                        <?php if (!empty($duration)): ?>
+                        <?php if (!empty($duration)) : ?>
                             <span class="sikshya-content-duration"><?php echo esc_html($duration); ?> min</span>
                         <?php endif; ?>
                     </div>
@@ -1294,7 +1291,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Link content to chapter
-     * 
+     *
      * @param int $content_id
      * @param int $chapter_id
      * @return bool
@@ -1306,11 +1303,11 @@ class CourseAjax extends AjaxAbstract
         if (!is_array($chapter_contents)) {
             $chapter_contents = [];
         }
-        
+
         $chapter_contents[] = $content_id;
-        
+
         $result = update_post_meta($chapter_id, '_sikshya_contents', $chapter_contents);
-        
+
         // Also store chapter_id in course meta (if we have course_id)
         $course_id = get_post_field('post_parent', $chapter_id);
         if ($course_id) {
@@ -1318,14 +1315,14 @@ class CourseAjax extends AjaxAbstract
             if (!is_array($course_chapters)) {
                 $course_chapters = [];
             }
-            
+
             // Add chapter if not already in list
             if (!in_array($chapter_id, $course_chapters)) {
                 $course_chapters[] = $chapter_id;
                 update_post_meta($course_id, '_sikshya_chapters', $course_chapters);
             }
         }
-        
+
         return $result;
     }
 
@@ -1339,7 +1336,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -1347,21 +1344,20 @@ class CourseAjax extends AjaxAbstract
 
             $content_id = intval($this->getPostData('content_id', 0));
             $chapter_id = intval($this->getPostData('chapter_id', 0));
-            
+
             if ($content_id === 0 || $chapter_id === 0) {
                 $this->sendError('Invalid content or chapter ID');
                 return;
             }
-            
+
             // Link content to chapter
             $result = $this->linkContentToChapter($content_id, $chapter_id);
-            
+
             if ($result) {
                 $this->sendSuccess([], 'Content linked to chapter successfully');
             } else {
                 $this->sendError('Failed to link content to chapter');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Link content to chapter error', $e);
             $this->sendError('Failed to link content to chapter: ' . $e->getMessage());
@@ -1370,14 +1366,14 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Generate complete curriculum HTML
-     * 
+     *
      * @param int $course_id
      * @return string
      */
     private function generateCurriculumHTML(int $course_id): string
     {
         error_log('Sikshya: generateCurriculumHTML called for course_id: ' . $course_id);
-        
+
         // Get all chapters for this course
         $chapters = get_posts([
             'post_type' => PostTypes::CHAPTER,
@@ -1388,9 +1384,9 @@ class CourseAjax extends AjaxAbstract
             'meta_key' => '_sikshya_order',
             'order' => 'ASC'
         ]);
-        
+
         error_log('Sikshya: Found ' . count($chapters) . ' chapters for course_id: ' . $course_id);
-        
+
         if (empty($chapters)) {
             error_log('Sikshya: No chapters found, returning empty state');
             // Return empty state
@@ -1422,9 +1418,9 @@ class CourseAjax extends AjaxAbstract
             <?php
             return ob_get_clean();
         }
-        
+
         error_log('Sikshya: Generating curriculum HTML for ' . count($chapters) . ' chapters');
-        
+
         ob_start();
         ?>
         <div class="sikshya-curriculum-items" id="curriculum-items">
@@ -1435,21 +1431,21 @@ class CourseAjax extends AjaxAbstract
                 $chapter_description = $chapter->post_content;
                 $chapter_order = get_post_meta($chapter_id, '_sikshya_order', true) ?: 1;
                 $chapter_duration = get_post_meta($chapter_id, '_sikshya_duration', true);
-                
+
                 error_log('Sikshya: Processing chapter: ' . $chapter_id . ' - ' . $chapter_title);
-                
+
                 // Get content counts
                 $chapter_contents = get_post_meta($chapter_id, '_sikshya_contents', true);
-                
+
                 // Ensure chapter_contents is always an array
                 if (!is_array($chapter_contents)) {
                     $chapter_contents = [];
                 }
-                
+
                 $lesson_count = 0;
                 $quiz_count = 0;
                 $assignment_count = 0;
-                
+
                 foreach ($chapter_contents as $content_id) {
                     $content_post_type = get_post_type($content_id);
                     switch ($content_post_type) {
@@ -1464,9 +1460,9 @@ class CourseAjax extends AjaxAbstract
                             break;
                     }
                 }
-                
+
                 error_log('Sikshya: Chapter ' . $chapter_id . ' has ' . $lesson_count . ' lessons, ' . $quiz_count . ' quizzes, ' . $assignment_count . ' assignments');
-                
+
                 // Generate chapter HTML with content counts
                 echo $this->generateChapterHTMLWithContent($chapter_id, $chapter_title, $chapter_description, $chapter_duration, $chapter_order, $lesson_count, $quiz_count, $assignment_count, $chapter_contents);
             }
@@ -1480,7 +1476,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Generate chapter HTML with content counts
-     * 
+     *
      * @param int $chapter_id
      * @param string $title
      * @param string $description
@@ -1529,7 +1525,7 @@ class CourseAjax extends AjaxAbstract
                 <div class="sikshya-chapter-info">
                     <div class="sikshya-chapter-main">
                         <h4 class="sikshya-chapter-title"><?php echo esc_html($title); ?></h4>
-                        <?php if (!empty($description)): ?>
+                        <?php if (!empty($description)) : ?>
                             <p class="sikshya-chapter-description"><?php echo esc_html($description); ?></p>
                         <?php endif; ?>
                         <div class="sikshya-chapter-content-summary">
@@ -1564,7 +1560,7 @@ class CourseAjax extends AjaxAbstract
             <div class="sikshya-chapter-content" id="content-chapter-<?php echo esc_attr($chapter_id); ?>">
                 <div class="sikshya-chapter-content-inner">
                     <div class="sikshya-lesson-list">
-                        <?php if ($lesson_count + $quiz_count + $assignment_count > 0): ?>
+                        <?php if ($lesson_count + $quiz_count + $assignment_count > 0) : ?>
                             <?php
                             // Display content items
                             if (is_array($chapter_contents)) {
@@ -1575,7 +1571,7 @@ class CourseAjax extends AjaxAbstract
                                         $content_description = $content_post->post_content;
                                         $content_duration = get_post_meta($content_id, '_sikshya_duration', true);
                                         $content_type = str_replace('sik_', '', $content_post->post_type);
-                                        
+
                                         echo $this->generateContentHTML($content_id, $content_title, $content_description, $content_duration, $content_type);
                                     }
                                 }
@@ -1610,28 +1606,27 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
 
             $course_id = $this->getCourseIdFromContext();
-            
+
             error_log('Sikshya: Loading curriculum for course_id: ' . $course_id);
-            
+
             if ($course_id === 0) {
                 $this->sendError('Invalid course ID');
                 return;
             }
-            
+
             // Load complete curriculum structure
             $curriculum_html = $this->generateCurriculumHTML($course_id);
-            
+
             error_log('Sikshya: Generated curriculum HTML length: ' . strlen($curriculum_html));
-            
+
             $this->sendSuccess(['html' => $curriculum_html], 'Curriculum loaded successfully');
-            
         } catch (\Exception $e) {
             $this->logError('Load curriculum error', $e);
             $this->sendError('Failed to load curriculum: ' . $e->getMessage());
@@ -1648,50 +1643,49 @@ class CourseAjax extends AjaxAbstract
                 wp_send_json_error(['message' => 'Invalid nonce']);
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 wp_send_json_error(['message' => 'Insufficient permissions']);
                 return;
             }
 
             $chapter_id = intval($this->getPostData('chapter_id', 0));
-            
+
             error_log('Sikshya: handleLoadChapterData called with chapter_id: ' . $chapter_id);
-            
+
             if ($chapter_id <= 0) {
                 error_log('Sikshya: Invalid chapter ID: ' . $chapter_id);
                 wp_send_json_error(['message' => 'Invalid chapter ID']);
                 return;
             }
-        
+
         // Get chapter data
-        $chapter = get_post($chapter_id);
-        error_log('Sikshya: Chapter post retrieved: ' . ($chapter ? 'YES' : 'NO'));
-        
-        if (!$chapter || $chapter->post_type !== PostTypes::CHAPTER) {
-            error_log('Sikshya: Chapter not found or wrong post type. Post type: ' . ($chapter ? $chapter->post_type : 'NULL'));
-            wp_send_json_error(['message' => 'Chapter not found']);
-            return;
-        }
-        
+            $chapter = get_post($chapter_id);
+            error_log('Sikshya: Chapter post retrieved: ' . ($chapter ? 'YES' : 'NO'));
+
+            if (!$chapter || $chapter->post_type !== PostTypes::CHAPTER) {
+                error_log('Sikshya: Chapter not found or wrong post type. Post type: ' . ($chapter ? $chapter->post_type : 'NULL'));
+                wp_send_json_error(['message' => 'Chapter not found']);
+                return;
+            }
+
         // Get chapter meta data
-        $duration = get_post_meta($chapter_id, '_sikshya_duration', true);
-        $order = get_post_meta($chapter_id, '_sikshya_order', true);
-        
-        error_log('Sikshya: Chapter meta data - duration: ' . $duration . ', order: ' . $order);
-        
-        $chapter_data = [
+            $duration = get_post_meta($chapter_id, '_sikshya_duration', true);
+            $order = get_post_meta($chapter_id, '_sikshya_order', true);
+
+            error_log('Sikshya: Chapter meta data - duration: ' . $duration . ', order: ' . $order);
+
+            $chapter_data = [
             'id' => $chapter_id,
             'title' => $chapter->post_title,
             'description' => $chapter->post_content,
             'duration' => $duration ?: '',
             'order' => $order ?: 1,
-        ];
-        
-        error_log('Sikshya: Chapter data prepared: ' . print_r($chapter_data, true));
-        
-        $this->sendSuccess($chapter_data);
-        
+            ];
+
+            error_log('Sikshya: Chapter data prepared: ' . print_r($chapter_data, true));
+
+            $this->sendSuccess($chapter_data);
         } catch (\Exception $e) {
             $this->logError('Load chapter data error', $e);
             $this->sendError('Failed to load chapter data: ' . $e->getMessage());
@@ -1708,7 +1702,7 @@ class CourseAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -1719,17 +1713,17 @@ class CourseAjax extends AjaxAbstract
             $description = sanitize_textarea_field($this->getPostData('description', ''));
             $duration = sanitize_text_field($this->getPostData('duration', ''));
             $order = intval($this->getPostData('order', 1));
-            
+
             if ($chapter_id <= 0) {
                 $this->sendError('Invalid chapter ID');
                 return;
             }
-            
+
             if (empty($title)) {
                 $this->sendError('Chapter title is required');
                 return;
             }
-            
+
             // Update chapter post
             $update_result = wp_update_post([
                 'ID' => $chapter_id,
@@ -1737,21 +1731,20 @@ class CourseAjax extends AjaxAbstract
                 'post_content' => $description,
                 'post_type' => PostTypes::CHAPTER,
             ]);
-            
+
             if (is_wp_error($update_result)) {
                 $this->sendError('Failed to update chapter: ' . $update_result->get_error_message());
                 return;
             }
-            
+
             // Update meta fields
             update_post_meta($chapter_id, '_sikshya_duration', $duration);
             update_post_meta($chapter_id, '_sikshya_order', $order);
-            
+
             $this->sendSuccess([
                 'message' => 'Chapter updated successfully',
                 'chapter_id' => $chapter_id
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Update chapter error', $e);
             $this->sendError('Failed to update chapter: ' . $e->getMessage());
@@ -1760,7 +1753,7 @@ class CourseAjax extends AjaxAbstract
 
     /**
      * Get content type icon
-     * 
+     *
      * @param string $content_type
      * @return string
      */
@@ -1771,7 +1764,7 @@ class CourseAjax extends AjaxAbstract
             'quiz' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
             'assignment' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
         ];
-        
+
         return $icons[$content_type] ?? $icons['lesson'];
     }
 
@@ -1787,18 +1780,18 @@ class CourseAjax extends AjaxAbstract
         }
 
         // Check user capabilities
-        if (!current_user_can('edit_posts')) {
+        if (!$this->assertCanManageCourses()) {
             wp_send_json_error('Insufficient permissions');
             return;
         }
 
         $chapters = $_POST['chapters'] ?? [];
         $lessons = $_POST['lessons'] ?? [];
-        
+
         // Debug logging
         error_log('Sikshya: Bulk delete - Chapters: ' . print_r($chapters, true));
         error_log('Sikshya: Bulk delete - Lessons: ' . print_r($lessons, true));
-        
+
         $deleted_count = 0;
         $errors = [];
 
@@ -1809,20 +1802,20 @@ class CourseAjax extends AjaxAbstract
                 $errors[] = "Invalid chapter ID: $chapter_id";
                 continue;
             }
-            
+
             // Check if post exists
             $post = get_post($chapter_id);
             if (!$post) {
                 $errors[] = "Chapter ID $chapter_id does not exist";
                 continue;
             }
-            
+
             // Check if it's actually a chapter post type
             if ($post->post_type !== PostTypes::CHAPTER) {
                 $errors[] = "Post ID $chapter_id is not a chapter (type: {$post->post_type})";
                 continue;
             }
-            
+
             if (wp_delete_post($chapter_id, true)) {
                 $deleted_count++;
             } else {
@@ -1837,20 +1830,20 @@ class CourseAjax extends AjaxAbstract
                 $errors[] = "Invalid lesson ID: $lesson_id";
                 continue;
             }
-            
+
             // Check if post exists
             $post = get_post($lesson_id);
             if (!$post) {
                 $errors[] = "Lesson ID $lesson_id does not exist";
                 continue;
             }
-            
+
             // Check if it's actually a lesson post type
             if ($post->post_type !== PostTypes::LESSON) {
                 $errors[] = "Post ID $lesson_id is not a lesson (type: {$post->post_type})";
                 continue;
             }
-            
+
             if (wp_delete_post($lesson_id, true)) {
                 $deleted_count++;
             } else {
@@ -1870,5 +1863,254 @@ class CourseAjax extends AjaxAbstract
                 'deleted_count' => $deleted_count
             ]);
         }
+    }
+
+    /**
+     * Service/REST: curriculum HTML (same as AJAX load_curriculum).
+     */
+    public function getCurriculumHtmlForService(int $course_id): string
+    {
+        return $this->generateCurriculumHTML($course_id);
+    }
+
+    /**
+     * Service/REST: create lesson/quiz/assignment content (no nonce; caller must authorize).
+     *
+     * @param array<string,mixed> $params title, description, duration, type
+     * @return array{success:bool,message?:string,data?:array}
+     */
+    public function createContentForService(array $params): array
+    {
+        $title = sanitize_text_field($params['title'] ?? '');
+        $description = wp_kses_post($params['description'] ?? '');
+        $duration = sanitize_text_field($params['duration'] ?? '');
+        $content_type = sanitize_text_field($params['type'] ?? 'lesson');
+        $lesson_type = sanitize_text_field($params['lesson_type'] ?? '');
+
+        if ($title === '') {
+            return ['success' => false, 'message' => __('Content title is required', 'sikshya')];
+        }
+
+        switch ($content_type) {
+            case 'lesson':
+                $post_type = PostTypes::LESSON;
+                break;
+            case 'quiz':
+                $post_type = PostTypes::QUIZ;
+                break;
+            case 'assignment':
+                $post_type = PostTypes::ASSIGNMENT;
+                break;
+            case 'question':
+                $post_type = PostTypes::QUESTION;
+                break;
+            default:
+                $post_type = PostTypes::LESSON;
+                break;
+        }
+
+        $content_id = wp_insert_post(
+            [
+                'post_title' => $title,
+                'post_content' => $description,
+                'post_type' => $post_type,
+                'post_status' => 'publish',
+            ]
+        );
+
+        if (is_wp_error($content_id)) {
+            return ['success' => false, 'message' => sprintf(/* translators: %s: content type */ __('Failed to create %s', 'sikshya'), $content_type)];
+        }
+
+        if ($duration !== '') {
+            update_post_meta($content_id, '_sikshya_duration', $duration);
+        }
+
+        if ($post_type === PostTypes::LESSON) {
+            // Ensure lesson type is set for the React editor (text/video).
+            if ($lesson_type === 'video' || $lesson_type === 'text') {
+                update_post_meta($content_id, '_sikshya_lesson_type', $lesson_type);
+            } else {
+                update_post_meta($content_id, '_sikshya_lesson_type', 'text');
+            }
+        }
+
+        $content_html = $this->generateContentHTML($content_id, $title, $description, $duration, $content_type);
+
+        return [
+            'success' => true,
+            'message' => sprintf(/* translators: %s: content type */ __('%s created successfully', 'sikshya'), ucfirst($content_type)),
+            'data' => [
+                'content_id' => $content_id,
+                'html' => $content_html,
+            ],
+        ];
+    }
+
+    /**
+     * REST: HTML for a course-builder modal (capability checked by route).
+     *
+     * @return array{success:bool,data?:array{html:string},message?:string}
+     */
+    public function restModalTemplate(string $modal_type, int $chapter_order = 1): array
+    {
+        $modal_type = sanitize_text_field($modal_type);
+        try {
+            if ($modal_type === 'chapter') {
+                $html = $this->loadChapterModalTemplate($chapter_order);
+            } elseif ($modal_type === 'edit-chapter') {
+                $html = $this->loadEditChapterModalTemplate();
+            } elseif ($modal_type === 'content-type') {
+                $html = $this->loadContentTypeModalTemplate();
+            } else {
+                $html = $this->getModalTemplate($modal_type);
+            }
+
+            return ['success' => true, 'data' => ['html' => $html]];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * REST: HTML for a content-type form partial.
+     *
+     * @return array{success:bool,data?:array{html:string},message?:string}
+     */
+    public function restFormTemplate(string $content_type): array
+    {
+        $content_type = sanitize_text_field($content_type);
+        try {
+            $html = $this->getContentTypeForm($content_type);
+
+            return ['success' => true, 'data' => ['html' => $html]];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * REST: create chapter post + return curriculum card HTML.
+     *
+     * @param array<string,mixed> $params course_id, title, description?, duration?, order?
+     * @return array{success:bool,data?:array{chapter_id:int,html:string},message?:string}
+     */
+    public function restCreateChapter(array $params): array
+    {
+        $title = sanitize_text_field($params['title'] ?? '');
+        $description = wp_kses_post($params['description'] ?? '');
+        $duration = sanitize_text_field($params['duration'] ?? '');
+        $order = (int) ($params['order'] ?? 1);
+        $course_id = (int) ($params['course_id'] ?? 0);
+
+        if ($title === '') {
+            return ['success' => false, 'message' => __('Chapter title is required', 'sikshya')];
+        }
+        if ($course_id <= 0) {
+            return ['success' => false, 'message' => __('Invalid course ID', 'sikshya')];
+        }
+
+        $chapter_id = wp_insert_post(
+            [
+                'post_title' => $title,
+                'post_content' => $description,
+                'post_type' => PostTypes::CHAPTER,
+                'post_status' => 'publish',
+                'post_parent' => $course_id,
+            ],
+            true
+        );
+
+        if (is_wp_error($chapter_id)) {
+            return ['success' => false, 'message' => $chapter_id->get_error_message()];
+        }
+
+        if ($duration !== '') {
+            update_post_meta($chapter_id, '_sikshya_duration', $duration);
+        }
+        update_post_meta($chapter_id, '_sikshya_order', $order);
+
+        $chapter_html = $this->generateChapterHTML((int) $chapter_id, $title, $description, $duration, $order);
+
+        return [
+            'success' => true,
+            'message' => __('Chapter created successfully', 'sikshya'),
+            'data' => [
+                'chapter_id' => (int) $chapter_id,
+                'html' => $chapter_html,
+            ],
+        ];
+    }
+
+    /**
+     * REST: chapter meta for edit modal.
+     *
+     * @return array{success:bool,data?:array<string,mixed>,message?:string}
+     */
+    public function restChapterData(int $chapter_id): array
+    {
+        if ($chapter_id <= 0) {
+            return ['success' => false, 'message' => __('Invalid chapter ID', 'sikshya')];
+        }
+
+        $chapter = get_post($chapter_id);
+        if (!$chapter || $chapter->post_type !== PostTypes::CHAPTER) {
+            return ['success' => false, 'message' => __('Chapter not found', 'sikshya')];
+        }
+
+        $duration = get_post_meta($chapter_id, '_sikshya_duration', true);
+        $order = get_post_meta($chapter_id, '_sikshya_order', true);
+
+        return [
+            'success' => true,
+            'data' => [
+                'id' => $chapter_id,
+                'title' => $chapter->post_title,
+                'description' => $chapter->post_content,
+                'duration' => $duration ?: '',
+                'order' => $order ?: 1,
+            ],
+        ];
+    }
+
+    /**
+     * REST: update chapter post + meta.
+     *
+     * @param array<string,mixed> $params chapter_id, title, description?, duration?, order?
+     * @return array{success:bool,message?:string}
+     */
+    public function restUpdateChapter(array $params): array
+    {
+        $chapter_id = (int) ($params['chapter_id'] ?? 0);
+        $title = sanitize_text_field($params['title'] ?? '');
+        $description = sanitize_textarea_field($params['description'] ?? '');
+        $duration = sanitize_text_field($params['duration'] ?? '');
+        $order = (int) ($params['order'] ?? 1);
+
+        if ($chapter_id <= 0) {
+            return ['success' => false, 'message' => __('Invalid chapter ID', 'sikshya')];
+        }
+        if ($title === '') {
+            return ['success' => false, 'message' => __('Chapter title is required', 'sikshya')];
+        }
+
+        $updated = wp_update_post(
+            [
+                'ID' => $chapter_id,
+                'post_title' => $title,
+                'post_content' => $description,
+                'post_type' => PostTypes::CHAPTER,
+            ],
+            true
+        );
+
+        if (is_wp_error($updated)) {
+            return ['success' => false, 'message' => $updated->get_error_message()];
+        }
+
+        update_post_meta($chapter_id, '_sikshya_duration', $duration);
+        update_post_meta($chapter_id, '_sikshya_order', $order);
+
+        return ['success' => true, 'message' => __('Chapter updated successfully', 'sikshya')];
     }
 }

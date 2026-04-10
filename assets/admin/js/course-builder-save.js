@@ -8,6 +8,14 @@
 (function($) {
     'use strict';
 
+    function restBase() {
+        return (window.sikshya_course_builder_ajax && window.sikshya_course_builder_ajax.rest_url) ? window.sikshya_course_builder_ajax.rest_url : '';
+    }
+
+    function restNonce() {
+        return (window.sikshya_course_builder_ajax && window.sikshya_course_builder_ajax.rest_nonce) ? window.sikshya_course_builder_ajax.rest_nonce : '';
+    }
+
     // Course Builder Save Handler
     window.SikshyaCourseBuilderSave = {
         /**
@@ -95,25 +103,25 @@
             const self = this;
             
             // Create content first
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_create_content',
-                    nonce: sikshya_ajax.nonce,
+            fetch(`${restBase()}curriculum/content`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': restNonce()
+                },
+                body: JSON.stringify({
                     type: contentType,
                     title: formData.title,
                     description: formData.description || '',
                     duration: formData.duration || ''
-                },
-                success: function(response) {
-                    if (response.success) {
-                        console.log('Content created successfully:', response);
-                        
-                        // Link content to chapter
+                })
+            })
+                .then(r => r.json())
+                .then(function(response) {
+                    if (response.success && response.data && response.data.content_id) {
                         self.linkContentToChapter(response.data.content_id, function(success, linkResponse) {
                             if (success) {
-                                // Reload curriculum to show updated content
                                 self.reloadCurriculum(function(reloadSuccess, reloadResponse) {
                                     if (callback) callback(reloadSuccess, reloadResponse);
                                 });
@@ -122,55 +130,68 @@
                             }
                         });
                     } else {
-                        console.error('Failed to create content:', response);
                         if (callback) callback(false, response);
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error creating content:', error);
+                })
+                .catch(function() {
                     if (callback) callback(false, { message: 'Network error creating content' });
-                }
-            });
+                });
         },
 
         /**
          * Link content to chapter
          */
         linkContentToChapter: function(contentId, callback) {
-            const self = this;
-            
-            // Get current chapter ID
-            const currentChapterId = this.getCurrentChapterId();
-            
-            if (!currentChapterId) {
+            const rawChapter = this.getCurrentChapterId();
+            const chapterIdNum = this.parseChapterIdForApi(rawChapter);
+
+            if (!chapterIdNum) {
                 console.error('No chapter selected for content');
                 if (callback) callback(false, { message: 'No chapter selected' });
                 return;
             }
-            
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_link_content_to_chapter',
-                    nonce: sikshya_ajax.nonce,
+
+            fetch(`${restBase()}curriculum/content/link`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': restNonce()
+                },
+                body: JSON.stringify({
                     content_id: contentId,
-                    chapter_id: currentChapterId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        console.log('Content linked to chapter successfully:', response);
-                        if (callback) callback(true, response);
-                    } else {
-                        console.error('Failed to link content to chapter:', response);
-                        if (callback) callback(false, response);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error linking content:', error);
+                    chapter_id: chapterIdNum
+                })
+            })
+                .then(r => r.json())
+                .then(function(response) {
+                    if (callback) callback(!!response.success, response);
+                })
+                .catch(function() {
                     if (callback) callback(false, { message: 'Network error linking content' });
-                }
-            });
+                });
+        },
+
+        /**
+         * REST expects numeric post ID; DOM uses chapter-{id}.
+         *
+         * @param {string|number|null|undefined} raw
+         * @return {number}
+         */
+        parseChapterIdForApi: function(raw) {
+            if (raw === null || raw === undefined || raw === '') {
+                return 0;
+            }
+            if (typeof raw === 'number' && raw > 0) {
+                return raw;
+            }
+            const s = String(raw);
+            const prefixed = s.match(/^chapter-(\d+)$/);
+            if (prefixed) {
+                return parseInt(prefixed[1], 10);
+            }
+            const n = parseInt(s, 10);
+            return isNaN(n) || n < 1 ? 0 : n;
         },
 
         /**
@@ -203,65 +224,28 @@
         reloadCurriculum: function(callback) {
             const self = this;
             
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_load_curriculum',
-                    nonce: sikshya_ajax.nonce
-                },
-                success: function(response) {
-                    if (response.success) {
-                        console.log('Curriculum reloaded successfully:', response);
-                        
-                        // Replace the curriculum content
+            const courseId = this.getCourseIdFromUrl();
+            fetch(`${restBase()}curriculum?course_id=${encodeURIComponent(courseId)}`, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: { 'X-WP-Nonce': restNonce() }
+            })
+                .then(r => r.json())
+                .then(function(response) {
+                    if (response.success && response.data && response.data.html) {
                         const curriculumContainer = document.querySelector('.sikshya-curriculum-builder');
                         if (curriculumContainer) {
                             curriculumContainer.innerHTML = response.data.html;
                         }
-                        
                         if (callback) callback(true, response);
                     } else {
-                        console.error('Failed to reload curriculum:', response);
                         if (callback) callback(false, response);
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error reloading curriculum:', error);
+                })
+                .catch(function() {
                     if (callback) callback(false, { message: 'Network error reloading curriculum' });
-                }
-            });
+                });
         },
-
-        /**
-         * Handle successful save
-         */
-        handleSaveSuccess: function(response) {
-            if (response.course_id) {
-                this.updateCourseIdInForm(response.course_id);
-                
-                // Update URL to use consistent course_id parameter
-                const currentUrl = new URL(window.location);
-                currentUrl.searchParams.set('course_id', response.course_id);
-                
-                // Remove the 'id' parameter if it exists to avoid confusion
-                currentUrl.searchParams.delete('id');
-                
-                // Update the URL without page reload
-                window.history.replaceState({}, '', currentUrl.toString());
-            }
-            
-            this.showNotification('success', 'Course saved successfully!');
-        },
-
-        /**
-         * Handle save error
-         */
-        handleSaveError: function(response) {
-            this.showNotification('error', response.message || 'Failed to save course');
-        },
-
-
 
         /**
          * Handle tab switching
@@ -361,23 +345,23 @@
          * Update content item (for curriculum)
          */
         updateContentItem: function(itemId, data) {
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_save_content_type',
-                    nonce: sikshya_ajax.nonce,
-                    item_id: itemId,
-                    data: data
+            fetch(`${restBase()}curriculum/content-item`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': restNonce()
                 },
-                success: function(response) {
+                body: JSON.stringify({ item_id: itemId, data: data })
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
                         this.showNotification('success', 'Content updated successfully');
                     } else {
-                        this.showNotification('error', response.data.message || 'Failed to update content');
+                        this.showNotification('error', response.message || 'Failed to update content');
                     }
-                }.bind(this)
-            });
+                }.bind(this));
         },
 
         /**
@@ -471,77 +455,51 @@
          */
         saveData: function(formData, callback) {
             const form = document.getElementById('sikshya-course-builder-form');
-            
+
             if (!form) {
                 callback(false, { message: 'Form not found' });
                 return;
             }
-            
-            // Create a temporary form for submission
-            const tempForm = document.createElement('form');
-            tempForm.method = 'POST';
-            tempForm.action = sikshya_ajax.ajax_url;
-            tempForm.style.display = 'none';
-            
-            // Add action and nonce
-            const actionField = document.createElement('input');
-            actionField.type = 'hidden';
-            actionField.name = 'action';
-            actionField.value = 'sikshya_save_course_builder';
-            tempForm.appendChild(actionField);
-            
-            const nonceField = document.createElement('input');
-            nonceField.type = 'hidden';
-            nonceField.name = 'nonce';
-            nonceField.value = sikshya_ajax.nonce;
-            tempForm.appendChild(nonceField);
-            
-            // Add all form data as hidden fields
-            for (let [key, value] of Object.entries(formData)) {
-                const field = document.createElement('input');
-                field.type = 'hidden';
-                field.name = key;
-                field.value = value;
-                tempForm.appendChild(field);
+
+            if (!restBase() || !restNonce()) {
+                callback(false, { message: 'REST is not configured. Reload the page and try again.' });
+                return;
             }
-            
-            // Add course status
-            const statusField = document.createElement('input');
-            statusField.type = 'hidden';
-            statusField.name = 'course_status';
-            statusField.value = formData.course_status || 'draft';
-            tempForm.appendChild(statusField);
-            
-            // Append form to body and submit
-            document.body.appendChild(tempForm);
-            
-            // Use fetch to submit the form and handle response
-            fetch(sikshya_ajax.ajax_url, {
+
+            // Submit the form itself; no manual field collection required.
+            const fd = new FormData(form);
+            fd.set('course_status', formData.course_status || 'draft');
+
+            fetch(`${restBase()}course-builder/save`, {
                 method: 'POST',
-                body: new FormData(tempForm)
+                credentials: 'same-origin',
+                headers: {
+                    'X-WP-Nonce': restNonce()
+                },
+                body: fd
             })
-            .then(response => response.json())
-            .then(data => {
-                // Remove temporary form
-                document.body.removeChild(tempForm);
-                
-                if (data.success) {
-                    callback(true, data.data);
-                } else {
-                    callback(false, data.data);
-                }
-            })
-            .catch(error => {
-                // Remove temporary form
-                document.body.removeChild(tempForm);
-                callback(false, { message: 'Network error occurred' });
-            });
+                .then(r => r.json())
+                .then(function(resp) {
+                    if (resp.success) {
+                        callback(true, resp.data || {});
+                    } else {
+                        callback(false, resp);
+                    }
+                })
+                .catch(function() {
+                    callback(false, { message: 'Network error occurred' });
+                });
         },
 
         /**
          * Handle successful save
          */
         handleSaveSuccess: function(response) {
+            $('.sikshya-field-error').remove();
+            $('.sikshya-form-row--field').removeClass('has-error');
+            $('.sikshya-tab-error-summary').remove();
+            $('.sikshya-nav-error-badge').attr('hidden', 'hidden').text('0');
+
             const message = response.status === 'published' 
                 ? 'Course published successfully!' 
                 : 'Course draft saved successfully!';
@@ -581,74 +539,102 @@
          * Handle save error
          */
         handleSaveError: function(response) {
-            // Clear previous field errors
             $('.sikshya-field-error').remove();
-            $('.sikshya-form-row').removeClass('has-error');
-            
-            // Handle validation errors
-            if (response.course || response.pricing) {
-                let errorMessages = [];
-                let firstErrorField = null;
-                let firstErrorTab = null;
-                
-                // Process course validation errors
-                if (response.course) {
-                    Object.keys(response.course).forEach(function(field) {
-                        const errorMessage = response.course[field];
-                        const fieldElement = $(`[name="${field}"]`);
-                        
-                        if (fieldElement.length) {
-                            const formRow = fieldElement.closest('.sikshya-form-row');
-                            formRow.addClass('has-error');
-                            formRow.append(`<div class="sikshya-field-error">${errorMessage}</div>`);
-                            
-                            // Track first error field and its tab
-                            if (!firstErrorField) {
-                                firstErrorField = fieldElement;
-                                firstErrorTab = this.getFieldTab(fieldElement);
-                            }
-                        }
-                        
-                        errorMessages.push(errorMessage);
-                    }.bind(this));
+            $('.sikshya-form-row--field').removeClass('has-error');
+            $('.sikshya-tab-error-summary').remove();
+            $('.sikshya-nav-error-badge').attr('hidden', 'hidden').text('0');
+
+            const fieldFlat = Object.assign(
+                {},
+                response.field_errors || {},
+                response.course || {},
+                response.pricing || {}
+            );
+
+            const tabErrors = response.errors || {};
+            const tabCounts = {};
+            const errorMessages = [];
+            let firstErrorField = null;
+            let firstErrorTab = null;
+
+            Object.keys(fieldFlat).forEach(function(fieldId) {
+                const errorMessage = fieldFlat[fieldId];
+                if (typeof errorMessage !== 'string') {
+                    return;
                 }
-                
-                // Process pricing validation errors
-                if (response.pricing) {
-                    Object.keys(response.pricing).forEach(function(field) {
-                        const errorMessage = response.pricing[field];
-                        const fieldElement = $(`[name="${field}"]`);
-                        
-                        if (fieldElement.length) {
-                            const formRow = fieldElement.closest('.sikshya-form-row');
-                            formRow.addClass('has-error');
-                            formRow.append(`<div class="sikshya-field-error">${errorMessage}</div>`);
-                            
-                            // Track first error field and its tab
-                            if (!firstErrorField) {
-                                firstErrorField = fieldElement;
-                                firstErrorTab = this.getFieldTab(fieldElement);
-                            }
-                        }
-                        
-                        errorMessages.push(errorMessage);
-                    }.bind(this));
+                errorMessages.push(errorMessage);
+
+                const wrap = document.querySelector('.sikshya-form-row--field[data-sikshya-field="' + fieldId + '"]');
+                if (wrap) {
+                    wrap.classList.add('has-error');
+                    const div = document.createElement('div');
+                    div.className = 'sikshya-field-error';
+                    div.textContent = errorMessage;
+                    wrap.appendChild(div);
+
+                    const tabContent = wrap.closest('.sikshya-tab-content');
+                    const tid = tabContent ? tabContent.id : null;
+                    if (tid) {
+                        tabCounts[tid] = (tabCounts[tid] || 0) + 1;
+                    }
+
+                    if (!firstErrorField) {
+                        firstErrorField = wrap.querySelector('input, select, textarea');
+                        firstErrorTab = tid;
+                    }
                 }
-                
-                // Show the first error message in notification
-                if (errorMessages.length > 0) {
-                    this.showNotification('error', errorMessages[0]);
-                } else {
-                    this.showNotification('error', response.message || 'Validation failed');
+            });
+
+            Object.keys(tabErrors).forEach(function(tabId) {
+                const e = tabErrors[tabId];
+                if (Array.isArray(e) && e.length && typeof e[0] === 'string') {
+                    tabCounts[tabId] = (tabCounts[tabId] || 0) + e.length;
+                    e.forEach(function(msg) {
+                        errorMessages.push(msg);
+                    });
+                    const tab = document.getElementById(tabId);
+                    if (tab) {
+                        const s = document.createElement('div');
+                        s.className = 'sikshya-tab-error-summary';
+                        s.setAttribute('role', 'alert');
+                        s.textContent = e.join(' ');
+                        tab.insertBefore(s, tab.firstChild);
+                    }
                 }
-                
-                // Switch to error tab and focus on first error field
-                if (firstErrorTab && firstErrorField) {
-                    this.switchToTabAndFocus(firstErrorTab, firstErrorField);
+            });
+
+            Object.keys(tabCounts).forEach(function(tid) {
+                const n = tabCounts[tid];
+                if (n < 1) {
+                    return;
                 }
+                const badge = document.querySelector('.sikshya-nav-error-badge[data-tab="' + tid + '"]');
+                if (badge) {
+                    badge.textContent = String(n);
+                    badge.removeAttribute('hidden');
+                }
+                const tab = document.getElementById(tid);
+                if (tab && !tab.querySelector('.sikshya-tab-error-summary')) {
+                    const s = document.createElement('div');
+                    s.className = 'sikshya-tab-error-summary';
+                    s.setAttribute('role', 'alert');
+                    s.textContent = 'Please review the highlighted fields in this section.';
+                    tab.insertBefore(s, tab.firstChild);
+                }
+            });
+
+            if (errorMessages.length > 0) {
+                this.showNotification('error', errorMessages[0]);
             } else {
-                // Handle general errors
                 this.showNotification('error', response.message || 'Failed to save course');
+            }
+
+            if (firstErrorTab && firstErrorField) {
+                this.switchToTabAndFocus(firstErrorTab, $(firstErrorField));
+            }
+
+            if (typeof window.sikshyaRefreshCourseBuilderConditionals === 'function') {
+                window.sikshyaRefreshCourseBuilderConditionals();
             }
         },
 
@@ -671,7 +657,6 @@
          * Get the tab ID for a field
          */
         getFieldTab: function(fieldElement) {
-            // Find which tab contains this field
             const tabContent = fieldElement.closest('.sikshya-tab-content');
             if (tabContent.length) {
                 return tabContent.attr('id');

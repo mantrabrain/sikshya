@@ -1,15 +1,12 @@
 /*
  * Sikshya LMS Dashboard Styles
  * Minimalistic Modern SaaS Design
- * Clean, elegant, and contemporary
+ * Depends on sikshya-admin (design-system tokens) — do not @import design-system here.
  */
-
-/* Import Design System */
-@import url('./design-system.css');
 
 /* ===== DASHBOARD LAYOUT ===== */
 .sikshya-dashboard {
-    background: #fafbfc;
+    background: var(--sikshya-admin-page-bg);
     margin: 0;
     border-radius: 0;
     box-shadow: none;
@@ -20,7 +17,7 @@
 
 /* ===== DASHBOARD HEADER ===== */
 .sikshya-dashboard .sikshya-header {
-    background: #f8f9fa;
+    background: var(--sikshya-admin-header-bg);
     padding: var(--sikshya-space-6) var(--sikshya-space-8);
     display: flex;
     justify-content: space-between;
@@ -38,6 +35,26 @@
     gap: var(--sikshya-space-4);
 }
 
+.sikshya-header-title-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sikshya-space-1);
+    min-width: 0;
+}
+
+.sikshya-header-title-text h1 {
+    margin: 0;
+}
+
+.sikshya-header-subtitle {
+    margin: 0;
+    font-size: var(--sikshya-text-sm);
+    font-weight: var(--sikshya-font-normal);
+    color: var(--sikshya-gray-500);
+    line-height: var(--sikshya-leading-normal);
+}
+
 .sikshya-dashboard .sikshya-header h1 {
     margin: 0;
     font-size: var(--sikshya-text-xl);
@@ -48,9 +65,8 @@
     color: var(--sikshya-gray-900);
 }
 
-.sikshya-dashboard .sikshya-header h1 i {
-    font-size: var(--sikshya-text-lg);
-    color: var(--sikshya-primary);
+.sikshya-dashboard .sikshya-header h1 .sikshya-header-icon {
+    flex-shrink: 0;
 }
 
 .sikshya-dashboard .sikshya-version {
@@ -245,6 +261,13 @@
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.sikshya-content-card-title-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--sikshya-gray-600);
 }
 
 .sikshya-content-card-subtitle {

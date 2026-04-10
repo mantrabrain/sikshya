@@ -385,30 +385,29 @@
         
         $row.addClass('deleting');
         
-        $.ajax({
-            url: sikshya_list_table.ajax_url,
-            method: 'POST',
-            data: {
-                action: 'sikshya_delete_course',
-                course_id: itemId,
-                nonce: sikshya_list_table.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    $row.fadeOut(300, function() {
-                        $(this).remove();
-                        SikshyaListTable.showNotice(response.data.message, 'success');
-                    });
-                } else {
-                    SikshyaListTable.showNotice(response.data.message, 'error');
-                }
-            },
-            error: function() {
-                SikshyaListTable.showNotice(sikshya_list_table.error_message, 'error');
-            },
-            complete: function() {
-                $row.removeClass('deleting');
+        fetch(`${sikshya_list_table.rest_url}courses/${itemId}`, {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: {
+                'X-WP-Nonce': sikshya_list_table.rest_nonce
             }
+        })
+        .then(r => r.json())
+        .then(function(response) {
+            if (response.success) {
+                $row.fadeOut(300, function() {
+                    $(this).remove();
+                    SikshyaListTable.showNotice(response.message || 'Deleted', 'success');
+                });
+            } else {
+                SikshyaListTable.showNotice(response.message || 'Error', 'error');
+            }
+        })
+        .catch(function() {
+            SikshyaListTable.showNotice(sikshya_list_table.error_message, 'error');
+        })
+        .finally(function() {
+            $row.removeClass('deleting');
         });
     };
 

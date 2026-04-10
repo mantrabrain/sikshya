@@ -5,6 +5,8 @@
  * @package Sikshya
  */
 
+use Sikshya\Constants\PostTypes;
+
 get_header(); ?>
 
 <div class="sikshya-course-catalog">
@@ -42,8 +44,8 @@ get_header(); ?>
             </div>
             
             <div class="sikshya-course-grid sikshya-course-grid--featured">
-                <?php foreach ($featured_courses as $course): ?>
-                    <?php $this->renderCourseCard($course, 'featured'); ?>
+                <?php foreach ($featured_courses as $course) : ?>
+                    <?php sikshya_render_course_card($course, 'featured'); ?>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -147,8 +149,8 @@ get_header(); ?>
                 <!-- Course Grid -->
                 <?php if (!empty($courses)): ?>
                     <div class="sikshya-course-grid">
-                        <?php foreach ($courses as $course): ?>
-                            <?php $this->renderCourseCard($course); ?>
+                        <?php foreach ($courses as $course) : ?>
+                            <?php sikshya_render_course_card($course); ?>
                         <?php endforeach; ?>
                     </div>
 
@@ -219,122 +221,13 @@ get_header(); ?>
             </div>
             
             <div class="sikshya-course-grid sikshya-course-grid--popular">
-                <?php foreach ($popular_courses as $course): ?>
-                    <?php $this->renderCourseCard($course, 'popular'); ?>
+                <?php foreach ($popular_courses as $course) : ?>
+                    <?php sikshya_render_course_card($course, 'popular'); ?>
                 <?php endforeach; ?>
             </div>
         </div>
     </section>
     <?php endif; ?>
 </div>
-
-<?php
-/**
- * Render course card
- */
-function renderCourseCard($course, $type = 'default') {
-    $course_id = $course->ID;
-    $course_price = get_post_meta($course_id, '_sikshya_price', true);
-    $course_sale_price = get_post_meta($course_id, '_sikshya_sale_price', true);
-    $course_duration = get_post_meta($course_id, '_sikshya_duration', true);
-    $course_difficulty = get_post_meta($course_id, '_sikshya_difficulty', true);
-    $course_instructor = get_userdata($course->post_author);
-    $course_thumbnail = get_the_post_thumbnail_url($course_id, 'medium');
-    $course_categories = get_the_terms($course_id, 'sikshya_course_category');
-    ?>
-    
-    <article class="sikshya-course-card sikshya-course-card--<?php echo esc_attr($type); ?>">
-        <div class="sikshya-course-card-image">
-            <?php if ($course_thumbnail): ?>
-                <img src="<?php echo esc_url($course_thumbnail); ?>" alt="<?php echo esc_attr($course->post_title); ?>" class="sikshya-course-thumbnail">
-            <?php else: ?>
-                <div class="sikshya-course-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                    </svg>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($course_sale_price && $course_sale_price < $course_price): ?>
-                <div class="sikshya-course-badge sikshya-course-badge--sale">
-                    <?php _e('Sale', 'sikshya'); ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if (get_post_meta($course_id, '_sikshya_featured', true)): ?>
-                <div class="sikshya-course-badge sikshya-course-badge--featured">
-                    <?php _e('Featured', 'sikshya'); ?>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <div class="sikshya-course-card-content">
-            <?php if ($course_categories && !is_wp_error($course_categories)): ?>
-                <div class="sikshya-course-categories">
-                    <?php foreach (array_slice($course_categories, 0, 2) as $category): ?>
-                        <span class="sikshya-course-category"><?php echo esc_html($category->name); ?></span>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <h3 class="sikshya-course-title">
-                <a href="<?php echo esc_url(get_permalink($course_id)); ?>">
-                    <?php echo esc_html($course->post_title); ?>
-                </a>
-            </h3>
-
-            <p class="sikshya-course-excerpt">
-                <?php echo esc_html(wp_trim_words($course->post_excerpt ?: $course->post_content, 15)); ?>
-            </p>
-
-            <div class="sikshya-course-meta">
-                <?php if ($course_instructor): ?>
-                    <div class="sikshya-course-instructor">
-                        <span class="sikshya-course-instructor-label"><?php _e('By', 'sikshya'); ?></span>
-                        <span class="sikshya-course-instructor-name"><?php echo esc_html($course_instructor->display_name); ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($course_duration): ?>
-                    <div class="sikshya-course-duration">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12,6 12,12 16,14"></polyline>
-                        </svg>
-                        <span><?php echo esc_html($course_duration); ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($course_difficulty): ?>
-                    <div class="sikshya-course-difficulty">
-                        <span class="sikshya-difficulty-badge sikshya-difficulty-badge--<?php echo esc_attr($course_difficulty); ?>">
-                            <?php echo esc_html(ucfirst($course_difficulty)); ?>
-                        </span>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="sikshya-course-footer">
-                <div class="sikshya-course-price">
-                    <?php if ($course_sale_price && $course_sale_price < $course_price): ?>
-                        <span class="sikshya-course-price-original"><?php echo esc_html(sikshya_format_price($course_price)); ?></span>
-                        <span class="sikshya-course-price-current"><?php echo esc_html(sikshya_format_price($course_sale_price)); ?></span>
-                    <?php elseif ($course_price): ?>
-                        <span class="sikshya-course-price-current"><?php echo esc_html(sikshya_format_price($course_price)); ?></span>
-                    <?php else: ?>
-                        <span class="sikshya-course-price-free"><?php _e('Free', 'sikshya'); ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-button sikshya-button--small">
-                    <?php _e('View Course', 'sikshya'); ?>
-                </a>
-            </div>
-        </div>
-    </article>
-    <?php
-}
-?>
 
 <?php get_footer(); ?> 

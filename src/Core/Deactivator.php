@@ -67,4 +67,4 @@ class Deactivator
         $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_sikshya_%'");
         $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_sikshya_%'");
     }
-} 
+}

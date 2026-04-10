@@ -73,4 +73,4 @@ class CertificateController
             wp_send_json_error($result['message'] ?? __('Failed to download certificate.', 'sikshya'));
         }
     }
-} 
+}

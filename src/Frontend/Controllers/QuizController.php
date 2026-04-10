@@ -35,22 +35,22 @@ class QuizController
     {
         $quiz_id = get_the_ID();
         $quiz = get_post($quiz_id);
-        
+
         if (!$quiz || $quiz->post_type !== 'sikshya_quiz') {
             return;
         }
 
         // Get quiz data
         $quiz_data = $this->getQuizData($quiz_id);
-        
+
         // Get course data
         $course_id = $quiz_data['course_id'];
         $course_data = $this->getCourseData($course_id);
-        
+
         // Check if user is enrolled
         $user_id = get_current_user_id();
         $is_enrolled = $this->plugin->getService('enrollment')->isEnrolled($course_id, $user_id);
-        
+
         if (!$is_enrolled) {
             wp_redirect(get_permalink($course_id));
             exit;
@@ -58,7 +58,7 @@ class QuizController
 
         // Get quiz attempts
         $attempts = $this->plugin->getService('quiz')->getUserAttempts($quiz_id, $user_id);
-        
+
         // Check if user can take quiz
         $can_take = $this->canTakeQuiz($quiz_id, $user_id);
 
@@ -239,7 +239,7 @@ class QuizController
     {
         $max_attempts = get_post_meta($quiz_id, 'sikshya_quiz_max_attempts', true);
         $current_attempts = $this->plugin->getService('quiz')->getUserAttempts($quiz_id, $user_id);
-        
+
         if ($max_attempts && count($current_attempts) >= $max_attempts) {
             return false;
         }
@@ -292,4 +292,4 @@ class QuizController
             'thumbnail' => get_the_post_thumbnail_url($course_id, 'medium'),
         ];
     }
-} 
+}

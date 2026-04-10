@@ -95,6 +95,16 @@
     color: #dc2626;
 }
 
+.sikshya-stat-change.neutral {
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.sikshya-stat-change.neutral .sikshya-stat-note {
+    font-weight: 500;
+}
+
 /* Chart Controls */
 .sikshya-chart-controls {
     display: flex;

@@ -1,10 +1,11 @@
 <?php
 
 namespace Sikshya\Frontend;
-
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
+use Sikshya\Frontend\Public\CartFormHandler;
+use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Frontend\Controllers\CourseController;
 use Sikshya\Frontend\Controllers\LessonController;
 use Sikshya\Frontend\Controllers\QuizController;
@@ -72,11 +73,10 @@ class Frontend
         add_action('wp_enqueue_scripts', [$this, 'enqueueFrontendAssets']);
         add_action('wp_head', [$this, 'addFrontendMeta']);
         add_action('wp_footer', [$this, 'addFrontendFooter']);
-        add_action('wp_ajax_sikshya_frontend_action', [$this, 'handleAjaxRequest']);
-        add_action('wp_ajax_nopriv_sikshya_frontend_action', [$this, 'handleAjaxRequest']);
+        add_action('template_redirect', [CartFormHandler::class, 'maybeHandle'], 5);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
         add_action('wp', [$this, 'initFrontend']);
-        add_filter('template_include', [$this, 'loadCustomTemplates']);
+        add_filter('template_include', [$this, 'loadCustomTemplates'], 99);
         add_action('wp_body_open', [$this, 'addBodyClasses']);
     }
 
@@ -113,8 +113,8 @@ class Frontend
 
         // Localize script
         wp_localize_script('sikshya-frontend', 'sikshyaFrontend', [
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('sikshya_frontend_nonce'),
+            'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
+            'restNonce' => wp_create_nonce('wp_rest'),
             'userId' => get_current_user_id(),
             'isLoggedIn' => is_user_logged_in(),
             'strings' => [
@@ -143,12 +143,12 @@ class Frontend
             wp_enqueue_style('sikshya-course-viewer');
         }
 
-        if (is_singular('sikshya_lesson')) {
+        if (is_singular(PostTypes::LESSON)) {
             wp_enqueue_script('sikshya-lesson-viewer');
             wp_enqueue_style('sikshya-lesson-viewer');
         }
 
-        if (is_singular('sikshya_quiz')) {
+        if (is_singular(PostTypes::QUIZ)) {
             wp_enqueue_script('sikshya-quiz-taker');
             wp_enqueue_style('sikshya-quiz-taker');
         }
@@ -162,6 +162,16 @@ class Frontend
             wp_enqueue_script('sikshya-course-catalog');
             wp_enqueue_style('sikshya-course-catalog');
         }
+
+        if (PublicPageUrls::isCurrentVirtualPage('checkout')) {
+            wp_enqueue_script(
+                'sikshya-checkout-page',
+                $this->plugin->getAssetUrl('js/checkout-page.js'),
+                ['sikshya-frontend'],
+                $this->plugin->version,
+                true
+            );
+        }
     }
 
     /**
@@ -172,13 +182,13 @@ class Frontend
         if (is_singular(PostTypes::COURSE)) {
             $course_id = get_the_ID();
             $course = get_post($course_id);
-            
+
             if ($course) {
                 echo '<meta property="og:title" content="' . esc_attr($course->post_title) . '" />';
                 echo '<meta property="og:description" content="' . esc_attr(wp_strip_all_tags($course->post_excerpt)) . '" />';
                 echo '<meta property="og:type" content="course" />';
                 echo '<meta property="og:url" content="' . esc_url(get_permalink($course_id)) . '" />';
-                
+
                 if (has_post_thumbnail($course_id)) {
                     $thumbnail_url = get_the_post_thumbnail_url($course_id, 'large');
                     echo '<meta property="og:image" content="' . esc_url($thumbnail_url) . '" />';
@@ -229,7 +239,8 @@ class Frontend
         }
 
         if (is_page('sikshya-courses')) {
-            $this->controllers['course']->catalog();
+            // CourseController implements index() for the catalog view.
+            $this->controllers['course']->index();
             exit;
         }
 
@@ -257,15 +268,22 @@ class Frontend
             }
         }
 
-        if (is_singular('sikshya_lesson')) {
+        if (is_singular(PostTypes::LESSON)) {
             $custom_template = $this->plugin->getTemplatePath('single-lesson.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
         }
 
-        if (is_singular('sikshya_quiz')) {
+        if (is_singular(PostTypes::QUIZ)) {
             $custom_template = $this->plugin->getTemplatePath('single-quiz.php');
+            if (file_exists($custom_template)) {
+                return $custom_template;
+            }
+        }
+
+        if (is_post_type_archive(PostTypes::COURSE)) {
+            $custom_template = $this->plugin->getTemplatePath('archive-sik_course.php');
             if (file_exists($custom_template)) {
                 return $custom_template;
             }
@@ -285,6 +303,23 @@ class Frontend
             }
         }
 
+        foreach (
+            [
+                'cart' => 'cart.php',
+                'checkout' => 'checkout.php',
+                'order' => 'order.php',
+                'account' => 'account.php',
+                'learn' => 'learn.php',
+            ] as $key => $file
+        ) {
+            if (PublicPageUrls::isCurrentVirtualPage($key)) {
+                $path = $this->plugin->getTemplatePath($file);
+                if (file_exists($path)) {
+                    return $path;
+                }
+            }
+        }
+
         return $template;
     }
 
@@ -299,11 +334,11 @@ class Frontend
             $classes[] = 'sikshya-course-page';
         }
 
-        if (is_singular('sikshya_lesson')) {
+        if (is_singular(PostTypes::LESSON)) {
             $classes[] = 'sikshya-lesson-page';
         }
 
-        if (is_singular('sikshya_quiz')) {
+        if (is_singular(PostTypes::QUIZ)) {
             $classes[] = 'sikshya-quiz-page';
         }
 
@@ -313,6 +348,16 @@ class Frontend
 
         if (is_page('sikshya-courses')) {
             $classes[] = 'sikshya-catalog-page';
+        }
+
+        if (is_post_type_archive(PostTypes::COURSE)) {
+            $classes[] = 'sikshya-course-archive';
+        }
+
+        foreach (['cart' => 'sikshya-cart-page', 'checkout' => 'sikshya-checkout-page', 'order' => 'sikshya-order-page', 'account' => 'sikshya-account-page', 'learn' => 'sikshya-learn-page'] as $k => $class) {
+            if (PublicPageUrls::isCurrentVirtualPage($k)) {
+                $classes[] = $class;
+            }
         }
 
         if (!empty($classes)) {
@@ -417,4 +462,4 @@ class Frontend
         $progress = $this->getUserProgress($course_id, $user_id);
         return $progress['completed'] ?? false;
     }
-} 
+}

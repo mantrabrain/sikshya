@@ -1,15 +1,17 @@
 <?php
+
 /**
  * Courses List Table
- * 
+ *
  * Displays courses in a WordPress-style list table with sorting, filtering, and bulk actions
- * 
+ *
  * @package Sikshya\Admin\ListTable
  * @since 1.0.0
  */
 
 namespace Sikshya\Admin\ListTable;
 
+use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 
@@ -20,14 +22,14 @@ if (!defined('ABSPATH')) {
 
 /**
  * Courses List Table Class
- * 
+ *
  * Handles the display and management of courses in the admin area
  */
 class CoursesListTable extends AbstractListTable
 {
     /**
      * Constructor
-     * 
+     *
      * @param \Sikshya\Core\Plugin $plugin
      */
     public function __construct($plugin)
@@ -96,8 +98,28 @@ class CoursesListTable extends AbstractListTable
     }
 
     /**
+     * Post status counts for subsubsub tabs.
+     *
+     * @return array<string, int>
+     */
+    protected function get_status_counts(): array
+    {
+        $counts = wp_count_posts(PostTypes::COURSE);
+        if (!$counts || is_wp_error($counts)) {
+            return parent::get_status_counts();
+        }
+
+        return [
+            'publish' => (int) ($counts->publish ?? 0),
+            'draft' => (int) ($counts->draft ?? 0),
+            'pending' => (int) ($counts->pending ?? 0),
+            'private' => (int) ($counts->private ?? 0),
+        ];
+    }
+
+    /**
      * Get items for the table
-     * 
+     *
      * @return array
      */
     protected function get_items(): array
@@ -130,7 +152,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Get dummy data for demo purposes
-     * 
+     *
      * @return array
      */
     protected function getDummyData(): array
@@ -325,7 +347,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Get total number of items
-     * 
+     *
      * @return int
      */
     protected function get_total_items(): int
@@ -355,7 +377,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Column default
-     * 
+     *
      * @param object $item
      * @param string $column_name
      * @return string
@@ -386,7 +408,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Column checkbox
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -400,17 +422,20 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Column title
-     * 
+     *
      * @param object $item
      * @return string
      */
     public function column_title($item): string
     {
         $title = $item->post_title;
-        $edit_url = admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->ID);
-        
-        $delete_url = wp_nonce_url(admin_url('admin.php?page=sikshya-courses&action=delete&id=' . $item->ID), 'delete-course_' . $item->ID);
-        
+        $edit_url = ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $item->ID]);
+
+        $delete_url = wp_nonce_url(
+            ReactAdminConfig::reactAppUrl('courses', ['action' => 'delete', 'id' => (string) $item->ID]),
+            'delete-course_' . $item->ID
+        );
+
         $row_actions = '<div class="row-actions">';
         $row_actions .= '<span class="edit">';
         $row_actions .= '<a href="' . esc_url($edit_url) . '">';
@@ -418,7 +443,7 @@ class CoursesListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Edit', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="view">';
         $row_actions .= '<a href="#" onclick="return false;">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -426,7 +451,7 @@ class CoursesListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('View', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="delete">';
         $row_actions .= '<a href="' . esc_url($delete_url) . '" onclick="return confirm(\'' . esc_js(__('Are you sure you want to delete this course?', 'sikshya')) . '\');">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -434,10 +459,10 @@ class CoursesListTable extends AbstractListTable
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
-        
+
         // Get student count
         $student_count = get_post_meta($item->ID, 'course_enrollments', true) ?: 0;
-        
+
         $output = '<div class="sikshya-course-title-wrapper">';
         $output .= '<div class="sikshya-course-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -455,15 +480,15 @@ class CoursesListTable extends AbstractListTable
         );
         $output .= '</div>';
         $output .= '</div>';
-        
+
         $output .= $row_actions;
-        
+
         return $output;
     }
 
     /**
      * Column instructor
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -472,11 +497,11 @@ class CoursesListTable extends AbstractListTable
         // Get the author of the course
         $author_id = $item->post_author;
         $author = get_userdata($author_id);
-        
+
         if (!$author) {
             return '<span class="sikshya-no-instructor">—</span>';
         }
-        
+
         $output = '<div class="sikshya-instructors">';
         $output .= sprintf(
             '<div class="sikshya-instructor">
@@ -488,13 +513,13 @@ class CoursesListTable extends AbstractListTable
             esc_html($author->display_name)
         );
         $output .= '</div>';
-        
+
         return $output;
     }
 
     /**
      * Column status
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -520,14 +545,14 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Column enrollments
-     * 
+     *
      * @param object $item
      * @return string
      */
     public function column_enrollments($item): string
     {
         $enrollments = get_post_meta($item->ID, 'course_enrollments', true) ?: 0;
-        
+
         return sprintf(
             '<a href="#">%d</a>',
             $enrollments
@@ -536,18 +561,18 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Column price
-     * 
+     *
      * @param object $item
      * @return string
      */
     public function column_categories($item): string
     {
         $categories = get_the_terms($item->ID, Taxonomies::COURSE_CATEGORY);
-        
+
         if (empty($categories) || is_wp_error($categories)) {
             return '<span class="sikshya-no-categories">—</span>';
         }
-        
+
         $output = '<div class="sikshya-categories">';
         foreach ($categories as $category) {
             $output .= sprintf(
@@ -556,18 +581,18 @@ class CoursesListTable extends AbstractListTable
             );
         }
         $output .= '</div>';
-        
+
         return $output;
     }
 
     public function column_rating($item): string
     {
         $rating = get_post_meta($item->ID, 'course_rating', true) ?: 0;
-        
+
         if ($rating == 0) {
             return '<span class="sikshya-no-rating">—</span>';
         }
-        
+
         return sprintf(
             '<span class="sikshya-rating-text">%s/5</span>',
             number_format($rating, 1)
@@ -578,17 +603,17 @@ class CoursesListTable extends AbstractListTable
     {
         $price = get_post_meta($item->ID, 'course_price', true) ?: '0.00';
         $original_price = get_post_meta($item->ID, 'course_original_price', true) ?: null;
-        
+
         if ($price === '0.00' || empty($price)) {
             return '<span class="sikshya-price-free">FREE</span>';
         }
 
         $formatted_price = '$' . number_format($price, 2);
-        
+
         if ($original_price && $original_price > $price) {
             $formatted_original = '$' . number_format($original_price, 2);
             $discount_percent = round((($original_price - $price) / $original_price) * 100);
-            
+
             return sprintf(
                 '<div class="sikshya-price-discounted">
                     <div class="sikshya-price-current">%s</div>
@@ -598,20 +623,20 @@ class CoursesListTable extends AbstractListTable
                 esc_html($formatted_original)
             );
         }
-        
+
         return '<span class="sikshya-price-paid">' . esc_html($formatted_price) . '</span>';
     }
 
     /**
      * Column lessons
-     * 
+     *
      * @param object $item
      * @return string
      */
     public function column_lessons($item): string
     {
         $lessons_count = get_post_meta($item->ID, 'course_lessons', true) ?: 0;
-        
+
         return sprintf(
             '<a href="#">%d</a>',
             $lessons_count
@@ -620,7 +645,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Column created
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -628,7 +653,7 @@ class CoursesListTable extends AbstractListTable
     {
         $date = new \DateTime($item->post_date);
         $date_format = 'M j, Y';
-        
+
         return sprintf(
             '<span title="%s">%s</span>',
             esc_attr($date->format('F j, Y g:i A')),
@@ -638,14 +663,14 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Delete a single course
-     * 
+     *
      * @param int $id
      * @return bool
      */
     protected function delete_item($id): bool
     {
         $course = get_post($id);
-        
+
         if (!$course || $course->post_type !== PostTypes::COURSE) {
             return false;
         }
@@ -655,16 +680,16 @@ class CoursesListTable extends AbstractListTable
         delete_post_meta($id, '_sikshya_course_price_type');
         delete_post_meta($id, '_sikshya_course_duration');
         delete_post_meta($id, '_sikshya_course_difficulty');
-        
+
         // Delete the course
         $result = wp_delete_post($id, true);
-        
+
         return $result !== false;
     }
 
     /**
      * Update course status
-     * 
+     *
      * @param int $id
      * @param string $status
      * @return bool
@@ -672,7 +697,7 @@ class CoursesListTable extends AbstractListTable
     protected function update_item_status($id, $status): bool
     {
         $course = get_post($id);
-        
+
         if (!$course || $course->post_type !== PostTypes::COURSE) {
             return false;
         }
@@ -681,13 +706,13 @@ class CoursesListTable extends AbstractListTable
             'ID' => $id,
             'post_status' => $status,
         ]);
-        
+
         return !is_wp_error($result);
     }
 
     /**
      * Get instructors list for filter
-     * 
+     *
      * @return array
      */
     private function getInstructorsList(): array
@@ -696,74 +721,75 @@ class CoursesListTable extends AbstractListTable
             'role__in' => ['administrator', 'instructor'],
             'orderby' => 'display_name',
         ]);
-        
+
         $list = ['' => __('All Instructors', 'sikshya')];
-        
+
         foreach ($instructors as $instructor) {
             $list[$instructor->ID] = $instructor->display_name;
         }
-        
+
         // If no instructors found, add dummy instructors for demo
         if (count($instructors) === 0) {
             $list[1] = 'John Smith';
             $list[2] = 'Sarah Johnson';
             $list[3] = 'Mike Wilson';
         }
-        
+
         return $list;
     }
 
     /**
      * Get status filter
-     * 
+     *
      * @return array|string
      */
     private function getStatusFilter()
     {
-        $status = $_GET['status'] ?? '';
-        
+        $status = sanitize_key($_GET['status'] ?? '');
+
         if (empty($status)) {
             return ['publish', 'draft', 'private', 'pending'];
         }
-        
-        return $status;
+
+        $allowed = ['publish', 'draft', 'private', 'pending'];
+        return in_array($status, $allowed, true) ? $status : ['publish', 'draft', 'private', 'pending'];
     }
 
     /**
      * Get instructor filter
-     * 
+     *
      * @return int|false
      */
     private function getInstructorFilter()
     {
         $instructor = $_GET['instructor'] ?? '';
-        
+
         if (empty($instructor)) {
             return false;
         }
-        
+
         return intval($instructor);
     }
 
     /**
      * Get price type filter
-     * 
+     *
      * @return string|false
      */
     private function getPriceTypeFilter()
     {
-        $price_type = $_GET['price_type'] ?? '';
-        
+        $price_type = sanitize_key($_GET['price_type'] ?? '');
+
         if (empty($price_type)) {
             return false;
         }
-        
-        return $price_type;
+
+        return in_array($price_type, ['free', 'paid'], true) ? $price_type : false;
     }
 
     /**
      * Get price type meta query
-     * 
+     *
      * @param string $price_type
      * @return array
      */
@@ -805,7 +831,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Get search term
-     * 
+     *
      * @return string
      */
     private function getSearchTerm(): string
@@ -815,33 +841,34 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Get order by
-     * 
+     *
      * @return string
      */
     private function getOrderBy(): string
     {
-        $orderby = $_GET['orderby'] ?? 'date';
-        
+        $orderby = sanitize_key($_GET['orderby'] ?? 'date');
+
         $allowed_orderby = ['title', 'instructor', 'status', 'enrollments', 'price', 'created', 'date'];
-        
-        return in_array($orderby, $allowed_orderby) ? $orderby : 'date';
+
+        return in_array($orderby, $allowed_orderby, true) ? $orderby : 'date';
     }
 
     /**
      * Get order
-     * 
+     *
      * @return string
      */
     private function getOrder(): string
     {
-        $order = $_GET['order'] ?? 'DESC';
-        
-        return in_array(strtoupper($order), ['ASC', 'DESC']) ? strtoupper($order) : 'DESC';
+        $order = sanitize_key($_GET['order'] ?? 'desc');
+
+        $order = strtoupper($order);
+        return in_array($order, ['ASC', 'DESC'], true) ? $order : 'DESC';
     }
 
     /**
      * Get course enrollments count
-     * 
+     *
      * @param int $course_id
      * @return int
      */
@@ -854,7 +881,7 @@ class CoursesListTable extends AbstractListTable
 
     /**
      * Get course lessons count
-     * 
+     *
      * @param int $course_id
      * @return int
      */
@@ -872,14 +899,14 @@ class CoursesListTable extends AbstractListTable
                 ],
             ],
         ];
-        
+
         $query = new \WP_Query($args);
         return $query->found_posts;
     }
 
     /**
      * Extra table navigation
-     * 
+     *
      * @param string $which
      * @return void
      */
@@ -888,9 +915,9 @@ class CoursesListTable extends AbstractListTable
         if ($which !== 'top') {
             return;
         }
-        
+
         echo '<div class="alignleft actions">';
-        echo '<a href="' . admin_url('admin.php?page=sikshya-add-course') . '" class="button button-primary">';
+        echo '<a href="' . esc_url(ReactAdminConfig::reactAppUrl('add-course')) . '" class="button button-primary">';
         echo '<span class="dashicons dashicons-plus-alt2"></span> ' . __('Add New Course', 'sikshya');
         echo '</a>';
         echo '</div>';

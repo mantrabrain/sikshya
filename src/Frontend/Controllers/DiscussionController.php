@@ -76,4 +76,4 @@ class DiscussionController
         $comments = $this->plugin->getService('discussion')->getComments($post_id);
         wp_send_json_success($comments);
     }
-} 
+}

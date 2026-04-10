@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Lesson AJAX Handler
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -19,7 +20,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * Lesson AJAX Handler Class
- * 
+ *
  * Handles all lesson-related AJAX operations including:
  * - Creating lessons for all content types
  * - Updating existing lessons
@@ -30,34 +31,34 @@ class LessonAjax extends AjaxAbstract
 {
     /**
      * Lesson service
-     * 
+     *
      * @var LessonService
      */
     private LessonService $lessonService;
-    
+
     /**
      * Course service
-     * 
+     *
      * @var CourseService
      */
     private CourseService $courseService;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param \Sikshya\Core\Plugin $plugin
+     * @param bool                 $register_hooks Passed to parent; avoids double initHooks.
      */
-    public function __construct($plugin)
+    public function __construct($plugin, bool $register_hooks = true)
     {
-        parent::__construct($plugin);
+        parent::__construct($plugin, $register_hooks);
         $this->lessonService = new LessonService();
         $this->courseService = new CourseService();
-        $this->initHooks();
     }
-    
+
     /**
      * Initialize AJAX hooks
-     * 
+     *
      * @return void
      */
     protected function initHooks(): void
@@ -67,12 +68,12 @@ class LessonAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_delete_lesson', [$this, 'handleDeleteLesson']);
         add_action('wp_ajax_sikshya_get_lesson', [$this, 'handleGetLesson']);
         add_action('wp_ajax_sikshya_get_lessons', [$this, 'handleGetLessons']);
-        
+
         // Lesson-specific operations
         add_action('wp_ajax_sikshya_upload_lesson_media', [$this, 'handleUploadLessonMedia']);
         add_action('wp_ajax_sikshya_save_lesson_meta', [$this, 'handleSaveLessonMeta']);
         add_action('wp_ajax_sikshya_duplicate_lesson', [$this, 'handleDuplicateLesson']);
-        
+
         // Content type specific handlers
         add_action('wp_ajax_sikshya_save_text_lesson', [$this, 'handleSaveTextLesson']);
         add_action('wp_ajax_sikshya_save_video_lesson', [$this, 'handleSaveVideoLesson']);
@@ -80,10 +81,10 @@ class LessonAjax extends AjaxAbstract
         add_action('wp_ajax_sikshya_save_assignment', [$this, 'handleSaveAssignment']);
         add_action('wp_ajax_sikshya_save_quiz', [$this, 'handleSaveQuiz']);
     }
-    
+
     /**
      * Handle general lesson save (for any content type)
-     * 
+     *
      * @return void
      */
     public function handleSaveLesson(): void
@@ -93,15 +94,15 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
-            
+
             $content_type = sanitize_text_field($this->getPostData('content_type', 'text'));
             $lesson_id = intval($this->getPostData('lesson_id', 0));
-            
+
             // Route to specific content type handler
             switch ($content_type) {
                 case 'text':
@@ -123,16 +124,15 @@ class LessonAjax extends AjaxAbstract
                     $this->sendError('Invalid content type');
                     break;
             }
-            
         } catch (\Exception $e) {
             $this->logError('Save lesson error', $e);
             $this->sendError('Failed to save lesson: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle text lesson save
-     * 
+     *
      * @return void
      */
     public function handleSaveTextLesson(): void
@@ -140,23 +140,22 @@ class LessonAjax extends AjaxAbstract
         try {
             $data = $this->getTextLessonData();
             $lesson_id = $this->saveLessonData($data, 'text');
-            
+
             $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
                 'lesson_title' => $lesson_title,
                 'message' => 'Text lesson saved successfully'
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Save text lesson error', $e);
             $this->sendError('Failed to save text lesson: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle video lesson save
-     * 
+     *
      * @return void
      */
     public function handleSaveVideoLesson(): void
@@ -164,23 +163,22 @@ class LessonAjax extends AjaxAbstract
         try {
             $data = $this->getVideoLessonData();
             $lesson_id = $this->saveLessonData($data, 'video');
-            
+
             $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
                 'lesson_title' => $lesson_title,
                 'message' => 'Video lesson saved successfully'
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Save video lesson error', $e);
             $this->sendError('Failed to save video lesson: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle audio lesson save
-     * 
+     *
      * @return void
      */
     public function handleSaveAudioLesson(): void
@@ -188,23 +186,22 @@ class LessonAjax extends AjaxAbstract
         try {
             $data = $this->getAudioLessonData();
             $lesson_id = $this->saveLessonData($data, 'audio');
-            
+
             $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
                 'lesson_title' => $lesson_title,
                 'message' => 'Audio lesson saved successfully'
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Save audio lesson error', $e);
             $this->sendError('Failed to save audio lesson: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle assignment save
-     * 
+     *
      * @return void
      */
     public function handleSaveAssignment(): void
@@ -212,23 +209,22 @@ class LessonAjax extends AjaxAbstract
         try {
             $data = $this->getAssignmentData();
             $lesson_id = $this->saveLessonData($data, 'assignment');
-            
+
             $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
                 'lesson_title' => $lesson_title,
                 'message' => 'Assignment saved successfully'
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Save assignment error', $e);
             $this->sendError('Failed to save assignment: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle quiz save
-     * 
+     *
      * @return void
      */
     public function handleSaveQuiz(): void
@@ -236,23 +232,22 @@ class LessonAjax extends AjaxAbstract
         try {
             $data = $this->getQuizData();
             $lesson_id = $this->saveLessonData($data, 'quiz');
-            
+
             $lesson_title = get_the_title($lesson_id);
             $this->sendSuccess([
                 'lesson_id' => $lesson_id,
                 'lesson_title' => $lesson_title,
                 'message' => 'Quiz saved successfully'
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Save quiz error', $e);
             $this->sendError('Failed to save quiz: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Get text lesson data from POST
-     * 
+     *
      * @return array
      */
     private function getTextLessonData(): array
@@ -283,10 +278,10 @@ class LessonAjax extends AjaxAbstract
             'status' => sanitize_text_field($this->getPostData('status', 'draft')),
         ];
     }
-    
+
     /**
      * Get video lesson data from POST
-     * 
+     *
      * @return array
      */
     private function getVideoLessonData(): array
@@ -309,10 +304,10 @@ class LessonAjax extends AjaxAbstract
             'status' => sanitize_text_field($this->getPostData('status', 'draft')),
         ];
     }
-    
+
     /**
      * Get audio lesson data from POST
-     * 
+     *
      * @return array
      */
     private function getAudioLessonData(): array
@@ -334,10 +329,10 @@ class LessonAjax extends AjaxAbstract
             'status' => sanitize_text_field($this->getPostData('status', 'draft')),
         ];
     }
-    
+
     /**
      * Get assignment data from POST
-     * 
+     *
      * @return array
      */
     private function getAssignmentData(): array
@@ -360,10 +355,10 @@ class LessonAjax extends AjaxAbstract
             'status' => sanitize_text_field($this->getPostData('status', 'draft')),
         ];
     }
-    
+
     /**
      * Get quiz data from POST
-     * 
+     *
      * @return array
      */
     private function getQuizData(): array
@@ -383,10 +378,10 @@ class LessonAjax extends AjaxAbstract
             'status' => sanitize_text_field($this->getPostData('status', 'draft')),
         ];
     }
-    
+
     /**
      * Save lesson data to database
-     * 
+     *
      * @param array $data
      * @param string $type
      * @return int
@@ -397,19 +392,19 @@ class LessonAjax extends AjaxAbstract
         if (empty($data['title'])) {
             throw new \InvalidArgumentException('Lesson title is required');
         }
-        
+
         if (empty($data['course_id'])) {
             throw new \InvalidArgumentException('Course ID is required');
         }
-        
+
         // Set default values
         $data['type'] = $type;
         $data['status'] = $data['status'] ?? 'draft';
         $data['author_id'] = get_current_user_id();
-        
+
         // Check if updating existing lesson
         $lesson_id = intval($this->getPostData('lesson_id', 0));
-        
+
         if ($lesson_id > 0) {
             // Update existing lesson
             $success = $this->lessonService->updateLesson($lesson_id, $data);
@@ -426,10 +421,10 @@ class LessonAjax extends AjaxAbstract
             return $lesson_id;
         }
     }
-    
+
     /**
      * Handle lesson delete
-     * 
+     *
      * @return void
      */
     public function handleDeleteLesson(): void
@@ -439,36 +434,35 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
-            
+
             $lesson_id = intval($this->getPostData('lesson_id', 0));
-            
+
             if ($lesson_id <= 0) {
                 $this->sendError('Invalid lesson ID');
                 return;
             }
-            
+
             $success = $this->lessonService->deleteLesson($lesson_id);
-            
+
             if ($success) {
                 $this->sendSuccess(null, 'Lesson deleted successfully');
             } else {
                 $this->sendError('Failed to delete lesson');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Delete lesson error', $e);
             $this->sendError('Failed to delete lesson: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle get lesson
-     * 
+     *
      * @return void
      */
     public function handleGetLesson(): void
@@ -478,31 +472,30 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             $lesson_id = intval($this->getPostData('lesson_id', 0));
-            
+
             if ($lesson_id <= 0) {
                 $this->sendError('Invalid lesson ID');
                 return;
             }
-            
+
             $lesson = $this->lessonService->getLesson($lesson_id);
-            
+
             if ($lesson) {
                 $this->sendSuccess(['lesson' => $lesson]);
             } else {
                 $this->sendError('Lesson not found');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Get lesson error', $e);
             $this->sendError('Failed to get lesson: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle get lessons
-     * 
+     *
      * @return void
      */
     public function handleGetLessons(): void
@@ -512,31 +505,30 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             $course_id = intval($this->getPostData('course_id', 0));
             $args = [
                 'posts_per_page' => intval($this->getPostData('posts_per_page', 20)),
                 'paged' => intval($this->getPostData('paged', 1)),
                 'post_status' => sanitize_text_field($this->getPostData('status', 'any')),
             ];
-            
+
             if ($course_id > 0) {
                 $lessons = $this->lessonService->getLessonsByCourse($course_id, $args);
             } else {
                 $lessons = $this->lessonService->getAllLessons($args);
             }
-            
+
             $this->sendSuccess(['lessons' => $lessons]);
-            
         } catch (\Exception $e) {
             $this->logError('Get lessons error', $e);
             $this->sendError('Failed to get lessons: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle lesson media upload
-     * 
+     *
      * @return void
      */
     public function handleUploadLessonMedia(): void
@@ -546,24 +538,23 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
-            
+
             // Handle file upload logic here
             $this->sendError('Media upload not implemented yet');
-            
         } catch (\Exception $e) {
             $this->logError('Upload lesson media error', $e);
             $this->sendError('Failed to upload media: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle save lesson meta
-     * 
+     *
      * @return void
      */
     public function handleSaveLessonMeta(): void
@@ -573,38 +564,37 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
-            
+
             $lesson_id = intval($this->getPostData('lesson_id', 0));
             $meta_key = sanitize_text_field($this->getPostData('meta_key', ''));
             $meta_value = $this->getPostData('meta_value', '');
-            
+
             if ($lesson_id <= 0 || empty($meta_key)) {
                 $this->sendError('Invalid lesson ID or meta key');
                 return;
             }
-            
+
             $success = $this->lessonService->setMeta($lesson_id, $meta_key, $meta_value);
-            
+
             if ($success) {
                 $this->sendSuccess(null, 'Lesson meta saved successfully');
             } else {
                 $this->sendError('Failed to save lesson meta');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Save lesson meta error', $e);
             $this->sendError('Failed to save lesson meta: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Handle duplicate lesson
-     * 
+     *
      * @return void
      */
     public function handleDuplicateLesson(): void
@@ -614,26 +604,26 @@ class LessonAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability()) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
-            
+
             $lesson_id = intval($this->getPostData('lesson_id', 0));
-            
+
             if ($lesson_id <= 0) {
                 $this->sendError('Invalid lesson ID');
                 return;
             }
-            
+
             $lesson = $this->lessonService->getLesson($lesson_id);
-            
+
             if (!$lesson) {
                 $this->sendError('Lesson not found');
                 return;
             }
-            
+
             // Create duplicate lesson data
             $duplicate_data = [
                 'title' => $lesson->post_title . ' (Copy)',
@@ -643,9 +633,9 @@ class LessonAjax extends AjaxAbstract
                 'duration' => $this->lessonService->getMeta($lesson_id, 'duration'),
                 'status' => 'draft',
             ];
-            
+
             $new_lesson_id = $this->lessonService->createLesson($duplicate_data);
-            
+
             if ($new_lesson_id) {
                 $this->sendSuccess([
                     'lesson_id' => $new_lesson_id,
@@ -654,11 +644,9 @@ class LessonAjax extends AjaxAbstract
             } else {
                 $this->sendError('Failed to duplicate lesson');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Duplicate lesson error', $e);
             $this->sendError('Failed to duplicate lesson: ' . $e->getMessage());
         }
     }
 }
-

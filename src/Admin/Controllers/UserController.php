@@ -60,7 +60,7 @@ class UserController
     public function students(): void
     {
         $action = $_GET['action'] ?? 'list';
-        
+
         switch ($action) {
             case 'add':
                 $this->addStudent();
@@ -82,7 +82,7 @@ class UserController
     public function instructors(): void
     {
         $action = $_GET['action'] ?? 'list';
-        
+
         switch ($action) {
             case 'add':
                 $this->addInstructor();
@@ -156,13 +156,13 @@ class UserController
     private function editStudent(): void
     {
         $user_id = intval($_GET['id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_die(__('Student not found.', 'sikshya'));
         }
 
         $student = get_user_by('id', $user_id);
-        
+
         if (!$student || !in_array('sikshya_student', $student->roles)) {
             wp_die(__('Student not found.', 'sikshya'));
         }
@@ -180,13 +180,13 @@ class UserController
     private function editInstructor(): void
     {
         $user_id = intval($_GET['id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_die(__('Instructor not found.', 'sikshya'));
         }
 
         $instructor = get_user_by('id', $user_id);
-        
+
         if (!$instructor || !in_array('sikshya_instructor', $instructor->roles)) {
             wp_die(__('Instructor not found.', 'sikshya'));
         }
@@ -204,13 +204,13 @@ class UserController
     private function viewStudent(): void
     {
         $user_id = intval($_GET['id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_die(__('Student not found.', 'sikshya'));
         }
 
         $student = get_user_by('id', $user_id);
-        
+
         if (!$student || !in_array('sikshya_student', $student->roles)) {
             wp_die(__('Student not found.', 'sikshya'));
         }
@@ -230,13 +230,13 @@ class UserController
     private function viewInstructor(): void
     {
         $user_id = intval($_GET['id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_die(__('Instructor not found.', 'sikshya'));
         }
 
         $instructor = get_user_by('id', $user_id);
-        
+
         if (!$instructor || !in_array('sikshya_instructor', $instructor->roles)) {
             wp_die(__('Instructor not found.', 'sikshya'));
         }
@@ -404,7 +404,7 @@ class UserController
              JOIN {$wpdb->posts} c ON sc.post_id = c.ID
              LEFT JOIN {$wpdb->users} u ON sc.instructor_id = u.ID
              WHERE e.user_id = %d
-             ORDER BY e.enrollment_date DESC",
+             ORDER BY e.enrolled_date DESC",
             $user_id
         ));
     }
@@ -648,13 +648,13 @@ class UserController
     private function approveInstructor(): void
     {
         $user_id = intval($_POST['user_id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_send_json_error(__('User ID is required.', 'sikshya'));
         }
 
         $user = get_user_by('id', $user_id);
-        
+
         if (!$user || !in_array('sikshya_instructor', $user->roles)) {
             wp_send_json_error(__('Instructor not found.', 'sikshya'));
         }
@@ -680,13 +680,13 @@ class UserController
     {
         $user_id = intval($_POST['user_id'] ?? 0);
         $reason = sanitize_textarea_field($_POST['reason'] ?? '');
-        
+
         if (!$user_id) {
             wp_send_json_error(__('User ID is required.', 'sikshya'));
         }
 
         $user = get_user_by('id', $user_id);
-        
+
         if (!$user || !in_array('sikshya_instructor', $user->roles)) {
             wp_send_json_error(__('Instructor not found.', 'sikshya'));
         }
@@ -713,13 +713,13 @@ class UserController
     {
         $user_id = intval($_POST['user_id'] ?? 0);
         $reason = sanitize_textarea_field($_POST['reason'] ?? '');
-        
+
         if (!$user_id) {
             wp_send_json_error(__('User ID is required.', 'sikshya'));
         }
 
         $user = get_user_by('id', $user_id);
-        
+
         if (!$user) {
             wp_send_json_error(__('User not found.', 'sikshya'));
         }
@@ -743,13 +743,13 @@ class UserController
     private function activateUser(): void
     {
         $user_id = intval($_POST['user_id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_send_json_error(__('User ID is required.', 'sikshya'));
         }
 
         $user = get_user_by('id', $user_id);
-        
+
         if (!$user) {
             wp_send_json_error(__('User not found.', 'sikshya'));
         }
@@ -772,20 +772,20 @@ class UserController
     private function deleteUser(): void
     {
         $user_id = intval($_POST['user_id'] ?? 0);
-        
+
         if (!$user_id) {
             wp_send_json_error(__('User ID is required.', 'sikshya'));
         }
 
         $user = get_user_by('id', $user_id);
-        
+
         if (!$user) {
             wp_send_json_error(__('User not found.', 'sikshya'));
         }
 
         // Delete user data
         global $wpdb;
-        
+
         $wpdb->delete($wpdb->prefix . 'sikshya_enrollments', ['user_id' => $user_id]);
         $wpdb->delete($wpdb->prefix . 'sikshya_progress', ['user_id' => $user_id]);
         $wpdb->delete($wpdb->prefix . 'sikshya_certificates', ['user_id' => $user_id]);
@@ -872,7 +872,7 @@ class UserController
     private function deleteUserData(int $user_id): void
     {
         global $wpdb;
-        
+
         $wpdb->delete($wpdb->prefix . 'sikshya_enrollments', ['user_id' => $user_id]);
         $wpdb->delete($wpdb->prefix . 'sikshya_progress', ['user_id' => $user_id]);
         $wpdb->delete($wpdb->prefix . 'sikshya_certificates', ['user_id' => $user_id]);
@@ -933,4 +933,4 @@ Best regards,
 
         wp_mail($user->user_email, $subject, $message);
     }
-} 
+}

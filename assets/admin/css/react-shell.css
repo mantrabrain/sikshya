@@ -1,0 +1,46 @@
+/**
+ * Full-width Sikshya React admin: hide default wp-admin chrome on our screens.
+ */
+body.sikshya-react-shell .screen-reader-shortcut,
+body.sikshya-react-shell a[href="#wpbody-content"],
+body.sikshya-react-shell a[href="#wp-toolbar"] {
+    display: none !important;
+}
+
+body.sikshya-react-shell #wpbody-content {
+    padding-bottom: 0;
+}
+
+body.sikshya-react-shell #wpcontent {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+body.sikshya-react-shell #adminmenuback,
+body.sikshya-react-shell #adminmenuwrap {
+    display: none !important;
+}
+
+body.sikshya-react-shell #wpfooter,
+body.sikshya-react-shell .sikshya-admin-footer {
+    display: none !important;
+}
+
+body.sikshya-react-shell #wpbody-content > .wrap {
+    margin: 0;
+    max-width: none;
+}
+
+/* No WordPress admin bar on the Sikshya app screen */
+body.sikshya-react-shell #wpadminbar {
+    display: none !important;
+}
+
+html.wp-toolbar body.sikshya-react-shell {
+    padding-top: 0 !important;
+}
+
+/* Reduce top offset when admin bar is present */
+body.sikshya-react-shell #wpbody {
+    padding-top: 0;
+}

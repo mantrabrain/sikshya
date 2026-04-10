@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Settings AJAX Handler
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -17,7 +18,7 @@ class SettingsAjax extends AjaxAbstract
 {
     /**
      * Initialize hooks
-     * 
+     *
      * @return void
      */
     protected function initHooks(): void
@@ -40,26 +41,26 @@ class SettingsAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability('manage_options')) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
 
             $tab = sanitize_text_field($this->getPostData('tab', ''));
-            
+
             if (empty($tab)) {
                 $this->sendError('Tab is required');
                 return;
             }
-            
+
             // Get settings manager first to access configuration
             $settings_manager = $this->plugin->getService('settings');
-            
+
             // Get the settings configuration for this tab to identify checkbox fields
             $tab_settings = $settings_manager->getTabSettings($tab);
             $checkbox_fields = [];
-            
+
             // Extract checkbox field names from the settings configuration
             foreach ($tab_settings as $section) {
                 if (isset($section['fields']) && is_array($section['fields'])) {
@@ -70,7 +71,7 @@ class SettingsAjax extends AjaxAbstract
                     }
                 }
             }
-            
+
             // Get all form data except action, nonce, and tab
             $data = [];
             foreach ($_POST as $key => $value) {
@@ -78,23 +79,22 @@ class SettingsAjax extends AjaxAbstract
                     $data[$key] = $value;
                 }
             }
-            
+
             // Handle unchecked checkboxes - set them to '0' if not present in POST data
             foreach ($checkbox_fields as $checkbox_field) {
                 if (!isset($data[$checkbox_field])) {
                     $data[$checkbox_field] = '0';
                 }
             }
-            
+
             // Save settings for the specific tab
             $result = $settings_manager->saveTabSettings($tab, $data);
-            
+
             if ($result) {
                 $this->sendSuccess(null, 'Settings saved successfully');
             } else {
                 $this->sendError('Failed to save settings');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Save settings error', $e);
             $this->sendError('Failed to save settings: ' . $e->getMessage());
@@ -111,27 +111,26 @@ class SettingsAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability('manage_options')) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
 
             $tab = sanitize_text_field($this->getPostData('tab', ''));
-            
+
             if (empty($tab)) {
                 $this->sendError('Tab is required');
                 return;
             }
-            
+
             // Get settings manager
             $settings_manager = $this->plugin->getService('settings');
-            
+
             // Render settings as HTML content
             $content = $settings_manager->renderTabSettings($tab);
-            
+
             $this->sendSuccess(['content' => $content]);
-            
         } catch (\Exception $e) {
             $this->logError('Load settings tab error', $e);
             $this->sendError('Failed to load settings: ' . $e->getMessage());
@@ -148,17 +147,17 @@ class SettingsAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability('manage_options')) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
 
             $tab = sanitize_text_field($this->getPostData('tab', ''));
-            
+
             // Get settings manager
             $settings_manager = $this->plugin->getService('settings');
-            
+
             if (!empty($tab)) {
                 // Reset specific tab
                 $result = $settings_manager->resetTabSettings($tab);
@@ -168,13 +167,12 @@ class SettingsAjax extends AjaxAbstract
                 $result = $settings_manager->resetAllSettings();
                 $message = 'All settings reset successfully';
             }
-            
+
             if ($result) {
                 $this->sendSuccess(null, $message);
             } else {
                 $this->sendError('Failed to reset settings');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Reset settings error', $e);
             $this->sendError('Failed to reset settings: ' . $e->getMessage());
@@ -191,17 +189,17 @@ class SettingsAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability('manage_options')) {
                 $this->sendError('Insufficient permissions');
                 return;
             }
 
             $tab = sanitize_text_field($this->getPostData('tab', ''));
-            
+
             // Get settings manager
             $settings_manager = $this->plugin->getService('settings');
-            
+
             if (!empty($tab)) {
                 // Export specific tab
                 $data = $settings_manager->exportTabSettings($tab);
@@ -211,12 +209,11 @@ class SettingsAjax extends AjaxAbstract
                 $data = $settings_manager->exportAllSettings();
                 $filename = 'sikshya-settings-all-' . date('Y-m-d') . '.json';
             }
-            
+
             $this->sendSuccess([
                 'data' => $data,
                 'filename' => $filename
             ]);
-            
         } catch (\Exception $e) {
             $this->logError('Export settings error', $e);
             $this->sendError('Failed to export settings: ' . $e->getMessage());
@@ -233,7 +230,7 @@ class SettingsAjax extends AjaxAbstract
                 $this->sendError('Invalid nonce');
                 return;
             }
-            
+
             if (!$this->checkCapability('manage_options')) {
                 $this->sendError('Insufficient permissions');
                 return;
@@ -241,32 +238,31 @@ class SettingsAjax extends AjaxAbstract
 
             $file_data = $this->getPostData('file_data', '');
             $overwrite = (bool) $this->getPostData('overwrite', false);
-            
+
             if (empty($file_data)) {
                 $this->sendError('No file data provided');
                 return;
             }
-            
+
             // Decode JSON data
             $data = json_decode($file_data, true);
-            
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->sendError('Invalid JSON data');
                 return;
             }
-            
+
             // Get settings manager
             $settings_manager = $this->plugin->getService('settings');
-            
+
             // Import settings
             $result = $settings_manager->importSettings($data, $overwrite);
-            
+
             if ($result) {
                 $this->sendSuccess(null, 'Settings imported successfully');
             } else {
                 $this->sendError('Failed to import settings');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Import settings error', $e);
             $this->sendError('Failed to import settings: ' . $e->getMessage());

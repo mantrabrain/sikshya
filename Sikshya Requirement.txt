@@ -1,0 +1,520 @@
+# Research-Based LMS Free vs Pro vs Elite Strategy (2026)
+
+This version is refined using:
+
+* your shared LMS feature inventory
+* current Tutor LMS and Masteriyo market positioning
+* 2026 WordPress LMS buyer expectations
+* free retention and premium conversion best practices
+* user complaints about LMS complexity and bloated setups
+
+---
+
+# 🎯 Core Product Positioning
+
+Your biggest opportunity is:
+
+**Simple when starting, powerful when scaling.**
+
+The free version should help users:
+
+* launch first course
+* enroll first students
+* make first sale
+
+The paid versions should help them:
+
+* improve outcomes
+* grow revenue
+* scale teams
+* build marketplace businesses
+
+---
+
+# 🥇 PRIORITY 1 — FREE (ACTIVATION + RETENTION)
+
+These features must help users successfully launch their first real course business.
+
+## 📚 Core Course Builder
+
+* unlimited courses
+* unlimited lessons
+* drag-and-drop curriculum builder
+* sections / chapters
+* video lessons
+* text lessons
+* downloadable lesson materials
+* lesson preview
+* course FAQ
+* announcements
+* student dashboard
+* progress tracking
+* wishlist
+
+## 🧠 Learning & Assessment
+
+* quiz builder basic
+* multiple choice
+* true/false
+* short answer
+* passing marks
+* quiz timer basic
+* certificates basic
+* assignments (limited basic)
+
+## 💳 Monetization (FREE)
+
+This is your strongest free differentiator.
+
+* native checkout
+* Stripe
+* PayPal
+* WooCommerce integration
+* one-time course purchase
+* free courses
+* manual enrollment
+* coupons basic
+
+## 👤 Student Experience
+
+* my courses
+* progress dashboard
+* profile
+* login / register
+* lesson preview
+* course completion tracking
+
+---
+
+# 🥈 PRIORITY 2 — PRO (GROWTH + ROI)
+
+These should convert users after their first success.
+
+## ⏳ Content Drip + Prerequisites
+
+* date-based drip
+* scheduled lesson unlock
+* cohort release
+* prerequisite lessons
+* prerequisite courses
+
+## 👨‍🏫 Multi Instructor
+
+* multiple instructors
+* co-author lessons
+* instructor permissions
+* revenue split
+* instructor dashboard
+
+## 📊 Reports + Gradebook
+
+* student analytics
+* completion reports
+* revenue analytics
+* assignment grading
+* gradebook
+* report exports
+* student activity log
+
+## 🎓 Advanced Certificates
+
+* drag-drop builder
+* QR verification
+* serial IDs
+* verification page
+* dynamic variables
+* branded templates
+
+## 💸 Subscriptions + Memberships
+
+* monthly subscription
+* yearly plans
+* recurring billing
+* access expiry
+* bundle subscriptions
+* memberships
+
+## 🎁 Revenue Growth Features
+
+* course bundles
+* advanced coupons
+* upsells
+* order bumps
+
+## 🎥 Live Learning
+
+* Zoom integration
+* Google Meet
+* Google Classroom
+* attendance logs
+
+## 🔐 Better UX + Conversion
+
+* social login
+* advanced quiz types
+* advanced assignments
+* drip notifications
+* better email automation
+
+---
+
+# 👑 PRIORITY 3 — ELITE (AGENCY + MARKETPLACE)
+
+These should be your premium highest-value tier.
+
+## 🏫 Multi Vendor LMS Marketplace
+
+* Udemy-style marketplace
+* instructor storefronts
+* commission split
+* payouts
+* withdrawal requests
+* marketplace reports
+* vendor analytics
+
+## ⚙️ Automation + Enterprise
+
+* Zapier
+* webhooks
+* public API
+* FluentCRM
+* HubSpot
+* Mailchimp
+* Brevo
+* Slack
+* Discord
+* WhatsApp
+
+## 🏷️ White Label + Agency
+
+* remove plugin branding
+* custom logo
+* custom admin labels
+* client site handoff
+* multisite support
+
+## 🌍 Enterprise Learning
+
+* multilingual
+* WPML
+* Weglot
+* SCORM advanced
+* H5P
+* enterprise reports
+
+---
+
+# 🚀 BEST UPGRADE FUNNEL
+
+## 🟢 FREE
+
+Launch first course and first sale.
+
+## 🔵 PRO
+
+Grow revenue, teams, subscriptions, and learning outcomes.
+
+## 🟣 ELITE
+
+Build academy, marketplace, or agency LMS business.
+
+---
+
+# 🧲 HIGHEST CONVERTING PAYWALL MOMENTS
+
+Use upgrade prompts at these exact product moments:
+
+1. after first course publish → unlock drip
+2. after first 10 students → unlock reports
+3. when adding second instructor → unlock multi instructor
+4. when enabling recurring payments → unlock subscriptions
+5. when selling multiple courses → unlock bundles
+6. when adding vendors → unlock marketplace
+
+---
+
+# 🏆 FINAL RESEARCHED SPLIT
+
+## ✅ FREE
+
+* builder
+* quizzes
+* certificates basic
+* assignments basic
+* Stripe
+* PayPal
+* WooCommerce
+* dashboard
+* wishlist
+* attachments
+* manual enrollment
+
+## 💎 PRO
+
+* drip
+* prerequisites
+* subscriptions
+* analytics
+* reports
+* advanced assignments
+* gradebook
+* multi instructor
+* advanced certificates
+* bundles
+* zoom / google meet
+* social login
+
+## 👑 ELITE
+
+* marketplace
+* white label
+* automation
+* API
+* CRM
+* webhooks
+* multilingual
+* enterprise analytics
+
+---
+
+# 💡 Strategic Summary
+
+Your winning angle is:
+
+**better free monetization + less complexity than Tutor LMS.**
+
+That improves:
+
+* WordPress.org installs
+* first-course success
+* free retention
+* premium conversion
+* agency upgrades
+
+SIKSHYA LMS PRICING STRATEGY
+LMS Pricing Plan (Copyable Text Format)
+YEARLY PRICING
+Free Plan — Creator Starter
+Price: $0
+Includes:
+Unlimited courses
+
+
+Lessons + quiz builder
+
+
+Certificates
+
+
+Basic assignments
+
+
+Stripe / WooCommerce payments
+
+
+Course attachments
+
+
+Course preview
+
+
+Announcements
+
+
+Basic reports
+
+
+Student dashboard
+
+
+Wishlist
+
+
+Elementor / page builder widgets
+
+
+One live class integration (Zoom or Google Meet)
+
+
+Social login
+
+
+Basic email notifications
+
+
+Manual enrollment
+
+
+Limited coupons
+
+
+Single instructor
+
+
+Basic content drip
+
+
+
+Business Plan — Most Popular
+Price: $99/year (1 site)
+Includes everything in Free +
+Multiple instructors
+
+
+Advanced quizzes
+
+
+Gradebook
+
+
+Advanced assignments
+
+
+Progress-based content drip
+
+
+Course prerequisites
+
+
+Course bundles
+
+
+Subscription / recurring payments
+
+
+Premium payment gateways
+
+
+CRM & email marketing automation
+
+
+Zoom + Google Meet
+
+
+Revenue sharing
+
+
+Public instructor profile
+
+
+Course FAQ
+
+
+Advanced certificates
+
+
+Student analytics
+
+
+Calendar
+
+
+Notifications
+
+
+Google Classroom
+
+
+SCORM
+
+
+H5P
+
+
+Unlimited students
+
+
+
+Agency Plan
+Price: $199/year (10 sites)
+Includes everything in Business +
+White label
+
+
+Client site management
+
+
+Multi-site activation
+
+
+Export/import templates
+
+
+Saved course blueprints
+
+
+Central license dashboard
+
+
+Priority support
+
+
+Team member roles
+
+
+Reusable content bank
+
+
+Premium migration tools
+
+
+
+LIFETIME PRICING
+Lifetime 1 Site
+Price: $249 one-time
+Lifetime 10 Sites
+Price: $399 one-time
+Lifetime Unlimited Sites
+Price: $699 one-time
+
+BEST CONVERSION STRATEGY
+Recommended pricing card order:
+Free
+
+
+Business (Most Popular)
+
+
+Agency
+
+
+Lifetime
+
+
+Recommended default highlighted plan:
+Business Plan ($99/year)
+
+
+Best upgrade path:
+Free for creators
+
+
+Business for growing schools
+
+
+Agency for freelancers/agencies
+
+
+Lifetime for WordPress power users
+
+
+This pricing structure is optimized for:
+strong free user retention
+
+
+premium feature upgrades
+
+
+agency expansion
+
+
+WordPress lifetime deal buyers
+
+
+Black Friday campaigns
+
+
+launch promotions
+
+
+

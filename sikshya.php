@@ -33,6 +33,14 @@ define('SIKSHYA_PLUGIN_BASENAME', plugin_basename(__FILE__));
 define('SIKSHYA_MINIMUM_WP_VERSION', '6.0');
 define('SIKSHYA_MINIMUM_PHP_VERSION', '8.1');
 
+/**
+ * When false, legacy `admin-ajax.php` handlers are not registered (REST-only mode).
+ * Set to true temporarily if a screen still depends on unmigrated AJAX.
+ */
+if (!defined('SIKSHYA_LEGACY_AJAX')) {
+    define('SIKSHYA_LEGACY_AJAX', false);
+}
+
 // Load Composer autoloader
 if (file_exists(SIKSHYA_PLUGIN_DIR . 'vendor/autoload.php')) {
     require_once SIKSHYA_PLUGIN_DIR . 'vendor/autoload.php';
@@ -41,6 +49,8 @@ if (file_exists(SIKSHYA_PLUGIN_DIR . 'vendor/autoload.php')) {
     require_once SIKSHYA_PLUGIN_DIR . 'src/Core/Autoloader.php';
     \Sikshya\Core\Autoloader::register();
 }
+
+require_once SIKSHYA_PLUGIN_DIR . 'includes/template-functions.php';
 
 // Initialize the plugin
 function sikshya() {

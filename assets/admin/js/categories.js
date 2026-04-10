@@ -134,55 +134,44 @@
 
             this.setLoading(true);
             
-            const ajaxData = {
-                action: 'sikshya_save_category',
-                nonce: sikshyaAdmin.nonce,
-                ...formData
-            };
-
-            $.ajax({
-                url: sikshyaAdmin.ajax_url,
-                type: 'POST',
-                data: ajaxData,
-                success: (response) => {
-                    this.setLoading(false);
-                    if (response.success) {
-                        this.showSuccess(response.data.message);
+            fetch(`${sikshyaAdmin.rest_url}taxonomies/course-category`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshyaAdmin.rest_nonce
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(r => r.json())
+            .then((response) => {
+                this.setLoading(false);
+                if (response.success) {
+                    this.showSuccess(response.message || 'Saved');
                         this.resetToAddMode();
                         this.refreshPage();
                     } else {
-                        this.showError(response.data.message || 'An error occurred');
+                        this.showError(response.message || 'An error occurred');
                     }
-                },
-                error: (xhr, status, error) => {
-                    this.setLoading(false);
-                    this.showError('Network error occurred');
-                }
             });
         },
 
         deleteCategory: function(categoryId) {
-            const ajaxData = {
-                action: 'sikshya_delete_category',
-                nonce: sikshyaAdmin.nonce,
-                term_id: categoryId
-            };
-
-            $.ajax({
-                url: sikshyaAdmin.ajax_url,
-                type: 'POST',
-                data: ajaxData,
-                success: (response) => {
-                    if (response.success) {
-                        this.showSuccess(response.data.message);
+            fetch(`${sikshyaAdmin.rest_url}taxonomies/course-category/${categoryId}`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    'X-WP-Nonce': sikshyaAdmin.rest_nonce
+                }
+            })
+            .then(r => r.json())
+            .then((response) => {
+                if (response.success) {
+                    this.showSuccess(response.message || 'Deleted');
                         this.refreshPage();
                     } else {
-                        this.showError(response.data.message || 'An error occurred');
+                        this.showError(response.message || 'An error occurred');
                     }
-                },
-                error: (xhr, status, error) => {
-                    this.showError('Network error occurred');
-                }
             });
         },
 

@@ -14,8 +14,8 @@ class Requirements
      */
     public static function check(): bool
     {
-        return self::checkWordPressVersion() 
-            && self::checkPHPVersion() 
+        return self::checkWordPressVersion()
+            && self::checkPHPVersion()
             && self::checkExtensions();
     }
 
@@ -102,4 +102,4 @@ class Requirements
             <?php
         }
     }
-} 
+}

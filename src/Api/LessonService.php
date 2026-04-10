@@ -92,4 +92,4 @@ class LessonService
             'permalink' => get_permalink($post->ID),
         ];
     }
-} 
+}

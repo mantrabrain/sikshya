@@ -43,7 +43,7 @@ class AnalyticsService
         }
 
         global $wpdb;
-        
+
         $wpdb->insert(
             $wpdb->prefix . 'sikshya_analytics',
             [
@@ -67,7 +67,7 @@ class AnalyticsService
     private function getClientIp(): string
     {
         $ipKeys = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
-        
+
         foreach ($ipKeys as $key) {
             if (array_key_exists($key, $_SERVER) === true) {
                 foreach (explode(',', $_SERVER[$key]) as $ip) {
@@ -78,7 +78,7 @@ class AnalyticsService
                 }
             }
         }
-        
+
         return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
-} 
+}

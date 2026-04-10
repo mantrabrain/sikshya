@@ -102,7 +102,7 @@ class FormBuilder extends BaseView
     public function renderForm(): string
     {
         $this->enqueueAssets();
-        
+
         return $this->render('form-builder', [
             'config' => $this->config,
             'fields' => $this->fields,
@@ -174,7 +174,7 @@ class FormBuilder extends BaseView
                 $field_min = isset($field['min']) ? "min=\"{$field['min']}\"" : '';
                 $field_max = isset($field['max']) ? "max=\"{$field['max']}\"" : '';
                 $field_step = isset($field['step']) ? "step=\"{$field['step']}\"" : '';
-                
+
                 echo "<input type=\"{$field_type}\" id=\"{$field_id}\" name=\"{$field_name}\" 
                       value=\"" . esc_attr($field_value) . "\" class=\"{$field_class}\" 
                       {$field_required} placeholder=\"{$field_placeholder}\" {$field_min} {$field_max} {$field_step}>";
@@ -183,7 +183,7 @@ class FormBuilder extends BaseView
             case 'textarea':
                 $field_rows = $field['rows'] ?? 4;
                 echo "<textarea id=\"{$field_id}\" name=\"{$field_name}\" class=\"{$field_class}\" 
-                      {$field_required} placeholder=\"{$field_placeholder}\" rows=\"{$field_rows}\">" . 
+                      {$field_required} placeholder=\"{$field_placeholder}\" rows=\"{$field_rows}\">" .
                       esc_textarea($field_value) . "</textarea>";
                 break;
 
@@ -251,7 +251,7 @@ class FormBuilder extends BaseView
                 break;
 
             case 'button':
-                echo "<button type=\"button\" id=\"{$field_id}\" class=\"{$field_class}\">" . 
+                echo "<button type=\"button\" id=\"{$field_id}\" class=\"{$field_class}\">" .
                      esc_html($field['value'] ?? '') . "</button>";
                 break;
 
@@ -269,4 +269,4 @@ class FormBuilder extends BaseView
                 break;
         }
     }
-} 
+}

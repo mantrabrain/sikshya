@@ -33,28 +33,26 @@
                 </div>
             `);
 
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_tools_action',
-                    action_type: 'system_info',
-                    nonce: sikshya_ajax.nonce
+            fetch(`${sikshya.rest_url}tools`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshya.rest_nonce,
                 },
-                success: function(response) {
-                    console.log('System info response:', response);
+                body: JSON.stringify({ action_type: 'system_info' }),
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
                         this.displaySystemInfo(response);
                     } else {
-                        console.error('System info error:', response);
-                        this.showError('Failed to load system information');
+                        this.showError(response.message || 'Failed to load system information');
                     }
-                }.bind(this),
-                error: function(xhr, status, error) {
-                    console.error('AJAX error:', {xhr, status, error});
+                }.bind(this))
+                .catch(function() {
                     this.showError('Failed to load system information');
-                }.bind(this)
-            });
+                }.bind(this));
         },
 
         displaySystemInfo: function(response) {
@@ -128,30 +126,30 @@
                 Exporting...
             `).prop('disabled', true);
 
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_tools_action',
-                    action_type: 'export_data',
-                    export_type: exportType,
-                    nonce: sikshya_ajax.nonce
+            fetch(`${sikshya.rest_url}tools`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshya.rest_nonce,
                 },
-                success: function(response) {
+                body: JSON.stringify({ action_type: 'export_data', export_type: exportType }),
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
                         this.downloadFile(response.data, exportType);
                         this.showSuccess('Data exported successfully');
                     } else {
-                        this.showError(response.data.message || 'Export failed');
+                        this.showError(response.message || 'Export failed');
                     }
-                }.bind(this),
-                error: function() {
+                }.bind(this))
+                .catch(function() {
                     this.showError('Export failed');
-                }.bind(this),
-                complete: function() {
+                }.bind(this))
+                .finally(function() {
                     $button.html(originalText).prop('disabled', false);
-                }
-            });
+                });
         },
 
         downloadFile: function(data, type) {
@@ -189,30 +187,30 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    $.ajax({
-                        url: sikshya_ajax.ajax_url,
-                        type: 'POST',
-                        data: {
-                            action: 'sikshya_tools_action',
-                            action_type: 'import_data',
-                            file_data: e.target.result,
-                            nonce: sikshya_ajax.nonce
+                    fetch(`${sikshya.rest_url}tools`, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-WP-Nonce': sikshya.rest_nonce,
                         },
-                        success: function(response) {
+                        body: JSON.stringify({ action_type: 'import_data', file_data: e.target.result }),
+                    })
+                        .then(r => r.json())
+                        .then(function(response) {
                             if (response.success) {
                                 this.showSuccess('Data imported successfully');
                                 $('#import-file').val('');
                             } else {
-                                this.showError(response.data.message || 'Import failed');
+                                this.showError(response.message || 'Import failed');
                             }
-                        }.bind(this),
-                        error: function() {
+                        }.bind(this))
+                        .catch(function() {
                             this.showError('Import failed');
-                        }.bind(this),
-                        complete: function() {
+                        }.bind(this))
+                        .finally(function() {
                             $button.html(originalText).prop('disabled', false);
-                        }
-                    });
+                        });
                 } catch (error) {
                     this.showError('Invalid file format');
                     $button.html(originalText).prop('disabled', false);
@@ -235,28 +233,29 @@
                 Clearing...
             `).prop('disabled', true);
 
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_tools_action',
-                    action_type: 'clear_cache',
-                    nonce: sikshya_ajax.nonce
+            fetch(`${sikshya.rest_url}tools`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshya.rest_nonce,
                 },
-                success: function(response) {
+                body: JSON.stringify({ action_type: 'clear_cache' }),
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
                         this.showSuccess('Cache cleared successfully');
                     } else {
-                        this.showError(response.data.message || 'Failed to clear cache');
+                        this.showError(response.message || 'Failed to clear cache');
                     }
-                }.bind(this),
-                error: function() {
+                }.bind(this))
+                .catch(function() {
                     this.showError('Failed to clear cache');
-                }.bind(this),
-                complete: function() {
+                }.bind(this))
+                .finally(function() {
                     $button.html(originalText).prop('disabled', false);
-                }
-            });
+                });
         },
 
         resetSettings: function() {
@@ -272,31 +271,32 @@
                 Resetting...
             `).prop('disabled', true);
 
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_tools_action',
-                    action_type: 'reset_settings',
-                    nonce: sikshya_ajax.nonce
+            fetch(`${sikshya.rest_url}tools`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshya.rest_nonce,
                 },
-                success: function(response) {
+                body: JSON.stringify({ action_type: 'reset_settings' }),
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
                         this.showSuccess('Settings reset successfully');
                         setTimeout(function() {
                             location.reload();
                         }, 1500);
                     } else {
-                        this.showError(response.data.message || 'Failed to reset settings');
+                        this.showError(response.message || 'Failed to reset settings');
                     }
-                }.bind(this),
-                error: function() {
+                }.bind(this))
+                .catch(function() {
                     this.showError('Failed to reset settings');
-                }.bind(this),
-                complete: function() {
+                }.bind(this))
+                .finally(function() {
                     $button.html(originalText).prop('disabled', false);
-                }
-            });
+                });
         },
 
         showSuccess: function(message) {

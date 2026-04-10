@@ -2,11 +2,12 @@
 
 namespace Sikshya\Admin\ListTable;
 
+use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 
 /**
  * Quizzes List Table
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -92,54 +93,74 @@ class QuizzesListTable extends AbstractListTable
     }
 
     /**
+     * Post status counts for subsubsub tabs.
+     *
+     * @return array<string, int>
+     */
+    protected function get_status_counts(): array
+    {
+        $counts = wp_count_posts(PostTypes::QUIZ);
+        if (!$counts || is_wp_error($counts)) {
+            return parent::get_status_counts();
+        }
+
+        return [
+            'publish' => (int) ($counts->publish ?? 0),
+            'draft' => (int) ($counts->draft ?? 0),
+            'pending' => (int) ($counts->pending ?? 0),
+            'private' => (int) ($counts->private ?? 0),
+        ];
+    }
+
+    /**
      * Get items for the table
-     * 
+     *
      * @return array
      */
     public function get_items(): array
     {
         // For demo purposes, return dummy data
         return $this->getDummyData();
-        
+
         // TODO: Implement actual database query
         /*
         global $wpdb;
-        
+
         $per_page = $this->get_items_per_page();
         $current_page = $this->get_pagenum();
         $offset = ($current_page - 1) * $per_page;
-        
+
         $where_clauses = [];
         $args = [];
-        
+
         // Apply filters
         if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
             $where_clauses[] = 'p.post_status = %s';
             $args[] = sanitize_text_field($_GET['status']);
         }
-        
+
         if (!empty($_GET['course']) && $_GET['course'] !== 'all') {
             $where_clauses[] = 'pm_course.meta_value = %d';
             $args[] = intval($_GET['course']);
         }
-        
+
         if (!empty($_GET['type']) && $_GET['type'] !== 'all') {
             $where_clauses[] = 'pm_type.meta_value = %s';
             $args[] = sanitize_text_field($_GET['type']);
         }
-        
+
         if (!empty($_GET['instructor']) && $_GET['instructor'] !== 'all') {
             $where_clauses[] = 'p.post_author = %d';
             $args[] = intval($_GET['instructor']);
         }
-        
+
         $where_sql = '';
         if (!empty($where_clauses)) {
             $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
         }
-        
+
         $query = "
-            SELECT 
+            SELECT
                 p.*,
                 pm_course.meta_value as course_id,
                 pm_type.meta_value as quiz_type,
@@ -157,62 +178,62 @@ class QuizzesListTable extends AbstractListTable
             ORDER BY p.post_date DESC
             LIMIT %d OFFSET %d
         ";
-        
+
         $args = array_merge([PostTypes::QUIZ], $args, [$per_page, $offset]);
-        
+
         if (!empty($args)) {
             $results = $wpdb->get_results($wpdb->prepare($query, $args));
         } else {
             $results = $wpdb->get_results($query);
         }
-        
+
         return $results ?: [];
         */
     }
 
     /**
      * Get total number of items
-     * 
+     *
      * @return int
      */
     public function get_total_items(): int
     {
         // For demo purposes, return dummy count
         return count($this->getDummyData());
-        
+
         // TODO: Implement actual count query
         /*
         global $wpdb;
-        
+
         $where_clauses = [];
         $args = [];
-        
+
         // Apply filters
         if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
             $where_clauses[] = 'p.post_status = %s';
             $args[] = sanitize_text_field($_GET['status']);
         }
-        
+
         if (!empty($_GET['course']) && $_GET['course'] !== 'all') {
             $where_clauses[] = 'pm_course.meta_value = %d';
             $args[] = intval($_GET['course']);
         }
-        
+
         if (!empty($_GET['type']) && $_GET['type'] !== 'all') {
             $where_clauses[] = 'pm_type.meta_value = %s';
             $args[] = sanitize_text_field($_GET['type']);
         }
-        
+
         if (!empty($_GET['instructor']) && $_GET['instructor'] !== 'all') {
             $where_clauses[] = 'p.post_author = %d';
             $args[] = intval($_GET['instructor']);
         }
-        
+
         $where_sql = '';
         if (!empty($where_clauses)) {
             $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
         }
-        
+
         $query = "
             SELECT COUNT(*)
             FROM {$wpdb->posts} p
@@ -221,9 +242,9 @@ class QuizzesListTable extends AbstractListTable
             WHERE p.post_type = %s
             {$where_sql}
         ";
-        
+
         $args = array_merge([PostTypes::QUIZ], $args);
-        
+
         if (!empty($args)) {
             return (int) $wpdb->get_var($wpdb->prepare($query, $args));
         } else {
@@ -234,7 +255,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Get dummy data for demonstration
-     * 
+     *
      * @return array
      */
     private function getDummyData(): array
@@ -349,7 +370,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Get courses list for filter
-     * 
+     *
      * @return array
      */
     private function getCoursesList(): array
@@ -368,7 +389,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Get instructors list for filter
-     * 
+     *
      * @return array
      */
     private function getInstructorsList(): array
@@ -384,7 +405,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Get quiz type name
-     * 
+     *
      * @param string $type
      * @return string
      */
@@ -402,7 +423,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Default column handler
-     * 
+     *
      * @param object $item
      * @param string $column_key
      * @return string
@@ -426,7 +447,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Checkbox
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -440,17 +461,23 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Title
-     * 
+     *
      * @param object $item
      * @return string
      */
     protected function columnTitle($item): string
     {
         $title = $item->post_title;
-        $edit_url = admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->course_id . '&tab=curriculum');
-        
-        $delete_url = wp_nonce_url(admin_url('admin.php?page=sikshya-quizzes&action=delete&id=' . $item->ID), 'delete-quiz_' . $item->ID);
-        
+        $edit_url = ReactAdminConfig::reactAppUrl('add-course', [
+            'course_id' => (string) $item->course_id,
+            'tab' => 'curriculum',
+        ]);
+
+        $delete_url = wp_nonce_url(
+            ReactAdminConfig::reactAppUrl('quizzes', ['action' => 'delete', 'id' => (string) $item->ID]),
+            'delete-quiz_' . $item->ID
+        );
+
         $row_actions = '<div class="row-actions">';
         $row_actions .= '<span class="edit">';
         $row_actions .= '<a href="' . esc_url($edit_url) . '">';
@@ -458,7 +485,7 @@ class QuizzesListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Edit', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="view">';
         $row_actions .= '<a href="#" onclick="return false;">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -466,7 +493,7 @@ class QuizzesListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('View', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="delete">';
         $row_actions .= '<a href="' . esc_url($delete_url) . '" onclick="return confirm(\'' . esc_js(__('Are you sure you want to delete this quiz?', 'sikshya')) . '\');">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -474,7 +501,7 @@ class QuizzesListTable extends AbstractListTable
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
-        
+
         $output = '<div class="sikshya-quiz-title-wrapper">';
         $output .= '<div class="sikshya-quiz-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -493,15 +520,15 @@ class QuizzesListTable extends AbstractListTable
         );
         $output .= '</div>';
         $output .= '</div>';
-        
+
         $output .= $row_actions;
-        
+
         return $output;
     }
 
     /**
      * Column: Course
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -514,7 +541,7 @@ class QuizzesListTable extends AbstractListTable
             $output .= '</svg>';
             $output .= sprintf(
                 '<a href="%s">%s</a>',
-                admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->course_id),
+                esc_url(ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $item->course_id])),
                 esc_html($item->course_title)
             );
             $output .= '</div>';
@@ -525,7 +552,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Type
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -540,20 +567,20 @@ class QuizzesListTable extends AbstractListTable
         ];
 
         $icon_path = $type_icons[$item->quiz_type] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
-        
+
         $output = '<div class="sikshya-quiz-type">';
         $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $output .= $icon_path;
         $output .= '</svg>';
         $output .= sprintf('<span>%s</span>', $type_name);
         $output .= '</div>';
-        
+
         return $output;
     }
 
     /**
      * Column: Questions
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -567,7 +594,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Duration
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -587,7 +614,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Instructor
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -612,7 +639,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Status
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -637,7 +664,7 @@ class QuizzesListTable extends AbstractListTable
 
     /**
      * Column: Created Date
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -645,7 +672,7 @@ class QuizzesListTable extends AbstractListTable
     {
         $date = new \DateTime($item->post_date);
         $date_format = 'M j, Y';
-        
+
         return sprintf(
             '<span title="%s">%s</span>',
             esc_attr($date->format('F j, Y g:i A')),
@@ -670,7 +697,7 @@ class QuizzesListTable extends AbstractListTable
                 </div>
                 <h3><?php esc_html_e('No quizzes found', 'sikshya'); ?></h3>
                 <p><?php esc_html_e('Get started by creating your first quiz.', 'sikshya'); ?></p>
-                <a href="<?php echo esc_url(admin_url('admin.php?page=sikshya-add-course')); ?>" class="button button-primary">
+                <a href="<?php echo esc_url(ReactAdminConfig::reactAppUrl('add-course')); ?>" class="button button-primary">
                     <?php esc_html_e('Create Quiz', 'sikshya'); ?>
                 </a>
             </div>

@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Frontend AJAX Handler
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -17,7 +18,7 @@ class FrontendAjax extends AjaxAbstract
 {
     /**
      * Initialize hooks
-     * 
+     *
      * @return void
      */
     protected function initHooks(): void
@@ -39,7 +40,7 @@ class FrontendAjax extends AjaxAbstract
             }
 
             $action = sanitize_text_field($this->getPostData('sub_action', ''));
-            
+
             switch ($action) {
                 case 'search_courses':
                     $this->handleSearchCourses();
@@ -56,7 +57,6 @@ class FrontendAjax extends AjaxAbstract
                 default:
                     $this->sendError('Invalid action');
             }
-            
         } catch (\Exception $e) {
             $this->logError('Frontend action error', $e);
             $this->sendError('Failed to process request: ' . $e->getMessage());
@@ -71,18 +71,18 @@ class FrontendAjax extends AjaxAbstract
         $search_term = sanitize_text_field($this->getPostData('search_term', ''));
         $category = sanitize_text_field($this->getPostData('category', ''));
         $page = intval($this->getPostData('page', 1));
-        
+
         $args = [
             'post_type' => 'sikshya_course',
             'post_status' => 'publish',
             'posts_per_page' => 12,
             'paged' => $page,
         ];
-        
+
         if (!empty($search_term)) {
             $args['s'] = $search_term;
         }
-        
+
         if (!empty($category)) {
             $args['tax_query'] = [
                 [
@@ -92,10 +92,10 @@ class FrontendAjax extends AjaxAbstract
                 ]
             ];
         }
-        
+
         $courses = get_posts($args);
         $total = wp_count_posts('sikshya_course')->publish;
-        
+
         $this->sendSuccess([
             'courses' => $courses,
             'total' => $total,
@@ -112,30 +112,30 @@ class FrontendAjax extends AjaxAbstract
             $this->sendError('User must be logged in to enroll');
             return;
         }
-        
+
         $course_id = intval($this->getPostData('course_id', 0));
-        
+
         if ($course_id === 0) {
             $this->sendError('Invalid course ID');
             return;
         }
-        
+
         $user_id = get_current_user_id();
-        
+
         // Check if already enrolled
         $enrollment = get_user_meta($user_id, '_sikshya_enrolled_courses', true);
         if (is_array($enrollment) && in_array($course_id, $enrollment)) {
             $this->sendError('Already enrolled in this course');
             return;
         }
-        
+
         // Add enrollment
         if (!is_array($enrollment)) {
             $enrollment = [];
         }
         $enrollment[] = $course_id;
         update_user_meta($user_id, '_sikshya_enrolled_courses', $enrollment);
-        
+
         $this->sendSuccess(null, 'Successfully enrolled in course');
     }
 
@@ -148,23 +148,23 @@ class FrontendAjax extends AjaxAbstract
             $this->sendError('User must be logged in to unenroll');
             return;
         }
-        
+
         $course_id = intval($this->getPostData('course_id', 0));
-        
+
         if ($course_id === 0) {
             $this->sendError('Invalid course ID');
             return;
         }
-        
+
         $user_id = get_current_user_id();
-        
+
         // Remove enrollment
         $enrollment = get_user_meta($user_id, '_sikshya_enrolled_courses', true);
         if (is_array($enrollment)) {
             $enrollment = array_diff($enrollment, [$course_id]);
             update_user_meta($user_id, '_sikshya_enrolled_courses', $enrollment);
         }
-        
+
         $this->sendSuccess(null, 'Successfully unenrolled from course');
     }
 
@@ -177,19 +177,19 @@ class FrontendAjax extends AjaxAbstract
             $this->sendError('User must be logged in');
             return;
         }
-        
+
         $course_id = intval($this->getPostData('course_id', 0));
-        
+
         if ($course_id === 0) {
             $this->sendError('Invalid course ID');
             return;
         }
-        
+
         $user_id = get_current_user_id();
-        
+
         // Get progress from user meta
         $progress = get_user_meta($user_id, '_sikshya_course_progress_' . $course_id, true);
-        
+
         if (!$progress) {
             $progress = [
                 'completed_lessons' => [],
@@ -197,7 +197,7 @@ class FrontendAjax extends AjaxAbstract
                 'percentage' => 0,
             ];
         }
-        
+
         $this->sendSuccess($progress);
     }
 }

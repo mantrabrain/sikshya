@@ -2,8 +2,9 @@
 
 namespace Sikshya\Admin\Controllers;
 
+use Sikshya\Admin\ReactAdminView;
 use Sikshya\Core\Plugin;
-use Sikshya\Admin\Views\DataTable;
+use Sikshya\Constants\PostTypes;
 use Sikshya\Admin\Views\FormBuilder;
 use Sikshya\Admin\ListTable\QuizzesListTable;
 
@@ -43,63 +44,21 @@ class QuizController
     }
 
     /**
+     * Capability gate for quiz admin AJAX.
+     */
+    private function assertCanManageQuizzes(): void
+    {
+        if (!current_user_can('manage_sikshya') && !current_user_can('edit_sikshya_quizzes') && !current_user_can('edit_posts')) {
+            wp_send_json_error(__('Insufficient permissions.', 'sikshya'), 403);
+        }
+    }
+
+    /**
      * Render quizzes list page
      */
     public function renderQuizzesPage(): void
     {
-        // Create and prepare the list table
-        $list_table = new QuizzesListTable($this->plugin);
-        $list_table->prepare_items();
-        
-        // Render the page with proper Sikshya design
-        ?>
-        <div class="sikshya-dashboard">
-            <!-- Header -->
-            <div class="sikshya-header">
-                <div class="sikshya-header-title">
-                    <h1>
-                        <i class="fas fa-question-circle"></i>
-                        <?php _e('Quizzes', 'sikshya'); ?>
-                    </h1>
-                    <span class="sikshya-version">v<?php echo esc_html(SIKSHYA_VERSION); ?></span>
-                </div>
-                <div class="sikshya-header-actions">
-                    <a href="<?php echo admin_url('admin.php?page=sikshya-add-course'); ?>" class="sikshya-btn sikshya-btn-primary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <?php _e('Add New Quiz', 'sikshya'); ?>
-                    </a>
-                </div>
-            </div>
-
-            <div class="sikshya-main-content">
-                <div class="sikshya-content-card">
-                    <div class="sikshya-content-card-header">
-                        <div class="sikshya-content-card-header-left">
-                            <h3 class="sikshya-content-card-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <?php _e('Manage Quizzes', 'sikshya'); ?>
-                            </h3>
-                            <p class="sikshya-content-card-subtitle"><?php _e('Create, edit, and manage your quizzes', 'sikshya'); ?></p>
-                        </div>
-                        <div class="sikshya-content-card-header-right">
-                            <?php $this->display_status_filter_tabs(); ?>
-                        </div>
-                    </div>
-                    <div class="sikshya-content-card-body">
-                        <form method="post">
-                            <?php
-                            $list_table->display();
-                            ?>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php
+        ReactAdminView::render('quizzes', []);
     }
 
     /**
@@ -185,127 +144,18 @@ class QuizController
     }
 
     /**
-     * Display status filter tabs
-     * 
-     * @return void
-     */
-    private function display_status_filter_tabs(): void
-    {
-        $current_status = $_GET['post_status'] ?? 'all';
-        $base_url = remove_query_arg(['post_status', 'paged']);
-        
-        $status_counts = $this->get_status_counts();
-        
-        echo '<ul class="subsubsub">';
-        
-        // All tab
-        $all_count = array_sum($status_counts);
-        $all_class = ($current_status === 'all') ? 'current' : '';
-        $all_url = $base_url;
-        echo '<li class="all">';
-        echo '<a href="' . esc_url($all_url) . '" class="' . esc_attr($all_class) . '"' . ($all_class ? ' aria-current="page"' : '') . '>';
-        echo esc_html__('All', 'sikshya') . ' <span class="count">(' . esc_html($all_count) . ')</span>';
-        echo '</a> |</li>';
-        
-        // Published tab
-        if (isset($status_counts['publish'])) {
-            $publish_class = ($current_status === 'publish') ? 'current' : '';
-            $publish_url = add_query_arg('post_status', 'publish', $base_url);
-            echo '<li class="publish">';
-            echo '<a href="' . esc_url($publish_url) . '" class="' . esc_attr($publish_class) . '">';
-            echo esc_html__('Published', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['publish']) . ')</span>';
-            echo '</a> |</li>';
-        }
-        
-        // Draft tab
-        if (isset($status_counts['draft'])) {
-            $draft_class = ($current_status === 'draft') ? 'current' : '';
-            $draft_url = add_query_arg('post_status', 'draft', $base_url);
-            echo '<li class="draft">';
-            echo '<a href="' . esc_url($draft_url) . '" class="' . esc_attr($draft_class) . '">';
-            echo esc_html__('Draft', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['draft']) . ')</span>';
-            echo '</a> |</li>';
-        }
-        
-        // Pending tab
-        if (isset($status_counts['pending'])) {
-            $pending_class = ($current_status === 'pending') ? 'current' : '';
-            $pending_url = add_query_arg('post_status', 'pending', $base_url);
-            echo '<li class="pending">';
-            echo '<a href="' . esc_url($pending_url) . '" class="' . esc_attr($pending_class) . '">';
-            echo esc_html__('Pending Review', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['pending']) . ')</span>';
-            echo '</a> |</li>';
-        }
-        
-        // Private tab
-        if (isset($status_counts['private'])) {
-            $private_class = ($current_status === 'private') ? 'current' : '';
-            $private_url = add_query_arg('post_status', 'private', $base_url);
-            echo '<li class="private">';
-            echo '<a href="' . esc_url($private_url) . '" class="' . esc_attr($private_class) . '">';
-            echo esc_html__('Private', 'sikshya') . ' <span class="count">(' . esc_html($status_counts['private']) . ')</span>';
-            echo '</a> |</li>';
-        }
-        
-        echo '</ul>';
-    }
-
-    /**
-     * Get status counts for filter tabs
-     *
-     * @return array
-     */
-    private function get_status_counts(): array
-    {
-        // For demo purposes, return dummy counts
-        return [
-            'all' => 8,
-            'publish' => 5,
-            'draft' => 2,
-            'pending' => 1,
-            'private' => 0,
-        ];
-        
-        // TODO: Implement actual status counting
-        /*
-        global $wpdb;
-        
-        $counts = [
-            'all' => 0,
-            'publish' => 0,
-            'draft' => 0,
-            'pending' => 0,
-            'private' => 0,
-        ];
-        
-        $results = $wpdb->get_results("
-            SELECT post_status, COUNT(*) as count
-            FROM {$wpdb->posts}
-            WHERE post_type = 'sik_quiz'
-            GROUP BY post_status
-        ");
-        
-        foreach ($results as $result) {
-            $counts[$result->post_status] = $result->count;
-            $counts['all'] += $result->count;
-        }
-        
-        return $counts;
-        */
-    }
-
-    /**
      * Handle quiz list AJAX request
      */
     public function handleQuizList(): void
     {
         check_ajax_referer('sikshya_nonce', 'nonce');
+        $this->assertCanManageQuizzes();
 
         $args = [
             'post_type' => 'sikshya_quiz',
             'post_status' => 'any',
             'posts_per_page' => 20,
-            'paged' => $_POST['page'] ?? 1,
+            'paged' => max(1, (int) ($_POST['page'] ?? 1)),
         ];
 
         $quizzes = get_posts($args);
@@ -323,6 +173,7 @@ class QuizController
     public function handleQuizSave(): void
     {
         check_ajax_referer('sikshya_nonce', 'nonce');
+        $this->assertCanManageQuizzes();
 
         $data = [
             'title' => sanitize_text_field($_POST['title'] ?? ''),
@@ -360,6 +211,7 @@ class QuizController
     public function handleQuizDelete(): void
     {
         check_ajax_referer('sikshya_nonce', 'nonce');
+        $this->assertCanManageQuizzes();
 
         $quiz_id = intval($_POST['id'] ?? 0);
 
@@ -389,7 +241,7 @@ class QuizController
         ];
 
         $quiz_id = wp_insert_post($post_data, true);
-        
+
         if (is_wp_error($quiz_id)) {
             throw new \Exception($quiz_id->get_error_message());
         }
@@ -418,7 +270,7 @@ class QuizController
         ];
 
         $result = wp_update_post($post_data, true);
-        
+
         if (is_wp_error($result)) {
             throw new \Exception($result->get_error_message());
         }
@@ -440,7 +292,7 @@ class QuizController
     private function getCoursesList(): array
     {
         $courses = get_posts([
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'title',
@@ -454,4 +306,4 @@ class QuizController
 
         return $list;
     }
-} 
+}

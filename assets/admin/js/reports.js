@@ -131,13 +131,26 @@
             ctx.style.maxHeight = '300px';
 
             console.log('Creating new enrollment chart');
+            const chartCfg = (typeof window.sikshyaReportsData !== 'undefined' && window.sikshyaReportsData.chart)
+                ? window.sikshyaReportsData.chart
+                : { labels: [], counts: [] };
+            const labels = chartCfg.labels && chartCfg.labels.length
+                ? chartCfg.labels
+                : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const counts = chartCfg.counts && chartCfg.counts.length
+                ? chartCfg.counts
+                : labels.map(function () { return 0; });
+            const enrollLabel = (window.sikshyaReportsData && window.sikshyaReportsData.i18n && window.sikshyaReportsData.i18n.enrollments)
+                ? window.sikshyaReportsData.i18n.enrollments
+                : 'Enrollments';
+
             this.charts.enrollment = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Enrollments',
-                        data: [65, 78, 90, 85, 95, 110, 125, 140, 135, 150, 165, 180],
+                        label: enrollLabel,
+                        data: counts,
                         borderColor: '#3B82F6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         tension: 0.4,

@@ -267,7 +267,7 @@ class DashboardController
     private function formatActivity(object $activity): array
     {
         $event_data = json_decode($activity->event_data, true);
-        
+
         return [
             'id' => $activity->id,
             'type' => $activity->event_type,
@@ -318,7 +318,7 @@ class DashboardController
              JOIN {$wpdb->users} u ON e.user_id = u.ID
              JOIN {$wpdb->prefix}sikshya_courses c ON e.course_id = c.id
              JOIN {$wpdb->posts} p ON c.post_id = p.ID
-             ORDER BY e.enrollment_date DESC
+             ORDER BY e.enrolled_date DESC
              LIMIT %d",
             $limit
         ));
@@ -359,10 +359,10 @@ class DashboardController
 
         // Get enrollment data for the last 30 days
         $enrollments = $wpdb->get_results(
-            "SELECT DATE(enrollment_date) as date, COUNT(*) as count
+            "SELECT DATE(enrolled_date) as date, COUNT(*) as count
              FROM {$wpdb->prefix}sikshya_enrollments
-             WHERE enrollment_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-             GROUP BY DATE(enrollment_date)
+             WHERE enrolled_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+             GROUP BY DATE(enrolled_date)
              ORDER BY date"
         );
 
@@ -381,4 +381,4 @@ class DashboardController
             'revenue' => $revenue,
         ];
     }
-} 
+}

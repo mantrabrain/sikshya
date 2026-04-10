@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Pricing Tab for Course Builder
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -19,57 +20,57 @@ class PricingTab extends AbstractTab
 {
     /**
      * Get the unique identifier for this tab
-     * 
+     *
      * @return string
      */
     public function getId(): string
     {
         return 'pricing';
     }
-    
+
     /**
      * Get the display title for this tab
-     * 
+     *
      * @return string
      */
     public function getTitle(): string
     {
         return __('Pricing & Access', 'sikshya');
     }
-    
+
     /**
      * Get the description for this tab
-     * 
+     *
      * @return string
      */
     public function getDescription(): string
     {
         return __('Set price and enrollment options', 'sikshya');
     }
-    
+
     /**
      * Get the SVG icon for this tab
-     * 
+     *
      * @return string
      */
     public function getIcon(): string
     {
         return '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>';
     }
-    
+
     /**
      * Get the tab order
-     * 
+     *
      * @return int
      */
     public function getOrder(): int
     {
         return 2;
     }
-    
+
     /**
      * Get the fields configuration for this tab
-     * 
+     *
      * @return array
      */
     public function getFields(): array
@@ -84,7 +85,7 @@ class PricingTab extends AbstractTab
                     </svg>',
                 ],
                 'fields' => [
-            'course_type' => [
+                'course_type' => [
                 'type' => 'select',
                 'label' => __('Course Type', 'sikshya'),
                 'options' => [
@@ -96,19 +97,18 @@ class PricingTab extends AbstractTab
                         'validation' => 'required',
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'three_column',
-            ],
-            'price' => [
+                ],
+                'price' => [
                 'type' => 'number',
                 'label' => __('Course Price', 'sikshya'),
                 'placeholder' => '99.99',
                 'step' => '0.01',
                 'min' => '0',
-                'required' => true,
                         'validation' => 'numeric|min:0',
                         'sanitization' => 'floatval',
                         'layout' => 'three_column',
-            ],
-            'sale_price' => [
+                ],
+                'sale_price' => [
                 'type' => 'number',
                 'label' => __('Discount Price', 'sikshya'),
                 'placeholder' => '79.99',
@@ -117,6 +117,62 @@ class PricingTab extends AbstractTab
                         'validation' => 'numeric|min:0',
                         'sanitization' => 'floatval',
                         'layout' => 'three_column',
+                    ],
+                'currency' => [
+                'type' => 'select',
+                'label' => __('Currency', 'sikshya'),
+                'options' => [
+                    'USD' => __('US Dollar (USD)', 'sikshya'),
+                    'EUR' => __('Euro (EUR)', 'sikshya'),
+                    'GBP' => __('British Pound (GBP)', 'sikshya'),
+                    'INR' => __('Indian Rupee (INR)', 'sikshya'),
+                    'AUD' => __('Australian Dollar (AUD)', 'sikshya'),
+                    'CAD' => __('Canadian Dollar (CAD)', 'sikshya'),
+                    'OTHER' => __('Other / manual', 'sikshya'),
+                ],
+                'default' => 'USD',
+                'description' => __('Shown with prices on the catalog and checkout.', 'sikshya'),
+                        'sanitization' => 'sanitize_text_field',
+                        'layout' => 'three_column',
+                    ],
+                ],
+            ],
+            'schedule' => [
+                'section' => [
+                    'title' => __('Schedule', 'sikshya'),
+                    'description' => __('Optional dates for the course run and enrollment window.', 'sikshya'),
+                    'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>',
+                ],
+                'fields' => [
+                    'course_start_date' => [
+                        'type' => 'date',
+                        'label' => __('Course start date', 'sikshya'),
+                        'description' => __('When the course content becomes available.', 'sikshya'),
+                        'sanitization' => 'sanitize_text_field',
+                        'layout' => 'two_column',
+                    ],
+                    'course_end_date' => [
+                        'type' => 'date',
+                        'label' => __('Course end date', 'sikshya'),
+                        'description' => __('When the course run ends (optional).', 'sikshya'),
+                        'sanitization' => 'sanitize_text_field',
+                        'layout' => 'two_column',
+                    ],
+                    'enrollment_start_date' => [
+                        'type' => 'date',
+                        'label' => __('Enrollment opens', 'sikshya'),
+                        'description' => __('First day students can enroll (optional).', 'sikshya'),
+                        'sanitization' => 'sanitize_text_field',
+                        'layout' => 'two_column',
+                    ],
+                    'enrollment_end_date' => [
+                        'type' => 'date',
+                        'label' => __('Enrollment closes', 'sikshya'),
+                        'description' => __('Last day students can enroll (optional).', 'sikshya'),
+                        'sanitization' => 'sanitize_text_field',
+                        'layout' => 'two_column',
                     ],
                 ],
             ],
@@ -129,7 +185,7 @@ class PricingTab extends AbstractTab
                     </svg>',
                 ],
                 'fields' => [
-            'enrollment_status' => [
+                'enrollment_status' => [
                 'type' => 'select',
                 'label' => __('Enrollment Status', 'sikshya'),
                 'options' => [
@@ -141,18 +197,17 @@ class PricingTab extends AbstractTab
                         'validation' => 'required',
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'three_column',
-            ],
-            'max_students' => [
+                ],
+                'max_students' => [
                 'type' => 'number',
-                'label' => __('Maximum Students', 'sikshya'),
-                'placeholder' => '100',
-                'min' => '1',
-                        'description' => __('Leave empty for unlimited enrollment', 'sikshya'),
-                        'validation' => 'numeric|min:1',
+                'label' => __('Maximum students', 'sikshya'),
+                'placeholder' => '',
+                'min' => '0',
+                        'description' => __('0 or leave empty for unlimited enrollment.', 'sikshya'),
                         'sanitization' => 'intval',
                         'layout' => 'three_column',
-            ],
-            'course_duration' => [
+                ],
+                'course_duration' => [
                 'type' => 'number',
                 'label' => __('Course Duration (Days)', 'sikshya'),
                 'placeholder' => '90',
@@ -173,7 +228,7 @@ class PricingTab extends AbstractTab
                     </svg>',
                 ],
                 'fields' => [
-            'prerequisites' => [
+                'prerequisites' => [
                 'type' => 'repeater',
                 'label' => __('Prerequisites', 'sikshya'),
                 'placeholder' => __('Basic knowledge of...', 'sikshya'),
@@ -181,8 +236,8 @@ class PricingTab extends AbstractTab
                         'description' => __('What should students know before taking this course?', 'sikshya'),
                         'validation' => 'array',
                         'sanitization' => 'sanitize_text_field',
-            ],
-            'requirements' => [
+                ],
+                'requirements' => [
                 'type' => 'repeater',
                 'label' => __('Course Requirements', 'sikshya'),
                 'placeholder' => __('Computer with internet access', 'sikshya'),
@@ -203,61 +258,99 @@ class PricingTab extends AbstractTab
                     </svg>',
                 ],
                 'fields' => [
-            'enable_drip' => [
-                'type' => 'checkbox',
-                'label' => __('Enable Drip Content', 'sikshya'),
-                        'validation' => 'boolval',
-                        'sanitization' => 'boolval',
-            ],
-            'drip_type' => [
-                'type' => 'select',
-                'label' => __('Drip Type', 'sikshya'),
-                'options' => [
-                    'interval' => __('Time Interval', 'sikshya'),
-                    'completion' => __('After Completion', 'sikshya'),
-                    'specific_date' => __('Specific Dates', 'sikshya'),
+                'enable_drip' => [
+                    'type' => 'checkbox',
+                    'label' => __('Enable drip content', 'sikshya'),
+                    'description' => __('Release lessons over time instead of all at once.', 'sikshya'),
+                    'validation' => 'boolval',
+                    'sanitization' => 'boolval',
                 ],
-                'default' => 'interval',
-                        'validation' => 'in:interval,completion,specific_date',
-                        'sanitization' => 'sanitize_text_field',
-                        'layout' => 'two_column',
-            ],
-            'drip_interval' => [
-                'type' => 'number',
-                'label' => __('Drip Interval (Days)', 'sikshya'),
-                'placeholder' => '7',
-                'min' => '1',
-                        'validation' => 'numeric|min:1',
-                        'sanitization' => 'intval',
-                        'layout' => 'two_column',
-            ],
-            'enable_certificate' => [
-                'type' => 'checkbox',
-                'label' => __('Enable Course Completion Certificate', 'sikshya'),
-                        'validation' => 'boolval',
-                        'sanitization' => 'boolval',
-            ],
-            'certificate_template' => [
-                'type' => 'select',
-                'label' => __('Certificate Template', 'sikshya'),
-                'options' => [
-                    'default' => __('Default Template', 'sikshya'),
-                    'modern' => __('Modern Template', 'sikshya'),
-                    'classic' => __('Classic Template', 'sikshya'),
-                    'custom' => __('Custom Template', 'sikshya'),
-                ],
-                'default' => 'default',
-                        'validation' => 'in:default,modern,classic,custom',
-                        'sanitization' => 'sanitize_text_field',
+                'drip_type' => [
+                    'type' => 'select',
+                    'label' => __('Drip type', 'sikshya'),
+                    'options' => [
+                        'interval' => __('Time interval', 'sikshya'),
+                        'completion' => __('After previous completion', 'sikshya'),
+                        'specific_date' => __('Specific dates', 'sikshya'),
                     ],
+                    'default' => 'interval',
+                    'depends_on' => 'enable_drip',
+                    'validation' => 'in:interval,completion,specific_date',
+                    'sanitization' => 'sanitize_text_field',
+                    'layout' => 'two_column',
+                ],
+                'drip_interval' => [
+                    'type' => 'number',
+                    'label' => __('Drip interval (days)', 'sikshya'),
+                    'placeholder' => '7',
+                    'min' => '1',
+                    'depends_all' => [
+                        ['on' => 'enable_drip'],
+                        ['on' => 'drip_type', 'value' => 'interval'],
+                    ],
+                    'validation' => 'numeric|min:1',
+                    'sanitization' => 'intval',
+                    'layout' => 'two_column',
+                ],
                 ],
             ],
         ];
     }
-    
+
+    /**
+     * Validate pricing fields; price is required only for paid / subscription courses.
+     *
+     * @param array $data Flat form data.
+     * @return array<string, string>
+     */
+    public function validate(array $data): array
+    {
+        $errors = parent::validate($data);
+
+        $type = isset($data['course_type']) ? sanitize_text_field(wp_unslash((string) $data['course_type'])) : 'paid';
+
+        if (in_array($type, ['paid', 'subscription'], true)) {
+            $price_raw = $data['price'] ?? '';
+            if ($price_raw === '' || $price_raw === null) {
+                $errors['price'] = __('Course price is required for paid or subscription courses.', 'sikshya');
+            } elseif (!is_numeric($price_raw) || floatval($price_raw) < 0) {
+                $errors['price'] = __('Please enter a valid price.', 'sikshya');
+            }
+        } else {
+            unset($errors['price']);
+        }
+
+        $course_start = $this->parseScheduleDate($data['course_start_date'] ?? '');
+        $course_end = $this->parseScheduleDate($data['course_end_date'] ?? '');
+        if ($course_start && $course_end && $course_end < $course_start) {
+            $errors['course_end_date'] = __('Course end date must be on or after the start date.', 'sikshya');
+        }
+
+        $enroll_start = $this->parseScheduleDate($data['enrollment_start_date'] ?? '');
+        $enroll_end = $this->parseScheduleDate($data['enrollment_end_date'] ?? '');
+        if ($enroll_start && $enroll_end && $enroll_end < $enroll_start) {
+            $errors['enrollment_end_date'] = __('Enrollment close date must be on or after the open date.', 'sikshya');
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    private function parseScheduleDate($value): int
+    {
+        if ($value === '' || $value === null) {
+            return 0;
+        }
+        $t = strtotime((string) $value);
+
+        return $t ? (int) $t : 0;
+    }
+
     /**
      * Render the tab content with exact same HTML markup
-     * 
+     *
      * @param array $data
      * @return string
      */
@@ -265,5 +358,4 @@ class PricingTab extends AbstractTab
     {
         return $this->renderSections($data);
     }
-    
 }

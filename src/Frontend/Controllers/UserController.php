@@ -34,7 +34,7 @@ class UserController
     public function dashboard(): void
     {
         $user_id = get_current_user_id();
-        
+
         if (!$user_id) {
             wp_redirect(wp_login_url());
             exit;
@@ -42,22 +42,22 @@ class UserController
 
         // Get user data
         $user_data = $this->getUserData($user_id);
-        
+
         // Get enrolled courses
         $enrolled_courses = $this->plugin->getService('enrollment')->getUserCourses($user_id);
-        
+
         // Get course progress
         $course_progress = [];
         foreach ($enrolled_courses as $course) {
             $course_progress[$course['id']] = $this->plugin->getService('progress')->getCourseProgress($course['id'], $user_id);
         }
-        
+
         // Get recent activities
         $activities = $this->plugin->getService('activity')->getUserActivities($user_id, 10);
-        
+
         // Get certificates
         $certificates = $this->plugin->getService('certificate')->getUserCertificates($user_id);
-        
+
         // Get achievements
         $achievements = $this->plugin->getService('achievement')->getUserAchievements($user_id);
 
@@ -71,7 +71,7 @@ class UserController
     public function profile(): void
     {
         $user_id = get_current_user_id();
-        
+
         if (!$user_id) {
             wp_redirect(wp_login_url());
             exit;
@@ -79,7 +79,7 @@ class UserController
 
         // Get user data
         $user_data = $this->getUserData($user_id);
-        
+
         // Get user statistics
         $stats = $this->getUserStats($user_id);
 
@@ -169,7 +169,7 @@ class UserController
         }
 
         $file = $_FILES['avatar'];
-        
+
         // Validate file
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
         if (!in_array($file['type'], $allowed_types)) {
@@ -272,7 +272,7 @@ class UserController
     private function getUserData(int $user_id): array
     {
         $user = get_userdata($user_id);
-        
+
         if (!$user) {
             return [];
         }
@@ -326,13 +326,13 @@ class UserController
     private function getUserRole(int $user_id): string
     {
         $user = get_userdata($user_id);
-        
+
         if (!$user) {
             return '';
         }
 
         $roles = $user->roles;
-        
+
         if (in_array('sikshya_instructor', $roles)) {
             return 'instructor';
         } elseif (in_array('sikshya_student', $roles)) {
@@ -343,4 +343,4 @@ class UserController
             return 'subscriber';
         }
     }
-} 
+}

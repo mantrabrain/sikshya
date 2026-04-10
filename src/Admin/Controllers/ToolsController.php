@@ -41,7 +41,7 @@ class ToolsController extends BaseView
             'page_title' => __('Tools', 'sikshya'),
             'page_description' => __('Manage and maintain your Sikshya LMS installation', 'sikshya'),
         ];
-        
+
         $this->render('tools');
     }
 
@@ -54,7 +54,7 @@ class ToolsController extends BaseView
             'page_title' => __('Help & Support', 'sikshya'),
             'page_description' => __('Get help and support for Sikshya LMS', 'sikshya'),
         ];
-        
+
         $this->render('help');
     }
 
@@ -64,10 +64,10 @@ class ToolsController extends BaseView
     public function handleAjax(): void
     {
         error_log('Sikshya ToolsController: handleAjax called');
-        
+
         $action = sanitize_text_field($_POST['action_type'] ?? '');
         error_log('Sikshya ToolsController: action_type = ' . $action);
-        
+
         switch ($action) {
             case 'clear_cache':
                 $this->clearCache();
@@ -98,12 +98,12 @@ class ToolsController extends BaseView
     {
         // Clear WordPress cache
         wp_cache_flush();
-        
+
         // Clear Sikshya specific cache
         delete_transient('sikshya_course_stats');
         delete_transient('sikshya_user_stats');
         delete_transient('sikshya_revenue_stats');
-        
+
         wp_send_json_success(['message' => __('Cache cleared successfully', 'sikshya')]);
     }
 
@@ -113,7 +113,7 @@ class ToolsController extends BaseView
     private function exportData(): void
     {
         $export_type = sanitize_text_field($_POST['export_type'] ?? 'courses');
-        
+
         switch ($export_type) {
             case 'courses':
                 $data = $this->exportCourses();
@@ -128,7 +128,7 @@ class ToolsController extends BaseView
                 wp_send_json_error(['message' => __('Invalid export type', 'sikshya')]);
                 return;
         }
-        
+
         wp_send_json_success([
             'message' => __('Data exported successfully', 'sikshya'),
             'data' => $data
@@ -142,11 +142,11 @@ class ToolsController extends BaseView
     {
         $import_type = sanitize_text_field($_POST['import_type'] ?? 'courses');
         $file_data = $_POST['file_data'] ?? '';
-        
+
         if (empty($file_data)) {
             wp_send_json_error(['message' => __('No file data provided', 'sikshya')]);
         }
-        
+
         // TODO: Implement import logic
         wp_send_json_success(['message' => __('Data imported successfully', 'sikshya')]);
     }
@@ -158,7 +158,7 @@ class ToolsController extends BaseView
     {
         // Reset to default settings
         delete_option('sikshya_settings');
-        
+
         wp_send_json_success(['message' => __('Settings reset to default', 'sikshya')]);
     }
 
@@ -168,9 +168,9 @@ class ToolsController extends BaseView
     private function getSystemInfo(): void
     {
         error_log('Sikshya ToolsController: getSystemInfo called');
-        
+
         global $wpdb;
-        
+
         $system_info = [
             'wordpress_version' => get_bloginfo('version'),
             'php_version' => PHP_VERSION,
@@ -181,9 +181,9 @@ class ToolsController extends BaseView
             'upload_max_filesize' => ini_get('upload_max_filesize'),
             'post_max_size' => ini_get('post_max_size'),
         ];
-        
+
         error_log('Sikshya ToolsController: system_info = ' . print_r($system_info, true));
-        
+
         wp_send_json_success($system_info);
     }
 
@@ -197,7 +197,7 @@ class ToolsController extends BaseView
             'numberposts' => -1,
             'post_status' => 'any'
         ]);
-        
+
         $data = [];
         foreach ($courses as $course) {
             $data[] = [
@@ -209,7 +209,7 @@ class ToolsController extends BaseView
                 'instructor' => get_post_meta($course->ID, '_course_instructor', true),
             ];
         }
-        
+
         return $data;
     }
 
@@ -219,7 +219,7 @@ class ToolsController extends BaseView
     private function exportStudents(): array
     {
         $students = get_users(['role' => 'subscriber']);
-        
+
         $data = [];
         foreach ($students as $student) {
             $data[] = [
@@ -230,7 +230,7 @@ class ToolsController extends BaseView
                 'date_registered' => $student->user_registered,
             ];
         }
-        
+
         return $data;
     }
 
@@ -240,7 +240,7 @@ class ToolsController extends BaseView
     private function exportInstructors(): array
     {
         $instructors = get_users(['role' => 'author']);
-        
+
         $data = [];
         foreach ($instructors as $instructor) {
             $data[] = [
@@ -251,7 +251,7 @@ class ToolsController extends BaseView
                 'date_registered' => $instructor->user_registered,
             ];
         }
-        
+
         return $data;
     }
 

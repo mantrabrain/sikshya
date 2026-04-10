@@ -72,4 +72,4 @@ class CacheService
         $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_sikshya_cache_%'");
         $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_sikshya_cache_%'");
     }
-} 
+}

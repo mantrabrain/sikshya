@@ -301,4 +301,4 @@ class Uninstaller
 
         return rmdir($dir);
     }
-} 
+}

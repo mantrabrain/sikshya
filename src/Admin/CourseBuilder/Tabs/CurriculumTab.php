@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Curriculum Tab for Course Builder
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -19,57 +20,57 @@ class CurriculumTab extends AbstractTab
 {
     /**
      * Get the unique identifier for this tab
-     * 
+     *
      * @return string
      */
     public function getId(): string
     {
         return 'curriculum';
     }
-    
+
     /**
      * Get the display title for this tab
-     * 
+     *
      * @return string
      */
     public function getTitle(): string
     {
         return __('Curriculum', 'sikshya');
     }
-    
+
     /**
      * Get the description for this tab
-     * 
+     *
      * @return string
      */
     public function getDescription(): string
     {
         return __('Add lessons, sections, and content', 'sikshya');
     }
-    
+
     /**
      * Get the SVG icon for this tab
-     * 
+     *
      * @return string
      */
     public function getIcon(): string
     {
         return '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>';
     }
-    
+
     /**
      * Get the tab order
-     * 
+     *
      * @return int
      */
     public function getOrder(): int
     {
         return 3;
     }
-    
+
     /**
      * Get the fields configuration for this tab
-     * 
+     *
      * @return array
      */
     public function getFields(): array
@@ -94,22 +95,19 @@ class CurriculumTab extends AbstractTab
             ],
         ];
     }
-    
+
     /**
      * Render the tab content with curriculum data loaded directly
-     * 
+     *
      * @param array $data
      * @return string
      */
     protected function renderContent(array $data): string
     {
-        error_log('Sikshya: renderContent called with data: ' . print_r($data, true));
-        
         $course_id = $data['course_id'] ?? 0;
-        error_log('Sikshya: Extracted course_id: ' . $course_id);
-        
+
         $curriculum_html = $this->loadCurriculumHTML($course_id);
-        
+
         ob_start();
         ?>
         
@@ -149,58 +147,29 @@ class CurriculumTab extends AbstractTab
 
         <!-- Curriculum Actions -->
         <div class="sikshya-curriculum-actions">
-            <button class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
+            <button type="button" class="sikshya-btn sikshya-btn-primary" onclick="showChapterModal()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-chapter-icon="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
-                <?php _e('Add Chapter', 'sikshya'); ?>
-            </button>
-            
-            <!-- Demo Button to Toggle Content -->
-            <button class="sikshya-btn sikshya-btn-secondary" onclick="toggleDemoContent()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                <?php _e('Load Sample Chapter', 'sikshya'); ?>
-            </button>
-            
-            
-            <div class="sikshya-action-divider"></div>
-            
-            <button class="sikshya-btn sikshya-btn-secondary" onclick="importFromTemplate()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
-                </svg>
-                <?php _e('Import from Template', 'sikshya'); ?>
-            </button>
-            
-            <button class="sikshya-btn sikshya-btn-secondary" onclick="bulkImport()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <?php _e('Bulk Import', 'sikshya'); ?>
+                <?php esc_html_e('Add Chapter', 'sikshya'); ?>
             </button>
         </div>
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Load curriculum HTML directly from database
-     * 
+     *
      * @param int $course_id
      * @return string
      */
     private function loadCurriculumHTML(int $course_id): string
     {
-        error_log('Sikshya: loadCurriculumHTML called with course_id: ' . $course_id);
-        
         if ($course_id <= 0) {
-            error_log('Sikshya: course_id is 0 or negative, returning empty state');
             return $this->getEmptyCurriculumHTML();
         }
-        
+
         // Get all chapters for this course
         $args = [
             'post_type' => \Sikshya\Constants\PostTypes::CHAPTER,
@@ -211,18 +180,13 @@ class CurriculumTab extends AbstractTab
             'meta_key' => '_sikshya_order',
             'order' => 'ASC'
         ];
-        
-        error_log('Sikshya: Query args: ' . print_r($args, true));
-        
+
         $chapters = get_posts($args);
-        
-        error_log('Sikshya: Found ' . count($chapters) . ' chapters for course_id: ' . $course_id);
-        
+
         if (empty($chapters)) {
-            error_log('Sikshya: No chapters found, returning empty state');
             return $this->getEmptyCurriculumHTML();
         }
-        
+
         ob_start();
         ?>
         <div class="sikshya-curriculum-items" id="curriculum-items">
@@ -233,17 +197,17 @@ class CurriculumTab extends AbstractTab
                 $chapter_description = $chapter->post_content;
                 $chapter_order = get_post_meta($chapter_id, '_sikshya_order', true) ?: 1;
                 $chapter_duration = get_post_meta($chapter_id, '_sikshya_duration', true);
-                
+
                 // Get content counts
                 $chapter_contents = get_post_meta($chapter_id, '_sikshya_contents', true);
                 if (!is_array($chapter_contents)) {
                     $chapter_contents = [];
                 }
-                
+
                 $lesson_count = 0;
                 $quiz_count = 0;
                 $assignment_count = 0;
-                
+
                 foreach ($chapter_contents as $content_id) {
                     $content_post_type = get_post_type($content_id);
                     switch ($content_post_type) {
@@ -258,7 +222,7 @@ class CurriculumTab extends AbstractTab
                             break;
                     }
                 }
-                
+
                 echo $this->generateChapterHTML($chapter_id, $chapter_title, $chapter_description, $chapter_duration, $chapter_order, $lesson_count, $quiz_count, $assignment_count, $chapter_contents);
             }
             ?>
@@ -266,10 +230,10 @@ class CurriculumTab extends AbstractTab
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Generate empty curriculum HTML
-     * 
+     *
      * @return string
      */
     private function getEmptyCurriculumHTML(): string
@@ -302,10 +266,10 @@ class CurriculumTab extends AbstractTab
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Generate chapter HTML
-     * 
+     *
      * @param int $chapter_id
      * @param string $title
      * @param string $description
@@ -386,7 +350,7 @@ class CurriculumTab extends AbstractTab
             <div class="sikshya-chapter-content" id="content-chapter-<?php echo esc_attr($chapter_id); ?>">
                 <div class="sikshya-chapter-content-inner">
                     <div class="sikshya-lesson-list">
-                        <?php if ($lesson_count + $quiz_count + $assignment_count > 0): ?>
+                        <?php if ($lesson_count + $quiz_count + $assignment_count > 0) : ?>
                             <?php
                             // Display content items
                             foreach ($chapter_contents as $content_id) {
@@ -396,7 +360,7 @@ class CurriculumTab extends AbstractTab
                                     $content_description = $content_post->post_content;
                                     $content_duration = get_post_meta($content_id, '_sikshya_duration', true);
                                     $content_type = str_replace('sik_', '', $content_post->post_type);
-                                    
+
                                     echo $this->generateContentHTML($content_id, $content_title, $content_description, $content_duration, $content_type);
                                 }
                             }
@@ -419,10 +383,10 @@ class CurriculumTab extends AbstractTab
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Generate content HTML
-     * 
+     *
      * @param int $content_id
      * @param string $title
      * @param string $description
@@ -449,7 +413,7 @@ class CurriculumTab extends AbstractTab
                 <div class="sikshya-lesson-info">
                     <div class="sikshya-lesson-main">
                         <h5 class="sikshya-lesson-title"><?php echo esc_html($title); ?></h5>
-                        <?php if (!empty($description)): ?>
+                        <?php if (!empty($description)) : ?>
                             <p class="sikshya-lesson-description"><?php echo esc_html($description); ?></p>
                         <?php endif; ?>
                     </div>
@@ -472,10 +436,10 @@ class CurriculumTab extends AbstractTab
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Get content type icon
-     * 
+     *
      * @param string $content_type
      * @return string
      */
@@ -486,13 +450,13 @@ class CurriculumTab extends AbstractTab
             'quiz' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
             'assignment' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
         ];
-        
+
         return $icons[$content_type] ?? $icons['lesson'];
     }
-    
+
     /**
      * Override save method for curriculum (handles chapters and lessons)
-     * 
+     *
      * @param array $data
      * @param int $course_id
      * @return bool
@@ -503,10 +467,10 @@ class CurriculumTab extends AbstractTab
         // This method is called for the main form submission
         return true;
     }
-    
+
     /**
      * Override load method for curriculum
-     * 
+     *
      * @param int $course_id
      * @return array
      */
@@ -515,10 +479,10 @@ class CurriculumTab extends AbstractTab
         // Curriculum is loaded via AJAX
         return [];
     }
-    
+
     /**
      * Override validate method for curriculum
-     * 
+     *
      * @param array $data
      * @return array
      */

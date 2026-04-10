@@ -66,10 +66,12 @@ $courses_query = new WP_Query($args);
             <?php while ($courses_query->have_posts()) : $courses_query->the_post(); ?>
                 <?php
                 $course_id = get_the_ID();
-                $price = get_post_meta($course_id, '_sikshya_price', true);
-                $sale_price = get_post_meta($course_id, '_sikshya_sale_price', true);
-                $duration = get_post_meta($course_id, '_sikshya_duration', true);
-                $difficulty = get_post_meta($course_id, '_sikshya_difficulty', true);
+                $pricing = sikshya_get_course_pricing($course_id);
+                $price = $pricing['price'];
+                $sale_price = $pricing['sale_price'];
+                $course_currency = $pricing['currency'];
+                $duration = sikshya_first_nonempty_post_meta($course_id, ['_sikshya_duration', '_sikshya_course_duration', 'sikshya_course_duration']);
+                $difficulty = sikshya_first_nonempty_post_meta($course_id, ['_sikshya_difficulty', '_sikshya_course_difficulty', 'sikshya_course_level']);
                 $featured = get_post_meta($course_id, '_sikshya_featured', true);
                 $enrollment_count = get_post_meta($course_id, '_sikshya_enrollment_count', true) ?: 0;
                 $rating = get_post_meta($course_id, '_sikshya_rating', true) ?: 0;
@@ -96,7 +98,7 @@ $courses_query = new WP_Query($args);
                         <span class="sikshya-course-card__badge sikshya-course-card__badge--featured">
                             <?php _e('Featured', 'sikshya'); ?>
                         </span>
-                    <?php elseif ($price == 0) : ?>
+                    <?php elseif ($price === null || (float) $price <= 0) : ?>
                         <span class="sikshya-course-card__badge sikshya-course-card__badge--free">
                             <?php _e('Free', 'sikshya'); ?>
                         </span>
@@ -164,16 +166,16 @@ $courses_query = new WP_Query($args);
                         
                         <!-- Course Price -->
                         <div class="sikshya-course-card__price">
-                            <?php if ($sale_price && $sale_price < $price) : ?>
+                            <?php if ($pricing['on_sale'] && $price !== null && $sale_price !== null) : ?>
                                 <span class="sikshya-course-card__price--sale">
-                                    <?php echo sikshya_format_price($sale_price); ?>
+                                    <?php echo wp_kses_post(sikshya_format_price((float) $sale_price, $course_currency)); ?>
                                 </span>
                                 <span class="sikshya-course-card__price--original">
-                                    <?php echo sikshya_format_price($price); ?>
+                                    <?php echo wp_kses_post(sikshya_format_price((float) $price, $course_currency)); ?>
                                 </span>
-                            <?php elseif ($price > 0) : ?>
+                            <?php elseif ($price !== null && (float) $price > 0) : ?>
                                 <span class="sikshya-course-card__price--regular">
-                                    <?php echo sikshya_format_price($price); ?>
+                                    <?php echo wp_kses_post(sikshya_format_price((float) $price, $course_currency)); ?>
                                 </span>
                             <?php else : ?>
                                 <span class="sikshya-course-card__price--free">
@@ -253,37 +255,25 @@ $courses_query = new WP_Query($args);
 
 <?php
 /**
- * Helper function to format price
- */
-function sikshya_format_price($price) {
-    $currency = get_option('sikshya_currency', 'USD');
-    $currency_position = get_option('sikshya_currency_position', 'left');
-    $decimal_separator = get_option('sikshya_decimal_separator', '.');
-    $thousand_separator = get_option('sikshya_thousand_separator', ',');
-    $number_of_decimals = get_option('sikshya_number_of_decimals', 2);
-    
-    $formatted_price = number_format($price, $number_of_decimals, $decimal_separator, $thousand_separator);
-    
-    if ($currency_position === 'left') {
-        return $currency . $formatted_price;
-    } else {
-        return $formatted_price . $currency;
-    }
-}
-
-/**
- * Helper function to check if user is enrolled
+ * Helper: check if user has an enrollment row for this course (any active progress state).
  */
 function sikshya_is_user_enrolled($user_id, $course_id) {
     global $wpdb;
-    
+
     $table_name = $wpdb->prefix . 'sikshya_enrollments';
-    $enrollment = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $table_name WHERE user_id = %d AND course_id = %d AND status = 'active'",
-        $user_id,
-        $course_id
-    ));
-    
+    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name)) !== $table_name) {
+        return false;
+    }
+
+    $table_sql = esc_sql($table_name);
+    $enrollment = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT id FROM `{$table_sql}` WHERE user_id = %d AND course_id = %d AND status IN ('active','enrolled','completed') LIMIT 1",
+            $user_id,
+            $course_id
+        )
+    );
+
     return !empty($enrollment);
 }
-?> 
+?>

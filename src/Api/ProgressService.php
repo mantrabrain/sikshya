@@ -13,29 +13,29 @@ class ProgressService
         $table = $wpdb->prefix . 'sikshya_progress';
         $user_id = $request->get_param('user_id');
         $course_id = $request->get_param('course_id');
-        
+
         $where = [];
         $prepare_values = [];
-        
+
         if ($user_id) {
             $where[] = 'user_id = %d';
             $prepare_values[] = $user_id;
         }
-        
+
         if ($course_id) {
             $where[] = 'course_id = %d';
             $prepare_values[] = $course_id;
         }
-        
+
         $where_clause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        $query = "SELECT * FROM {$table} {$where_clause} ORDER BY updated_date DESC";
-        
+        $query = "SELECT * FROM {$table} {$where_clause} ORDER BY updated_at DESC";
+
         if (!empty($prepare_values)) {
             $query = $wpdb->prepare($query, ...$prepare_values);
         }
-        
+
         $progress = $wpdb->get_results($query);
-        
+
         return new WP_REST_Response([
             'progress' => array_map([$this, 'formatProgress'], $progress),
         ]);
@@ -51,7 +51,7 @@ class ProgressService
             'status' => $progress->status,
             'percentage' => $progress->percentage,
             'completed_date' => $progress->completed_date,
-            'updated_date' => $progress->updated_date,
+            'updated_at' => $progress->updated_at ?? null,
         ];
     }
-} 
+}

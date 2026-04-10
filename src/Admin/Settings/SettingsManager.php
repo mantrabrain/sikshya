@@ -3,10 +3,11 @@
 namespace Sikshya\Admin\Settings;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Services\PermalinkService;
 
 /**
  * Settings Manager Class
- * 
+ *
  * @package Sikshya\Admin\Settings
  * @since 1.0.0
  */
@@ -69,6 +70,7 @@ class SettingsManager
                 'progress' => $this->getProgressSettings(),
                 'notifications' => $this->getNotificationsSettings(),
                 'integrations' => $this->getIntegrationsSettings(),
+                'permalinks' => $this->getPermalinksSettings(),
                 'security' => $this->getSecuritySettings(),
                 'advanced' => $this->getAdvancedSettings(),
             ];
@@ -114,31 +116,24 @@ class SettingsManager
     public function saveSetting(string $key, $value): bool
     {
         $option_name = '_sikshya_' . $key;
-        $old_value = get_option($option_name);
-        $result = update_option($option_name, $value);
-        
-        // Debug logging
-        error_log('Sikshya SettingsManager - Saving option: ' . $option_name . ' = ' . $value . ' (result: ' . ($result ? 'true' : 'false') . ')');
-        
-        // Check if the option was actually saved
+        update_option($option_name, $value);
+
         $saved_value = get_option($option_name);
-        error_log('Sikshya SettingsManager - Retrieved option: ' . $option_name . ' = ' . $saved_value);
-        
-        // WordPress update_option returns false if value didn't change, but that's not a failure
-        // We consider it successful if the value is now what we wanted it to be
-        // Handle type differences (string vs int, empty string vs null, etc.)
+
         $value_normalized = $this->normalizeValue($value);
         $saved_normalized = $this->normalizeValue($saved_value);
-        
-        error_log('Sikshya SettingsManager - Value comparison: original="' . $value . '" normalized="' . $value_normalized . '", saved="' . $saved_value . '" normalized="' . $saved_normalized . '"');
-        
+
         if ($value_normalized === $saved_normalized) {
-            error_log('Sikshya SettingsManager - Option saved successfully (value matches)');
             return true;
-        } else {
-            error_log('Sikshya SettingsManager - Option save failed (value mismatch: expected "' . $value_normalized . '", got "' . $saved_normalized . '")');
-            return false;
         }
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(
+                'Sikshya SettingsManager: option mismatch after save for ' . $option_name
+            );
+        }
+
+        return false;
     }
 
     /**
@@ -167,16 +162,12 @@ class SettingsManager
      */
     public function saveTabSettings(string $tab, array $data): bool
     {
-        error_log('Sikshya SettingsManager - saveTabSettings called for tab: ' . $tab);
-        error_log('Sikshya SettingsManager - Data to save: ' . print_r($data, true));
-        
         // Get the settings configuration for this tab
         $tab_settings = $this->getTabSettings($tab);
         if (empty($tab_settings)) {
-            error_log('Sikshya SettingsManager - No settings configuration found for tab: ' . $tab);
             return false;
         }
-        
+
         // Extract field names from the settings configuration
         $field_names = [];
         foreach ($tab_settings as $section) {
@@ -188,9 +179,7 @@ class SettingsManager
                 }
             }
         }
-        
-        error_log('Sikshya SettingsManager - Field names from config: ' . print_r($field_names, true));
-        
+
         // Filter data to only include fields that are in the configuration
         $settings_to_save = [];
         foreach ($data as $key => $value) {
@@ -198,11 +187,14 @@ class SettingsManager
                 $settings_to_save[$key] = $value;
             }
         }
-        
-        error_log('Sikshya SettingsManager - Settings to save: ' . print_r($settings_to_save, true));
-        
+
         // Save the settings
-        return $this->saveSettings($settings_to_save);
+        $ok = $this->saveSettings($settings_to_save);
+        if ($ok && $tab === 'permalinks') {
+            flush_rewrite_rules(false);
+        }
+
+        return $ok;
     }
 
     /**
@@ -217,7 +209,7 @@ class SettingsManager
         if (empty($tab_settings)) {
             return false;
         }
-        
+
         $success = true;
         foreach ($tab_settings as $section) {
             if (isset($section['fields']) && is_array($section['fields'])) {
@@ -231,7 +223,7 @@ class SettingsManager
                 }
             }
         }
-        
+
         return $success;
     }
 
@@ -244,13 +236,13 @@ class SettingsManager
     {
         $all_settings = $this->getAllSettings();
         $success = true;
-        
+
         foreach ($all_settings as $tab => $tab_settings) {
             if (!$this->resetTabSettings($tab)) {
                 $success = false;
             }
         }
-        
+
         return $success;
     }
 
@@ -264,7 +256,7 @@ class SettingsManager
     {
         $tab_settings = $this->getTabSettings($tab);
         $export_data = [];
-        
+
         foreach ($tab_settings as $section) {
             if (isset($section['fields']) && is_array($section['fields'])) {
                 foreach ($section['fields'] as $field) {
@@ -274,7 +266,7 @@ class SettingsManager
                 }
             }
         }
-        
+
         return $export_data;
     }
 
@@ -287,11 +279,11 @@ class SettingsManager
     {
         $all_settings = $this->getAllSettings();
         $export_data = [];
-        
+
         foreach ($all_settings as $tab => $tab_settings) {
             $export_data[$tab] = $this->exportTabSettings($tab);
         }
-        
+
         return $export_data;
     }
 
@@ -305,7 +297,7 @@ class SettingsManager
     public function importSettings(array $data, bool $overwrite = false): bool
     {
         $success = true;
-        
+
         foreach ($data as $tab => $tab_data) {
             if (is_array($tab_data)) {
                 foreach ($tab_data as $key => $value) {
@@ -317,7 +309,7 @@ class SettingsManager
                 }
             }
         }
-        
+
         return $success;
     }
 
@@ -336,13 +328,13 @@ class SettingsManager
         }
 
         $output = '<div class="sikshya-settings-tab-content">';
-        
+
         foreach ($settings as $section) {
             $output .= $this->renderSection($section, $field_errors);
         }
-        
+
         $output .= '</div>';
-        
+
         return $output;
     }
 
@@ -356,7 +348,7 @@ class SettingsManager
     protected function renderSection(array $section, array $field_errors = []): string
     {
         $output = '<div class="sikshya-settings-section">' . "\n";
-        
+
         if (!empty($section['title'])) {
             $icon = $section['icon'] ?? 'fas fa-cog';
             $output .= '        <h3 class="sikshya-settings-section-title">' . "\n";
@@ -364,7 +356,7 @@ class SettingsManager
             $output .= '            ' . esc_html($section['title']) . '        ' . "\n";
             $output .= '        </h3>' . "\n";
         }
-        
+
         if (!empty($section['fields'])) {
             $output .= '        ' . "\n";
             $output .= '        <div class="sikshya-settings-grid">' . "\n";
@@ -379,9 +371,9 @@ class SettingsManager
             }
             $output .= '        </div>' . "\n";
         }
-        
+
         $output .= '    </div>';
-        
+
         return $output;
     }
 
@@ -401,21 +393,21 @@ class SettingsManager
         $default = $field['default'] ?? '';
         $placeholder = $field['placeholder'] ?? '';
         $options = $field['options'] ?? [];
-        
+
         $current_value = $this->getSetting($key, $default);
-        
+
         $field_class = 'sikshya-settings-field';
         if (!empty($error_message)) {
             $field_class .= ' has-error';
         }
-        
+
         $output = '            <div class="' . $field_class . '">' . "\n";
-        
+
         // Label (skip for checkbox as it's handled in the checkbox case)
         if (!empty($label) && $type !== 'checkbox') {
             $output .= '                <label for="' . esc_attr($key) . '">' . esc_html($label) . '</label>' . "\n";
         }
-        
+
         // Field input
         switch ($type) {
             case 'textarea':
@@ -425,7 +417,7 @@ class SettingsManager
                 }
                 $output .= '>' . esc_textarea($current_value) . '</textarea>' . "\n";
                 break;
-                
+
             case 'select':
                 $output .= '                <select id="' . esc_attr($key) . '" name="' . esc_attr($key) . '">' . "\n";
                 foreach ($options as $option_value => $option_label) {
@@ -434,7 +426,7 @@ class SettingsManager
                 }
                 $output .= '                </select>' . "\n";
                 break;
-                
+
             case 'checkbox':
                 $checked = checked($current_value, '1', false);
                 $output .= '                <div class="sikshya-checkbox-wrapper">' . "\n";
@@ -444,7 +436,7 @@ class SettingsManager
                 }
                 $output .= '                </div>' . "\n";
                 break;
-                
+
             case 'radio':
                 foreach ($options as $option_value => $option_label) {
                     $checked = checked($current_value, $option_value, false);
@@ -454,7 +446,7 @@ class SettingsManager
                     $output .= '                </label>' . "\n";
                 }
                 break;
-                
+
             case 'number':
                 $output .= '                <input type="number" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
@@ -469,7 +461,7 @@ class SettingsManager
                 }
                 $output .= '>' . "\n";
                 break;
-                
+
             case 'email':
                 $output .= '                <input type="email" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
@@ -478,7 +470,7 @@ class SettingsManager
                 }
                 $output .= '>' . "\n";
                 break;
-                
+
             case 'password':
                 $output .= '                <input type="password" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
@@ -487,7 +479,7 @@ class SettingsManager
                 }
                 $output .= '>' . "\n";
                 break;
-                
+
             case 'url':
                 $output .= '                <input type="url" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
@@ -496,19 +488,19 @@ class SettingsManager
                 }
                 $output .= '>' . "\n";
                 break;
-                
+
             case 'color':
                 $output .= '                <input type="color" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
                 $output .= '>' . "\n";
                 break;
-                
+
             case 'datetime-local':
                 $output .= '                <input type="datetime-local" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
                 $output .= '>' . "\n";
                 break;
-                
+
             default: // text
                 $output .= '                <input type="text" id="' . esc_attr($key) . '" name="' . esc_attr($key) . '"';
                 $output .= ' value="' . esc_attr($current_value) . '"';
@@ -518,12 +510,12 @@ class SettingsManager
                 $output .= '>' . "\n";
                 break;
         }
-        
+
         // Description
         if (!empty($description)) {
             $output .= '                <p class="description">' . esc_html($description) . '</p>' . "\n";
         }
-        
+
         // Error message
         if (!empty($error_message)) {
             $output .= '                <div class="sikshya-field-error">' . "\n";
@@ -531,9 +523,9 @@ class SettingsManager
             $output .= '                    <span>' . esc_html($error_message) . '</span>' . "\n";
             $output .= '                </div>' . "\n";
         }
-        
+
         $output .= '            </div>' . "\n";
-        
+
         return $output;
     }
 
@@ -558,7 +550,7 @@ class SettingsManager
                         'default' => get_bloginfo('name'),
                         'required' => true,
                         'sanitize_callback' => 'sanitize_text_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             return !empty(trim($value)) ? true : __('Site title cannot be empty.', 'sikshya');
                         }
                     ],
@@ -570,7 +562,7 @@ class SettingsManager
                         'placeholder' => __('Enter a description for your LMS', 'sikshya'),
                         'default' => get_bloginfo('description'),
                         'sanitize_callback' => 'sanitize_textarea_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             return strlen($value) <= 500 ? true : __('Description cannot exceed 500 characters.', 'sikshya');
                         }
                     ],
@@ -583,7 +575,7 @@ class SettingsManager
                         'default' => get_option('admin_email'),
                         'required' => true,
                         'sanitize_callback' => 'sanitize_email',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             return is_email($value) ? true : __('Please enter a valid email address.', 'sikshya');
                         }
                     ],
@@ -597,7 +589,7 @@ class SettingsManager
                         'min' => 1,
                         'max' => 100,
                         'sanitize_callback' => 'intval',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             $value = intval($value);
                             if ($value < 1) {
                                 return __('File size must be at least 1 MB.', 'sikshya');
@@ -633,7 +625,7 @@ class SettingsManager
                             'SGD' => __('Singapore Dollar (S$)', 'sikshya')
                         ],
                         'sanitize_callback' => 'sanitize_text_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             $valid_currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR', 'BRL', 'MXN', 'SGD'];
                             return in_array($value, $valid_currencies) ? true : __('Invalid currency selected.', 'sikshya');
                         }
@@ -651,7 +643,7 @@ class SettingsManager
                             'right_space' => __('Right with space (100 $)', 'sikshya')
                         ],
                         'sanitize_callback' => 'sanitize_text_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             $valid_positions = ['left', 'right', 'left_space', 'right_space'];
                             return in_array($value, $valid_positions) ? true : __('Invalid currency position selected.', 'sikshya');
                         }
@@ -670,7 +662,7 @@ class SettingsManager
                         'default' => get_option('timezone_string'),
                         'options' => $this->getTimezoneOptions(),
                         'sanitize_callback' => 'sanitize_text_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             return in_array($value, \DateTimeZone::listIdentifiers()) ? true : __('Invalid timezone selected.', 'sikshya');
                         }
                     ],
@@ -688,7 +680,7 @@ class SettingsManager
                             'j F Y' => date('j F Y')
                         ],
                         'sanitize_callback' => 'sanitize_text_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             $valid_formats = ['F j, Y', 'Y-m-d', 'm/d/Y', 'd/m/Y', 'j F Y'];
                             return in_array($value, $valid_formats) ? true : __('Invalid date format selected.', 'sikshya');
                         }
@@ -704,7 +696,7 @@ class SettingsManager
                             'H:i' => date('H:i')
                         ],
                         'sanitize_callback' => 'sanitize_text_field',
-                        'validate_callback' => function($value) {
+                        'validate_callback' => function ($value) {
                             $valid_formats = ['g:i a', 'H:i'];
                             return in_array($value, $valid_formats) ? true : __('Invalid time format selected.', 'sikshya');
                         }
@@ -1862,6 +1854,161 @@ class SettingsManager
     }
 
     /**
+     * Permalink settings (virtual LMS pages + CPT/taxonomy URL bases).
+     *
+     * @return array
+     */
+    protected function getPermalinksSettings(): array
+    {
+        $defaults = PermalinkService::defaults();
+        $slug_validate = function ($value) {
+            $s = sanitize_title((string) $value);
+
+            return $s !== '' ? true : __('Enter a valid URL slug.', 'sikshya');
+        };
+
+        return [
+            [
+                'title' => __('Learner pages (URL segment)', 'sikshya'),
+                'icon' => 'fas fa-link',
+                'description' => __(
+                    'With pretty permalinks, these become paths like example.com/cart. With plain permalinks, URLs use ?sikshya_page=cart instead.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'permalink_cart',
+                        'type' => 'text',
+                        'label' => __('Cart permalink', 'sikshya'),
+                        'description' => __('Slug for the shopping cart page.', 'sikshya'),
+                        'default' => $defaults['permalink_cart'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'permalink_checkout',
+                        'type' => 'text',
+                        'label' => __('Checkout permalink', 'sikshya'),
+                        'description' => __('Slug for the checkout page.', 'sikshya'),
+                        'default' => $defaults['permalink_checkout'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'permalink_account',
+                        'type' => 'text',
+                        'label' => __('Account permalink', 'sikshya'),
+                        'description' => __('Slug for the learner account / dashboard page.', 'sikshya'),
+                        'default' => $defaults['permalink_account'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'permalink_learn',
+                        'type' => 'text',
+                        'label' => __('Learn page permalink', 'sikshya'),
+                        'description' => __('Slug for the course learn / curriculum page.', 'sikshya'),
+                        'default' => $defaults['permalink_learn'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'permalink_order',
+                        'type' => 'text',
+                        'label' => __('Order / receipt permalink', 'sikshya'),
+                        'description' => __('Slug for viewing an order receipt (order_id is passed in the query string).', 'sikshya'),
+                        'default' => $defaults['permalink_order'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                ],
+            ],
+            [
+                'title' => __('Content type bases', 'sikshya'),
+                'icon' => 'fas fa-folder-open',
+                'description' => __(
+                    'URL prefix for single posts and archives. Changing these updates rewrite rules; save and visit Settings → Permalinks if URLs do not update immediately.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'rewrite_base_course',
+                        'type' => 'text',
+                        'label' => __('Course base', 'sikshya'),
+                        'description' => __('Archive and single course URLs use this segment.', 'sikshya'),
+                        'default' => $defaults['rewrite_base_course'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'rewrite_base_lesson',
+                        'type' => 'text',
+                        'label' => __('Lesson base', 'sikshya'),
+                        'description' => __('Single lesson URLs use this segment.', 'sikshya'),
+                        'default' => $defaults['rewrite_base_lesson'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'rewrite_base_quiz',
+                        'type' => 'text',
+                        'label' => __('Quiz base', 'sikshya'),
+                        'description' => __('Single quiz URLs use this segment.', 'sikshya'),
+                        'default' => $defaults['rewrite_base_quiz'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'rewrite_base_assignment',
+                        'type' => 'text',
+                        'label' => __('Assignment base', 'sikshya'),
+                        'description' => __('Single assignment URLs use this segment.', 'sikshya'),
+                        'default' => $defaults['rewrite_base_assignment'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'rewrite_base_certificate',
+                        'type' => 'text',
+                        'label' => __('Certificate base', 'sikshya'),
+                        'description' => __('Single certificate URLs use this segment.', 'sikshya'),
+                        'default' => $defaults['rewrite_base_certificate'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                ],
+            ],
+            [
+                'title' => __('Taxonomy bases', 'sikshya'),
+                'icon' => 'fas fa-tags',
+                'fields' => [
+                    [
+                        'key' => 'rewrite_tax_course_category',
+                        'type' => 'text',
+                        'label' => __('Course category base', 'sikshya'),
+                        'description' => __(
+                            'URL segment for course category archives. Avoid the same slug as WordPress post categories if both are used.',
+                            'sikshya'
+                        ),
+                        'default' => $defaults['rewrite_tax_course_category'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                    [
+                        'key' => 'rewrite_tax_course_tag',
+                        'type' => 'text',
+                        'label' => __('Course tag base', 'sikshya'),
+                        'description' => __('URL segment for course tag archives.', 'sikshya'),
+                        'default' => $defaults['rewrite_tax_course_tag'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get Advanced Settings
      *
      * @return array
@@ -1910,11 +2057,11 @@ class SettingsManager
     {
         $timezones = \DateTimeZone::listIdentifiers();
         $options = [];
-        
+
         foreach ($timezones as $timezone) {
             $options[$timezone] = $timezone;
         }
-        
+
         return $options;
     }
 
@@ -1930,16 +2077,16 @@ class SettingsManager
         if ($value === null) {
             return '';
         }
-        
+
         // Convert to string and trim
         $normalized = (string) $value;
         $normalized = trim($normalized);
-        
+
         // Handle numeric values (convert "0" to "0", not empty)
         if (is_numeric($value) && $value == 0) {
             return '0';
         }
-        
+
         return $normalized;
     }
 }

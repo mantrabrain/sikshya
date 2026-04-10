@@ -4,9 +4,9 @@ namespace Sikshya\Services;
 
 /**
  * Question Type Service
- * 
+ *
  * Handles all question type operations and validation
- * 
+ *
  * @package Sikshya\Services
  */
 class QuestionTypeService
@@ -69,7 +69,7 @@ class QuestionTypeService
 
     /**
      * Get all question types
-     * 
+     *
      * @return array
      */
     public function getAllQuestionTypes(): array
@@ -79,7 +79,7 @@ class QuestionTypeService
 
     /**
      * Get question type by key
-     * 
+     *
      * @param string $type
      * @return array|null
      */
@@ -90,7 +90,7 @@ class QuestionTypeService
 
     /**
      * Check if question type exists
-     * 
+     *
      * @param string $type
      * @return bool
      */
@@ -101,7 +101,7 @@ class QuestionTypeService
 
     /**
      * Get question type label
-     * 
+     *
      * @param string $type
      * @return string
      */
@@ -113,7 +113,7 @@ class QuestionTypeService
 
     /**
      * Get question type description
-     * 
+     *
      * @param string $type
      * @return string
      */
@@ -125,7 +125,7 @@ class QuestionTypeService
 
     /**
      * Get question type icon
-     * 
+     *
      * @param string $type
      * @return string
      */
@@ -137,7 +137,7 @@ class QuestionTypeService
 
     /**
      * Check if question type supports options
-     * 
+     *
      * @param string $type
      * @return bool
      */
@@ -149,7 +149,7 @@ class QuestionTypeService
 
     /**
      * Check if question type supports single answer
-     * 
+     *
      * @param string $type
      * @return bool
      */
@@ -161,7 +161,7 @@ class QuestionTypeService
 
     /**
      * Check if question type supports multiple answers
-     * 
+     *
      * @param string $type
      * @return bool
      */
@@ -173,7 +173,7 @@ class QuestionTypeService
 
     /**
      * Check if question type is auto-gradable
-     * 
+     *
      * @param string $type
      * @return bool
      */
@@ -185,7 +185,7 @@ class QuestionTypeService
 
     /**
      * Check if question type requires text input
-     * 
+     *
      * @param string $type
      * @return bool
      */
@@ -197,7 +197,7 @@ class QuestionTypeService
 
     /**
      * Validate question data based on type
-     * 
+     *
      * @param string $type
      * @param array $data
      * @return array Validation result
@@ -205,7 +205,7 @@ class QuestionTypeService
     public function validateQuestionData(string $type, array $data): array
     {
         $errors = [];
-        
+
         if (!$this->isValidQuestionType($type)) {
             $errors[] = 'Invalid question type';
             return ['valid' => false, 'errors' => $errors];
@@ -222,10 +222,10 @@ class QuestionTypeService
                 $errors[] = 'Options are required for this question type';
             } else {
                 // Validate options
-                $validOptions = array_filter($data['options'], function($option) {
+                $validOptions = array_filter($data['options'], function ($option) {
                     return !empty(trim($option));
                 });
-                
+
                 if (count($validOptions) < 2) {
                     $errors[] = 'At least 2 options are required';
                 }
@@ -255,7 +255,7 @@ class QuestionTypeService
 
     /**
      * Get default options for question type
-     * 
+     *
      * @param string $type
      * @return array
      */
@@ -265,23 +265,23 @@ class QuestionTypeService
             case 'multiple_choice':
                 return [
                     'Option A',
-                    'Option B', 
+                    'Option B',
                     'Option C',
                     'Option D'
                 ];
-            
+
             case 'true_false':
                 return [
                     'True',
                     'False'
                 ];
-            
+
             case 'matching':
                 return [
                     'left' => ['Item 1', 'Item 2', 'Item 3'],
                     'right' => ['Match A', 'Match B', 'Match C']
                 ];
-            
+
             case 'fill_blank':
             case 'essay':
             default:
@@ -291,47 +291,47 @@ class QuestionTypeService
 
     /**
      * Get question type options for select dropdown
-     * 
+     *
      * @return array
      */
     public function getQuestionTypeOptions(): array
     {
         $options = [];
-        
+
         foreach (self::QUESTION_TYPES as $key => $type) {
             $options[$key] = $type['label'];
         }
-        
+
         return $options;
     }
 
     /**
      * Get auto-gradable question types
-     * 
+     *
      * @return array
      */
     public function getAutoGradableTypes(): array
     {
-        return array_filter(self::QUESTION_TYPES, function($type) {
+        return array_filter(self::QUESTION_TYPES, function ($type) {
             return $type['auto_gradable'];
         });
     }
 
     /**
      * Get manual grading question types
-     * 
+     *
      * @return array
      */
     public function getManualGradingTypes(): array
     {
-        return array_filter(self::QUESTION_TYPES, function($type) {
+        return array_filter(self::QUESTION_TYPES, function ($type) {
             return !$type['auto_gradable'];
         });
     }
 
     /**
      * Convert question type from frontend format to database format
-     * 
+     *
      * @param string $frontendType
      * @return string
      */
@@ -344,13 +344,13 @@ class QuestionTypeService
             'essay' => 'essay',
             'matching' => 'matching'
         ];
-        
+
         return $mapping[$frontendType] ?? $frontendType;
     }
 
     /**
      * Convert question type from database format to frontend format
-     * 
+     *
      * @param string $databaseType
      * @return string
      */
@@ -363,7 +363,7 @@ class QuestionTypeService
             'essay' => 'essay',
             'matching' => 'matching'
         ];
-        
+
         return $mapping[$databaseType] ?? $databaseType;
     }
-} 
+}

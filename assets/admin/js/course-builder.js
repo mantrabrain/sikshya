@@ -5,48 +5,33 @@ let lessonCount = 0;
 let chapterCount = 0;
 let currentContentType = null;
 let currentChapterId = null;
+
+function setCurrentChapterId(id) {
+    currentChapterId = id;
+    window.currentChapterId = id;
+}
 let selectedItems = new Set();
 let isBulkMode = false;
 
-// AJAX helper function
-function sikshyaAjax(action, data, callback) {
-    // Check if sikshya_course_builder_ajax is available
-    if (typeof sikshya_course_builder_ajax === 'undefined') {
-        console.error('Sikshya: sikshya_course_builder_ajax object is not defined!');
-        alert('Sikshya AJAX configuration is missing. Please refresh the page.');
-        return;
+function restBase() {
+    return (typeof sikshya_course_builder_ajax !== 'undefined' && sikshya_course_builder_ajax.rest_url) ? sikshya_course_builder_ajax.rest_url : '';
+}
+
+function restNonce() {
+    return (typeof sikshya_course_builder_ajax !== 'undefined' && sikshya_course_builder_ajax.rest_nonce) ? sikshya_course_builder_ajax.rest_nonce : '';
+}
+
+/**
+ * Course builder REST helper (cookie session + X-WP-Nonce).
+ */
+function courseBuilderFetch(path, options) {
+    options = options || {};
+    const headers = Object.assign({}, options.headers || {});
+    headers['X-WP-Nonce'] = restNonce();
+    if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
     }
-    
-    const ajaxData = {
-        action: action,
-        nonce: sikshya_course_builder_ajax.nonce,
-        ...data
-    };
-
-    console.log('Sikshya AJAX Request:', {
-        action: action,
-        data: ajaxData,
-        url: sikshya_course_builder_ajax.ajax_url
-    });
-
-    jQuery.post(sikshya_course_builder_ajax.ajax_url, ajaxData, function(response) {
-        console.log('Sikshya AJAX Raw Response:', response);
-        console.log('Sikshya AJAX Response Success:', response.success);
-        console.log('Sikshya AJAX Response Data:', response.data);
-        
-        if (response.success) {
-            console.log('Sikshya AJAX: Calling success callback');
-            callback(response);
-        } else {
-            console.error('Sikshya AJAX Error:', response.data);
-            alert('Error: ' + response.data);
-        }
-    }).fail(function(xhr, status, error) {
-        console.error('Sikshya AJAX Failed:', error);
-        console.error('XHR Status:', xhr.status);
-        console.error('XHR Response:', xhr.responseText);
-        alert('Request failed: ' + error);
-    });
+    return fetch(restBase() + path, Object.assign({ credentials: 'same-origin' }, options, { headers: headers })).then(function(r) { return r.json(); });
 }
 
 // Tab switching with URL parameter support
@@ -389,10 +374,13 @@ function toggleAdvancedForm(button) {
 
 // Chapter Management
 function showChapterModal() {
-    sikshyaAjax('sikshya_load_modal_template', {
-        modal_type: 'chapter',
-        chapter_order: chapterCount + 1
-    }, function(response) {
+    const order = chapterCount + 1;
+    courseBuilderFetch('templates/modal?modal_type=chapter&chapter_order=' + encodeURIComponent(order), { method: 'GET' })
+    .then(function(response) {
+        if (!response.success || !response.data || !response.data.html) {
+            console.error('Sikshya: modal load failed', response);
+            return;
+        }
         console.log('Sikshya: Modal HTML received:', response.data.html);
         document.body.insertAdjacentHTML('beforeend', response.data.html);
         
@@ -410,7 +398,8 @@ function showChapterModal() {
                 console.log('Sikshya: Alternative modal selector:', altModal);
             }
         }, 10);
-    });
+    })
+    .catch(function(err) { console.error('Sikshya: modal fetch failed', err); });
 }
 
 function saveChapter() {
@@ -439,34 +428,32 @@ function saveChapter() {
         
         console.log('Sikshya: Course data to save:', { title: courseTitle, description: courseDescription });
         
-        // Save course as draft first
-        sikshyaAjax('sikshya_course_builder_save', {
-            title: courseTitle,
-            description: courseDescription,
-            course_id: 0,
-            course_status: 'draft'
-        }, function(data) {
+        courseBuilderFetch('course-builder/save', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: courseTitle,
+                description: courseDescription,
+                course_id: 0,
+                course_status: 'draft'
+            })
+        }).then(function(data) {
             console.log('Sikshya: Course save response:', data);
-            
-            if (data && data.course_id) {
-                console.log('Sikshya: Course saved successfully with ID:', data.course_id);
-                
-                // Update the course_id in the form
+            const cid = data && data.data && data.data.course_id ? data.data.course_id : null;
+            if (data && data.success && cid) {
+                console.log('Sikshya: Course saved successfully with ID:', cid);
                 if (courseIdField) {
-                    courseIdField.value = data.course_id;
+                    courseIdField.value = cid;
                 }
-                
-                // Update URL to include course_id
                 const url = new URL(window.location);
-                url.searchParams.set('course_id', data.course_id);
+                url.searchParams.set('course_id', cid);
                 window.history.replaceState({}, '', url.toString());
-                
-                // Now create the chapter with the new course_id
-                createChapterWithCourseId(data.course_id, title, duration, order);
+                createChapterWithCourseId(cid, title, duration, order);
             } else {
                 console.error('Sikshya: Failed to save course:', data);
                 alert('Failed to save course. Please try again.');
             }
+        }).catch(function() {
+            alert('Failed to save course. Please try again.');
         });
     } else {
         console.log('Sikshya: Course already exists, creating chapter directly with courseId:', courseId);
@@ -478,15 +465,18 @@ function saveChapter() {
 function createChapterWithCourseId(courseId, title, duration, order) {
     console.log('Sikshya: Creating chapter with courseId:', courseId, 'title:', title);
     
-    sikshyaAjax('sikshya_create_chapter', {
-        title: title,
-        duration: duration,
-        order: order,
-        course_id: courseId
-    }, function(response) {
+    courseBuilderFetch('curriculum/chapters', {
+        method: 'POST',
+        body: JSON.stringify({
+            title: title,
+            duration: duration,
+            order: order,
+            course_id: courseId
+        })
+    }).then(function(response) {
         console.log('Sikshya: Chapter creation response:', response);
         
-        if (response && response.data && response.data.html && response.data.chapter_id) {
+        if (response && response.success && response.data && response.data.html && response.data.chapter_id) {
             // Clear form before closing modal
             const titleField = document.getElementById('chapter-title');
             const descriptionField = document.getElementById('chapter-description');
@@ -510,6 +500,8 @@ function createChapterWithCourseId(courseId, title, duration, order) {
             console.error('Sikshya: Failed to create chapter:', response);
             alert('Failed to create chapter. Please try again.');
         }
+    }).catch(function() {
+        alert('Failed to create chapter. Please try again.');
     });
 }
 
@@ -706,28 +698,23 @@ function editChapter(chapterId) {
     const numericId = chapterId.replace('chapter-', '');
     console.log('Numeric chapter ID:', numericId);
     
-    // Load chapter data via AJAX
-    sikshyaAjax('sikshya_load_chapter_data', {
-        chapter_id: numericId
-    }, function(data) {
+    courseBuilderFetch('curriculum/chapters/' + encodeURIComponent(numericId), { method: 'GET' })
+    .then(function(data) {
         console.log('Chapter data loaded:', data);
         
-        if (data && data.success) {
+        if (data && data.success && data.data) {
             const chapterData = data.data;
             console.log('Chapter data object:', chapterData);
             console.log('Chapter title:', chapterData.title);
             console.log('Chapter duration:', chapterData.duration);
             console.log('Chapter order:', chapterData.order);
             
-            // Load the edit modal template
-            sikshyaAjax('sikshya_load_modal_template', {
-                modal_type: 'edit-chapter'
-            }, function(modalData) {
+            return courseBuilderFetch('templates/modal?modal_type=' + encodeURIComponent('edit-chapter') + '&chapter_order=1', { method: 'GET' })
+            .then(function(modalData) {
                 console.log('Modal template loaded:', modalData);
                 
-                if (modalData && modalData.html) {
-                    // Insert modal HTML
-                    document.body.insertAdjacentHTML('beforeend', modalData.html);
+                if (modalData && modalData.success && modalData.data && modalData.data.html) {
+                    document.body.insertAdjacentHTML('beforeend', modalData.data.html);
                     
                     // Get the modal
         const modal = document.querySelector('.sikshya-modal-overlay');
@@ -795,6 +782,9 @@ function editChapter(chapterId) {
             console.error('Failed to load chapter data:', data);
             alert('Failed to load chapter data. Please try again.');
         }
+    })
+    .catch(function() {
+        alert('Failed to load chapter data. Please try again.');
     });
 }
 
@@ -819,31 +809,31 @@ function updateChapter(chapterId) {
         return;
     }
     
-    // Send update request via AJAX
-    sikshyaAjax('sikshya_update_chapter', {
-        chapter_id: chapterId,
-        title: title,
-        duration: duration,
-        order: order
-    }, function(data) {
+    const orderNum = order !== '' && order !== undefined ? parseInt(order, 10) : 1;
+    courseBuilderFetch('curriculum/chapters/' + encodeURIComponent(chapterId), {
+        method: 'PATCH',
+        body: JSON.stringify({
+            title: title,
+            duration: duration || '',
+            order: isNaN(orderNum) ? 1 : orderNum
+        })
+    })
+    .then(function(data) {
         console.log('Chapter update response:', data);
-        
         if (data && data.success) {
-    // Close modal
             closeModal(modal);
-            
-            // Reload the curriculum tab to show updated data
             const curriculumTab = document.querySelector('[data-tab="curriculum"]');
             if (curriculumTab) {
                 curriculumTab.click();
             }
-    
-    // Show success message
-    alert('Chapter updated successfully!');
+            alert('Chapter updated successfully!');
         } else {
             console.error('Failed to update chapter:', data);
-            alert('Failed to update chapter. Please try again.');
+            alert((data && data.message) ? data.message : 'Failed to update chapter. Please try again.');
         }
+    })
+    .catch(function() {
+        alert('Failed to update chapter. Please try again.');
     });
 }
 
@@ -993,12 +983,15 @@ function confirmIndividualChapterDeletion() {
 
 // Content Management
 function showContentTypeModal() {
-    sikshyaAjax('sikshya_load_modal_template', {
-        modal_type: 'content-type'
-    }, function(data) {
-        document.body.insertAdjacentHTML('beforeend', data.html);
-        const modal = document.querySelector('.sikshya-modal-overlay');
-        openModal(modal);
+    courseBuilderFetch('templates/modal?modal_type=' + encodeURIComponent('content-type'), { method: 'GET' })
+    .then(function(data) {
+        if (data && data.success && data.data && data.data.html) {
+            document.body.insertAdjacentHTML('beforeend', data.data.html);
+            const modal = document.querySelector('.sikshya-modal-overlay');
+            if (modal) {
+                openModal(modal);
+            }
+        }
     });
 }
 
@@ -1090,33 +1083,26 @@ function showContentFormModal(contentType) {
 
 function showFullWidthModal(contentType) {
     console.log('Loading form for content type:', contentType); // Debug log
-    console.log('Sikshya: About to call sikshyaAjax with action: sikshya_load_form_template');
-    console.log('Sikshya: Course builder AJAX object:', sikshya_course_builder_ajax);
-    
-    // Check if sikshyaAjax function exists
-    if (typeof sikshyaAjax !== 'function') {
-        console.error('Sikshya: sikshyaAjax function not found!');
-        alert('Sikshya AJAX function not available. Please refresh the page.');
+
+    if (!restBase() || !restNonce()) {
+        alert('REST is not configured. Please refresh the page.');
         return;
     }
-    
-    console.log('Sikshya: Calling sikshyaAjax...');
-    
-    sikshyaAjax('sikshya_load_form_template', {
-        content_type: contentType
-    }, function(response) {
-        console.log('Sikshya: AJAX success callback called');
+
+    courseBuilderFetch('templates/form?content_type=' + encodeURIComponent(contentType), { method: 'GET' })
+    .then(function(response) {
         console.log('Form template response:', response); // Debug log
-        console.log('Response data:', response.data); // Debug log
-        console.log('HTML content length:', response.data.html ? response.data.html.length : 0); // Debug log
-        
-        // Create modal wrapper with improved design
+        const formHtml = (response && response.data && response.data.html) ? response.data.html : '';
+        if (!response || !response.success) {
+            alert((response && response.message) ? response.message : 'Failed to load form template.');
+            return;
+        }
+
         const modal = document.createElement('div');
         modal.className = 'sikshya-modal-overlay';
-        
-        // Get content type display name and icon
+
         const contentTypeInfo = getContentTypeInfo(contentType);
-        
+
         modal.innerHTML = `
             <div class="sikshya-modal sikshya-modal-extra-large">
                 <div class="sikshya-modal-header">
@@ -1136,7 +1122,7 @@ function showFullWidthModal(contentType) {
                     </div>
                 </div>
                 <div class="sikshya-modal-body">
-                    ${response.data.html || '<p>No form content loaded</p>'}
+                    ${formHtml || '<p>No form content loaded</p>'}
                 </div>
                 <div class="sikshya-modal-footer">
                     <button class="sikshya-btn sikshya-btn-secondary" onclick="closeModal(this)">Cancel</button>
@@ -1145,14 +1131,16 @@ function showFullWidthModal(contentType) {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
         openModal(modal);
-        
-        // Initialize tab functionality for lesson forms
+
         initializeLessonFormTabs(modal);
-        
+
         console.log('Modal created and opened for:', contentType); // Debug log
+    })
+    .catch(function() {
+        alert('Failed to load form template. Please try again.');
     });
 }
 
@@ -1420,7 +1408,7 @@ function saveContent(contentType) {
         const existingChapters = document.querySelectorAll('.sikshya-chapter');
         if (existingChapters.length > 0) {
             // Use the first chapter
-            currentChapterId = existingChapters[0].id;
+            setCurrentChapterId(existingChapters[0].id);
             console.log('Auto-selected first chapter:', currentChapterId);
         } else {
             // Create a default chapter first
@@ -1459,36 +1447,33 @@ function createDefaultChapterAndAddContent(contentType, formData) {
     
     // If course_id is 0, we need to save the course first
     if (courseId === 0) {
-        // Get basic course data from the form
-        const courseTitle = document.querySelector('input[name="title"]')?.value || 'New Course';
-        const courseDescription = document.querySelector('textarea[name="description"]')?.value || '';
-        
-        // Save course as draft first
-        sikshyaAjax('sikshya_course_builder_save', {
-            title: courseTitle,
-            description: courseDescription,
-            course_id: 0,
-            course_status: 'draft'
-        }, function(data) {
+        const form = document.getElementById('sikshya-course-builder-form');
+        if (!form) {
+            alert('Course form not found. Please refresh the page.');
+            return;
+        }
+        const fd = new FormData(form);
+        fd.set('course_status', 'draft');
+
+        courseBuilderFetch('course-builder/save', { method: 'POST', body: fd })
+        .then(function(data) {
             console.log('Course save response:', data);
-            
-            if (data && data.course_id) {
-                // Update the course_id in the form
+            const newCourseId = data && data.data && data.data.course_id ? data.data.course_id : 0;
+            if (data && data.success && newCourseId) {
                 if (courseIdField) {
-                    courseIdField.value = data.course_id;
+                    courseIdField.value = newCourseId;
                 }
-                
-                // Update URL to include course_id
                 const url = new URL(window.location);
-                url.searchParams.set('course_id', data.course_id);
+                url.searchParams.set('course_id', newCourseId);
                 window.history.replaceState({}, '', url.toString());
-                
-                // Now create the default chapter and content with the new course_id
-                createDefaultChapterAndContentWithCourseId(data.course_id, contentType, formData);
+                createDefaultChapterAndContentWithCourseId(newCourseId, contentType, formData);
             } else {
                 console.error('Failed to save course:', data);
-                alert('Failed to save course. Please try again.');
+                alert((data && data.message) ? data.message : 'Failed to save course. Please try again.');
             }
+        })
+        .catch(function() {
+            alert('Failed to save course. Please try again.');
         });
     } else {
         // Course already exists, create default chapter and content directly
@@ -1506,32 +1491,37 @@ function createDefaultChapterAndContentWithCourseId(courseId, contentType, formD
         course_id: courseId
     };
     
-    sikshyaAjax('sikshya_create_chapter', defaultChapterData, function(data) {
+    courseBuilderFetch('curriculum/chapters', {
+        method: 'POST',
+        body: JSON.stringify(defaultChapterData)
+    })
+    .then(function(data) {
         console.log('Default chapter created:', data);
-        
-        // Set as current chapter
-        currentChapterId = data.chapter_id;
-        
-        // Now create the content using the save handler
+        const chapterIdNum = data && data.data && data.data.chapter_id ? data.data.chapter_id : 0;
+        if (!data || !data.success || !chapterIdNum) {
+            alert((data && data.message) ? data.message : 'Failed to create chapter. Please try again.');
+            return;
+        }
+        setCurrentChapterId('chapter-' + chapterIdNum);
+
         if (window.SikshyaCourseBuilderSave) {
             window.SikshyaCourseBuilderSave.saveContent(contentType, formData, function(success, response) {
                 if (success) {
-            // Close modal
-            closeModal(document.querySelector('.sikshya-modal-overlay'));
-            
-            // Update progress
-            updateProgress();
-            
-            lessonCount++;
+                    closeModal(document.querySelector('.sikshya-modal-overlay'));
+                    updateProgress();
+                    lessonCount++;
                 } else {
                     console.error('Failed to save content:', response);
                     alert('Failed to save content. Please try again.');
                 }
-        });
+            });
         } else {
             console.error('SikshyaCourseBuilderSave not available');
             alert('Save handler not available. Please refresh the page.');
         }
+    })
+    .catch(function() {
+        alert('Failed to create chapter. Please try again.');
     });
 }
 
@@ -1712,11 +1702,18 @@ function editContentModal(contentId, contentType) {
     const currentDescription = contentItem.dataset.description || '';
     const currentDuration = contentItem.dataset.duration || '';
     
-    // Load the edit form template
-    sikshyaAjax('sikshya_load_form_template', {
-        form_type: 'advanced',
-        content_type: contentType
-    }, function(data) {
+    if (!restBase() || !restNonce()) {
+        alert('REST is not configured. Please refresh the page.');
+        return;
+    }
+
+    courseBuilderFetch('templates/form?content_type=' + encodeURIComponent(contentType), { method: 'GET' })
+    .then(function(resp) {
+        const data = resp && resp.data ? resp.data : {};
+        if (!resp || !resp.success || !data.html) {
+            alert((resp && resp.message) ? resp.message : 'Failed to load edit form.');
+            return;
+        }
         // Create modal wrapper
         const modal = document.createElement('div');
         modal.className = 'sikshya-modal-overlay';
@@ -1764,6 +1761,9 @@ function editContentModal(contentId, contentType) {
         setTimeout(() => {
             populateEditForm(contentType, currentTitle, currentDescription, currentDuration);
         }, 100);
+    })
+    .catch(function() {
+        alert('Failed to load edit form. Please try again.');
     });
 }
 
@@ -1879,7 +1879,7 @@ function editContent(button) {
 // Utility Functions
 function addContent(chapterId) {
     if (chapterId) {
-        currentChapterId = chapterId;
+        setCurrentChapterId(chapterId);
         showContentTypeModal();
     } else {
         showChapterModal();
@@ -1982,35 +1982,38 @@ function publishCourse() {
 
 function submitCourseForm() {
     const form = document.getElementById('sikshya-course-builder-form');
+    if (!form || !restBase() || !restNonce()) {
+        showNotification('Form or REST is not available. Please refresh the page.', 'error');
+        return;
+    }
     const formData = new FormData(form);
-    
-    // Add curriculum data
+
     const curriculumData = collectCurriculumData();
     formData.append('curriculum_data', JSON.stringify(curriculumData));
-    
-    // Show loading state
+
+    const statusField = document.getElementById('course-status-field');
+    if (statusField && statusField.value) {
+        formData.set('course_status', statusField.value);
+    }
+
     showLoadingState();
-    
-    // Submit via AJAX
-    fetch(ajaxurl, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
+
+    courseBuilderFetch('course-builder/save', { method: 'POST', body: formData })
+    .then(function(data) {
         hideLoadingState();
         if (data.success) {
             showNotification('Course saved successfully!', 'success');
-            if (data.data.redirect) {
+            if (data.data && data.data.redirect) {
                 window.location.href = data.data.redirect;
             }
         } else {
-            showNotification(data.data.message || 'Error saving course', 'error');
+            const msg = data.message || (data.data && data.data.message) || 'Error saving course';
+            showNotification(msg, 'error');
         }
     })
-    .catch(error => {
+    .catch(function(error) {
         hideLoadingState();
-        showNotification('Error saving course: ' + error.message, 'error');
+        showNotification('Error saving course: ' + (error && error.message ? error.message : 'network'), 'error');
         console.error('Error:', error);
     });
 }
@@ -3809,11 +3812,23 @@ function saveChapterOrder() {
         id: chapter.getAttribute('data-chapter-id'),
         order: chapter.getAttribute('data-order')
     }));
-    
-    // Send to server via AJAX
-    sikshyaAjax('sikshya_update_chapter_order', {
-        chapter_order: chapterOrder
-    }, function(response) {
+
+    const courseIdField = document.querySelector('input[name="course_id"]');
+    let courseId = courseIdField ? parseInt(courseIdField.value, 10) || 0 : 0;
+    if (!courseId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        courseId = parseInt(urlParams.get('course_id') || urlParams.get('id') || '0', 10) || 0;
+    }
+    if (courseId <= 0) {
+        console.warn('saveChapterOrder: missing course_id, skipping sync');
+        return;
+    }
+
+    courseBuilderFetch('curriculum/chapter-order', {
+        method: 'POST',
+        body: JSON.stringify({ course_id: courseId, chapter_order: chapterOrder })
+    })
+    .then(function(response) {
         console.log('Chapter order updated:', response);
     });
 }
@@ -4246,18 +4261,17 @@ function deleteBulkItems(items) {
         deleteBtn.disabled = true;
     }
     
-    // Prepare data
-    const data = {
-        action: 'sikshya_bulk_delete_items',
-        chapters: chaptersToDelete,
-        lessons: lessonsToDelete,
-        nonce: sikshya_course_builder_ajax.nonce || ''
-    };
-    
-    console.log('Sikshya: Bulk delete request data:', data);
-    
-    // Send AJAX request
-    sikshyaAjax('sikshya_bulk_delete_items', data, function(response) {
+    fetch(`${restBase()}curriculum/bulk-delete`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': restNonce(),
+        },
+        body: JSON.stringify({ chapters: chaptersToDelete, lessons: lessonsToDelete }),
+    })
+    .then(r => r.json())
+    .then(function(response) {
         console.log('Sikshya: Bulk delete response:', response);
         
         // Restore button state immediately
@@ -4284,7 +4298,7 @@ function deleteBulkItems(items) {
             }
             
             // Show success message
-            const deletedCount = response.data && response.data.deleted_count ? response.data.deleted_count : items.length;
+            const deletedCount = response.deleted_count ? response.deleted_count : items.length;
             sikshyaAlert(`${deletedCount} items deleted successfully.`, 'success');
             
             // Update curriculum counts
@@ -4292,15 +4306,22 @@ function deleteBulkItems(items) {
         } else {
             // Display detailed error message
             let errorMessage = 'Error deleting items: ';
-            if (response.data && response.data.message) {
-                errorMessage += response.data.message;
-            } else if (response.data && response.data.errors && response.data.errors.length > 0) {
-                errorMessage += response.data.errors.join(', ');
+            if (response.message) {
+                errorMessage += response.message;
+            } else if (response.errors && response.errors.length > 0) {
+                errorMessage += response.errors.join(', ');
             } else {
                 errorMessage += 'Unknown error';
             }
             sikshyaAlert(errorMessage, 'error');
         }
+    })
+    .catch(function() {
+        if (deleteBtn && originalText) {
+            deleteBtn.innerHTML = originalText;
+            deleteBtn.disabled = false;
+        }
+        sikshyaAlert('Error deleting items: Network error', 'error');
     });
 }
 

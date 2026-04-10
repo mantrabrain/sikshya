@@ -129,31 +129,28 @@
                 </div>
             `);
 
-            const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
-            
-            // Make AJAX request
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_load_settings_tab',
-                    tab: tab,
-                    nonce: nonce
+            fetch(`${sikshya_ajax.rest_url}settings/tab/${encodeURIComponent(tab)}`, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'X-WP-Nonce': sikshya_ajax.rest_nonce,
                 },
-                success: function(response) {
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
-                        $content.html(response.data.content);
+                        $content.html((response.data && response.data.content) ? response.data.content : '');
                     } else {
                         $content.html(`
                             <div class="sikshya-error">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <span>${response.data.message || 'Error loading settings.'}</span>
+                                <span>${response.message || 'Error loading settings.'}</span>
                             </div>
                         `);
-                        SikshyaSettings.showNotification(response.data.message || 'Error loading settings.', 'error');
+                        SikshyaSettings.showNotification(response.message || 'Error loading settings.', 'error');
                     }
-                },
-                error: function() {
+                })
+                .catch(function() {
                     $content.html(`
                         <div class="sikshya-error">
                             <i class="fas fa-exclamation-triangle"></i>
@@ -161,8 +158,7 @@
                         </div>
                     `);
                     SikshyaSettings.showNotification('Network error. Please try again.', 'error');
-                }
-            });
+                });
         },
 
         // Handle form submission
@@ -185,10 +181,11 @@
             
             // Collect form data
             const formData = new FormData($form[0]);
-            const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
-            formData.append('action', 'sikshya_save_settings');
-            formData.append('nonce', nonce);
-            formData.append('tab', SikshyaSettings.currentTab);
+            const payload = {};
+            for (let [k, v] of formData.entries()) {
+                payload[k] = v;
+            }
+            payload.tab = SikshyaSettings.currentTab;
             
             // Debug: Log the form data being sent
             console.log('Form data entries:');
@@ -196,49 +193,51 @@
                 console.log(key + ': ' + value);
             }
             
-            // Make AJAX request
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
+            fetch(`${sikshya_ajax.rest_url}settings/save`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshya_ajax.rest_nonce,
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
-                        SikshyaSettings.showNotification(response.data.message, 'success');
+                        SikshyaSettings.showNotification(response.message || 'Saved', 'success');
                         
                         // Reload tab content to show updated values
                         SikshyaSettings.loadTabContent(SikshyaSettings.currentTab);
                     } else {
                         // Show general error message
-                        SikshyaSettings.showNotification(response.data.message, 'error');
+                        SikshyaSettings.showNotification(response.message || 'Error', 'error');
                         
                         // Show field-specific errors if any
-                        if (response.data.field_errors && Object.keys(response.data.field_errors).length > 0) {
-                            console.error('Field errors:', response.data.field_errors);
+                        if (response.errors && Object.keys(response.errors).length > 0) {
+                            console.error('Field errors:', response.errors);
                             
                             // Update form content with error states
-                            if (response.data.updated_content) {
+                            if (response.data && response.data.updated_content) {
                                 $('#sikshya-settings-content').html(response.data.updated_content);
                             }
                         }
                         
                         // Show general errors if any
-                        if (response.data.general_errors && response.data.general_errors.length > 0) {
+                        if (response.data && response.data.general_errors && response.data.general_errors.length > 0) {
                             console.error('General errors:', response.data.general_errors);
                         }
                     }
-                },
-                error: function() {
+                })
+                .catch(function() {
                     SikshyaSettings.showNotification('Network error. Please try again.', 'error');
-                },
-                complete: function() {
+                })
+                .finally(function() {
                     // Restore button state for all save buttons
                     $submitBtns.each(function(index) {
                         $(this).html(originalTexts[index]).prop('disabled', false);
                     });
-                }
-            });
+                });
         },
 
         // Handle reset settings
@@ -268,36 +267,33 @@
             // Show loading state
             $btn.html('<i class="fas fa-spinner fa-spin"></i> Resetting All Settings...').prop('disabled', true);
             
-            // Make AJAX request to reset all settings
-            const nonce = window.sikshya_settings_nonce || sikshya_ajax.nonce;
-            console.log('SikshyaSettings: Making AJAX request with nonce:', nonce);
-            $.ajax({
-                url: sikshya_ajax.ajax_url,
-                type: 'POST',
-                data: {
-                    action: 'sikshya_reset_settings',
-                    nonce: nonce
+            fetch(`${sikshya_ajax.rest_url}settings/reset`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': sikshya_ajax.rest_nonce,
                 },
-                success: function(response) {
-                    console.log('SikshyaSettings: AJAX response:', response);
+                body: JSON.stringify({}),
+            })
+                .then(r => r.json())
+                .then(function(response) {
                     if (response.success) {
-                        SikshyaSettings.showNotification(response.data.message, 'success');
+                        SikshyaSettings.showNotification(response.message || 'Reset', 'success');
                         
                         // Reload current tab content to show reset values
                         SikshyaSettings.loadTabContent(SikshyaSettings.currentTab);
                     } else {
-                        SikshyaSettings.showNotification(response.data.message, 'error');
+                        SikshyaSettings.showNotification(response.message || 'Error', 'error');
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('SikshyaSettings: AJAX error:', {xhr, status, error});
+                })
+                .catch(function() {
                     SikshyaSettings.showNotification('Network error. Please try again.', 'error');
-                },
-                complete: function() {
+                })
+                .finally(function() {
                     // Restore button state
                     $btn.html(originalText).prop('disabled', false);
-                }
-            });
+                });
         },
 
         // Handle URL hash change

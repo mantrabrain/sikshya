@@ -89,4 +89,4 @@ class SecurityService
                 return esc_html($output);
         }
     }
-} 
+}

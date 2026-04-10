@@ -198,7 +198,7 @@ class CourseController
     private function render(string $template, array $data = []): void
     {
         $template_path = $this->plugin->getTemplatePath($template . '.php');
-        
+
         if (file_exists($template_path)) {
             extract($data);
             include $template_path;
@@ -211,7 +211,7 @@ class CourseController
     private function renderDefault(string $template, array $data = []): void
     {
         $template_path = $this->plugin->getTemplatePath('default/' . $template . '.php');
-        
+
         if (file_exists($template_path)) {
             extract($data);
             include $template_path;
@@ -223,7 +223,7 @@ class CourseController
     private function getPagination(array $args): array
     {
         global $wp_query;
-        
+
         $total_posts = $wp_query->found_posts;
         $posts_per_page = $args['posts_per_page'] ?? 12;
         $current_page = $args['paged'] ?? 1;
@@ -240,4 +240,4 @@ class CourseController
             'next_page' => $current_page + 1,
         ];
     }
-} 
+}

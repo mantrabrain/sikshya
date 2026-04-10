@@ -2,10 +2,11 @@
 
 namespace Sikshya\Database\Repositories;
 
-use WP_Query;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
+use WP_Query;
 
-class CourseRepository
+class CourseRepository implements RepositoryInterface
 {
     public function findAll(array $args = []): array
     {
@@ -16,10 +17,10 @@ class CourseRepository
             'orderby' => 'date',
             'order' => 'DESC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -41,14 +42,14 @@ class CourseRepository
         ];
 
         $post_id = wp_insert_post($post_data, true);
-        
+
         if (is_wp_error($post_id)) {
             return 0;
         }
 
         // Set custom meta fields
         $this->setMetaFields($post_id, $data);
-        
+
         return $post_id;
     }
 
@@ -63,14 +64,14 @@ class CourseRepository
         ];
 
         $result = wp_update_post($post_data, true);
-        
+
         if (is_wp_error($result)) {
             return false;
         }
 
         // Update custom meta fields
         $this->setMetaFields($id, $data);
-        
+
         return true;
     }
 
@@ -78,6 +79,49 @@ class CourseRepository
     {
         $result = wp_delete_post($id, true);
         return $result !== false;
+    }
+
+    /**
+     * Whether the ID refers to a Sikshya course post.
+     */
+    public function isCourse(int $id): bool
+    {
+        $post = get_post($id);
+        return $post !== null && $post->post_type === PostTypes::COURSE;
+    }
+
+    /**
+     * Insert a course post from builder fields (title + HTML description).
+     *
+     * @return int|\WP_Error Post ID or error.
+     */
+    public function insertFromBuilder(string $title, string $description_html, string $post_status)
+    {
+        return wp_insert_post(
+            [
+                'post_title' => sanitize_text_field($title),
+                'post_content' => wp_kses_post($description_html),
+                'post_type' => PostTypes::COURSE,
+                'post_status' => sanitize_key($post_status),
+            ],
+            true
+        );
+    }
+
+    /**
+     * Update only post_status for an existing course row.
+     */
+    public function updatePostStatus(int $id, string $post_status): bool
+    {
+        $result = wp_update_post(
+            [
+                'ID' => $id,
+                'post_status' => sanitize_key($post_status),
+            ],
+            true
+        );
+
+        return !is_wp_error($result);
     }
 
     public function findByInstructor(int $instructor_id, array $args = []): array
@@ -90,10 +134,10 @@ class CourseRepository
             'orderby' => 'date',
             'order' => 'DESC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -106,10 +150,10 @@ class CourseRepository
             'orderby' => 'date',
             'order' => 'DESC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -122,10 +166,10 @@ class CourseRepository
             's' => $search_term,
             'orderby' => 'relevance',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -145,10 +189,10 @@ class CourseRepository
             'orderby' => 'date',
             'order' => 'DESC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -162,10 +206,10 @@ class CourseRepository
             'orderby' => 'meta_value_num',
             'order' => 'DESC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -209,4 +253,4 @@ class CourseRepository
     {
         return delete_post_meta($post_id, $key);
     }
-} 
+}

@@ -187,17 +187,16 @@ get_header(); ?>
                                     </div>
                                     
                                     <div class="sikshya-course-price">
-                                        <?php 
-                                        $price = get_post_meta(get_the_ID(), 'course_price', true);
-                                        $sale_price = get_post_meta(get_the_ID(), 'course_sale_price', true);
-                                        
-                                        if ($sale_price && $sale_price < $price) {
-                                            echo '<span class="sikshya-price-current">$' . number_format($sale_price, 2) . '</span>';
-                                            echo '<span class="sikshya-price-original">$' . number_format($price, 2) . '</span>';
-                                        } elseif ($price && $price > 0) {
-                                            echo '<span class="sikshya-price">$' . number_format($price, 2) . '</span>';
+                                        <?php
+                                        $tid = get_the_ID();
+                                        $p = sikshya_get_course_pricing($tid);
+                                        if ($p['on_sale'] && null !== $p['price'] && null !== $p['sale_price']) {
+                                            echo '<span class="sikshya-price-current">' . wp_kses_post(sikshya_format_price((float) $p['sale_price'], $p['currency'])) . '</span>';
+                                            echo '<span class="sikshya-price-original">' . wp_kses_post(sikshya_format_price((float) $p['price'], $p['currency'])) . '</span>';
+                                        } elseif (null !== $p['price'] && (float) $p['price'] > 0) {
+                                            echo '<span class="sikshya-price">' . wp_kses_post(sikshya_format_price((float) $p['price'], $p['currency'])) . '</span>';
                                         } else {
-                                            echo '<span class="sikshya-price-free">' . __('FREE', 'sikshya') . '</span>';
+                                            echo '<span class="sikshya-price-free">' . esc_html__('Free', 'sikshya') . '</span>';
                                         }
                                         ?>
                                     </div>

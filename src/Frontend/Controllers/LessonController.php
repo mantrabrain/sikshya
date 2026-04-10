@@ -35,22 +35,22 @@ class LessonController
     {
         $lesson_id = get_the_ID();
         $lesson = get_post($lesson_id);
-        
+
         if (!$lesson || $lesson->post_type !== 'sikshya_lesson') {
             return;
         }
 
         // Get lesson data
         $lesson_data = $this->getLessonData($lesson_id);
-        
+
         // Get course data
         $course_id = $lesson_data['course_id'];
         $course_data = $this->getCourseData($course_id);
-        
+
         // Check if user is enrolled
         $user_id = get_current_user_id();
         $is_enrolled = $this->plugin->getService('enrollment')->isEnrolled($course_id, $user_id);
-        
+
         if (!$is_enrolled) {
             wp_redirect(get_permalink($course_id));
             exit;
@@ -58,10 +58,10 @@ class LessonController
 
         // Get lesson progress
         $progress = $this->plugin->getService('progress')->getLessonProgress($lesson_id, $user_id);
-        
+
         // Get next and previous lessons
         $navigation = $this->getLessonNavigation($lesson_id, $course_id);
-        
+
         // Get lesson content
         $content = $this->getLessonContent($lesson_id);
 
@@ -245,7 +245,7 @@ class LessonController
     private function getLessonNavigation(int $lesson_id, int $course_id): array
     {
         $current_order = get_post_meta($lesson_id, 'sikshya_lesson_order', true);
-        
+
         // Get previous lesson
         $prev_lesson = get_posts([
             'post_type' => 'sikshya_lesson',
@@ -318,24 +318,24 @@ class LessonController
                 $content['video_provider'] = get_post_meta($lesson_id, 'sikshya_lesson_video_provider', true);
                 $content['video_id'] = get_post_meta($lesson_id, 'sikshya_lesson_video_id', true);
                 break;
-                
+
             case 'audio':
                 $content['audio_url'] = get_post_meta($lesson_id, 'sikshya_lesson_audio_url', true);
                 break;
-                
+
             case 'document':
                 $content['document_url'] = get_post_meta($lesson_id, 'sikshya_lesson_document_url', true);
                 $content['document_type'] = get_post_meta($lesson_id, 'sikshya_lesson_document_type', true);
                 break;
-                
+
             case 'presentation':
                 $content['presentation_url'] = get_post_meta($lesson_id, 'sikshya_lesson_presentation_url', true);
                 break;
-                
+
             case 'interactive':
                 $content['interactive_content'] = get_post_meta($lesson_id, 'sikshya_lesson_interactive_content', true);
                 break;
-                
+
             default:
                 $content['text_content'] = get_post_field('post_content', $lesson_id);
                 break;
@@ -353,7 +353,7 @@ class LessonController
     private function getLessonAttachments(int $lesson_id): array
     {
         $attachments = get_post_meta($lesson_id, 'sikshya_lesson_attachments', true);
-        
+
         if (!$attachments) {
             return [];
         }
@@ -374,4 +374,4 @@ class LessonController
 
         return $attachment_data;
     }
-} 
+}

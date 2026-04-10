@@ -2,9 +2,11 @@
 
 namespace Sikshya\Admin\ListTable;
 
+use Sikshya\Admin\ReactAdminConfig;
+
 /**
  * Instructors List Table
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -61,38 +63,38 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Get items for the table
-     * 
+     *
      * @return array
      */
     public function get_items(): array
     {
         // For demo purposes, return dummy data
         return $this->getDummyData();
-        
+
         // TODO: Implement actual database query
         /*
         global $wpdb;
-        
+
         $per_page = $this->get_items_per_page();
         $current_page = $this->get_pagenum();
         $offset = ($current_page - 1) * $per_page;
-        
+
         $where_clauses = [];
         $args = [];
-        
+
         // Apply filters
         if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
             $where_clauses[] = 'um_status.meta_value = %s';
             $args[] = sanitize_text_field($_GET['status']);
         }
-        
+
         $where_sql = '';
         if (!empty($where_clauses)) {
             $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
         }
-        
+
         $query = "
-            SELECT 
+            SELECT
                 u.*,
                 um_status.meta_value as instructor_status,
                 COUNT(DISTINCT c.ID) as courses_count,
@@ -108,54 +110,54 @@ class InstructorsListTable extends AbstractListTable
             ORDER BY u.user_registered DESC
             LIMIT %d OFFSET %d
         ";
-        
+
         $args = array_merge($args, [$per_page, $offset]);
-        
+
         if (!empty($args)) {
             $results = $wpdb->get_results($wpdb->prepare($query, $args));
         } else {
             $results = $wpdb->get_results($query);
         }
-        
+
         return $results ?: [];
         */
     }
 
     /**
      * Get total number of items
-     * 
+     *
      * @return int
      */
     public function get_total_items(): int
     {
         // For demo purposes, return dummy count
         return count($this->getDummyData());
-        
+
         // TODO: Implement actual count query
         /*
         global $wpdb;
-        
+
         $where_clauses = [];
         $args = [];
-        
+
         // Apply filters
         if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
             $where_clauses[] = 'um_status.meta_value = %s';
             $args[] = sanitize_text_field($_GET['status']);
         }
-        
+
         $where_sql = '';
         if (!empty($where_clauses)) {
             $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
         }
-        
+
         $query = "
             SELECT COUNT(DISTINCT u.ID)
             FROM {$wpdb->users} u
             LEFT JOIN {$wpdb->usermeta} um_status ON u.ID = um_status.user_id AND um_status.meta_key = '_sikshya_instructor_status'
             {$where_sql}
         ";
-        
+
         if (!empty($args)) {
             return (int) $wpdb->get_var($wpdb->prepare($query, $args));
         } else {
@@ -166,7 +168,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Get dummy data for demonstration
-     * 
+     *
      * @return array
      */
     private function getDummyData(): array
@@ -257,7 +259,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Checkbox
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -271,7 +273,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Name
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -279,9 +281,12 @@ class InstructorsListTable extends AbstractListTable
     {
         $name = $item->display_name;
         $edit_url = admin_url('user-edit.php?user_id=' . $item->ID);
-        
-        $delete_url = wp_nonce_url(admin_url('admin.php?page=sikshya-instructors&action=delete&id=' . $item->ID), 'delete-instructor_' . $item->ID);
-        
+
+        $delete_url = wp_nonce_url(
+            ReactAdminConfig::reactAppUrl('instructors', ['action' => 'delete', 'id' => (string) $item->ID]),
+            'delete-instructor_' . $item->ID
+        );
+
         $row_actions = '<div class="row-actions">';
         $row_actions .= '<span class="edit">';
         $row_actions .= '<a href="' . esc_url($edit_url) . '">';
@@ -289,7 +294,7 @@ class InstructorsListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Edit', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="view">';
         $row_actions .= '<a href="#" onclick="return false;">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -297,7 +302,7 @@ class InstructorsListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('View', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="delete">';
         $row_actions .= '<a href="' . esc_url($delete_url) . '" onclick="return confirm(\'' . esc_js(__('Are you sure you want to delete this instructor?', 'sikshya')) . '\');">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -305,7 +310,7 @@ class InstructorsListTable extends AbstractListTable
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
-        
+
         $output = '<div class="sikshya-instructor-title-wrapper">';
         $output .= '<div class="sikshya-instructor-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -324,15 +329,15 @@ class InstructorsListTable extends AbstractListTable
         );
         $output .= '</div>';
         $output .= '</div>';
-        
+
         $output .= $row_actions;
-        
+
         return $output;
     }
 
     /**
      * Column: Email
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -347,7 +352,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Courses
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -370,7 +375,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Students
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -393,7 +398,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Rating
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -417,7 +422,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Status
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -441,7 +446,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Column: Joined Date
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -449,7 +454,7 @@ class InstructorsListTable extends AbstractListTable
     {
         $date = new \DateTime($item->user_registered);
         $date_format = 'M j, Y';
-        
+
         return sprintf(
             '<span title="%s">%s</span>',
             esc_attr($date->format('F j, Y g:i A')),
@@ -459,7 +464,7 @@ class InstructorsListTable extends AbstractListTable
 
     /**
      * Default column
-     * 
+     *
      * @param object $item
      * @param string $column_name
      * @return string

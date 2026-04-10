@@ -61,10 +61,10 @@ class EnrollmentController
 
         // Get course data
         $course_data = $this->getCourseData($course_id);
-        
+
         // Get payment methods
         $payment_methods = $this->plugin->getService('payment')->getAvailableMethods();
-        
+
         // Get user data
         $user_data = $this->getUserData($user_id);
 
@@ -122,19 +122,21 @@ class EnrollmentController
             wp_send_json_error(__('Course is not available.', 'sikshya'));
         }
 
-        // Check enrollment limits
-        $max_students = get_post_meta($course_id, 'sikshya_course_max_students', true);
-        if ($max_students) {
+        // Check enrollment limits (course builder + legacy meta keys).
+        $max_raw = sikshya_first_nonempty_post_meta(
+            $course_id,
+            ['_sikshya_max_students', '_sikshya_course_max_students', 'sikshya_course_max_students']
+        );
+        $max_students = is_numeric($max_raw) ? (int) $max_raw : 0;
+        if ($max_students > 0) {
             $current_enrollments = $this->plugin->getService('enrollment')->getCourseEnrollmentsCount($course_id);
             if ($current_enrollments >= $max_students) {
                 wp_send_json_error(__('Course enrollment limit reached.', 'sikshya'));
             }
         }
 
-        // Get course price
-        $price = get_post_meta($course_id, 'sikshya_course_price', true);
-        $sale_price = get_post_meta($course_id, 'sikshya_course_sale_price', true);
-        $final_price = $sale_price ?: $price;
+        $pricing = sikshya_get_course_pricing($course_id);
+        $final_price = $pricing['effective'];
 
         // If course is free, enroll directly
         if (!$final_price || $final_price == 0) {
@@ -156,10 +158,14 @@ class EnrollmentController
         }
 
         // For paid courses, redirect to payment
-        $payment_url = add_query_arg([
-            'course_id' => $course_id,
-            'amount' => $final_price,
-        ], home_url('/sikshya-payment/'));
+        $payment_url = add_query_arg(
+            [
+                'course_id' => $course_id,
+                'amount' => $final_price,
+                'currency' => $pricing['currency'],
+            ],
+            home_url('/sikshya-payment/')
+        );
 
         wp_send_json_success([
             'redirect_url' => $payment_url,
@@ -249,16 +255,15 @@ class EnrollmentController
             wp_send_json_error(__('Payment method is required.', 'sikshya'));
         }
 
-        // Get course price
-        $price = get_post_meta($course_id, 'sikshya_course_price', true);
-        $sale_price = get_post_meta($course_id, 'sikshya_course_sale_price', true);
-        $final_price = $sale_price ?: $price;
+        $pricing = sikshya_get_course_pricing($course_id);
+        $final_price = $pricing['effective'];
 
         // Process payment
         $payment_result = $this->plugin->getService('payment')->processPayment([
             'course_id' => $course_id,
             'user_id' => $user_id,
             'amount' => $final_price,
+            'currency' => $pricing['currency'],
             'payment_method' => $payment_method,
             'payment_data' => $payment_data,
         ]);
@@ -292,15 +297,27 @@ class EnrollmentController
      */
     private function getCourseData(int $course_id): array
     {
+        $pricing = sikshya_get_course_pricing($course_id);
+
         return [
             'id' => $course_id,
             'title' => get_the_title($course_id),
             'excerpt' => get_post_field('post_excerpt', $course_id),
             'thumbnail' => get_the_post_thumbnail_url($course_id, 'large'),
-            'price' => get_post_meta($course_id, 'sikshya_course_price', true),
-            'sale_price' => get_post_meta($course_id, 'sikshya_course_sale_price', true),
-            'duration' => get_post_meta($course_id, 'sikshya_course_duration', true),
-            'level' => get_post_meta($course_id, 'sikshya_course_level', true),
+            'price' => $pricing['price'],
+            'sale_price' => $pricing['sale_price'],
+            'currency' => $pricing['currency'],
+            'price_html' => null !== $pricing['effective'] && (float) $pricing['effective'] > 0
+                ? sikshya_format_price((float) $pricing['effective'], $pricing['currency'])
+                : '',
+            'duration' => sikshya_first_nonempty_post_meta(
+                $course_id,
+                ['_sikshya_duration', '_sikshya_course_duration', 'sikshya_course_duration']
+            ),
+            'level' => sikshya_first_nonempty_post_meta(
+                $course_id,
+                ['_sikshya_difficulty', '_sikshya_course_level', 'sikshya_course_level']
+            ),
             'instructor' => $this->getCourseInstructor($course_id),
             'lessons_count' => $this->getCourseLessonsCount($course_id),
             'students_count' => $this->getCourseStudentsCount($course_id),
@@ -314,7 +331,7 @@ class EnrollmentController
     private function getUserData(int $user_id): array
     {
         $user = get_userdata($user_id);
-        
+
         if (!$user) {
             return [];
         }
@@ -334,13 +351,13 @@ class EnrollmentController
     private function getCourseInstructor(int $course_id): array
     {
         $instructor_id = get_post_meta($course_id, 'sikshya_course_instructor', true);
-        
+
         if (!$instructor_id) {
             return [];
         }
 
         $instructor = get_userdata($instructor_id);
-        
+
         if (!$instructor) {
             return [];
         }
@@ -374,7 +391,7 @@ class EnrollmentController
         $lessons_query = new \WP_Query($args);
         $count = $lessons_query->found_posts;
         wp_reset_postdata();
-        
+
         return $count;
     }
 
@@ -393,4 +410,4 @@ class EnrollmentController
     {
         return $this->plugin->getService('review')->getCourseRating($course_id);
     }
-} 
+}

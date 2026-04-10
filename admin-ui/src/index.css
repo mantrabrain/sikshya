@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  margin: 0;
+}
+
+#sikshya-admin-root {
+  min-height: calc(100vh - 32px);
+}
+
+body.sikshya-react-shell #sikshya-admin-root {
+  min-height: 100vh;
+}
+
+/* WordPress admin bar offset (not used on Sikshya React shell) */
+body.admin-bar:not(.sikshya-react-shell) #sikshya-admin-root {
+  min-height: calc(100vh - 62px);
+}
+
+/* Settings page: restyle legacy WP markup to match Sikshya admin UI. */
+.settings-legacy-html {
+  font-size: 14px;
+}
+
+.settings-legacy-html .form-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+  margin: 0;
+}
+
+.settings-legacy-html .form-table th {
+  width: 240px;
+  padding: 8px 16px 0 0;
+  vertical-align: top;
+  font-weight: 600;
+  color: rgb(15 23 42); /* slate-900 */
+}
+
+.settings-legacy-html .form-table td {
+  padding: 0;
+}
+
+.settings-legacy-html label {
+  font-weight: 600;
+  color: rgb(30 41 59); /* slate-800 */
+}
+
+.settings-legacy-html .description {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgb(100 116 139); /* slate-500 */
+}
+
+.settings-legacy-html input[type='text'],
+.settings-legacy-html input[type='number'],
+.settings-legacy-html input[type='email'],
+.settings-legacy-html input[type='url'],
+.settings-legacy-html input[type='password'],
+.settings-legacy-html input[type='date'],
+.settings-legacy-html input[type='time'],
+.settings-legacy-html input[type='datetime-local'],
+.settings-legacy-html select,
+.settings-legacy-html textarea {
+  width: 100%;
+  max-width: 720px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid rgb(226 232 240); /* slate-200 */
+  background: white;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: rgb(15 23 42); /* slate-900 */
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.settings-legacy-html textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.settings-legacy-html input[type='checkbox'] {
+  height: 16px;
+  width: 16px;
+  border-radius: 4px;
+  border: 1px solid rgb(203 213 225); /* slate-300 */
+}
+
+.settings-legacy-html .button,
+.settings-legacy-html input[type='submit'],
+.settings-legacy-html button[type='submit'] {
+  border-radius: 12px;
+  border: 1px solid rgb(226 232 240); /* slate-200 */
+  background: white;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: rgb(30 41 59); /* slate-800 */
+}
+
+.settings-legacy-html .button-primary,
+.settings-legacy-html input[type='submit'].button-primary,
+.settings-legacy-html button[type='submit'].button-primary {
+  border-color: rgb(37 99 235); /* brand-ish */
+  background: rgb(37 99 235);
+  color: white;
+}

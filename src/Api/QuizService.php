@@ -92,4 +92,4 @@ class QuizService
             'permalink' => get_permalink($post->ID),
         ];
     }
-} 
+}

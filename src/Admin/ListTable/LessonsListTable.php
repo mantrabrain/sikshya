@@ -1,15 +1,17 @@
 <?php
+
 /**
  * Lessons List Table
- * 
+ *
  * Displays lessons in a WordPress-style list table with sorting, filtering, and bulk actions
- * 
+ *
  * @package Sikshya\Admin\ListTable
  * @since 1.0.0
  */
 
 namespace Sikshya\Admin\ListTable;
 
+use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 
 // Prevent direct access
@@ -19,14 +21,14 @@ if (!defined('ABSPATH')) {
 
 /**
  * Lessons List Table Class
- * 
+ *
  * Handles the display and management of lessons in the admin area
  */
 class LessonsListTable extends AbstractListTable
 {
     /**
      * Constructor
-     * 
+     *
      * @param \Sikshya\Core\Plugin $plugin
      */
     public function __construct($plugin)
@@ -105,15 +107,35 @@ class LessonsListTable extends AbstractListTable
     }
 
     /**
+     * Post status counts for subsubsub tabs.
+     *
+     * @return array<string, int>
+     */
+    protected function get_status_counts(): array
+    {
+        $counts = wp_count_posts(PostTypes::LESSON);
+        if (!$counts || is_wp_error($counts)) {
+            return parent::get_status_counts();
+        }
+
+        return [
+            'publish' => (int) ($counts->publish ?? 0),
+            'draft' => (int) ($counts->draft ?? 0),
+            'pending' => (int) ($counts->pending ?? 0),
+            'private' => (int) ($counts->private ?? 0),
+        ];
+    }
+
+    /**
      * Get items for the table
-     * 
+     *
      * @return array
      */
     protected function get_items(): array
     {
         // For demo purposes, return dummy data
         return $this->getDummyData();
-        
+
         // Original code (commented out for demo)
         /*
         global $wpdb;
@@ -169,7 +191,7 @@ class LessonsListTable extends AbstractListTable
 
         // Build the main query
         $query = "
-            SELECT 
+            SELECT
                 p.ID,
                 p.post_title,
                 p.post_content,
@@ -185,17 +207,17 @@ class LessonsListTable extends AbstractListTable
                 pm_order.meta_value as lesson_order
             FROM {$wpdb->posts} p
             LEFT JOIN {$wpdb->posts} c ON c.ID = (
-                SELECT pm.meta_value 
-                FROM {$wpdb->postmeta} pm 
-                WHERE pm.post_id = p.ID 
-                AND pm.meta_key = '_sikshya_course_id' 
+                SELECT pm.meta_value
+                FROM {$wpdb->postmeta} pm
+                WHERE pm.post_id = p.ID
+                AND pm.meta_key = '_sikshya_course_id'
                 LIMIT 1
             )
             LEFT JOIN {$wpdb->posts} c ON c.ID = (
-                SELECT pm.meta_value 
-                FROM {$wpdb->postmeta} pm 
-                WHERE pm.post_id = p.ID 
-                AND pm.meta_key = '_sikshya_course_id' 
+                SELECT pm.meta_value
+                FROM {$wpdb->postmeta} pm
+                WHERE pm.post_id = p.ID
+                AND pm.meta_key = '_sikshya_course_id'
                 LIMIT 1
             )
             LEFT JOIN {$wpdb->users} u ON u.ID = c.post_author
@@ -222,14 +244,14 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Get total number of items
-     * 
+     *
      * @return int
      */
     protected function get_total_items(): int
     {
         // For demo purposes, return count of dummy data
         return count($this->getDummyData());
-        
+
         // Original code (commented out for demo)
         /*
         global $wpdb;
@@ -282,10 +304,10 @@ class LessonsListTable extends AbstractListTable
             SELECT COUNT(*)
             FROM {$wpdb->posts} p
             LEFT JOIN {$wpdb->posts} c ON c.ID = (
-                SELECT pm.meta_value 
-                FROM {$wpdb->postmeta} pm 
-                WHERE pm.post_id = p.ID 
-                AND pm.meta_key = '_sikshya_course_id' 
+                SELECT pm.meta_value
+                FROM {$wpdb->postmeta} pm
+                WHERE pm.post_id = p.ID
+                AND pm.meta_key = '_sikshya_course_id'
                 LIMIT 1
             )
             WHERE " . implode(' AND ', $where);
@@ -301,7 +323,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Get dummy data for demo purposes
-     * 
+     *
      * @return array
      */
     protected function getDummyData(): array
@@ -482,24 +504,24 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Get courses list for filter
-     * 
+     *
      * @return array
      */
     private function getCoursesList(): array
     {
-        global $wpdb;
-
-        $courses = $wpdb->get_results("
-            SELECT ID, post_title 
-            FROM {$wpdb->posts} 
-            WHERE post_type = 'sik_course' 
-            AND post_status IN ('publish', 'draft')
-            ORDER BY post_title ASC
-        ");
-
         $options = ['' => __('All Courses', 'sikshya')];
-        foreach ($courses as $course) {
-            $options[$course->ID] = $course->post_title;
+
+        $courses = get_posts([
+            'post_type' => PostTypes::COURSE,
+            'post_status' => ['publish', 'draft'],
+            'posts_per_page' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC',
+            'fields' => 'ids',
+        ]);
+
+        foreach ($courses as $course_id) {
+            $options[$course_id] = get_the_title($course_id);
         }
 
         return $options;
@@ -507,24 +529,21 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Get instructors list for filter
-     * 
+     *
      * @return array
      */
     private function getInstructorsList(): array
     {
-        global $wpdb;
-
-        $instructors = $wpdb->get_results("
-            SELECT DISTINCT u.ID, u.display_name
-            FROM {$wpdb->users} u
-            INNER JOIN {$wpdb->posts} p ON p.post_author = u.ID
-            WHERE p.post_type = 'sik_course'
-            ORDER BY u.display_name ASC
-        ");
-
         $options = ['' => __('All Instructors', 'sikshya')];
-        foreach ($instructors as $instructor) {
-            $options[$instructor->ID] = $instructor->display_name;
+
+        $users = get_users([
+            'role__in' => ['administrator', 'sikshya_instructor'],
+            'orderby' => 'display_name',
+            'fields' => ['ID', 'display_name'],
+        ]);
+
+        foreach ($users as $user) {
+            $options[$user->ID] = $user->display_name;
         }
 
         return $options;
@@ -532,7 +551,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Get lesson type display name
-     * 
+     *
      * @param string $post_type
      * @return string
      */
@@ -551,17 +570,23 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column: Title
-     * 
+     *
      * @param object $item
      * @return string
      */
     protected function columnTitle($item): string
     {
         $title = $item->post_title;
-        $edit_url = admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->course_id . '&tab=curriculum');
-        
-        $delete_url = wp_nonce_url(admin_url('admin.php?page=sikshya-lessons&action=delete&id=' . $item->ID), 'delete-lesson_' . $item->ID);
-        
+        $edit_url = ReactAdminConfig::reactAppUrl('add-course', [
+            'course_id' => (string) $item->course_id,
+            'tab' => 'curriculum',
+        ]);
+
+        $delete_url = wp_nonce_url(
+            ReactAdminConfig::reactAppUrl('lessons', ['action' => 'delete', 'id' => (string) $item->ID]),
+            'delete-lesson_' . $item->ID
+        );
+
         $row_actions = '<div class="row-actions">';
         $row_actions .= '<span class="edit">';
         $row_actions .= '<a href="' . esc_url($edit_url) . '">';
@@ -569,7 +594,7 @@ class LessonsListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Edit', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="view">';
         $row_actions .= '<a href="#" onclick="return false;">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -577,7 +602,7 @@ class LessonsListTable extends AbstractListTable
         $row_actions .= '<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('View', 'sikshya') . '</a> | </span>';
-        
+
         $row_actions .= '<span class="delete">';
         $row_actions .= '<a href="' . esc_url($delete_url) . '" onclick="return confirm(\'' . esc_js(__('Are you sure you want to delete this lesson?', 'sikshya')) . '\');">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -585,7 +610,7 @@ class LessonsListTable extends AbstractListTable
         $row_actions .= '</svg>';
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
-        
+
         // Get lesson type icon
         $type_icons = [
             'sikshya_text' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
@@ -594,9 +619,9 @@ class LessonsListTable extends AbstractListTable
             'sikshya_quiz' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
             'sikshya_assignment' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>'
         ];
-        
+
         $icon_path = $type_icons[$item->post_type] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
-        
+
         $output = '<div class="sikshya-lesson-title-wrapper">';
         $output .= '<div class="sikshya-lesson-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -615,15 +640,15 @@ class LessonsListTable extends AbstractListTable
         );
         $output .= '</div>';
         $output .= '</div>';
-        
+
         $output .= $row_actions;
-        
+
         return $output;
     }
 
     /**
      * Column: Course
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -636,7 +661,7 @@ class LessonsListTable extends AbstractListTable
             $output .= '</svg>';
             $output .= sprintf(
                 '<a href="%s">%s</a>',
-                admin_url('admin.php?page=sikshya-add-course&course_id=' . $item->course_id),
+                esc_url(ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $item->course_id])),
                 esc_html($item->course_title)
             );
             $output .= '</div>';
@@ -647,7 +672,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column: Type
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -663,20 +688,20 @@ class LessonsListTable extends AbstractListTable
         ];
 
         $icon_path = $type_icons[$item->post_type] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
-        
+
         $output = '<div class="sikshya-lesson-type">';
         $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $output .= $icon_path;
         $output .= '</svg>';
         $output .= sprintf('<span>%s</span>', $type_name);
         $output .= '</div>';
-        
+
         return $output;
     }
 
     /**
      * Column: Duration
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -696,7 +721,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column: Instructor
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -721,7 +746,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column: Status
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -746,7 +771,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column: Created Date
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -754,7 +779,7 @@ class LessonsListTable extends AbstractListTable
     {
         $date = new \DateTime($item->post_date);
         $date_format = 'M j, Y';
-        
+
         return sprintf(
             '<span title="%s">%s</span>',
             esc_attr($date->format('F j, Y g:i A')),
@@ -764,7 +789,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column default
-     * 
+     *
      * @param object $item
      * @param string $column_name
      * @return string
@@ -793,7 +818,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Column checkbox
-     * 
+     *
      * @param object $item
      * @return string
      */
@@ -807,7 +832,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Display empty state
-     * 
+     *
      * @return void
      */
     protected function display_empty_state(): void
@@ -820,7 +845,7 @@ class LessonsListTable extends AbstractListTable
         echo '</svg>';
         echo '<h3 class="sikshya-empty-state-title">' . esc_html($this->config['empty_message']) . '</h3>';
         echo '<p class="sikshya-empty-state-description">' . esc_html__('Get started by creating your first lesson.', 'sikshya') . '</p>';
-        echo '<a href="' . admin_url('admin.php?page=sikshya-add-course') . '" class="sikshya-btn sikshya-btn-primary">';
+        echo '<a href="' . esc_url(ReactAdminConfig::reactAppUrl('add-course')) . '" class="sikshya-btn sikshya-btn-primary">';
         echo '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         echo '<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>';
         echo '</svg>';
@@ -833,7 +858,7 @@ class LessonsListTable extends AbstractListTable
 
     /**
      * Get default sortable columns
-     * 
+     *
      * @return array
      */
     protected function getDefaultSortableColumns(): array

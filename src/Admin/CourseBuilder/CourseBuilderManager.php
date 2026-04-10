@@ -1,7 +1,8 @@
 <?php
+
 /**
  * Course Builder Manager
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -23,14 +24,14 @@ class CourseBuilderManager
 {
     /**
      * Plugin instance
-     * 
+     *
      * @var \Sikshya\Core\Plugin
      */
     private $plugin;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param \Sikshya\Core\Plugin $plugin
      */
     public function __construct($plugin)
@@ -38,10 +39,10 @@ class CourseBuilderManager
         $this->plugin = $plugin;
         $this->initTabs();
     }
-    
+
     /**
      * Initialize all tabs
-     * 
+     *
      * @return void
      */
     private function initTabs(): void
@@ -51,24 +52,24 @@ class CourseBuilderManager
         TabRegistry::registerTab(new PricingTab($this->plugin));
         TabRegistry::registerTab(new CurriculumTab($this->plugin));
         TabRegistry::registerTab(new SettingsTab($this->plugin));
-        
+
         // Allow other plugins to register additional tabs
         do_action('sikshya_register_course_builder_tabs', $this->plugin);
     }
-    
+
     /**
      * Get all registered tabs
-     * 
+     *
      * @return array
      */
     public function getAllTabs(): array
     {
         return TabRegistry::getTabsByOrder();
     }
-    
+
     /**
      * Get a specific tab
-     * 
+     *
      * @param string $tab_id
      * @return \Sikshya\Admin\CourseBuilder\Core\TabInterface|null
      */
@@ -76,20 +77,20 @@ class CourseBuilderManager
     {
         return TabRegistry::getTab($tab_id);
     }
-    
+
     /**
      * Get the first tab ID (for default active tab)
-     * 
+     *
      * @return string|null
      */
     public function getFirstTabId(): ?string
     {
         return TabRegistry::getFirstTabId();
     }
-    
+
     /**
      * Render the navigation tabs
-     * 
+     *
      * @param string $active_tab
      * @return string
      */
@@ -97,14 +98,14 @@ class CourseBuilderManager
     {
         $tabs = $this->getAllTabs();
         $active_tab = $active_tab ?: $this->getFirstTabId();
-        
+
         ob_start();
         ?>
         <nav class="sikshya-sidebar-nav">
             <div class="sikshya-nav-section">
                 <h4 class="sikshya-nav-section-title"><?php _e('Course Setup', 'sikshya'); ?></h4>
                 <ul class="sikshya-nav-list">
-                    <?php foreach ($tabs as $tab): ?>
+                    <?php foreach ($tabs as $tab) : ?>
                         <li class="sikshya-nav-item">
                             <a href="#" class="sikshya-nav-link <?php echo ($active_tab === $tab->getId()) ? 'active' : ''; ?>" 
                                onclick="switchTab('<?php echo esc_attr($tab->getId()); ?>'); return false;" 
@@ -114,6 +115,7 @@ class CourseBuilderManager
                                 </svg>
                                 <div class="sikshya-nav-content">
                                     <span class="sikshya-nav-title"><?php echo esc_html($tab->getTitle()); ?></span>
+                                    <span class="sikshya-nav-error-badge" data-tab="<?php echo esc_attr($tab->getId()); ?>" hidden aria-hidden="true">0</span>
                                     <span class="sikshya-nav-desc"><?php echo esc_html($tab->getDescription()); ?></span>
                                 </div>
                             </a>
@@ -151,10 +153,10 @@ class CourseBuilderManager
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Render all tab content
-     * 
+     *
      * @param string $active_tab
      * @param int $course_id
      * @return string
@@ -163,28 +165,22 @@ class CourseBuilderManager
     {
         $tabs = $this->getAllTabs();
         $active_tab = $active_tab ?: $this->getFirstTabId();
-        
-        error_log('Sikshya CourseBuilderManager: renderTabContent called with course_id: ' . $course_id);
-        
+
         ob_start();
         ?>
         <div class="sikshya-content">
-            <?php foreach ($tabs as $tab): ?>
+            <?php foreach ($tabs as $tab) : ?>
                 <?php
                 $data = [];
                 if ($course_id > 0) {
-                    error_log('Sikshya: Loading data for tab: ' . $tab->getId() . ' with course_id: ' . $course_id);
                     $data = $tab->load($course_id);
-                    error_log('Sikshya: Tab ' . $tab->getId() . ' data: ' . print_r($data, true));
                 } else {
-                    error_log('Sikshya: No course_id provided, using empty data array for tab: ' . $tab->getId());
                     $data = [];
                 }
-                
+
                 // Add course_id to data array for tabs that need it
                 $data['course_id'] = $course_id;
-                
-                error_log('Sikshya: About to render tab ' . $tab->getId() . ' with data: ' . print_r($data, true));
+
                 echo $tab->render($data, $active_tab);
                 ?>
             <?php endforeach; ?>
@@ -192,50 +188,39 @@ class CourseBuilderManager
         <?php
         return ob_get_clean();
     }
-    
+
     /**
      * Save all tab data
-     * 
+     *
      * @param array $data
      * @param int $course_id
      * @return array Array of errors
      */
     public function saveAllTabs(array $data, int $course_id): array
     {
-        error_log('Sikshya CourseBuilderManager: Starting saveAllTabs for course ID: ' . $course_id);
         $errors = [];
         $tabs = $this->getAllTabs();
-        
+
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
-            error_log('Sikshya CourseBuilderManager: Saving tab: ' . $tab_id);
-            
+
             // For flat data structure, pass all data to each tab
             // Each tab will save only its own fields based on field definitions
-            
+
             // Save tab data
             $success = $tab->save($data, $course_id);
-            
+
             if (!$success) {
-                error_log('Sikshya CourseBuilderManager: Failed to save tab: ' . $tab_id);
                 $errors[$tab_id] = [sprintf(__('Failed to save %s tab data.', 'sikshya'), $tab->getTitle())];
-            } else {
-                error_log('Sikshya CourseBuilderManager: Successfully saved tab: ' . $tab_id);
             }
         }
-        
-        if (!empty($errors)) {
-            error_log('Sikshya CourseBuilderManager: SaveAllTabs completed with errors: ' . print_r($errors, true));
-        } else {
-            error_log('Sikshya CourseBuilderManager: SaveAllTabs completed successfully');
-        }
-        
+
         return $errors;
     }
-    
+
     /**
      * Load all tab data
-     * 
+     *
      * @param int $course_id
      * @return array
      */
@@ -243,18 +228,18 @@ class CourseBuilderManager
     {
         $data = [];
         $tabs = $this->getAllTabs();
-        
+
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
             $data[$tab_id] = $tab->load($course_id);
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Validate all tab data
-     * 
+     *
      * @param array $data
      * @return array Array of errors
      */
@@ -262,10 +247,10 @@ class CourseBuilderManager
     {
         $errors = [];
         $tabs = $this->getAllTabs();
-        
+
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
-            
+
             // For flat data structure, pass all data to each tab for validation
             // Each tab will validate only its own fields based on field definitions
             $tab_errors = $tab->validate($data);
@@ -273,25 +258,64 @@ class CourseBuilderManager
                 $errors[$tab_id] = $tab_errors;
             }
         }
-        
+
         return $errors;
     }
-    
+
     /**
      * Get tab fields for JavaScript
-     * 
+     *
      * @return array
      */
     public function getTabFieldsForJs(): array
     {
         $fields = [];
         $tabs = $this->getAllTabs();
-        
+
         foreach ($tabs as $tab) {
             $tab_id = $tab->getId();
             $fields[$tab_id] = $tab->getFields();
         }
-        
+
         return $fields;
+    }
+
+    /**
+     * Tab summaries for React / JSON bootstrap (id, title, description).
+     *
+     * @return array<int, array{id:string, title:string, description:string}>
+     */
+    public function getTabsForBootstrap(): array
+    {
+        $out = [];
+        foreach ($this->getAllTabs() as $tab) {
+            $out[] = [
+                'id' => $tab->getId(),
+                'title' => $tab->getTitle(),
+                'description' => $tab->getDescription(),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Flat field values from all tabs for a course (merged; later tabs win on key collision).
+     *
+     * @param int $course_id
+     * @return array<string, mixed>
+     */
+    public function getFlatFieldValuesForCourse(int $course_id): array
+    {
+        $flat = [];
+        foreach ($this->getAllTabs() as $tab) {
+            $loaded = $tab->load($course_id);
+            foreach ($loaded as $k => $v) {
+                $flat[$k] = $v;
+            }
+        }
+        $flat['course_id'] = $course_id;
+
+        return $flat;
     }
 }

@@ -12,6 +12,11 @@ use Sikshya\Core\Plugin;
 class Database
 {
     /**
+     * Bump when schema or migrations change (incremental upgrades via maybeUpgrade).
+     */
+    public const SCHEMA_VERSION = '1.3.0';
+
+    /**
      * Plugin instance
      *
      * @var Plugin
@@ -36,27 +41,6 @@ class Database
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
 
-        // Enrollments table
-        $sql_enrollments = "CREATE TABLE {$wpdb->prefix}sikshya_enrollments (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            user_id bigint(20) NOT NULL,
-            course_id bigint(20) NOT NULL,
-            status varchar(50) NOT NULL DEFAULT 'enrolled',
-            enrolled_date datetime NOT NULL,
-            completed_date datetime NULL,
-            payment_method varchar(100) NULL,
-            amount decimal(10,2) NOT NULL DEFAULT 0.00,
-            transaction_id varchar(255) NULL,
-            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            KEY user_id (user_id),
-            KEY course_id (course_id),
-            KEY status (status),
-            KEY enrolled_date (enrolled_date),
-            UNIQUE KEY unique_enrollment (user_id, course_id)
-        ) $charset_collate;";
-
         // Progress table
         $sql_progress = "CREATE TABLE {$wpdb->prefix}sikshya_progress (
             id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -77,27 +61,6 @@ class Database
             KEY quiz_id (quiz_id),
             KEY status (status),
             UNIQUE KEY unique_progress (user_id, course_id, lesson_id, quiz_id)
-        ) $charset_collate;";
-
-        // Certificates table
-        $sql_certificates = "CREATE TABLE {$wpdb->prefix}sikshya_certificates (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            user_id bigint(20) NOT NULL,
-            course_id bigint(20) NOT NULL,
-            certificate_number varchar(100) NOT NULL,
-            issued_date datetime NOT NULL,
-            expiry_date datetime NULL,
-            status varchar(50) NOT NULL DEFAULT 'active',
-            download_url varchar(500) NULL,
-            certificate_data longtext NULL,
-            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            KEY user_id (user_id),
-            KEY course_id (course_id),
-            KEY certificate_number (certificate_number),
-            KEY status (status),
-            UNIQUE KEY unique_certificate (user_id, course_id)
         ) $charset_collate;";
 
         // Payments table
@@ -239,10 +202,10 @@ class Database
 
         // Execute all SQL statements
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        
-        dbDelta($sql_enrollments);
+
+        dbDelta($this->getEnrollmentsCreateSql());
         dbDelta($sql_progress);
-        dbDelta($sql_certificates);
+        dbDelta($this->getCertificatesCreateSql());
         dbDelta($sql_payments);
         dbDelta($sql_quiz_attempts);
         dbDelta($sql_quiz_questions);
@@ -251,8 +214,213 @@ class Database
         dbDelta($sql_notifications);
         dbDelta($sql_reviews);
 
-        // Update database version
-        update_option('sikshya_db_version', '1.0.0');
+        dbDelta($this->getQuizAttemptItemsCreateSql());
+        dbDelta($this->getOrdersCreateSql());
+        dbDelta($this->getOrderItemsCreateSql());
+        dbDelta($this->getCouponsCreateSql());
+        dbDelta($this->getCouponRedemptionsCreateSql());
+    }
+
+    /**
+     * Run incremental migrations after updates (safe to call on every request; version-gated).
+     */
+    public function maybeUpgrade(): void
+    {
+        $current = get_option('sikshya_db_version', '0');
+        if (version_compare((string) $current, '1.1.0', '<')) {
+            $this->migrateTo110();
+            update_option('sikshya_db_version', '1.1.0');
+            $current = '1.1.0';
+        }
+        if (version_compare((string) $current, '1.2.0', '<')) {
+            $this->migrateTo120();
+            update_option('sikshya_db_version', '1.2.0');
+            $current = '1.2.0';
+        }
+        if (version_compare((string) $current, '1.3.0', '<')) {
+            $this->migrateTo130();
+            update_option('sikshya_db_version', '1.3.0');
+        }
+    }
+
+    private function migrateTo110(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($this->getQuizAttemptItemsCreateSql());
+        dbDelta($this->getEnrollmentsCreateSql());
+        dbDelta($this->getCertificatesCreateSql());
+    }
+
+    private function migrateTo120(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($this->getOrdersCreateSql());
+        dbDelta($this->getOrderItemsCreateSql());
+        dbDelta($this->getCouponsCreateSql());
+        dbDelta($this->getCouponRedemptionsCreateSql());
+    }
+
+    private function migrateTo130(): void
+    {
+        // Hook point for future additive migrations.
+    }
+
+    private function getEnrollmentsCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_enrollments (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            course_id bigint(20) NOT NULL,
+            status varchar(50) NOT NULL DEFAULT 'enrolled',
+            enrolled_date datetime NOT NULL,
+            completed_date datetime NULL,
+            payment_method varchar(100) NULL,
+            amount decimal(10,2) NOT NULL DEFAULT 0.00,
+            transaction_id varchar(255) NULL,
+            progress decimal(5,2) NOT NULL DEFAULT 0.00,
+            notes text NULL,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY course_id (course_id),
+            KEY status (status),
+            KEY enrolled_date (enrolled_date),
+            UNIQUE KEY unique_enrollment (user_id, course_id)
+        ) $charset_collate;";
+    }
+
+    private function getCertificatesCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_certificates (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            course_id bigint(20) NOT NULL,
+            certificate_number varchar(100) NOT NULL,
+            issued_date datetime NOT NULL,
+            expiry_date datetime NULL,
+            status varchar(50) NOT NULL DEFAULT 'active',
+            download_url varchar(500) NULL,
+            certificate_data longtext NULL,
+            template_post_id bigint(20) NULL,
+            verification_code varchar(64) NULL,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY course_id (course_id),
+            KEY certificate_number (certificate_number),
+            KEY verification_code (verification_code),
+            KEY status (status),
+            UNIQUE KEY unique_certificate (user_id, course_id)
+        ) $charset_collate;";
+    }
+
+    private function getQuizAttemptItemsCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_quiz_attempt_items (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            attempt_id bigint(20) NOT NULL,
+            question_id bigint(20) NOT NULL,
+            answer longtext NULL,
+            is_correct tinyint(1) NOT NULL DEFAULT 0,
+            points_earned decimal(8,2) NOT NULL DEFAULT 0.00,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY attempt_id (attempt_id),
+            KEY question_id (question_id)
+        ) $charset_collate;";
+    }
+
+    private function getOrdersCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_orders (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL DEFAULT 0,
+            status varchar(32) NOT NULL DEFAULT 'pending',
+            currency varchar(3) NOT NULL DEFAULT 'USD',
+            subtotal decimal(12,2) NOT NULL DEFAULT 0.00,
+            discount_total decimal(12,2) NOT NULL DEFAULT 0.00,
+            total decimal(12,2) NOT NULL DEFAULT 0.00,
+            gateway varchar(32) NOT NULL DEFAULT '',
+            gateway_intent_id varchar(255) NULL,
+            coupon_id bigint(20) NULL,
+            meta longtext NULL,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY status (status),
+            KEY gateway_intent_id (gateway_intent_id)
+        ) $charset_collate;";
+    }
+
+    private function getOrderItemsCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_order_items (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            order_id bigint(20) NOT NULL,
+            course_id bigint(20) NOT NULL,
+            quantity int(11) NOT NULL DEFAULT 1,
+            unit_price decimal(12,2) NOT NULL DEFAULT 0.00,
+            line_total decimal(12,2) NOT NULL DEFAULT 0.00,
+            PRIMARY KEY (id),
+            KEY order_id (order_id),
+            KEY course_id (course_id)
+        ) $charset_collate;";
+    }
+
+    private function getCouponsCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_coupons (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            code varchar(64) NOT NULL,
+            discount_type varchar(16) NOT NULL DEFAULT 'percent',
+            discount_value decimal(12,2) NOT NULL DEFAULT 0.00,
+            max_uses int(11) NOT NULL DEFAULT 0,
+            used_count int(11) NOT NULL DEFAULT 0,
+            expires_at datetime NULL,
+            status varchar(20) NOT NULL DEFAULT 'active',
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY code (code),
+            KEY status (status)
+        ) $charset_collate;";
+    }
+
+    private function getCouponRedemptionsCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_coupon_redemptions (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            coupon_id bigint(20) NOT NULL,
+            user_id bigint(20) NOT NULL,
+            order_id bigint(20) NOT NULL,
+            redeemed_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY coupon_id (coupon_id),
+            KEY order_id (order_id)
+        ) $charset_collate;";
     }
 
     /**
@@ -271,7 +439,7 @@ class Database
     {
         global $wpdb;
         $table_name = $this->getTableName($table);
-        $result = $wpdb->get_var("SHOW TABLES LIKE '{$table_name}'");
+        $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
         return $result === $table_name;
     }
 
@@ -282,4 +450,4 @@ class Database
     {
         return get_option('sikshya_db_version', '0.0.0');
     }
-} 
+}

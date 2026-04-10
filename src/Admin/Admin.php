@@ -2,6 +2,7 @@
 
 namespace Sikshya\Admin;
 
+use Sikshya\Core\LegacyAjax;
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Controllers\CourseController;
 use Sikshya\Admin\Controllers\CourseCategoriesController;
@@ -14,7 +15,8 @@ use Sikshya\Admin\Controllers\ToolsController;
 use Sikshya\Admin\Controllers\SettingController;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
-use Sikshya\Constants\Taxonomies;
+use Sikshya\Admin\ReactAdminConfig;
+use Sikshya\Admin\ReactAdminView;
 
 /**
  * Admin Management Class
@@ -44,11 +46,9 @@ class Admin
      */
     public function __construct(Plugin $plugin)
     {
-        error_log('Sikshya: Admin constructor called');
         $this->plugin = $plugin;
         $this->initControllers();
         $this->initHooks();
-        error_log('Sikshya: Admin constructor completed');
     }
 
     /**
@@ -56,7 +56,6 @@ class Admin
      */
     private function initControllers(): void
     {
-        error_log('Sikshya: Admin initControllers called');
         $this->controllers['course'] = new \Sikshya\Admin\Controllers\CourseController($this->plugin);
         $this->controllers['course_categories'] = new \Sikshya\Admin\Controllers\CourseCategoriesController($this->plugin);
         $this->controllers['lesson'] = new \Sikshya\Admin\Controllers\LessonController($this->plugin);
@@ -66,7 +65,6 @@ class Admin
         $this->controllers['report'] = new \Sikshya\Admin\Controllers\ReportController($this->plugin);
         $this->controllers['setting'] = new \Sikshya\Admin\Controllers\SettingController($this->plugin);
         $this->controllers['tools'] = new \Sikshya\Admin\Controllers\ToolsController($this->plugin);
-        error_log('Sikshya: Admin controllers initialized');
     }
 
     /**
@@ -77,22 +75,26 @@ class Admin
         add_action('admin_menu', [$this, 'addAdminMenus']);
         add_action('admin_init', [$this, 'initAdmin']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
-        add_action('wp_ajax_sikshya_admin_action', [$this, 'handleAjaxRequest']);
-        add_action('wp_ajax_sikshya_categories_action', [$this, 'handleCategoriesAjaxRequest']);
+        if (LegacyAjax::hooksEnabled()) {
+            add_action('wp_ajax_sikshya_admin_action', [$this, 'handleAjaxRequest']);
+            add_action('wp_ajax_sikshya_categories_action', [$this, 'handleCategoriesAjaxRequest']);
+        }
         add_action('admin_notices', [$this, 'displayAdminNotices']);
         add_action('admin_footer', [$this, 'addAdminFooter']);
-        
+        add_filter('admin_body_class', [$this, 'filterAdminBodyClass']);
+        add_action('admin_init', [self::class, 'redirectLegacySikshyaReactMenus'], 0);
+        add_filter('show_admin_bar', [self::class, 'hideAdminBarOnSikshyaApp']);
+        add_action('admin_enqueue_scripts', [self::class, 'dequeueWordPressUiOnSikshyaApp'], 10000);
+        add_action('admin_head', [self::class, 'printSikshyaReactShellHead'], 1);
+
         // Remove all other admin notices on Sikshya pages
         add_action('admin_head', [$this, 'removeOtherNoticesOnSikshyaPages']);
-        
+
         // Remove WordPress notices at action level
         add_action('admin_init', [$this, 'removeWordPressNoticesOnSikshyaPages'], 1);
-        
+
         // Suppress PHP notices and warnings on Sikshya pages
         add_action('admin_init', [$this, 'suppressPHPNoticesOnSikshyaPages'], 1);
-        
-
-        
     }
 
     /**
@@ -100,146 +102,305 @@ class Admin
      */
     public function addAdminMenus(): void
     {
-        // Main menu
+        // Single top-level entry: all React areas are sub-routes (`view=`). Legacy `page=sikshya-*` URLs redirect in admin_init.
         add_menu_page(
             __('Sikshya LMS', 'sikshya'),
             __('Sikshya LMS', 'sikshya'),
             'edit_posts',
-            'sikshya',
-            [$this, 'renderDashboardPage'],
+            AdminPages::DASHBOARD,
+            [$this, 'renderSikshyaApp'],
             'dashicons-welcome-learn-more',
             5
         );
 
-        // Dashboard submenu
+        // Core editor lists (no duplicate top-level CPT menus — all live under Sikshya LMS).
         add_submenu_page(
             'sikshya',
-            __('Dashboard', 'sikshya'),
-            __('Dashboard', 'sikshya'),
+            __('Assignments', 'sikshya'),
+            __('Assignments', 'sikshya'),
             'edit_posts',
-            'sikshya',
-            [$this, 'renderDashboardPage']
+            'edit.php?post_type=' . PostTypes::ASSIGNMENT,
+            ''
         );
 
-        // Courses submenu
         add_submenu_page(
             'sikshya',
-            __('Courses', 'sikshya'),
-            __('Courses', 'sikshya'),
+            __('Questions', 'sikshya'),
+            __('Questions', 'sikshya'),
             'edit_posts',
-            AdminPages::COURSES,
-            [$this, 'renderCoursesPage']
+            'edit.php?post_type=' . PostTypes::QUESTION,
+            ''
         );
 
-        // Add Course submenu
         add_submenu_page(
             'sikshya',
-            __('Add Course', 'sikshya'),
-            __('Add Course', 'sikshya'),
+            __('Chapters', 'sikshya'),
+            __('Chapters', 'sikshya'),
             'edit_posts',
-            AdminPages::ADD_COURSE,
-            [$this, 'renderAddCoursePage']
+            'edit.php?post_type=' . PostTypes::CHAPTER,
+            ''
         );
 
-        // Course Categories submenu
         add_submenu_page(
             'sikshya',
-            __('Categories', 'sikshya'),
-            __('Categories', 'sikshya'),
-            'manage_categories',
-            AdminPages::COURSE_CATEGORIES,
-            [$this, 'renderCourseCategoriesPage']
-        );
-
-        // Lessons submenu
-        add_submenu_page(
-            'sikshya',
-            __('Lessons', 'sikshya'),
-            __('Lessons', 'sikshya'),
+            __('Certificates', 'sikshya'),
+            __('Certificates', 'sikshya'),
             'edit_posts',
-            AdminPages::LESSONS,
-            [$this, 'renderLessonsPage']
+            'edit.php?post_type=' . PostTypes::CERTIFICATE,
+            ''
         );
+    }
 
-        // Add Lesson submenu (hidden from menu)
-        add_submenu_page(
-            'sikshya',
-            __('Add New Lesson', 'sikshya'),
-            __('Add New Lesson', 'sikshya'),
-            'edit_posts',
-            AdminPages::ADD_LESSON,
-            [$this, 'renderAddLessonPage']
-        );
+    /**
+     * True when the request targets the unified React admin (`admin.php?page=sikshya`).
+     */
+    public static function isSikshyaReactAppRequest(): bool
+    {
+        if (!is_admin()) {
+            return false;
+        }
+        if (empty($_GET['page']) || !is_string($_GET['page'])) {
+            return false;
+        }
 
-        // Quizzes submenu
-        add_submenu_page(
-            'sikshya',
-            __('Quizzes', 'sikshya'),
-            __('Quizzes', 'sikshya'),
-            'edit_posts',
-            AdminPages::QUIZZES,
-            [$this, 'renderQuizzesPage']
-        );
+        return sanitize_key(wp_unslash($_GET['page'])) === AdminPages::DASHBOARD;
+    }
 
-        // Students submenu
-        add_submenu_page(
-            'sikshya',
-            __('Students', 'sikshya'),
-            __('Students', 'sikshya'),
-            'edit_posts',
-            AdminPages::STUDENTS,
-            [$this, 'renderStudentsPage']
-        );
+    /**
+     * Hide WP skip links and other chrome on the Sikshya full-screen shell.
+     */
+    public static function printSikshyaReactShellHead(): void
+    {
+        if (!self::isSikshyaReactAppRequest()) {
+            return;
+        }
+        echo '<style id="sikshya-react-wp-chrome-hide">
+            body.sikshya-react-shell .screen-reader-shortcut,
+            body.sikshya-react-shell #wpbody-content > .screen-reader-text,
+            body.sikshya-react-shell a[href="#wpbody-content"],
+            body.sikshya-react-shell a[href="#wp-toolbar"] {
+                clip: rect(0, 0, 0, 0) !important;
+                clip-path: inset(50%) !important;
+                height: 1px !important;
+                width: 1px !important;
+                margin: -1px !important;
+                overflow: hidden !important;
+                padding: 0 !important;
+                position: absolute !important;
+                white-space: nowrap !important;
+                border: 0 !important;
+                display: none !important;
+            }
+        </style>';
+    }
 
-        // Instructors submenu
-        add_submenu_page(
-            'sikshya',
-            __('Instructors', 'sikshya'),
-            __('Instructors', 'sikshya'),
-            'edit_posts',
-            AdminPages::INSTRUCTORS,
-            [$this, 'renderInstructorsPage']
-        );
+    /**
+     * Redirect old per-screen menu slugs to the unified app (`page=sikshya&view=…`).
+     */
+    public static function redirectLegacySikshyaReactMenus(): void
+    {
+        if (!is_user_logged_in() || wp_doing_ajax()) {
+            return;
+        }
 
-        // Reports submenu
-        add_submenu_page(
-            'sikshya',
-            __('Reports', 'sikshya'),
-            __('Reports', 'sikshya'),
-            'edit_posts',
-            AdminPages::REPORTS,
-            [$this, 'renderReportsPage']
-        );
+        if (empty($_GET['page']) || !is_string($_GET['page'])) {
+            return;
+        }
 
-        // Settings submenu
-        add_submenu_page(
-            'sikshya',
-            __('Settings', 'sikshya'),
-            __('Settings', 'sikshya'),
-            'manage_options',
-            AdminPages::SETTINGS,
-            [$this, 'renderSettingsPage']
-        );
+        $page = sanitize_key(wp_unslash($_GET['page']));
 
-        // Tools submenu
-        add_submenu_page(
-            'sikshya',
-            __('Tools', 'sikshya'),
-            __('Tools', 'sikshya'),
-            'manage_options',
-            AdminPages::TOOLS,
-            [$this->controllers['tools'], 'tools']
-        );
+        $map = [
+            AdminPages::COURSES => 'courses',
+            AdminPages::ADD_COURSE => 'add-course',
+            AdminPages::COURSE_CATEGORIES => 'course-categories',
+            AdminPages::LESSONS => 'lessons',
+            AdminPages::ADD_LESSON => 'add-lesson',
+            AdminPages::QUIZZES => 'quizzes',
+            AdminPages::STUDENTS => 'students',
+            AdminPages::INSTRUCTORS => 'instructors',
+            AdminPages::REPORTS => 'reports',
+            AdminPages::SETTINGS => 'settings',
+        ];
 
-        // Help submenu
-        add_submenu_page(
-            'sikshya',
-            __('Help & Support', 'sikshya'),
-            __('Help & Support', 'sikshya'),
-            'manage_options',
-            AdminPages::HELP,
-            [$this->controllers['tools'], 'help']
-        );
+        if (!isset($map[$page])) {
+            return;
+        }
+
+        $params = [
+            'page' => AdminPages::DASHBOARD,
+            'view' => $map[$page],
+        ];
+
+        $whitelist = ['tab', 'course_id', 'id', 'action', 'post', '_wpnonce'];
+        foreach ($whitelist as $key) {
+            if (!isset($_GET[$key])) {
+                continue;
+            }
+            $val = wp_unslash($_GET[$key]);
+            if (is_array($val)) {
+                continue;
+            }
+            $params[$key] = sanitize_text_field((string) $val);
+        }
+
+        wp_safe_redirect(add_query_arg($params, admin_url('admin.php')));
+        exit;
+    }
+
+    /**
+     * Hide the WP admin bar on the unified Sikshya React screen.
+     *
+     * @param bool $show Whether to show the admin bar.
+     * @return bool
+     */
+    public static function hideAdminBarOnSikshyaApp($show)
+    {
+        return self::isSikshyaReactAppRequest() ? false : $show;
+    }
+
+    /**
+     * Strip core wp-admin styles/scripts on the Sikshya app so only the React shell shows.
+     */
+    public static function dequeueWordPressUiOnSikshyaApp(): void
+    {
+        $screen = get_current_screen();
+        if (!$screen || $screen->id !== 'toplevel_page_sikshya') {
+            return;
+        }
+
+        $styles = [
+            'wp-admin',
+            'admin-menu',
+            'common',
+            'forms',
+            'buttons',
+            'dashicons',
+            'list-tables',
+            'admin-bar',
+            'colors',
+            'ie',
+            'site-icon',
+            'wp-auth-check',
+        ];
+
+        foreach ($styles as $handle) {
+            wp_dequeue_style($handle);
+        }
+
+        $scripts = [
+            'admin-bar',
+            'hoverintent-js',
+            'admin-widgets',
+            'wp-auth-check',
+            'wp-embed',
+        ];
+
+        foreach ($scripts as $handle) {
+            wp_dequeue_script($handle);
+        }
+    }
+
+    /**
+     * Render the unified Sikshya React admin (`view` query selects the subpage).
+     */
+    public function renderSikshyaApp(): void
+    {
+        if (!current_user_can('edit_posts')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        $view = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : 'dashboard';
+
+        $allowed = [
+            'dashboard',
+            'courses',
+            'add-course',
+            'course-categories',
+            'edit-content',
+            'lessons',
+            'add-lesson',
+            'quizzes',
+            'assignments',
+            'questions',
+            'chapters',
+            'certificates',
+            'issued-certificates',
+            'students',
+            'instructors',
+            'enrollments',
+            'reports',
+            'payments',
+            'orders',
+            'coupons',
+            'gradebook',
+            'content-drip',
+            'subscriptions',
+            'course-team',
+            'marketplace',
+            'settings',
+            'tools',
+        ];
+
+        if (!in_array($view, $allowed, true)) {
+            $view = 'dashboard';
+        }
+
+        if ($view === 'tools' && !current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if ($view === 'settings' && !current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if ($view === 'payments' && !current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if (
+            $view === 'enrollments'
+            && !current_user_can('manage_sikshya')
+            && !current_user_can('edit_sikshya_courses')
+        ) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if (
+            $view === 'issued-certificates'
+            && !current_user_can('manage_sikshya')
+            && !current_user_can('edit_sikshya_courses')
+        ) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if (
+            in_array($view, ['orders', 'coupons', 'subscriptions'], true)
+            && !current_user_can('manage_options')
+        ) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if ($view === 'marketplace' && !current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if ($view === 'course-categories' && !current_user_can('manage_categories')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        $initial = [];
+
+        if ($view === 'dashboard') {
+            $initial = ReactAdminConfig::dashboardInitialData();
+        } elseif ($view === 'reports') {
+            $initial = ReactAdminConfig::reportsInitialData();
+        }
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            $initial['useEntityListMock'] = true;
+        }
+
+        ReactAdminView::render($view, $initial);
     }
 
     /**
@@ -249,10 +410,10 @@ class Admin
     {
         // Initialize admin-specific functionality
         do_action('sikshya_admin_init', $this);
-        
+
         // Hook into admin_enqueue_scripts early to dequeue WordPress core styles
         add_action('admin_enqueue_scripts', [$this, 'dequeueWordPressCoreStylesEarly'], 1);
-        
+
         // Filter to remove styles from chunked loading
         add_filter('print_styles_array', [$this, 'filterChunkedStyles'], 10, 1);
     }
@@ -263,18 +424,33 @@ class Admin
     public function enqueueAdminAssets(): void
     {
         $screen = get_current_screen();
-        
-        // Debug: Log screen ID for troubleshooting
-        if ($screen) {
-            error_log('Sikshya Admin Screen ID: ' . $screen->id);
-            error_log('Sikshya Admin Screen Base: ' . $screen->base);
-            error_log('Sikshya Admin Screen Parent: ' . $screen->parent_base);
-            error_log('Sikshya Admin Screen Hook: ' . $screen->parent_file);
-        } else {
-            error_log('Sikshya Admin: No screen object available');
+        if (!$screen) {
+            return;
         }
-        
-        // Enqueue Font Awesome for icons
+
+        $sikshya_post_types = [
+            PostTypes::COURSE,
+            PostTypes::LESSON,
+            PostTypes::QUIZ,
+            PostTypes::ASSIGNMENT,
+            PostTypes::QUESTION,
+            PostTypes::CHAPTER,
+            PostTypes::CERTIFICATE,
+        ];
+        $is_sikshya_post_screen = isset($screen->post_type)
+            && in_array($screen->post_type, $sikshya_post_types, true);
+        $sid = (string) ($screen->id ?? '');
+        $sbase = (string) ($screen->base ?? '');
+
+        $is_sikshya_screen = $is_sikshya_post_screen
+            || strpos($sid, 'sikshya') !== false
+            || strpos($sbase, 'sikshya') !== false;
+
+        if (!$is_sikshya_screen) {
+            return;
+        }
+
+        // Enqueue Font Awesome for icons (Sikshya admin only).
         wp_enqueue_style(
             'font-awesome',
             'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
@@ -282,11 +458,12 @@ class Admin
             '6.0.0'
         );
 
-    
+        // Enqueue settings assets only on React settings subpage
+        $is_react_settings = ($screen->id === 'toplevel_page_sikshya'
+            && isset($_GET['view'])
+            && sanitize_key(wp_unslash((string) $_GET['view'])) === 'settings');
 
-        // Enqueue settings assets only on settings page
-        if ($screen && $screen->id === 'sikshya-lms_page_sikshya-settings') {
-            error_log('Sikshya: Enqueuing settings assets for screen: ' . $screen->id);
+        if ($is_react_settings) {
             wp_enqueue_style(
                 'sikshya-settings',
                 SIKSHYA_PLUGIN_URL . 'assets/admin/css/settings.css',
@@ -300,7 +477,7 @@ class Admin
                 SIKSHYA_VERSION,
                 true
             );
-            
+
             // Enqueue modal system for settings page
             wp_enqueue_style(
                 'sikshya-modal',
@@ -315,14 +492,10 @@ class Admin
                 SIKSHYA_VERSION,
                 true
             );
-            
-            error_log('Sikshya: Settings assets enqueued successfully');
-        } else {
-            error_log('Sikshya: Not enqueuing settings assets. Screen ID: ' . ($screen ? $screen->id : 'null'));
-            error_log('Sikshya: Expected screen ID: sikshya_page_sikshya-settings');
+
         }
-        
-        // Enqueue toast system assets on all admin pages
+
+        // Toast (Sikshya admin only).
         wp_enqueue_style(
             'sikshya-toast',
             SIKSHYA_PLUGIN_URL . 'assets/admin/css/toast.css',
@@ -348,7 +521,7 @@ class Admin
         wp_dequeue_style('buttons');
         wp_dequeue_style('wp-admin');
         wp_dequeue_style('dashicons');
-        
+
         // Dequeue WordPress core scripts that might interfere
         wp_dequeue_script('admin-bar');
         wp_dequeue_script('wp-embed');
@@ -361,20 +534,19 @@ class Admin
      */
     public function filterChunkedStyles($styles): array
     {
+        if (!is_array($styles)) {
+            $styles = [];
+        }
+
         $screen = get_current_screen();
-        
-        // Only filter on specific Sikshya list table pages
-        if ($screen && in_array($screen->id, [
-            'sikshya-lms_page_sikshya-courses',
-            'sikshya-lms_page_sikshya-lessons',
-            'sikshya-lms_page_sikshya-quizzes'
-        ])) {
-            // Remove WordPress core styles from the chunked loading
-            $styles = array_filter($styles, function($style) {
-                return !in_array($style, ['forms', 'buttons', 'list-tables']);
+
+        $sid = $screen ? (string) ($screen->id ?? '') : '';
+        if ($screen && $sid === 'toplevel_page_sikshya') {
+            $styles = array_filter($styles, function ($style) {
+                return !in_array($style, ['forms', 'buttons', 'list-tables'], true);
             });
         }
-        
+
         return $styles;
     }
 
@@ -384,17 +556,13 @@ class Admin
     public function dequeueWordPressCoreStylesEarly(): void
     {
         $screen = get_current_screen();
-        
-        // Only dequeue on specific Sikshya list table pages
-        if ($screen && in_array($screen->id, [
-            'sikshya-lms_page_sikshya-courses',
-            'sikshya-lms_page_sikshya-lessons',
-            'sikshya-lms_page_sikshya-quizzes'
-        ])) {
-            // Dequeue WordPress core styles that interfere with our custom design
+
+        if ($screen && $screen->id === 'toplevel_page_sikshya') {
             wp_dequeue_style('list-tables');
             wp_dequeue_style('forms');
             wp_dequeue_style('buttons');
+            wp_dequeue_style('wp-admin');
+            wp_dequeue_style('admin-menu');
         }
     }
 
@@ -490,27 +658,29 @@ class Admin
     private function isSikshyaAdminPage(): bool
     {
         $screen = get_current_screen();
-        
+
         if (!$screen) {
             return false;
         }
 
-        // List of Sikshya admin page IDs
-        $sikshya_pages = [
-            'toplevel_page_sikshya',
-            'sikshya_page_sikshya-courses',
-            'sikshya_page_sikshya-add-course', 
-            'sikshya_page_sikshya-lessons',
-            'sikshya_page_sikshya-quizzes',
-            'sikshya_page_sikshya-questions',
-            'sikshya_page_sikshya-enrollments',
-            'sikshya_page_sikshya-reports',
-            'sikshya_page_sikshya-settings',
-            'sikshya_page_sikshya-tools',
-            'sikshya_page_sikshya-addons'
+        $sikshya_post_types = [
+            PostTypes::COURSE,
+            PostTypes::LESSON,
+            PostTypes::QUIZ,
+            PostTypes::ASSIGNMENT,
+            PostTypes::QUESTION,
+            PostTypes::CHAPTER,
+            PostTypes::CERTIFICATE,
         ];
+        $is_sikshya_post_screen = isset($screen->post_type)
+            && in_array($screen->post_type, $sikshya_post_types, true);
 
-        return in_array($screen->id, $sikshya_pages, true);
+        $sid = (string) ($screen->id ?? '');
+        $sbase = (string) ($screen->base ?? '');
+
+        return $is_sikshya_post_screen
+            || strpos($sid, 'sikshya') !== false
+            || strpos($sbase, 'sikshya') !== false;
     }
 
     /**
@@ -541,29 +711,29 @@ class Admin
         if ($this->isSikshyaAdminPage()) {
             // Store our handler before removing all actions
             $our_handler = [$this, 'displayAdminNotices'];
-            
+
             // Remove all admin notice actions
             remove_all_actions('admin_notices');
             remove_all_actions('all_admin_notices');
             remove_all_actions('network_admin_notices');
             remove_all_actions('user_admin_notices');
-            
+
             // Re-add only our Sikshya notice handler
             add_action('admin_notices', $our_handler);
-            
+
             // Remove specific WordPress update notices
             remove_action('admin_notices', 'update_nag', 3);
             remove_action('network_admin_notices', 'update_nag', 3);
             remove_action('admin_notices', 'maintenance_nag', 10);
-            
+
             // Remove file editing warnings
             remove_action('admin_notices', 'wp_print_file_editor_templates');
-            
+
             // Remove plugin update nags
             remove_action('load-update-core.php', 'wp_update_plugins');
             remove_action('load-plugins.php', 'wp_update_plugins');
             remove_action('load-update.php', 'wp_update_plugins');
-            
+
             // Clear any existing notices in the options
             delete_option('sikshya_admin_notices');
         }
@@ -589,7 +759,7 @@ class Admin
         if (!in_array($errno, [E_NOTICE, E_WARNING, E_USER_NOTICE, E_USER_WARNING])) {
             return false; // Let WordPress handle other errors
         }
-        
+
         // List of notices/warnings to suppress on Sikshya pages
         $suppress_patterns = [
             '/textdomain.*was triggered too early/i',
@@ -597,7 +767,7 @@ class Admin
             '/_load_textdomain_just_in_time.*incorrectly/i',
             '/pragyan.*domain.*triggered too early/i',
         ];
-        
+
         foreach ($suppress_patterns as $pattern) {
             if (preg_match($pattern, $errstr)) {
                 // Log to our own log if needed (optional)
@@ -605,7 +775,7 @@ class Admin
                 return true; // Suppress this error
             }
         }
-        
+
         // For other notices/warnings, let WordPress handle them
         return false;
     }
@@ -619,32 +789,32 @@ class Admin
             // Remove lines containing theme-related notices
             $lines = explode("\n", $contents);
             $filtered_lines = [];
-            
+
             foreach ($lines as $line) {
                 $should_suppress = false;
-                
+
                 $suppress_patterns = [
                     '/textdomain.*was triggered too early/i',
                     '/translation loading.*domain.*triggered too early/i',
                     '/_load_textdomain_just_in_time.*incorrectly/i',
                     '/pragyan.*domain.*triggered too early/i',
                 ];
-                
+
                 foreach ($suppress_patterns as $pattern) {
                     if (preg_match($pattern, $line)) {
                         $should_suppress = true;
                         break;
                     }
                 }
-                
+
                 if (!$should_suppress) {
                     $filtered_lines[] = $line;
                 }
             }
-            
+
             return implode("\n", $filtered_lines);
         }
-        
+
         return $contents;
     }
 
@@ -665,13 +835,35 @@ class Admin
     public function addAdminFooter(): void
     {
         $screen = get_current_screen();
-        
+
         // Restore error reporting if not on Sikshya page
         if (!$screen || !$this->isSikshyaAdminPage()) {
             $this->restoreErrorReporting();
         }
-        
-        if (!$screen || strpos($screen->id, 'sikshya') === false) {
+
+        if (!$screen) {
+            return;
+        }
+
+        $sikshya_post_types = [
+            PostTypes::COURSE,
+            PostTypes::LESSON,
+            PostTypes::QUIZ,
+            PostTypes::ASSIGNMENT,
+            PostTypes::QUESTION,
+            PostTypes::CHAPTER,
+            PostTypes::CERTIFICATE,
+        ];
+        $is_sikshya_post_screen = isset($screen->post_type)
+            && in_array($screen->post_type, $sikshya_post_types, true);
+        $sid = (string) ($screen->id ?? '');
+        $sbase = (string) ($screen->base ?? '');
+
+        $is_sikshya = $is_sikshya_post_screen
+            || strpos($sid, 'sikshya') !== false
+            || strpos($sbase, 'sikshya') !== false;
+
+        if (!$is_sikshya) {
             return;
         }
 
@@ -683,6 +875,51 @@ class Admin
             'https://support.sikshya.com'
         ) . '</p>';
         echo '</div>';
+    }
+
+    /**
+     * Add body classes for Sikshya wp-admin screens (layout + shell CSS).
+     *
+     * @param string $classes Space-separated classes from WordPress.
+     * @return string
+     */
+    public function filterAdminBodyClass($classes): string
+    {
+        $classes = is_string($classes) ? $classes : '';
+
+        $screen = get_current_screen();
+        if (!$screen) {
+            return $classes;
+        }
+
+        $sikshya_post_types = [
+            PostTypes::COURSE,
+            PostTypes::LESSON,
+            PostTypes::QUIZ,
+            PostTypes::ASSIGNMENT,
+            PostTypes::QUESTION,
+            PostTypes::CHAPTER,
+            PostTypes::CERTIFICATE,
+        ];
+        $is_sikshya_post_screen = isset($screen->post_type)
+            && in_array($screen->post_type, $sikshya_post_types, true);
+
+        $sid = (string) ($screen->id ?? '');
+        $sbase = (string) ($screen->base ?? '');
+
+        if ($screen->id === 'toplevel_page_sikshya') {
+            return trim($classes . ' sikshya-lms-admin sikshya-react-shell');
+        }
+
+        if (
+            strpos($sid, 'sikshya') === false
+            && strpos($sbase, 'sikshya') === false
+            && !$is_sikshya_post_screen
+        ) {
+            return $classes;
+        }
+
+        return trim($classes . ' sikshya-lms-admin');
     }
 
     /**
@@ -735,35 +972,7 @@ class Admin
      */
     public function renderDashboardPage(): void
     {
-        if (!current_user_can('edit_posts')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
-        }
-
-        $dashboard = new \Sikshya\Admin\Views\Dashboard($this->plugin, [
-            'title' => __('Sikshya LMS Dashboard', 'sikshya'),
-            'description' => __('Welcome to your learning management system', 'sikshya'),
-        ]);
-
-        // Add dashboard widgets
-        $dashboard->addWidgets([
-            'stats' => [
-                'title' => __('Statistics', 'sikshya'),
-                'content' => $this->renderStatsWidget(),
-                'type' => 'stats',
-            ],
-            'recent_courses' => [
-                'title' => __('Recent Courses', 'sikshya'),
-                'content' => $this->renderRecentCoursesWidget(),
-                'type' => 'list',
-            ],
-            'quick_actions' => [
-                'title' => __('Quick Actions', 'sikshya'),
-                'content' => $this->renderQuickActionsWidget(),
-                'type' => 'actions',
-            ],
-        ]);
-
-        echo $dashboard->renderDashboard();
+        $this->renderSikshyaApp();
     }
 
     /**
@@ -787,20 +996,13 @@ class Admin
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
-        // Debug information
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Sikshya: Rendering Add Course Page');
-            error_log('Sikshya: Current user ID: ' . get_current_user_id());
-            error_log('Sikshya: Current user capabilities: ' . print_r(wp_get_current_user()->allcaps, true));
-        }
-
         try {
             $this->controllers['course']->renderAddCoursePage();
         } catch (\Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 error_log('Sikshya: Error rendering Add Course Page: ' . $e->getMessage());
             }
-            wp_die('Error rendering Add Course Page: ' . $e->getMessage());
+            wp_die(esc_html($e->getMessage()));
         }
     }
 
@@ -905,12 +1107,17 @@ class Admin
      */
     private function renderStatsWidget(): string
     {
-        $course_counts = wp_count_posts('sikshya_course');
-        $total_courses = isset($course_counts->publish) ? $course_counts->publish : 0;
-        
+        $course_counts = wp_count_posts(PostTypes::COURSE);
+        $total_courses = isset($course_counts->publish) ? (int) $course_counts->publish : 0;
+
+        $user_counts = count_users();
+        $total_students = isset($user_counts['avail_roles']['sikshya_student'])
+            ? (int) $user_counts['avail_roles']['sikshya_student']
+            : 0;
+
         $stats = [
             'total_courses' => $total_courses,
-            'total_students' => count_users()['total_users'],
+            'total_students' => $total_students,
             'total_revenue' => '$0.00',
             'active_enrollments' => 0,
         ];
@@ -925,13 +1132,10 @@ class Admin
                     </svg>
                 </div>
             </div>
-            <div class="sikshya-stat-number"><?php echo esc_html($stats['total_courses']); ?></div>
-            <div class="sikshya-stat-label"><?php _e('Total Courses', 'sikshya'); ?></div>
-            <div class="sikshya-stat-change positive">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 14l3-3m0 0l3 3m-3-3v9"/>
-                </svg>
-                +12% from last month
+            <div class="sikshya-stat-number"><?php echo esc_html((string) $stats['total_courses']); ?></div>
+            <div class="sikshya-stat-label"><?php esc_html_e('Published courses', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change neutral">
+                <span class="sikshya-stat-note"><?php esc_html_e('Live count', 'sikshya'); ?></span>
             </div>
         </div>
         
@@ -943,13 +1147,10 @@ class Admin
                     </svg>
                 </div>
             </div>
-            <div class="sikshya-stat-number"><?php echo esc_html($stats['total_students']); ?></div>
-            <div class="sikshya-stat-label"><?php _e('Total Students', 'sikshya'); ?></div>
-            <div class="sikshya-stat-change positive">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 14l3-3m0 0l3 3m-3-3v9"/>
-                </svg>
-                +8% from last month
+            <div class="sikshya-stat-number"><?php echo esc_html((string) $stats['total_students']); ?></div>
+            <div class="sikshya-stat-label"><?php esc_html_e('Students (Sikshya role)', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change neutral">
+                <span class="sikshya-stat-note"><?php esc_html_e('Live count', 'sikshya'); ?></span>
             </div>
         </div>
         
@@ -962,12 +1163,9 @@ class Admin
                 </div>
             </div>
             <div class="sikshya-stat-number"><?php echo esc_html($stats['total_revenue']); ?></div>
-            <div class="sikshya-stat-label"><?php _e('Total Revenue', 'sikshya'); ?></div>
-            <div class="sikshya-stat-change positive">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 14l3-3m0 0l3 3m-3-3v9"/>
-                </svg>
-                +15% from last month
+            <div class="sikshya-stat-label"><?php esc_html_e('Total revenue', 'sikshya'); ?></div>
+            <div class="sikshya-stat-change neutral">
+                <span class="sikshya-stat-note"><?php esc_html_e('Connect payments in Settings', 'sikshya'); ?></span>
             </div>
         </div>
         
@@ -979,13 +1177,10 @@ class Admin
                     </svg>
                 </div>
             </div>
-            <div class="sikshya-stat-number"><?php echo esc_html($stats['active_enrollments']); ?></div>
-            <div class="sikshya-stat-label"><?php _e('Active Enrollments', 'sikshya'); ?></div>
+            <div class="sikshya-stat-number"><?php echo esc_html((string) $stats['active_enrollments']); ?></div>
+            <div class="sikshya-stat-label"><?php esc_html_e('Active enrollments', 'sikshya'); ?></div>
             <div class="sikshya-stat-change neutral">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
-                </svg>
-                No change
+                <span class="sikshya-stat-note"><?php esc_html_e('Reports → Enrollments when available', 'sikshya'); ?></span>
             </div>
         </div>
         <?php
@@ -998,7 +1193,7 @@ class Admin
     private function renderRecentCoursesWidget(): string
     {
         $recent_courses = get_posts([
-            'post_type' => 'sikshya_course',
+            'post_type' => PostTypes::COURSE,
             'posts_per_page' => 5,
             'post_status' => 'publish',
         ]);
@@ -1010,7 +1205,7 @@ class Admin
                 $author = get_userdata($course->post_author);
                 $author_initials = substr($author->display_name, 0, 2);
                 $course_date = get_the_date('M j, Y', $course->ID);
-                
+
                 echo '<li class="sikshya-list-item">';
                 echo '<div class="sikshya-list-item-content">';
                 echo '<div class="sikshya-list-item-avatar">' . esc_html($author_initials) . '</div>';
@@ -1049,17 +1244,17 @@ class Admin
         ob_start();
         ?>
         <div class="sikshya-quick-actions">
-            <a href="<?php echo admin_url('admin.php?page=sikshya-add-course'); ?>" class="sikshya-btn sikshya-btn-primary sikshya-mb-2">
-                <?php _e('Add Course', 'sikshya'); ?>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=' . AdminPages::ADD_COURSE)); ?>" class="sikshya-btn sikshya-btn-primary sikshya-mb-2">
+                <?php esc_html_e('Add course', 'sikshya'); ?>
             </a>
-            <a href="<?php echo admin_url('admin.php?page=sikshya-lessons'); ?>" class="sikshya-btn sikshya-btn-secondary sikshya-mb-2">
-                <?php _e('Add Lesson', 'sikshya'); ?>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=' . AdminPages::ADD_LESSON)); ?>" class="sikshya-btn sikshya-btn-secondary sikshya-mb-2">
+                <?php esc_html_e('Add lesson', 'sikshya'); ?>
             </a>
-            <a href="<?php echo admin_url('admin.php?page=sikshya-quizzes'); ?>" class="sikshya-btn sikshya-btn-secondary sikshya-mb-2">
-                <?php _e('Add Quiz', 'sikshya'); ?>
+            <a href="<?php echo esc_url(admin_url('post-new.php?post_type=' . rawurlencode(PostTypes::QUIZ))); ?>" class="sikshya-btn sikshya-btn-secondary sikshya-mb-2">
+                <?php esc_html_e('Add quiz', 'sikshya'); ?>
             </a>
         </div>
         <?php
         return ob_get_clean();
     }
-} 
+}

@@ -2,36 +2,38 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Constants\PostTypes;
+use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use WP_Query;
 
-class LessonRepository
+class LessonRepository implements RepositoryInterface
 {
     public function findAll(array $args = []): array
     {
         $defaults = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_status' => 'publish',
             'posts_per_page' => -1,
             'orderby' => 'menu_order',
             'order' => 'ASC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
     public function findById(int $id): ?object
     {
         $post = get_post($id);
-        return ($post && $post->post_type === 'sikshya_lesson') ? $post : null;
+        return ($post && $post->post_type === PostTypes::LESSON) ? $post : null;
     }
 
     public function create(array $data): int
     {
         $post_data = [
-            'post_type' => 'sikshya_lesson',
+            'post_type' => PostTypes::LESSON,
             'post_title' => sanitize_text_field($data['title'] ?? ''),
             'post_content' => wp_kses_post($data['content'] ?? ''),
             'post_status' => $data['status'] ?? 'draft',
@@ -40,14 +42,14 @@ class LessonRepository
         ];
 
         $post_id = wp_insert_post($post_data, true);
-        
+
         if (is_wp_error($post_id)) {
             return 0;
         }
 
         // Set custom meta fields
         $this->setMetaFields($post_id, $data);
-        
+
         return $post_id;
     }
 
@@ -62,14 +64,14 @@ class LessonRepository
         ];
 
         $result = wp_update_post($post_data, true);
-        
+
         if (is_wp_error($result)) {
             return false;
         }
 
         // Update custom meta fields
         $this->setMetaFields($id, $data);
-        
+
         return true;
     }
 
@@ -95,10 +97,10 @@ class LessonRepository
                 ],
             ],
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -118,10 +120,10 @@ class LessonRepository
                 ],
             ],
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -134,10 +136,10 @@ class LessonRepository
             'orderby' => 'menu_order',
             'order' => 'ASC',
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -151,10 +153,10 @@ class LessonRepository
             'order' => 'ASC',
             's' => $search_term,
         ];
-        
+
         $query_args = wp_parse_args($args, $defaults);
         $query = new WP_Query($query_args);
-        
+
         return $query->posts;
     }
 
@@ -187,7 +189,7 @@ class LessonRepository
                 ],
             ],
         ];
-        
+
         $query = new WP_Query($args);
         return !empty($query->posts) ? $query->posts[0] : null;
     }
@@ -214,7 +216,7 @@ class LessonRepository
                 ],
             ],
         ];
-        
+
         $query = new WP_Query($args);
         return !empty($query->posts) ? $query->posts[0] : null;
     }
@@ -257,7 +259,7 @@ class LessonRepository
 
     /**
      * Set content type specific meta fields
-     * 
+     *
      * @param int $post_id
      * @param array $data
      * @return void
@@ -287,7 +289,7 @@ class LessonRepository
 
     /**
      * Set text lesson specific meta fields
-     * 
+     *
      * @param int $post_id
      * @param array $data
      * @return void
@@ -313,7 +315,7 @@ class LessonRepository
 
     /**
      * Set video lesson specific meta fields
-     * 
+     *
      * @param int $post_id
      * @param array $data
      * @return void
@@ -338,7 +340,7 @@ class LessonRepository
 
     /**
      * Set audio lesson specific meta fields
-     * 
+     *
      * @param int $post_id
      * @param array $data
      * @return void
@@ -363,7 +365,7 @@ class LessonRepository
 
     /**
      * Set assignment specific meta fields
-     * 
+     *
      * @param int $post_id
      * @param array $data
      * @return void
@@ -388,7 +390,7 @@ class LessonRepository
 
     /**
      * Set quiz specific meta fields
-     * 
+     *
      * @param int $post_id
      * @param array $data
      * @return void
@@ -425,4 +427,4 @@ class LessonRepository
     {
         return delete_post_meta($post_id, '_sikshya_' . $key);
     }
-} 
+}

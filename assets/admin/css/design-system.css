@@ -152,6 +152,15 @@
     --sikshya-breakpoint-lg: 1024px;
     --sikshya-breakpoint-xl: 1280px;
     --sikshya-breakpoint-2xl: 1536px;
+
+    /*
+     * Admin shell (wp-admin Sikshya LMS pages)
+     * Override in child themes or custom CSS for white-label / dark mode experiments.
+     */
+    --sikshya-admin-page-bg: #fafbfc;
+    --sikshya-admin-header-bg: #f8f9fa;
+    --sikshya-admin-content-max-width: 1400px;
+    --sikshya-admin-header-border: var(--sikshya-gray-200);
 }
 
 /* === GLOBAL RESET & BASE === */

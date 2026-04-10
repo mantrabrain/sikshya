@@ -1,0 +1,123 @@
+/**
+ * Sikshya LMS — admin shell (WordPress wp-admin integration)
+ * Scoped to body.sikshya-lms-admin
+ */
+
+body.sikshya-lms-admin #wpbody-content {
+  padding-bottom: 2rem;
+}
+
+/* Full-width Sikshya surfaces: reduce double “wrap” feel */
+body.sikshya-lms-admin #wpbody-content > .wrap {
+  max-width: none;
+  margin-right: 20px;
+}
+
+body.sikshya-lms-admin .sikshya-dashboard {
+  margin-left: -20px;
+  margin-right: 0;
+  border-radius: 0;
+}
+
+@media screen and (max-width: 782px) {
+  body.sikshya-lms-admin .sikshya-dashboard {
+    margin-left: -10px;
+  }
+}
+
+/* Dashicons inside Sikshya headers / nav */
+body.sikshya-lms-admin .sikshya-header h1 .sikshya-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sikshya-primary, #2563eb);
+}
+
+body.sikshya-lms-admin .sikshya-header h1 .sikshya-header-icon svg {
+  display: block;
+}
+
+body.sikshya-lms-admin .sikshya-header h1 .dashicons,
+body.sikshya-lms-admin .sikshya-settings-tab .dashicons {
+  width: 1.25em;
+  height: 1.25em;
+  font-size: 1.25em;
+  line-height: 1;
+  vertical-align: middle;
+  color: var(--sikshya-primary, #2563eb);
+}
+
+body.sikshya-lms-admin .sikshya-btn .dashicons {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 1;
+  vertical-align: text-bottom;
+  margin-right: 4px;
+}
+
+body.sikshya-lms-admin .sikshya-settings-tab .dashicons {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Focus rings for keyboard users */
+body.sikshya-lms-admin .sikshya-btn:focus-visible,
+body.sikshya-lms-admin .sikshya-settings-tab:focus-visible,
+body.sikshya-lms-admin .sikshya-quick-action:focus-visible {
+  outline: 2px solid var(--sikshya-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+/* Footer bar */
+body.sikshya-lms-admin .sikshya-admin-footer {
+  margin: 1.5rem 20px 0 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--sikshya-gray-200, #e5e7eb);
+  color: var(--sikshya-gray-500, #6b7280);
+  font-size: 12px;
+}
+
+body.sikshya-lms-admin .sikshya-admin-footer a {
+  color: var(--sikshya-primary, #2563eb);
+}
+
+@keyframes sikshya-dashicon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body.sikshya-lms-admin .sikshya-dashicon-spin {
+  display: inline-block;
+  animation: sikshya-dashicon-spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sikshya-lms-admin .sikshya-dashicon-spin {
+    animation: none;
+  }
+}
+
+/* Dashboard stat footnotes (honest copy vs fake trends) */
+body.sikshya-lms-admin .sikshya-stat-note {
+  font-size: 12px;
+  color: var(--sikshya-gray-500, #6b7280);
+  line-height: 1.35;
+}
+
+/* Course builder sidebar hint */
+body.sikshya-lms-admin .sikshya-progress-section--hint {
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: var(--sikshya-gray-50, #f9fafb);
+  border: 1px solid var(--sikshya-gray-200, #e5e7eb);
+  border-radius: 8px;
+}
+
+body.sikshya-lms-admin .sikshya-progress-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--sikshya-gray-600, #4b5563);
+}

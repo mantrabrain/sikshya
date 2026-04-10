@@ -2,6 +2,7 @@
 
 namespace Sikshya\Admin\Controllers;
 
+use Sikshya\Admin\ReactAdminView;
 use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Core\Plugin;
 use Sikshya\Admin\Views\BaseView;
@@ -46,25 +47,7 @@ class SettingController extends BaseView
      */
     public function renderSettingsPage(): void
     {
-        // Get current tab from URL or default to general
-        $current_tab = sanitize_text_field($_GET['tab'] ?? 'general');
-        
-        // Validate tab exists
-        $valid_tabs = array_keys($this->settingsManager->getAllSettings());
-        if (!in_array($current_tab, $valid_tabs)) {
-            $current_tab = 'general';
-        }
-        
-        // Render initial tab content
-        $initial_content = $this->settingsManager->renderTabSettings($current_tab);
-        
-        // Pass data to template
-        $this->data = [
-            'current_tab' => $current_tab,
-            'initial_content' => $initial_content
-        ];
-        
-        $this->render('settings');
+        ReactAdminView::render('settings', []);
     }
 
     /**

@@ -20,9 +20,10 @@ class Activator
             wp_die(__('Sikshya LMS requires WordPress 6.0+ and PHP 8.1+', 'sikshya'));
         }
 
-        // Create database tables
+        // Create database tables + incremental migrations
         $database = new \Sikshya\Database\Database(Plugin::getInstance());
         $database->createTables();
+        $database->maybeUpgrade();
 
         // Create user roles
         self::createRoles();
@@ -199,4 +200,4 @@ class Activator
 
         update_option('sikshya_uninstall_options', $uninstall_options);
     }
-} 
+}

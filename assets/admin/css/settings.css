@@ -5,12 +5,12 @@
 .sikshya-settings-page {
     margin: 20px 0;
     font-family: var(--sikshya-font-family);
-    background: #fafbfc;
+    background: var(--sikshya-admin-page-bg, #fafbfc);
 }
 
 /* Settings Header - Using Design System */
 .sikshya-header {
-    background: #f8f9fa;
+    background: var(--sikshya-admin-header-bg, #f8f9fa);
     padding: var(--sikshya-space-6) var(--sikshya-space-8);
     display: flex;
     justify-content: space-between;

@@ -53,7 +53,7 @@ class LessonService
 
     /**
      * Validate content type specific fields
-     * 
+     *
      * @param array $data
      * @return void
      */
@@ -82,7 +82,7 @@ class LessonService
 
     /**
      * Validate text lesson fields
-     * 
+     *
      * @param array $data
      * @return void
      */
@@ -95,18 +95,18 @@ class LessonService
 
     /**
      * Validate video lesson fields
-     * 
+     *
      * @param array $data
      * @return void
      */
     private function validateVideoLessonFields(array $data): void
     {
         $video_source = $data['video_source'] ?? 'upload';
-        
+
         if ($video_source === 'upload' && empty($data['video_file'])) {
             throw new \InvalidArgumentException('Video file is required for upload source');
         }
-        
+
         if ($video_source === 'youtube' && empty($data['video_url'])) {
             throw new \InvalidArgumentException('Video URL is required for YouTube source');
         }
@@ -114,18 +114,18 @@ class LessonService
 
     /**
      * Validate audio lesson fields
-     * 
+     *
      * @param array $data
      * @return void
      */
     private function validateAudioLessonFields(array $data): void
     {
         $audio_source = $data['audio_source'] ?? 'upload';
-        
+
         if ($audio_source === 'upload' && empty($data['audio_file'])) {
             throw new \InvalidArgumentException('Audio file is required for upload source');
         }
-        
+
         if ($audio_source === 'spotify' && empty($data['audio_url'])) {
             throw new \InvalidArgumentException('Audio URL is required for Spotify source');
         }
@@ -133,7 +133,7 @@ class LessonService
 
     /**
      * Validate assignment fields
-     * 
+     *
      * @param array $data
      * @return void
      */
@@ -146,7 +146,7 @@ class LessonService
 
     /**
      * Validate quiz fields
-     * 
+     *
      * @param array $data
      * @return void
      */
@@ -266,4 +266,4 @@ class LessonService
             'modified' => $lesson->post_modified,
         ];
     }
-} 
+}

@@ -42,7 +42,7 @@ class LogService
         }
 
         global $wpdb;
-        
+
         $wpdb->insert(
             $wpdb->prefix . 'sikshya_logs',
             [
@@ -99,4 +99,4 @@ class LogService
             $this->log('debug', $message, $context);
         }
     }
-} 
+}

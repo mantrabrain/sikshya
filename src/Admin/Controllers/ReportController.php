@@ -2,10 +2,12 @@
 
 namespace Sikshya\Admin\Controllers;
 
+use DateTimeImmutable;
+use Sikshya\Admin\Views\BaseView;
+use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CacheService;
-use Sikshya\Admin\Views\BaseView;
 
 /**
  * Report Controller
@@ -14,6 +16,13 @@ use Sikshya\Admin\Views\BaseView;
  */
 class ReportController extends BaseView
 {
+    /**
+     * Request-level cache for reports snapshot (template + localize + controller).
+     *
+     * @var array|null
+     */
+    private static $reports_snapshot_cache = null;
+
     /**
      * Plugin instance
      *
@@ -48,6 +57,144 @@ class ReportController extends BaseView
     }
 
     /**
+     * Overview numbers + last-12-month enrollment series for the reports screen and Chart.js.
+     *
+     * @return array{stats: array<string, mixed>, chart: array{labels: string[], counts: int[]}}
+     */
+    public static function getReportsPageSnapshot(): array
+    {
+        if (null !== self::$reports_snapshot_cache) {
+            return self::$reports_snapshot_cache;
+        }
+
+        self::$reports_snapshot_cache = [
+            'stats' => self::queryReportsOverviewStats(),
+            'chart' => self::queryEnrollmentChartLast12Months(),
+        ];
+
+        return self::$reports_snapshot_cache;
+    }
+
+    /**
+     * Drop cached snapshot so the next read queries the database again (e.g. REST refresh).
+     */
+    public static function clearReportsSnapshotCache(): void
+    {
+        self::$reports_snapshot_cache = null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function queryReportsOverviewStats(): array
+    {
+        global $wpdb;
+
+        $enrollment_table = $wpdb->prefix . 'sikshya_enrollments';
+        $payments_table = $wpdb->prefix . 'sikshya_payments';
+
+        $course_counts = wp_count_posts(PostTypes::COURSE);
+        $published_courses = isset($course_counts->publish) ? (int) $course_counts->publish : 0;
+
+        $total_enrollments = 0;
+        $distinct_learners = 0;
+        $completed_enrollments = 0;
+
+        if (self::reportsTableExists($enrollment_table)) {
+            $total_enrollments = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$enrollment_table}");
+            $distinct_learners = (int) $wpdb->get_var("SELECT COUNT(DISTINCT user_id) FROM {$enrollment_table}");
+            $completed_enrollments = (int) $wpdb->get_var(
+                "SELECT COUNT(*) FROM {$enrollment_table} WHERE status = 'completed'"
+            );
+        }
+
+        $revenue_total = 0.0;
+        if (self::reportsTableExists($payments_table)) {
+            $revenue_total = (float) $wpdb->get_var(
+                "SELECT COALESCE(SUM(amount), 0) FROM {$payments_table} WHERE status = 'completed'"
+            );
+        }
+
+        $completion_rate = $total_enrollments > 0
+            ? round(100 * ($completed_enrollments / $total_enrollments), 1)
+            : 0.0;
+
+        $student_users = count_users();
+        $student_role_count = isset($student_users['avail_roles']['sikshya_student'])
+            ? (int) $student_users['avail_roles']['sikshya_student']
+            : 0;
+
+        $currency = (string) get_option('sikshya_currency', 'USD');
+        $revenue_html = function_exists('sikshya_format_price')
+            ? sikshya_format_price($revenue_total, $currency)
+            : esc_html(number_format_i18n($revenue_total, 2));
+
+        return [
+            'published_courses' => $published_courses,
+            'total_enrollments' => $total_enrollments,
+            'distinct_learners' => $distinct_learners > 0 ? $distinct_learners : $student_role_count,
+            'completed_enrollments' => $completed_enrollments,
+            'completion_rate' => $completion_rate,
+            'revenue_total' => $revenue_total,
+            'revenue_html' => $revenue_html,
+            'has_enrollment_table' => self::reportsTableExists($enrollment_table),
+            'has_payments_table' => self::reportsTableExists($payments_table),
+        ];
+    }
+
+    /**
+     * @return array{labels: string[], counts: int[]}
+     */
+    private static function queryEnrollmentChartLast12Months(): array
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'sikshya_enrollments';
+        $map = [];
+
+        if (self::reportsTableExists($table)) {
+            $start = (new DateTimeImmutable('first day of this month', wp_timezone()))->modify('-11 months');
+            $start_str = $start->format('Y-m-d 00:00:00');
+
+            $table_sql = esc_sql($table);
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name escaped; values bound.
+            $rows = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT DATE_FORMAT(enrolled_date, '%%Y-%%m') AS ym, COUNT(*) AS c FROM `{$table_sql}` WHERE enrolled_date >= %s GROUP BY ym ORDER BY ym ASC",
+                    $start_str
+                )
+            );
+
+            foreach ($rows as $row) {
+                $map[$row->ym] = (int) $row->c;
+            }
+        }
+
+        $labels = [];
+        $counts = [];
+        $cursor = (new DateTimeImmutable('first day of this month', wp_timezone()))->modify('-11 months');
+
+        for ($i = 0; $i < 12; $i++) {
+            $key = $cursor->format('Y-m');
+            $labels[] = wp_date('M', $cursor->getTimestamp());
+            $counts[] = $map[$key] ?? 0;
+            $cursor = $cursor->modify('+1 month');
+        }
+
+        return [
+            'labels' => $labels,
+            'counts' => $counts,
+        ];
+    }
+
+    private static function reportsTableExists(string $table_name): bool
+    {
+        global $wpdb;
+
+        return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name)) === $table_name;
+    }
+
+    /**
      * Initialize controller
      */
     public function init(): void
@@ -60,11 +207,13 @@ class ReportController extends BaseView
      */
     public function index(): void
     {
+        $snapshot = self::getReportsPageSnapshot();
         $this->data = [
             'page_title' => __('Reports', 'sikshya'),
             'page_description' => __('Analytics and insights for your LMS', 'sikshya'),
+            'report_snapshot' => $snapshot,
         ];
-        
+
         $this->render('reports');
     }
 
@@ -73,12 +222,7 @@ class ReportController extends BaseView
      */
     public function renderReportsPage(): void
     {
-        $this->data = [
-            'page_title' => __('Reports', 'sikshya'),
-            'page_description' => __('Analytics and insights for your LMS', 'sikshya'),
-        ];
-        
-        $this->render('reports');
+        \Sikshya\Admin\ReactAdminView::render('reports', \Sikshya\Admin\ReactAdminConfig::reportsInitialData());
     }
 
     /**
@@ -110,7 +254,7 @@ class ReportController extends BaseView
     {
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $course_id = intval($_GET['course_id'] ?? 0);
-        
+
         $enrollments = $this->getEnrollmentData($period, $course_id);
         $courses = $this->getCourses();
 
@@ -125,7 +269,7 @@ class ReportController extends BaseView
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $course_id = intval($_GET['course_id'] ?? 0);
         $instructor_id = intval($_GET['instructor_id'] ?? 0);
-        
+
         $revenue = $this->getRevenueData($period, $course_id, $instructor_id);
         $courses = $this->getCourses();
         $instructors = $this->getInstructors();
@@ -140,7 +284,7 @@ class ReportController extends BaseView
     {
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $category_id = intval($_GET['category_id'] ?? 0);
-        
+
         $courses = $this->getCourseData($period, $category_id);
         $categories = $this->getCategories();
 
@@ -154,7 +298,7 @@ class ReportController extends BaseView
     {
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $status = sanitize_text_field($_GET['status'] ?? '');
-        
+
         $students = $this->getStudentData($period, $status);
 
         include $this->plugin->getTemplatePath('admin/reports/students.php');
@@ -167,7 +311,7 @@ class ReportController extends BaseView
     {
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $status = sanitize_text_field($_GET['status'] ?? '');
-        
+
         $instructors = $this->getInstructorData($period, $status);
 
         include $this->plugin->getTemplatePath('admin/reports/instructors.php');
@@ -180,7 +324,7 @@ class ReportController extends BaseView
     {
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $course_id = intval($_GET['course_id'] ?? 0);
-        
+
         $quizzes = $this->getQuizData($period, $course_id);
         $courses = $this->getCourses();
 
@@ -194,7 +338,7 @@ class ReportController extends BaseView
     {
         $period = sanitize_text_field($_GET['period'] ?? '30');
         $course_id = intval($_GET['course_id'] ?? 0);
-        
+
         $certificates = $this->getCertificateData($period, $course_id);
         $courses = $this->getCourses();
 
@@ -299,8 +443,8 @@ class ReportController extends BaseView
                 JOIN {$wpdb->prefix}sikshya_courses sc ON e.course_id = sc.id
                 JOIN {$wpdb->posts} c ON sc.post_id = c.ID
                 LEFT JOIN {$wpdb->users} i ON sc.instructor_id = i.ID
-                WHERE e.enrollment_date >= %s {$course_filter}
-                ORDER BY e.enrollment_date DESC";
+                WHERE e.enrolled_date >= %s {$course_filter}
+                ORDER BY e.enrolled_date DESC";
 
         return $wpdb->get_results($wpdb->prepare($sql, $date_filter));
     }
@@ -604,7 +748,7 @@ class ReportController extends BaseView
 
         return (int) $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->prefix}sikshya_enrollments 
-             WHERE enrollment_date >= %s",
+             WHERE enrolled_date >= %s",
             $date_filter
         ));
     }
@@ -692,13 +836,13 @@ class ReportController extends BaseView
 
         $total_enrollments = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->prefix}sikshya_enrollments 
-             WHERE enrollment_date >= %s",
+             WHERE enrolled_date >= %s",
             $date_filter
         ));
 
         $completed_enrollments = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$wpdb->prefix}sikshya_enrollments 
-             WHERE enrollment_date >= %s AND status = 'completed'",
+             WHERE enrolled_date >= %s AND status = 'completed'",
             $date_filter
         ));
 
@@ -760,11 +904,11 @@ class ReportController extends BaseView
 
         return $wpdb->get_results($wpdb->prepare(
             "SELECT 
-                DATE(enrollment_date) as date,
+                DATE(enrolled_date) as date,
                 COUNT(*) as count
              FROM {$wpdb->prefix}sikshya_enrollments
-             WHERE enrollment_date >= %s
-             GROUP BY DATE(enrollment_date)
+             WHERE enrolled_date >= %s
+             GROUP BY DATE(enrolled_date)
              ORDER BY date",
             $date_filter
         ));
@@ -927,22 +1071,22 @@ class ReportController extends BaseView
     private function exportToCsv(array $data, string $report_type): void
     {
         $filename = "sikshya_{$report_type}_report_" . date('Y-m-d') . ".csv";
-        
+
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
-        
+
         $output = fopen('php://output', 'w');
-        
+
         if (!empty($data)) {
             // Write headers
             fputcsv($output, array_keys((array) $data[0]));
-            
+
             // Write data
             foreach ($data as $row) {
                 fputcsv($output, (array) $row);
             }
         }
-        
+
         fclose($output);
         exit;
     }
@@ -988,4 +1132,4 @@ class ReportController extends BaseView
 
         wp_send_json_success($data);
     }
-} 
+}

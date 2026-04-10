@@ -119,7 +119,7 @@ class DataTable extends BaseView
     public function renderTable(): string
     {
         $this->enqueueAssets();
-        
+
         return $this->render('datatable', [
             'config' => $this->config,
             'items' => $this->items,
@@ -161,4 +161,4 @@ class DataTable extends BaseView
         wp_enqueue_style('sikshya-datatable');
         wp_enqueue_script('sikshya-datatable');
     }
-} 
+}

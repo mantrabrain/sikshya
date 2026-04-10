@@ -2,6 +2,7 @@
 
 namespace Sikshya\Admin\Controllers;
 
+use Sikshya\Admin\ReactAdminView;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Constants\PostTypes;
@@ -39,43 +40,7 @@ class CourseCategoriesController
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
-        // Get existing categories
-        $categories = get_terms([
-            'taxonomy' => Taxonomies::COURSE_CATEGORY,
-            'hide_empty' => false,
-            'orderby' => 'name',
-            'order' => 'ASC',
-        ]);
-
-        // Get category statistics
-        $category_stats = [];
-        if (!is_wp_error($categories)) {
-            foreach ($categories as $category) {
-                $category_stats[$category->term_id] = [
-                    'course_count' => $category->count,
-                    'description' => $category->description,
-                ];
-            }
-        }
-
-        // Prepare data for template
-        $data = [
-            'title' => __('Course Categories', 'sikshya'),
-            'description' => __('Manage course categories and organize your courses', 'sikshya'),
-            'categories' => $categories,
-            'category_stats' => $category_stats,
-            'taxonomy' => Taxonomies::COURSE_CATEGORY,
-            'post_type' => PostTypes::COURSE,
-        ];
-
-        // Load the template
-        $template_path = $this->plugin->getTemplatePath('admin/views/categories/index.php');
-        if (file_exists($template_path)) {
-            extract($data);
-            include $template_path;
-        } else {
-            wp_die(__('Template not found', 'sikshya'));
-        }
+        ReactAdminView::render('course-categories', []);
     }
 
     /**

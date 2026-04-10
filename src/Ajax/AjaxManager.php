@@ -1,7 +1,8 @@
 <?php
+
 /**
  * AJAX Manager
- * 
+ *
  * @package Sikshya
  * @since 1.0.0
  */
@@ -17,21 +18,21 @@ class AjaxManager
 {
     /**
      * Plugin instance
-     * 
+     *
      * @var \Sikshya\Core\Plugin
      */
     private $plugin;
-    
+
     /**
      * AJAX handlers
-     * 
+     *
      * @var array
      */
     private $handlers = [];
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param \Sikshya\Core\Plugin $plugin
      */
     public function __construct($plugin)
@@ -41,41 +42,43 @@ class AjaxManager
         $this->initHandlers();
         error_log('Sikshya: AjaxManager handlers initialized');
     }
-    
+
     /**
      * Initialize AJAX handlers
-     * 
+     *
      * @return void
      */
     private function initHandlers(): void
     {
         error_log('Sikshya: AjaxManager initHandlers called');
-        
-        // Course AJAX handler
-        $this->handlers['course'] = new CourseAjax($this->plugin);
+
+        $register_hooks = !defined('SIKSHYA_LEGACY_AJAX') || SIKSHYA_LEGACY_AJAX;
+
+        // Course handler (hooks optional — still needed for curriculum HTML helpers in REST-only mode).
+        $this->handlers['course'] = new CourseAjax($this->plugin, $register_hooks);
         error_log('Sikshya: CourseAjax handler created');
-        
+
         // Lesson AJAX handler
-        $this->handlers['lesson'] = new \Sikshya\Ajax\LessonAjax($this->plugin);
+        $this->handlers['lesson'] = new \Sikshya\Ajax\LessonAjax($this->plugin, $register_hooks);
         error_log('Sikshya: LessonAjax handler created');
-        
+
         // Settings AJAX handler
-        $this->handlers['settings'] = new SettingsAjax($this->plugin);
+        $this->handlers['settings'] = new SettingsAjax($this->plugin, $register_hooks);
         error_log('Sikshya: SettingsAjax handler created');
-        
+
         // Categories AJAX handler
-        $this->handlers['categories'] = new CategoriesAjax();
+        $this->handlers['categories'] = new CategoriesAjax($register_hooks);
         error_log('Sikshya: CategoriesAjax handler created');
-        
+
         // Allow other plugins to register additional handlers
         do_action('sikshya_register_ajax_handlers', $this->plugin, $this);
-        
+
         error_log('Sikshya: AjaxManager initHandlers completed');
     }
-    
+
     /**
      * Register a custom AJAX handler
-     * 
+     *
      * @param string $name
      * @param AjaxAbstract $handler
      * @return void
@@ -84,10 +87,10 @@ class AjaxManager
     {
         $this->handlers[$name] = $handler;
     }
-    
+
     /**
      * Get an AJAX handler
-     * 
+     *
      * @param string $name
      * @return AjaxAbstract|null
      */
@@ -95,10 +98,10 @@ class AjaxManager
     {
         return $this->handlers[$name] ?? null;
     }
-    
+
     /**
      * Get all AJAX handlers
-     * 
+     *
      * @return array
      */
     public function getHandlers(): array
