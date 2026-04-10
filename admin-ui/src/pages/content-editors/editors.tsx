@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getWpApi } from '../../api';
 import { appViewHref } from '../../lib/appUrl';
 import { ApiErrorPanel } from '../../components/shared/ApiErrorPanel';
+import { useSikshyaDialog } from '../../components/shared/SikshyaDialogContext';
 import { ButtonPrimary } from '../../components/shared/buttons';
 import { HorizontalEditorTabs } from '../../components/shared/HorizontalEditorTabs';
 import type { SikshyaReactConfig } from '../../types';
@@ -96,24 +97,40 @@ export type ContentEditorProps = {
   forcedCourseId?: number;
 };
 
-async function trash(editor: ReturnType<typeof useWpContentPost>, backHref: string, entityLabel: string) {
-  if (editor.isNew) {
-    return;
-  }
-  if (!window.confirm(`Move this ${entityLabel.toLowerCase()} to the trash?`)) {
-    return;
-  }
-  try {
-    await editor.remove();
-    window.location.href = backHref;
-  } catch {
-    /* handled */
-  }
+function useMoveToTrash(
+  editor: ReturnType<typeof useWpContentPost>,
+  backHref: string,
+  entityLabel: string
+) {
+  const { confirm } = useSikshyaDialog();
+  return useCallback(() => {
+    void (async () => {
+      if (editor.isNew) {
+        return;
+      }
+      const ok = await confirm({
+        title: 'Move to trash?',
+        message: `Move this ${entityLabel.toLowerCase()} to the trash? You can restore it later from the Trash tab.`,
+        variant: 'danger',
+        confirmLabel: 'Move to trash',
+      });
+      if (!ok) {
+        return;
+      }
+      try {
+        await editor.remove();
+        window.location.href = backHref;
+      } catch {
+        /* handled by editor error state */
+      }
+    })();
+  }, [editor, backHref, entityLabel, confirm]);
 }
 
 export function LessonEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded } = props;
   const editor = useWpContentPost('sik_lesson', postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
@@ -355,7 +372,7 @@ export function LessonEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>
@@ -423,6 +440,7 @@ function EditorActions(props: {
 export function QuizEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded, config } = props;
   const editor = useWpContentPost('sik_quiz', postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
@@ -841,7 +859,7 @@ export function QuizEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>
@@ -851,6 +869,7 @@ export function QuizEditor(props: ContentEditorProps) {
 export function QuestionEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded } = props;
   const editor = useWpContentPost('sik_question', postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
@@ -1159,7 +1178,7 @@ export function QuestionEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>
@@ -1169,6 +1188,7 @@ export function QuestionEditor(props: ContentEditorProps) {
 export function AssignmentEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded } = props;
   const editor = useWpContentPost('sik_assignment', postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
@@ -1360,7 +1380,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>
@@ -1372,6 +1392,7 @@ type CourseOpt = { id: number; title: string };
 export function ChapterEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded, forcedCourseId } = props;
   const editor = useWpContentPost('sik_chapter', postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
@@ -1591,7 +1612,7 @@ export function ChapterEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>
@@ -1602,6 +1623,7 @@ export function ChapterEditor(props: ContentEditorProps) {
 export function CertificateEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded } = props;
   const editor = useWpContentPost('sikshya_certificate', postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('draft');
   const [featuredId, setFeaturedId] = useState(0);
@@ -1762,7 +1784,7 @@ export function CertificateEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>
@@ -1773,6 +1795,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded } = props;
   const rest = props.postType.replace(/^\//, '');
   const editor = useWpContentPost(rest, postId);
+  const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
@@ -1906,7 +1929,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
           saving={editor.saving}
           isNew={editor.isNew}
           onSave={() => void onSave()}
-          onTrash={() => void trash(editor, backHref, entityLabel)}
+          onTrash={moveToTrash}
         />
       )}
     </EditorFormShell>

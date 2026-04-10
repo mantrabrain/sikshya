@@ -101,18 +101,34 @@ class AdminAssetsService
             true
         );
 
+        // Register modal early — list table / tools / categories depend on it.
+        wp_register_style(
+            'sikshya-modal',
+            $this->plugin->getAssetUrl('admin/css/modal.css'),
+            ['sikshya-admin'],
+            SIKSHYA_VERSION
+        );
+
+        wp_register_script(
+            'sikshya-modal',
+            $this->plugin->getAssetUrl('admin/js/modal.js'),
+            ['jquery', 'sikshya-admin'],
+            SIKSHYA_VERSION,
+            true
+        );
+
         // Register list table assets
         wp_register_style(
             'sikshya-admin-list-table',
             $this->plugin->getAssetUrl('admin/css/list-table.css'),
-            ['sikshya-admin'],
+            ['sikshya-admin', 'sikshya-modal'],
             SIKSHYA_VERSION
         );
 
         wp_register_script(
             'sikshya-admin-list-table',
             $this->plugin->getAssetUrl('admin/js/list-table.js'),
-            ['jquery', 'sikshya-admin'],
+            ['jquery', 'sikshya-admin', 'sikshya-modal'],
             SIKSHYA_VERSION,
             true
         );
@@ -137,14 +153,14 @@ class AdminAssetsService
         wp_register_style(
             'sikshya-tools',
             $this->plugin->getAssetUrl('admin/css/tools.css'),
-            ['sikshya-admin'],
+            ['sikshya-admin', 'sikshya-modal'],
             SIKSHYA_VERSION
         );
 
         wp_register_script(
             'sikshya-tools',
             $this->plugin->getAssetUrl('admin/js/tools.js'),
-            ['jquery', 'sikshya-admin'],
+            ['jquery', 'sikshya-admin', 'sikshya-modal'],
             SIKSHYA_VERSION,
             true
         );
@@ -169,14 +185,14 @@ class AdminAssetsService
         wp_register_style(
             'sikshya-categories',
             $this->plugin->getAssetUrl('admin/css/categories.css'),
-            ['sikshya-admin'],
+            ['sikshya-admin', 'sikshya-modal'],
             SIKSHYA_VERSION
         );
 
         wp_register_script(
             'sikshya-categories',
             $this->plugin->getAssetUrl('admin/js/categories.js'),
-            ['jquery'],
+            ['jquery', 'sikshya-modal'],
             SIKSHYA_VERSION,
             true
         );
@@ -192,22 +208,6 @@ class AdminAssetsService
         wp_register_script(
             'sikshya-lessons',
             $this->plugin->getAssetUrl('admin/js/lessons.js'),
-            ['jquery', 'sikshya-admin'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register modal assets
-        wp_register_style(
-            'sikshya-modal',
-            $this->plugin->getAssetUrl('admin/css/modal.css'),
-            ['sikshya-admin'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-modal',
-            $this->plugin->getAssetUrl('admin/js/modal.js'),
             ['jquery', 'sikshya-admin'],
             SIKSHYA_VERSION,
             true

@@ -7,6 +7,7 @@ import { SkeletonCard } from '../components/shared/Skeleton';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
 type SettingsField = {
@@ -63,6 +64,7 @@ function isTruthyCheckboxValue(v: unknown): boolean {
 
 export function SettingsPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const { confirm } = useSikshyaDialog();
   const qTab = config.query?.tab;
   const initialTab = qTab && qTab.length ? qTab : 'general';
   const [tab, setTab] = useState<string>(initialTab);
@@ -148,7 +150,13 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   };
 
   const onReset = async () => {
-    if (!window.confirm(`Reset ${tabMeta.label} settings to defaults?`)) {
+    const ok = await confirm({
+      title: 'Reset settings?',
+      message: `Reset ${tabMeta.label} settings to their default values?`,
+      variant: 'danger',
+      confirmLabel: 'Reset',
+    });
+    if (!ok) {
       return;
     }
     setSaving(true);

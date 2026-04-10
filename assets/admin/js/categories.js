@@ -116,10 +116,19 @@
                 }).catch(() => {
                     // User cancelled
                 });
-            } else {
-                if (confirm(`Are you sure you want to delete the category "${categoryName}"?`)) {
-                    this.deleteCategory(categoryId);
-                }
+            } else if (typeof SikshyaModal !== 'undefined' && SikshyaModal.confirm) {
+                var self = this;
+                SikshyaModal.confirm({
+                    title: 'Delete category',
+                    message: `Are you sure you want to delete the category "${categoryName}"? This action cannot be undone.`,
+                    confirmText: 'Delete',
+                    cancelText: 'Cancel',
+                    onConfirm: function() {
+                        self.deleteCategory(categoryId);
+                    }
+                });
+            } else if (confirm(`Are you sure you want to delete the category "${categoryName}"?`)) {
+                this.deleteCategory(categoryId);
             }
         },
 
@@ -320,6 +329,8 @@
         showSuccess: function(message) {
             if (window.SikshyaToast) {
                 SikshyaToast.successMessage(message);
+            } else if (typeof SikshyaModal !== 'undefined' && SikshyaModal.alert) {
+                SikshyaModal.alert({ title: 'Success', message: message, buttonText: 'OK' });
             } else {
                 alert(message);
             }
@@ -328,6 +339,8 @@
         showError: function(message) {
             if (window.SikshyaToast) {
                 SikshyaToast.errorMessage(message);
+            } else if (typeof SikshyaModal !== 'undefined' && SikshyaModal.alert) {
+                SikshyaModal.alert({ title: 'Error', message: message, buttonText: 'OK' });
             } else {
                 alert(message);
             }

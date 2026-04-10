@@ -1,4 +1,5 @@
 import { getConfig } from './config/env';
+import { SikshyaDialogProvider } from './components/shared/SikshyaDialogContext';
 import { ContentPostEditorPage } from './pages/ContentPostEditorPage';
 import { ContentDripPage } from './pages/ContentDripPage';
 import { CourseCategoriesPage } from './pages/CourseCategoriesPage';
@@ -25,6 +26,7 @@ export default function App() {
   const config = getConfig();
   const page = config.page;
 
+  const routes = (() => {
   switch (page) {
     case 'dashboard':
       return <DashboardPage config={config} title="Dashboard" />;
@@ -150,4 +152,7 @@ export default function App() {
         />
       );
   }
+  })();
+
+  return <SikshyaDialogProvider>{routes}</SikshyaDialogProvider>;
 }

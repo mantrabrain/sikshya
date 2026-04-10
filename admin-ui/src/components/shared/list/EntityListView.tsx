@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { getWpApi } from '../../../api';
 import { ApiErrorPanel } from '../ApiErrorPanel';
 import type { Column } from '../DataTable';
 import { DataTable } from '../DataTable';
 import { DataTableSkeleton } from '../Skeleton';
+import { useSikshyaDialog } from '../SikshyaDialogContext';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import { useWpPostCollection, type WpPostCollectionQuery } from '../../../hooks/useWpPostCollection';
 import {
@@ -55,6 +57,8 @@ type Props = {
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   emptyStateAction?: ReactNode;
+  /** Row checkboxes + bulk move to trash / permanent delete (trash tab). Default true. */
+  bulkDeleteEnabled?: boolean;
 };
 
 /**
@@ -78,12 +82,19 @@ export function EntityListView({
   emptyStateTitle,
   emptyStateDescription,
   emptyStateAction,
+  bulkDeleteEnabled = true,
 }: Props) {
+  const { confirm } = useSikshyaDialog();
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
   const [status, setStatus] = useState<WpPostCollectionStatus>('any');
   const [orderby, setOrderby] = useState(defaultSortField);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
+  const [bulkActionValue, setBulkActionValue] = useState('');
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkError, setBulkError] = useState<unknown>(null);
+  const headerSelectRef = useRef<HTMLInputElement>(null);
 
   const pickable = useMemo(() => columns.filter((c) => !c.alwaysVisible), [columns]);
 
@@ -143,13 +154,6 @@ export function EntityListView({
     });
   }, [columns, columnPickerStorageKey, colVis]);
 
-  const skeletonHeaders = useMemo(() => {
-    if (skeletonHeadersProp?.length) {
-      return skeletonHeadersProp;
-    }
-    return columns.map((c) => c.header || '\u00a0');
-  }, [columns, skeletonHeadersProp]);
-
   const countsQuery = useWpPostStatusCounts(restBase);
   const listQuery = useWpPostCollection(restBase, {
     search: debouncedSearch,
@@ -171,6 +175,153 @@ export function EntityListView({
     status === 'any';
 
   const rows = showMockRows ? mockPlaceholderRows : apiRows;
+  const includeBulkCol = bulkDeleteEnabled && !showMockRows;
+  const trashMode = status === 'trash';
+
+  useEffect(() => {
+    setSelectedIds(new Set());
+    setBulkActionValue('');
+    setBulkError(null);
+  }, [debouncedSearch, status, orderby, order, restBase]);
+
+  useEffect(() => {
+    setBulkActionValue('');
+  }, [trashMode]);
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const ids = rows.map((r) => r.id);
+      const allSel = ids.length > 0 && ids.every((id) => prev.has(id));
+      const next = new Set(prev);
+      if (allSel) {
+        ids.forEach((id) => next.delete(id));
+      } else {
+        ids.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  }, [rows]);
+
+  const toggleOne = useCallback((id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const visibleRowIds = useMemo(() => rows.map((r) => r.id), [rows]);
+  const checkedOnPage = useMemo(
+    () => visibleRowIds.filter((id) => selectedIds.has(id)).length,
+    [visibleRowIds, selectedIds]
+  );
+  const allVisibleSelected = visibleRowIds.length > 0 && checkedOnPage === visibleRowIds.length;
+
+  useEffect(() => {
+    const el = headerSelectRef.current;
+    if (!el || !includeBulkCol) {
+      return;
+    }
+    el.indeterminate = checkedOnPage > 0 && checkedOnPage < visibleRowIds.length;
+  }, [checkedOnPage, visibleRowIds.length, includeBulkCol]);
+
+  const selectionColumn: Column<WpPost> = useMemo(
+    () => ({
+      id: '_bulk_select',
+      header: (
+        <input
+          ref={headerSelectRef}
+          type="checkbox"
+          className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
+          aria-label="Select all on this page"
+          checked={allVisibleSelected}
+          onChange={toggleSelectAll}
+        />
+      ),
+      alwaysVisible: true,
+      headerClassName: 'w-12',
+      cellClassName: 'w-12',
+      render: (r) => (
+        <input
+          type="checkbox"
+          className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
+          aria-label={`Select row ${r.id}`}
+          checked={selectedIds.has(r.id)}
+          onChange={() => toggleOne(r.id)}
+        />
+      ),
+    }),
+    [allVisibleSelected, selectedIds, toggleOne, toggleSelectAll]
+  );
+
+  const displayColumns = useMemo(
+    () => (includeBulkCol ? [selectionColumn, ...visibleColumns] : visibleColumns),
+    [includeBulkCol, selectionColumn, visibleColumns]
+  );
+
+  const tableSkeletonHeaders = useMemo(() => {
+    const base = skeletonHeadersProp?.length
+      ? skeletonHeadersProp
+      : columns.map((c) => c.header || '\u00a0');
+    return includeBulkCol ? ['', ...base] : base;
+  }, [columns, skeletonHeadersProp, includeBulkCol]);
+
+  const onBulkApply = useCallback(async () => {
+    if (!includeBulkCol || selectedIds.size === 0) {
+      return;
+    }
+    if (trashMode && bulkActionValue !== 'delete_permanent') {
+      return;
+    }
+    if (!trashMode && bulkActionValue !== 'move_trash') {
+      return;
+    }
+
+    const n = selectedIds.size;
+    const ok = await confirm({
+      title: trashMode ? 'Delete permanently?' : 'Move to trash?',
+      message: trashMode
+        ? `Permanently delete ${n} item(s)? This cannot be undone.`
+        : `Move ${n} item(s) to the trash? You can restore them from the Trash tab.`,
+      variant: 'danger',
+      confirmLabel: trashMode ? 'Delete permanently' : 'Move to trash',
+    });
+    if (!ok) {
+      return;
+    }
+
+    setBulkBusy(true);
+    setBulkError(null);
+    const api = getWpApi();
+    const ids = [...selectedIds];
+    try {
+      for (const id of ids) {
+        const path = trashMode ? `/${restBase}/${id}?force=true` : `/${restBase}/${id}`;
+        await api.delete(path);
+      }
+      setSelectedIds(new Set());
+      setBulkActionValue('');
+      listQuery.refetch();
+      countsQuery.refetch();
+    } catch (e) {
+      setBulkError(e);
+    } finally {
+      setBulkBusy(false);
+    }
+  }, [
+    includeBulkCol,
+    selectedIds,
+    trashMode,
+    bulkActionValue,
+    confirm,
+    restBase,
+    listQuery,
+    countsQuery,
+  ]);
 
   const totalLine = useMemo(() => {
     if (showMockRows) {
@@ -213,7 +364,15 @@ export function EntityListView({
       />
 
       <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-3 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
-        <BulkActionsBar />
+        <BulkActionsBar
+          disabled={!includeBulkCol}
+          selectedCount={selectedIds.size}
+          value={bulkActionValue}
+          onChange={setBulkActionValue}
+          onApply={() => void onBulkApply()}
+          applyBusy={bulkBusy}
+          trashMode={trashMode}
+        />
         <StatusCountPills
           pills={statusPills}
           value={status}
@@ -222,6 +381,12 @@ export function EntityListView({
           countsLoading={countsQuery.loading}
         />
       </div>
+
+      {bulkError ? (
+        <div className="border-b border-red-100 px-4 py-3 dark:border-red-900/40">
+          <ApiErrorPanel error={bulkError} title="Bulk action failed" onRetry={() => setBulkError(null)} />
+        </div>
+      ) : null}
 
       {showMockRows ? (
         <div className="border-b border-amber-200/80 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100">
@@ -240,10 +405,10 @@ export function EntityListView({
           <ApiErrorPanel error={listQuery.error} onRetry={listQuery.refetch} title="Could not load list" />
         </div>
       ) : listQuery.loading ? (
-        <DataTableSkeleton headers={skeletonHeaders} rows={8} />
+        <DataTableSkeleton headers={tableSkeletonHeaders} rows={8} />
       ) : (
         <DataTable
-          columns={visibleColumns}
+          columns={displayColumns}
           rows={rows}
           rowKey={(r) => r.id}
           emptyContent={emptyContent}

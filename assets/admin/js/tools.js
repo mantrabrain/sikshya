@@ -221,82 +221,116 @@
         },
 
         clearCache: function() {
-            if (!confirm('Are you sure you want to clear the cache?')) {
-                return;
-            }
+            var self = this;
+            var proceed = function() {
+                const $button = $('#clear-cache');
+                const originalText = $button.html();
 
-            const $button = $('#clear-cache');
-            const originalText = $button.html();
-
-            $button.html(`
+                $button.html(`
                 <div class="sikshya-spinner" style="width: 1rem; height: 1rem; margin: 0;"></div>
                 Clearing...
             `).prop('disabled', true);
 
-            fetch(`${sikshya.rest_url}tools`, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': sikshya.rest_nonce,
-                },
-                body: JSON.stringify({ action_type: 'clear_cache' }),
-            })
-                .then(r => r.json())
-                .then(function(response) {
-                    if (response.success) {
-                        this.showSuccess('Cache cleared successfully');
-                    } else {
-                        this.showError(response.message || 'Failed to clear cache');
-                    }
-                }.bind(this))
-                .catch(function() {
-                    this.showError('Failed to clear cache');
-                }.bind(this))
-                .finally(function() {
-                    $button.html(originalText).prop('disabled', false);
-                });
-        },
+                fetch(`${sikshya.rest_url}tools`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': sikshya.rest_nonce,
+                    },
+                    body: JSON.stringify({ action_type: 'clear_cache' }),
+                })
+                    .then(r => r.json())
+                    .then(function(response) {
+                        if (response.success) {
+                            self.showSuccess('Cache cleared successfully');
+                        } else {
+                            self.showError(response.message || 'Failed to clear cache');
+                        }
+                    })
+                    .catch(function() {
+                        self.showError('Failed to clear cache');
+                    })
+                    .finally(function() {
+                        $button.html(originalText).prop('disabled', false);
+                    });
+            };
 
-        resetSettings: function() {
-            if (!confirm('Are you sure you want to reset all settings? This action cannot be undone.')) {
+            if (typeof SikshyaModal !== 'undefined' && SikshyaModal.confirm) {
+                SikshyaModal.confirm({
+                    title: 'Clear cache?',
+                    message: 'Are you sure you want to clear the cache?',
+                    confirmText: 'Clear cache',
+                    cancelText: 'Cancel',
+                    onConfirm: function() {
+                        proceed();
+                    }
+                });
                 return;
             }
 
-            const $button = $('#reset-settings');
-            const originalText = $button.html();
+            if (!confirm('Are you sure you want to clear the cache?')) {
+                return;
+            }
+            proceed();
+        },
 
-            $button.html(`
+        resetSettings: function() {
+            var self = this;
+            var proceedReset = function() {
+                const $button = $('#reset-settings');
+                const originalText = $button.html();
+
+                $button.html(`
                 <div class="sikshya-spinner" style="width: 1rem; height: 1rem; margin: 0;"></div>
                 Resetting...
             `).prop('disabled', true);
 
-            fetch(`${sikshya.rest_url}tools`, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': sikshya.rest_nonce,
-                },
-                body: JSON.stringify({ action_type: 'reset_settings' }),
-            })
-                .then(r => r.json())
-                .then(function(response) {
-                    if (response.success) {
-                        this.showSuccess('Settings reset successfully');
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1500);
-                    } else {
-                        this.showError(response.message || 'Failed to reset settings');
+                fetch(`${sikshya.rest_url}tools`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': sikshya.rest_nonce,
+                    },
+                    body: JSON.stringify({ action_type: 'reset_settings' }),
+                })
+                    .then(r => r.json())
+                    .then(function(response) {
+                        if (response.success) {
+                            self.showSuccess('Settings reset successfully');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            self.showError(response.message || 'Failed to reset settings');
+                        }
+                    })
+                    .catch(function() {
+                        self.showError('Failed to reset settings');
+                    })
+                    .finally(function() {
+                        $button.html(originalText).prop('disabled', false);
+                    });
+            };
+
+            if (typeof SikshyaModal !== 'undefined' && SikshyaModal.confirm) {
+                SikshyaModal.confirm({
+                    title: 'Reset all settings?',
+                    message: 'Are you sure you want to reset all settings? This action cannot be undone.',
+                    confirmText: 'Reset',
+                    cancelText: 'Cancel',
+                    onConfirm: function() {
+                        proceedReset();
                     }
-                }.bind(this))
-                .catch(function() {
-                    this.showError('Failed to reset settings');
-                }.bind(this))
-                .finally(function() {
-                    $button.html(originalText).prop('disabled', false);
                 });
+                return;
+            }
+
+            if (!confirm('Are you sure you want to reset all settings? This action cannot be undone.')) {
+                return;
+            }
+            proceedReset();
         },
 
         showSuccess: function(message) {

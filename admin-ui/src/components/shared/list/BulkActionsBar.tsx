@@ -1,7 +1,30 @@
+export type BulkActionsBarProps = {
+  /** When true (e.g. sample data), bulk UI is disabled. */
+  disabled?: boolean;
+  selectedCount: number;
+  value: string;
+  onChange: (value: string) => void;
+  onApply: () => void;
+  applyBusy?: boolean;
+  /** Trash tab: only permanent delete is offered. */
+  trashMode: boolean;
+};
+
 /**
- * Placeholder bulk row — wire actions + selection in a follow-up.
+ * WordPress-style bulk row for entity lists (select + Apply).
  */
-export function BulkActionsBar() {
+export function BulkActionsBar({
+  disabled,
+  selectedCount,
+  value,
+  onChange,
+  onApply,
+  applyBusy = false,
+  trashMode,
+}: BulkActionsBarProps) {
+  const blocked = disabled || applyBusy;
+  const canApply = !blocked && selectedCount > 0 && value !== '';
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <label htmlFor="sikshya-bulk" className="sr-only">
@@ -9,19 +32,31 @@ export function BulkActionsBar() {
       </label>
       <select
         id="sikshya-bulk"
-        disabled
-        className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-500"
-        defaultValue=""
+        disabled={blocked}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-800/50"
       >
         <option value="">Bulk actions</option>
+        {trashMode ? (
+          <option value="delete_permanent">Delete permanently</option>
+        ) : (
+          <option value="move_trash">Move to trash</option>
+        )}
       </select>
       <button
         type="button"
-        disabled
-        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-400 dark:border-slate-600 dark:bg-slate-800"
+        disabled={!canApply}
+        onClick={onApply}
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
       >
-        Apply
+        {applyBusy ? 'Applying…' : 'Apply'}
       </button>
+      {selectedCount > 0 ? (
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          {selectedCount} selected
+        </span>
+      ) : null}
     </div>
   );
 }

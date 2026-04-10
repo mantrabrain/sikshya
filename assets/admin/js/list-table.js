@@ -372,7 +372,24 @@
      * Confirm delete action
      */
     SikshyaListTable.confirmDelete = function(itemId) {
-        if (confirm(sikshya_list_table.confirm_delete_message)) {
+        var msg = (typeof sikshya_list_table !== 'undefined' && sikshya_list_table.confirm_delete_message)
+            ? sikshya_list_table.confirm_delete_message
+            : 'Are you sure you want to delete this item?';
+
+        if (typeof SikshyaModal !== 'undefined' && SikshyaModal.confirm) {
+            SikshyaModal.confirm({
+                title: 'Confirm delete',
+                message: msg,
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                onConfirm: function() {
+                    SikshyaListTable.deleteItem(itemId);
+                }
+            });
+            return;
+        }
+
+        if (confirm(msg)) {
             SikshyaListTable.deleteItem(itemId);
         }
     };

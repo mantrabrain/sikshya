@@ -5,6 +5,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -30,6 +31,7 @@ type ListResponse = {
 
 export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const { confirm } = useSikshyaDialog();
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const [page, setPage] = useState(1);
 
@@ -44,7 +46,13 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
   const verifyBase = `${config.siteUrl.replace(/\/$/, '')}/wp-json/sikshya/v1/public/certificates/verify`;
 
   const revoke = async (id: number) => {
-    if (!window.confirm('Revoke this certificate? It will no longer verify publicly.')) {
+    const ok = await confirm({
+      title: 'Revoke certificate?',
+      message: 'This certificate will no longer verify publicly.',
+      variant: 'danger',
+      confirmLabel: 'Revoke',
+    });
+    if (!ok) {
       return;
     }
     await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.issuedCertificatesRevoke, { id });

@@ -4,6 +4,7 @@ import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
 import { CourseBuilderSkeleton, SkeletonLine } from '../components/shared/Skeleton';
@@ -1075,6 +1076,7 @@ function BuilderSectionMenu({
 
 export function CourseBuilderPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const { confirm } = useSikshyaDialog();
   const q = config.query || {};
   const courseIdFromUrl = Number(q.course_id || q.id || 0) || 0;
 
@@ -1409,7 +1411,13 @@ function CourseBuilderEditor({
     if (!postId || postId <= 0) {
       return;
     }
-    if (!window.confirm('Delete this item permanently? This cannot be undone.')) {
+    const ok = await confirm({
+      title: 'Delete permanently?',
+      message: 'This removes the item from the site. This cannot be undone.',
+      variant: 'danger',
+      confirmLabel: 'Delete permanently',
+    });
+    if (!ok) {
       return;
     }
     setCurriculumOutlineError(null);

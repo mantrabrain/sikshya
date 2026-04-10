@@ -3,6 +3,7 @@ import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
 type ToolsTab = 'status' | 'export' | 'maintenance';
@@ -26,6 +27,7 @@ const TAB_IDLE =
 
 export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const { confirm } = useSikshyaDialog();
   const [tab, setTab] = useState<ToolsTab>('status');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -78,12 +80,20 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) 
   };
 
   const resetPluginSettings = () => {
-    if (!window.confirm('Reset all Sikshya settings to default? This cannot be undone.')) {
-      return;
-    }
-    void runTool({ action_type: 'reset_settings' })
-      .then((res) => setMessage(res.message ?? 'Done.'))
-      .catch(() => void 0);
+    void (async () => {
+      const ok = await confirm({
+        title: 'Reset all settings?',
+        message: 'Reset every Sikshya setting to its default? This cannot be undone.',
+        variant: 'danger',
+        confirmLabel: 'Reset everything',
+      });
+      if (!ok) {
+        return;
+      }
+      void runTool({ action_type: 'reset_settings' })
+        .then((res) => setMessage(res.message ?? 'Done.'))
+        .catch(() => void 0);
+    })();
   };
 
   const exportPayload = () => {

@@ -10,6 +10,7 @@ import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { Column } from '../components/shared/DataTable';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useWpTermCollection } from '../hooks/useWpTermCollection';
@@ -34,6 +35,7 @@ type CategoryPayload = {
 
 export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title: string; subtitle: string }) {
   const { config, title, subtitle } = props;
+  const { confirm, alert: alertDialog } = useSikshyaDialog();
   const useMock = useEntityListMockEnabled(config);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -248,7 +250,13 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
                 label: 'Delete',
                 danger: true,
                 onClick: async () => {
-                  if (!window.confirm(`Delete category “${t.name}”?`)) {
+                  const ok = await confirm({
+                    title: 'Delete category?',
+                    message: `Delete category “${t.name}”?`,
+                    variant: 'danger',
+                    confirmLabel: 'Delete',
+                  });
+                  if (!ok) {
                     return;
                   }
                   try {
@@ -258,7 +266,10 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
                     }
                     bumpList();
                   } catch (e) {
-                    window.alert(getErrorSummary(e));
+                    await alertDialog({
+                      title: 'Could not delete category',
+                      message: getErrorSummary(e),
+                    });
                   }
                 },
               },
@@ -267,7 +278,7 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
         ),
       },
     ],
-    [selectedId, bumpList, startNew]
+    [selectedId, bumpList, startNew, confirm, alertDialog]
   );
 
   const emptyContent = (
