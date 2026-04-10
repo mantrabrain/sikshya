@@ -47,7 +47,7 @@ class CourseController extends BaseView
      */
     private function initHooks(): void
     {
-        // AJAX handlers are now managed by AjaxManager
+        // Admin UI uses REST + React.
     }
 
     /**

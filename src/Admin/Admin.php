@@ -396,10 +396,6 @@ class Admin
             $initial = ReactAdminConfig::reportsInitialData();
         }
 
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            $initial['useEntityListMock'] = true;
-        }
-
         ReactAdminView::render($view, $initial);
     }
 

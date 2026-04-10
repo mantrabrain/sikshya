@@ -204,12 +204,28 @@ final class CheckoutService
         ];
     }
 
+    /**
+     * PayPal REST host: explicit {@see paypal_mode}, else derive from {@see enable_test_mode}.
+     */
+    private function paypalRestBase(): string
+    {
+        $mode = strtolower(trim((string) $this->settings()->getSetting('paypal_mode', '')));
+        if ($mode === '') {
+            $test = $this->settings()->getSetting('enable_test_mode', true);
+            $is_test = $test === true || $test === 1 || $test === '1' || $test === 'true' || $test === 'yes';
+            $mode = $is_test ? 'sandbox' : 'live';
+        }
+
+        return in_array($mode, ['live', 'production'], true)
+            ? 'https://api-m.paypal.com'
+            : 'https://api-m.sandbox.paypal.com';
+    }
+
     private function createPayPalOrder(object $order): array
     {
         $client_id = (string) $this->settings()->getSetting('paypal_client_id', '');
         $secret = (string) $this->settings()->getSetting('paypal_secret', '');
-        $mode = strtolower((string) $this->settings()->getSetting('paypal_mode', 'sandbox'));
-        $base = $mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+        $base = $this->paypalRestBase();
 
         if ($client_id === '' || $secret === '') {
             throw new \RuntimeException(__('PayPal is not configured.', 'sikshya'));
@@ -328,8 +344,7 @@ final class CheckoutService
     {
         $client_id = (string) $this->settings()->getSetting('paypal_client_id', '');
         $secret = (string) $this->settings()->getSetting('paypal_secret', '');
-        $mode = strtolower((string) $this->settings()->getSetting('paypal_mode', 'sandbox'));
-        $base = $mode === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+        $base = $this->paypalRestBase();
 
         $token_res = wp_remote_post(
             $base . '/v1/oauth2/token',

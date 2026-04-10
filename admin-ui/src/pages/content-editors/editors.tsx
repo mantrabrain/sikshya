@@ -47,6 +47,14 @@ function metaStringArray(raw: unknown): string[] {
   return raw.map((x) => String(x));
 }
 
+function parseQuestionCorrectJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return null;
+  }
+}
+
 /** Full-width editor surface (matches dashboard main column usage). */
 const EDITOR_SURFACE =
   'overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900';
@@ -877,6 +885,12 @@ export function QuestionEditor(props: ContentEditorProps) {
   const [points, setPoints] = useState(1);
   const [options, setOptions] = useState<string[]>(() => [...DEFAULT_MCQ_OPTIONS]);
   const [correctAnswer, setCorrectAnswer] = useState('');
+  const [multiCorrect, setMultiCorrect] = useState<number[]>([]);
+  const [matchLeft, setMatchLeft] = useState<string[]>(['', '']);
+  const [matchRight, setMatchRight] = useState<string[]>(['', '']);
+  const [matchMap, setMatchMap] = useState<number[]>([0, 0]);
+  const [orderItems, setOrderItems] = useState<string[]>(['Item 1', 'Item 2', 'Item 3']);
+  const [orderPerm, setOrderPerm] = useState<number[]>([0, 1, 2]);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
 
@@ -889,6 +903,12 @@ export function QuestionEditor(props: ContentEditorProps) {
       setPoints(1);
       setOptions([...DEFAULT_MCQ_OPTIONS]);
       setCorrectAnswer('');
+      setMultiCorrect([]);
+      setMatchLeft(['', '']);
+      setMatchRight(['', '']);
+      setMatchMap([0, 0]);
+      setOrderItems(['Item 1', 'Item 2', 'Item 3']);
+      setOrderPerm([0, 1, 2]);
       return;
     }
     if (!editor.post) {
@@ -899,25 +919,162 @@ export function QuestionEditor(props: ContentEditorProps) {
     setContent(contentFromPost(p));
     setStatus(p.status || 'draft');
     const m = p.meta as Record<string, unknown> | undefined;
-    setQType(String(readMeta(m, '_sikshya_question_type') ?? ''));
+    const t = String(readMeta(m, '_sikshya_question_type') ?? '');
+    setQType(t);
     setPoints(Number(readMeta(m, '_sikshya_question_points') ?? 1));
     const loadedOpts = metaStringArray(readMeta(m, '_sikshya_question_options'));
+    const rawCorrect = String(readMeta(m, '_sikshya_question_correct_answer') ?? '');
+
+    if (t === 'matching') {
+      setOptions([]);
+      const parsed = parseQuestionCorrectJson(rawCorrect) as { matching?: { left?: string[]; right?: string[]; map?: number[] } } | null;
+      const mm = parsed && typeof parsed === 'object' && parsed !== null ? parsed.matching : undefined;
+      if (mm && Array.isArray(mm.left) && Array.isArray(mm.right)) {
+        setMatchLeft(mm.left.map(String));
+        setMatchRight(mm.right.map(String));
+        const n = mm.left.length;
+        const map =
+          Array.isArray(mm.map) && mm.map.length === n ? mm.map.map((x) => Number(x)) : mm.left.map((_, i) => i);
+        setMatchMap(map);
+      } else {
+        setMatchLeft(['', '']);
+        setMatchRight(['', '']);
+        setMatchMap([0, 0]);
+      }
+      setCorrectAnswer('');
+      setMultiCorrect([]);
+      return;
+    }
+
+    if (t === 'ordering') {
+      const items = loadedOpts.length >= 2 ? loadedOpts : ['Item 1', 'Item 2', 'Item 3'];
+      setOrderItems(items);
+      const permRaw = parseQuestionCorrectJson(rawCorrect);
+      if (Array.isArray(permRaw) && permRaw.length === items.length && permRaw.every((x) => typeof x === 'number')) {
+        setOrderPerm(permRaw as number[]);
+      } else {
+        setOrderPerm(items.map((_, i) => i));
+      }
+      setOptions(items);
+      setCorrectAnswer('');
+      setMultiCorrect([]);
+      return;
+    }
+
+    if (t === 'multiple_response') {
+      setOptions(loadedOpts.length >= 2 ? loadedOpts : [...DEFAULT_MCQ_OPTIONS]);
+      const parsed = parseQuestionCorrectJson(rawCorrect);
+      setMultiCorrect(
+        Array.isArray(parsed) ? parsed.map((x) => Number(x)).filter((n) => Number.isInteger(n) && n >= 0) : [],
+      );
+      setCorrectAnswer('');
+      setMatchLeft(['', '']);
+      setMatchRight(['', '']);
+      setMatchMap([0, 0]);
+      return;
+    }
+
+    if (t === 'true_false') {
+      setOptions(['True', 'False']);
+      setCorrectAnswer(rawCorrect === 'false' ? 'false' : 'true');
+      setMultiCorrect([]);
+      setMatchLeft(['', '']);
+      setMatchRight(['', '']);
+      setMatchMap([0, 0]);
+      return;
+    }
+
     setOptions(loadedOpts.length >= 2 ? loadedOpts : [...DEFAULT_MCQ_OPTIONS]);
-    setCorrectAnswer(String(readMeta(m, '_sikshya_question_correct_answer') ?? ''));
+    setCorrectAnswer(rawCorrect);
+    setMultiCorrect([]);
+    setMatchLeft(['', '']);
+    setMatchRight(['', '']);
+    setMatchMap([0, 0]);
+    setOrderItems(['Item 1', 'Item 2', 'Item 3']);
+    setOrderPerm([0, 1, 2]);
   }, [editor.post, editor.isNew]);
+
+  const onTypeChange = (v: string) => {
+    setQType(v);
+    if (v === 'true_false') {
+      setCorrectAnswer('true');
+      setOptions(['True', 'False']);
+      setMultiCorrect([]);
+      return;
+    }
+    if (v === 'multiple_choice') {
+      setOptions([...DEFAULT_MCQ_OPTIONS]);
+      setCorrectAnswer('');
+      setMultiCorrect([]);
+      return;
+    }
+    if (v === 'multiple_response') {
+      setOptions([...DEFAULT_MCQ_OPTIONS]);
+      setCorrectAnswer('');
+      setMultiCorrect([]);
+      return;
+    }
+    if (v === 'matching') {
+      setMatchLeft(['', '']);
+      setMatchRight(['', '']);
+      setMatchMap([0, 0]);
+      setOptions([]);
+      setCorrectAnswer('');
+      setMultiCorrect([]);
+      return;
+    }
+    if (v === 'ordering') {
+      setOrderItems(['Item 1', 'Item 2', 'Item 3']);
+      setOrderPerm([0, 1, 2]);
+      setOptions(['Item 1', 'Item 2', 'Item 3']);
+      setCorrectAnswer('');
+      setMultiCorrect([]);
+      return;
+    }
+    setOptions([...DEFAULT_MCQ_OPTIONS]);
+    setCorrectAnswer('');
+    setMultiCorrect([]);
+  };
 
   const onSave = async () => {
     setSaveMsg(null);
     editor.setError(null);
     const trimmedOptions = options.map((o) => o.trim()).filter(Boolean);
+    let optionsPayload: string[] = [];
     let correctPayload = '';
+
     if (qType === 'multiple_choice') {
+      optionsPayload = trimmedOptions;
       correctPayload = correctAnswer;
+    } else if (qType === 'multiple_response') {
+      optionsPayload = trimmedOptions;
+      correctPayload = JSON.stringify([...multiCorrect].sort((a, b) => a - b));
     } else if (qType === 'true_false') {
+      optionsPayload = [];
       correctPayload = correctAnswer === 'false' ? 'false' : 'true';
-    } else if (qType === 'short_answer') {
+    } else if (qType === 'short_answer' || qType === 'fill_blank') {
+      optionsPayload = [];
       correctPayload = correctAnswer.trim();
+    } else if (qType === 'essay') {
+      optionsPayload = [];
+      correctPayload = '';
+    } else if (qType === 'matching') {
+      optionsPayload = [];
+      correctPayload = JSON.stringify({
+        matching: {
+          left: matchLeft.map((x) => x.trim()),
+          right: matchRight.map((x) => x.trim()),
+          map: matchMap.map((x) => Number(x)),
+        },
+      });
+    } else if (qType === 'ordering') {
+      const items = orderItems.map((x) => x.trim()).filter(Boolean);
+      const useItems = items.length >= 2 ? items : ['Item 1', 'Item 2'];
+      optionsPayload = useItems;
+      const perm = orderPerm.length === useItems.length ? orderPerm : useItems.map((_, i) => i);
+      correctPayload = JSON.stringify(perm);
     }
+
     const body: Record<string, unknown> = {
       title,
       content,
@@ -925,7 +1082,7 @@ export function QuestionEditor(props: ContentEditorProps) {
       meta: {
         _sikshya_question_type: qType,
         _sikshya_question_points: Math.max(0, points),
-        _sikshya_question_options: qType === 'multiple_choice' ? trimmedOptions : [],
+        _sikshya_question_options: optionsPayload,
         _sikshya_question_correct_answer: correctPayload,
       },
     };
@@ -945,6 +1102,20 @@ export function QuestionEditor(props: ContentEditorProps) {
     }
   };
 
+  const moveOrderSlot = (pos: number, dir: -1 | 1) => {
+    setOrderPerm((prev) => {
+      const j = pos + dir;
+      if (j < 0 || j >= prev.length) {
+        return prev;
+      }
+      const next = [...prev];
+      const tmp = next[pos];
+      next[pos] = next[j];
+      next[j] = tmp;
+      return next;
+    });
+  };
+
   return (
     <EditorFormShell
       loading={editor.loading}
@@ -961,7 +1132,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                 {title?.trim() ? title : 'Question'}
               </h2>
               <p className={HINT}>
-                Content: question stem, answer choices, and feedback. Settings: type, points, and status.
+                Content: type, stem, and answers. Settings: points and publish status.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
@@ -993,12 +1164,28 @@ export function QuestionEditor(props: ContentEditorProps) {
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
-              {!qType ? (
-                <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
-                  Choose a <span className="font-semibold">Question type</span> in the Settings tab first — then you can
-                  add choices and the correct answer here.
-                </p>
-              ) : null}
+              <div>
+                <label className={LABEL} htmlFor="sik-q-type-content">
+                  Question type
+                </label>
+                <p className={HINT}>Controls which answer fields appear below.</p>
+                <select
+                  id="sik-q-type-content"
+                  className={FIELD}
+                  value={qType}
+                  onChange={(e) => onTypeChange(e.target.value)}
+                >
+                  <option value="">Select type…</option>
+                  <option value="multiple_choice">Multiple choice (one correct)</option>
+                  <option value="multiple_response">Multiple response (several correct)</option>
+                  <option value="true_false">True / false</option>
+                  <option value="short_answer">Short answer</option>
+                  <option value="fill_blank">Fill in the blank</option>
+                  <option value="ordering">Ordering / sequencing</option>
+                  <option value="matching">Matching</option>
+                  <option value="essay">Essay (manual grading)</option>
+                </select>
+              </div>
               <div>
                 <label className={LABEL} htmlFor="sik-q-title">
                   Question text
@@ -1008,14 +1195,20 @@ export function QuestionEditor(props: ContentEditorProps) {
                   id="sik-q-title"
                   rows={4}
                   className={`${FIELD} min-h-[88px] w-full`}
+                  placeholder="Enter the question stem…"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
+              {!qType ? (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
+                  Pick a <span className="font-semibold">question type</span> above to configure answers.
+                </p>
+              ) : null}
               {qType === 'multiple_choice' ? (
                 <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
                   <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Answer choices</div>
-                  <p className={HINT}>Add at least two options and mark the correct one.</p>
+                  <p className={HINT}>At least two options; mark the correct one.</p>
                   <ul className="space-y-3">
                     {options.map((opt, idx) => (
                       <li key={idx} className="flex flex-wrap items-start gap-3">
@@ -1076,11 +1269,74 @@ export function QuestionEditor(props: ContentEditorProps) {
                   </button>
                 </div>
               ) : null}
+              {qType === 'multiple_response' ? (
+                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Answer choices</div>
+                  <p className={HINT}>Check every option that should be marked correct.</p>
+                  <ul className="space-y-3">
+                    {options.map((opt, idx) => (
+                      <li key={idx} className="flex flex-wrap items-start gap-3">
+                        <label className="mt-2.5 flex shrink-0 cursor-pointer items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                          <input
+                            type="checkbox"
+                            checked={multiCorrect.includes(idx)}
+                            onChange={() =>
+                              setMultiCorrect((prev) =>
+                                prev.includes(idx)
+                                  ? prev.filter((x) => x !== idx)
+                                  : [...prev, idx].sort((a, b) => a - b),
+                              )
+                            }
+                            className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                          />
+                          Correct
+                        </label>
+                        <input
+                          className={`${FIELD} min-w-0 flex-1`}
+                          value={opt}
+                          onChange={(e) =>
+                            setOptions((prev) => {
+                              const next = [...prev];
+                              next[idx] = e.target.value;
+                              return next;
+                            })
+                          }
+                          placeholder={`Option ${idx + 1}`}
+                        />
+                        <button
+                          type="button"
+                          className="mt-1.5 shrink-0 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-white dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                          onClick={() => {
+                            setOptions((prev) => prev.filter((_, i) => i !== idx));
+                            setMultiCorrect((prev) =>
+                              prev
+                                .filter((i) => i !== idx)
+                                .map((i) => (i > idx ? i - 1 : i))
+                                .sort((a, b) => a - b),
+                            );
+                          }}
+                          disabled={options.length <= 2}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    className="text-sm font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+                    onClick={() => setOptions((prev) => [...prev, ''])}
+                  >
+                    + Add option
+                  </button>
+                </div>
+              ) : null}
               {qType === 'true_false' ? (
                 <div>
                   <label className={LABEL} htmlFor="sik-q-tf">
                     Correct answer
                   </label>
+                  <p className={HINT}>Learners choose between true and false.</p>
                   <select
                     id="sik-q-tf"
                     className={FIELD}
@@ -1092,36 +1348,204 @@ export function QuestionEditor(props: ContentEditorProps) {
                   </select>
                 </div>
               ) : null}
-              {qType === 'short_answer' ? (
+              {qType === 'short_answer' || qType === 'fill_blank' ? (
                 <div>
                   <label className={LABEL} htmlFor="sik-q-expected">
-                    Expected answer
+                    {qType === 'fill_blank' ? 'Accepted answer(s)' : 'Expected answer'}
                   </label>
-                  <p className={HINT}>Used for auto-checking (exact match, case-insensitive can be applied on the learner side).</p>
+                  <p className={HINT}>
+                    {qType === 'fill_blank'
+                      ? 'Separate multiple correct spellings with | (pipe). Comparison is case-insensitive.'
+                      : 'Case-insensitive match. Use | between alternative correct answers.'}
+                  </p>
                   <input
                     id="sik-q-expected"
                     className={FIELD}
                     value={correctAnswer}
                     onChange={(e) => setCorrectAnswer(e.target.value)}
-                    placeholder="e.g. Paris"
+                    placeholder={qType === 'fill_blank' ? 'e.g. Paris|paris' : 'e.g. photosynthesis'}
                   />
+                </div>
+              ) : null}
+              {qType === 'ordering' ? (
+                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Steps / items</div>
+                  <p className={HINT}>Edit labels, then arrange the correct order (top = first).</p>
+                  <ul className="space-y-2">
+                    {orderItems.map((lab, idx) => (
+                      <li key={idx} className="flex flex-wrap gap-2">
+                        <input
+                          className={`${FIELD} min-w-0 flex-1`}
+                          value={lab}
+                          onChange={(e) =>
+                            setOrderItems((prev) => {
+                              const next = [...prev];
+                              next[idx] = e.target.value;
+                              return next;
+                            })
+                          }
+                          placeholder={`Item ${idx + 1}`}
+                        />
+                        <button
+                          type="button"
+                          className="rounded-lg border border-slate-200 px-2 py-1 text-xs dark:border-slate-600"
+                          onClick={() => {
+                            setOrderItems((prev) => prev.filter((_, i) => i !== idx));
+                            setOrderPerm((prev) => {
+                              const filt = prev.filter((p) => p !== idx).map((p) => (p > idx ? p - 1 : p));
+                              return filt.length ? filt : [0];
+                            });
+                          }}
+                          disabled={orderItems.length <= 2}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    className="text-sm font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400"
+                    onClick={() => {
+                      setOrderItems((prev) => [...prev, '']);
+                      setOrderPerm((prev) => [...prev, prev.length]);
+                    }}
+                  >
+                    + Add item
+                  </button>
+                  <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">Correct order</div>
+                  <ol className="mt-2 space-y-2">
+                    {orderPerm.map((itemIdx, pos) => (
+                      <li
+                        key={`${pos}-${itemIdx}`}
+                        className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-600 dark:bg-slate-900"
+                      >
+                        <span className="min-w-0 flex-1 text-sm text-slate-800 dark:text-slate-100">
+                          {orderItems[itemIdx] ?? `Item ${itemIdx}`}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-xs font-medium text-slate-600 dark:text-slate-400"
+                          onClick={() => moveOrderSlot(pos, -1)}
+                          disabled={pos === 0}
+                        >
+                          Up
+                        </button>
+                        <button
+                          type="button"
+                          className="text-xs font-medium text-slate-600 dark:text-slate-400"
+                          onClick={() => moveOrderSlot(pos, 1)}
+                          disabled={pos >= orderPerm.length - 1}
+                        >
+                          Down
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
+              {qType === 'matching' ? (
+                <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Matching pairs</div>
+                  <p className={HINT}>For each prompt on the left, choose the matching answer column index.</p>
+                  <ul className="space-y-3">
+                    {matchLeft.map((left, i) => (
+                      <li key={i} className="grid gap-2 sm:grid-cols-2 sm:items-end">
+                        <label className="block min-w-0">
+                          <span className={HINT}>Prompt {i + 1}</span>
+                          <input
+                            className={`${FIELD} mt-1 w-full`}
+                            value={left}
+                            onChange={(e) =>
+                              setMatchLeft((prev) => {
+                                const n = [...prev];
+                                n[i] = e.target.value;
+                                return n;
+                              })
+                            }
+                            placeholder="Left column text"
+                          />
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <label className="block min-w-0 flex-1">
+                            <span className={HINT}>Matches answer</span>
+                            <select
+                              className={`${FIELD} mt-1 w-full`}
+                              value={matchMap[i] ?? 0}
+                              onChange={(e) =>
+                                setMatchMap((prev) => {
+                                  const n = [...prev];
+                                  n[i] = Number(e.target.value);
+                                  return n;
+                                })
+                              }
+                            >
+                              {matchRight.map((_, ri) => (
+                                <option key={ri} value={ri}>
+                                  #{ri + 1}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">Answer column</div>
+                  <ul className="mt-2 space-y-2">
+                    {matchRight.map((r, i) => (
+                      <li key={i} className="flex gap-2">
+                        <input
+                          className={`${FIELD} flex-1`}
+                          value={r}
+                          onChange={(e) =>
+                            setMatchRight((prev) => {
+                              const n = [...prev];
+                              n[i] = e.target.value;
+                              return n;
+                            })
+                          }
+                          placeholder={`Answer ${i + 1}`}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="text-sm font-semibold text-brand-600"
+                      onClick={() => {
+                        setMatchLeft((prev) => [...prev, '']);
+                        setMatchMap((prev) => [...prev, 0]);
+                      }}
+                    >
+                      + Add prompt
+                    </button>
+                    <button
+                      type="button"
+                      className="text-sm font-semibold text-brand-600"
+                      onClick={() => setMatchRight((prev) => [...prev, ''])}
+                    >
+                      + Add answer
+                    </button>
+                  </div>
                 </div>
               ) : null}
               {qType === 'essay' ? (
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Essay questions are graded manually. Add optional feedback below for your team (not shown automatically to
-                  learners unless you expose it later).
+                  Essays are graded manually. Use the explanation field below for model answers or staff notes.
                 </p>
               ) : null}
               <div>
                 <label className={LABEL} htmlFor="sik-q-body">
                   Explanation / feedback (optional)
                 </label>
-                <p className={HINT}>Shown after grading or for instructor reference. Stored as post content.</p>
+                <p className={HINT}>Shown after grading or kept for instructors. Stored as post content.</p>
                 <textarea
                   id="sik-q-body"
                   rows={8}
                   className={`${FIELD} min-h-[160px] w-full`}
+                  placeholder="Optional explanation for learners or grading notes…"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                 />
@@ -1129,37 +1553,26 @@ export function QuestionEditor(props: ContentEditorProps) {
             </div>
           ) : (
             <div className="space-y-6" role="tabpanel">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div>
-                  <label className={LABEL} htmlFor="sik-q-type">
-                    Question type
-                  </label>
-                  <select id="sik-q-type" className={FIELD} value={qType} onChange={(e) => setQType(e.target.value)}>
-                    <option value="">Select…</option>
-                    <option value="multiple_choice">Multiple choice</option>
-                    <option value="true_false">True / false</option>
-                    <option value="short_answer">Short answer</option>
-                    <option value="essay">Essay</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={LABEL} htmlFor="sik-q-points">
-                    Points
-                  </label>
-                  <input
-                    id="sik-q-points"
-                    type="number"
-                    min={0}
-                    className={FIELD}
-                    value={points}
-                    onChange={(e) => setPoints(Number(e.target.value))}
-                  />
-                </div>
+              <div>
+                <label className={LABEL} htmlFor="sik-q-points">
+                  Points
+                </label>
+                <p className={HINT}>Awarded when the answer is correct (auto-graded types only).</p>
+                <input
+                  id="sik-q-points"
+                  type="number"
+                  min={0}
+                  className={FIELD}
+                  placeholder="1"
+                  value={points}
+                  onChange={(e) => setPoints(Number(e.target.value))}
+                />
               </div>
               <div>
                 <label className={LABEL} htmlFor="sik-q-status">
                   Status
                 </label>
+                <p className={HINT}>Draft stays hidden from learners until published.</p>
                 <select id="sik-q-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
                   <option value="draft">Draft</option>
                   <option value="publish">Published</option>

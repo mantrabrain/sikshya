@@ -124,7 +124,18 @@ class PostTypeManager
             );
         };
 
+        // Course (sik_course) — list tables + React admin.
+        $str_meta(PostTypes::COURSE, '_sikshya_course_price');
+        $str_meta(PostTypes::COURSE, '_sikshya_course_duration');
+        $str_meta(PostTypes::COURSE, '_sikshya_course_level');
+        // Legacy sample / theme keys (mirror into canonical keys on save is optional; REST exposes for read).
+        $str_meta(PostTypes::COURSE, '_sikshya_price');
+        $str_meta(PostTypes::COURSE, '_sikshya_duration');
+        $str_meta(PostTypes::COURSE, '_sikshya_difficulty');
+
         // Quiz (sik_quiz): _sikshya_quiz_* stored as sikshya_quiz_* in forms → DB key _sikshya_quiz_*.
+        $int_meta(PostTypes::LESSON, '_sikshya_lesson_course');
+        $int_meta(PostTypes::QUIZ, '_sikshya_quiz_course');
         $int_meta(PostTypes::QUIZ, '_sikshya_quiz_time_limit');
         $int_meta(PostTypes::QUIZ, '_sikshya_quiz_passing_score');
         $int_meta(PostTypes::QUIZ, '_sikshya_quiz_attempts_allowed');
@@ -145,6 +156,7 @@ class PostTypeManager
         $str_meta(PostTypes::ASSIGNMENT, '_sikshya_assignment_due_date');
         $int_meta(PostTypes::ASSIGNMENT, '_sikshya_assignment_points');
         $str_meta(PostTypes::ASSIGNMENT, '_sikshya_assignment_type');
+        $int_meta(PostTypes::ASSIGNMENT, '_sikshya_assignment_course');
 
         // Chapter (sik_chapter).
         $int_meta(PostTypes::CHAPTER, '_sikshya_chapter_order');

@@ -24,9 +24,6 @@ type Props = {
   emptyMessage: string;
   skeletonHeaders?: string[];
   columnPickerStorageKey?: string;
-  useMockPlaceholder?: boolean;
-  mockPlaceholderRows?: WpRestUser[];
-  mockBannerMessage?: string;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   emptyStateAction?: ReactNode;
@@ -45,9 +42,6 @@ export function UserEntityListView({
   emptyMessage,
   skeletonHeaders: skeletonHeadersProp,
   columnPickerStorageKey,
-  useMockPlaceholder = false,
-  mockPlaceholderRows = [],
-  mockBannerMessage = 'Sample data preview — no users returned yet.',
   emptyStateTitle,
   emptyStateDescription,
   emptyStateAction,
@@ -129,27 +123,15 @@ export function UserEntityListView({
     perPage: 50,
   });
 
-  const apiRows = listQuery.data?.data ?? [];
-  const showMockRows =
-    useMockPlaceholder &&
-    mockPlaceholderRows.length > 0 &&
-    !listQuery.loading &&
-    !listQuery.error &&
-    apiRows.length === 0 &&
-    debouncedSearch.trim() === '';
-
-  const rows = showMockRows ? mockPlaceholderRows : apiRows;
+  const rows = listQuery.data?.data ?? [];
 
   const totalLine = useMemo(() => {
-    if (showMockRows) {
-      return `Showing sample rows (${rows.length})`;
-    }
     const t = listQuery.data?.total;
     if (t == null) {
       return null;
     }
     return `Showing ${rows.length} of ${t}`;
-  }, [listQuery.data?.total, rows.length, showMockRows]);
+  }, [listQuery.data?.total, rows.length]);
 
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
 
@@ -184,12 +166,6 @@ export function UserEntityListView({
         <BulkActionsBar />
         <p className="text-xs text-slate-500 dark:text-slate-400">{contextHint}</p>
       </div>
-
-      {showMockRows ? (
-        <div className="border-b border-amber-200/80 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100">
-          {mockBannerMessage}
-        </div>
-      ) : null}
 
       {totalLine ? (
         <div className="border-b border-slate-100 px-4 py-2 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">

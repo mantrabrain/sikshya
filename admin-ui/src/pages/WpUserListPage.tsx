@@ -4,8 +4,6 @@ import { UserEntityListView } from '../components/shared/list/UserEntityListView
 import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { LinkButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
-import { useEntityListMockEnabled } from '../lib/entityListMock';
-import { MOCK_INSTRUCTORS, MOCK_STUDENTS } from '../lib/mockWpUsers';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { NavItem, SikshyaReactConfig, WpRestUser } from '../types';
 
@@ -25,8 +23,6 @@ export function WpUserListPage(props: {
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
 
   const roleSlug = variant === 'students' ? 'sikshya_student' : 'sikshya_instructor';
-  const mockRows = variant === 'students' ? MOCK_STUDENTS : MOCK_INSTRUCTORS;
-  const useMock = useEntityListMockEnabled(config);
   const newUrl = `${adminBase}user-new.php`;
 
   const columns: Column<WpRestUser>[] = useMemo(
@@ -111,8 +107,6 @@ export function WpUserListPage(props: {
         emptyStateDescription="Try another search or add a user from WordPress."
         emptyStateAction={<LinkButtonPrimary href={newUrl}>+ Add user</LinkButtonPrimary>}
         skeletonHeaders={['Name', 'Email', 'Registered', '']}
-        useMockPlaceholder={useMock}
-        mockPlaceholderRows={mockRows}
       />
     </AppShell>
   );

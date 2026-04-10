@@ -6,7 +6,7 @@
  * Layering:
  * - Repositories: CourseRepository, PostMetaRepository (meta via tabs).
  * - This service: validateAllTabs + create/update course post + saveAllTabs.
- * - Controllers: CourseAjax, REST AdminRestRoutes (HTTP only).
+ * - REST AdminRestRoutes + CourseCurriculumActions (HTTP only).
  *
  * @package Sikshya\Services
  */

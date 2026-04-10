@@ -14,8 +14,6 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { Column } from '../components/shared/DataTable';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useWpTermCollection } from '../hooks/useWpTermCollection';
-import { useEntityListMockEnabled } from '../lib/entityListMock';
-import { MOCK_COURSE_CATEGORIES } from '../lib/mockWpTerms';
 import type { NavItem, SikshyaReactConfig, WpTerm } from '../types';
 
 const TAXONOMY = 'sikshya_course_category';
@@ -36,7 +34,6 @@ type CategoryPayload = {
 export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title: string; subtitle: string }) {
   const { config, title, subtitle } = props;
   const { confirm, alert: alertDialog } = useSikshyaDialog();
-  const useMock = useEntityListMockEnabled(config);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [name, setName] = useState('');
@@ -67,15 +64,7 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
     refreshNonce: listNonce,
   });
 
-  const apiRows = listQuery.data?.data ?? [];
-  const showMockRows =
-    useMock &&
-    MOCK_COURSE_CATEGORIES.length > 0 &&
-    !listQuery.loading &&
-    !listQuery.error &&
-    apiRows.length === 0 &&
-    debouncedSearch.trim() === '';
-  const rows = showMockRows ? MOCK_COURSE_CATEGORIES : apiRows;
+  const rows = listQuery.data?.data ?? [];
 
   const startNew = useCallback(() => {
     setSelectedId(null);
@@ -432,9 +421,7 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
               onSortOrderToggle={onSortOrderToggle}
             />
             <div className="border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-              {showMockRows ? (
-                <span className="font-medium text-amber-800 dark:text-amber-200">Sample preview — connect to live data.</span>
-              ) : listQuery.data?.total != null ? (
+              {listQuery.data?.total != null ? (
                 <span>
                   Showing {rows.length} of {listQuery.data.total}
                 </span>

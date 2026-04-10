@@ -17,7 +17,7 @@ final class CartTemplateData
         $ids = CartStorage::getCourseIds();
         $lines = [];
         $subtotal = 0.0;
-        $currency = 'USD';
+        $currency = function_exists('sikshya_get_store_currency_code') ? sikshya_get_store_currency_code() : 'USD';
 
         foreach ($ids as $cid) {
             $p = get_post($cid);
@@ -27,9 +27,6 @@ final class CartTemplateData
             $pricing = function_exists('sikshya_get_course_pricing') ? sikshya_get_course_pricing($cid) : [];
             $eff = isset($pricing['effective']) && $pricing['effective'] !== null ? (float) $pricing['effective'] : 0.0;
             $subtotal += $eff;
-            if (!empty($pricing['currency'])) {
-                $currency = (string) $pricing['currency'];
-            }
             $lines[] = [
                 'course_id' => $cid,
                 'title' => get_the_title($p),

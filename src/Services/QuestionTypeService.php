@@ -25,6 +25,16 @@ class QuestionTypeService
             'requires_text_input' => false,
             'icon' => 'fas fa-list-ul'
         ],
+        'multiple_response' => [
+            'label' => 'Multiple Response',
+            'description' => 'Select all correct answers',
+            'supports_options' => true,
+            'supports_single_answer' => false,
+            'supports_multiple_answers' => true,
+            'auto_gradable' => true,
+            'requires_text_input' => false,
+            'icon' => 'fas fa-tasks'
+        ],
         'true_false' => [
             'label' => 'True/False',
             'description' => 'Choose between True or False',
@@ -35,15 +45,35 @@ class QuestionTypeService
             'requires_text_input' => false,
             'icon' => 'fas fa-toggle-on'
         ],
+        'short_answer' => [
+            'label' => 'Short Answer',
+            'description' => 'Brief text response (auto-graded; use | for accepted alternatives)',
+            'supports_options' => false,
+            'supports_single_answer' => true,
+            'supports_multiple_answers' => false,
+            'auto_gradable' => true,
+            'requires_text_input' => true,
+            'icon' => 'fas fa-i-cursor'
+        ],
         'fill_blank' => [
             'label' => 'Fill in the Blank',
-            'description' => 'Fill in the missing word or phrase',
+            'description' => 'Fill in the missing word or phrase (use | for multiple accepted answers)',
             'supports_options' => false,
             'supports_single_answer' => true,
             'supports_multiple_answers' => false,
             'auto_gradable' => true,
             'requires_text_input' => true,
             'icon' => 'fas fa-pencil-alt'
+        ],
+        'ordering' => [
+            'label' => 'Ordering',
+            'description' => 'Put items in the correct sequence',
+            'supports_options' => true,
+            'supports_single_answer' => false,
+            'supports_multiple_answers' => false,
+            'auto_gradable' => true,
+            'requires_text_input' => false,
+            'icon' => 'fas fa-sort'
         ],
         'essay' => [
             'label' => 'Essay',
@@ -57,8 +87,8 @@ class QuestionTypeService
         ],
         'matching' => [
             'label' => 'Matching',
-            'description' => 'Match items from two columns',
-            'supports_options' => true,
+            'description' => 'Match each left column item to the correct right column item',
+            'supports_options' => false,
             'supports_single_answer' => false,
             'supports_multiple_answers' => true,
             'auto_gradable' => true,
@@ -217,14 +247,16 @@ class QuestionTypeService
         }
 
         // Check options for question types that support them
-        if ($this->supportsOptions($type)) {
+        if ($this->supportsOptions($type) && $type !== 'matching') {
             if (empty($data['options']) || !is_array($data['options'])) {
                 $errors[] = 'Options are required for this question type';
             } else {
-                // Validate options
-                $validOptions = array_filter($data['options'], function ($option) {
-                    return !empty(trim($option));
-                });
+                $validOptions = array_filter(
+                    $data['options'],
+                    static function ($option) {
+                        return $option !== null && $option !== '' && trim((string) $option) !== '';
+                    }
+                );
 
                 if (count($validOptions) < 2) {
                     $errors[] = 'At least 2 options are required';
@@ -232,10 +264,43 @@ class QuestionTypeService
             }
         }
 
+        if ($type === 'matching') {
+            $raw = $data['correct_answer'] ?? '';
+            $dec = is_string($raw) ? json_decode($raw, true) : (is_array($raw) ? $raw : []);
+            if (
+                !is_array($dec)
+                || empty($dec['matching']['left'])
+                || empty($dec['matching']['right'])
+                || empty($dec['matching']['map'])
+                || !is_array($dec['matching']['map'])
+            ) {
+                $errors[] = 'Matching pairs are incomplete';
+            }
+        }
+
         // Check correct answer
-        if ($this->isAutoGradable($type)) {
-            if (empty($data['correct_answer'])) {
+        if ($this->isAutoGradable($type) && $type !== 'essay') {
+            if ($type === 'multiple_response') {
+                $raw = $data['correct_answer'] ?? '';
+                $arr = is_string($raw) ? json_decode($raw, true) : $raw;
+                if (!is_array($arr) || count($arr) < 1) {
+                    $errors[] = 'Select at least one correct option';
+                }
+            } elseif ($type === 'ordering') {
+                $raw = $data['correct_answer'] ?? '';
+                $arr = is_string($raw) ? json_decode($raw, true) : $raw;
+                if (!is_array($arr) || count($arr) < 2) {
+                    $errors[] = 'Ordering answer is invalid';
+                }
+            } elseif ($type === 'matching') {
+                /* validated above */
+            } elseif (!array_key_exists('correct_answer', $data)) {
                 $errors[] = 'Correct answer is required for auto-gradable questions';
+            } else {
+                $ca = $data['correct_answer'];
+                if ($ca === '' || $ca === null) {
+                    $errors[] = 'Correct answer is required for auto-gradable questions';
+                }
             }
         }
 
@@ -282,7 +347,14 @@ class QuestionTypeService
                     'right' => ['Match A', 'Match B', 'Match C']
                 ];
 
+            case 'ordering':
+                return ['First step', 'Second step', 'Third step'];
+
+            case 'multiple_response':
+                return ['Option A', 'Option B', 'Option C', 'Option D'];
+
             case 'fill_blank':
+            case 'short_answer':
             case 'essay':
             default:
                 return [];
@@ -339,8 +411,11 @@ class QuestionTypeService
     {
         $mapping = [
             'multiple-choice' => 'multiple_choice',
+            'multiple-response' => 'multiple_response',
             'true-false' => 'true_false',
             'fill-blank' => 'fill_blank',
+            'short-answer' => 'short_answer',
+            'ordering' => 'ordering',
             'essay' => 'essay',
             'matching' => 'matching'
         ];
@@ -358,8 +433,11 @@ class QuestionTypeService
     {
         $mapping = [
             'multiple_choice' => 'multiple-choice',
+            'multiple_response' => 'multiple-response',
             'true_false' => 'true-false',
             'fill_blank' => 'fill-blank',
+            'short_answer' => 'short-answer',
+            'ordering' => 'ordering',
             'essay' => 'essay',
             'matching' => 'matching'
         ];

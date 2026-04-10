@@ -609,20 +609,20 @@ class SettingsManager
                     [
                         'key' => 'currency',
                         'type' => 'select',
-                        'label' => __('Default Currency', 'sikshya'),
-                        'description' => __('Default currency for course pricing and payments', 'sikshya'),
+                        'label' => __('Currency', 'sikshya'),
+                        'description' => __('Used for all course prices, cart, and checkout.', 'sikshya'),
                         'default' => 'USD',
                         'options' => [
-                            'USD' => __('US Dollar ($)', 'sikshya'),
+                            'USD' => __('United States (US) dollar ($)', 'sikshya'),
                             'EUR' => __('Euro (€)', 'sikshya'),
-                            'GBP' => __('British Pound (£)', 'sikshya'),
-                            'CAD' => __('Canadian Dollar (C$)', 'sikshya'),
-                            'AUD' => __('Australian Dollar (A$)', 'sikshya'),
-                            'JPY' => __('Japanese Yen (¥)', 'sikshya'),
-                            'INR' => __('Indian Rupee (₹)', 'sikshya'),
-                            'BRL' => __('Brazilian Real (R$)', 'sikshya'),
-                            'MXN' => __('Mexican Peso ($)', 'sikshya'),
-                            'SGD' => __('Singapore Dollar (S$)', 'sikshya')
+                            'GBP' => __('British pound (£)', 'sikshya'),
+                            'CAD' => __('Canadian dollar (C$)', 'sikshya'),
+                            'AUD' => __('Australian dollar (A$)', 'sikshya'),
+                            'JPY' => __('Japanese yen (¥)', 'sikshya'),
+                            'INR' => __('Indian rupee (₹)', 'sikshya'),
+                            'BRL' => __('Brazilian real (R$)', 'sikshya'),
+                            'MXN' => __('Mexican peso ($)', 'sikshya'),
+                            'SGD' => __('Singapore dollar (S$)', 'sikshya')
                         ],
                         'sanitize_callback' => 'sanitize_text_field',
                         'validate_callback' => function ($value) {
@@ -634,19 +634,49 @@ class SettingsManager
                         'key' => 'currency_position',
                         'type' => 'select',
                         'label' => __('Currency Position', 'sikshya'),
-                        'description' => __('Position of currency symbol relative to the amount', 'sikshya'),
+                        'description' => __('How the amount and symbol are shown together.', 'sikshya'),
                         'default' => 'left',
                         'options' => [
-                            'left' => __('Left ($100)', 'sikshya'),
-                            'right' => __('Right (100$)', 'sikshya'),
-                            'left_space' => __('Left with space ($ 100)', 'sikshya'),
-                            'right_space' => __('Right with space (100 $)', 'sikshya')
+                            'left' => __('Left ($99.99)', 'sikshya'),
+                            'right' => __('Right (99.99$)', 'sikshya'),
+                            'left_space' => __('Left with space ($ 99.99)', 'sikshya'),
+                            'right_space' => __('Right with space (99.99 $)', 'sikshya')
                         ],
                         'sanitize_callback' => 'sanitize_text_field',
                         'validate_callback' => function ($value) {
                             $valid_positions = ['left', 'right', 'left_space', 'right_space'];
                             return in_array($value, $valid_positions) ? true : __('Invalid currency position selected.', 'sikshya');
                         }
+                    ],
+                    [
+                        'key' => 'currency_thousand_separator',
+                        'type' => 'text',
+                        'label' => __('Thousand Separator', 'sikshya'),
+                        'description' => __('Character between thousands groups (often comma).', 'sikshya'),
+                        'placeholder' => ',',
+                        'default' => ',',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                    [
+                        'key' => 'currency_decimal_separator',
+                        'type' => 'text',
+                        'label' => __('Decimal Separator', 'sikshya'),
+                        'description' => __('Character before fractional digits (often a period).', 'sikshya'),
+                        'placeholder' => '.',
+                        'default' => '.',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                    [
+                        'key' => 'currency_decimal_places',
+                        'type' => 'select',
+                        'label' => __('Number of Decimals', 'sikshya'),
+                        'description' => __('Decimal places shown for money amounts.', 'sikshya'),
+                        'default' => 2,
+                        'options' => [
+                            0 => __('0 (whole numbers)', 'sikshya'),
+                            2 => __('2 (e.g. 99.99)', 'sikshya'),
+                            3 => __('3 (e.g. 99.999)', 'sikshya')
+                        ]
                     ]
                 ]
             ],
@@ -1142,7 +1172,10 @@ class SettingsManager
                         'key' => 'payment_gateway',
                         'type' => 'select',
                         'label' => __('Primary Payment Gateway', 'sikshya'),
-                        'description' => __('Primary payment gateway for processing transactions', 'sikshya'),
+                        'description' => __(
+                            'Primary gateway preference. Native cart/checkout currently implements Stripe and PayPal only; Razorpay, Mollie, and manual are reserved for future releases.',
+                            'sikshya'
+                        ),
                         'default' => '',
                         'options' => [
                             '' => __('Select Gateway', 'sikshya'),
@@ -1273,18 +1306,6 @@ class SettingsManager
                         'label' => __('Tax Inclusive Pricing', 'sikshya'),
                         'description' => __('Course prices include tax (vs. tax added on top)', 'sikshya'),
                         'default' => false
-                    ],
-                    [
-                        'key' => 'currency_decimal_places',
-                        'type' => 'select',
-                        'label' => __('Decimal Places', 'sikshya'),
-                        'description' => __('Number of decimal places for currency display', 'sikshya'),
-                        'default' => 2,
-                        'options' => [
-                            0 => __('0 (Whole numbers)', 'sikshya'),
-                            2 => __('2 (e.g., $10.99)', 'sikshya'),
-                            3 => __('3 (e.g., $10.999)', 'sikshya')
-                        ]
                     ]
                 ]
             ],

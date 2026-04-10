@@ -65,7 +65,6 @@ export const SIKSHYA_ENDPOINTS = {
     outlineStructure: '/curriculum/outline-structure',
   },
   settings: {
-    tab: (tab: string) => `/settings/tab/${encodeURIComponent(tab)}`,
     schema: '/settings/schema',
     values: (tab: string) => `/settings/values?tab=${encodeURIComponent(tab)}`,
     save: '/settings/save',

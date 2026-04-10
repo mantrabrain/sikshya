@@ -79,6 +79,33 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) 
       .catch(() => void 0);
   };
 
+  const importSampleLms = () => {
+    void (async () => {
+      const ok = await confirm({
+        title: 'Import sample courses?',
+        message:
+          'This creates published sample courses, chapters, lessons, quizzes, and questions from the bundled JSON pack. Safe to run on a staging site; avoid duplicates on production if you already imported once.',
+        variant: 'default',
+        confirmLabel: 'Import sample data',
+      });
+      if (!ok) {
+        return;
+      }
+      void runTool({ action_type: 'import_sample_data', pack: 'default' })
+        .then((res) => {
+          const data = res.data as { counts?: Record<string, number> } | undefined;
+          const c = data?.counts;
+          const bits = c
+            ? Object.entries(c)
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(', ')
+            : '';
+          setMessage(bits ? `${res.message ?? 'Done.'} (${bits})` : (res.message ?? 'Done.'));
+        })
+        .catch(() => void 0);
+    })();
+  };
+
   const resetPluginSettings = () => {
     void (async () => {
       const ok = await confirm({
@@ -279,9 +306,13 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) 
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <h2 className="text-base font-semibold text-slate-900 dark:text-white">Maintenance</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Clear Sikshya-related transients and object cache. Reset removes the main Sikshya settings option.
+            Clear Sikshya-related transients and object cache. Import demo content from the plugin sample pack. Reset
+            removes the main Sikshya settings option.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
+            <ButtonPrimary type="button" disabled={busy} onClick={() => importSampleLms()}>
+              Import sample LMS data
+            </ButtonPrimary>
             <ButtonPrimary type="button" disabled={busy} onClick={() => clearCache()}>
               Clear cache
             </ButtonPrimary>

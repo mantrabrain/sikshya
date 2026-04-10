@@ -410,6 +410,8 @@ class CourseInfoTab extends AbstractTab
         // Save meta fields using parent method
         $meta_success = parent::save($data, $course_id);
 
+        $this->syncFeaturedThumbnail($course_id, $data);
+
         $this->syncCourseTaxonomies($course_id, $data);
 
         // Allow pro plugins to save additional fields
@@ -486,6 +488,54 @@ class CourseInfoTab extends AbstractTab
             $data['course_tags'] = implode(', ', $tag_terms);
         }
 
+        $thumb_id = (int) get_post_thumbnail_id($course_id);
+        $data['featured_image_id'] = $thumb_id > 0 ? $thumb_id : 0;
+        if ($thumb_id > 0) {
+            $url = wp_get_attachment_image_url($thumb_id, 'large') ?: '';
+            if ($url !== '') {
+                $data['featured_image'] = $url;
+            }
+        }
+
         return $data;
+    }
+
+    /**
+     * Set or clear the WordPress featured image from builder payload (attachment ID and/or URL).
+     *
+     * @param int                  $course_id Course post ID.
+     * @param array<string, mixed> $data      Builder save payload.
+     */
+    private function syncFeaturedThumbnail(int $course_id, array $data): void
+    {
+        $has_id_key = array_key_exists('featured_image_id', $data);
+        $aid = $has_id_key ? (int) $data['featured_image_id'] : -1;
+        $url = isset($data['featured_image']) ? esc_url_raw((string) $data['featured_image']) : '';
+
+        if ($aid > 0 && wp_attachment_is_image($aid)) {
+            set_post_thumbnail($course_id, $aid);
+
+            return;
+        }
+
+        if ($has_id_key && $aid === 0) {
+            if ($url === '') {
+                delete_post_thumbnail($course_id);
+            } else {
+                $found = attachment_url_to_postid($url);
+                if ($found > 0) {
+                    set_post_thumbnail($course_id, $found);
+                }
+            }
+
+            return;
+        }
+
+        if ($aid === -1 && $url !== '') {
+            $found = attachment_url_to_postid($url);
+            if ($found > 0) {
+                set_post_thumbnail($course_id, $found);
+            }
+        }
     }
 }

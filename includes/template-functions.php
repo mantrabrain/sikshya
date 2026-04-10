@@ -72,7 +72,19 @@ function sikshya_get_currency_symbol(string $code): string
 }
 
 /**
- * Format amount with Sikshya general settings (position, decimals).
+ * Store currency code from Sikshya settings (Payment tab — stored as `_sikshya_currency`).
+ *
+ * @return string ISO code.
+ */
+function sikshya_get_store_currency_code(): string
+{
+    $raw = get_option('_sikshya_currency', 'USD');
+
+    return sikshya_normalize_currency_code((string) $raw);
+}
+
+/**
+ * Format amount with Sikshya currency settings (separators, position, decimals).
  *
  * @param float  $amount   Amount.
  * @param string $currency ISO code (for symbol).
@@ -81,14 +93,16 @@ function sikshya_get_currency_symbol(string $code): string
 function sikshya_format_price_plain(float $amount, string $currency = 'USD'): string
 {
     $currency = sikshya_normalize_currency_code($currency);
-    $decimals = (int) get_option('sikshya_currency_decimal_places', get_option('sikshya_number_of_decimals', 2));
+    $decimals = (int) get_option('_sikshya_currency_decimal_places', 2);
     if ($decimals < 0) {
         $decimals = 2;
     }
 
-    $formatted = number_format_i18n($amount, $decimals);
+    $thousand = (string) get_option('_sikshya_currency_thousand_separator', ',');
+    $decimal = (string) get_option('_sikshya_currency_decimal_separator', '.');
+    $formatted = number_format($amount, $decimals, $decimal, $thousand);
     $symbol = sikshya_get_currency_symbol($currency);
-    $position = get_option('sikshya_currency_position', 'left');
+    $position = (string) get_option('_sikshya_currency_position', 'left');
 
     if ($currency === 'OTHER' || $symbol === '') {
         return trim($currency . ' ' . $formatted);
@@ -108,25 +122,21 @@ function sikshya_format_price_plain(float $amount, string $currency = 'USD'): st
 }
 
 /**
- * Format a price for display. Optional currency uses course-level `_sikshya_currency` when set.
+ * Format a price for display. Currency always comes from global Sikshya settings unless $currency_code is passed explicitly.
  *
  * @param float|string      $amount         Raw amount.
- * @param string|null       $currency_code  ISO code or null to use default option.
- * @param int|null          $course_id      When set, read `_sikshya_currency` if $currency_code is null.
+ * @param string|null       $currency_code  ISO code override, or null for store default.
+ * @param int|null          $course_id      Unused; kept for backward compatibility.
  * @return string           HTML (may include WooCommerce price HTML).
  */
 function sikshya_format_price($amount, ?string $currency_code = null, ?int $course_id = null): string
 {
+    unset($course_id);
     $amount = is_numeric($amount) ? (float) $amount : 0.0;
 
-    if (null === $currency_code && $course_id) {
-        $from_meta = sikshya_first_nonempty_post_meta($course_id, ['_sikshya_currency']);
-        if ($from_meta !== '') {
-            $currency_code = sikshya_normalize_currency_code((string) $from_meta);
-        }
-    }
-
-    $code = $currency_code ? sikshya_normalize_currency_code($currency_code) : sikshya_normalize_currency_code((string) get_option('sikshya_currency', 'USD'));
+    $code = $currency_code
+        ? sikshya_normalize_currency_code($currency_code)
+        : sikshya_get_store_currency_code();
 
     $wc_currency = function_exists('get_woocommerce_currency') ? strtoupper((string) get_woocommerce_currency()) : '';
 
@@ -154,10 +164,7 @@ function sikshya_get_course_pricing(int $course_id): array
         ['_sikshya_sale_price', '_sikshya_course_sale_price', 'sikshya_course_sale_price']
     );
 
-    $currency_raw = sikshya_first_nonempty_post_meta($course_id, ['_sikshya_currency']);
-    $currency = $currency_raw !== ''
-        ? sikshya_normalize_currency_code((string) $currency_raw)
-        : sikshya_normalize_currency_code((string) get_option('sikshya_currency', 'USD'));
+    $currency = sikshya_get_store_currency_code();
 
     $price = is_numeric($price_raw) ? (float) $price_raw : null;
     $sale = is_numeric($sale_raw) ? (float) $sale_raw : null;

@@ -36,9 +36,22 @@ if (!is_user_logged_in()) {
             </ul>
             <p><strong><?php esc_html_e('Total', 'sikshya'); ?>:</strong> <?php echo esc_html(number_format_i18n($co['subtotal_hint'], 2) . ' ' . $co['currency']); ?></p>
 
+            <?php
+            $gw = $co['gateways'] ?? ['stripe' => false, 'paypal' => false];
+            $any_gw = !empty($gw['stripe']) || !empty($gw['paypal']);
+            ?>
             <div class="sikshya-checkout-gateways">
-                <button type="button" class="sikshya-btn sikshya-btn--primary" data-sikshya-gateway="stripe"><?php esc_html_e('Pay with Stripe', 'sikshya'); ?></button>
-                <button type="button" class="sikshya-btn sikshya-btn--ghost" data-sikshya-gateway="paypal"><?php esc_html_e('Pay with PayPal', 'sikshya'); ?></button>
+                <?php if (!empty($gw['stripe'])) : ?>
+                    <button type="button" class="sikshya-btn sikshya-btn--primary" data-sikshya-gateway="stripe"><?php esc_html_e('Pay with Stripe', 'sikshya'); ?></button>
+                <?php endif; ?>
+                <?php if (!empty($gw['paypal'])) : ?>
+                    <button type="button" class="sikshya-btn sikshya-btn--ghost" data-sikshya-gateway="paypal"><?php esc_html_e('Pay with PayPal', 'sikshya'); ?></button>
+                <?php endif; ?>
+                <?php if (!$any_gw) : ?>
+                    <p class="sikshya-checkout-gateways__notice">
+                        <?php esc_html_e('No payment gateway is configured. Add your Stripe secret key or PayPal REST credentials under Sikshya → Settings → Payment.', 'sikshya'); ?>
+                    </p>
+                <?php endif; ?>
             </div>
             <p class="sikshya-checkout-status" id="sikshya-checkout-status" role="status" aria-live="polite"></p>
         <?php endif; ?>

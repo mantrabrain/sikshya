@@ -11,12 +11,13 @@ namespace Sikshya\Api;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\ReactAdminConfig;
-use Sikshya\Ajax\CourseAjax;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Services\CategoryService;
 use Sikshya\Services\CourseBuilderService;
+use Sikshya\Services\CourseCurriculumActions;
 use Sikshya\Services\CurriculumService;
+use Sikshya\Services\SampleDataImporter;
 use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Licensing\Pro;
 use WP_Error;
@@ -92,21 +93,6 @@ class AdminRestRoutes
             ],
         ]);
 
-        register_rest_route($namespace, '/curriculum', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'getCurriculum'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-                'args' => [
-                    'course_id' => [
-                        'required' => true,
-                        'type' => 'integer',
-                        'sanitize_callback' => 'absint',
-                    ],
-                ],
-            ],
-        ]);
-
         register_rest_route($namespace, '/curriculum/content', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -163,40 +149,6 @@ class AdminRestRoutes
             ],
         ]);
 
-        register_rest_route($namespace, '/templates/modal', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'getModalTemplate'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-                'args' => [
-                    'modal_type' => [
-                        'required' => true,
-                        'type' => 'string',
-                        'sanitize_callback' => 'sanitize_text_field',
-                    ],
-                    'chapter_order' => [
-                        'default' => 1,
-                        'sanitize_callback' => 'absint',
-                    ],
-                ],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/templates/form', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'getFormTemplate'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-                'args' => [
-                    'content_type' => [
-                        'required' => true,
-                        'type' => 'string',
-                        'sanitize_callback' => 'sanitize_text_field',
-                    ],
-                ],
-            ],
-        ]);
-
         register_rest_route($namespace, '/curriculum/chapters', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -235,14 +187,6 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::DELETABLE,
                 'callback' => [$this, 'deleteCategory'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/settings/tab/(?P<tab>[a-z0-9_-]+)', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'getSettingsTab'],
                 'permission_callback' => [$this, 'permissionAdmin'],
             ],
         ]);
@@ -545,8 +489,8 @@ class AdminRestRoutes
         $private = (int) ($c->private ?? 0);
         $trash = (int) ($c->trash ?? 0);
 
-        // "All" tab: same idea as wp-admin lists — non-trash rows; trash is its own filter.
-        $any = $publish + $draft + $pending + $future + $private;
+        // "All" tab: include trash so counts match REST list when status=any (see RestCollectionQueryService).
+        $any = $publish + $draft + $pending + $future + $private + $trash;
 
         return new WP_REST_Response(
             [
@@ -572,45 +516,15 @@ class AdminRestRoutes
         return is_array($b) ? $b : [];
     }
 
-    private function courseUi(): ?CourseAjax
+    private function curriculumActions(): ?CourseCurriculumActions
     {
         $ui = $this->plugin->getService('courseBuilderUi');
-        return $ui instanceof CourseAjax ? $ui : null;
-    }
-
-    public function getModalTemplate(WP_REST_Request $request): WP_REST_Response
-    {
-        $ui = $this->courseUi();
-        if (!$ui) {
-            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
-        }
-
-        $r = $ui->restModalTemplate((string) $request->get_param('modal_type'), (int) $request->get_param('chapter_order'));
-        if (empty($r['success'])) {
-            return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], 400);
-        }
-
-        return new WP_REST_Response(['success' => true, 'data' => $r['data'] ?? []], 200);
-    }
-
-    public function getFormTemplate(WP_REST_Request $request): WP_REST_Response
-    {
-        $ui = $this->courseUi();
-        if (!$ui) {
-            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
-        }
-
-        $r = $ui->restFormTemplate((string) $request->get_param('content_type'));
-        if (empty($r['success'])) {
-            return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], 400);
-        }
-
-        return new WP_REST_Response(['success' => true, 'data' => $r['data'] ?? []], 200);
+        return $ui instanceof CourseCurriculumActions ? $ui : null;
     }
 
     public function createChapter(WP_REST_Request $request): WP_REST_Response
     {
-        $ui = $this->courseUi();
+        $ui = $this->curriculumActions();
         if (!$ui) {
             return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
@@ -632,7 +546,7 @@ class AdminRestRoutes
 
     public function getChapter(WP_REST_Request $request): WP_REST_Response
     {
-        $ui = $this->courseUi();
+        $ui = $this->curriculumActions();
         if (!$ui) {
             return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
@@ -648,7 +562,7 @@ class AdminRestRoutes
 
     public function updateChapter(WP_REST_Request $request): WP_REST_Response
     {
-        $ui = $this->courseUi();
+        $ui = $this->curriculumActions();
         if (!$ui) {
             return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
@@ -865,26 +779,6 @@ class AdminRestRoutes
         );
     }
 
-    public function getCurriculum(WP_REST_Request $request): WP_REST_Response
-    {
-        $svc = $this->plugin->getService('curriculum');
-        if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
-        }
-
-        $course_id = (int) $request->get_param('course_id');
-        $out = $svc->getCurriculumHtml($course_id);
-
-        return new WP_REST_Response(
-            [
-                'success' => !empty($out['success']),
-                'message' => $out['message'] ?? '',
-                'data' => $out['data'] ?? [],
-            ],
-            !empty($out['success']) ? 200 : 400
-        );
-    }
-
     public function createContent(WP_REST_Request $request): WP_REST_Response
     {
         $svc = $this->plugin->getService('curriculum');
@@ -1033,27 +927,6 @@ class AdminRestRoutes
         }
 
         return new WP_REST_Response(['success' => true, 'message' => "Successfully deleted {$deleted} items", 'deleted_count' => $deleted], 200);
-    }
-
-    public function getSettingsTab(WP_REST_Request $request): WP_REST_Response
-    {
-        $tab = (string) $request->get_param('tab');
-        $tab = sanitize_key($tab);
-        $allowed = ['general','courses','lessons','quizzes','students','instructors','enrollment','progress','certificates','assignments','payment','email','notifications','integrations','permalinks','security','advanced'];
-        if (!in_array($tab, $allowed, true)) {
-            return new WP_REST_Response(['success' => false, 'message' => __('Invalid tab.', 'sikshya')], 400);
-        }
-
-        $path = $this->plugin->getTemplatePath('admin/views/settings/tabs/' . $tab . '.php');
-        if (!file_exists($path)) {
-            return new WP_REST_Response(['success' => false, 'message' => __('Tab template not found.', 'sikshya')], 404);
-        }
-
-        ob_start();
-        include $path;
-        $content = (string) ob_get_clean();
-
-        return new WP_REST_Response(['success' => true, 'data' => ['content' => $content]], 200);
     }
 
     public function getSettingsSchema(WP_REST_Request $request): WP_REST_Response
@@ -1244,6 +1117,45 @@ class AdminRestRoutes
                             : __('Some settings could not be imported.', 'sikshya'),
                     ],
                     $ok ? 200 : 400
+                );
+            case 'import_sample_data':
+                if (!defined('SIKSHYA_PLUGIN_FILE')) {
+                    return new WP_REST_Response(
+                        ['success' => false, 'message' => __('Plugin bootstrap unavailable.', 'sikshya')],
+                        500
+                    );
+                }
+
+                $pack_key = sanitize_key((string) ($p['pack'] ?? 'default'));
+                $filename = $pack_key === 'default' ? 'sample-lms.json' : $pack_key . '.json';
+                $path = dirname(SIKSHYA_PLUGIN_FILE) . '/sample-data/' . $filename;
+                $data = SampleDataImporter::loadJsonFile($path);
+                if ($data === null) {
+                    return new WP_REST_Response(
+                        ['success' => false, 'message' => __('Sample data file not found or invalid.', 'sikshya')],
+                        400
+                    );
+                }
+
+                $curriculum = $this->plugin->getService('curriculum');
+                $actions = $this->plugin->getService('courseBuilderUi');
+                if (!$curriculum instanceof CurriculumService || !$actions instanceof CourseCurriculumActions) {
+                    return new WP_REST_Response(
+                        ['success' => false, 'message' => __('Service unavailable.', 'sikshya')],
+                        500
+                    );
+                }
+
+                $importer = new SampleDataImporter($curriculum, $actions);
+                $out = $importer->importPack($data);
+
+                return new WP_REST_Response(
+                    [
+                        'success' => (bool) $out['success'],
+                        'message' => (string) $out['message'],
+                        'data' => ['counts' => $out['counts'] ?? []],
+                    ],
+                    $out['success'] ? 200 : 400
                 );
             case 'export_data':
                 $export_type = sanitize_key((string) ($p['export_type'] ?? 'courses'));

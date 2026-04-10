@@ -23,6 +23,8 @@ type DataTableProps<T> = {
   emptyContent?: ReactNode;
   /** When false, omit outer {@link Card} (e.g. inside {@link ListPanel}). */
   wrapInCard?: boolean;
+  /** Extra classes for each body row (e.g. faded trashed rows on “All”). */
+  getRowClassName?: (row: T) => string | undefined;
 };
 
 /**
@@ -35,6 +37,7 @@ export function DataTable<T>({
   emptyMessage = 'No rows to display.',
   emptyContent,
   wrapInCard = true,
+  getRowClassName,
 }: DataTableProps<T>) {
   const table = (
     <div className="overflow-x-auto">
@@ -63,7 +66,10 @@ export function DataTable<T>({
         ) : (
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {rows.map((row) => (
-              <tr key={rowKey(row)} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+              <tr
+                key={rowKey(row)}
+                className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 ${getRowClassName?.(row) ?? ''}`.trim()}
+              >
                 {columns.map((col) => (
                   <td key={col.id} className={`px-4 py-3 ${col.cellClassName || ''}`}>
                     {col.render(row)}

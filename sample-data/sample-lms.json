@@ -1,0 +1,318 @@
+{
+  "version": 1,
+  "label": "Sikshya starter catalog",
+  "course_categories": [
+    { "name": "Web Development", "slug": "web-development" },
+    { "name": "WordPress", "slug": "wordpress" },
+    { "name": "Data & Analytics", "slug": "data-analytics" },
+    { "name": "Design", "slug": "design" },
+    { "name": "Capstone", "slug": "capstone" }
+  ],
+  "courses": [
+    {
+      "title": "Introduction to Web Development",
+      "content": "<p>Build a solid foundation with HTML, CSS, and JavaScript. You will create small pages and understand how browsers render content.</p>",
+      "status": "publish",
+      "categories": ["web-development"],
+      "meta": {
+        "_sikshya_price": "49",
+        "_sikshya_difficulty": "beginner",
+        "_sikshya_duration": "8"
+      },
+      "chapters": [
+        {
+          "title": "How the web works",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Clients, servers, and HTTP",
+              "content": "<p>Learn how requests flow from the browser to a server and back.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "Developer tools overview",
+              "content": "<p>Use the inspector, console, and network tab effectively.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "Web foundations quiz",
+              "content": "",
+              "passing_score": 70,
+              "time_limit": 15,
+              "questions": [
+                {
+                  "title": "Which language describes the structure of a page?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["HTML", "Python", "SQL", "Bash"],
+                  "correct_answer": "0"
+                },
+                {
+                  "title": "CSS is responsible for visual presentation.",
+                  "question_type": "true_false",
+                  "points": 1,
+                  "options": [],
+                  "correct_answer": "true"
+                },
+                {
+                  "title": "The capital of France is _____.",
+                  "question_type": "fill_blank",
+                  "points": 1,
+                  "options": [],
+                  "correct_answer": "Paris|paris"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "HTML & accessibility",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Semantic markup",
+              "content": "<p>Use headings, landmarks, and forms that screen readers understand.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "assignment",
+              "title": "Markup a short article",
+              "content": "<p>Submit semantic HTML for a two-section article with a navigation skip link.</p>",
+              "meta": {
+                "_sikshya_assignment_points": 10,
+                "_sikshya_assignment_type": "file"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "WordPress for Educators",
+      "content": "<p>Publish courses, pages, and media with WordPress. Ideal for instructors moving lessons online.</p>",
+      "status": "publish",
+      "categories": ["wordpress"],
+      "meta": {
+        "_sikshya_price": "59",
+        "_sikshya_difficulty": "beginner",
+        "_sikshya_duration": "6"
+      },
+      "chapters": [
+        {
+          "title": "Site setup",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Themes and the block editor",
+              "content": "<p>Choose a theme and edit pages with blocks.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "WordPress basics",
+              "passing_score": 75,
+              "questions": [
+                {
+                  "title": "Where do you usually add plugins?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["Dashboard → Plugins", "wp-config.php only", "Robots.txt", "FTP root only"],
+                  "correct_answer": "0"
+                },
+                {
+                  "title": "Select all that are common post types.",
+                  "question_type": "multiple_response",
+                  "points": 2,
+                  "options": ["Post", "Order receipt", "Page", "Attachment"],
+                  "correct_answer": [0, 2, 3]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Media and learners",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Uploading video and captions",
+              "content": "<p>Host on YouTube or Vimeo and embed responsibly.</p>",
+              "lesson_type": "video"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Data Literacy Essentials",
+      "content": "<p>Read charts, understand averages, and avoid common statistical traps.</p>",
+      "status": "publish",
+      "categories": ["data-analytics"],
+      "meta": {
+        "_sikshya_price": "39",
+        "_sikshya_difficulty": "intermediate",
+        "_sikshya_duration": "5"
+      },
+      "chapters": [
+        {
+          "title": "Describing data",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Mean, median, and when they lie",
+              "content": "<p>Skewed distributions and outliers.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "Statistics warm-up",
+              "passing_score": 60,
+              "questions": [
+                {
+                  "title": "Match the concept to the definition.",
+                  "question_type": "matching",
+                  "points": 2,
+                  "options": [],
+                  "correct_answer": {
+                    "matching": {
+                      "left": ["Median", "Mode", "Mean"],
+                      "right": ["Middle value when sorted", "Most frequent value", "Sum divided by count"],
+                      "map": [0, 1, 2]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Visualization",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Choosing the right chart",
+              "content": "<p>Bar, line, and scatter plots at a glance.</p>",
+              "lesson_type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "UX Design Fundamentals",
+      "content": "<p>User research, wireframes, and usable interfaces for learning products.</p>",
+      "status": "publish",
+      "categories": ["design"],
+      "meta": {
+        "_sikshya_price": "69",
+        "_sikshya_difficulty": "beginner",
+        "_sikshya_duration": "10"
+      },
+      "chapters": [
+        {
+          "title": "Research",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Interviewing learners",
+              "content": "<p>Open questions, note-taking, and synthesis.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "UX vocabulary",
+              "passing_score": 70,
+              "questions": [
+                {
+                  "title": "Put the design process steps in the correct order.",
+                  "question_type": "ordering",
+                  "points": 2,
+                  "options": ["Test with users", "Define the problem", "Sketch solutions", "Ship and measure"],
+                  "correct_answer": [1, 2, 0, 3]
+                },
+                {
+                  "title": "Explain why contrast matters for readability (short answer).",
+                  "question_type": "short_answer",
+                  "points": 1,
+                  "options": [],
+                  "correct_answer": "contrast"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Prototyping",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Low-fidelity wireframes",
+              "content": "<p>Boxes, flows, and happy paths.</p>",
+              "lesson_type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Capstone: Launch Your Mini-Course",
+      "content": "<p>Apply everything: outline, record one lesson, and publish a quiz.</p>",
+      "status": "publish",
+      "categories": ["capstone", "design"],
+      "meta": {
+        "_sikshya_price": "0",
+        "_sikshya_difficulty": "advanced",
+        "_sikshya_duration": "12"
+      },
+      "chapters": [
+        {
+          "title": "Planning",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Learning outcomes checklist",
+              "content": "<p>Write three measurable outcomes for your topic.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "Recording your first video",
+              "content": "<p>Lighting, audio, and simple editing.</p>",
+              "lesson_type": "video"
+            }
+          ]
+        },
+        {
+          "title": "Assessment",
+          "contents": [
+            {
+              "type": "quiz",
+              "title": "Course launch quiz",
+              "passing_score": 80,
+              "questions": [
+                {
+                  "title": "A clear learning outcome should be observable.",
+                  "question_type": "true_false",
+                  "points": 1,
+                  "options": [],
+                  "correct_answer": "true"
+                },
+                {
+                  "title": "Describe one way to gather learner feedback after launch.",
+                  "question_type": "essay",
+                  "points": 3,
+                  "options": [],
+                  "correct_answer": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

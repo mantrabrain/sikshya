@@ -39,9 +39,18 @@ export function BulkActionsBar({
       >
         <option value="">Bulk actions</option>
         {trashMode ? (
-          <option value="delete_permanent">Delete permanently</option>
+          <>
+            <option value="restore_draft">Restore to draft</option>
+            <option value="delete_permanent">Delete permanently</option>
+          </>
         ) : (
-          <option value="move_trash">Move to trash</option>
+          <>
+            <option value="move_trash">Move to trash</option>
+            <option value="publish">Publish</option>
+            <option value="draft">Move to draft</option>
+            <option value="pending">Mark pending review</option>
+            <option value="private">Move to private</option>
+          </>
         )}
       </select>
       <button

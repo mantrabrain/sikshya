@@ -84,23 +84,6 @@ class AdminAssetsService
             true
         );
 
-        wp_register_script(
-            'sikshya-course-builder-fields',
-            $this->plugin->getAssetUrl('admin/js/course-builder-fields.js'),
-            [],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register course builder save script
-        wp_register_script(
-            'sikshya-course-builder-save',
-            $this->plugin->getAssetUrl('admin/js/course-builder-save.js'),
-            ['jquery', 'sikshya-toast', 'sikshya-course-builder-fields'],
-            SIKSHYA_VERSION,
-            true
-        );
-
         // Register modal early — list table / tools / categories depend on it.
         wp_register_style(
             'sikshya-modal',
@@ -193,22 +176,6 @@ class AdminAssetsService
             'sikshya-categories',
             $this->plugin->getAssetUrl('admin/js/categories.js'),
             ['jquery', 'sikshya-modal'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register lessons assets
-        wp_register_style(
-            'sikshya-lessons',
-            $this->plugin->getAssetUrl('admin/css/lessons.css'),
-            ['sikshya-admin'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-lessons',
-            $this->plugin->getAssetUrl('admin/js/lessons.js'),
-            ['jquery', 'sikshya-admin'],
             SIKSHYA_VERSION,
             true
         );

@@ -8,7 +8,6 @@
 
 namespace Sikshya\Services;
 
-use Sikshya\Ajax\CourseAjax;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\ContentPostRepository;
@@ -30,10 +29,10 @@ class CurriculumService
     ) {
     }
 
-    private function courseAjax(): ?CourseAjax
+    private function curriculumActions(): ?CourseCurriculumActions
     {
         $ui = $this->plugin->getService('courseBuilderUi');
-        return $ui instanceof CourseAjax ? $ui : null;
+        return $ui instanceof CourseCurriculumActions ? $ui : null;
     }
 
     /**
@@ -41,33 +40,12 @@ class CurriculumService
      */
     public function createContent(array $params): array
     {
-        $ajax = $this->courseAjax();
-        if (!$ajax) {
+        $actions = $this->curriculumActions();
+        if (!$actions) {
             return ['success' => false, 'message' => __('Course handler unavailable', 'sikshya')];
         }
 
-        return $ajax->createContentForService($params);
-    }
-
-    /**
-     * @return array{success:bool,message?:string,data?:array}
-     */
-    public function getCurriculumHtml(int $course_id): array
-    {
-        if (!$this->courses->isCourse($course_id)) {
-            return ['success' => false, 'message' => __('Invalid course ID', 'sikshya')];
-        }
-
-        $ajax = $this->courseAjax();
-        if (!$ajax) {
-            return ['success' => false, 'message' => __('Course handler unavailable', 'sikshya')];
-        }
-
-        return [
-            'success' => true,
-            'data' => ['html' => $ajax->getCurriculumHtmlForService($course_id)],
-            'message' => __('Curriculum loaded successfully', 'sikshya'),
-        ];
+        return $actions->createContentForService($params);
     }
 
     public function linkContentToChapter(int $content_id, int $chapter_id): array

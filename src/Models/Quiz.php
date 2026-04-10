@@ -444,26 +444,61 @@ class Quiz
      */
     private function isAnswerCorrect(string $question_type, $user_answer, $correct_answer, array $options = []): bool
     {
-        $questionTypeService = new \Sikshya\Services\QuestionTypeService();
-
         switch ($question_type) {
             case 'multiple_choice':
             case 'true_false':
                 return $user_answer === $correct_answer;
 
             case 'fill_blank':
-                // Case-insensitive comparison for fill in the blank
-                return strtolower(trim($user_answer)) === strtolower(trim($correct_answer));
-
-            case 'matching':
-                // For matching questions, check if all pairs match
-                if (is_array($user_answer) && is_array($correct_answer)) {
-                    return $user_answer === $correct_answer;
+            case 'short_answer':
+                $u = strtolower(trim((string) $user_answer));
+                if ($u === '') {
+                    return false;
                 }
+                foreach (array_map('trim', explode('|', (string) $correct_answer)) as $o) {
+                    if ($o !== '' && strtolower((string) $o) === $u) {
+                        return true;
+                    }
+                }
+
                 return false;
 
+            case 'multiple_response':
+                $exp = is_string($correct_answer) ? json_decode($correct_answer, true) : $correct_answer;
+                $got = is_string($user_answer) ? json_decode($user_answer, true) : $user_answer;
+                if (!is_array($exp) || !is_array($got)) {
+                    return false;
+                }
+                $e = array_map('intval', $exp);
+                $g = array_map('intval', $got);
+                sort($e);
+                sort($g);
+
+                return $e === $g;
+
+            case 'ordering':
+                $exp = is_string($correct_answer) ? json_decode($correct_answer, true) : $correct_answer;
+                $got = is_string($user_answer) ? json_decode($user_answer, true) : $user_answer;
+                if (!is_array($exp) || !is_array($got)) {
+                    return false;
+                }
+
+                return array_map('intval', $exp) === array_map('intval', $got);
+
+            case 'matching':
+                $dec = is_string($correct_answer) ? json_decode($correct_answer, true) : $correct_answer;
+                if (!is_array($dec) || empty($dec['matching']['map']) || !is_array($dec['matching']['map'])) {
+                    return false;
+                }
+                $exp_map = array_map('intval', $dec['matching']['map']);
+                $got = is_string($user_answer) ? json_decode($user_answer, true) : $user_answer;
+                if (!is_array($got) || empty($got['map']) || !is_array($got['map'])) {
+                    return false;
+                }
+
+                return $exp_map === array_map('intval', $got['map']);
+
             case 'essay':
-                // Essay questions are not auto-gradable
                 return false;
 
             default:

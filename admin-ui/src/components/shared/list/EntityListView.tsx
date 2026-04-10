@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { WpPost } from '../../../types';
 import { getWpApi } from '../../../api';
 import { ApiErrorPanel } from '../ApiErrorPanel';
 import type { Column } from '../DataTable';
@@ -12,7 +13,6 @@ import {
   type WpPostCollectionStatus,
 } from '../../../hooks/useWpPostStatusCounts';
 import { columnVisibilityStorageKey, loadColumnVisibility, saveColumnVisibility } from '../../../lib/columnVisibility';
-import type { WpPost } from '../../../types';
 import { BulkActionsBar } from './BulkActionsBar';
 import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 import { ListEmptyState } from './ListEmptyState';
@@ -48,17 +48,13 @@ type Props = {
   columnPickerStorageKey?: string;
   /** Merged into the WP collection query (e.g. `{ embed: '1' }` for `_embed`). */
   collectionQueryExtras?: Partial<WpPostCollectionQuery>;
-  /** Sample catalog rows when the API returns none (e.g. dev or `useEntityListMock` in config). */
-  useMockPlaceholder?: boolean;
-  /** Rows to show when mock mode is on (from {@link getMockRowsForRestBase} or custom). */
-  mockPlaceholderRows?: WpPost[];
-  /** Optional line under the toolbar when showing mocks. */
-  mockBannerMessage?: string;
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   emptyStateAction?: ReactNode;
   /** Row checkboxes + bulk move to trash / permanent delete (trash tab). Default true. */
   bulkDeleteEnabled?: boolean;
+  /** Called when the list query is ready so parents can refresh after row actions (stable callback recommended). */
+  onListReady?: (api: { refresh: () => Promise<void> }) => void;
 };
 
 /**
@@ -76,13 +72,11 @@ export function EntityListView({
   skeletonHeaders: skeletonHeadersProp,
   columnPickerStorageKey,
   collectionQueryExtras,
-  useMockPlaceholder = false,
-  mockPlaceholderRows = [],
-  mockBannerMessage = 'Sample data preview — no items returned yet.',
   emptyStateTitle,
   emptyStateDescription,
   emptyStateAction,
   bulkDeleteEnabled = true,
+  onListReady,
 }: Props) {
   const { confirm } = useSikshyaDialog();
   const [search, setSearch] = useState('');
@@ -164,19 +158,21 @@ export function EntityListView({
     ...collectionQueryExtras,
   });
 
-  const apiRows = listQuery.data?.data ?? [];
-  const showMockRows =
-    useMockPlaceholder &&
-    mockPlaceholderRows.length > 0 &&
-    !listQuery.loading &&
-    !listQuery.error &&
-    apiRows.length === 0 &&
-    debouncedSearch.trim() === '' &&
-    status === 'any';
-
-  const rows = showMockRows ? mockPlaceholderRows : apiRows;
-  const includeBulkCol = bulkDeleteEnabled && !showMockRows;
+  const rows = listQuery.data?.data ?? [];
+  const includeBulkCol = bulkDeleteEnabled;
   const trashMode = status === 'trash';
+
+  useEffect(() => {
+    if (!onListReady) {
+      return;
+    }
+    onListReady({
+      refresh: async () => {
+        await listQuery.refetch();
+        await countsQuery.refetch();
+      },
+    });
+  }, [onListReady, listQuery.refetch, countsQuery.refetch]);
 
   useEffect(() => {
     setSelectedIds(new Set());
@@ -271,52 +267,106 @@ export function EntityListView({
   }, [columns, skeletonHeadersProp, includeBulkCol]);
 
   const onBulkApply = useCallback(async () => {
-    if (!includeBulkCol || selectedIds.size === 0) {
-      return;
-    }
-    if (trashMode && bulkActionValue !== 'delete_permanent') {
-      return;
-    }
-    if (!trashMode && bulkActionValue !== 'move_trash') {
+    if (!includeBulkCol || selectedIds.size === 0 || bulkActionValue === '') {
       return;
     }
 
     const n = selectedIds.size;
-    const ok = await confirm({
-      title: trashMode ? 'Delete permanently?' : 'Move to trash?',
-      message: trashMode
-        ? `Permanently delete ${n} item(s)? This cannot be undone.`
-        : `Move ${n} item(s) to the trash? You can restore them from the Trash tab.`,
-      variant: 'danger',
-      confirmLabel: trashMode ? 'Delete permanently' : 'Move to trash',
-    });
-    if (!ok) {
+    const api = getWpApi();
+    const ids = [...selectedIds];
+
+    const done = async () => {
+      setSelectedIds(new Set());
+      setBulkActionValue('');
+      await listQuery.refetch();
+      await countsQuery.refetch();
+    };
+
+    const runPatchAll = async (body: Record<string, string>) => {
+      setBulkBusy(true);
+      setBulkError(null);
+      try {
+        for (const id of ids) {
+          await api.patch(`/${restBase}/${id}`, body);
+        }
+        await done();
+      } catch (e) {
+        setBulkError(e);
+      } finally {
+        setBulkBusy(false);
+      }
+    };
+
+    if (trashMode) {
+      if (bulkActionValue === 'restore_draft') {
+        await runPatchAll({ status: 'draft' });
+        return;
+      }
+      if (bulkActionValue === 'delete_permanent') {
+        const ok = await confirm({
+          title: 'Delete permanently?',
+          message: `Permanently delete ${n} item(s)? This cannot be undone.`,
+          variant: 'danger',
+          confirmLabel: 'Delete permanently',
+        });
+        if (!ok) {
+          return;
+        }
+        setBulkBusy(true);
+        setBulkError(null);
+        try {
+          for (const id of ids) {
+            await api.delete(`/${restBase}/${id}?force=true`);
+          }
+          await done();
+        } catch (e) {
+          setBulkError(e);
+        } finally {
+          setBulkBusy(false);
+        }
+        return;
+      }
       return;
     }
 
-    setBulkBusy(true);
-    setBulkError(null);
-    const api = getWpApi();
-    const ids = [...selectedIds];
-    try {
-      for (const id of ids) {
-        const path = trashMode ? `/${restBase}/${id}?force=true` : `/${restBase}/${id}`;
-        await api.delete(path);
+    if (bulkActionValue === 'move_trash') {
+      const ok = await confirm({
+        title: 'Move to trash?',
+        message: `Move ${n} item(s) to the trash? You can restore from the All or Trash tab.`,
+        variant: 'danger',
+        confirmLabel: 'Move to trash',
+      });
+      if (!ok) {
+        return;
       }
-      setSelectedIds(new Set());
-      setBulkActionValue('');
-      listQuery.refetch();
-      countsQuery.refetch();
-    } catch (e) {
-      setBulkError(e);
-    } finally {
-      setBulkBusy(false);
+      setBulkBusy(true);
+      setBulkError(null);
+      try {
+        for (const id of ids) {
+          await api.delete(`/${restBase}/${id}`);
+        }
+        await done();
+      } catch (e) {
+        setBulkError(e);
+      } finally {
+        setBulkBusy(false);
+      }
+      return;
+    }
+
+    if (
+      bulkActionValue === 'publish' ||
+      bulkActionValue === 'draft' ||
+      bulkActionValue === 'pending' ||
+      bulkActionValue === 'private'
+    ) {
+      await runPatchAll({ status: bulkActionValue });
     }
   }, [
     includeBulkCol,
     selectedIds,
-    trashMode,
     bulkActionValue,
+    trashMode,
     confirm,
     restBase,
     listQuery,
@@ -324,15 +374,12 @@ export function EntityListView({
   ]);
 
   const totalLine = useMemo(() => {
-    if (showMockRows) {
-      return `Showing sample rows (${rows.length})`;
-    }
     const t = listQuery.data?.total;
     if (t == null) {
       return null;
     }
     return `Showing ${rows.length} of ${t}`;
-  }, [listQuery.data?.total, rows.length, showMockRows]);
+  }, [listQuery.data?.total, rows.length]);
 
   const onSortOrderToggle = () => setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
 
@@ -388,12 +435,6 @@ export function EntityListView({
         </div>
       ) : null}
 
-      {showMockRows ? (
-        <div className="border-b border-amber-200/80 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100">
-          {mockBannerMessage}
-        </div>
-      ) : null}
-
       {totalLine ? (
         <div className="border-b border-slate-100 px-4 py-2 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
           {totalLine}
@@ -413,6 +454,9 @@ export function EntityListView({
           rowKey={(r) => r.id}
           emptyContent={emptyContent}
           wrapInCard={false}
+          getRowClassName={
+            status === 'any' ? (r) => (r.status === 'trash' ? 'opacity-50 saturate-75' : undefined) : undefined
+          }
         />
       )}
     </ListPanel>

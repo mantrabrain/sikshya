@@ -82,13 +82,18 @@ export type WpPost = {
   link?: string;
   date?: string;
   modified?: string;
+  author?: number;
   featured_media?: number;
   meta?: Record<string, unknown>;
+  /** Term IDs on the post (edit context). */
+  sikshya_course_category?: number[];
   _embedded?: {
+    author?: Array<{ id?: number; name?: string; slug?: string }>;
     'wp:featuredmedia'?: Array<{
       source_url?: string;
       alt_text?: string;
     }>;
+    'wp:term'?: Array<Array<{ id?: number; name?: string; taxonomy?: string; slug?: string }>>;
   };
 };
 

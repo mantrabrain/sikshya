@@ -266,14 +266,17 @@ function buildFieldLayoutRows(entries: [string, FieldConfig][]): LayoutRow[] {
 
 function FieldInput(props: {
   id: string;
+  fieldKey?: string;
   cfg: FieldConfig;
   value: unknown;
   onChange: (v: unknown) => void;
   users: UserOpt[];
   /** Site root URL for permalink preview */
   siteUrl?: string;
+  /** Update another builder field (e.g. attachment ID when picking featured image). */
+  onSiblingFieldChange?: (key: string, v: unknown) => void;
 }) {
-  const { id, cfg, value, onChange, users, siteUrl } = props;
+  const { id, fieldKey, cfg, value, onChange, users, siteUrl, onSiblingFieldChange } = props;
   const t = cfg.type || 'text';
   const base = (siteUrl || '').replace(/\/?$/, '/');
 
@@ -316,6 +319,8 @@ function FieldInput(props: {
         id={id}
         type="date"
         className={FIELD_INPUT}
+        placeholder={cfg.placeholder || 'YYYY-MM-DD'}
+        title={cfg.description || cfg.placeholder || 'Pick a date'}
         value={iso}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -367,6 +372,11 @@ function FieldInput(props: {
         id={id}
         value={(value as string) ?? ''}
         onChange={(url) => onChange(url)}
+        onAttachmentIdChange={
+          fieldKey === 'featured_image' && onSiblingFieldChange
+            ? (aid) => onSiblingFieldChange('featured_image_id', aid)
+            : undefined
+        }
         className={FIELD_INPUT}
         placeholder={cfg.placeholder || cfg.description}
         imageOnly
@@ -383,6 +393,8 @@ function FieldInput(props: {
         max={cfg.max}
         step={cfg.step}
         className={FIELD_INPUT}
+        placeholder={cfg.placeholder ?? '0'}
+        title={cfg.description}
         value={value === undefined || value === null ? '' : String(value)}
         onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
       />
@@ -519,6 +531,7 @@ function FieldInput(props: {
                       <textarea
                         rows={3}
                         className={`${FIELD_INPUT} min-h-[88px] resize-y`}
+                        placeholder={sub.placeholder}
                         value={sv}
                         onChange={(e) => {
                           const next = [...(rows.length ? rows : [{}])];
@@ -530,6 +543,8 @@ function FieldInput(props: {
                       <input
                         type={st === 'url' ? 'url' : 'text'}
                         className={FIELD_INPUT}
+                        placeholder={sub.placeholder}
+                        title={sub.description}
                         value={sv}
                         onChange={(e) => {
                           const next = [...(rows.length ? rows : [{}])];
@@ -603,10 +618,12 @@ function BuilderFieldBlock(props: {
       <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-3 dark:border-slate-700/80 dark:bg-slate-800/30">
         <FieldInput
           id={`f-${fid}`}
+          fieldKey={fid}
           cfg={fcfg}
           value={values[fid]}
           users={users}
           siteUrl={siteUrl}
+          onSiblingFieldChange={onFieldChange}
           onChange={(v) => onFieldChange(fid, v)}
         />
       </div>
@@ -622,10 +639,12 @@ function BuilderFieldBlock(props: {
       {fcfg.description ? <p className={FIELD_HINT}>{fcfg.description}</p> : null}
       <FieldInput
         id={`f-${fid}`}
+        fieldKey={fid}
         cfg={fcfg}
         value={values[fid]}
         users={users}
         siteUrl={siteUrl}
+        onSiblingFieldChange={onFieldChange}
         onChange={(v) => onFieldChange(fid, v)}
       />
     </div>

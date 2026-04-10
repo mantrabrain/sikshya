@@ -1,13 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { EntityListView, StatusBadge } from '../components/shared/list';
 import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
-import { useEntityListMockEnabled } from '../lib/entityListMock';
-import { getMockRowsForRestBase } from '../lib/mockWpPosts';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
+import { courseMetaString, coursePriceLabel, embeddedAuthorName } from '../lib/courseListMeta';
+import { formatDisplaySlug } from '../lib/formatDisplaySlug';
+import { embeddedTermNames } from '../lib/wpPostTerms';
+import { wpPostStatusRowActions } from '../lib/wpPostStatusRowActions';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
 
@@ -15,12 +18,17 @@ function stripTags(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
 }
 
+const COURSE_CAT_TAX = 'sikshya_course_category';
+
 export function CoursesPage(props: { config: SikshyaReactConfig; title: string; restBase: string }) {
   const { config, title, restBase } = props;
   const [createOpen, setCreateOpen] = useState(false);
+  const { confirm } = useSikshyaDialog();
+  const refreshListRef = useRef<(() => Promise<void>) | null>(null);
 
-  const useMockPlaceholder = useEntityListMockEnabled(config);
-  const mockRows = getMockRowsForRestBase('sik_course');
+  const onListReady = useCallback((api: { refresh: () => Promise<void> }) => {
+    refreshListRef.current = api.refresh;
+  }, []);
 
   const columns: Column<WpPost>[] = useMemo(
     () => [
@@ -36,10 +44,48 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
               <span dangerouslySetInnerHTML={{ __html: r.title.rendered }} />
             </a>
             {r.slug ? (
-              <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{r.slug}</div>
+              <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                {formatDisplaySlug(r.slug, r.status)}
+              </div>
             ) : null}
           </div>
         ),
+      },
+      {
+        id: 'categories',
+        header: 'Categories',
+        defaultHidden: false,
+        cellClassName: 'max-w-[14rem] text-slate-600 dark:text-slate-400',
+        render: (r) => {
+          const names = embeddedTermNames(r, COURSE_CAT_TAX);
+          return names.length ? names.join(', ') : '—';
+        },
+      },
+      {
+        id: 'author',
+        header: 'Author',
+        defaultHidden: true,
+        cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+        render: (r) => embeddedAuthorName(r),
+      },
+      {
+        id: 'price',
+        header: 'Price',
+        cellClassName: 'whitespace-nowrap tabular-nums',
+        render: (r) => coursePriceLabel(r),
+      },
+      {
+        id: 'duration',
+        header: 'Duration',
+        defaultHidden: true,
+        cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+        render: (r) => courseMetaString(r, '_sikshya_course_duration', '_sikshya_duration'),
+      },
+      {
+        id: 'level',
+        header: 'Level',
+        cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+        render: (r) => courseMetaString(r, '_sikshya_course_level', '_sikshya_difficulty'),
       },
       {
         id: 'modified',
@@ -60,7 +106,8 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         cellClassName: 'text-right',
         render: (r) => {
           const label = stripTags(r.title.rendered) || 'Course';
-          const items = [
+          const refresh = () => refreshListRef.current?.() ?? Promise.resolve();
+          const base: Parameters<typeof RowActionsMenu>[0]['items'] = [
             {
               key: 'builder',
               label: 'Edit in builder',
@@ -77,11 +124,12 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
                 ]
               : []),
           ];
-          return <RowActionsMenu ariaLabel={`Actions for ${label}`} items={items} />;
+          const statusItems = wpPostStatusRowActions(restBase, r, refresh, confirm);
+          return <RowActionsMenu ariaLabel={`Actions for ${label}`} items={[...base, ...statusItems]} />;
         },
       },
     ],
-    [config]
+    [config, restBase, confirm]
   );
 
   return (
@@ -109,8 +157,8 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         ]}
         defaultSortField="title"
         columnPickerStorageKey="course"
-        useMockPlaceholder={useMockPlaceholder}
-        mockPlaceholderRows={mockRows}
+        collectionQueryExtras={{ embed: '1' }}
+        onListReady={onListReady}
         columns={columns}
         emptyMessage="No courses match your filters. Try clearing search or choosing another status."
         emptyStateTitle="No courses found"
@@ -118,7 +166,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         emptyStateAction={
           <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new course</ButtonPrimary>
         }
-        skeletonHeaders={['Course', 'Updated', 'Status', '']}
+        skeletonHeaders={['Course', 'Categories', 'Price', 'Level', 'Updated', 'Status', '']}
       />
     </AppShell>
   );

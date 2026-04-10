@@ -148,11 +148,6 @@ class Frontend
             wp_enqueue_style('sikshya-lesson-viewer');
         }
 
-        if (is_singular(PostTypes::QUIZ)) {
-            wp_enqueue_script('sikshya-quiz-taker');
-            wp_enqueue_style('sikshya-quiz-taker');
-        }
-
         if (is_page('sikshya-dashboard')) {
             wp_enqueue_script('sikshya-dashboard');
             wp_enqueue_style('sikshya-dashboard');
@@ -170,6 +165,31 @@ class Frontend
                 ['sikshya-frontend'],
                 $this->plugin->version,
                 true
+            );
+        }
+
+        if (is_singular(PostTypes::QUIZ)) {
+            wp_enqueue_script(
+                'sikshya-quiz-taker',
+                $this->plugin->getAssetUrl('js/quiz-taker.js'),
+                [],
+                $this->plugin->version,
+                true
+            );
+            wp_localize_script(
+                'sikshya-quiz-taker',
+                'sikshyaQuizTaker',
+                [
+                    'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
+                    'restNonce' => wp_create_nonce('wp_rest'),
+                    'quizId' => (string) get_queried_object_id(),
+                    'i18n' => [
+                        'score' => __('Your score: %s%%', 'sikshya'),
+                        'passed' => __('You passed this quiz.', 'sikshya'),
+                        'notPassed' => __('You did not reach the passing score.', 'sikshya'),
+                        'error' => __('Could not submit the quiz. Please try again.', 'sikshya'),
+                    ],
+                ]
             );
         }
     }

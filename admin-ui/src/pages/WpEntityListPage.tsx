@@ -1,13 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { EntityListView, StatusBadge } from '../components/shared/list';
 import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary, LinkButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
-import { useEntityListMockEnabled } from '../lib/entityListMock';
-import { getMockRowsForRestBase } from '../lib/mockWpPosts';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
+import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { formatPostDate } from '../lib/formatPostDate';
+import { wpPostStatusRowActions } from '../lib/wpPostStatusRowActions';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
 import { getWpApi } from '../api';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -111,6 +112,15 @@ export function WpEntityListPage(props: {
   const newHref = appViewHref(config, 'edit-content', { post_type: restBase });
   const isLessonList = restBase === 'sik_lesson';
   const isCertificateList = restBase === 'sikshya_certificate';
+  const isQuizList = restBase === 'sik_quiz';
+  const isQuestionList = restBase === 'sik_question';
+  const isChapterList = restBase === 'sik_chapter';
+  const isAssignmentList = restBase === 'sik_assignment';
+  const { confirm } = useSikshyaDialog();
+  const refreshListRef = useRef<(() => Promise<void>) | null>(null);
+  const onListReady = useCallback((api: { refresh: () => Promise<void> }) => {
+    refreshListRef.current = api.refresh;
+  }, []);
   const [addLessonOpen, setAddLessonOpen] = useState(false);
   const [addLessonBusy, setAddLessonBusy] = useState(false);
   const [addLessonError, setAddLessonError] = useState<unknown>(null);
@@ -171,14 +181,157 @@ export function WpEntityListPage(props: {
                 <div className="mt-0.5 text-xs capitalize text-slate-500 dark:text-slate-400">{orient}</div>
               ) : null}
               {r.slug ? (
-                <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{r.slug}</div>
+                <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                  {formatDisplaySlug(r.slug, r.status)}
+                </div>
               ) : null}
             </div>
           );
         },
       };
 
+      const courseLink = (cid: number) =>
+        cid > 0 ? (
+          <a
+            href={appViewHref(config, 'add-course', { course_id: String(cid) })}
+            className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+          >
+            #{cid}
+          </a>
+        ) : (
+          '—'
+        );
+
+      const detailCols: Column<WpPost>[] = [];
+      if (isLessonList) {
+        detailCols.push(
+          {
+            id: 'course',
+            header: 'Course',
+            cellClassName: 'whitespace-nowrap',
+            render: (r) => {
+              const m = r.meta as Record<string, unknown> | undefined;
+              return courseLink(Number(m?._sikshya_lesson_course ?? 0));
+            },
+          },
+          {
+            id: 'lesson_type',
+            header: 'Type',
+            cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+            render: (r) => {
+              const t = String((r.meta as Record<string, unknown> | undefined)?._sikshya_lesson_type || '');
+              return t || '—';
+            },
+          },
+          {
+            id: 'duration',
+            header: 'Duration',
+            defaultHidden: true,
+            cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+            render: (r) => String((r.meta as Record<string, unknown> | undefined)?._sikshya_lesson_duration || '—'),
+          }
+        );
+      } else if (isQuizList) {
+        detailCols.push(
+          {
+            id: 'course',
+            header: 'Course',
+            cellClassName: 'whitespace-nowrap',
+            render: (r) => {
+              const m = r.meta as Record<string, unknown> | undefined;
+              return courseLink(Number(m?._sikshya_quiz_course ?? 0));
+            },
+          },
+          {
+            id: 'passing',
+            header: 'Pass %',
+            cellClassName: 'whitespace-nowrap tabular-nums',
+            render: (r) => {
+              const v = (r.meta as Record<string, unknown> | undefined)?._sikshya_quiz_passing_score;
+              return v != null && String(v) !== '' ? String(v) : '—';
+            },
+          },
+          {
+            id: 'time_limit',
+            header: 'Time (min)',
+            defaultHidden: true,
+            cellClassName: 'whitespace-nowrap tabular-nums',
+            render: (r) => {
+              const v = (r.meta as Record<string, unknown> | undefined)?._sikshya_quiz_time_limit;
+              return v != null && String(v) !== '' && String(v) !== '0' ? String(v) : '—';
+            },
+          }
+        );
+      } else if (isQuestionList) {
+        detailCols.push(
+          {
+            id: 'qtype',
+            header: 'Question type',
+            cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+            render: (r) => String((r.meta as Record<string, unknown> | undefined)?._sikshya_question_type || '—'),
+          },
+          {
+            id: 'points',
+            header: 'Points',
+            cellClassName: 'whitespace-nowrap tabular-nums',
+            render: (r) => {
+              const v = (r.meta as Record<string, unknown> | undefined)?._sikshya_question_points;
+              return v != null && String(v) !== '' ? String(v) : '—';
+            },
+          }
+        );
+      } else if (isChapterList) {
+        detailCols.push(
+          {
+            id: 'course',
+            header: 'Course',
+            cellClassName: 'whitespace-nowrap',
+            render: (r) => {
+              const m = r.meta as Record<string, unknown> | undefined;
+              return courseLink(Number(m?._sikshya_chapter_course_id ?? 0));
+            },
+          },
+          {
+            id: 'order',
+            header: 'Order',
+            cellClassName: 'whitespace-nowrap tabular-nums',
+            render: (r) => {
+              const v = (r.meta as Record<string, unknown> | undefined)?._sikshya_chapter_order;
+              return v != null && String(v) !== '' ? String(v) : '—';
+            },
+          }
+        );
+      } else if (isAssignmentList) {
+        detailCols.push(
+          {
+            id: 'course',
+            header: 'Course',
+            cellClassName: 'whitespace-nowrap',
+            render: (r) => {
+              const m = r.meta as Record<string, unknown> | undefined;
+              return courseLink(Number(m?._sikshya_assignment_course ?? 0));
+            },
+          },
+          {
+            id: 'assign_pts',
+            header: 'Points',
+            cellClassName: 'whitespace-nowrap tabular-nums',
+            render: (r) => {
+              const v = (r.meta as Record<string, unknown> | undefined)?._sikshya_assignment_points;
+              return v != null && String(v) !== '' ? String(v) : '—';
+            },
+          },
+          {
+            id: 'assign_type',
+            header: 'Type',
+            cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
+            render: (r) => String((r.meta as Record<string, unknown> | undefined)?._sikshya_assignment_type || '—'),
+          }
+        );
+      }
+
       const rest: Column<WpPost>[] = [
+        ...detailCols,
         {
           id: 'modified',
           header: 'Updated',
@@ -198,26 +351,36 @@ export function WpEntityListPage(props: {
           cellClassName: 'text-right',
           render: (r) => {
             const label = stripTags(r.title.rendered) || 'Item';
-            const items = [
+            const refresh = () => refreshListRef.current?.() ?? Promise.resolve();
+            const base: Parameters<typeof RowActionsMenu>[0]['items'] = [
               { key: 'edit', label: 'Edit', href: editHref(r.id) },
               ...(r.link && r.link !== '#'
                 ? [{ key: 'view', label: 'View', href: r.link, external: true as const }]
                 : []),
             ];
-            return <RowActionsMenu ariaLabel={`Actions for ${label}`} items={items} />;
+            const statusItems = wpPostStatusRowActions(restBase, r, refresh, confirm);
+            return <RowActionsMenu ariaLabel={`Actions for ${label}`} items={[...base, ...statusItems]} />;
           },
         },
       ];
 
       return isCertificateList ? [previewCol, titleCol, ...rest] : [titleCol, ...rest];
     },
-    [config, restBase, isLessonList, isCertificateList]
+    [
+      config,
+      restBase,
+      isLessonList,
+      isCertificateList,
+      isQuizList,
+      isQuestionList,
+      isChapterList,
+      isAssignmentList,
+      confirm,
+    ]
   );
 
   const searchPh = `Search ${title.toLowerCase()}…`;
   const pickerKey = `post_${restBase.replace(/[^a-z0-9_-]/gi, '_')}`;
-  const useMock = useEntityListMockEnabled(config);
-  const mockRows = getMockRowsForRestBase(restBase);
 
   return (
     <AppShell
@@ -292,9 +455,8 @@ export function WpEntityListPage(props: {
         defaultSortField="title"
         columnPickerStorageKey={pickerKey}
         collectionQueryExtras={isCertificateList ? { embed: '1' } : undefined}
+        onListReady={onListReady}
         columns={columns}
-        useMockPlaceholder={useMock}
-        mockPlaceholderRows={mockRows}
         emptyMessage="No items match your filters."
         emptyStateTitle="No items found"
         emptyStateDescription="Try another status or search term, or add a new item."

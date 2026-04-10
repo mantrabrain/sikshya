@@ -16,6 +16,7 @@ use Sikshya\Services\AnalyticsService;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\FrontendAssetsService;
 use Sikshya\Services\AdminAssetsService;
+use Sikshya\Services\RestCollectionQueryService;
 
 /**
  * Main Plugin Class
@@ -149,11 +150,12 @@ final class Plugin
             // WordPress integration services
             $this->services['frontendAssets'] = new FrontendAssetsService($this);
             $this->services['adminAssets'] = new AdminAssetsService($this);
+            $this->services['restCollectionQuery'] = new RestCollectionQueryService();
             $this->services['postTypes'] = new PostTypeService($this);
             $this->services['taxonomies'] = new TaxonomyService($this);
 
-            // Course builder UI (templates, chapter HTML) — no admin-ajax hooks.
-            $this->services['courseBuilderUi'] = new \Sikshya\Ajax\CourseAjax($this, false);
+            // Curriculum chapter/content helpers for REST (React admin).
+            $this->services['courseBuilderUi'] = new \Sikshya\Services\CourseCurriculumActions();
 
             $this->services['categoryService'] = new \Sikshya\Services\CategoryService($this->services['taxonomyRepository']);
             $this->services['curriculum'] = new \Sikshya\Services\CurriculumService(
@@ -217,6 +219,9 @@ final class Plugin
         // Initialize assets
         $this->services['frontendAssets']->init();
         $this->services['adminAssets']->init();
+        if (isset($this->services['restCollectionQuery']) && $this->services['restCollectionQuery'] instanceof RestCollectionQueryService) {
+            $this->services['restCollectionQuery']->init();
+        }
 
         // Hook into WordPress
         do_action('sikshya_init', $this);
