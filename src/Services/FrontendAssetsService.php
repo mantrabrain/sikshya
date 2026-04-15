@@ -64,6 +64,14 @@ class FrontendAssetsService
             SIKSHYA_VERSION
         );
 
+        // Course listings (archive, taxonomy, shortcodes/blocks that render cards)
+        wp_enqueue_style(
+            'sikshya-course-listing',
+            $this->plugin->getAssetUrl('css/course-listing.css'),
+            ['sikshya-public-ds', 'sikshya-frontend'],
+            SIKSHYA_VERSION
+        );
+
         if (is_singular(PostTypes::COURSE)) {
             wp_enqueue_style(
                 'sikshya-single-course',

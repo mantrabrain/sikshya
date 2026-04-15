@@ -86,6 +86,198 @@
                 "_sikshya_assignment_points": 10,
                 "_sikshya_assignment_type": "file"
               }
+            },
+            {
+              "type": "lesson",
+              "title": "Forms and labels (with real-world accessibility patterns)",
+              "content": "<p>Learn label associations, fieldsets, error messages, and keyboard navigation.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "HTML & a11y quick check",
+              "content": "",
+              "passing_score": 70,
+              "time_limit": 10,
+              "questions": [
+                {
+                  "title": "Which attribute connects a <label> to an <input>?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["for/id", "name/value", "role/aria", "class/style"],
+                  "correct_answer": "0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "CSS foundations",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Selectors, specificity, and the cascade (the parts that actually bite you)",
+              "content": "<p>Understand how rules win, why styles override, and how to debug confidently.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "Layout with Flexbox",
+              "content": "<p>Build common UI rows, columns, and alignment patterns with flex.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "Layout with Grid",
+              "content": "<p>Create 2D layouts, responsive columns, and consistent gaps.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "CSS basics quiz",
+              "content": "",
+              "passing_score": 70,
+              "time_limit": 15,
+              "questions": [
+                {
+                  "title": "Which property controls the space between grid tracks?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["gap", "margin", "padding", "outline"],
+                  "correct_answer": "0"
+                },
+                {
+                  "title": "Specificity matters when two rules target the same element.",
+                  "question_type": "true_false",
+                  "points": 1,
+                  "options": [],
+                  "correct_answer": "true"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "JavaScript essentials",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Variables, types, and the mental model (what changes, what doesn’t)",
+              "content": "<p>Learn the basics and the gotchas that show up in real apps.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "DOM manipulation and events",
+              "content": "<p>Select elements, react to clicks, and update the page safely.</p>",
+              "lesson_type": "video"
+            },
+            {
+              "type": "lesson",
+              "title": "Async JavaScript: promises and fetch",
+              "content": "<p>Make network requests and handle loading and errors.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "assignment",
+              "title": "Build a tiny interactive checklist (stretch: persist to localStorage)",
+              "content": "<p>Create a checklist UI with add/remove/toggle actions.</p>",
+              "meta": {
+                "_sikshya_assignment_points": 20,
+                "_sikshya_assignment_type": "file"
+              }
+            },
+            {
+              "type": "quiz",
+              "title": "JavaScript fundamentals quiz",
+              "content": "",
+              "passing_score": 70,
+              "time_limit": 20,
+              "questions": [
+                {
+                  "title": "Which method converts JSON text into a JavaScript value?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["JSON.parse", "JSON.stringify", "toString", "parseInt"],
+                  "correct_answer": "0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Responsive UI and media",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Responsive typography and comfortable reading widths",
+              "content": "<p>Line length, scale, and spacing for long-session readability.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "Images and video embeds (aspect ratio done right)",
+              "content": "<p>Keep media responsive, avoid layout shifts, and preserve aspect ratios.</p>",
+              "lesson_type": "video"
+            },
+            {
+              "type": "lesson",
+              "title": "Audio lessons: clarity and pacing",
+              "content": "<p>How to structure audio-first content for learning.</p>",
+              "lesson_type": "audio"
+            },
+            {
+              "type": "quiz",
+              "title": "Responsive basics quiz",
+              "content": "",
+              "passing_score": 70,
+              "time_limit": 12,
+              "questions": [
+                {
+                  "title": "Which unit is relative to the viewport width?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["vw", "em", "rem", "px"],
+                  "correct_answer": "0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ship it: deployment & next steps",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "From local files to a live site (a practical deployment overview)",
+              "content": "<p>Domains, hosting, and what actually happens when you deploy.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "lesson",
+              "title": "Performance basics: measure first, then optimize",
+              "content": "<p>Learn the key metrics that affect perceived speed.</p>",
+              "lesson_type": "text"
+            },
+            {
+              "type": "quiz",
+              "title": "Deployment wrap-up quiz",
+              "content": "",
+              "passing_score": 70,
+              "time_limit": 10,
+              "questions": [
+                {
+                  "title": "A CDN primarily helps with…",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["Serving assets closer to users", "Writing database queries", "Compiling JavaScript", "Replacing hosting"],
+                  "correct_answer": "0"
+                }
+              ]
             }
           ]
         }

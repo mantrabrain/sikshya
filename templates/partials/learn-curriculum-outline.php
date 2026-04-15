@@ -1,0 +1,146 @@
+<?php
+/**
+ * Course content curriculum outline (sidebar).
+ *
+ * Expects `$outline_blocks` (array of blocks from template data) and `sikshya_learn_icon()`.
+ *
+ * @package Sikshya
+ */
+
+if (!isset($outline_blocks) || !is_array($outline_blocks)) {
+    return;
+}
+
+if ($outline_blocks === []) {
+    ?>
+    <p class="sikshya-curriculumOutline__empty sikshya-muted"><?php esc_html_e('No curriculum items are published for this course yet.', 'sikshya'); ?></p>
+    <?php
+    return;
+}
+?>
+<nav class="sikshya-curriculumOutline" aria-label="<?php esc_attr_e('Curriculum', 'sikshya'); ?>">
+    <?php foreach ($outline_blocks as $chapter_index => $block) : ?>
+        <?php
+        $chapter_post = $block['chapter'];
+        $chapter_num = (int) $chapter_index + 1;
+        $item_n = isset($block['item_count']) ? (int) $block['item_count'] : count((array) ($block['items'] ?? []));
+        $done_n = isset($block['completed_in_section']) ? (int) $block['completed_in_section'] : 0;
+        $sec_min = isset($block['section_duration_minutes']) ? (int) $block['section_duration_minutes'] : 0;
+        ?>
+        <?php
+        $chapter_has_current = false;
+        foreach ((array) ($block['items'] ?? []) as $maybe_item) {
+            if (!empty($maybe_item['current'])) {
+                $chapter_has_current = true;
+                break;
+            }
+        }
+        ?>
+        <details class="sikshya-curriculumOutline__chapter" open <?php echo $chapter_has_current ? 'data-sikshya-current-chapter="1"' : ''; ?>>
+            <summary class="sikshya-curriculumOutline__sectionSummary">
+                <span class="sikshya-curriculumOutline__sectionHead">
+                    <span class="sikshya-curriculumOutline__sectionIcon" aria-hidden="true">
+                        <?php echo sikshya_learn_icon('book'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </span>
+                    <span class="sikshya-curriculumOutline__sectionText">
+                        <span class="sikshya-curriculumOutline__sectionLabel">
+                            <?php
+                            echo esc_html(
+                                sprintf(
+                                    /* translators: %d: chapter sequence number (1-based) */
+                                    __('Chapter %d', 'sikshya'),
+                                    $chapter_num
+                                )
+                            );
+                            ?>
+                        </span>
+                        <span class="sikshya-curriculumOutline__sectionTitle"><?php echo esc_html($chapter_post->post_title); ?></span>
+                        <span class="sikshya-curriculumOutline__sectionMeta">
+                            <?php
+                            $meta_bits = [];
+                            $meta_bits[] = sprintf(
+                                /* translators: 1: completed count, 2: total items */
+                                __('%1$d / %2$d', 'sikshya'),
+                                $done_n,
+                                $item_n
+                            );
+                            if ($sec_min > 0) {
+                                $meta_bits[] = sprintf(
+                                    /* translators: 1: minutes */
+                                    _n('%d min', '%d min', $sec_min, 'sikshya'),
+                                    $sec_min
+                                );
+                            }
+                            echo esc_html(implode(' • ', $meta_bits));
+                            ?>
+                        </span>
+                    </span>
+                    <span class="sikshya-curriculumOutline__sectionChevron" aria-hidden="true">
+                        <?php echo sikshya_learn_icon('chevron-down'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </span>
+                </span>
+            </summary>
+            <ol class="sikshya-curriculumOutline__list">
+                <?php foreach ((array) ($block['items'] ?? []) as $item) : ?>
+                    <?php
+                    $current = !empty($item['current']);
+                    $icon = (string) ($item['type_key'] ?? 'content');
+                    $completed = !empty($item['completed']);
+                    $lesson_type = sanitize_key((string) ($item['lesson_type'] ?? ''));
+                    $idx = isset($item['index_in_section']) ? (int) $item['index_in_section'] : 0;
+                    $sub = trim((string) ($item['subtitle_compact'] ?? ''));
+                    if ($sub === '') {
+                        $sub = trim((string) ($item['meta_line'] ?? ''));
+                    }
+                    $item_title = (string) ($item['title'] ?? '');
+                    ?>
+                    <li class="sikshya-curriculumOutline__item" <?php echo $current ? ' data-sikshya-current="1"' : ''; ?>>
+                        <div class="sikshya-curriculumOutline__row<?php echo $current ? ' is-current' : ''; ?>">
+                            <a class="sikshya-curriculumOutline__link" href="<?php echo esc_url((string) ($item['permalink'] ?? '')); ?>" <?php echo $current ? 'aria-current="page"' : ''; ?>>
+                                <span class="sikshya-curriculumOutline__check<?php echo $completed ? ' is-done' : ''; ?>" aria-hidden="true">
+                                    <?php if ($completed) : ?>
+                                        <?php echo sikshya_learn_icon('check'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                    <?php endif; ?>
+                                </span>
+                                <span class="sikshya-curriculumOutline__itemIcon" aria-hidden="true">
+                                    <?php
+                                    if ($icon === 'lesson') {
+                                        if ($lesson_type === 'video') {
+                                            echo sikshya_learn_icon('play-video');
+                                        } elseif ($lesson_type === 'audio') {
+                                            echo sikshya_learn_icon('audio');
+                                        } else {
+                                            // text/document/unknown
+                                            echo sikshya_learn_icon('doc');
+                                        }
+                                    } elseif ($icon === 'quiz') {
+                                        echo sikshya_learn_icon('clipboard');
+                                    } elseif ($icon === 'assignment') {
+                                        echo sikshya_learn_icon('assignment');
+                                    } else {
+                                        echo sikshya_learn_icon('doc');
+                                    }
+                                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                    ?>
+                                </span>
+                                <span class="sikshya-curriculumOutline__linkBody">
+                                    <?php if ($completed) : ?>
+                                        <span class="screen-reader-text"><?php esc_html_e('Completed:', 'sikshya'); ?></span>
+                                    <?php endif; ?>
+                                    <span class="sikshya-curriculumOutline__lessonTitle" title="<?php echo esc_attr($item_title); ?>">
+                                        <?php echo esc_html($idx > 0 ? sprintf('%d. %s', $idx, $item_title) : $item_title); ?>
+                                    </span>
+                                    <?php if ($sub !== '') : ?>
+                                        <span class="sikshya-curriculumOutline__lessonSub">
+                                            <span class="sikshya-curriculumOutline__dur"><?php echo esc_html($sub); ?></span>
+                                        </span>
+                                    <?php endif; ?>
+                                </span>
+                            </a>
+                        </div>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </details>
+    <?php endforeach; ?>
+</nav>

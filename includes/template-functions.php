@@ -182,6 +182,24 @@ function sikshya_get_course_pricing(int $course_id): array
 }
 
 /**
+ * Render a reusable template partial from the plugin.
+ *
+ * @param string $relative Relative path inside plugin root (e.g. 'templates/partials/course-card.php').
+ * @param array  $vars     Variables to extract into template scope.
+ */
+function sikshya_render_template_partial(string $relative, array $vars = []): void
+{
+    $path = dirname(__DIR__) . '/' . ltrim($relative, '/');
+    if (!is_readable($path)) {
+        return;
+    }
+    if ($vars !== []) {
+        extract($vars, EXTR_SKIP);
+    }
+    include $path;
+}
+
+/**
  * Echo a course card (used on catalog, featured, and popular sections).
  *
  * @param \WP_Post $course Course post object.
@@ -199,110 +217,17 @@ function sikshya_render_course_card(\WP_Post $course, string $type = 'default'):
     $course_thumbnail = get_the_post_thumbnail_url($course_id, 'medium');
     $course_categories = get_the_terms($course_id, \Sikshya\Constants\Taxonomies::COURSE_CATEGORY);
 
-    $price_num = $p['price'];
-    $sale_num = $p['sale_price'];
-    $on_sale = $p['on_sale'];
-    $currency = $p['currency'];
-
-    $card_label = sprintf(
-        /* translators: %s: course title */
-        __('Course: %s', 'sikshya'),
-        $course->post_title
-    );
-    ?>
-    <article class="sikshya-course-card sikshya-course-card--<?php echo esc_attr($type); ?>" aria-label="<?php echo esc_attr($card_label); ?>">
-        <div class="sikshya-course-card-image">
-            <?php if ($course_thumbnail) : ?>
-                <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-course-card-image-link" tabindex="-1" aria-hidden="true">
-                    <img src="<?php echo esc_url($course_thumbnail); ?>" alt="" class="sikshya-course-thumbnail" loading="lazy" width="400" height="225">
-                </a>
-            <?php else : ?>
-                <div class="sikshya-course-placeholder" aria-hidden="true">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" focusable="false">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14,2 14,8 20,8"></polyline>
-                    </svg>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($on_sale) : ?>
-                <div class="sikshya-course-badge sikshya-course-badge--sale">
-                    <?php esc_html_e('Sale', 'sikshya'); ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (get_post_meta($course_id, '_sikshya_featured', true)) : ?>
-                <div class="sikshya-course-badge sikshya-course-badge--featured">
-                    <?php esc_html_e('Featured', 'sikshya'); ?>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <div class="sikshya-course-card-content">
-            <?php if ($course_categories && !is_wp_error($course_categories)) : ?>
-                <div class="sikshya-course-categories">
-                    <?php foreach (array_slice($course_categories, 0, 2) as $category) : ?>
-                        <span class="sikshya-course-category"><?php echo esc_html($category->name); ?></span>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <h3 class="sikshya-course-title">
-                <a href="<?php echo esc_url(get_permalink($course_id)); ?>">
-                    <?php echo esc_html($course->post_title); ?>
-                </a>
-            </h3>
-
-            <p class="sikshya-course-excerpt">
-                <?php echo esc_html(wp_trim_words($course->post_excerpt ?: $course->post_content, 15)); ?>
-            </p>
-
-            <div class="sikshya-course-meta">
-                <?php if ($course_instructor) : ?>
-                    <div class="sikshya-course-instructor">
-                        <span class="sikshya-course-instructor-label"><?php esc_html_e('By', 'sikshya'); ?></span>
-                        <span class="sikshya-course-instructor-name"><?php echo esc_html($course_instructor->display_name); ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($course_duration) : ?>
-                    <div class="sikshya-course-duration">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12,6 12,12 16,14"></polyline>
-                        </svg>
-                        <span><?php echo esc_html($course_duration); ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($course_difficulty) : ?>
-                    <div class="sikshya-course-difficulty">
-                        <span class="sikshya-difficulty-badge sikshya-difficulty-badge--<?php echo esc_attr($course_difficulty); ?>">
-                            <?php echo esc_html(ucfirst((string) $course_difficulty)); ?>
-                        </span>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="sikshya-course-footer">
-                <div class="sikshya-course-price">
-                    <?php if ($on_sale && null !== $price_num && null !== $sale_num) : ?>
-                        <span class="sikshya-course-price-original" aria-hidden="true"><?php echo wp_kses_post(sikshya_format_price($price_num, $currency)); ?></span>
-                        <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price($sale_num, $currency)); ?></span>
-                    <?php elseif (null !== $price_num && $price_num > 0) : ?>
-                        <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price($price_num, $currency)); ?></span>
-                    <?php else : ?>
-                        <span class="sikshya-course-price-free"><?php esc_html_e('Free', 'sikshya'); ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-button sikshya-button--small">
-                    <?php esc_html_e('View course', 'sikshya'); ?>
-                </a>
-            </div>
-        </div>
-    </article>
-    <?php
+    sikshya_render_template_partial('templates/partials/course-card.php', [
+        'course' => $course,
+        'type' => $type,
+        'pricing' => $p,
+        'course_duration' => $course_duration,
+        'course_difficulty' => $course_difficulty,
+        'course_instructor' => $course_instructor,
+        'course_thumbnail' => $course_thumbnail,
+        'course_categories' => $course_categories,
+        'curriculum_counts' => sikshya_get_course_curriculum_counts($course_id),
+    ]);
 }
 
 /**
@@ -388,6 +313,48 @@ function sikshya_is_user_enrolled_in_course(int $course_id, int $user_id = 0): b
 function sikshya_get_course_curriculum_public(int $course_id): array
 {
     return \Sikshya\Services\PublicCurriculumService::getCourseCurriculum($course_id);
+}
+
+/**
+ * Curriculum counts for catalog cards (cached).
+ *
+ * @return array{lessons:int,quizzes:int,assignments:int,total:int}
+ */
+function sikshya_get_course_curriculum_counts(int $course_id): array
+{
+    $course_id = (int) $course_id;
+    if ($course_id <= 0) {
+        return ['lessons' => 0, 'quizzes' => 0, 'assignments' => 0, 'total' => 0];
+    }
+
+    $cache_key = 'sikshya_course_counts_' . $course_id . '_' . (string) get_post_modified_time('U', true, $course_id);
+    $cached = get_transient($cache_key);
+    if (is_array($cached)) {
+        return array_merge(['lessons' => 0, 'quizzes' => 0, 'assignments' => 0, 'total' => 0], $cached);
+    }
+
+    $counts = ['lessons' => 0, 'quizzes' => 0, 'assignments' => 0, 'total' => 0];
+    $blocks = sikshya_get_course_curriculum_public($course_id);
+    foreach ($blocks as $b) {
+        foreach ((array) ($b['contents'] ?? []) as $content_post) {
+            if (!$content_post instanceof \WP_Post) {
+                continue;
+            }
+            $pt = (string) $content_post->post_type;
+            if ($pt === 'sik_lesson') {
+                $counts['lessons']++;
+            } elseif ($pt === 'sik_quiz') {
+                $counts['quizzes']++;
+            } elseif ($pt === 'sik_assignment') {
+                $counts['assignments']++;
+            }
+            $counts['total']++;
+        }
+    }
+
+    set_transient($cache_key, $counts, 6 * HOUR_IN_SECONDS);
+
+    return $counts;
 }
 
 /**

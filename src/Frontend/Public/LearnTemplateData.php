@@ -6,6 +6,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Services\PublicCurriculumService;
+use Sikshya\Frontend\Public\SampleCatalog;
 
 /**
  * View-model builder for the course learn / curriculum page (presentation layer).
@@ -44,6 +45,8 @@ final class LearnTemplateData
 
         $course_post = $course_id > 0 ? get_post($course_id) : null;
         $stats       = self::computeStats($blocks);
+        $sample_course = $course_post ? SampleCatalog::findCourseByTitle((string) get_the_title($course_post)) : null;
+        $mock_ui = SampleCatalog::mockUiMeta($course_post ? (string) get_the_title($course_post) : '');
 
         $vm = [
             'course_id'   => $course_id,
@@ -52,6 +55,8 @@ final class LearnTemplateData
             'curriculum'  => $blocks,
             'blocks'      => $blocks,
             'stats'       => $stats,
+            'sample_course' => $sample_course,
+            'mock_ui' => $mock_ui,
             'error'       => $error,
             'course_thumb'=> $course_post ? get_the_post_thumbnail_url($course_post->ID, 'large') : '',
             'urls'        => [
@@ -66,7 +71,7 @@ final class LearnTemplateData
 
     /**
      * @param array<int, array{chapter: \WP_Post, contents: array<int, \WP_Post>}> $raw
-     * @return array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>}>
+     * @return array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, item_count: int}>
      */
     private static function enrichBlocks(int $user_id, int $course_id, array $raw): array
     {
@@ -76,11 +81,14 @@ final class LearnTemplateData
         foreach ($raw as $row) {
             $chapter = $row['chapter'];
             $items   = [];
+            $idx     = 0;
 
             foreach ($row['contents'] as $p) {
                 if (! $p instanceof \WP_Post) {
                     continue;
                 }
+
+                ++$idx;
 
                 $type_key   = self::contentTypeKey($p->post_type);
                 $pto        = get_post_type_object($p->post_type);
@@ -90,17 +98,34 @@ final class LearnTemplateData
 
                 $items[] = [
                     'post'        => $p,
-                    'permalink'   => get_permalink($p) ?: '',
+                    'permalink'   => self::learnPermalinkFor($p, $type_key),
                     'title'       => get_the_title($p),
                     'type_key'    => $type_key,
                     'type_label'  => $type_label,
+                    'lesson_type' => $type_key === 'lesson' ? sanitize_key((string) get_post_meta((int) $p->ID, '_sikshya_lesson_type', true)) : '',
+                    'meta_line'   => CurriculumOutlineMeta::itemMetaLine($p, $type_key),
+                    'duration_minutes' => CurriculumOutlineMeta::itemDurationMinutes($p, $type_key),
+                    'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
+                    'index_in_section' => $idx,
                     'completed'   => self::isItemCompleted($progress, $user_id, $course_id, $p),
                 ];
+            }
+
+            $completed_in_section = 0;
+            $section_mins         = 0;
+            foreach ($items as $it) {
+                if (!empty($it['completed'])) {
+                    ++$completed_in_section;
+                }
+                $section_mins += (int) ($it['duration_minutes'] ?? 0);
             }
 
             $out[] = [
                 'chapter' => $chapter,
                 'items'   => $items,
+                'item_count' => count($items),
+                'completed_in_section' => $completed_in_section,
+                'section_duration_minutes' => $section_mins,
             ];
         }
 
@@ -119,6 +144,16 @@ final class LearnTemplateData
             default:
                 return 'content';
         }
+    }
+
+    private static function learnPermalinkFor(\WP_Post $p, string $type_key): string
+    {
+        if (in_array($type_key, ['lesson', 'quiz', 'assignment'], true)) {
+            $slug = $p->post_name ?: sanitize_title((string) $p->post_title);
+            return PublicPageUrls::learnContent($type_key, $slug);
+        }
+
+        return get_permalink($p) ?: '';
     }
 
     private static function isItemCompleted(ProgressRepository $progress, int $user_id, int $course_id, \WP_Post $p): bool

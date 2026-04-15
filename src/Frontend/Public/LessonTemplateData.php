@@ -3,6 +3,11 @@
 namespace Sikshya\Frontend\Public;
 
 use Sikshya\Constants\PostTypes;
+use Sikshya\Database\Repositories\EnrollmentRepository;
+use Sikshya\Database\Repositories\ProgressRepository;
+use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Services\PublicCurriculumService;
+use Sikshya\Frontend\Public\SampleCatalog;
 
 /**
  * @package Sikshya\Frontend\Public
@@ -14,15 +19,262 @@ final class LessonTemplateData
      */
     public static function forPost(\WP_Post $post): array
     {
+        $lesson_id = (int) $post->ID;
+        $course_id = self::lessonCourseId($lesson_id);
+        $uid       = get_current_user_id();
+
+        $error    = '';
+        $enrolled = false;
+        $blocks   = [];
+
+        if ($uid <= 0) {
+            $error = __('Please log in to access your learning.', 'sikshya');
+        } elseif ($course_id <= 0) {
+            $error = __('This lesson is not linked to a course.', 'sikshya');
+        } else {
+            $repo     = new EnrollmentRepository();
+            $enrolled = $repo->findByUserAndCourse($uid, $course_id) !== null;
+            if (!$enrolled) {
+                $error = __('You are not enrolled in this course.', 'sikshya');
+            } else {
+                $raw    = PublicCurriculumService::getCourseCurriculum($course_id);
+                $blocks = self::enrichBlocks($uid, $course_id, $raw, $lesson_id);
+            }
+        }
+
+        $course_post = $course_id > 0 ? get_post($course_id) : null;
+        $stats       = self::computeStats($blocks);
+        $nav         = self::computePrevNext($blocks, $lesson_id);
+        $current_chapter = self::currentChapterFor($blocks);
+        $sample_course = $course_post ? SampleCatalog::findCourseByTitle((string) get_the_title($course_post)) : null;
+        $sample_item = $sample_course ? SampleCatalog::findContentByTitleInCourse($sample_course, (string) get_the_title($post)) : null;
+        $mock_ui = SampleCatalog::mockUiMeta(($course_post ? (string) get_the_title($course_post) : '') . '|' . (string) get_the_title($post));
+
         return apply_filters(
             'sikshya_lesson_template_data',
             [
                 'post' => $post,
+                'lesson_id' => $lesson_id,
+                'course_id' => $course_id,
+                'course' => $course_post,
+                'current_chapter' => $current_chapter,
+                'logged_in' => $uid > 0,
+                'enrolled' => $enrolled,
+                'error' => $error,
+                'blocks' => $blocks,
+                'stats' => $stats,
+                'nav' => $nav,
+                'sample_course' => $sample_course,
+                'sample_item' => $sample_item,
+                'mock_ui' => $mock_ui,
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
+                    'login' => wp_login_url(get_permalink($post) ?: ''),
+                    'course' => $course_post ? (get_permalink($course_post) ?: '') : '',
+                    'learn' => PublicPageUrls::learnForCourse($course_id),
+                    'account' => PublicPageUrls::url('account'),
                 ],
             ],
             $post
         );
+    }
+
+    /**
+     * @param array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>}> $blocks
+     * @return \WP_Post|null
+     */
+    private static function currentChapterFor(array $blocks): ?\WP_Post
+    {
+        foreach ($blocks as $block) {
+            foreach ((array) ($block['items'] ?? []) as $item) {
+                if (!empty($item['current']) && isset($block['chapter']) && $block['chapter'] instanceof \WP_Post) {
+                    return $block['chapter'];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static function lessonCourseId(int $lesson_id): int
+    {
+        $a = (int) get_post_meta($lesson_id, '_sikshya_lesson_course', true);
+        if ($a > 0) {
+            return $a;
+        }
+
+        return (int) get_post_meta($lesson_id, 'sikshya_lesson_course', true);
+    }
+
+    /**
+     * @param array<int, array{chapter: \WP_Post, contents: array<int, \WP_Post>}> $raw
+     * @return array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, item_count: int, open: bool}>
+     */
+    private static function enrichBlocks(int $user_id, int $course_id, array $raw, int $current_post_id): array
+    {
+        $progress = new ProgressRepository();
+        $out      = [];
+
+        foreach ($raw as $row) {
+            $chapter = $row['chapter'];
+            $items   = [];
+            $idx     = 0;
+
+            foreach ($row['contents'] as $p) {
+                if (!$p instanceof \WP_Post) {
+                    continue;
+                }
+
+                ++$idx;
+
+                $is_current = (int) $p->ID === $current_post_id;
+
+                $type_key   = self::contentTypeKey($p->post_type);
+                $pto        = get_post_type_object($p->post_type);
+                $type_label = $pto && isset($pto->labels->singular_name)
+                    ? (string) $pto->labels->singular_name
+                    : $p->post_type;
+
+                $items[] = [
+                    'post' => $p,
+                    'id' => (int) $p->ID,
+                    'permalink' => self::learnPermalinkFor($p, $type_key),
+                    'title' => get_the_title($p),
+                    'type_key' => $type_key,
+                    'type_label' => $type_label,
+                    'lesson_type' => $type_key === 'lesson' ? sanitize_key((string) get_post_meta((int) $p->ID, '_sikshya_lesson_type', true)) : '',
+                    'meta_line' => CurriculumOutlineMeta::itemMetaLine($p, $type_key),
+                    'duration_minutes' => CurriculumOutlineMeta::itemDurationMinutes($p, $type_key),
+                    'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
+                    'index_in_section' => $idx,
+                    'completed' => self::isItemCompleted($progress, $user_id, $course_id, $p),
+                    'current' => $is_current,
+                ];
+            }
+
+            $completed_in_section = 0;
+            $section_mins         = 0;
+            foreach ($items as $it) {
+                if (!empty($it['completed'])) {
+                    ++$completed_in_section;
+                }
+                $section_mins += (int) ($it['duration_minutes'] ?? 0);
+            }
+
+            $out[] = [
+                'chapter' => $chapter,
+                'items' => $items,
+                'item_count' => count($items),
+                'completed_in_section' => $completed_in_section,
+                'section_duration_minutes' => $section_mins,
+                // Outline UI: all chapters expanded by default (see curriculum partial).
+                'open' => true,
+            ];
+        }
+
+        return $out;
+    }
+
+    private static function contentTypeKey(string $post_type): string
+    {
+        switch ($post_type) {
+            case PostTypes::LESSON:
+                return 'lesson';
+            case PostTypes::QUIZ:
+                return 'quiz';
+            case PostTypes::ASSIGNMENT:
+                return 'assignment';
+            default:
+                return 'content';
+        }
+    }
+
+    private static function learnPermalinkFor(\WP_Post $p, string $type_key): string
+    {
+        if (in_array($type_key, ['lesson', 'quiz', 'assignment'], true)) {
+            $slug = $p->post_name ?: sanitize_title((string) $p->post_title);
+            return PublicPageUrls::learnContent($type_key, $slug);
+        }
+
+        return get_permalink($p) ?: '';
+    }
+
+    private static function isItemCompleted(ProgressRepository $progress, int $user_id, int $course_id, \WP_Post $p): bool
+    {
+        if ($p->post_type === PostTypes::LESSON) {
+            return $progress->hasLessonCompletion($user_id, $course_id, (int) $p->ID);
+        }
+
+        if ($p->post_type === PostTypes::QUIZ) {
+            return $progress->hasQuizCompletion($user_id, $course_id, (int) $p->ID);
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, open: bool}> $blocks
+     * @return array{total_items: int, completed_items: int, percent: int}
+     */
+    private static function computeStats(array $blocks): array
+    {
+        $total     = 0;
+        $completed = 0;
+
+        foreach ($blocks as $block) {
+            foreach ($block['items'] as $item) {
+                ++$total;
+                if (!empty($item['completed'])) {
+                    ++$completed;
+                }
+            }
+        }
+
+        $percent = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
+
+        return [
+            'total_items' => $total,
+            'completed_items' => $completed,
+            'percent' => $percent,
+        ];
+    }
+
+    /**
+     * @param array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, open: bool}> $blocks
+     * @return array{prev: string, next: string}
+     */
+    private static function computePrevNext(array $blocks, int $current_post_id): array
+    {
+        $flat = [];
+        foreach ($blocks as $block) {
+            foreach ($block['items'] as $item) {
+                if (!empty($item['permalink'])) {
+                    $flat[] = [
+                        'id' => (int) ($item['id'] ?? 0),
+                        'permalink' => (string) $item['permalink'],
+                    ];
+                }
+            }
+        }
+
+        $prev = '';
+        $next = '';
+        foreach ($flat as $i => $row) {
+            if ($row['id'] !== $current_post_id) {
+                continue;
+            }
+            if ($i > 0) {
+                $prev = $flat[$i - 1]['permalink'];
+            }
+            if ($i < count($flat) - 1) {
+                $next = $flat[$i + 1]['permalink'];
+            }
+            break;
+        }
+
+        return [
+            'prev' => $prev,
+            'next' => $next,
+        ];
     }
 }

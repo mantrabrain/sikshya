@@ -42,12 +42,16 @@ get_header();
                 </div>
                 <div class="sikshya-pagination">
                     <?php
-                    echo paginate_links(
+                    $links = paginate_links(
                         [
                             'prev_text' => __('Previous', 'sikshya'),
                             'next_text' => __('Next', 'sikshya'),
+                            'type' => 'list',
                         ]
                     );
+                    if (!empty($links)) {
+                        echo wp_kses_post($links);
+                    }
                     ?>
                 </div>
             <?php else : ?>

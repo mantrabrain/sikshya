@@ -1,0 +1,1774 @@
+/**
+ * Sikshya Learn UI — SaaS learning workspace (long-session friendly).
+ *
+ * Notes:
+ * - This file styles only the distraction-free Learn shell.
+ * - Keep contrast comfortable (avoid pure black on pure white).
+ */
+
+:root {
+  /* =========================================================
+   * Sikshya Learn — STYLE GUIDE (Design Tokens)
+   * =======================================================*/
+
+  /* Layout */
+  --sikshya-learn-topbar-h: 56px;
+  --sikshya-learn-railhead-h: 52px;
+  --sikshya-learn-railhead-pad: 16px;
+  --sikshya-learn-sidebar-w: 400px;
+  --sikshya-learn-sidebar-w-current: var(--sikshya-learn-sidebar-w);
+  --sikshya-learn-gutter: 16px;
+  /* Offset for safe area; admin-bar is handled separately to avoid double-spacing */
+  --sikshya-learn-top-offset: env(safe-area-inset-top, 0px);
+  /* Topbar visibility multiplier (1 visible, 0 scrolled away) */
+  --sikshya-learn-topbar-visible: 1;
+
+  /* Curriculum sidebar — derived from Sikshya Learn tokens (brand blue, neutral surfaces) */
+  --sikshya-curriculum-accent: var(--sikshya-learn-primary);
+  --sikshya-curriculum-accent-strong: #1d4ed8;
+  --sikshya-curriculum-section-open: rgba(15, 23, 42, 0.04);
+  --sikshya-curriculum-row-active: rgba(37, 99, 235, 0.08);
+  --sikshya-curriculum-row-hover: rgba(15, 23, 42, 0.04);
+  --sikshya-curriculum-check-todo: rgba(17, 24, 39, 0.35);
+
+  /* Color system (comfortable contrast) */
+  --sikshya-learn-bg: #f5f7ff;
+  --sikshya-learn-surface: #ffffff;
+  --sikshya-learn-surface-2: #f8fafc;
+  --sikshya-learn-surface-3: #eef2ff;
+  --sikshya-learn-text: #0f172a;
+  --sikshya-learn-muted: #64748b;
+  --sikshya-learn-border: #e2e8f0;
+  /* Top bar — light surface (matches panels + public Sikshya aesthetic) */
+  --sikshya-learn-topbar-bg: rgba(37, 99, 235, 0.08);
+  --sikshya-learn-topbar-edge: rgba(15, 23, 42, 0.08);
+  --sikshya-learn-topbar-shadow: 0 1px 0 rgba(15, 23, 42, 0.05), 0 6px 18px rgba(15, 23, 42, 0.05);
+
+  /* Brand / actions */
+  --sikshya-learn-primary: #2563eb;
+  --sikshya-learn-primary-2: #60a5fa;
+  --sikshya-learn-danger: #dc2626;
+  --sikshya-learn-success: #16a34a;
+
+  /* Typography scale */
+  --sikshya-learn-fs-11: 11px;
+  --sikshya-learn-fs-12: 12px;
+  --sikshya-learn-fs-13: 13px;
+  --sikshya-learn-fs-14: 14px;
+  --sikshya-learn-fs-15: 15px;
+  --sikshya-learn-fs-16: 16px;
+  --sikshya-learn-fs-18: 18px;
+  --sikshya-learn-fs-22: 22px;
+
+  /* Long-session typography */
+  --sikshya-learn-lh-body: 1.65;
+  --sikshya-learn-lh-tight: 1.25;
+  --sikshya-learn-tracking-tight: -0.015em;
+
+  /* Spacing scale */
+  --sikshya-learn-space-6: 6px;
+  --sikshya-learn-space-8: 8px;
+  --sikshya-learn-space-10: 10px;
+  --sikshya-learn-space-12: 12px;
+  --sikshya-learn-space-14: 14px;
+  --sikshya-learn-space-16: 16px;
+
+  /* Radius + shadows */
+  --sikshya-learn-radius-8: 8px;
+  --sikshya-learn-radius-10: 10px;
+  --sikshya-learn-radius-12: 12px;
+  --sikshya-learn-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --sikshya-learn-shadow-md: 0 1px 2px rgba(16, 24, 40, 0.06), 0 10px 28px rgba(16, 24, 40, 0.08);
+  --sikshya-learn-shadow-panel: 0 1px 3px rgba(16, 24, 40, 0.05), 0 6px 24px rgba(16, 24, 40, 0.04);
+
+  /* Main column reading width (prose / tabs) */
+  --sikshya-learn-prose-max: 52rem;
+
+  /* Focus ring (accessibility) */
+  --sikshya-learn-focus: var(--sikshya-learn-primary);
+  --sikshya-learn-focus-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+
+  /* UI neutrals for long-session states */
+  --sikshya-learn-ink: rgba(15, 23, 42, 0.92);
+  --sikshya-learn-hover: rgba(15, 23, 42, 0.04);
+  --sikshya-learn-press: rgba(15, 23, 42, 0.06);
+  --sikshya-learn-accent-wash: rgba(37, 99, 235, 0.06);
+  --sikshya-learn-accent-wash-2: rgba(37, 99, 235, 0.10);
+  --sikshya-learn-sidebar-active: rgba(37, 99, 235, 0.10);
+}
+
+/* Collapsible sidebar (desktop + mobile) */
+.sikshya-sidebarCollapsed {
+  --sikshya-learn-sidebar-w-current: 0px;
+}
+
+/* WP adds layout offset for admin bar; don't double-count it */
+.admin-bar.sikshya-learning-shell {
+  --sikshya-learn-top-offset: 0px;
+}
+
+/* Base */
+.sikshya-learning-shell,
+.sikshya-learning-shell * {
+  box-sizing: border-box;
+}
+
+.sikshya-learning-shell {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-size: var(--sikshya-learn-fs-15);
+  line-height: var(--sikshya-learn-lh-body);
+  background: var(--sikshya-learn-bg);
+  color: var(--sikshya-learn-text);
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.sikshya-learning-shell a {
+  color: inherit;
+}
+
+.sikshya-muted {
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-zeroMargin {
+  margin: 0;
+}
+
+.sikshya-learning-shell :focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+
+.sikshya-learning-shell button,
+.sikshya-learning-shell input,
+.sikshya-learning-shell select,
+.sikshya-learning-shell textarea {
+  font: inherit;
+}
+
+.sikshya-learning-app {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Layout shell */
+.sikshya-learnLayout {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Top bar — light chrome: brand, current context, exit (Sikshya Learn) */
+.sikshya-learnTopbar {
+  position: sticky;
+  top: var(--sikshya-learn-top-offset);
+  z-index: 50;
+  height: var(--sikshya-learn-topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: max(var(--sikshya-learn-railhead-pad), env(safe-area-inset-left));
+  padding-right: max(var(--sikshya-learn-railhead-pad), env(safe-area-inset-right));
+  background: var(--sikshya-learn-topbar-bg);
+  color: var(--sikshya-learn-text);
+  border-bottom: 1px solid var(--sikshya-learn-topbar-edge);
+  box-shadow: var(--sikshya-learn-topbar-shadow);
+}
+
+.sikshya-learnTopbar__left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.sikshya-learnTopbar .sikshya-iconBtn {
+  flex: 0 0 auto;
+  color: var(--sikshya-learn-text);
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-learnTopbar .sikshya-iconBtn:hover {
+  background: var(--sikshya-learn-accent-wash);
+  color: var(--sikshya-learn-primary);
+}
+
+.sikshya-learnTopbar .sikshya-iconBtn:active {
+  background: var(--sikshya-learn-accent-wash-2);
+}
+
+.sikshya-learnTopbar__brand {
+  flex: 0 0 auto;
+  font-weight: 800;
+  font-size: var(--sikshya-learn-fs-14);
+  letter-spacing: var(--sikshya-learn-tracking-tight);
+  color: var(--sikshya-learn-text);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 6px 8px;
+  margin: 0 2px 0 0;
+  border-radius: var(--sikshya-learn-radius-8);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.sikshya-learnTopbar__brand:hover {
+  color: var(--sikshya-learn-primary);
+  background: var(--sikshya-learn-accent-wash);
+}
+
+.sikshya-learnTopbar__brand:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+
+.sikshya-learnTopbar__title {
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 4px 0 4px 14px;
+  border-left: 1px solid var(--sikshya-learn-border);
+  font-weight: 600;
+  font-size: var(--sikshya-learn-fs-13);
+  line-height: var(--sikshya-learn-lh-tight);
+  letter-spacing: var(--sikshya-learn-tracking-tight);
+  color: var(--sikshya-learn-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sikshya-learnTopbar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.sikshya-learnTopbar__right .sikshya-btn {
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+@media (max-width: 1023px) {
+  .sikshya-learnTopbar__title {
+    max-width: min(52vw, 280px);
+  }
+}
+
+@media (max-width: 480px) {
+  .sikshya-learnTopbar__brand {
+    max-width: 38vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* =========================================================
+ * Buttons (Learn Style Guide Component)
+ * - Primary: main CTA (Continue, Mark complete, Start quiz)
+ * - Outline: secondary actions on light chrome (Exit learning)
+ * - Light: subtle actions on dark surfaces (Prev/Next on player)
+ * - Dark: optional contrast on dark surfaces
+ * =======================================================*/
+.sikshya-learning-shell .sikshya-btn {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font-weight: 750;
+  letter-spacing: var(--sikshya-learn-tracking-tight);
+  border-radius: var(--sikshya-learn-radius-10);
+  padding: 10px 14px;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: var(--sikshya-learn-lh-tight);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: none;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.sikshya-learning-shell .sikshya-btn:active {
+  transform: translateY(1px);
+}
+
+.sikshya-learning-shell .sikshya-btn:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+  box-shadow: var(--sikshya-learn-focus-shadow);
+}
+
+.sikshya-learning-shell .sikshya-btn[aria-disabled="true"],
+.sikshya-learning-shell .sikshya-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+/* Size */
+.sikshya-learning-shell .sikshya-btn--sm {
+  padding: 8px 12px;
+  font-size: var(--sikshya-learn-fs-13);
+}
+
+/* Primary */
+.sikshya-learning-shell .sikshya-btn--primary {
+  background: var(--sikshya-learn-primary);
+  color: #fff;
+  border-color: rgba(37, 99, 235, 0.26);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.16) inset;
+}
+
+.sikshya-learning-shell .sikshya-btn--primary:hover {
+  background: var(--sikshya-curriculum-accent-strong);
+}
+
+/* Outline — secondary actions (e.g. Exit learning on light top bar) */
+.sikshya-learning-shell .sikshya-btn--outline {
+  background: var(--sikshya-learn-surface);
+  color: var(--sikshya-learn-text);
+  border-color: var(--sikshya-learn-border);
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.sikshya-learning-shell .sikshya-btn--outline:hover {
+  background: var(--sikshya-learn-surface-2);
+  border-color: rgba(37, 99, 235, 0.20);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learning-shell .sikshya-btn--outline:active {
+  background: var(--sikshya-learn-surface-3);
+}
+
+/* Dark — reserved for future dark surfaces (e.g. embedded players); not used on light top bar */
+.sikshya-learning-shell .sikshya-btn--dark {
+  background: #1f2937;
+  color: #f9fafb;
+  border-color: rgba(15, 23, 42, 0.5);
+}
+
+.sikshya-learning-shell .sikshya-btn--dark:hover {
+  background: #111827;
+  border-color: #111827;
+}
+
+/* Light */
+.sikshya-learning-shell .sikshya-btn--light {
+  background: var(--sikshya-learn-surface-2);
+  color: var(--sikshya-learn-text);
+  border-color: var(--sikshya-learn-border);
+}
+
+.sikshya-learning-shell .sikshya-btn--light:hover {
+  background: var(--sikshya-learn-surface-3);
+  border-color: rgba(37, 99, 235, 0.16);
+}
+
+/* Icon sizing inside buttons */
+.sikshya-learning-shell .sikshya-btn svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.sikshya-iconBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--sikshya-learn-radius-10);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sikshya-iconBtn:hover {
+  background: var(--sikshya-learn-press);
+}
+
+.sikshya-iconBtn:active {
+  transform: translateY(1px);
+}
+
+.sikshya-iconBtn:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+
+.sikshya-iconBtn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Main area — sidebar is fixed below top bar (full viewport height); drawer on small screens */
+.sikshya-learnMain {
+  position: relative;
+  min-width: 0;
+}
+
+/*
+ * Sidebar: position fixed + top/bottom pins full height under the sticky top bar.
+ * (Matches “sticky” learner expectation: column stays put while main content scrolls.)
+ */
+.sikshya-learnSidebar {
+  position: fixed;
+  top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
+  left: 0;
+  bottom: 0;
+  width: var(--sikshya-learn-sidebar-w);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--sikshya-learn-surface);
+  border-right: 1px solid var(--sikshya-learn-border);
+  z-index: 40;
+  overflow: auto;
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03);
+  will-change: transform;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sikshya-sidebarCollapsed .sikshya-learnSidebar {
+  transform: translateX(calc(-1 * var(--sikshya-learn-sidebar-w)));
+}
+
+.sikshya-learnSidebar__inner {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sikshya-learnSidebar__head {
+  height: var(--sikshya-learn-railhead-h);
+  padding: 0 var(--sikshya-learn-railhead-pad);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--sikshya-learn-border);
+  background: var(--sikshya-learn-surface);
+}
+
+.sikshya-learnSidebar__heading {
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-16);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-sidebarAction {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--sikshya-learn-muted);
+  font-weight: 700;
+  font-size: var(--sikshya-learn-fs-12);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-sidebarAction:hover {
+  background: var(--sikshya-learn-surface-2);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnSidebar__scroll {
+  flex: 1;
+  overflow: visible;
+  padding: 10px 12px 16px;
+}
+
+.sikshya-learnSidebar__scroll:has(.sikshya-curriculumOutline) {
+  padding: 0;
+}
+
+.sikshya-learnSidebar__scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sikshya-learnSidebar__scroll::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.10);
+  border-radius: 999px;
+}
+
+.sikshya-learnSidebar__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sikshya-learnOverlay {
+  position: fixed;
+  top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 39;
+}
+
+@media (max-width: 1023px) {
+  .sikshya-learnSidebar {
+    width: min(var(--sikshya-learn-sidebar-w), 92vw);
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+  }
+  .sikshya-outlineOpen .sikshya-learnSidebar {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learnOverlay {
+    display: none !important;
+  }
+
+  .sikshya-learnSidebar {
+    transform: translateX(0);
+  }
+}
+
+/* =========================================================
+ * Main content column (right of curriculum sidebar)
+ * =======================================================*/
+.sikshya-learnContent {
+  min-width: 0;
+  padding: 0 22px 48px;
+  padding-left: calc(var(--sikshya-learn-sidebar-w-current) + 22px);
+  padding-right: max(22px, env(safe-area-inset-right));
+  max-width: none;
+  width: 100%;
+  transition: padding-left 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 1023px) {
+  .sikshya-learnContent {
+    padding: 0 16px 40px;
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+}
+
+.sikshya-contentSection {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.sikshya-contentSection:first-child {
+  margin-top: 0;
+}
+
+.sikshya-contentSection:last-child {
+  margin-bottom: 0;
+}
+
+.sikshya-contentPanel {
+  background: var(--sikshya-learn-surface);
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-12);
+  padding: 20px 22px;
+  min-height: 0;
+  box-shadow: var(--sikshya-learn-shadow-panel);
+}
+
+.sikshya-contentPanel--plain {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Empty / error state (content area only) */
+.sikshya-contentSection--centered {
+  min-height: calc(100dvh - (var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible))) - 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sikshya-contentPanel--emptyState {
+  border-radius: var(--sikshya-learn-radius-16);
+  padding: 28px;
+  box-shadow: none;
+  max-width: 56rem;
+  width: 100%;
+  background: rgba(245, 158, 11, 0.10); /* warning wash */
+  border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+.sikshya-learnEmptyState {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.sikshya-learnEmptyState__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.30);
+  color: #b45309;
+}
+
+.sikshya-learnEmptyState__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sikshya-learnEmptyState__title {
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-18);
+  line-height: var(--sikshya-learn-lh-tight);
+  letter-spacing: var(--sikshya-learn-tracking-tight);
+  font-weight: 800;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnEmptyState__message {
+  margin: 8px 0 0;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-learnEmptyState__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* Content column: prefer plain, unboxed reading experience */
+.sikshya-learning-shell .sikshya-learnContent .sikshya-contentPanel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.sikshya-learning-shell .sikshya-learnContent .sikshya-contentPanel--header {
+  background: var(--sikshya-learn-surface);
+  border-bottom: 1px solid var(--sikshya-learn-border);
+  padding-left: var(--sikshya-learn-railhead-pad);
+  padding-right: max(var(--sikshya-learn-railhead-pad), env(safe-area-inset-right));
+}
+
+.sikshya-contentPanel--header {
+  height: var(--sikshya-learn-railhead-h);
+  padding: 0 var(--sikshya-learn-railhead-pad);
+  border-radius: 0;
+  box-shadow: none;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--sikshya-learn-border);
+  display: flex;
+  align-items: center;
+}
+
+.sikshya-contentPanel--header {
+  /* Bleed through column padding so header strip touches edges */
+  margin-left: -22px;
+  margin-right: calc(-1 * max(22px, env(safe-area-inset-right)));
+}
+
+@media (max-width: 1023px) {
+  .sikshya-contentPanel--header {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader {
+  width: 100%;
+  margin-bottom: 0;
+  gap: 0;
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader__title {
+  font-size: var(--sikshya-learn-fs-16);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader__top {
+  align-items: center;
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader__actions {
+  padding-top: 0;
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sikshya-learnHeader__metaInline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: min(48vw, 540px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  align-self: center;
+}
+
+.sikshya-learnHeader__metaInline::-webkit-scrollbar {
+  display: none;
+}
+
+.sikshya-learnHeader__metaInline .sikshya-pill {
+  padding: 5px 9px;
+  font-size: 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader__titles {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sikshya-learnHeader__titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sikshya-learnHeader__titleRow--withMeta {
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.sikshya-learnHeader__titleLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.sikshya-learnHeader__chapterInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 34ch;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--sikshya-learn-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sikshya-learnHeader__chapterInline .sikshya-learnHeader__chapterIcon {
+  opacity: 0.85;
+}
+
+.sikshya-learnHeader__typeIcon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  color: var(--sikshya-learn-primary);
+}
+
+.sikshya-learnHeader__typeIcon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.sikshya-contentPanel--header .sikshya-learnHeader__chapter {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--sikshya-learn-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sikshya-learnHeader__chapterIcon {
+  display: inline-flex;
+  color: var(--sikshya-learn-muted);
+  opacity: 0.9;
+}
+
+.sikshya-learnHeader__chapterIcon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.sikshya-learnContent > .sikshya-contentPanel[role="alert"] {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(254, 242, 242, 0.85);
+  box-shadow: var(--sikshya-learn-shadow-sm);
+}
+
+.sikshya-learnContent > .sikshya-contentPanel[role="alert"] p {
+  margin: 0;
+  color: var(--sikshya-learn-text);
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.55;
+}
+
+/* Content header + meta */
+.sikshya-learnHeader {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.sikshya-learnHeader__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sikshya-learnHeader__titles {
+  min-width: 0;
+}
+
+.sikshya-learnHeader__actions {
+  flex: 0 0 auto;
+  padding-top: 2px;
+}
+
+.sikshya-learnHeader__kicker {
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sikshya-learn-muted);
+  margin-bottom: 6px;
+}
+
+.sikshya-learnHeader__chapter {
+  margin-top: 6px;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 700;
+  color: var(--sikshya-learn-muted);
+  line-height: 1.35;
+}
+
+.sikshya-learnHeader__title {
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-22);
+  font-weight: 800;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sikshya-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--sikshya-learn-border);
+  background: var(--sikshya-learn-surface-2);
+  color: var(--sikshya-learn-text);
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sikshya-pill:hover {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: var(--sikshya-learn-surface-3);
+}
+
+.sikshya-progress {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.sikshya-progress__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: var(--sikshya-learn-fs-13);
+}
+
+.sikshya-progress__top strong {
+  font-weight: 800;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-progress__bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sikshya-learn-surface-2);
+  overflow: hidden;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.sikshya-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--sikshya-learn-primary), var(--sikshya-learn-primary-2));
+}
+
+/* Video player (lesson shell) */
+.sikshya-videoMock {
+  margin-top: 16px;
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+  border-radius: var(--sikshya-learn-radius-12);
+  overflow: hidden;
+  background: #0b1220;
+  box-shadow: none;
+}
+
+/* 16:9 stage: constrained height for long sessions */
+.sikshya-videoMock__stage {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: min(60vh, 520px);
+  overflow: hidden;
+  background: radial-gradient(1200px 600px at 50% 10%, rgba(96, 165, 250, 0.35), transparent 60%),
+    radial-gradient(800px 400px at 10% 90%, rgba(37, 99, 235, 0.35), transparent 60%),
+    #0b1220;
+}
+
+.sikshya-videoMock__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.sikshya-videoMock__embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.sikshya-videoMock__badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.sikshya-videoMock__play {
+  display: inline-grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 800;
+}
+
+.sikshya-videoMock__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: rgba(15, 23, 42, 0.65);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: var(--sikshya-learn-fs-12);
+  font-variant-numeric: tabular-nums;
+}
+
+.sikshya-videoMock__scrub {
+  height: 5px;
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sikshya-videoMock__spacer {
+  width: 4px;
+}
+
+/* Lists + split columns */
+.sikshya-learnSplit {
+  display: grid;
+  gap: 20px;
+  margin-top: 18px;
+  padding-top: 4px;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learnSplit {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+}
+
+.sikshya-learnH3 {
+  margin: 0 0 12px;
+  font-size: var(--sikshya-learn-fs-14);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnList {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--sikshya-learn-text);
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.55;
+}
+
+.sikshya-learnList li {
+  margin: 8px 0;
+  padding-left: 2px;
+}
+
+.sikshya-learnList li::marker {
+  color: var(--sikshya-learn-primary);
+}
+
+.sikshya-resList {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.6;
+}
+
+.sikshya-resList li {
+  margin: 10px 0;
+}
+
+.sikshya-resLink {
+  color: var(--sikshya-learn-primary);
+  font-weight: 600;
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+.sikshya-resLink:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+/* Notes + announcements + reviews */
+.sikshya-noteMock {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-10);
+  background: var(--sikshya-learn-surface-2);
+  margin-bottom: 12px;
+}
+
+.sikshya-noteMock:last-of-type {
+  margin-bottom: 0;
+}
+
+.sikshya-noteMock__time {
+  font-weight: 800;
+  font-size: var(--sikshya-learn-fs-12);
+  font-variant-numeric: tabular-nums;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-noteMock__text {
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.5;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-announce {
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-10);
+  padding: 14px 16px;
+  background: var(--sikshya-learn-surface-2);
+}
+
+.sikshya-announce__title {
+  font-weight: 800;
+  font-size: var(--sikshya-learn-fs-14);
+  margin-bottom: 6px;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-announce__meta {
+  font-size: var(--sikshya-learn-fs-12);
+  margin-bottom: 10px;
+}
+
+.sikshya-reviewMock {
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-10);
+  padding: 14px 16px;
+  background: var(--sikshya-learn-surface-2);
+  margin-top: 12px;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.5;
+}
+
+.sikshya-reviewMock:first-of-type {
+  margin-top: 4px;
+}
+
+/* Quiz preview (quiz shell) */
+.sikshya-quizMock {
+  margin-top: 16px;
+}
+
+.sikshya-quizMock__card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.sikshya-quizMock__qTitle {
+  font-weight: 800;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.45;
+  margin-bottom: 12px;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-quizMock__opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--sikshya-learn-radius-10);
+  border: 0;
+  background: transparent;
+  margin-bottom: 8px;
+  font-size: var(--sikshya-learn-fs-14);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.sikshya-quizMock__opt:hover {
+  background: rgba(37, 99, 235, 0.03);
+}
+
+.sikshya-quizMock__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--sikshya-learn-border);
+}
+
+/* Tabs (Sikshya primary = active) */
+.sikshya-tabsSection {
+  margin-top: 8px;
+}
+
+.sikshya-tabsBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--sikshya-learn-border);
+  margin-bottom: 16px;
+  padding-bottom: 0;
+}
+
+.sikshya-tabBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  margin-bottom: -1px;
+  padding: 11px 14px;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--sikshya-learn-radius-8) var(--sikshya-learn-radius-8) 0 0;
+  color: var(--sikshya-learn-muted);
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.sikshya-tabBtn:hover {
+  color: var(--sikshya-learn-text);
+  background: var(--sikshya-learn-accent-wash);
+}
+
+.sikshya-tabBtn.is-active {
+  border-bottom-color: var(--sikshya-learn-primary);
+  color: var(--sikshya-learn-text);
+  font-weight: 800;
+}
+
+.sikshya-tabBtn:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+
+.sikshya-tabPanel {
+  display: none;
+}
+
+.sikshya-tabPanel.is-active {
+  display: block;
+}
+
+.sikshya-tabPanel .sikshya-contentPanel {
+  max-width: none;
+  width: 100%;
+}
+
+/* WordPress / rich text inside panels */
+.sikshya-learnContent .sikshya-contentPanel :where(p) {
+  margin: 0 0 1em;
+  font-size: var(--sikshya-learn-fs-15);
+  line-height: var(--sikshya-learn-lh-body);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(p):last-child {
+  margin-bottom: 0;
+}
+
+.sikshya-learnContent .sikshya-contentPanel p a,
+.sikshya-learnContent .sikshya-contentPanel li a,
+.sikshya-learnContent .sikshya-contentPanel blockquote a,
+.sikshya-learnContent .sikshya-contentPanel td a,
+.sikshya-learnContent .sikshya-contentPanel figcaption a {
+  color: var(--sikshya-learn-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sikshya-learnContent .sikshya-contentPanel p a:hover,
+.sikshya-learnContent .sikshya-contentPanel li a:hover,
+.sikshya-learnContent .sikshya-contentPanel blockquote a:hover,
+.sikshya-learnContent .sikshya-contentPanel td a:hover,
+.sikshya-learnContent .sikshya-contentPanel figcaption a:hover {
+  color: #1d4ed8;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(ul, ol) {
+  margin: 0 0 1em;
+  padding-left: 1.25rem;
+  font-size: var(--sikshya-learn-fs-15);
+  line-height: var(--sikshya-learn-lh-body);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(li) {
+  margin: 0.35em 0;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(h2, h3, h4) {
+  margin: 1.25em 0 0.5em;
+  font-weight: 800;
+  line-height: var(--sikshya-learn-lh-tight);
+  letter-spacing: var(--sikshya-learn-tracking-tight);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(h2) {
+  font-size: var(--sikshya-learn-fs-18);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(h3) {
+  font-size: var(--sikshya-learn-fs-16);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(h4) {
+  font-size: var(--sikshya-learn-fs-14);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(h2):first-child,
+.sikshya-learnContent .sikshya-contentPanel :where(h3):first-child,
+.sikshya-learnContent .sikshya-contentPanel :where(h4):first-child {
+  margin-top: 0;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(pre) {
+  margin: 1em 0;
+  padding: 14px 16px;
+  border-radius: var(--sikshya-learn-radius-12);
+  background: rgba(2, 6, 23, 0.92);
+  color: rgba(248, 250, 252, 0.92);
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.92em;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(:not(pre) > code) {
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #1d4ed8;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: var(--sikshya-learn-fs-14);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(th, td) {
+  border-bottom: 1px solid var(--sikshya-learn-border);
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(th) {
+  font-weight: 800;
+  color: var(--sikshya-learn-text);
+}
+
+/* Native / embedded players in lesson prose — full width, locked 16:9 */
+.sikshya-learnContent .sikshya-contentPanel :where(video) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: #0b1220;
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-learnContent .sikshya-contentPanel iframe[src*="youtube.com/embed"],
+.sikshya-learnContent .sikshya-contentPanel iframe[src*="youtube-nocookie.com/embed"],
+.sikshya-learnContent .sikshya-contentPanel iframe[src*="player.vimeo.com/video"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-learnContent .sikshya-contentPanel :where(blockquote) {
+  margin: 1em 0;
+  padding: 12px 16px;
+  border-left: 3px solid rgba(37, 99, 235, 0.45);
+  background: var(--sikshya-learn-surface-2);
+  border-radius: 0 var(--sikshya-learn-radius-8) var(--sikshya-learn-radius-8) 0;
+  color: var(--sikshya-learn-text);
+}
+
+/* Course content — curriculum accordion + lesson rows (Sikshya Learn) */
+.sikshya-curriculumOutline {
+  margin: 0;
+  padding: 0;
+}
+
+.sikshya-curriculumOutline__empty {
+  margin: 0;
+  padding: var(--sikshya-learn-space-16);
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.5;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-curriculumOutline__chapter {
+  border-bottom: 1px solid var(--sikshya-learn-border);
+  margin: 0;
+}
+
+.sikshya-curriculumOutline__sectionSummary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: var(--sikshya-learn-surface);
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.sikshya-curriculumOutline__sectionSummary:hover {
+  background: var(--sikshya-learn-hover);
+}
+
+.sikshya-curriculumOutline__sectionSummary:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: -2px;
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-curriculumOutline__sectionSummary::-webkit-details-marker,
+.sikshya-curriculumOutline__sectionSummary::marker {
+  display: none;
+}
+
+.sikshya-curriculumOutline__chapter[open] > .sikshya-curriculumOutline__sectionSummary {
+  background: var(--sikshya-curriculum-section-open);
+}
+
+.sikshya-curriculumOutline__chapter[data-sikshya-current-chapter="1"] > .sikshya-curriculumOutline__sectionSummary {
+  background: var(--sikshya-learn-sidebar-active);
+  box-shadow: inset 4px 0 0 var(--sikshya-curriculum-accent);
+}
+
+.sikshya-curriculumOutline__chapter[data-sikshya-current-chapter="1"] > .sikshya-curriculumOutline__sectionSummary .sikshya-curriculumOutline__sectionTitle {
+  color: var(--sikshya-curriculum-accent-strong);
+}
+
+.sikshya-curriculumOutline__chapter[data-sikshya-current-chapter="1"] > .sikshya-curriculumOutline__sectionSummary .sikshya-curriculumOutline__sectionChevron {
+  color: var(--sikshya-curriculum-accent-strong);
+}
+
+.sikshya-curriculumOutline__chapter[data-sikshya-current-chapter="1"] > .sikshya-curriculumOutline__sectionSummary:hover {
+  background: rgba(37, 99, 235, 0.12);
+}
+
+.sikshya-curriculumOutline__chapter[open] > .sikshya-curriculumOutline__sectionSummary:hover {
+  background: var(--sikshya-curriculum-section-open);
+}
+
+.sikshya-curriculumOutline__sectionHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px var(--sikshya-learn-space-16) 12px;
+  min-height: 48px;
+}
+
+.sikshya-curriculumOutline__sectionIcon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-curriculumOutline__sectionIcon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.sikshya-curriculumOutline__sectionText {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sikshya-curriculumOutline__sectionLabel {
+  display: block;
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-curriculumOutline__sectionTitle {
+  display: block;
+  font-size: var(--sikshya-learn-fs-14);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--sikshya-learn-text);
+  letter-spacing: -0.01em;
+}
+
+.sikshya-curriculumOutline__sectionMeta {
+  display: block;
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--sikshya-learn-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sikshya-curriculumOutline__sectionChevron {
+  flex: 0 0 auto;
+  color: var(--sikshya-learn-muted);
+  margin-top: 2px;
+  transition: transform 0.2s ease, color 0.15s ease;
+}
+
+.sikshya-curriculumOutline__sectionSummary:hover .sikshya-curriculumOutline__sectionChevron {
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-curriculumOutline__sectionChevron svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.sikshya-curriculumOutline__chapter[open] .sikshya-curriculumOutline__sectionChevron {
+  transform: rotate(180deg);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-curriculumOutline__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--sikshya-learn-surface);
+}
+
+.sikshya-curriculumOutline__item {
+  margin: 0;
+  padding: 0;
+}
+
+.sikshya-curriculumOutline__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding-right: 6px;
+  border-top: 1px solid var(--sikshya-learn-border);
+  background: var(--sikshya-learn-surface);
+  transition: background 0.15s ease;
+}
+
+.sikshya-curriculumOutline__row.is-current {
+  background: var(--sikshya-curriculum-row-active);
+  box-shadow: inset 3px 0 0 var(--sikshya-curriculum-accent);
+}
+
+.sikshya-curriculumOutline__row:focus-within {
+  background: var(--sikshya-learn-accent-wash);
+}
+
+.sikshya-curriculumOutline__row.is-current:focus-within {
+  background: var(--sikshya-learn-accent-wash-2);
+}
+
+.sikshya-curriculumOutline__row:not(.is-current):hover {
+  background: var(--sikshya-learn-hover);
+}
+
+.sikshya-curriculumOutline__link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 8px 12px var(--sikshya-learn-space-16);
+  text-decoration: none;
+  color: var(--sikshya-learn-text);
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.sikshya-curriculumOutline__itemIcon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--sikshya-learn-muted);
+  opacity: 0.95;
+}
+
+.sikshya-curriculumOutline__itemIcon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.sikshya-curriculumOutline__check {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  border-radius: var(--sikshya-learn-radius-8);
+  border: 2px solid var(--sikshya-curriculum-check-todo);
+  background: var(--sikshya-learn-surface);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sikshya-curriculumOutline__check.is-done {
+  border-color: transparent;
+  background: var(--sikshya-curriculum-accent);
+}
+
+.sikshya-curriculumOutline__check.is-done svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
+
+.sikshya-curriculumOutline__linkBody {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sikshya-curriculumOutline__lessonTitle {
+  font-size: var(--sikshya-learn-fs-14);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--sikshya-learn-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.sikshya-curriculumOutline__row.is-current .sikshya-curriculumOutline__lessonTitle {
+  font-weight: 500;
+  color: var(--sikshya-curriculum-accent-strong);
+}
+
+.sikshya-curriculumOutline__lessonSub {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--sikshya-learn-fs-12);
+  line-height: 1.25;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-curriculumOutline__dur {
+  font-size: var(--sikshya-learn-fs-12);
+  color: var(--sikshya-learn-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sikshya-curriculumOutline__resourcesBtn {
+  appearance: none;
+  flex: 0 0 auto;
+  align-self: flex-end;
+  margin: 2px 0 6px 0;
+  padding: 4px 8px;
+  min-height: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(37, 99, 235, 0.32);
+  background: var(--sikshya-learn-surface);
+  color: var(--sikshya-curriculum-accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  line-height: 1.3;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sikshya-curriculumOutline__resourcesBtn:hover {
+  border-color: var(--sikshya-curriculum-accent);
+  background: rgba(37, 99, 235, 0.06);
+  color: var(--sikshya-curriculum-accent-strong);
+}
+
+.sikshya-curriculumOutline__resourcesBtn:active {
+  transform: translateY(1px);
+}
+
+.sikshya-curriculumOutline__resourcesBtnInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.sikshya-curriculumOutline__resourcesBtnInner svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.sikshya-curriculumOutline__link:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: -2px;
+  border-radius: var(--sikshya-learn-radius-8);
+}
+
+.sikshya-curriculumOutline__resourcesBtn:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+  box-shadow: var(--sikshya-learn-focus-shadow);
+}
+
+/* Reduce motion for long sessions */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+

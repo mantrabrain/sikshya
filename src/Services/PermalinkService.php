@@ -12,6 +12,8 @@ namespace Sikshya\Services;
 final class PermalinkService
 {
     public const QUERY_VAR = 'sikshya_page';
+    public const LEARN_TYPE_VAR = 'sikshya_learn_type';
+    public const LEARN_SLUG_VAR = 'sikshya_learn_slug';
 
     /**
      * Option keys (stored as _sikshya_{key}).
@@ -102,6 +104,8 @@ final class PermalinkService
     public static function filterQueryVars(array $vars): array
     {
         $vars[] = self::QUERY_VAR;
+        $vars[] = self::LEARN_TYPE_VAR;
+        $vars[] = self::LEARN_SLUG_VAR;
 
         return $vars;
     }
@@ -123,6 +127,18 @@ final class PermalinkService
                 'top'
             );
         }
+
+        // Learn player routes (distraction-free UI):
+        // /learn/lesson/{lesson-slug}
+        // /learn/quiz/{quiz-slug}
+        // /learn/assignment/{assignment-slug}
+        $learn_slug = self::sanitizeSlug($p['permalink_learn'] ?? 'learn');
+        $learn_re   = preg_quote($learn_slug, '/');
+        add_rewrite_rule(
+            '^' . $learn_re . '/(lesson|quiz|assignment)/([^/]+)/?$',
+            'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=$matches[1]&' . self::LEARN_SLUG_VAR . '=$matches[2]',
+            'top'
+        );
     }
 
     /**

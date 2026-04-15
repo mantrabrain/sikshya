@@ -7,6 +7,7 @@ use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\CartFormHandler;
 use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Services\PermalinkService;
 use Sikshya\Frontend\Controllers\CourseController;
 use Sikshya\Frontend\Controllers\LessonController;
 use Sikshya\Frontend\Controllers\QuizController;
@@ -138,6 +139,11 @@ class Frontend
             return;
         }
 
+        // Distraction-free learn/player pages load a standalone shell and their own CSS/JS.
+        if (PublicPageUrls::isCurrentVirtualPage('learn')) {
+            return;
+        }
+
         wp_enqueue_style(
             'sikshya-public-ds',
             $this->plugin->getAssetUrl('css/public-design-system.css'),
@@ -149,6 +155,14 @@ class Frontend
             'sikshya-frontend',
             $this->plugin->getAssetUrl('css/frontend.css'),
             ['sikshya-public-ds'],
+            $this->plugin->version
+        );
+
+        // Course listings (archive, taxonomy, shortcodes/blocks that render cards)
+        wp_enqueue_style(
+            'sikshya-course-listing',
+            $this->plugin->getAssetUrl('css/course-listing.css'),
+            ['sikshya-public-ds', 'sikshya-frontend'],
             $this->plugin->version
         );
 
@@ -357,6 +371,64 @@ class Frontend
      */
     public function handleTemplateRedirect(): void
     {
+        // Learn player routes: /learn/{type}/{slug} (no theme header/footer).
+        if (PublicPageUrls::isCurrentVirtualPage('learn')) {
+            $type = (string) get_query_var(PermalinkService::LEARN_TYPE_VAR);
+            $slug = (string) get_query_var(PermalinkService::LEARN_SLUG_VAR);
+
+            if ($type !== '' && $slug !== '') {
+                $post_type = '';
+                $template  = '';
+
+                switch ($type) {
+                    case 'lesson':
+                        $post_type = PostTypes::LESSON;
+                        $template  = $this->plugin->getTemplatePath('single-lesson.php');
+                        break;
+                    case 'quiz':
+                        $post_type = PostTypes::QUIZ;
+                        $template  = $this->plugin->getTemplatePath('single-quiz.php');
+                        break;
+                    case 'assignment':
+                        $post_type = PostTypes::ASSIGNMENT;
+                        // If/when an assignment template exists, use it. Fallback to lesson template for now.
+                        $template  = $this->plugin->getTemplatePath('single-lesson.php');
+                        break;
+                }
+
+                $p = $post_type !== '' ? get_page_by_path(sanitize_title($slug), OBJECT, $post_type) : null;
+                if ($p instanceof \WP_Post && $p->post_status === 'publish' && $template !== '' && file_exists($template)) {
+                    global $wp_query;
+
+                    $wp_query = new \WP_Query(
+                        [
+                            'post_type' => $post_type,
+                            'p' => (int) $p->ID,
+                        ]
+                    );
+                    $wp_query->is_singular = true;
+                    $wp_query->is_single   = true;
+                    $wp_query->is_home     = false;
+                    $wp_query->is_page     = false;
+                    $wp_query->is_archive  = false;
+
+                    $GLOBALS['post'] = $p;
+                    setup_postdata($p);
+
+                    include $template;
+                    exit;
+                }
+
+                // If we got here, the route is invalid.
+                global $wp_query;
+                if ($wp_query instanceof \WP_Query) {
+                    $wp_query->set_404();
+                    status_header(404);
+                    nocache_headers();
+                }
+            }
+        }
+
         if (PublicPageUrls::isCurrentVirtualPage('order')) {
             $legacy_id = isset($_GET['order_id']) ? (int) $_GET['order_id'] : 0;
             $has_key = isset($_GET['order_key']) && OrderRepository::sanitizePublicToken(

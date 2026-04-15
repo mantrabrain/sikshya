@@ -26,13 +26,20 @@ get_header();
 
         <div class="sikshya-pagination">
             <?php
-            the_posts_pagination(
+            $links = paginate_links(
                 [
+                    'total' => (int) $wp_query->max_num_pages,
+                    'current' => max(1, (int) get_query_var('paged')),
                     'mid_size' => 2,
                     'prev_text' => __('Previous', 'sikshya'),
                     'next_text' => __('Next', 'sikshya'),
+                    'type' => 'list',
                 ]
             );
+            if (!empty($links)) {
+                // paginate_links returns HTML list; safe for output.
+                echo wp_kses_post($links);
+            }
             ?>
         </div>
     </div>

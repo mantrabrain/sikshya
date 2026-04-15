@@ -34,6 +34,36 @@ final class PublicPageUrls
     }
 
     /**
+     * Learn player URL for course content (lesson/quiz/assignment).
+     *
+     * Pretty permalinks: /learn/lesson/{slug}
+     * Plain permalinks:  /?sikshya_page=learn&sikshya_learn_type=lesson&sikshya_learn_slug={slug}
+     */
+    public static function learnContent(string $type, string $slug): string
+    {
+        $type = sanitize_key($type);
+        $slug = sanitize_title($slug);
+        if ($type === '' || $slug === '') {
+            return self::url('learn');
+        }
+
+        if (PermalinkService::isPlainPermalinks()) {
+            return add_query_arg(
+                [
+                    PermalinkService::QUERY_VAR => 'learn',
+                    PermalinkService::LEARN_TYPE_VAR => $type,
+                    PermalinkService::LEARN_SLUG_VAR => $slug,
+                ],
+                home_url('/')
+            );
+        }
+
+        $base = untrailingslashit(self::url('learn'));
+
+        return user_trailingslashit($base . '/' . rawurlencode($type) . '/' . rawurlencode($slug));
+    }
+
+    /**
      * Receipt URL using opaque 32-char hex token (not sequential order ID).
      */
     public static function orderView(string $public_token): string
