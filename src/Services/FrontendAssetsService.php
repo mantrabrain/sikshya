@@ -126,15 +126,7 @@ class FrontendAssetsService
             SIKSHYA_VERSION,
             true
         );
-
-        // Localize script
-        wp_localize_script('sikshya-frontend', 'sikshya', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('sikshya_nonce'),
-            'plugin_url' => $this->plugin->getPluginUrl(),
-            'is_logged_in' => is_user_logged_in(),
-            'user_id' => get_current_user_id(),
-        ]);
+        // Localization for this handle lives in Frontend::enqueueFrontendAssets (sikshyaFrontend + sikshya_frontend).
     }
 
     /**
@@ -142,7 +134,7 @@ class FrontendAssetsService
      */
     public function addCustomCss(): void
     {
-        $custom_css = get_option('sikshya_custom_css', '');
+        $custom_css = Settings::getRaw('sikshya_custom_css', '');
         if (!empty($custom_css)) {
             echo '<style type="text/css">' . esc_html($custom_css) . '</style>';
         }
@@ -153,7 +145,7 @@ class FrontendAssetsService
      */
     public function addCustomJs(): void
     {
-        $custom_js = get_option('sikshya_custom_js', '');
+        $custom_js = Settings::getRaw('sikshya_custom_js', '');
         if (!empty($custom_js)) {
             echo '<script type="text/javascript">' . esc_html($custom_js) . '</script>';
         }

@@ -45,6 +45,60 @@
             this.initProgressBars();
             this.initCounters();
             this.initLazyLoading();
+            this.initCourseArchiveViewToggle();
+        },
+
+        // Course archive grid/list toggle (client-side, persisted; no URL change).
+        // Use getAttribute / classList — jQuery .data() does not reliably read
+        // data-sikshya-archive-view (hyphenated HTML5 attributes map to camelCase internally).
+        initCourseArchiveViewToggle: function() {
+            const root = document.querySelector('.sikshya-archive-courses');
+            if (!root) {
+                return;
+            }
+            const grid = root.querySelector('.sikshya-course-grid');
+            const btns = root.querySelectorAll('[data-sikshya-archive-view]');
+            if (!grid || !btns.length) {
+                return;
+            }
+
+            const KEY = 'sikshya_course_archive_view';
+            const readBtnView = function(btn) {
+                return String(btn.getAttribute('data-sikshya-archive-view') || '').trim();
+            };
+
+            const apply = function(view) {
+                const v = view === 'list' ? 'list' : 'grid';
+                grid.classList.toggle('sikshya-course-grid--list', v === 'list');
+                btns.forEach(function(b) {
+                    const isActive = readBtnView(b) === v;
+                    b.classList.toggle('is-active', isActive);
+                    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                });
+            };
+
+            let boot = 'grid';
+            try {
+                boot = window.localStorage.getItem(KEY) || 'grid';
+            } catch (e) {
+                boot = 'grid';
+            }
+            apply(boot);
+
+            root.addEventListener('click', function(ev) {
+                const btn = ev.target.closest('[data-sikshya-archive-view]');
+                if (!btn || !root.contains(btn)) {
+                    return;
+                }
+                ev.preventDefault();
+                const view = readBtnView(btn) || 'grid';
+                apply(view);
+                try {
+                    window.localStorage.setItem(KEY, view === 'list' ? 'list' : 'grid');
+                } catch (e) {
+                    // ignore
+                }
+            });
         },
 
         // Handle Course Enrollment

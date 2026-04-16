@@ -2,12 +2,15 @@
 
 namespace Sikshya\Frontend;
 use Sikshya\Core\Plugin;
+use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\CartFormHandler;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PermalinkService;
+use Sikshya\Services\LearnPublicIdService;
+use Sikshya\Services\Settings;
 use Sikshya\Frontend\Controllers\CourseController;
 use Sikshya\Frontend\Controllers\LessonController;
 use Sikshya\Frontend\Controllers\QuizController;
@@ -76,12 +79,102 @@ class Frontend
         add_action('wp', [$this, 'maybeConfigureAccountShellPage']);
         add_action('wp_head', [$this, 'addFrontendMeta']);
         add_action('wp_footer', [$this, 'addFrontendFooter']);
+        add_action('admin_bar_menu', [$this, 'addSikshyaAdminBarLinks'], 80);
         // Run on init (before template output) so redirects/cookies are not broken by theme notices.
         add_action('init', [CartFormHandler::class, 'maybeHandle'], 20);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
         add_action('wp', [$this, 'initFrontend']);
         add_filter('template_include', [$this, 'loadCustomTemplates'], 99);
         add_action('wp_body_open', [$this, 'addBodyClasses']);
+    }
+
+    /**
+     * Add quick "Edit" links for Sikshya-specific frontend pages (admin bar).
+     *
+     * @param \WP_Admin_Bar $bar
+     */
+    public function addSikshyaAdminBarLinks($bar): void
+    {
+        if (!is_admin_bar_showing() || is_admin()) {
+            return;
+        }
+        if (!$bar instanceof \WP_Admin_Bar) {
+            return;
+        }
+
+        // Singular Sikshya post types (course/lesson/quiz/assignment/certificate).
+        if (is_singular([PostTypes::COURSE, PostTypes::LESSON, PostTypes::QUIZ, PostTypes::ASSIGNMENT, PostTypes::CERTIFICATE])) {
+            $post_id = get_queried_object_id();
+            if ($post_id > 0 && current_user_can('edit_post', $post_id)) {
+                $pt = (string) get_post_type($post_id);
+                $label = __('Edit', 'sikshya');
+                $href = get_edit_post_link($post_id, 'raw');
+
+                if ($pt === PostTypes::COURSE) {
+                    $label = __('Edit course', 'sikshya');
+                    // New admin UI: course builder.
+                    $href = ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $post_id]);
+                } elseif ($pt === PostTypes::LESSON) {
+                    $label = __('Edit lesson', 'sikshya');
+                    // New admin UI: edit within course builder curriculum tab.
+                    $cid = (int) get_post_meta($post_id, '_sikshya_lesson_course', true);
+                    if ($cid > 0) {
+                        $href = ReactAdminConfig::reactAppUrl('add-course', [
+                            'course_id' => (string) $cid,
+                            'tab' => 'curriculum',
+                        ]);
+                    }
+                } elseif ($pt === PostTypes::QUIZ) {
+                    $label = __('Edit quiz', 'sikshya');
+                    $cid = (int) get_post_meta($post_id, '_sikshya_quiz_course', true);
+                    if ($cid > 0) {
+                        $href = ReactAdminConfig::reactAppUrl('add-course', [
+                            'course_id' => (string) $cid,
+                            'tab' => 'curriculum',
+                        ]);
+                    }
+                } elseif ($pt === PostTypes::ASSIGNMENT) {
+                    $label = __('Edit assignment', 'sikshya');
+                    $cid = (int) get_post_meta($post_id, '_sikshya_assignment_course', true);
+                    if ($cid > 0) {
+                        $href = ReactAdminConfig::reactAppUrl('add-course', [
+                            'course_id' => (string) $cid,
+                            'tab' => 'curriculum',
+                        ]);
+                    }
+                } elseif ($pt === PostTypes::CERTIFICATE) {
+                    $label = __('Edit certificate', 'sikshya');
+                    // Certificates are managed in the React admin "Certificates" section.
+                    $href = ReactAdminConfig::reactAppUrl('certificates');
+                }
+                $bar->add_node([
+                    'id' => 'sikshya-edit-current',
+                    // `site-name` is present across themes (incl. block themes); safest place.
+                    'parent' => 'site-name',
+                    'title' => $label,
+                    'href' => $href,
+                ]);
+
+                // Extra fallback: add a top-level node too (some themes hide `site-name` children).
+                $bar->add_node([
+                    'id' => 'sikshya-edit-current-top',
+                    'title' => $label,
+                    'href' => $href,
+                ]);
+            }
+            return;
+        }
+
+        // Course archive page (quick link to course list).
+        if (is_post_type_archive(PostTypes::COURSE) && current_user_can('edit_posts')) {
+            $bar->add_node([
+                'id' => 'sikshya-edit-courses',
+                'parent' => 'site-name',
+                'title' => __('Edit courses', 'sikshya'),
+                'href' => admin_url('edit.php?post_type=' . PostTypes::COURSE),
+            ]);
+            return;
+        }
     }
 
     /**
@@ -211,21 +304,41 @@ class Frontend
             true
         );
 
-        // Localize script
+        $frontendStrings = [
+            'confirmEnroll' => __('Are you sure you want to enroll in this course?', 'sikshya'),
+            'confirmUnenroll' => __('Are you sure you want to unenroll from this course?', 'sikshya'),
+            'confirmSubmit' => __('Are you sure you want to submit this quiz?', 'sikshya'),
+            'saving' => __('Saving...', 'sikshya'),
+            'saved' => __('Saved successfully!', 'sikshya'),
+            'error' => __('An error occurred. Please try again.', 'sikshya'),
+            'loading' => __('Loading...', 'sikshya'),
+            'noResults' => __('No results found.', 'sikshya'),
+        ];
+
+        // Localize script (camelCase object for newer code).
         wp_localize_script('sikshya-frontend', 'sikshyaFrontend', [
             'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
             'restNonce' => wp_create_nonce('wp_rest'),
             'userId' => get_current_user_id(),
             'isLoggedIn' => is_user_logged_in(),
+            'strings' => $frontendStrings,
+        ]);
+
+        // Legacy object expected by assets/js/frontend.js (snake_case + enroll AJAX nonce).
+        wp_localize_script('sikshya-frontend', 'sikshya_frontend', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'login_url' => wp_login_url(),
+            'is_user_logged_in' => is_user_logged_in(),
+            'nonce' => wp_create_nonce('sikshya_enroll_nonce'),
             'strings' => [
-                'confirmEnroll' => __('Are you sure you want to enroll in this course?', 'sikshya'),
-                'confirmUnenroll' => __('Are you sure you want to unenroll from this course?', 'sikshya'),
-                'confirmSubmit' => __('Are you sure you want to submit this quiz?', 'sikshya'),
-                'saving' => __('Saving...', 'sikshya'),
-                'saved' => __('Saved successfully!', 'sikshya'),
-                'error' => __('An error occurred. Please try again.', 'sikshya'),
-                'loading' => __('Loading...', 'sikshya'),
-                'noResults' => __('No results found.', 'sikshya'),
+                'confirm_enroll' => $frontendStrings['confirmEnroll'],
+                'confirm_quiz_submit' => $frontendStrings['confirmSubmit'],
+                'loading' => $frontendStrings['loading'],
+                'enroll_success' => __('Successfully enrolled.', 'sikshya'),
+                'enroll_error' => __('Enrollment failed. Please try again.', 'sikshya'),
+                'quiz_submit_error' => __('Could not submit the quiz.', 'sikshya'),
+                'progress_update_error' => __('Could not update progress.', 'sikshya'),
+                'error' => $frontendStrings['error'],
             ],
         ]);
 
@@ -375,6 +488,44 @@ class Frontend
         if (PublicPageUrls::isCurrentVirtualPage('learn')) {
             $type = (string) get_query_var(PermalinkService::LEARN_TYPE_VAR);
             $slug = (string) get_query_var(PermalinkService::LEARN_SLUG_VAR);
+            $pid  = (string) get_query_var(PermalinkService::LEARN_PUBLIC_ID_VAR);
+
+            // Non-logged-in users landing on /learn/ should be redirected to discovery.
+            // The learn hub is primarily a "My learning" dashboard; public/free access starts from courses.
+            if ($type === '' && $slug === '' && !isset($_GET['course_id']) && !is_user_logged_in()) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                $archive = get_post_type_archive_link(PostTypes::COURSE);
+                wp_safe_redirect($archive ?: home_url('/'), 302);
+                exit;
+            }
+
+            // If the request is the generic learn page with course_id, redirect to the first item.
+            // This keeps /learn/?course_id=123 from being a dead-end.
+            if ($type === '' && $slug === '' && isset($_GET['course_id'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                $course_id = (int) $_GET['course_id']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+                if ($course_id > 0 && function_exists('sikshya_get_course_curriculum_public')) {
+                    $curriculum = sikshya_get_course_curriculum_public($course_id);
+                    foreach ($curriculum as $block) {
+                        foreach ((array) ($block['contents'] ?? []) as $p) {
+                            if (!$p instanceof \WP_Post) {
+                                continue;
+                            }
+                            $pt = (string) $p->post_type;
+                            if ($pt === PostTypes::LESSON) {
+                                wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::learnContentForPost($p), 302);
+                                exit;
+                            }
+                            if ($pt === PostTypes::QUIZ) {
+                                wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::learnContentForPost($p), 302);
+                                exit;
+                            }
+                            if ($pt === PostTypes::ASSIGNMENT) {
+                                wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::learnContentForPost($p), 302);
+                                exit;
+                            }
+                        }
+                    }
+                }
+            }
 
             if ($type !== '' && $slug !== '') {
                 $post_type = '';
@@ -396,7 +547,33 @@ class Frontend
                         break;
                 }
 
-                $p = $post_type !== '' ? get_page_by_path(sanitize_title($slug), OBJECT, $post_type) : null;
+                $p = null;
+
+                // Preferred (when enabled): resolve by public id and redirect if slug mismatches.
+                if ($post_type !== '' && PermalinkService::learnUsePublicId() && $pid !== '') {
+                    $resolved_id = LearnPublicIdService::postIdFromPublicId($pid, $post_type);
+                    if ($resolved_id > 0) {
+                        $p = get_post($resolved_id);
+                        if ($p instanceof \WP_Post && $p->post_status === 'publish') {
+                            $canonical = PublicPageUrls::learnContentForPost($p);
+                            $req_slug = sanitize_title($slug);
+                            if ($req_slug !== (string) $p->post_name) {
+                                wp_safe_redirect($canonical, 301);
+                                exit;
+                            }
+                        }
+                    }
+                }
+
+                // Legacy: resolve by slug, and if public id mode is on, redirect to canonical URL with public id.
+                if (!$p instanceof \WP_Post && $post_type !== '') {
+                    $p = get_page_by_path(sanitize_title($slug), OBJECT, $post_type);
+                    if ($p instanceof \WP_Post && $p->post_status === 'publish' && PermalinkService::learnUsePublicId()) {
+                        wp_safe_redirect(PublicPageUrls::learnContentForPost($p), 301);
+                        exit;
+                    }
+                }
+
                 if ($p instanceof \WP_Post && $p->post_status === 'publish' && $template !== '' && file_exists($template)) {
                     global $wp_query;
 
@@ -601,12 +778,12 @@ class Frontend
      */
     public function addNotice(string $message, string $type = 'info'): void
     {
-        $notices = get_option('sikshya_frontend_notices', []);
+        $notices = Settings::getRaw('sikshya_frontend_notices', []);
         $notices[] = [
             'message' => $message,
             'type' => $type,
         ];
-        update_option('sikshya_frontend_notices', $notices);
+        Settings::setRaw('sikshya_frontend_notices', $notices);
     }
 
     /**
@@ -614,7 +791,7 @@ class Frontend
      */
     public function displayNotices(): void
     {
-        $notices = get_option('sikshya_frontend_notices', []);
+        $notices = Settings::getRaw('sikshya_frontend_notices', []);
 
         if (!empty($notices)) {
             foreach ($notices as $notice) {
