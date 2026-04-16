@@ -152,6 +152,48 @@
             });
         },
 
+        // Certificate download (expects href or data-url on the control).
+        handleCertificateDownload: function(e) {
+            e.preventDefault();
+            const $btn = $(e.currentTarget);
+            const url = $btn.attr('href') || $btn.data('url');
+            if (url) {
+                window.open(url, '_blank', 'noopener,noreferrer');
+            }
+        },
+
+        // Favorites UI hook (toggle state; persistence can be wired to REST later).
+        handleFavorite: function(e) {
+            e.preventDefault();
+            $(e.currentTarget).toggleClass('is-favorited');
+        },
+
+        // Share course link (Web Share API or clipboard / prompt fallback).
+        handleShare: function(e) {
+            e.preventDefault();
+            const $btn = $(e.currentTarget);
+            const $card = $btn.closest('.sikshya-course-card');
+            let url = '';
+            if ($card.length) {
+                const $link = $card.find('.sikshya-course-title a, .sikshya-course-card-image-link').first();
+                url = ($link.attr('href') || '').toString();
+            }
+            if (!url) {
+                url = window.location.href;
+            }
+            if (navigator.share) {
+                navigator.share({ url: url }).catch(function() {});
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function() {
+                    SikshyaFrontend.showAlert('success', 'Link copied to clipboard');
+                }).catch(function() {
+                    window.prompt('Copy this course link:', url);
+                });
+            } else {
+                window.prompt('Copy this course link:', url);
+            }
+        },
+
         // Handle Quiz Option Selection
         handleQuizOption: function(e) {
             const $option = $(this);
