@@ -11,6 +11,8 @@ if (!isset($outline_blocks) || !is_array($outline_blocks)) {
     return;
 }
 
+$outline_show_progress = isset($outline_show_progress) ? (bool) $outline_show_progress : true;
+
 if ($outline_blocks === []) {
     ?>
     <p class="sikshya-curriculumOutline__empty sikshya-muted"><?php esc_html_e('No curriculum items are published for this course yet.', 'sikshya'); ?></p>
@@ -24,7 +26,7 @@ if ($outline_blocks === []) {
         $chapter_post = $block['chapter'];
         $chapter_num = (int) $chapter_index + 1;
         $item_n = isset($block['item_count']) ? (int) $block['item_count'] : count((array) ($block['items'] ?? []));
-        $done_n = isset($block['completed_in_section']) ? (int) $block['completed_in_section'] : 0;
+        $done_n = $outline_show_progress && isset($block['completed_in_section']) ? (int) $block['completed_in_section'] : 0;
         $sec_min = isset($block['section_duration_minutes']) ? (int) $block['section_duration_minutes'] : 0;
         ?>
         <?php
@@ -58,12 +60,20 @@ if ($outline_blocks === []) {
                         <span class="sikshya-curriculumOutline__sectionMeta">
                             <?php
                             $meta_bits = [];
-                            $meta_bits[] = sprintf(
-                                /* translators: 1: completed count, 2: total items */
-                                __('%1$d / %2$d', 'sikshya'),
-                                $done_n,
-                                $item_n
-                            );
+                            if ($outline_show_progress) {
+                                $meta_bits[] = sprintf(
+                                    /* translators: 1: completed count, 2: total items */
+                                    __('%1$d / %2$d', 'sikshya'),
+                                    $done_n,
+                                    $item_n
+                                );
+                            } else {
+                                $meta_bits[] = sprintf(
+                                    /* translators: %d: total items */
+                                    _n('%d item', '%d items', $item_n, 'sikshya'),
+                                    $item_n
+                                );
+                            }
                             if ($sec_min > 0) {
                                 $meta_bits[] = sprintf(
                                     /* translators: 1: minutes */
@@ -85,7 +95,7 @@ if ($outline_blocks === []) {
                     <?php
                     $current = !empty($item['current']);
                     $icon = (string) ($item['type_key'] ?? 'content');
-                    $completed = !empty($item['completed']);
+                    $completed = $outline_show_progress && !empty($item['completed']);
                     $lesson_type = sanitize_key((string) ($item['lesson_type'] ?? ''));
                     $idx = isset($item['index_in_section']) ? (int) $item['index_in_section'] : 0;
                     $sub = trim((string) ($item['subtitle_compact'] ?? ''));
@@ -99,7 +109,10 @@ if ($outline_blocks === []) {
                             <a class="sikshya-curriculumOutline__link" href="<?php echo esc_url((string) ($item['permalink'] ?? '')); ?>" <?php echo $current ? 'aria-current="page"' : ''; ?>>
                                 <span class="sikshya-curriculumOutline__check<?php echo $completed ? ' is-done' : ''; ?>" aria-hidden="true">
                                     <?php if ($completed) : ?>
-                                        <?php echo sikshya_learn_icon('check'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        <svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true" focusable="false">
+                                            <circle cx="12" cy="12" r="10" fill="currentColor"></circle>
+                                            <path d="M8 12.5l2.5 2.5L16.5 9" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
                                     <?php endif; ?>
                                 </span>
                                 <span class="sikshya-curriculumOutline__itemIcon" aria-hidden="true">
@@ -124,9 +137,6 @@ if ($outline_blocks === []) {
                                     ?>
                                 </span>
                                 <span class="sikshya-curriculumOutline__linkBody">
-                                    <?php if ($completed) : ?>
-                                        <span class="screen-reader-text"><?php esc_html_e('Completed:', 'sikshya'); ?></span>
-                                    <?php endif; ?>
                                     <span class="sikshya-curriculumOutline__lessonTitle" title="<?php echo esc_attr($item_title); ?>">
                                         <?php echo esc_html($idx > 0 ? sprintf('%d. %s', $idx, $item_title) : $item_title); ?>
                                     </span>

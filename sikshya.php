@@ -51,6 +51,7 @@ if (file_exists(SIKSHYA_PLUGIN_DIR . 'vendor/autoload.php')) {
 }
 
 require_once SIKSHYA_PLUGIN_DIR . 'includes/template-functions.php';
+require_once SIKSHYA_PLUGIN_DIR . 'includes/course-archive-filters.php';
 
 // Initialize the plugin
 function sikshya() {

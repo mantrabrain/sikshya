@@ -7,7 +7,7 @@ use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PublicCurriculumService;
-use Sikshya\Frontend\Public\SampleCatalog;
+use Sikshya\Services\Settings;
 
 /**
  * @package Sikshya\Frontend\Public
@@ -26,29 +26,46 @@ final class LessonTemplateData
         $error    = '';
         $enrolled = false;
         $blocks   = [];
+        $is_preview = false;
 
-        if ($uid <= 0) {
-            $error = __('Please log in to access your learning.', 'sikshya');
-        } elseif ($course_id <= 0) {
+        $track_progress = Settings::isTruthy(Settings::get('track_lesson_progress', true));
+        $show_progress = Settings::isTruthy(Settings::get('students_can_see_progress', true));
+
+        if ($course_id <= 0) {
             $error = __('This lesson is not linked to a course.', 'sikshya');
         } else {
-            $repo     = new EnrollmentRepository();
-            $enrolled = $repo->findByUserAndCourse($uid, $course_id) !== null;
+            $repo = new EnrollmentRepository();
+            $enrolled = $uid > 0 && $repo->findByUserAndCourse($uid, $course_id) !== null;
+
+            $raw = PublicCurriculumService::getCourseCurriculum($course_id);
+
+            // Allow preview when enabled globally and for the course.
             if (!$enrolled) {
-                $error = __('You are not enrolled in this course.', 'sikshya');
+                $is_preview = self::canPreviewContent($course_id, $raw, $lesson_id);
+            }
+
+            if (!$enrolled && !$is_preview) {
+                $error = $uid <= 0
+                    ? __('Please log in to access this lesson.', 'sikshya')
+                    : __('You are not enrolled in this course.', 'sikshya');
             } else {
-                $raw    = PublicCurriculumService::getCourseCurriculum($course_id);
-                $blocks = self::enrichBlocks($uid, $course_id, $raw, $lesson_id);
+                $blocks = self::enrichBlocks(
+                    $uid,
+                    $course_id,
+                    $raw,
+                    $lesson_id,
+                    $track_progress && $show_progress
+                );
             }
         }
 
         $course_post = $course_id > 0 ? get_post($course_id) : null;
-        $stats       = self::computeStats($blocks);
+        $stats       = ($track_progress && $show_progress) ? self::computeStats($blocks) : ['total_items' => 0, 'completed_items' => 0, 'percent' => 0];
         $nav         = self::computePrevNext($blocks, $lesson_id);
         $current_chapter = self::currentChapterFor($blocks);
-        $sample_course = $course_post ? SampleCatalog::findCourseByTitle((string) get_the_title($course_post)) : null;
-        $sample_item = $sample_course ? SampleCatalog::findContentByTitleInCourse($sample_course, (string) get_the_title($post)) : null;
-        $mock_ui = SampleCatalog::mockUiMeta(($course_post ? (string) get_the_title($course_post) : '') . '|' . (string) get_the_title($post));
+        $current_completed = self::isCurrentCompleted($blocks);
+
+        $course_features = self::courseFeatures($course_id);
 
         return apply_filters(
             'sikshya_lesson_template_data',
@@ -60,13 +77,14 @@ final class LessonTemplateData
                 'current_chapter' => $current_chapter,
                 'logged_in' => $uid > 0,
                 'enrolled' => $enrolled,
+                'is_preview' => $is_preview,
                 'error' => $error,
                 'blocks' => $blocks,
                 'stats' => $stats,
                 'nav' => $nav,
-                'sample_course' => $sample_course,
-                'sample_item' => $sample_item,
-                'mock_ui' => $mock_ui,
+                'show_progress' => $track_progress && $show_progress,
+                'current_completed' => $current_completed,
+                'course_features' => $course_features,
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
                     'login' => wp_login_url(get_permalink($post) ?: ''),
@@ -74,9 +92,101 @@ final class LessonTemplateData
                     'learn' => PublicPageUrls::learnForCourse($course_id),
                     'account' => PublicPageUrls::url('account'),
                 ],
+                'rest' => [
+                    'url' => esc_url_raw(rest_url('sikshya/v1/')),
+                    'nonce' => wp_create_nonce('wp_rest'),
+                ],
             ],
             $post
         );
+    }
+
+    /**
+     * @param array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>}> $blocks
+     */
+    private static function isCurrentCompleted(array $blocks): bool
+    {
+        foreach ($blocks as $block) {
+            foreach ((array) ($block['items'] ?? []) as $item) {
+                if (!empty($item['current'])) {
+                    return !empty($item['completed']);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether the current content is preview-accessible (guest or non-enrolled).
+     *
+     * Rules:
+     * - Global setting: enable_course_preview (default true)
+     * - Per-course meta: _sikshya_enable_course_preview (truthy)
+     * - If lesson meta _sikshya_is_free is truthy → allow
+     * - Else allow when within first N items (preview_lessons_count) in curriculum (lessons only)
+     *
+     * @param array<int, array{chapter:\WP_Post, contents: array<int, \WP_Post>}> $raw_curriculum
+     */
+    private static function canPreviewContent(int $course_id, array $raw_curriculum, int $lesson_id): bool
+    {
+        if (!Settings::isTruthy(Settings::get('enable_course_preview', true))) {
+            return false;
+        }
+
+        $course_preview = get_post_meta($course_id, '_sikshya_enable_course_preview', true);
+        if (!Settings::isTruthy($course_preview)) {
+            return false;
+        }
+
+        $is_free = get_post_meta($lesson_id, '_sikshya_is_free', true);
+        if (Settings::isTruthy($is_free)) {
+            return true;
+        }
+
+        $cap = (int) Settings::get('preview_lessons_count', 3);
+        if ($cap <= 0) {
+            return false;
+        }
+
+        $seen = 0;
+        foreach ($raw_curriculum as $row) {
+            foreach ((array) ($row['contents'] ?? []) as $p) {
+                if (!$p instanceof \WP_Post) {
+                    continue;
+                }
+                if ($p->post_type !== PostTypes::LESSON) {
+                    continue;
+                }
+                ++$seen;
+                if ((int) $p->ID === $lesson_id) {
+                    return $seen <= $cap;
+                }
+                if ($seen >= $cap && $cap > 0) {
+                    // early exit if we've passed the preview window.
+                    continue;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Effective course features for Learn UI (global + per-course).
+     *
+     * @return array{reviews: bool, discussions: bool, qa: bool, certificate: bool}
+     */
+    private static function courseFeatures(int $course_id): array
+    {
+        $global_reviews = Settings::isTruthy(Settings::get('enable_reviews', true));
+
+        return [
+            'reviews' => $global_reviews && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
+            'discussions' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
+            'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
+            'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),
+        ];
     }
 
     /**
@@ -110,7 +220,7 @@ final class LessonTemplateData
      * @param array<int, array{chapter: \WP_Post, contents: array<int, \WP_Post>}> $raw
      * @return array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, item_count: int, open: bool}>
      */
-    private static function enrichBlocks(int $user_id, int $course_id, array $raw, int $current_post_id): array
+    private static function enrichBlocks(int $user_id, int $course_id, array $raw, int $current_post_id, bool $with_progress): array
     {
         $progress = new ProgressRepository();
         $out      = [];
@@ -147,7 +257,7 @@ final class LessonTemplateData
                     'duration_minutes' => CurriculumOutlineMeta::itemDurationMinutes($p, $type_key),
                     'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
                     'index_in_section' => $idx,
-                    'completed' => self::isItemCompleted($progress, $user_id, $course_id, $p),
+                    'completed' => $with_progress ? self::isItemCompleted($progress, $user_id, $course_id, $p) : false,
                     'current' => $is_current,
                 ];
             }
@@ -155,7 +265,7 @@ final class LessonTemplateData
             $completed_in_section = 0;
             $section_mins         = 0;
             foreach ($items as $it) {
-                if (!empty($it['completed'])) {
+                if ($with_progress && !empty($it['completed'])) {
                     ++$completed_in_section;
                 }
                 $section_mins += (int) ($it['duration_minutes'] ?? 0);
@@ -165,7 +275,7 @@ final class LessonTemplateData
                 'chapter' => $chapter,
                 'items' => $items,
                 'item_count' => count($items),
-                'completed_in_section' => $completed_in_section,
+                'completed_in_section' => $with_progress ? $completed_in_section : 0,
                 'section_duration_minutes' => $section_mins,
                 // Outline UI: all chapters expanded by default (see curriculum partial).
                 'open' => true,
@@ -192,8 +302,7 @@ final class LessonTemplateData
     private static function learnPermalinkFor(\WP_Post $p, string $type_key): string
     {
         if (in_array($type_key, ['lesson', 'quiz', 'assignment'], true)) {
-            $slug = $p->post_name ?: sanitize_title((string) $p->post_title);
-            return PublicPageUrls::learnContent($type_key, $slug);
+            return PublicPageUrls::learnContentForPost($p);
         }
 
         return get_permalink($p) ?: '';

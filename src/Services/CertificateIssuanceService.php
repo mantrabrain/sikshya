@@ -20,7 +20,7 @@ final class CertificateIssuanceService
 
     public function certificatesEnabled(): bool
     {
-        $settings = get_option('sikshya_course_settings', []);
+        $settings = Settings::getRaw('sikshya_course_settings', []);
 
         return !empty($settings['enable_certificates']);
     }

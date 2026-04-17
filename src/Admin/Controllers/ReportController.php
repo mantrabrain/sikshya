@@ -7,6 +7,7 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Admin\ReactAdminView;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
+use Sikshya\Services\Settings;
 
 /**
  * Reports data for the React admin (snapshot API). Legacy PHP report views and admin-ajax removed.
@@ -92,7 +93,7 @@ class ReportController
 
         $currency = function_exists('sikshya_get_store_currency_code')
             ? sikshya_get_store_currency_code()
-            : (string) get_option('_sikshya_currency', 'USD');
+            : (string) Settings::get('currency', 'USD');
         $revenue_html = function_exists('sikshya_format_price')
             ? sikshya_format_price($revenue_total, $currency)
             : esc_html(number_format_i18n($revenue_total, 2));

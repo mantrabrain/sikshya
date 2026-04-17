@@ -34,6 +34,12 @@ export type SikshyaReactConfig = {
   appAdminBase: string;
   siteUrl: string;
   pluginUrl: string;
+  /** Global frontend permalink bases (from PHP `PermalinkService::get()`). */
+  permalinks?: Record<string, string>;
+  /** True when WordPress permalink structure is empty (plain permalinks). */
+  plainPermalinks?: boolean;
+  /** CPT keys needed for building example URLs. */
+  postTypes?: { course?: string; lesson?: string; quiz?: string; assignment?: string };
   user: { name: string; avatarUrl: string };
   navigation: NavItem[];
   initialData: Record<string, unknown>;

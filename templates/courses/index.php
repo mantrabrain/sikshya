@@ -202,7 +202,7 @@ get_header(); ?>
                         </div>
                         <h3 class="sikshya-no-courses-title"><?php _e('No courses found', 'sikshya'); ?></h3>
                         <p class="sikshya-no-courses-text"><?php _e('Try adjusting your search criteria or browse our featured courses.', 'sikshya'); ?></p>
-                        <a href="<?php echo esc_url(home_url('/courses/')); ?>" class="sikshya-button sikshya-button--primary">
+                        <a href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/')); ?>" class="sikshya-button sikshya-button--primary">
                             <?php _e('Browse All Courses', 'sikshya'); ?>
                         </a>
                     </div>

@@ -394,21 +394,21 @@ while (have_posts()) :
 
                         <div class="sikshya-course-lp__actions">
                             <?php if (!empty($vm['is_enrolled'])) : ?>
-                                <a class="sikshya-btn sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls['learn']); ?>"><?php esc_html_e('Continue learning', 'sikshya'); ?></a>
-                                <a class="sikshya-btn sikshya-btn--ghost sikshya-course-lp__btn-full" href="<?php echo esc_url($urls['account']); ?>"><?php esc_html_e('My learning', 'sikshya'); ?></a>
+                                <a class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls['learn_first'] ?? $urls['learn']); ?>"><?php esc_html_e('Continue learning', 'sikshya'); ?></a>
+                                <a class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full" href="<?php echo esc_url($urls['account']); ?>"><?php esc_html_e('My learning', 'sikshya'); ?></a>
                             <?php elseif (!empty($vm['is_paid'])) : ?>
                                 <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form">
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="add" />
                                     <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
                                     <input type="hidden" name="sikshya_redirect_to_checkout" value="1" />
-                                    <button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-course-lp__btn-full"><?php esc_html_e('Buy now', 'sikshya'); ?></button>
+                                    <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full"><?php esc_html_e('Buy now', 'sikshya'); ?></button>
                                 </form>
                                 <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form">
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="add" />
                                     <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
-                                    <button type="submit" class="sikshya-btn sikshya-btn--ghost sikshya-course-lp__btn-full"><?php esc_html_e('Add to cart', 'sikshya'); ?></button>
+                                    <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full"><?php esc_html_e('Add to cart', 'sikshya'); ?></button>
                                 </form>
                                 <a class="sikshya-course-lp__sub-link" href="<?php echo esc_url($urls['cart']); ?>"><?php esc_html_e('View cart', 'sikshya'); ?></a>
                             <?php elseif (is_user_logged_in()) : ?>
@@ -416,10 +416,10 @@ while (have_posts()) :
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="enroll_free" />
                                     <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
-                                    <button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-course-lp__btn-full"><?php esc_html_e('Enroll for free', 'sikshya'); ?></button>
+                                    <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full"><?php esc_html_e('Enroll for free', 'sikshya'); ?></button>
                                 </form>
                             <?php else : ?>
-                                <a class="sikshya-btn sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls['login']); ?>"><?php esc_html_e('Log in to enroll', 'sikshya'); ?></a>
+                                <a class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls['login']); ?>"><?php esc_html_e('Log in to enroll', 'sikshya'); ?></a>
                             <?php endif; ?>
                         </div>
 

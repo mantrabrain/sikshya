@@ -11,6 +11,7 @@ namespace Sikshya\Api;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\ReactAdminConfig;
+use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Commerce\OrderFulfillmentService;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
@@ -19,11 +20,13 @@ use Sikshya\Services\CourseBuilderService;
 use Sikshya\Services\CourseCurriculumActions;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
+use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\CurriculumService;
 use Sikshya\Services\SampleDataImporter;
 use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Licensing\Pro;
+use Sikshya\Services\Settings;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -305,6 +308,47 @@ class AdminRestRoutes
                     'course_id' => [
                         'type' => 'integer',
                         'minimum' => 0,
+                    ],
+                    'search' => [
+                        'type' => 'string',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/quiz-attempts', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getAdminQuizAttempts'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+                'args' => [
+                    'page' => [
+                        'type' => 'integer',
+                        'default' => 1,
+                        'minimum' => 1,
+                    ],
+                    'per_page' => [
+                        'type' => 'integer',
+                        'default' => 30,
+                        'minimum' => 1,
+                        'maximum' => 100,
+                    ],
+                    'quiz_id' => [
+                        'type' => 'integer',
+                        'minimum' => 0,
+                    ],
+                    'course_id' => [
+                        'type' => 'integer',
+                        'minimum' => 0,
+                    ],
+                    'user_id' => [
+                        'type' => 'integer',
+                        'minimum' => 0,
+                    ],
+                    'status' => [
+                        'type' => 'string',
+                        'sanitize_callback' => 'sanitize_key',
                     ],
                     'search' => [
                         'type' => 'string',
@@ -953,7 +997,18 @@ class AdminRestRoutes
 
         $tabs = $svc->getAllSettings();
         // Return settings config (sections + fields) as-is; React client renders it.
-        return new WP_REST_Response(['success' => true, 'data' => ['tabs' => $tabs]], 200);
+        return new WP_REST_Response(
+            [
+                'success' => true,
+                'data' => [
+                    'tabs' => $tabs,
+                    'meta' => [
+                        'payment_gateways' => PaymentGatewayRegistry::clientPayload(),
+                    ],
+                ],
+            ],
+            200
+        );
     }
 
     public function getSettingsValues(WP_REST_Request $request): WP_REST_Response
@@ -1068,7 +1123,7 @@ class AdminRestRoutes
             case 'system_info':
                 global $wpdb;
                 $theme = wp_get_theme();
-                $plugins = (array) get_option('active_plugins', []);
+                $plugins = (array) Settings::getRaw('active_plugins', []);
 
                 return new WP_REST_Response(
                     [
@@ -1465,6 +1520,150 @@ class AdminRestRoutes
                 'pages' => $per_page > 0 ? (int) ceil($total / $per_page) : 0,
                 'page' => $page,
                 'per_page' => $per_page,
+            ],
+            200
+        );
+    }
+
+    /**
+     * Paginated quiz attempts with learner + quiz/course labels for the React admin.
+     */
+    public function getAdminQuizAttempts(WP_REST_Request $request): WP_REST_Response
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'sikshya_quiz_attempts';
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            return new WP_REST_Response(
+                [
+                    'success' => true,
+                    'attempts' => [],
+                    'total' => 0,
+                    'pages' => 0,
+                    'page' => 1,
+                    'per_page' => 30,
+                    'table_missing' => true,
+                ],
+                200
+            );
+        }
+
+        $per_page = max(1, min(100, absint($request->get_param('per_page') ?: 30)));
+        $page = max(1, absint($request->get_param('page') ?: 1));
+        $offset = ($page - 1) * $per_page;
+
+        $quiz_id = (int) ($request->get_param('quiz_id') ?: 0);
+        $course_id = (int) ($request->get_param('course_id') ?: 0);
+        $user_id = (int) ($request->get_param('user_id') ?: 0);
+        $status = sanitize_key((string) ($request->get_param('status') ?: ''));
+        $search = sanitize_text_field((string) $request->get_param('search'));
+
+        $users_table = $wpdb->users;
+        $posts_table = $wpdb->posts;
+
+        $where = ['1=1'];
+        $prepare = [];
+
+        if ($quiz_id > 0) {
+            $where[] = 'a.quiz_id = %d';
+            $prepare[] = $quiz_id;
+        }
+        if ($course_id > 0) {
+            $where[] = 'a.course_id = %d';
+            $prepare[] = $course_id;
+        }
+        if ($user_id > 0) {
+            $where[] = 'a.user_id = %d';
+            $prepare[] = $user_id;
+        }
+        if ($status !== '') {
+            $where[] = 'a.status = %s';
+            $prepare[] = $status;
+        }
+        if ($search !== '') {
+            // Match by learner name/email or quiz/course title.
+            $like = '%' . $wpdb->esc_like($search) . '%';
+            $where[] = '(u.display_name LIKE %s OR u.user_email LIKE %s OR q.post_title LIKE %s OR c.post_title LIKE %s)';
+            array_push($prepare, $like, $like, $like, $like);
+        }
+
+        $where_sql = implode(' AND ', $where);
+        $table_sql = esc_sql($table);
+
+        // Total count.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name escaped; values bound.
+        $total = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$table_sql}` a LEFT JOIN {$users_table} u ON u.ID = a.user_id LEFT JOIN {$posts_table} q ON q.ID = a.quiz_id LEFT JOIN {$posts_table} c ON c.ID = a.course_id WHERE {$where_sql}", ...$prepare));
+        $pages = $total > 0 ? (int) ceil($total / $per_page) : 0;
+
+        // Rows.
+        $prepare_rows = array_merge($prepare, [$per_page, $offset]);
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name escaped; values bound.
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT a.id, a.user_id, a.quiz_id, a.course_id, a.attempt_number, a.score, a.status, a.started_at, a.completed_at,
+                        u.display_name AS user_name, u.user_email AS user_email,
+                        q.post_title AS quiz_title,
+                        c.post_title AS course_title
+                 FROM `{$table_sql}` a
+                 LEFT JOIN {$users_table} u ON u.ID = a.user_id
+                 LEFT JOIN {$posts_table} q ON q.ID = a.quiz_id
+                 LEFT JOIN {$posts_table} c ON c.ID = a.course_id
+                 WHERE {$where_sql}
+                 ORDER BY a.completed_at DESC, a.id DESC
+                 LIMIT %d OFFSET %d",
+                ...$prepare_rows
+            ),
+            ARRAY_A
+        );
+
+        $global_attempts_limit = (int) Settings::get('quiz_attempts_limit', 1);
+        if ($global_attempts_limit < 0) {
+            $global_attempts_limit = 0;
+        }
+        $repo = new QuizAttemptRepository();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $qid = isset($r['quiz_id']) ? (int) $r['quiz_id'] : 0;
+            $uid = isset($r['user_id']) ? (int) $r['user_id'] : 0;
+            $per_quiz = $qid > 0 ? (int) get_post_meta($qid, '_sikshya_quiz_attempts_allowed', true) : 0;
+            $limit = $per_quiz > 0 ? $per_quiz : $global_attempts_limit;
+            if ($limit < 0) {
+                $limit = 0;
+            }
+            $used = ($uid > 0 && $qid > 0) ? $repo->countAttemptsForUserQuiz($uid, $qid) : 0;
+            $remaining = $limit > 0 ? max(0, $limit - $used) : null;
+
+            $out[] = [
+                'id' => (int) ($r['id'] ?? 0),
+                'user_id' => $uid,
+                'user_name' => (string) ($r['user_name'] ?? ''),
+                'user_email' => (string) ($r['user_email'] ?? ''),
+                'quiz_id' => $qid,
+                'quiz_title' => (string) ($r['quiz_title'] ?? ''),
+                'course_id' => (int) ($r['course_id'] ?? 0),
+                'course_title' => (string) ($r['course_title'] ?? ''),
+                'attempt_number' => (int) ($r['attempt_number'] ?? 0),
+                'score' => (float) ($r['score'] ?? 0),
+                'status' => (string) ($r['status'] ?? ''),
+                'started_at' => (string) ($r['started_at'] ?? ''),
+                'completed_at' => (string) ($r['completed_at'] ?? ''),
+                'attempts_used' => (int) $used,
+                'attempts_limit' => (int) $limit,
+                'attempts_remaining' => $remaining,
+                'is_locked' => $limit > 0 ? $used >= $limit : false,
+            ];
+        }
+
+        return new WP_REST_Response(
+            [
+                'success' => true,
+                'attempts' => $out,
+                'total' => $total,
+                'pages' => $pages,
+                'page' => $page,
+                'per_page' => $per_page,
+                'table_missing' => false,
             ],
             200
         );

@@ -10,6 +10,7 @@ namespace Sikshya\Api;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Sikshya\Services\Settings;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -24,11 +25,11 @@ class JwtAuthService
 
     public function __construct()
     {
-        $secret = \get_option(self::OPTION_KEY, '');
+        $secret = Settings::getRaw(self::OPTION_KEY, '');
         if (!is_string($secret) || $secret === '') {
             // Plugins load before pluggable.php, so wp_generate_password() is not available here.
             $secret = bin2hex(random_bytes(32));
-            \update_option(self::OPTION_KEY, $secret, false);
+            Settings::setRaw(self::OPTION_KEY, $secret, false);
         }
         $this->secret = $secret;
     }

@@ -9,6 +9,7 @@ use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Public\CheckoutTemplateData;
 use Sikshya\Services\CourseService;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -87,8 +88,9 @@ class CheckoutRestRoutes
         $coupon = isset($params['coupon_code']) ? trim(sanitize_text_field((string) $params['coupon_code'])) : '';
 
         $has_courses = $course_ids !== [] || $course_id > 0;
-        $allowed_gateways = ['stripe', 'paypal', 'offline'];
-        if (!$has_courses || !in_array($gateway, $allowed_gateways, true)) {
+        $configured = CheckoutTemplateData::gatewaysConfigured();
+        $allowed_gateways = array_keys($configured);
+        if (!$has_courses || !in_array($gateway, $allowed_gateways, true) || empty($configured[$gateway])) {
             return new WP_REST_Response(
                 ['ok' => false, 'code' => 'invalid_params', 'message' => __('Invalid parameters.', 'sikshya')],
                 400
@@ -236,16 +238,44 @@ class CheckoutRestRoutes
                 );
             }
         } else {
-            return new WP_REST_Response(
-                ['ok' => false, 'code' => 'bad_gateway', 'message' => __('Unsupported gateway.', 'sikshya')],
-                400
-            );
+            /**
+             * Pro/addons can verify/capture payments for additional gateways.
+             *
+             * Return true when payment is verified as complete, false to let core reject, or a WP_REST_Response to short-circuit.
+             */
+            $handled = apply_filters('sikshya_checkout_confirm_gateway', false, $gateway, $order, $params);
+            if ($handled instanceof \WP_REST_Response) {
+                return $handled;
+            }
+            if ($handled !== true) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'bad_gateway', 'message' => __('Unsupported gateway.', 'sikshya')],
+                    400
+                );
+            }
         }
 
         $fulfill = $this->fulfillmentService();
         $fulfill->fulfillPaidOrder($order_id);
 
-        return new WP_REST_Response(['ok' => true, 'message' => __('Enrollment complete.', 'sikshya')], 200);
+        $public_token = '';
+        if (isset($order->public_token) && is_string($order->public_token)) {
+            $public_token = (string) $order->public_token;
+        }
+        if ($public_token === '') {
+            $public_token = (new OrderRepository())->ensurePublicToken($order_id);
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'message' => __('Enrollment complete.', 'sikshya'),
+                'data' => [
+                    'redirect_url' => PublicPageUrls::orderView($public_token),
+                ],
+            ],
+            200
+        );
     }
 
     private function checkoutService(): CheckoutService

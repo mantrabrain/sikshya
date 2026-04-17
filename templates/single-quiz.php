@@ -101,6 +101,63 @@ while (have_posts()) {
                 ?>
                 <span class="sikshya-learnTopbar__title" title="<?php echo esc_attr($course_title); ?>"><?php echo esc_html($course_title); ?></span>
             </div>
+            <?php if (!empty($vm['show_progress'])) : ?>
+                <?php
+                $pct = isset($vm['stats']['percent']) ? (int) $vm['stats']['percent'] : 0;
+                $done = isset($vm['stats']['completed_items']) ? (int) $vm['stats']['completed_items'] : 0;
+                $total = isset($vm['stats']['total_items']) ? (int) $vm['stats']['total_items'] : 0;
+                ?>
+                <div class="sikshya-learnTopbar__middle">
+                    <div class="sikshya-learnHeader__progressWrap">
+                        <button
+                            type="button"
+                            class="sikshya-learnHeader__progressBtn"
+                            data-sikshya-progress-btn
+                            aria-haspopup="dialog"
+                            aria-expanded="false"
+                            aria-label="<?php echo esc_attr__('Course progress', 'sikshya'); ?>"
+                        >
+                            <span class="sikshya-learnHeader__progressBar" aria-hidden="true">
+                                <span class="sikshya-learnHeader__progressFill" style="<?php echo esc_attr('width:' . max(0, min(100, $pct)) . '%'); ?>"></span>
+                            </span>
+                            <span class="sikshya-learnHeader__progressCount"><?php echo esc_html($done . '/' . $total); ?></span>
+                            <span class="sikshya-learnHeader__progressPct"><?php echo esc_html($pct . '%'); ?></span>
+                        </button>
+                        <div class="sikshya-progressPopover" data-sikshya-progress-popover hidden>
+                            <h3 class="sikshya-progressPopover__title"><?php esc_html_e('Progress', 'sikshya'); ?></h3>
+                            <div class="sikshya-progressPopover__meta">
+                        <?php
+                                echo esc_html(
+                                    sprintf(
+                                        /* translators: 1: completed, 2: total */
+                                        __('%1$d of %2$d items completed', 'sikshya'),
+                                        $done,
+                                        $total
+                                    )
+                                );
+                                ?>
+                            </div>
+                            <div class="sikshya-progressPopover__bar" aria-hidden="true">
+                                <span style="<?php echo esc_attr('width:' . max(0, min(100, $pct)) . '%'); ?>"></span>
+                            </div>
+                            <div class="sikshya-progressPopover__grid">
+                                <div class="sikshya-progressPopover__stat">
+                                    <p class="sikshya-progressPopover__k"><?php esc_html_e('Completed', 'sikshya'); ?></p>
+                                    <p class="sikshya-progressPopover__v"><?php echo esc_html((string) $done); ?></p>
+                                </div>
+                                <div class="sikshya-progressPopover__stat">
+                                    <p class="sikshya-progressPopover__k"><?php esc_html_e('Remaining', 'sikshya'); ?></p>
+                                    <p class="sikshya-progressPopover__v"><?php echo esc_html((string) max(0, $total - $done)); ?></p>
+                                </div>
+                                <div class="sikshya-progressPopover__stat">
+                                    <p class="sikshya-progressPopover__k"><?php esc_html_e('Total', 'sikshya'); ?></p>
+                                    <p class="sikshya-progressPopover__v"><?php echo esc_html((string) $total); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
             <div class="sikshya-learnTopbar__right">
                 <?php if (!empty($vm['urls']['account'])) : ?>
                     <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($vm['urls']['account']); ?>">
@@ -111,7 +168,7 @@ while (have_posts()) {
             </div>
         </header>
 
-    <?php if (!empty($vm['logged_in']) && !empty($vm['enrolled']) && empty($vm['error'])) : ?>
+            <?php if (!empty($vm['logged_in']) && !empty($vm['enrolled']) && empty($vm['error'])) : ?>
         <script>
             window.sikshyaQuizTaker = <?php
             echo wp_json_encode(
@@ -143,41 +200,7 @@ while (have_posts()) {
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
                         $outline_blocks = $vm['blocks'];
-                        if (!empty($_GET['mock_long'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-                            $mock_chapters = [];
-                            $k = 0;
-                            for ($c = 1; $c <= 4; $c++) {
-                                $items = [];
-                                for ($i = 1; $i <= 7; $i++) {
-                                    ++$k;
-                                    $type_key = ($k % 6 === 0) ? 'quiz' : (($k % 9 === 0) ? 'assignment' : 'lesson');
-                                    $lesson_type = ($type_key === 'lesson' && ($k % 5 === 0)) ? 'audio' : (($type_key === 'lesson' && ($k % 3 === 0)) ? 'video' : 'text');
-                                    $is_current = $k === 6;
-                                    $items[] = [
-                                        'permalink' => $is_current ? (string) (get_permalink() ?: '') : '#',
-                                        'title' => sprintf('Item %d — Extremely long curriculum item title to verify hover/active styles and scrolling comfort', $k),
-                                        'type_key' => $type_key,
-                                        'lesson_type' => $lesson_type,
-                                        'meta_line' => $type_key === 'quiz' ? '10 questions · 15 min limit · Pass 70%' : ($type_key === 'assignment' ? 'File upload · 10 pts' : ucfirst($lesson_type) . ' · 12 min'),
-                                        'subtitle_compact' => $type_key === 'quiz' ? '15min' : ($type_key === 'assignment' ? '10 pts' : '12min'),
-                                        'index_in_section' => $i,
-                                        'completed' => ($k % 4 === 0),
-                                        'current' => $is_current,
-                                    ];
-                                }
-                                $mock_chapters[] = [
-                                    'chapter' => (object) [
-                                        'post_title' => sprintf('Chapter %d — Foundations and patterns for long-session learning UIs (long chapter title)', $c),
-                                    ],
-                                    'items' => $items,
-                                    'item_count' => count($items),
-                                    'completed_in_section' => (int) floor(count($items) / 3),
-                                    'section_duration_minutes' => 75,
-                                    'open' => true,
-                                ];
-                            }
-                            $outline_blocks = $mock_chapters;
-                        }
+                        $outline_show_progress = !empty($vm['show_progress']);
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
@@ -213,13 +236,14 @@ while (have_posts()) {
                     </div>
                 <?php else : ?>
                     <?php
-                    $mock = [
-                        'course' => !empty($vm['course']) && $vm['course'] instanceof WP_Post ? get_the_title($vm['course']) : __('Introduction to Web Development', 'sikshya'),
-                        'questions' => 8,
-                        'time_limit' => 15,
-                        'passing' => 70,
-                        'attempts' => 2,
-                    ];
+                    $quiz_id = !empty($vm['post']) && $vm['post'] instanceof WP_Post ? (int) $vm['post']->ID : 0;
+                    $question_count = !empty($vm['questions']) && is_array($vm['questions']) ? count($vm['questions']) : 0;
+                    $duration_mins = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true) : 0;
+                    $passing_score = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_passing_score', true) : 0;
+                    $passing_score = $passing_score > 0 ? $passing_score : 70;
+                    $attempts_max = isset($vm['attempts_max']) ? (int) $vm['attempts_max'] : 0;
+                    $attempts_exhausted = !empty($vm['attempts_exhausted']);
+                    $attempts_message = !empty($vm['attempts_message']) ? (string) $vm['attempts_message'] : '';
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
@@ -242,34 +266,103 @@ while (have_posts()) {
                                                 <?php endif; ?>
                                             </div>
                                             <div class="sikshya-learnHeader__metaInline" aria-label="<?php echo esc_attr__('Quiz details', 'sikshya'); ?>">
-                                                <span class="sikshya-pill"><?php echo esc_html(sprintf(__('%d questions', 'sikshya'), (int) $mock['questions'])); ?></span>
-                                                <span class="sikshya-pill"><?php echo esc_html(sprintf(__('%d min', 'sikshya'), (int) $mock['time_limit'])); ?></span>
-                                                <span class="sikshya-pill"><?php echo esc_html(sprintf(__('Pass %d%%', 'sikshya'), (int) $mock['passing'])); ?></span>
-                                                <span class="sikshya-pill"><?php echo esc_html(sprintf(__('Attempts %d', 'sikshya'), (int) $mock['attempts'])); ?></span>
+                                                <span class="sikshya-pill"><?php echo esc_html(sprintf(__('%d questions', 'sikshya'), (int) $question_count)); ?></span>
+                                                <?php if ($duration_mins > 0) : ?>
+                                                    <span class="sikshya-pill"><?php echo esc_html(sprintf(__('%d min', 'sikshya'), (int) $duration_mins)); ?></span>
+                                                <?php endif; ?>
+                                                <span class="sikshya-pill"><?php echo esc_html(sprintf(__('Pass %d%%', 'sikshya'), (int) $passing_score)); ?></span>
+                                                <?php if ($attempts_max > 0) : ?>
+                                                    <span class="sikshya-pill"><?php echo esc_html(sprintf(__('Attempts %d', 'sikshya'), (int) $attempts_max)); ?></span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="sikshya-learnHeader__actions">
-                                        <button type="button" class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                        <?php if (!$attempts_exhausted) : ?>
+                                            <button
+                                                type="button"
+                                                class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
+                                                data-sikshya-quiz-start
+                                            ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                        <?php else : ?>
+                                            <?php
+                                            $lock_tip = $attempts_message !== ''
+                                                ? $attempts_message
+                                                : __('You have reached the maximum number of attempts for this quiz.', 'sikshya');
+                                            ?>
+                                            <span class="sikshya-tooltipWrap" data-sikshya-tooltip-wrap>
+                                                <button
+                                                    type="button"
+                                                    class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
+                                                    disabled
+                                                    aria-disabled="true"
+                                                ><?php esc_html_e('Quiz locked', 'sikshya'); ?></button>
+                                                <span class="sikshya-tooltip" role="tooltip">
+                                                    <?php echo esc_html($lock_tip); ?>
+                                                </span>
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="sikshya-quizMock">
-                            <div class="sikshya-quizMock__card">
-                                <div class="sikshya-quizMock__q">
-                                    <div class="sikshya-quizMock__qTitle"><?php esc_html_e('1) Which language describes the structure of a page?', 'sikshya'); ?></div>
-                                    <label class="sikshya-quizMock__opt"><input type="radio" name="q1"> HTML</label>
-                                    <label class="sikshya-quizMock__opt"><input type="radio" name="q1"> Python</label>
-                                    <label class="sikshya-quizMock__opt"><input type="radio" name="q1"> SQL</label>
-                                    <label class="sikshya-quizMock__opt"><input type="radio" name="q1"> Bash</label>
+                        <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                            <?php if (!empty($vm['questions']) && is_array($vm['questions'])) : ?>
+                                <form
+                                    class="sikshya-quiz-form"
+                                    data-quiz-id="<?php echo esc_attr((string) $quiz_id); ?>"
+                                    action="#"
+                                    method="post"
+                                    data-sikshya-quiz-form
+                                    <?php echo $attempts_exhausted ? '' : 'hidden'; ?>
+                                >
+                                    <?php if ($attempts_exhausted) : ?>
+                                        <fieldset disabled aria-disabled="true">
+                                    <?php endif; ?>
+                                    <?php foreach ($vm['questions'] as $qi => $q) : ?>
+                                        <?php
+                                        if (!is_array($q)) {
+                                            continue;
+                                        }
+                                        $qid = isset($q['id']) ? (int) $q['id'] : 0;
+                                        $qtitle = isset($q['title']) ? (string) $q['title'] : '';
+                                        $opts = isset($q['options']) && is_array($q['options']) ? $q['options'] : [];
+                                        if ($qid <= 0) {
+                                            continue;
+                                        }
+                                        ?>
+                                        <fieldset class="sikshya-quizQ sikshya-q" data-qid="<?php echo esc_attr((string) $qid); ?>" data-qtype="single_choice">
+                                            <legend class="sikshya-quizQ__title sikshya-q__title">
+                                                <?php echo esc_html(sprintf(__('%1$d) %2$s', 'sikshya'), (int) ($qi + 1), $qtitle)); ?>
+                                            </legend>
+                                            <?php foreach ($opts as $oi => $opt) : ?>
+                                                <label class="sikshya-quizQ__opt">
+                                                    <input
+                                                        type="radio"
+                                                        name="<?php echo esc_attr('question_' . $qid); ?>"
+                                                        value="<?php echo esc_attr((string) $oi); ?>"
+                                                    />
+                                                    <span><?php echo esc_html((string) $opt); ?></span>
+                                                </label>
+                                                <?php endforeach; ?>
+                                        </fieldset>
+                                    <?php endforeach; ?>
+                                    <?php if ($attempts_exhausted) : ?>
+                                        </fieldset>
+                                    <?php endif; ?>
+                                    <div class="sikshya-quiz-result" hidden aria-live="polite"></div>
+                                    <div class="sikshya-quizActions">
+                                        <button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-quiz-submit" <?php echo $attempts_exhausted ? 'disabled aria-disabled="true"' : ''; ?>><?php esc_html_e('Submit quiz', 'sikshya'); ?></button>
                                 </div>
-                                <div class="sikshya-quizMock__footer">
-                                    <span class="sikshya-muted"><?php esc_html_e('Mock question for design preview', 'sikshya'); ?></span>
-                                    <button type="button" class="sikshya-btn sikshya-btn--light sikshya-btn--sm"><?php esc_html_e('Next', 'sikshya'); ?></button>
-                                </div>
-                            </div>
+                                </form>
+                            <?php else : ?>
+                                <?php if (trim((string) get_the_content()) !== '') : ?>
+                                    <?php the_content(); ?>
+                                <?php else : ?>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('This quiz does not have questions yet.', 'sikshya'); ?></p>
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -279,6 +372,12 @@ while (have_posts()) {
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="resources"><?php esc_html_e('Resources', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
+                            <?php if (!empty($vm['course_features']['discussions'])) : ?>
+                                <button type="button" class="sikshya-tabBtn" data-sikshya-tab="discussions"><?php esc_html_e('Discussions', 'sikshya'); ?></button>
+                            <?php endif; ?>
+                            <?php if (!empty($vm['course_features']['reviews'])) : ?>
+                                <button type="button" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
+                            <?php endif; ?>
                         </div>
                         <div class="sikshya-tabPanel is-active" data-sikshya-panel="overview">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
@@ -320,10 +419,7 @@ while (have_posts()) {
                         <div class="sikshya-tabPanel" data-sikshya-panel="resources">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
-                                <ul class="sikshya-resList">
-                                    <li><a href="#" class="sikshya-resLink"><?php esc_html_e('Quiz reference sheet (PDF)', 'sikshya'); ?></a><span class="sikshya-muted"> • 180 KB</span></li>
-                                    <li><a href="#" class="sikshya-resLink"><?php esc_html_e('Practice questions (DOC)', 'sikshya'); ?></a><span class="sikshya-muted"> • 6 pages</span></li>
-                                </ul>
+                                <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this quiz yet.', 'sikshya'); ?></p>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="instructions">
@@ -346,7 +442,86 @@ while (have_posts()) {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <?php if (!empty($vm['course_features']['discussions'])) : ?>
+                            <div class="sikshya-tabPanel" data-sikshya-panel="discussions">
+                                <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                                    <h3 class="sikshya-learnH3"><?php esc_html_e('Discussions', 'sikshya'); ?></h3>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('Discussions are enabled for this course, but the discussion UI is not available yet.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($vm['course_features']['reviews'])) : ?>
+                            <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
+                                <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                                    <h3 class="sikshya-learnH3"><?php esc_html_e('Reviews', 'sikshya'); ?></h3>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('Reviews are enabled for this course, but the reviews UI is not available yet.', 'sikshya'); ?></p>
+                                </div>
+                            </div>
+            <?php endif; ?>
+        </div>
+
+                    <?php
+                    // Sticky Prev/Next: derive from curriculum blocks.
+                    $flat = [];
+                    foreach ((array) ($vm['blocks'] ?? []) as $block) {
+                        foreach ((array) ($block['items'] ?? []) as $it) {
+                            if (!is_array($it)) {
+                                continue;
+                            }
+                            $flat[] = $it;
+                        }
+                    }
+                    $current_index = -1;
+                    foreach ($flat as $i => $it) {
+                        if (!empty($it['current'])) {
+                            $current_index = (int) $i;
+                            break;
+                        }
+                    }
+                    $prev = ($current_index > 0) ? ($flat[$current_index - 1] ?? null) : null;
+                    $next = ($current_index >= 0) ? ($flat[$current_index + 1] ?? null) : null;
+                    $prev_url = is_array($prev) ? (string) ($prev['permalink'] ?? '') : '';
+                    $next_url = is_array($next) ? (string) ($next['permalink'] ?? '') : '';
+                    $prev_title = is_array($prev) ? (string) ($prev['title'] ?? '') : '';
+                    $next_title = is_array($next) ? (string) ($next['title'] ?? '') : '';
+                    ?>
+                    <nav class="sikshya-learnDock" aria-label="<?php esc_attr_e('Quiz navigation', 'sikshya'); ?>">
+                        <?php if ($prev_url !== '') : ?>
+                            <a class="sikshya-learnDock__btn sikshya-learnDock__btn--prev" href="<?php echo esc_url($prev_url); ?>">
+                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                <span class="sikshya-learnDock__meta">
+                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Previous', 'sikshya'); ?></span>
+                                    <span class="sikshya-learnDock__title"><?php echo esc_html($prev_title); ?></span>
+                                </span>
+                            </a>
+                        <?php else : ?>
+                            <span class="sikshya-learnDock__btn is-disabled" aria-disabled="true">
+                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                <span class="sikshya-learnDock__meta">
+                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Previous', 'sikshya'); ?></span>
+                                    <span class="sikshya-learnDock__title"><?php esc_html_e('Start', 'sikshya'); ?></span>
+                                </span>
+                            </span>
+                        <?php endif; ?>
+
+                        <?php if ($next_url !== '') : ?>
+                            <a class="sikshya-learnDock__btn sikshya-learnDock__btn--next" href="<?php echo esc_url($next_url); ?>">
+                                <span class="sikshya-learnDock__meta">
+                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Next', 'sikshya'); ?></span>
+                                    <span class="sikshya-learnDock__title"><?php echo esc_html($next_title); ?></span>
+                                </span>
+                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-right'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                            </a>
+                        <?php else : ?>
+                            <span class="sikshya-learnDock__btn sikshya-learnDock__btn--next is-disabled" aria-disabled="true">
+                                <span class="sikshya-learnDock__meta">
+                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Next', 'sikshya'); ?></span>
+                                    <span class="sikshya-learnDock__title"><?php esc_html_e('End', 'sikshya'); ?></span>
+                                </span>
+                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-right'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                            </span>
+                        <?php endif; ?>
+                    </nav>
                 <?php endif; ?>
             </section>
         </main>
@@ -413,6 +588,48 @@ while (have_posts()) {
     currentChapterSummary?.scrollIntoView({ block: 'nearest' });
     currentLink?.scrollIntoView({ block: 'center' });
   }, { once: true });
+
+  // Progress popover
+  const progressBtn = document.querySelector('[data-sikshya-progress-btn]');
+  const popover = document.querySelector('[data-sikshya-progress-popover]');
+  function closeProgress() {
+    if (!progressBtn || !popover) return;
+    popover.hidden = true;
+    progressBtn.setAttribute('aria-expanded', 'false');
+  }
+  if (progressBtn && popover) {
+    progressBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      popover.hidden = !popover.hidden;
+      progressBtn.setAttribute('aria-expanded', popover.hidden ? 'false' : 'true');
+    });
+    document.addEventListener('click', (e) => {
+      if (popover.hidden) return;
+      const t = e.target;
+      if (!(t instanceof Node)) return;
+      if (popover.contains(t) || progressBtn.contains(t)) return;
+      closeProgress();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      closeProgress();
+    });
+  }
+
+  // Quiz start: reveal the form and focus first question.
+  const startBtn = document.querySelector('[data-sikshya-quiz-start]');
+  const quizForm = document.querySelector('[data-sikshya-quiz-form]');
+  if (startBtn && quizForm) {
+    startBtn.addEventListener('click', () => {
+      if (startBtn.hasAttribute('disabled') || startBtn.getAttribute('aria-disabled') === 'true') {
+        return;
+      }
+      quizForm.hidden = false;
+      const first = quizForm.querySelector('input, textarea, select, button');
+      if (first && first.focus) first.focus();
+      quizForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 })();
 </script>
     <?php

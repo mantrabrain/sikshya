@@ -38,7 +38,7 @@ class AnalyticsService
      */
     public function trackEvent(string $eventType, array $eventData = [], ?int $userId = null, ?int $courseId = null): void
     {
-        if (!get_option('sikshya_enable_analytics', 'yes')) {
+        if (!Settings::getRaw('sikshya_enable_analytics', 'yes')) {
             return;
         }
 

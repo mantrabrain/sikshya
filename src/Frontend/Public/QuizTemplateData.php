@@ -8,7 +8,7 @@ use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PublicCurriculumService;
-use Sikshya\Frontend\Public\SampleCatalog;
+use Sikshya\Services\Settings;
 
 /**
  * @package Sikshya\Frontend\Public
@@ -29,35 +29,66 @@ final class QuizTemplateData
         $error = '';
         $enrolled = false;
         $blocks = [];
+        $is_preview = false;
+
+        $track_progress = Settings::isTruthy(Settings::get('track_quiz_progress', true));
+        $show_progress = Settings::isTruthy(Settings::get('students_can_see_progress', true));
         if ($uid <= 0) {
-            $error = __('Please log in to access your learning.', 'sikshya');
-        } elseif ($course_id <= 0) {
+            // allow preview below
+        }
+
+        if ($course_id <= 0) {
             $error = __('This quiz is not linked to a course.', 'sikshya');
         } else {
             $repo     = new EnrollmentRepository();
             $enrolled = $repo->findByUserAndCourse($uid, $course_id) !== null;
+            $raw    = PublicCurriculumService::getCourseCurriculum($course_id);
+
+            // Quizzes can be previewed only when explicitly marked free.
             if (!$enrolled) {
-                $error = __('You are not enrolled in this course.', 'sikshya');
+                $is_preview = self::canPreviewQuiz($course_id, $quiz_id);
+            }
+
+            if (!$enrolled && !$is_preview) {
+                $error = $uid <= 0
+                    ? __('Please log in to access this quiz.', 'sikshya')
+                    : __('You are not enrolled in this course.', 'sikshya');
             } else {
-                $raw    = PublicCurriculumService::getCourseCurriculum($course_id);
-                $blocks = self::enrichBlocks($uid, $course_id, $raw, $quiz_id);
+                $blocks = self::enrichBlocks(
+                    $uid,
+                    $course_id,
+                    $raw,
+                    $quiz_id,
+                    $track_progress && $show_progress
+                );
             }
         }
 
         $attempts_used = 0;
         $attempts_max = self::quizAttemptsCap($quiz_id);
+        $attempts_exhausted = false;
+        $attempts_message = '';
         if ($uid > 0 && $quiz_id > 0) {
             $attempts_used = (new QuizAttemptRepository())->countAttemptsForUserQuiz($uid, $quiz_id);
         }
+        if ($attempts_max <= 0) {
+            $attempts_max = (int) Settings::get('quiz_attempts_limit', 1);
+        }
+        if ($attempts_max < 0) {
+            $attempts_max = 0;
+        }
+
+        if ($error === '' && $enrolled && $attempts_max > 0 && $attempts_used >= $attempts_max) {
+            $attempts_exhausted = true;
+            $attempts_message = __('You have reached the maximum number of attempts for this quiz.', 'sikshya');
+        }
 
         $course_post = $course_id > 0 ? get_post($course_id) : null;
-        $stats       = self::computeStats($blocks);
+        $stats       = ($track_progress && $show_progress) ? self::computeStats($blocks) : ['total_items' => 0, 'completed_items' => 0, 'percent' => 0];
         $nav         = self::computePrevNext($blocks, $quiz_id);
         $current_chapter = self::currentChapterFor($blocks);
         $questions = self::buildQuestionsForQuiz($quiz_id);
-        $sample_course = $course_post ? SampleCatalog::findCourseByTitle((string) get_the_title($course_post)) : null;
-        $sample_item = $sample_course ? SampleCatalog::findContentByTitleInCourse($sample_course, (string) get_the_title($post)) : null;
-        $mock_ui = SampleCatalog::mockUiMeta(($course_post ? (string) get_the_title($course_post) : '') . '|' . (string) get_the_title($post));
+        $course_features = self::courseFeatures($course_id);
 
         return apply_filters(
             'sikshya_quiz_template_data',
@@ -72,14 +103,16 @@ final class QuizTemplateData
                 'blocks' => $blocks,
                 'stats' => $stats,
                 'nav' => $nav,
-                'sample_course' => $sample_course,
-                'sample_item' => $sample_item,
-                'mock_ui' => $mock_ui,
                 'questions' => $questions,
                 'attempts_used' => $attempts_used,
                 'attempts_max' => $attempts_max,
                 'attempts_limited' => $attempts_max > 0,
                 'attempts_remaining' => $attempts_max > 0 ? max(0, $attempts_max - $attempts_used) : null,
+                'attempts_exhausted' => $attempts_exhausted,
+                'attempts_message' => $attempts_message,
+                'show_progress' => $track_progress && $show_progress,
+                'course_features' => $course_features,
+                'is_preview' => $is_preview,
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
                     'login' => wp_login_url(get_permalink($post) ?: ''),
@@ -90,6 +123,34 @@ final class QuizTemplateData
             ],
             $post
         );
+    }
+
+    private static function canPreviewQuiz(int $course_id, int $quiz_id): bool
+    {
+        if (!Settings::isTruthy(Settings::get('enable_course_preview', true))) {
+            return false;
+        }
+        $course_preview = get_post_meta($course_id, '_sikshya_enable_course_preview', true);
+        if (!Settings::isTruthy($course_preview)) {
+            return false;
+        }
+        // quizzes are previewable only if explicitly marked free
+        return Settings::isTruthy(get_post_meta($quiz_id, '_sikshya_is_free', true));
+    }
+
+    /**
+     * @return array{reviews: bool, discussions: bool, qa: bool, certificate: bool}
+     */
+    private static function courseFeatures(int $course_id): array
+    {
+        $global_reviews = Settings::isTruthy(Settings::get('enable_reviews', true));
+
+        return [
+            'reviews' => $global_reviews && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
+            'discussions' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
+            'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
+            'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),
+        ];
     }
 
     /**
@@ -113,7 +174,7 @@ final class QuizTemplateData
      * @param array<int, array{chapter: \WP_Post, contents: array<int, \WP_Post>}> $raw
      * @return array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, item_count: int, open: bool}>
      */
-    private static function enrichBlocks(int $user_id, int $course_id, array $raw, int $current_post_id): array
+    private static function enrichBlocks(int $user_id, int $course_id, array $raw, int $current_post_id, bool $with_progress): array
     {
         $progress = new ProgressRepository();
         $out      = [];
@@ -150,7 +211,7 @@ final class QuizTemplateData
                     'duration_minutes' => CurriculumOutlineMeta::itemDurationMinutes($p, $type_key),
                     'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
                     'index_in_section' => $idx,
-                    'completed' => self::isItemCompleted($progress, $user_id, $course_id, $p),
+                    'completed' => $with_progress ? self::isItemCompleted($progress, $user_id, $course_id, $p) : false,
                     'current' => $is_current,
                 ];
             }
@@ -158,7 +219,7 @@ final class QuizTemplateData
             $completed_in_section = 0;
             $section_mins         = 0;
             foreach ($items as $it) {
-                if (!empty($it['completed'])) {
+                if ($with_progress && !empty($it['completed'])) {
                     ++$completed_in_section;
                 }
                 $section_mins += (int) ($it['duration_minutes'] ?? 0);
@@ -168,7 +229,7 @@ final class QuizTemplateData
                 'chapter' => $chapter,
                 'items' => $items,
                 'item_count' => count($items),
-                'completed_in_section' => $completed_in_section,
+                'completed_in_section' => $with_progress ? $completed_in_section : 0,
                 'section_duration_minutes' => $section_mins,
                 // Outline UI: all chapters expanded by default (see curriculum partial).
                 'open' => true,
@@ -195,8 +256,7 @@ final class QuizTemplateData
     private static function learnPermalinkFor(\WP_Post $p, string $type_key): string
     {
         if (in_array($type_key, ['lesson', 'quiz', 'assignment'], true)) {
-            $slug = $p->post_name ?: sanitize_title((string) $p->post_title);
-            return PublicPageUrls::learnContent($type_key, $slug);
+            return PublicPageUrls::learnContentForPost($p);
         }
 
         return get_permalink($p) ?: '';

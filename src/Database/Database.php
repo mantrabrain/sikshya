@@ -3,6 +3,7 @@
 namespace Sikshya\Database;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Services\Settings;
 
 /**
  * Database Management Class
@@ -226,25 +227,25 @@ class Database
      */
     public function maybeUpgrade(): void
     {
-        $current = get_option('sikshya_db_version', '0');
+        $current = Settings::getRaw('sikshya_db_version', '0');
         if (version_compare((string) $current, '1.1.0', '<')) {
             $this->migrateTo110();
-            update_option('sikshya_db_version', '1.1.0');
+            Settings::setRaw('sikshya_db_version', '1.1.0');
             $current = '1.1.0';
         }
         if (version_compare((string) $current, '1.2.0', '<')) {
             $this->migrateTo120();
-            update_option('sikshya_db_version', '1.2.0');
+            Settings::setRaw('sikshya_db_version', '1.2.0');
             $current = '1.2.0';
         }
         if (version_compare((string) $current, '1.3.0', '<')) {
             $this->migrateTo130();
-            update_option('sikshya_db_version', '1.3.0');
+            Settings::setRaw('sikshya_db_version', '1.3.0');
             $current = '1.3.0';
         }
         if (version_compare((string) $current, '1.4.0', '<')) {
             $this->migrateTo140();
-            update_option('sikshya_db_version', '1.4.0');
+            Settings::setRaw('sikshya_db_version', '1.4.0');
         }
     }
 
@@ -472,6 +473,6 @@ class Database
      */
     public function getVersion(): string
     {
-        return get_option('sikshya_db_version', '0.0.0');
+        return (string) Settings::getRaw('sikshya_db_version', '0.0.0');
     }
 }

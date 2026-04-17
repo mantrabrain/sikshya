@@ -13,6 +13,8 @@
  * - $course_categories (array|\WP_Error|false)
  * - $curriculum_counts (array{lessons:int,quizzes:int,assignments:int,total:int})
  *
+ * Primary CTA in the card body uses $pricing (effective price), enrollment, and cart POST handlers.
+ *
  * @package Sikshya
  */
 
@@ -32,6 +34,20 @@ $price_num = $pricing['price'] ?? null;
 $sale_num = $pricing['sale_price'] ?? null;
 $on_sale = !empty($pricing['on_sale']);
 $currency = (string) ($pricing['currency'] ?? 'USD');
+
+$effective_price = $pricing['effective'] ?? null;
+$is_paid_course = null !== $effective_price && (float) $effective_price > 0.00001;
+$is_user_enrolled = function_exists('sikshya_is_user_enrolled_in_course') && sikshya_is_user_enrolled_in_course($course_id);
+$course_permalink = get_permalink($course_id);
+$course_permalink = is_string($course_permalink) ? $course_permalink : '';
+$learn_entry_url = function_exists('sikshya_course_learn_entry_url') ? sikshya_course_learn_entry_url($course_id) : $course_permalink;
+
+$course_price_ui = 'free';
+if ($on_sale && null !== $price_num && null !== $sale_num) {
+    $course_price_ui = 'sale';
+} elseif (null !== $price_num && (float) $price_num > 0) {
+    $course_price_ui = 'paid';
+}
 
 $card_label = sprintf(
     /* translators: %s: course title */
@@ -70,11 +86,24 @@ $card_label = sprintf(
 
     <div class="sikshya-course-card-body">
         <div class="sikshya-course-card-primary">
-            <?php if (!empty($course_categories) && !is_wp_error($course_categories)) : ?>
-                <div class="sikshya-course-categories">
-                    <?php foreach (array_slice($course_categories, 0, 2) as $category) : ?>
-                        <span class="sikshya-course-category"><?php echo esc_html($category->name); ?></span>
-                    <?php endforeach; ?>
+            <?php
+            $has_cats = !empty($course_categories) && !is_wp_error($course_categories);
+            $has_counts = !empty($curriculum_counts) && is_array($curriculum_counts) && !empty($curriculum_counts['total']);
+            ?>
+            <?php if ($has_cats) : ?>
+                <div class="sikshya-course-card-kicker">
+                    <div class="sikshya-course-categories">
+                        <?php foreach (array_slice($course_categories, 0, 2) as $category) : ?>
+                            <?php
+                            $category_term_link = get_term_link($category);
+                            if (!is_wp_error($category_term_link)) :
+                                ?>
+                                <a class="sikshya-course-category" href="<?php echo esc_url($category_term_link); ?>"><?php echo esc_html($category->name); ?></a>
+                            <?php else : ?>
+                                <span class="sikshya-course-category"><?php echo esc_html($category->name); ?></span>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             <?php endif; ?>
 
@@ -85,22 +114,115 @@ $card_label = sprintf(
             </h3>
 
             <p class="sikshya-course-excerpt">
-                <?php echo esc_html(wp_trim_words($course->post_excerpt ?: $course->post_content, 18)); ?>
+                <?php echo esc_html(wp_trim_words($course->post_excerpt ?: $course->post_content, 14)); ?>
             </p>
 
-            <?php if (!empty($curriculum_counts) && is_array($curriculum_counts) && !empty($curriculum_counts['total'])) : ?>
-                <div class="sikshya-course-counts" aria-label="<?php echo esc_attr__('Course curriculum counts', 'sikshya'); ?>">
-                    <?php if (!empty($curriculum_counts['lessons'])) : ?>
-                        <span class="sikshya-course-counts__pill"><?php echo esc_html(sprintf(_n('%d lesson', '%d lessons', (int) $curriculum_counts['lessons'], 'sikshya'), (int) $curriculum_counts['lessons'])); ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($curriculum_counts['quizzes'])) : ?>
-                        <span class="sikshya-course-counts__pill"><?php echo esc_html(sprintf(_n('%d quiz', '%d quizzes', (int) $curriculum_counts['quizzes'], 'sikshya'), (int) $curriculum_counts['quizzes'])); ?></span>
-                    <?php endif; ?>
-                    <?php if (!empty($curriculum_counts['assignments'])) : ?>
-                        <span class="sikshya-course-counts__pill"><?php echo esc_html(sprintf(_n('%d assignment', '%d assignments', (int) $curriculum_counts['assignments'], 'sikshya'), (int) $curriculum_counts['assignments'])); ?></span>
+            <div class="sikshya-course-card-meta-actions<?php echo $has_counts ? '' : ' sikshya-course-card-meta-actions--action-only'; ?>">
+                <div class="sikshya-course-card-actions">
+                    <?php if ($is_user_enrolled) : ?>
+                        <a class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action" href="<?php echo esc_url($learn_entry_url); ?>">
+                            <span class="sikshya-button__icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </span>
+                            <span class="sikshya-button__label"><?php esc_html_e('Continue learning', 'sikshya'); ?></span>
+                        </a>
+                    <?php elseif ($is_paid_course) : ?>
+                        <form method="post" action="<?php echo esc_url($course_permalink); ?>" class="sikshya-course-card-action-form">
+                            <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
+                            <input type="hidden" name="sikshya_cart_action" value="add" />
+                            <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
+                            <input type="hidden" name="sikshya_redirect_to_checkout" value="1" />
+                            <button type="submit" class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action">
+                                <span class="sikshya-button__icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                </span>
+                                <span class="sikshya-button__label"><?php esc_html_e('Buy now', 'sikshya'); ?></span>
+                            </button>
+                        </form>
+                    <?php elseif (is_user_logged_in()) : ?>
+                        <form method="post" action="<?php echo esc_url($course_permalink); ?>" class="sikshya-course-card-action-form">
+                            <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
+                            <input type="hidden" name="sikshya_cart_action" value="enroll_free" />
+                            <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
+                            <button type="submit" class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action">
+                                <span class="sikshya-button__icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                </span>
+                                <span class="sikshya-button__label"><?php esc_html_e('Enroll now', 'sikshya'); ?></span>
+                            </button>
+                        </form>
+                    <?php else : ?>
+                        <a class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action" href="<?php echo esc_url(wp_login_url($course_permalink)); ?>">
+                            <span class="sikshya-button__icon" aria-hidden="true">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                            </span>
+                            <span class="sikshya-button__label"><?php esc_html_e('Enroll now', 'sikshya'); ?></span>
+                        </a>
                     <?php endif; ?>
                 </div>
-            <?php endif; ?>
+
+                <?php if ($has_counts) : ?>
+                    <ul class="sikshya-course-curriculum-stats" aria-label="<?php echo esc_attr__('Course curriculum', 'sikshya'); ?>">
+                        <?php if (!empty($curriculum_counts['lessons'])) : ?>
+                            <?php
+                            $n = (int) $curriculum_counts['lessons'];
+                            $lessons_tip = sprintf(_n('%d Lesson', '%d Lessons', $n, 'sikshya'), $n);
+                            ?>
+                            <li class="sikshya-course-curriculum-stats__item">
+                                <span
+                                    class="sikshya-course-curriculum-stats__badge sikshya-course-curriculum-stats__badge--icon-value"
+                                    tabindex="0"
+                                    aria-label="<?php echo esc_attr($lessons_tip); ?>"
+                                >
+                                    <span class="sikshya-course-curriculum-stats__tooltip" aria-hidden="true"><?php echo esc_html($lessons_tip); ?></span>
+                                    <span class="sikshya-course-curriculum-stats__icon" aria-hidden="true">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 0 4 4h6z"/></svg>
+                                    </span>
+                                    <span class="sikshya-course-curriculum-stats__value" aria-hidden="true"><?php echo esc_html((string) $n); ?></span>
+                                </span>
+                            </li>
+                        <?php endif; ?>
+                        <?php if (!empty($curriculum_counts['quizzes'])) : ?>
+                            <?php
+                            $n = (int) $curriculum_counts['quizzes'];
+                            $quizzes_tip = sprintf(_n('%d Quiz', '%d Quizzes', $n, 'sikshya'), $n);
+                            ?>
+                            <li class="sikshya-course-curriculum-stats__item">
+                                <span
+                                    class="sikshya-course-curriculum-stats__badge sikshya-course-curriculum-stats__badge--icon-value"
+                                    tabindex="0"
+                                    aria-label="<?php echo esc_attr($quizzes_tip); ?>"
+                                >
+                                    <span class="sikshya-course-curriculum-stats__tooltip" aria-hidden="true"><?php echo esc_html($quizzes_tip); ?></span>
+                                    <span class="sikshya-course-curriculum-stats__icon" aria-hidden="true">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                                    </span>
+                                    <span class="sikshya-course-curriculum-stats__value" aria-hidden="true"><?php echo esc_html((string) $n); ?></span>
+                                </span>
+                            </li>
+                        <?php endif; ?>
+                        <?php if (!empty($curriculum_counts['assignments'])) : ?>
+                            <?php
+                            $n = (int) $curriculum_counts['assignments'];
+                            $assign_tip = sprintf(_n('%d Assignment', '%d Assignments', $n, 'sikshya'), $n);
+                            ?>
+                            <li class="sikshya-course-curriculum-stats__item">
+                                <span
+                                    class="sikshya-course-curriculum-stats__badge sikshya-course-curriculum-stats__badge--icon-value"
+                                    tabindex="0"
+                                    aria-label="<?php echo esc_attr($assign_tip); ?>"
+                                >
+                                    <span class="sikshya-course-curriculum-stats__tooltip" aria-hidden="true"><?php echo esc_html($assign_tip); ?></span>
+                                    <span class="sikshya-course-curriculum-stats__icon" aria-hidden="true">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                                    </span>
+                                    <span class="sikshya-course-curriculum-stats__value" aria-hidden="true"><?php echo esc_html((string) $n); ?></span>
+                                </span>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
         </div>
 
         <aside class="sikshya-course-card-aside" aria-label="<?php esc_attr_e('Course details', 'sikshya'); ?>">
@@ -140,7 +262,7 @@ $card_label = sprintf(
                 <?php endif; ?>
             </ul>
 
-            <div class="sikshya-course-aside-price">
+            <div class="sikshya-course-aside-price sikshya-course-price sikshya-course-price--<?php echo esc_attr($course_price_ui); ?>">
                 <?php if ($on_sale && null !== $price_num && null !== $sale_num) : ?>
                     <span class="sikshya-course-price-original" aria-hidden="true"><?php echo wp_kses_post(sikshya_format_price($price_num, $currency)); ?></span>
                     <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price($sale_num, $currency)); ?></span>
@@ -151,13 +273,16 @@ $card_label = sprintf(
                 <?php endif; ?>
             </div>
 
-            <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-button sikshya-button--small sikshya-course-aside-cta">
-                <?php esc_html_e('View course', 'sikshya'); ?>
+            <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-button sikshya-button--outline sikshya-button--small sikshya-course-aside-cta">
+                <span class="sikshya-button__icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+                <span class="sikshya-button__label"><?php esc_html_e('View course', 'sikshya'); ?></span>
             </a>
         </aside>
 
         <div class="sikshya-course-card-footer">
-            <div class="sikshya-course-price">
+            <div class="sikshya-course-price sikshya-course-price--<?php echo esc_attr($course_price_ui); ?>">
                 <?php if ($on_sale && null !== $price_num && null !== $sale_num) : ?>
                     <span class="sikshya-course-price-original" aria-hidden="true"><?php echo wp_kses_post(sikshya_format_price($price_num, $currency)); ?></span>
                     <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price($sale_num, $currency)); ?></span>
@@ -168,8 +293,11 @@ $card_label = sprintf(
                 <?php endif; ?>
             </div>
 
-            <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-button sikshya-button--small">
-                <?php esc_html_e('View course', 'sikshya'); ?>
+            <a href="<?php echo esc_url(get_permalink($course_id)); ?>" class="sikshya-button sikshya-button--outline sikshya-button--small">
+                <span class="sikshya-button__icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+                <span class="sikshya-button__label"><?php esc_html_e('View course', 'sikshya'); ?></span>
             </a>
         </div>
     </div>

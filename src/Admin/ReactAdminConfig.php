@@ -6,6 +6,7 @@ use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Licensing\Pro;
+use Sikshya\Services\PermalinkService;
 
 /**
  * Bootstrap payload for the React admin shell (URL-based pages, full-width layout).
@@ -41,6 +42,15 @@ final class ReactAdminConfig
             'appAdminBase' => add_query_arg(['page' => AdminPages::DASHBOARD], admin_url('admin.php')),
             'siteUrl' => home_url('/'),
             'pluginUrl' => SIKSHYA_PLUGIN_URL,
+            // Frontend permalink bases (must mirror global Sikshya permalink settings).
+            'permalinks' => PermalinkService::get(),
+            'plainPermalinks' => PermalinkService::isPlainPermalinks(),
+            'postTypes' => [
+                'course' => PostTypes::COURSE,
+                'lesson' => PostTypes::LESSON,
+                'quiz' => PostTypes::QUIZ,
+                'assignment' => PostTypes::ASSIGNMENT,
+            ],
             'user' => [
                 'name' => $user->display_name ?: $user->user_login,
                 'avatarUrl' => $avatar ? (string) $avatar : '',

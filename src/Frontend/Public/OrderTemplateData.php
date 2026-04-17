@@ -4,6 +4,7 @@ namespace Sikshya\Frontend\Public;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\OrderRepository;
+use Sikshya\Services\Settings;
 
 /**
  * @package Sikshya\Frontend\Public
@@ -41,7 +42,7 @@ final class OrderTemplateData
                 $status_label = self::statusLabel($st);
                 $gateway_label = self::gatewayLabel($gw);
                 if ($gw === 'offline' && ($st === 'on-hold' || $st === 'pending')) {
-                    $offline_instructions_html = (string) get_option('_sikshya_offline_payment_instructions', '');
+                    $offline_instructions_html = (string) Settings::get('offline_payment_instructions', '');
                 }
             }
         }

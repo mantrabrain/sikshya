@@ -72,7 +72,21 @@ final class CourseCurriculumActions
         }
 
         if ($duration !== '') {
-            update_post_meta($content_id, '_sikshya_duration', $duration);
+            // Normalize duration to an integer minute count when possible.
+            $mins = (int) preg_replace('/[^0-9]/', '', (string) $duration);
+            if ($mins < 0) {
+                $mins = 0;
+            }
+
+            // Keep legacy generic key for backward compatibility, but prefer per-type keys for rendering.
+            update_post_meta($content_id, '_sikshya_duration', (string) $duration);
+
+            if ($post_type === PostTypes::LESSON) {
+                update_post_meta($content_id, '_sikshya_lesson_duration', $mins);
+                update_post_meta($content_id, 'sikshya_lesson_duration', $mins);
+            } elseif ($post_type === PostTypes::QUIZ) {
+                update_post_meta($content_id, '_sikshya_quiz_time_limit', $mins);
+            }
         }
 
         if ($post_type === PostTypes::LESSON) {

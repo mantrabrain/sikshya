@@ -2,6 +2,9 @@
 
 namespace Sikshya\Frontend\Public;
 
+use Sikshya\Licensing\Pro;
+use Sikshya\Services\Settings;
+
 /**
  * @package Sikshya\Frontend\Public
  */
@@ -14,15 +17,57 @@ final class CheckoutTemplateData
      */
     public static function gatewaysConfigured(): array
     {
-        $stripe = (string) get_option('_sikshya_stripe_secret_key', '') !== '';
-        $paypal = (string) get_option('_sikshya_paypal_client_id', '') !== ''
-            && (string) get_option('_sikshya_paypal_secret', '') !== '';
-        $offline_raw = get_option('_sikshya_enable_offline_payment', '1');
+        $enable_offline = Settings::get('enable_offline_payment', '1');
+        $enable_paypal = Settings::get('enable_paypal_payment', '1');
+        $enable_stripe = Settings::get('enable_stripe_payment', '0');
+
+        $stripe = Pro::isActive()
+            && self::isTruthyGatewayOption($enable_stripe)
+            && (string) Settings::get('stripe_secret_key', '') !== '';
+
+        $paypal = self::isTruthyGatewayOption($enable_paypal)
+            && (string) Settings::get('paypal_client_id', '') !== ''
+            && (string) Settings::get('paypal_secret', '') !== '';
+
+        // Pro gateways (configured + enabled) — actual session handling lives in Pro.
+        $razorpay = Pro::isActive()
+            && self::isTruthyGatewayOption(Settings::get('enable_razorpay_payment', '0'))
+            && (string) Settings::get('razorpay_key_id', '') !== ''
+            && (string) Settings::get('razorpay_key_secret', '') !== '';
+
+        $mollie = Pro::isActive()
+            && self::isTruthyGatewayOption(Settings::get('enable_mollie_payment', '0'))
+            && (string) Settings::get('mollie_api_key', '') !== '';
+
+        $paystack = Pro::isActive()
+            && self::isTruthyGatewayOption(Settings::get('enable_paystack_payment', '0'))
+            && (string) Settings::get('paystack_public_key', '') !== ''
+            && (string) Settings::get('paystack_secret_key', '') !== '';
+
+        $square = Pro::isActive()
+            && self::isTruthyGatewayOption(Settings::get('enable_square_payment', '0'))
+            && (string) Settings::get('square_access_token', '') !== ''
+            && (string) Settings::get('square_location_id', '') !== '';
+
+        $authorize_net = Pro::isActive()
+            && self::isTruthyGatewayOption(Settings::get('enable_authorize_net_payment', '0'))
+            && (string) Settings::get('authorize_net_login_id', '') !== ''
+            && (string) Settings::get('authorize_net_transaction_key', '') !== '';
+
+        $bank_transfer = Pro::isActive()
+            && self::isTruthyGatewayOption(Settings::get('enable_bank_transfer_payment', '0'))
+            && (string) Settings::get('bank_transfer_instructions', '') !== '';
 
         return [
-            'offline' => self::isTruthyGatewayOption($offline_raw),
+            'offline' => self::isTruthyGatewayOption($enable_offline),
             'stripe' => $stripe,
             'paypal' => $paypal,
+            'razorpay' => $razorpay,
+            'mollie' => $mollie,
+            'paystack' => $paystack,
+            'square' => $square,
+            'authorize_net' => $authorize_net,
+            'bank_transfer' => $bank_transfer,
         ];
     }
 

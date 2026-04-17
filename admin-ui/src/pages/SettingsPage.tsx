@@ -33,6 +33,20 @@ type SettingsSchema = Record<string, SettingsSection[]>;
 
 type SettingsTabMeta = { id: string; label: string; description: string; icon: string };
 
+type PaymentGatewayMeta = {
+  id: string;
+  label: string;
+  description: string;
+  tier: string;
+  locked: boolean;
+  enabled_setting_key: string;
+  setting_keys: string[];
+};
+
+type SettingsSchemaMeta = {
+  payment_gateways?: PaymentGatewayMeta[];
+};
+
 const TAB_META: SettingsTabMeta[] = [
   { id: 'general', label: 'General', description: 'Core plugin behavior and defaults.', icon: 'puzzle' },
   { id: 'courses', label: 'Courses', description: 'Catalog and course-level defaults.', icon: 'course' },
@@ -53,6 +67,13 @@ const TAB_META: SettingsTabMeta[] = [
   { id: 'advanced', label: 'Advanced', description: 'Developer and system options.', icon: 'cog' },
 ];
 
+type ToastState = {
+  open: boolean;
+  kind: 'success' | 'error' | 'info';
+  title: string;
+  message?: string;
+};
+
 function fieldToStringValue(v: unknown): string {
   if (v === null || v === undefined) return '';
   return String(v);
@@ -60,6 +81,99 @@ function fieldToStringValue(v: unknown): string {
 
 function isTruthyCheckboxValue(v: unknown): boolean {
   return v === true || v === 1 || v === '1' || v === 'yes' || v === 'on';
+}
+
+function normalizeForDirtyCompare(v: unknown): string {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'boolean') return v ? '1' : '0';
+  if (typeof v === 'number') return String(v);
+  return String(v);
+}
+
+function stableNormalizeRecord(obj: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  const keys = Object.keys(obj).sort();
+  for (const k of keys) {
+    out[k] = normalizeForDirtyCompare(obj[k]);
+  }
+  return out;
+}
+
+function parseGatewayOrder(v: unknown): string[] {
+  const s = typeof v === 'string' ? v.trim() : '';
+  if (!s) return [];
+  return s
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+}
+
+function serializeGatewayOrder(ids: string[]): string {
+  return ids.map((x) => x.trim()).filter(Boolean).join(',');
+}
+
+function sectionIconName(raw?: string): string {
+  // Settings schema icons come from PHP as FontAwesome classes (e.g. "fas fa-link").
+  // React admin uses our own SVG icon set, so map common FA names to our icon keys.
+  const s = (raw || '').trim();
+  const fa = s.replace(/^fas\s+fa-/, '').replace(/^fa-/, '');
+  switch (fa) {
+    case 'link':
+      return 'tag';
+    case 'folder-open':
+    case 'folder':
+      return 'course';
+    case 'tags':
+      return 'tag';
+    case 'route':
+      return 'layers';
+    case 'cog':
+    case 'cogs':
+      return 'cog';
+    case 'info-circle':
+      return 'helpCircle';
+    case 'question-circle':
+      return 'helpCircle';
+    case 'bell':
+      return 'helpCircle';
+    case 'shield-alt':
+      return 'cog';
+    case 'tools':
+      return 'cog';
+    default:
+      return fa || 'cog';
+  }
+}
+
+function SectionCard({
+  children,
+  title,
+  description,
+  icon,
+}: {
+  children: React.ReactNode;
+  title?: string;
+  description?: string;
+  icon?: string;
+}) {
+  return (
+    <section className="rounded-2xl border border-slate-200/80 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/30">
+      {title ? (
+        <div className="mb-5 flex items-start gap-3">
+          <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <NavIcon name={sectionIconName(icon)} className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
+            {description ? (
+              <p className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{description}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+      {children}
+    </section>
+  );
 }
 
 export function SettingsPage(props: { config: SikshyaReactConfig; title: string }) {
@@ -70,11 +184,13 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   const [tab, setTab] = useState<string>(initialTab);
 
   const schema = useAsyncData(async () => {
-    const res = await getSikshyaApi().get<{ success: boolean; data?: { tabs?: SettingsSchema } }>(SIKSHYA_ENDPOINTS.settings.schema);
+    const res = await getSikshyaApi().get<{ success: boolean; data?: { tabs?: SettingsSchema; meta?: SettingsSchemaMeta } }>(
+      SIKSHYA_ENDPOINTS.settings.schema
+    );
     if (!res.success) {
       throw new Error('Could not load settings schema.');
     }
-    return res.data?.tabs || {};
+    return { tabs: res.data?.tabs || {}, meta: res.data?.meta || {} };
   }, []);
 
   const values = useAsyncData(async () => {
@@ -90,7 +206,8 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null); // kept for inline header hint
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
 
@@ -100,13 +217,8 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
     setInitialValues(values.data);
     setSaveMsg(null);
     setSaveError(null);
+    setToast(null);
   }, [values.data, tab]);
-
-  useEffect(() => {
-    if (qTab && qTab.length && qTab !== tab) {
-      setTab(qTab);
-    }
-  }, [qTab, tab]);
 
   useEffect(() => {
     // Keep URL in sync for shareable / refresh-safe navigation.
@@ -116,20 +228,28 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   }, [tab]);
 
   const tabMeta = useMemo(() => TAB_META.find((t) => t.id === tab) || TAB_META[0], [tab]);
-  const tabSchema = (schema.data || {})[tab] || [];
+  const tabSchema = (schema.data?.tabs || {})[tab] || [];
+  const schemaMeta = schema.data?.meta || {};
 
   const dirty = useMemo(() => {
     try {
-      return JSON.stringify(draft) !== JSON.stringify(initialValues);
+      return JSON.stringify(stableNormalizeRecord(draft)) !== JSON.stringify(stableNormalizeRecord(initialValues));
     } catch {
       return true;
     }
   }, [draft, initialValues]);
 
+  useEffect(() => {
+    if (!toast?.open) return;
+    const t = window.setTimeout(() => setToast(null), 3800);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
   const onSave = async () => {
     setSaving(true);
     setSaveError(null);
     setSaveMsg(null);
+    setToast(null);
     try {
       const res = await getSikshyaApi().post<{ success: boolean; message?: string; data?: { values?: Record<string, unknown> } }>(
         SIKSHYA_ENDPOINTS.settings.save,
@@ -141,9 +261,17 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
       const next = res.data?.values || {};
       setDraft(next);
       setInitialValues(next);
-      setSaveMsg(res.message || 'Settings saved.');
+      const msg = res.message || 'Settings saved.';
+      setSaveMsg(msg);
+      setToast({ open: true, kind: 'success', title: 'Saved', message: msg });
     } catch (e) {
       setSaveError(e);
+      setToast({
+        open: true,
+        kind: 'error',
+        title: 'Save failed',
+        message: e instanceof Error ? e.message : 'Could not save settings. Please try again.',
+      });
     } finally {
       setSaving(false);
     }
@@ -162,6 +290,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
     setSaving(true);
     setSaveError(null);
     setSaveMsg(null);
+    setToast(null);
     try {
       const res = await getSikshyaApi().post<{ success: boolean; message?: string }>(SIKSHYA_ENDPOINTS.settings.reset, {
         tab,
@@ -170,12 +299,373 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
         throw new Error(res.message || 'Reset failed.');
       }
       await values.refetch();
-      setSaveMsg(res.message || 'Settings reset.');
+      const msg = res.message || 'Settings reset.';
+      setSaveMsg(msg);
+      setToast({ open: true, kind: 'success', title: 'Reset', message: msg });
     } catch (e) {
       setSaveError(e);
+      setToast({
+        open: true,
+        kind: 'error',
+        title: 'Reset failed',
+        message: e instanceof Error ? e.message : 'Could not reset settings. Please try again.',
+      });
     } finally {
       setSaving(false);
     }
+  };
+
+  const renderField = (f: SettingsField) => {
+    const k = f.key;
+    const type = f.type || 'text';
+    const cur = draft[k];
+
+    const label = f.label || k;
+    const desc = f.description || '';
+
+    if (type === 'checkbox') {
+      const checked = isTruthyCheckboxValue(cur);
+      return (
+        <div key={k} className="lg:col-span-2">
+          <label className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4"
+              checked={checked}
+              onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.checked ? '1' : '0' }))}
+            />
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
+              {desc ? <span className="mt-1 block text-xs text-slate-400/90 dark:text-slate-500/80">{desc}</span> : null}
+            </span>
+          </label>
+        </div>
+      );
+    }
+
+    if (type === 'select') {
+      const opts = f.options || {};
+      return (
+        <div key={k}>
+          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
+            {label}
+          </label>
+          {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+          <select
+            id={k}
+            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+            value={fieldToStringValue(cur ?? f.default ?? '')}
+            onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
+          >
+            {Object.entries(opts).map(([ov, ol]) => (
+              <option key={ov} value={ov}>
+                {ol}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+
+    if (type === 'textarea') {
+      return (
+        <div key={k} className="lg:col-span-2">
+          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
+            {label}
+          </label>
+          {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+          <textarea
+            id={k}
+            rows={4}
+            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+            value={fieldToStringValue(cur ?? f.default ?? '')}
+            onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
+            placeholder={f.placeholder || ''}
+          />
+        </div>
+      );
+    }
+
+    const inputType = type === 'number' ? 'number' : type === 'email' ? 'email' : type === 'password' ? 'password' : 'text';
+    return (
+      <div key={k}>
+        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
+          {label}
+        </label>
+        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        <input
+          id={k}
+          type={inputType}
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          value={fieldToStringValue(cur ?? f.default ?? '')}
+          onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
+          placeholder={f.placeholder || ''}
+          min={typeof f.min === 'number' ? f.min : undefined}
+          max={typeof f.max === 'number' ? f.max : undefined}
+        />
+      </div>
+    );
+  };
+
+  const PaymentTab = () => {
+    const gateways = (schemaMeta.payment_gateways || []) as PaymentGatewayMeta[];
+    const [open, setOpen] = useState<string | null>(gateways[0]?.id || 'offline');
+
+    const byTitle = (t: string) => tabSchema.find((s) => (s.title || '').toLowerCase().trim() === t.toLowerCase().trim());
+    const secGateways = byTitle('Payment Gateways');
+
+    const gatewayFields = Array.isArray(secGateways?.fields) ? secGateways!.fields! : [];
+
+    // Pull key global fields into the gateway manager header.
+    const getField = (key: string) => gatewayFields.find((f) => f.key === key);
+    const fPrimary = getField('payment_gateway');
+    const fTestMode = getField('enable_test_mode');
+    const fOrder = getField('payment_gateways_order');
+    const fieldsByKey = useMemo(() => {
+      const map = new Map<string, SettingsField>();
+      for (const sec of tabSchema) {
+        for (const f of sec.fields || []) {
+          if (f?.key) map.set(f.key, f);
+        }
+      }
+      return map;
+    }, [tabSchema]);
+
+    const orderedGateways = useMemo(() => {
+      const current = parseGatewayOrder(draft['payment_gateways_order']);
+      const byId = new Map(gateways.map((g) => [g.id, g]));
+      const out: PaymentGatewayMeta[] = [];
+
+      for (const id of current) {
+        const g = byId.get(id);
+        if (g) out.push(g);
+      }
+      for (const g of gateways) {
+        if (!out.find((x) => x.id === g.id)) out.push(g);
+      }
+      return out;
+    }, [gateways, draft]);
+
+    const setGatewayOrder = (ids: string[]) => {
+      setDraft((p) => ({ ...p, payment_gateways_order: serializeGatewayOrder(ids) }));
+    };
+
+    const otherSections = tabSchema.filter(
+      (s) =>
+        s !== secGateways &&
+        Array.isArray(s.fields) &&
+        s.fields.length
+    );
+
+    const GatewayRow = ({
+      id,
+      title,
+      subtitle,
+      badge,
+      enabledKey,
+      pro,
+      locked,
+      canReorder,
+      onMoveUp,
+      onMoveDown,
+    }: {
+      id: string;
+      title: string;
+      subtitle: string;
+      badge?: 'ACTIVE' | 'TEST' | 'PRO';
+      enabledKey?: string;
+      pro?: boolean;
+      locked?: boolean;
+      canReorder?: boolean;
+      onMoveUp?: () => void;
+      onMoveDown?: () => void;
+    }) => {
+      const selected = open === id;
+      const enabled = enabledKey ? isTruthyCheckboxValue(draft[enabledKey]) : true;
+      return (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => (o === id ? null : id))}
+          className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+            selected
+              ? 'border-brand-200 bg-white shadow-sm dark:border-brand-900/60 dark:bg-slate-900'
+              : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-900'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                <NavIcon name={id === 'offline' ? 'tag' : id === 'paypal' ? 'users' : 'badge'} className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">{title}</div>
+                  {badge ? (
+                    <span
+                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                        badge === 'PRO'
+                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
+                          : badge === 'TEST'
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200'
+                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
+                      }`}
+                    >
+                      {badge}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="truncate text-xs text-slate-400/90 dark:text-slate-500/80">{subtitle}</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {canReorder ? (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
+                    onClick={onMoveUp}
+                    aria-label="Move up"
+                    title="Move up"
+                    disabled={!onMoveUp}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
+                    onClick={onMoveDown}
+                    aria-label="Move down"
+                    title="Move down"
+                    disabled={!onMoveDown}
+                  >
+                    ↓
+                  </button>
+                </div>
+              ) : null}
+              {enabledKey ? (
+                <label
+                  className={`flex items-center gap-2 text-xs font-semibold ${
+                    pro || locked ? 'opacity-60' : 'text-slate-700 dark:text-slate-200'
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    disabled={!!pro || !!locked}
+                    checked={!!enabled}
+                    onChange={(e) => setDraft((p) => ({ ...p, [enabledKey]: e.target.checked ? '1' : '0' }))}
+                  />
+                  {enabled ? 'Enabled' : 'Disabled'}
+                </label>
+              ) : null}
+              <span className={`text-slate-400 transition ${selected ? 'rotate-180' : ''}`} aria-hidden>
+                ▾
+              </span>
+            </div>
+          </div>
+        </button>
+      );
+    };
+
+    const gatewaySettingsFields = (g: PaymentGatewayMeta): SettingsField[] => {
+      const out: SettingsField[] = [];
+      for (const k of g.setting_keys || []) {
+        const f = fieldsByKey.get(k);
+        if (f) out.push(f);
+      }
+      return out;
+    };
+
+    return (
+      <div className="space-y-8">
+        <SectionCard title="Payment gateways" description="Enable and configure payment gateways. Expand a gateway to edit its settings." icon="fas fa-credit-card">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {fPrimary ? renderField(fPrimary) : null}
+            <div className="lg:col-span-2">{fTestMode ? renderField(fTestMode) : null}</div>
+            {/* Keep this field present for persistence even if users don’t touch it directly. */}
+            <div className="hidden">{fOrder ? renderField(fOrder) : null}</div>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            {orderedGateways.map((g, idx) => {
+              const enabledKey = g.enabled_setting_key || undefined;
+              const locked = !!g.locked;
+              const pro = g.tier === 'pro';
+
+              const badge =
+                locked
+                  ? ('PRO' as const)
+                  : enabledKey && isTruthyCheckboxValue(draft[enabledKey])
+                    ? ('ACTIVE' as const)
+                    : undefined;
+
+              const fields = gatewaySettingsFields(g);
+              const ids = orderedGateways.map((x) => x.id);
+
+              const canReorder = orderedGateways.length > 1;
+              const onMoveUp =
+                idx > 0
+                  ? () => {
+                      const next = [...ids];
+                      const [item] = next.splice(idx, 1);
+                      next.splice(idx - 1, 0, item);
+                      setGatewayOrder(next);
+                    }
+                  : undefined;
+              const onMoveDown =
+                idx < orderedGateways.length - 1
+                  ? () => {
+                      const next = [...ids];
+                      const [item] = next.splice(idx, 1);
+                      next.splice(idx + 1, 0, item);
+                      setGatewayOrder(next);
+                    }
+                  : undefined;
+
+              return (
+                <div key={g.id}>
+                  <GatewayRow
+                    id={g.id}
+                    title={g.label}
+                    subtitle={g.description}
+                    badge={badge}
+                    enabledKey={enabledKey}
+                    pro={pro}
+                    locked={locked}
+                    canReorder={canReorder}
+                    onMoveUp={onMoveUp}
+                    onMoveDown={onMoveDown}
+                  />
+                  {open === g.id ? (
+                    <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                      {locked ? (
+                        <div className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+                          This gateway is available in the Pro version.
+                        </div>
+                      ) : null}
+                      {fields.length ? (
+                        <div className={`grid gap-6 lg:grid-cols-2 ${locked ? 'opacity-60' : ''}`}>{fields.map(renderField)}</div>
+                      ) : (
+                        <div className="text-sm text-slate-600 dark:text-slate-300">
+                          {locked ? 'Upgrade to configure this gateway.' : 'No additional settings for this gateway.'}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </SectionCard>
+
+        {otherSections.map((sec, i) => (
+          <SectionCard key={i} title={sec.title} description={sec.description} icon={sec.icon}>
+            <div className="grid gap-6 lg:grid-cols-2">{(sec.fields || []).map(renderField)}</div>
+          </SectionCard>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -189,10 +679,51 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
       title={title}
       subtitle="Global settings"
     >
+      {toast?.open ? (
+        <div className="fixed right-6 top-6 z-[9999] w-[360px] max-w-[calc(100vw-48px)]">
+          <div
+            className={`rounded-2xl border px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${
+              toast.kind === 'success'
+                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-100'
+                : toast.kind === 'error'
+                  ? 'border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-100'
+                  : 'border-slate-200 bg-white/95 text-slate-900 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100'
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl ${
+                  toast.kind === 'success'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+                    : toast.kind === 'error'
+                      ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200'
+                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <NavIcon name={toast.kind === 'success' ? 'badge' : toast.kind === 'error' ? 'helpCircle' : 'helpCircle'} className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold">{toast.title}</div>
+                {toast.message ? <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div> : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => setToast(null)}
+                className="rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="min-w-0">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800">
+          <div className="overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+            <div className="border-b border-slate-200/60 px-4 py-4 dark:border-slate-800/70">
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300">
                   <NavIcon name="puzzle" className="h-5 w-5" />
@@ -221,14 +752,18 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                         className={`w-full rounded-xl px-3 py-2 text-left transition ${
                           selected
                             ? 'bg-brand-600 text-white'
-                            : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/60'
+                            : 'text-slate-700 hover:bg-white/70 dark:text-slate-200 dark:hover:bg-slate-900/50'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <NavIcon name={t.icon} className={`h-4 w-4 ${selected ? 'text-white/90' : 'text-slate-400'}`} />
                           <div className="text-sm font-semibold">{t.label}</div>
                         </div>
-                        <div className={`mt-0.5 text-xs leading-snug ${selected ? 'text-white/85' : 'text-slate-500 dark:text-slate-400'}`}>
+                        <div
+                          className={`mt-0.5 text-xs leading-snug ${
+                            selected ? 'text-white/80' : 'text-slate-400/90 dark:text-slate-500/80'
+                          }`}
+                        >
                           {t.description}
                         </div>
                       </button>
@@ -254,8 +789,8 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
               </div>
             }
           >
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/35">
+              <div className="border-b border-slate-200/60 px-6 py-5 dark:border-slate-800/70">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -263,7 +798,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                       {tabMeta.label}
                     </div>
                     <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{tabMeta.label} settings</h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{tabMeta.description}</p>
+                    <p className="mt-1 text-sm text-slate-400/90 dark:text-slate-500/80">{tabMeta.description}</p>
                     {saveMsg ? (
                       <p className="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">{saveMsg}</p>
                     ) : null}
@@ -273,7 +808,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                       type="button"
                       disabled={saving}
                       onClick={() => void onReset()}
-                      className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className="inline-flex items-center justify-center rounded-lg border border-slate-200/70 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white disabled:opacity-50 dark:border-slate-600 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-900"
                     >
                       Reset
                     </button>
@@ -292,129 +827,23 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
 
               <div className="px-6 py-6">
                 {tabSchema.length ? (
-                  <div className="space-y-8">
-                    {tabSchema.map((sec, i) => {
-                      const fields = Array.isArray(sec.fields) ? sec.fields : [];
-                      if (!fields.length) {
-                        return null;
-                      }
-                      return (
-                        <section key={i} className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                          {sec.title ? (
-                            <div className="mb-5 flex items-start gap-3">
-                              <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                <NavIcon name={(sec.icon || 'cog').replace(/^fas fa-/, '')} className="h-5 w-5" />
-                              </span>
-                              <div className="min-w-0">
-                                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{sec.title}</h3>
-                                {sec.description ? (
-                                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{sec.description}</p>
-                                ) : null}
-                              </div>
-                            </div>
-                          ) : null}
-
-                          <div className="grid gap-6 lg:grid-cols-2">
-                            {fields.map((f) => {
-                              const k = f.key;
-                              const type = f.type || 'text';
-                              const cur = draft[k];
-
-                              const label = f.label || k;
-                              const desc = f.description || '';
-
-                              if (type === 'checkbox') {
-                                const checked = isTruthyCheckboxValue(cur);
-                                return (
-                                  <div key={k} className="lg:col-span-2">
-                                    <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
-                                      <input
-                                        type="checkbox"
-                                        className="mt-1 h-4 w-4"
-                                        checked={checked}
-                                        onChange={(e) =>
-                                          setDraft((p) => ({ ...p, [k]: e.target.checked ? '1' : '0' }))
-                                        }
-                                      />
-                                      <span className="min-w-0">
-                                        <span className="block text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
-                                        {desc ? (
-                                          <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{desc}</span>
-                                        ) : null}
-                                      </span>
-                                    </label>
-                                  </div>
-                                );
-                              }
-
-                              if (type === 'select') {
-                                const opts = f.options || {};
-                                return (
-                                  <div key={k}>
-                                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-                                      {label}
-                                    </label>
-                                    {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{desc}</p> : null}
-                                    <select
-                                      id={k}
-                                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                                      value={fieldToStringValue(cur ?? f.default ?? '')}
-                                      onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
-                                    >
-                                      {Object.entries(opts).map(([ov, ol]) => (
-                                        <option key={ov} value={ov}>
-                                          {ol}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                );
-                              }
-
-                              if (type === 'textarea') {
-                                return (
-                                  <div key={k} className="lg:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-                                      {label}
-                                    </label>
-                                    {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{desc}</p> : null}
-                                    <textarea
-                                      id={k}
-                                      rows={4}
-                                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                                      value={fieldToStringValue(cur ?? f.default ?? '')}
-                                      onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
-                                      placeholder={f.placeholder || ''}
-                                    />
-                                  </div>
-                                );
-                              }
-
-                              const inputType = type === 'number' ? 'number' : type === 'email' ? 'email' : 'text';
-                              return (
-                                <div key={k}>
-                                  <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-                                    {label}
-                                  </label>
-                                  {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{desc}</p> : null}
-                                  <input
-                                    id={k}
-                                    type={inputType}
-                                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                                    value={fieldToStringValue(cur ?? f.default ?? '')}
-                                    onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
-                                    placeholder={f.placeholder || ''}
-                                    min={typeof f.min === 'number' ? f.min : undefined}
-                                    max={typeof f.max === 'number' ? f.max : undefined}
-                                  />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </section>
-                      );
-                    })}
-                  </div>
+                  tab === 'payment' ? (
+                    <PaymentTab />
+                  ) : (
+                    <div className="space-y-8">
+                      {tabSchema.map((sec, i) => {
+                        const fields = Array.isArray(sec.fields) ? sec.fields : [];
+                        if (!fields.length) {
+                          return null;
+                        }
+                        return (
+                          <SectionCard key={i} title={sec.title} description={sec.description} icon={sec.icon}>
+                            <div className="grid gap-6 lg:grid-cols-2">{fields.map(renderField)}</div>
+                          </SectionCard>
+                        );
+                      })}
+                    </div>
+                  )
                 ) : (
                   <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-950/20">
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-200">No settings defined for this tab.</p>

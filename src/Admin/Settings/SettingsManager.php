@@ -3,6 +3,7 @@
 namespace Sikshya\Admin\Settings;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 
 /**
@@ -74,6 +75,11 @@ class SettingsManager
                 'security' => $this->getSecuritySettings(),
                 'advanced' => $this->getAdvancedSettings(),
             ];
+
+            /**
+             * Allow addons to add/modify settings tabs and sections.
+             */
+            $this->settings = apply_filters('sikshya_settings_tabs', $this->settings);
         }
         return $this->settings;
     }
@@ -89,7 +95,12 @@ class SettingsManager
     public function getTabSettings(string $tab): array
     {
         $all_settings = $this->getAllSettings();
-        return $all_settings[$tab] ?? [];
+        $settings = $all_settings[$tab] ?? [];
+
+        /**
+         * Allow addons to customize a single tab's sections/fields.
+         */
+        return apply_filters('sikshya_settings_tab_' . sanitize_key($tab), $settings);
     }
 
     /**
@@ -101,9 +112,7 @@ class SettingsManager
      */
     public function getSetting(string $key, $default = '')
     {
-        $option_name = '_sikshya_' . $key;
-        $value = get_option($option_name, $default);
-        return $value;
+        return Settings::get($key, $default);
     }
 
     /**
@@ -115,10 +124,9 @@ class SettingsManager
      */
     public function saveSetting(string $key, $value): bool
     {
-        $option_name = '_sikshya_' . $key;
-        update_option($option_name, $value);
+        Settings::set($key, $value);
 
-        $saved_value = get_option($option_name);
+        $saved_value = Settings::get($key, null);
 
         $value_normalized = $this->normalizeValue($value);
         $saved_normalized = $this->normalizeValue($saved_value);
@@ -129,7 +137,7 @@ class SettingsManager
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log(
-                'Sikshya SettingsManager: option mismatch after save for ' . $option_name
+                'Sikshya SettingsManager: option mismatch after save for ' . ('_sikshya_' . sanitize_key($key))
             );
         }
 
@@ -572,7 +580,7 @@ class SettingsManager
                         'label' => __('Admin Email', 'sikshya'),
                         'description' => __('Primary email address for system notifications', 'sikshya'),
                         'placeholder' => __('admin@example.com', 'sikshya'),
-                        'default' => get_option('admin_email'),
+                        'default' => Settings::getRaw('admin_email'),
                         'required' => true,
                         'sanitize_callback' => 'sanitize_email',
                         'validate_callback' => function ($value) {
@@ -689,7 +697,7 @@ class SettingsManager
                         'type' => 'select',
                         'label' => __('Timezone', 'sikshya'),
                         'description' => __('Timezone for displaying dates and times', 'sikshya'),
-                        'default' => get_option('timezone_string'),
+                        'default' => Settings::getRaw('timezone_string'),
                         'options' => $this->getTimezoneOptions(),
                         'sanitize_callback' => 'sanitize_text_field',
                         'validate_callback' => function ($value) {
@@ -701,7 +709,7 @@ class SettingsManager
                         'type' => 'select',
                         'label' => __('Date Format', 'sikshya'),
                         'description' => __('Format for displaying dates throughout the LMS', 'sikshya'),
-                        'default' => get_option('date_format'),
+                        'default' => Settings::getRaw('date_format'),
                         'options' => [
                             'F j, Y' => date('F j, Y'),
                             'Y-m-d' => date('Y-m-d'),
@@ -720,7 +728,7 @@ class SettingsManager
                         'type' => 'select',
                         'label' => __('Time Format', 'sikshya'),
                         'description' => __('Format for displaying times throughout the LMS', 'sikshya'),
-                        'default' => get_option('time_format'),
+                        'default' => Settings::getRaw('time_format'),
                         'options' => [
                             'g:i a' => date('g:i a'),
                             'H:i' => date('H:i')
@@ -1173,19 +1181,29 @@ class SettingsManager
                         'type' => 'select',
                         'label' => __('Primary Payment Gateway', 'sikshya'),
                         'description' => __(
-                            'Default preference for integrations. Checkout always lists offline payment (when enabled) first, then Stripe and PayPal when configured.',
+                            'Default preference for integrations. Checkout shows enabled gateways based on your configuration and license.',
                             'sikshya'
                         ),
                         'default' => 'offline',
                         'options' => [
                             '' => __('Select Gateway', 'sikshya'),
                             'offline' => __('Offline / manual', 'sikshya'),
-                            'stripe' => __('Stripe', 'sikshya'),
                             'paypal' => __('PayPal', 'sikshya'),
-                            'razorpay' => __('Razorpay', 'sikshya'),
-                            'mollie' => __('Mollie', 'sikshya'),
-                            'manual' => __('Manual Payment (legacy label)', 'sikshya')
+                            'stripe' => __('Stripe (Pro)', 'sikshya'),
+                            'razorpay' => __('Razorpay (Pro)', 'sikshya'),
+                            'mollie' => __('Mollie (Pro)', 'sikshya'),
+                            'manual' => __('Manual Payment (legacy label)', 'sikshya'),
                         ]
+                    ],
+                    [
+                        'key' => 'payment_gateways_order',
+                        'type' => 'text',
+                        'label' => __('Gateway order', 'sikshya'),
+                        'description' => __(
+                            'Controls the display order of gateways at checkout. (Managed by the Payment tab UI.)',
+                            'sikshya'
+                        ),
+                        'default' => '',
                     ],
                     [
                         'key' => 'enable_offline_payment',
@@ -1196,6 +1214,68 @@ class SettingsManager
                             'sikshya'
                         ),
                         'default' => true
+                    ],
+                    [
+                        'key' => 'enable_paypal_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable PayPal at checkout', 'sikshya'),
+                        'description' => __(
+                            'Shows PayPal on checkout when enabled and credentials are configured.',
+                            'sikshya'
+                        ),
+                        'default' => true,
+                    ],
+                    [
+                        'key' => 'enable_stripe_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Stripe at checkout (Pro)', 'sikshya'),
+                        'description' => __(
+                            'Shows Stripe on checkout when Pro is active, enabled, and keys are configured.',
+                            'sikshya'
+                        ),
+                        'default' => false,
+                    ],
+                    [
+                        'key' => 'enable_razorpay_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Razorpay at checkout (Pro)', 'sikshya'),
+                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'default' => false,
+                    ],
+                    [
+                        'key' => 'enable_mollie_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Mollie at checkout (Pro)', 'sikshya'),
+                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'default' => false,
+                    ],
+                    [
+                        'key' => 'enable_paystack_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Paystack at checkout (Pro)', 'sikshya'),
+                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'default' => false,
+                    ],
+                    [
+                        'key' => 'enable_square_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Square at checkout (Pro)', 'sikshya'),
+                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'default' => false,
+                    ],
+                    [
+                        'key' => 'enable_authorize_net_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Authorize.Net at checkout (Pro)', 'sikshya'),
+                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'default' => false,
+                    ],
+                    [
+                        'key' => 'enable_bank_transfer_payment',
+                        'type' => 'checkbox',
+                        'label' => __('Enable Bank Transfer at checkout (Pro)', 'sikshya'),
+                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'default' => false,
                     ],
                     [
                         'key' => 'offline_payment_instructions',
@@ -1314,6 +1394,14 @@ class SettingsManager
                             'sandbox' => __('Sandbox (Test)', 'sikshya'),
                             'live' => __('Live (Production)', 'sikshya')
                         ]
+                    ],
+                    [
+                        'key' => 'paypal_webhook_id',
+                        'type' => 'text',
+                        'label' => __('Webhook ID', 'sikshya'),
+                        'description' => __('PayPal webhook ID used to verify webhook signatures (recommended).', 'sikshya'),
+                        'placeholder' => 'A PayPal Webhook ID',
+                        'default' => ''
                     ]
                 ]
             ],
@@ -1558,7 +1646,7 @@ class SettingsManager
                         'label' => __('From Email', 'sikshya'),
                         'description' => __('Email address to use in "From" field', 'sikshya'),
                         'placeholder' => 'noreply@yoursite.com',
-                        'default' => get_option('admin_email')
+                        'default' => Settings::getRaw('admin_email')
                     ],
                     [
                         'key' => 'reply_to_email',
@@ -1566,7 +1654,7 @@ class SettingsManager
                         'label' => __('Reply-To Email', 'sikshya'),
                         'description' => __('Email address for replies', 'sikshya'),
                         'placeholder' => 'support@yoursite.com',
-                        'default' => get_option('admin_email')
+                        'default' => Settings::getRaw('admin_email')
                     ]
                 ]
             ],
@@ -1972,6 +2060,26 @@ class SettingsManager
                         'default' => $defaults['permalink_order'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
+                    ],
+                ],
+            ],
+            [
+                'title' => __('Learn player URL format', 'sikshya'),
+                'icon' => 'fas fa-route',
+                'description' => __(
+                    'Controls whether Learn URLs include a stable public id segment. Keeping it enabled is recommended for long-term compatibility when titles/slugs change and when content is reused across courses.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'learn_permalink_use_public_id',
+                        'type' => 'checkbox',
+                        'label' => __('Use public_id in Learn URLs (recommended)', 'sikshya'),
+                        'description' => __(
+                            'Enabled: /learn/lesson/{public_id}/{slug}. Disabled: /learn/lesson/{slug}. Existing links will continue to work via redirects.',
+                            'sikshya'
+                        ),
+                        'default' => '1',
                     ],
                 ],
             ],

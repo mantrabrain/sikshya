@@ -37,7 +37,7 @@ class LogService
      */
     public function log(string $level, string $message, array $context = []): void
     {
-        if (!get_option('sikshya_enable_logging', 'yes')) {
+        if (!Settings::getRaw('sikshya_enable_logging', 'yes')) {
             return;
         }
 

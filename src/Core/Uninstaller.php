@@ -2,6 +2,8 @@
 
 namespace Sikshya\Core;
 
+use Sikshya\Services\Settings;
+
 /**
  * Plugin Uninstaller
  *
@@ -20,7 +22,7 @@ class Uninstaller
         }
 
         // Get uninstall options
-        $uninstall_options = get_option('sikshya_uninstall_options', [
+        $uninstall_options = Settings::getRaw('sikshya_uninstall_options', [
             'remove_data' => true,
             'remove_tables' => true,
             'remove_options' => true,

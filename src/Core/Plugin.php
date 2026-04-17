@@ -17,6 +17,7 @@ use Sikshya\Services\CourseService;
 use Sikshya\Services\FrontendAssetsService;
 use Sikshya\Services\AdminAssetsService;
 use Sikshya\Services\RestCollectionQueryService;
+use Sikshya\Services\Settings;
 
 /**
  * Main Plugin Class
@@ -202,9 +203,9 @@ final class Plugin
     {
         PermalinkService::boot();
 
-        $stored_ver = (string) get_option('sikshya_plugin_version', '');
+        $stored_ver = (string) Settings::getRaw('sikshya_plugin_version', '');
         if ($stored_ver !== $this->version) {
-            update_option('sikshya_plugin_version', $this->version);
+            Settings::setRaw('sikshya_plugin_version', $this->version);
             flush_rewrite_rules(false);
         }
 

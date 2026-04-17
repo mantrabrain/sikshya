@@ -292,6 +292,26 @@ function sikshya_frontend_page_url(string $key): string
 }
 
 /**
+ * Learn / player entry URL for a course (catalog cards, enrolled CTA).
+ *
+ * @param int $course_id Course post ID.
+ */
+function sikshya_course_learn_entry_url(int $course_id): string
+{
+    $course_id = (int) $course_id;
+    if ($course_id <= 0) {
+        return home_url('/');
+    }
+    if (class_exists(\Sikshya\Frontend\Public\PublicPageUrls::class)) {
+        return \Sikshya\Frontend\Public\PublicPageUrls::learnForCourse($course_id);
+    }
+
+    $p = get_permalink($course_id);
+
+    return is_string($p) && $p !== '' ? $p : home_url('/');
+}
+
+/**
  * Whether the current user is enrolled (DB-backed).
  */
 function sikshya_is_user_enrolled_in_course(int $course_id, int $user_id = 0): bool

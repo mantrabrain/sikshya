@@ -256,10 +256,12 @@
 
 .sikshya-course-grid--list .sikshya-course-card {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(180px, 240px);
+  grid-template-columns: minmax(200px, 260px) minmax(260px, 1fr) minmax(176px, 208px);
   grid-template-areas: "image primary aside";
   align-items: stretch;
-  column-gap: var(--sikshya-spacing-6);
+  column-gap: var(--sikshya-spacing-5);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.08);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .sikshya-course-grid--list .sikshya-course-card-body {
@@ -269,29 +271,43 @@
 .sikshya-course-grid--list .sikshya-course-card-image {
   grid-area: image;
   align-self: stretch;
-  min-height: 200px;
-  aspect-ratio: auto;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  margin: 0;
   border-radius: var(--sikshya-radius-lg) 0 0 var(--sikshya-radius-lg);
+  border: none;
+  border-right: 1px solid var(--sikshya-gray-100);
+  box-shadow: none;
+  background: var(--sikshya-gray-100);
 }
 
 .sikshya-course-grid--list .sikshya-course-card-primary {
   grid-area: primary;
-  padding: var(--sikshya-spacing-5) 0;
+  padding: var(--sikshya-spacing-5) var(--sikshya-spacing-3) var(--sikshya-spacing-5) 0;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .sikshya-course-grid--list .sikshya-course-card-aside {
   grid-area: aside;
   align-self: stretch;
   margin: 0;
-  padding: var(--sikshya-spacing-5);
-  border-left: 1px solid var(--sikshya-gray-200);
-  background: var(--sikshya-gray-50);
+  padding: var(--sikshya-spacing-5) var(--sikshya-spacing-5) var(--sikshya-spacing-5) var(--sikshya-spacing-4);
+  border-left: 1px solid var(--sikshya-gray-100);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.55) 100%);
   border-radius: 0 var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0;
   display: flex;
   flex-direction: column;
-  gap: var(--sikshya-spacing-4);
+  gap: var(--sikshya-spacing-3);
   min-width: 0;
+  box-sizing: border-box;
+  justify-content: center;
 }
 
 /* List: bottom price row is in the aside (reference layout); hide duplicate footer */
@@ -301,15 +317,11 @@
 
 .sikshya-course-grid--list .sikshya-course-card:hover {
   transform: none;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.05);
+  border-color: var(--sikshya-gray-300);
 }
 
 /* List: fill image cell — photo covers full thumbnail area */
-.sikshya-course-grid--list .sikshya-course-card-image {
-  position: relative;
-  overflow: hidden;
-  background: var(--sikshya-gray-200);
-}
-
 .sikshya-course-grid--list .sikshya-course-card-image-link {
   position: absolute;
   inset: 0;
@@ -346,7 +358,8 @@
   background: var(--sikshya-white);
   border: 1px solid var(--sikshya-gray-200);
   border-radius: var(--sikshya-radius-lg);
-  overflow: hidden;
+  /* visible so curriculum stat CSS tooltips are not clipped (children handle their own overflow) */
+  overflow: visible;
   box-shadow: var(--sikshya-shadow);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
   position: relative;
@@ -364,6 +377,11 @@
   height: auto;
   overflow: hidden;
   background: var(--sikshya-gray-100);
+}
+
+/* Card uses overflow:visible for stat tooltips; clip top corners on the hero image */
+.sikshya-course-card > .sikshya-course-card-image:first-child {
+  border-radius: var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0 0;
 }
 
 .sikshya-course-card-image-link {
@@ -514,26 +532,51 @@
   margin-top: 0;
 }
 
-/* List view: stacked rows with separators (reference UI) */
-.sikshya-course-grid--list .sikshya-aside-item {
-  padding: var(--sikshya-spacing-3) 0;
-  border-bottom: 1px solid var(--sikshya-gray-200);
+/* List view: compact meta (no heavy row borders) */
+.sikshya-course-grid--list .sikshya-course-aside-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.sikshya-course-grid--list .sikshya-course-aside-list .sikshya-aside-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.sikshya-course-grid--list .sikshya-aside-item {
+  padding: 5px 0;
+  border-bottom: 0;
+}
+
+.sikshya-course-grid--list .sikshya-aside-item__icon {
+  color: var(--sikshya-gray-400);
 }
 
 .sikshya-course-grid--list .sikshya-course-aside-price {
-  margin-top: var(--sikshya-spacing-2);
+  margin-top: var(--sikshya-spacing-1);
   padding-top: var(--sikshya-spacing-4);
-  border-top: 1px solid var(--sikshya-gray-200);
+  margin-bottom: var(--sikshya-spacing-1);
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
 }
 
 .sikshya-course-grid--list .sikshya-course-aside-cta {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   justify-content: center;
+  margin-top: var(--sikshya-spacing-2);
+  margin-inline: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.sikshya-course-card-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
+  margin-bottom: var(--sikshya-spacing-3);
+}
+
+.sikshya-course-card-kicker .sikshya-course-categories {
+  margin-bottom: 0;
 }
 
 .sikshya-course-categories {
@@ -543,12 +586,23 @@
 }
 
 .sikshya-course-category {
-  padding: var(--sikshya-spacing-1) var(--sikshya-spacing-2);
-  background: var(--sikshya-primary-light);
-  color: var(--sikshya-primary-dark);
-  border-radius: var(--sikshya-radius);
+  padding: 0;
+  background: transparent;
+  color: var(--sikshya-primary);
+  border-radius: 0;
   font-size: var(--sikshya-font-size-xs);
-  font-weight: 500;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a.sikshya-course-category:hover {
+  color: var(--sikshya-primary-dark);
+  text-decoration: underline;
+}
+
+a.sikshya-course-category:focus-visible {
+  outline: 2px solid var(--sikshya-primary);
+  outline-offset: 2px;
 }
 
 .sikshya-course-title {
@@ -576,12 +630,185 @@
 .sikshya-course-excerpt {
   font-size: var(--sikshya-font-size-sm);
   color: var(--sikshya-gray-600);
-  margin-bottom: var(--sikshya-spacing-4);
+  margin-bottom: 0;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Primary CTA left, curriculum badges right — grid + list (single row; scroll if tight) */
+.sikshya-course-card-meta-actions {
+  margin-top: var(--sikshya-spacing-4);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+  overflow: visible;
+}
+
+.sikshya-course-card-meta-actions--action-only {
+  justify-content: flex-start;
+}
+
+.sikshya-course-card-meta-actions .sikshya-course-card-actions {
+  margin-top: 0;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+}
+
+.sikshya-course-curriculum-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.sikshya-course-curriculum-stats__item {
+  display: inline-flex;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Icon + number; rectangle chips; tooltip is a real child so it stays anchored to this badge */
+.sikshya-course-curriculum-stats__badge--icon-value {
+  position: relative;
+  z-index: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 1.625rem;
+  padding: 2px 7px 2px 6px;
+  border-radius: var(--sikshya-radius);
+  border: 1px solid var(--sikshya-gray-300);
+  background: var(--sikshya-white);
+  color: var(--sikshya-gray-800);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  cursor: default;
+  flex-shrink: 0;
+  transform: translateZ(0);
+}
+
+.sikshya-course-curriculum-stats__badge--icon-value:hover,
+.sikshya-course-curriculum-stats__badge--icon-value:focus-visible {
+  background: var(--sikshya-gray-50);
+  border-color: var(--sikshya-gray-400);
+  z-index: 40;
+}
+
+.sikshya-course-curriculum-stats__badge--icon-value:focus-visible {
+  outline: 2px solid var(--sikshya-primary);
+  outline-offset: 2px;
+}
+
+.sikshya-course-curriculum-stats__tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  top: auto;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 0;
+  max-width: min(220px, calc(100vw - 1.5rem));
+  padding: 5px 8px;
+  border-radius: var(--sikshya-radius);
+  background: var(--sikshya-gray-900);
+  color: var(--sikshya-white);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.14s ease, visibility 0.14s ease;
+  z-index: 50;
+}
+
+.sikshya-course-curriculum-stats__badge--icon-value:hover .sikshya-course-curriculum-stats__tooltip,
+.sikshya-course-curriculum-stats__badge--icon-value:focus-visible .sikshya-course-curriculum-stats__tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sikshya-course-curriculum-stats__value {
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.sikshya-course-curriculum-stats__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.sikshya-course-curriculum-stats__icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.sikshya-course-card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sikshya-course-card-action-form {
+  margin: 0;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.sikshya-course-card-actions .sikshya-course-card-action {
+  width: auto;
+  max-width: 100%;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Wider primary CTAs (Buy now / Enroll now / Continue learning) vs outline View course */
+.sikshya-course-card-meta-actions .sikshya-button.sikshya-button--small {
+  padding: var(--sikshya-spacing-2) var(--sikshya-spacing-5);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  min-width: 9rem;
+}
+
+.sikshya-course-grid--list .sikshya-course-title {
+  margin-bottom: var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.sikshya-course-grid--list .sikshya-course-excerpt {
+  -webkit-line-clamp: 2;
+  line-height: 1.45;
+  color: var(--sikshya-gray-600);
 }
 
 .sikshya-course-counts {
@@ -662,47 +889,93 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--sikshya-spacing-4) var(--sikshya-spacing-5);
+  gap: var(--sikshya-spacing-4);
+  padding: var(--sikshya-spacing-5) var(--sikshya-spacing-5);
   margin-top: auto;
   border-top: 1px solid var(--sikshya-gray-200);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, var(--sikshya-white) 60%);
+  border-radius: 0 0 var(--sikshya-radius-lg) var(--sikshya-radius-lg);
 }
 
-.sikshya-course-card-footer .sikshya-button,
-.sikshya-course-aside-cta.sikshya-button {
+.sikshya-course-card-footer .sikshya-course-price {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sikshya-course-card-footer .sikshya-button--outline {
+  flex-shrink: 0;
   border: 1px solid var(--sikshya-gray-300);
   background: var(--sikshya-white);
   color: var(--sikshya-gray-800);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
-.sikshya-course-card-footer .sikshya-button:hover,
-.sikshya-course-aside-cta.sikshya-button:hover {
+.sikshya-course-card-footer .sikshya-button--outline:hover {
   background: var(--sikshya-gray-50);
   border-color: var(--sikshya-gray-400);
   color: var(--sikshya-gray-900);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
+/* Course card pricing (grid footer + list aside) */
 .sikshya-course-price {
   display: flex;
   align-items: center;
   gap: var(--sikshya-spacing-2);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
 }
 
-.sikshya-course-price-original {
-  font-size: var(--sikshya-font-size-sm);
-  color: var(--sikshya-gray-500);
-  text-decoration: line-through;
+.sikshya-course-price--sale {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sikshya-spacing-2);
 }
 
-.sikshya-course-price-current {
-  font-size: var(--sikshya-font-size-lg);
-  font-weight: 600;
+/* Same size as paid price; only color (and strike) differ */
+.sikshya-course-price--sale .sikshya-course-price-original,
+.sikshya-course-price--sale .sikshya-course-price-current {
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.sikshya-course-price--sale .sikshya-course-price-original {
+  /* Fade via color only — opacity was hiding the strike along with the glyphs */
+  color: var(--sikshya-gray-300);
+  text-decoration-line: line-through;
+  text-decoration-thickness: max(2px, 0.09em);
+  text-decoration-color: var(--sikshya-gray-600);
+  text-underline-offset: 0;
+  -webkit-text-decoration-line: line-through;
+}
+
+@supports (color: color-mix(in srgb, white, black)) {
+  .sikshya-course-price--sale .sikshya-course-price-original {
+    color: color-mix(in srgb, var(--sikshya-gray-500) 38%, var(--sikshya-white));
+  }
+}
+
+.sikshya-course-price--sale .sikshya-course-price-current {
+  color: var(--sikshya-primary);
+}
+
+.sikshya-course-price--paid .sikshya-course-price-current {
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--sikshya-gray-900);
+  line-height: 1.15;
 }
 
-.sikshya-course-price-free {
-  font-size: var(--sikshya-font-size-lg);
-  font-weight: 600;
+.sikshya-course-price--free .sikshya-course-price-free {
+  font-size: var(--sikshya-font-size-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--sikshya-success);
+  line-height: 1.15;
 }
 
 /* Pagination (WP core paginate_links output) */
@@ -792,15 +1065,25 @@
 
   .sikshya-course-grid--list .sikshya-course-card-image {
     grid-row: auto;
+    align-self: stretch;
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-block: 0;
     border-radius: var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0 0;
     min-height: 0;
     aspect-ratio: 16 / 9;
+    max-height: none;
+    border: none;
+    border-bottom: 1px solid var(--sikshya-gray-100);
+    box-shadow: none;
   }
 
   .sikshya-course-grid--list .sikshya-course-card-aside {
     border-left: none;
     border-top: 1px solid var(--sikshya-gray-200);
     border-radius: 0 0 var(--sikshya-radius-lg) var(--sikshya-radius-lg);
+    background: var(--sikshya-gray-50);
   }
 
   .sikshya-course-card-primary {

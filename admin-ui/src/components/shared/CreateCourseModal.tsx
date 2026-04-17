@@ -24,7 +24,15 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const siteRoot = config.siteUrl.replace(/\/$/, '');
-  const permalinkPreview = slug.trim() ? `${siteRoot}/courses/${slug.trim()}/` : `${siteRoot}/courses/…/`;
+  const courseBase = (config.permalinks && config.permalinks.rewrite_base_course) || 'courses';
+  const coursePostType = (config.postTypes && config.postTypes.course) || 'sik_course';
+  const permalinkPreview = (() => {
+    const s = slug.trim() || '…';
+    if (config.plainPermalinks) {
+      return `${siteRoot}/?post_type=${encodeURIComponent(coursePostType)}&name=${encodeURIComponent(s)}`;
+    }
+    return `${siteRoot}/${encodeURIComponent(courseBase)}/${encodeURIComponent(s)}/`;
+  })();
 
   useEffect(() => {
     if (open) {

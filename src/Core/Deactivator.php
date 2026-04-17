@@ -2,6 +2,8 @@
 
 namespace Sikshya\Core;
 
+use Sikshya\Services\Settings;
+
 /**
  * Plugin Deactivator
  *
@@ -24,7 +26,7 @@ class Deactivator
         flush_rewrite_rules();
 
         // Set deactivation time
-        update_option('sikshya_deactivation_time', current_time('timestamp'));
+        Settings::setRaw('sikshya_deactivation_time', current_time('timestamp'));
 
         // Trigger deactivation hook
         do_action('sikshya_deactivated');

@@ -3,7 +3,6 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
-use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
 
 /**
@@ -66,7 +65,6 @@ class AdminAssetsService
             SIKSHYA_VERSION,
             true
         );
-
 
 
         wp_register_style(
@@ -197,12 +195,10 @@ class AdminAssetsService
             [],
             file_exists($react_css) ? (string) filemtime($react_css) : SIKSHYA_VERSION
         );
-        // Load after `media-audiovideo` so `wp.media` + `media-views` + `media-editor` are fully initialized
-        // (see wp_enqueue_media() in core — do not depend on `media-editor` alone).
         wp_register_script(
             'sikshya-react-admin',
             $this->plugin->getAssetUrl('admin/react/sikshya-admin.js'),
-            ['jquery', 'media-audiovideo'],
+            ['jquery'],
             file_exists($react_js) ? (string) filemtime($react_js) : SIKSHYA_VERSION,
             true
         );
@@ -244,8 +240,8 @@ class AdminAssetsService
 
         // React shell bundle: only the unified Sikshya app screen (subpages use `view=`).
         if ($screen_id === 'toplevel_page_sikshya') {
-            // Register media scripts + localize `media-views` before our bundle (core comment in media.php #24724).
             wp_enqueue_media();
+
             wp_enqueue_style('sikshya-react-shell');
             wp_enqueue_style('sikshya-react-admin');
             wp_enqueue_script('sikshya-react-admin');

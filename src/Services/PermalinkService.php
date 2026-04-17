@@ -14,6 +14,7 @@ final class PermalinkService
     public const QUERY_VAR = 'sikshya_page';
     public const LEARN_TYPE_VAR = 'sikshya_learn_type';
     public const LEARN_SLUG_VAR = 'sikshya_learn_slug';
+    public const LEARN_PUBLIC_ID_VAR = 'sikshya_learn_public_id';
 
     /**
      * Option keys (stored as _sikshya_{key}).
@@ -47,7 +48,7 @@ final class PermalinkService
     {
         $out = [];
         foreach (self::defaults() as $key => $default) {
-            $stored = get_option('_sikshya_' . $key, null);
+            $stored = Settings::get($key, null);
             if ($stored === null || $stored === '') {
                 $out[ $key ] = $default;
             } else {
@@ -67,7 +68,7 @@ final class PermalinkService
 
     public static function isPlainPermalinks(): bool
     {
-        return '' === (string) get_option('permalink_structure');
+        return '' === (string) Settings::getRaw('permalink_structure');
     }
 
     /**
@@ -106,8 +107,21 @@ final class PermalinkService
         $vars[] = self::QUERY_VAR;
         $vars[] = self::LEARN_TYPE_VAR;
         $vars[] = self::LEARN_SLUG_VAR;
+        $vars[] = self::LEARN_PUBLIC_ID_VAR;
 
         return $vars;
+    }
+
+    /**
+     * Whether Learn URLs should include a stable public id segment.
+     *
+     * @example /learn/lesson/{public_id}/{slug}
+     */
+    public static function learnUsePublicId(): bool
+    {
+        $v = Settings::get('learn_permalink_use_public_id', '1');
+
+        return (string) $v === '1';
     }
 
     public static function registerRewriteRules(): void
@@ -134,6 +148,17 @@ final class PermalinkService
         // /learn/assignment/{assignment-slug}
         $learn_slug = self::sanitizeSlug($p['permalink_learn'] ?? 'learn');
         $learn_re   = preg_quote($learn_slug, '/');
+
+        // New: /learn/{type}/{public_id}/{slug}
+        if (self::learnUsePublicId()) {
+            add_rewrite_rule(
+                '^' . $learn_re . '/(lesson|quiz|assignment)/([^/]+)/([^/]+)/?$',
+                'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=$matches[1]&' . self::LEARN_PUBLIC_ID_VAR . '=$matches[2]&' . self::LEARN_SLUG_VAR . '=$matches[3]',
+                'top'
+            );
+        }
+
+        // Legacy: /learn/{type}/{slug}
         add_rewrite_rule(
             '^' . $learn_re . '/(lesson|quiz|assignment)/([^/]+)/?$',
             'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=$matches[1]&' . self::LEARN_SLUG_VAR . '=$matches[2]',

@@ -54,6 +54,11 @@ class CurriculumService
             return ['success' => false, 'message' => __('Invalid content or chapter ID', 'sikshya')];
         }
 
+        $content_post = get_post($content_id);
+        if (!$content_post) {
+            return ['success' => false, 'message' => __('Content not found', 'sikshya')];
+        }
+
         $chapter_contents = $this->meta->get($chapter_id, '_sikshya_contents', true);
         if (!is_array($chapter_contents)) {
             $chapter_contents = [];
@@ -70,6 +75,17 @@ class CurriculumService
             if (!in_array($chapter_id, $course_chapters, true)) {
                 $course_chapters[] = $chapter_id;
                 $this->meta->update($course_id, '_sikshya_chapters', $course_chapters);
+            }
+
+            // Ensure newly-created content is linked back to its course (Learn templates rely on this meta).
+            if ((string) $content_post->post_type === PostTypes::LESSON) {
+                update_post_meta($content_id, '_sikshya_lesson_course', $course_id);
+                // Back-compat for older readers (non-prefixed).
+                update_post_meta($content_id, 'sikshya_lesson_course', $course_id);
+            } elseif ((string) $content_post->post_type === PostTypes::QUIZ) {
+                update_post_meta($content_id, '_sikshya_quiz_course', $course_id);
+            } elseif ((string) $content_post->post_type === PostTypes::ASSIGNMENT) {
+                update_post_meta($content_id, '_sikshya_assignment_course', $course_id);
             }
         }
 

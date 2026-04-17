@@ -10,6 +10,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Services\CertificateIssuanceService;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\LearnerCurriculumHelper;
+use Sikshya\Services\Settings;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -158,11 +159,6 @@ class LearnerRestRoutes
 
         /**
          * Allow Pro modules (drip, prerequisites) to block lesson completion.
-         *
-         * @param bool $can_complete Default true.
-         * @param int $user_id User ID.
-         * @param int $course_id Course post ID.
-         * @param int $lesson_id Lesson post ID.
          */
         $can_complete = apply_filters('sikshya_can_complete_lesson', true, $uid, $course_id, $lesson_id);
         if (!$can_complete) {
@@ -444,7 +440,17 @@ class LearnerRestRoutes
         $b = (int) get_post_meta($quiz_id, '_sikshya_quiz_attempts_limit', true);
         $m = max($a, $b);
 
-        return $m > 0 ? $m : 0;
+        if ($m > 0) {
+            return $m;
+        }
+
+        // Fall back to the global default (0 means unlimited).
+        $global = (int) Settings::get('quiz_attempts_limit', 1);
+        if ($global < 0) {
+            $global = 0;
+        }
+
+        return $global > 0 ? $global : 0;
     }
 
     private function syncEnrollmentProgress(int $user_id, int $course_id): void

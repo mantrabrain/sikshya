@@ -25,6 +25,8 @@ export const SIKSHYA_ENDPOINTS = {
     overview: '/admin/overview',
     /** Reports chart + stats refresh. Course-manager auth. */
     reportsSnapshot: '/admin/reports-snapshot',
+    /** Paginated quiz attempts (per learner + quiz). Course-manager auth. */
+    quizAttempts: '/admin/quiz-attempts',
     /** Paginated enrollments with learner/course labels. Course-manager auth. */
     enrollments: '/admin/enrollments',
     /** Paginated payments. Course-manager auth (same as other admin routes). */

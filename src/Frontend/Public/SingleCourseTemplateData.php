@@ -5,6 +5,8 @@ namespace Sikshya\Frontend\Public;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\EnrollmentRepository;
+use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Services\Settings;
 
 /**
  * View-model for {@see templates/single-course.php} (no business logic in the template file).
@@ -92,6 +94,7 @@ final class SingleCourseTemplateData
 
         $curriculum_stats = self::curriculumStats($curriculum);
         $includes_lines = self::buildIncludesLines($duration_hours, $curriculum_stats, $course_highlights);
+        $first_content_url = self::firstContentUrl($curriculum, $course_id);
 
         $discount_percent = null;
         if (!empty($pricing['on_sale']) && isset($pricing['price'], $pricing['sale_price'])) {
@@ -102,7 +105,7 @@ final class SingleCourseTemplateData
             }
         }
 
-        $last_updated = get_the_modified_date(get_option('date_format'), $post);
+        $last_updated = get_the_modified_date(Settings::getRaw('date_format'), $post);
 
         $data = [
             'course_id' => $course_id,
@@ -142,6 +145,7 @@ final class SingleCourseTemplateData
                 'cart' => PublicPageUrls::url('cart'),
                 'checkout' => PublicPageUrls::url('checkout'),
                 'learn' => PublicPageUrls::learnForCourse($course_id),
+                'learn_first' => $first_content_url,
                 'account' => PublicPageUrls::url('account'),
                 'courses_archive' => get_post_type_archive_link(PostTypes::COURSE) ?: '',
                 'login' => wp_login_url(get_permalink($course_id)),
@@ -181,6 +185,38 @@ final class SingleCourseTemplateData
         ];
 
         return $chain;
+    }
+
+    /**
+     * First curriculum item deep link into Learn UI.
+     *
+     * @param array<int, array{chapter: \WP_Post, contents: array<int, \WP_Post>}> $curriculum
+     */
+    private static function firstContentUrl(array $curriculum, int $course_id): string
+    {
+        foreach ($curriculum as $block) {
+            foreach ($block['contents'] ?? [] as $p) {
+                if (!$p instanceof \WP_Post) {
+                    continue;
+                }
+                $pt = (string) $p->post_type;
+                $slug = (string) $p->post_name;
+                if ($slug === '') {
+                    continue;
+                }
+                if ($pt === PostTypes::LESSON) {
+                    return PublicPageUrls::learnContentForPost($p);
+                }
+                if ($pt === PostTypes::QUIZ) {
+                    return PublicPageUrls::learnContentForPost($p);
+                }
+                if ($pt === PostTypes::ASSIGNMENT) {
+                    return PublicPageUrls::learnContentForPost($p);
+                }
+            }
+        }
+
+        return PublicPageUrls::learnForCourse($course_id);
     }
 
     /**

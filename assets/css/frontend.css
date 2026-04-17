@@ -317,9 +317,40 @@
   color: var(--sikshya-white);
 }
 
+.sikshya-button--outline {
+  border: 1px solid var(--sikshya-gray-300);
+  background: var(--sikshya-white);
+  color: var(--sikshya-gray-800);
+}
+
+.sikshya-button--outline:hover {
+  background: var(--sikshya-gray-50);
+  border-color: var(--sikshya-gray-400);
+  color: var(--sikshya-gray-900);
+}
+
 .sikshya-button--small {
   padding: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
   font-size: var(--sikshya-font-size-xs);
+}
+
+.sikshya-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+  color: inherit;
+}
+
+.sikshya-button__icon svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+
+.sikshya-button__label {
+  display: inline-block;
 }
 
 /* No Courses State */

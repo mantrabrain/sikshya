@@ -17,6 +17,7 @@ use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Admin\ReactAdminView;
+use Sikshya\Services\Settings;
 
 /**
  * Admin Management Class
@@ -260,6 +261,7 @@ class Admin
 
     /**
      * Strip core wp-admin styles/scripts on the Sikshya app so only the React shell shows.
+     * We keep styles/scripts that the WordPress media modal depends on.
      */
     public static function dequeueWordPressUiOnSikshyaApp(): void
     {
@@ -273,8 +275,6 @@ class Admin
             'admin-menu',
             'common',
             'forms',
-            'buttons',
-            'dashicons',
             'list-tables',
             'admin-bar',
             'colors',
@@ -410,7 +410,6 @@ class Admin
         // Hook into admin_enqueue_scripts early to dequeue WordPress core styles
         add_action('admin_enqueue_scripts', [$this, 'dequeueWordPressCoreStylesEarly'], 1);
 
-        // Filter to remove styles from chunked loading
         add_filter('print_styles_array', [$this, 'filterChunkedStyles'], 10, 1);
     }
 
@@ -512,13 +511,9 @@ class Admin
      */
     private function dequeueWordPressCoreStyles(): void
     {
-        // Dequeue WordPress core form and button styles
         wp_dequeue_style('forms');
-        wp_dequeue_style('buttons');
         wp_dequeue_style('wp-admin');
-        wp_dequeue_style('dashicons');
 
-        // Dequeue WordPress core scripts that might interfere
         wp_dequeue_script('admin-bar');
         wp_dequeue_script('wp-embed');
     }
@@ -539,12 +534,13 @@ class Admin
         $sid = $screen ? (string) ($screen->id ?? '') : '';
         if ($screen && $sid === 'toplevel_page_sikshya') {
             $styles = array_filter($styles, function ($style) {
-                return !in_array($style, ['forms', 'buttons', 'list-tables'], true);
+                return !in_array($style, ['forms', 'list-tables'], true);
             });
         }
 
         return $styles;
     }
+
 
     /**
      * Dequeue WordPress core styles early in the process
@@ -556,7 +552,6 @@ class Admin
         if ($screen && $screen->id === 'toplevel_page_sikshya') {
             wp_dequeue_style('list-tables');
             wp_dequeue_style('forms');
-            wp_dequeue_style('buttons');
             wp_dequeue_style('wp-admin');
             wp_dequeue_style('admin-menu');
         }
@@ -632,7 +627,7 @@ class Admin
         }
 
         // Get notices from session or options
-        $notices = get_option('sikshya_admin_notices', []);
+        $notices = Settings::getRaw('sikshya_admin_notices', []);
 
         if (!empty($notices)) {
             foreach ($notices as $notice) {
@@ -926,12 +921,12 @@ class Admin
      */
     public function addNotice(string $message, string $type = 'info'): void
     {
-        $notices = get_option('sikshya_admin_notices', []);
+        $notices = Settings::getRaw('sikshya_admin_notices', []);
         $notices[] = [
             'message' => $message,
             'type' => $type,
         ];
-        update_option('sikshya_admin_notices', $notices);
+        Settings::setRaw('sikshya_admin_notices', $notices);
     }
 
     /**

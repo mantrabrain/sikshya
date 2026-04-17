@@ -6,6 +6,8 @@ use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
+use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Licensing\Pro;
 
 /**
  * One-time checkout: offline (manual), Stripe PaymentIntent, PayPal order creation.
@@ -208,6 +210,16 @@ final class CheckoutService
         return $this->isTruthySetting($v);
     }
 
+    public function isPayPalEnabled(): bool
+    {
+        return $this->isTruthySetting($this->settings()->getSetting('enable_paypal_payment', '1'));
+    }
+
+    public function isStripeEnabled(): bool
+    {
+        return Pro::isActive() && $this->isTruthySetting($this->settings()->getSetting('enable_stripe_payment', '0'));
+    }
+
     /**
      * When true, choosing offline immediately enrolls (honor system). When false, order stays on-hold until an admin marks it paid.
      */
@@ -251,11 +263,27 @@ final class CheckoutService
         $this->orders->updateOrder($order_id, ['gateway' => $gateway]);
 
         if ($gateway === 'stripe') {
+            if (!$this->isStripeEnabled()) {
+                throw new \RuntimeException(__('Stripe is not available on this site.', 'sikshya'));
+            }
             return $this->createStripePaymentIntent($order);
         }
 
         if ($gateway === 'paypal') {
+            if (!$this->isPayPalEnabled()) {
+                throw new \RuntimeException(__('PayPal is disabled.', 'sikshya'));
+            }
             return $this->createPayPalOrder($order);
+        }
+
+        /**
+         * Pro/addons can start sessions for additional gateways.
+         *
+         * Return an array payload like Stripe/PayPal, or null to ignore.
+         */
+        $payload = apply_filters('sikshya_checkout_start_gateway_session', null, $order, $gateway, $order_id, $this);
+        if (is_array($payload)) {
+            return $payload;
         }
 
         throw new \InvalidArgumentException(__('Unsupported gateway.', 'sikshya'));
@@ -364,6 +392,23 @@ final class CheckoutService
 
         $payload = [
             'intent' => 'CAPTURE',
+            'application_context' => [
+                // Redirect back to Sikshya checkout to capture and enroll.
+                'return_url' => add_query_arg(
+                    [
+                        'sikshya_paypal_return' => '1',
+                        'order_id' => (string) $order->id,
+                    ],
+                    PublicPageUrls::url('checkout')
+                ),
+                'cancel_url' => add_query_arg(
+                    [
+                        'sikshya_paypal_cancel' => '1',
+                        'order_id' => (string) $order->id,
+                    ],
+                    PublicPageUrls::url('checkout')
+                ),
+            ],
             'purchase_units' => [
                 [
                     'reference_id' => (string) $order->id,

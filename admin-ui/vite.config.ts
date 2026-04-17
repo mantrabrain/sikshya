@@ -16,6 +16,10 @@ export default defineConfig({
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),
       output: {
+        // IIFE wraps the entire bundle in (function(){…})() so minified
+        // variable names never leak to window and clobber WordPress globals
+        // like window.wp (which broke wp.media).
+        format: 'iife',
         entryFileNames: 'sikshya-admin.js',
         chunkFileNames: 'sikshya-admin-[name].js',
         assetFileNames: (info) => {

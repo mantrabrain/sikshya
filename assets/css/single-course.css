@@ -323,6 +323,13 @@
   gap: var(--sikshya-spacing-2);
 }
 
+.sikshya-course-lp .sikshya-course-lp__actions .sikshya-btn {
+  padding: 0.55rem 1rem;
+  border-radius: var(--sikshya-radius-md);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.2;
+}
+
 .sikshya-course-lp__form {
   margin: 0;
 }
@@ -331,7 +338,7 @@
   width: 100%;
   justify-content: center;
   text-align: center;
-  min-height: 2.75rem;
+  min-height: 40px;
 }
 
 .sikshya-course-lp .sikshya-btn:focus-visible {

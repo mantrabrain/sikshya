@@ -2,6 +2,8 @@
 
 namespace Sikshya\Core;
 
+use Sikshya\Services\Settings;
+
 /**
  * Plugin Activator
  *
@@ -35,7 +37,7 @@ class Activator
         flush_rewrite_rules();
 
         // Set activation time
-        update_option('sikshya_activation_time', current_time('timestamp'));
+        Settings::setRaw('sikshya_activation_time', current_time('timestamp'));
 
         // Trigger activation hook
         do_action('sikshya_activated');
@@ -151,7 +153,7 @@ class Activator
             'timezone' => wp_timezone_string(),
         ];
 
-        update_option('sikshya_general_settings', $general_settings);
+        Settings::setRaw('sikshya_general_settings', $general_settings);
 
         // Course settings
         $course_settings = [
@@ -166,19 +168,19 @@ class Activator
             'enable_assignments' => true,
         ];
 
-        update_option('sikshya_course_settings', $course_settings);
+        Settings::setRaw('sikshya_course_settings', $course_settings);
 
         // Email settings
         $email_settings = [
             'from_name' => get_bloginfo('name'),
-            'from_email' => get_option('admin_email'),
+            'from_email' => Settings::getRaw('admin_email'),
             'welcome_email' => true,
             'course_completion_email' => true,
             'certificate_email' => true,
             'reminder_emails' => true,
         ];
 
-        update_option('sikshya_email_settings', $email_settings);
+        Settings::setRaw('sikshya_email_settings', $email_settings);
 
         // Payment settings
         $payment_settings = [
@@ -188,7 +190,7 @@ class Activator
             'currency' => 'USD',
         ];
 
-        update_option('sikshya_payment_settings', $payment_settings);
+        Settings::setRaw('sikshya_payment_settings', $payment_settings);
 
         // Uninstall options
         $uninstall_options = [
@@ -198,6 +200,6 @@ class Activator
             'remove_files' => false,
         ];
 
-        update_option('sikshya_uninstall_options', $uninstall_options);
+        Settings::setRaw('sikshya_uninstall_options', $uninstall_options);
     }
 }

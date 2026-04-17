@@ -347,6 +347,12 @@ abstract class AbstractTab implements TabInterface
             $section_fields = $section_config['fields'] ?? [];
 
             foreach ($section_fields as $field_id => $field_config) {
+                // featured_image is stored as _thumbnail_id via set_post_thumbnail();
+                // skip the redundant _sikshya_featured_image URL meta.
+                if ($field_id === 'featured_image') {
+                    continue;
+                }
+
                 $value = $data[$field_id] ?? '';
 
                 // Sanitize the value using field configuration
@@ -395,6 +401,7 @@ abstract class AbstractTab implements TabInterface
                 return sanitize_text_field((string) $value);
 
             case 'url':
+            case 'media_upload':
                 return esc_url_raw($value);
 
             case 'number':
@@ -1140,12 +1147,14 @@ abstract class AbstractTab implements TabInterface
     {
         $label = $field_config['label'] ?? $field_id;
         $description = $field_config['description'] ?? '';
+        $base = get_post_type_archive_link(PostTypes::COURSE);
+        $base = $base ? trailingslashit($base) : trailingslashit(home_url('/'));
 
         ob_start();
         ?>
         <div class="sikshya-permalink-wrapper">
             <div class="sikshya-permalink-display" id="permalink-display">
-                <span class="sikshya-permalink-base"><?php echo esc_url(home_url('/courses/')); ?></span>
+                <span class="sikshya-permalink-base"><?php echo esc_url($base); ?></span>
                 <span class="sikshya-permalink-slug" id="permalink-slug"><?php echo esc_html($value); ?></span>
             </div>
             <?php if (empty($value) || !isset($this->renderData['id'])) : ?>
