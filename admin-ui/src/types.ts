@@ -8,17 +8,30 @@ export type NavItem = {
   children?: NavItem[];
 };
 
+/** Full-width alerts below the shell header (from PHP `shellAlerts` + `sikshya_react_shell_alerts`). */
+export type ShellAlert = {
+  id: string;
+  variant: 'info' | 'success' | 'warning' | 'error';
+  title: string;
+  message?: string;
+  actions?: Array<{ label: string; href: string; external?: boolean }>;
+};
+
 /** Injected by PHP (`Pro::getClientPayload`) for upsell and per-feature UI locks. */
 export type SikshyaLicensing = {
   isProActive: boolean;
+  /** True when the Sikshya Pro plugin file is loaded (may still be unlicensed). */
+  proPluginInstalled?: boolean;
   /** Mirrors PHP {@see \Sikshya\Licensing\Pro::siteTier()}. */
-  siteTier: 'free' | 'business' | 'agency' | 'elite';
+  siteTier: 'free' | 'starter' | 'growth' | 'agency' | 'business' | 'elite';
+  /** Mirrors PHP {@see \Sikshya\Licensing\Pro::siteTierLabel()}. */
+  siteTierLabel?: string;
   upgradeUrl: string;
   featureStates: Record<string, boolean>;
   catalog: Array<{
     id: string;
     label: string;
-    tier: 'free' | 'pro' | 'elite';
+    tier: 'free' | 'starter' | 'pro' | 'elite';
     group: string;
     description?: string;
   }>;
@@ -26,7 +39,12 @@ export type SikshyaLicensing = {
 
 export type SikshyaReactConfig = {
   page: string;
+  /** Sikshya (free) plugin version. */
   version: string;
+  /** Sikshya Pro add-on version when Pro is licensed (injected by PHP). */
+  proVersion?: string;
+  /** Installed Sikshya Pro add-on semver when the Pro plugin is loaded (even if not yet licensed). */
+  proPluginVersion?: string;
   restUrl: string;
   restNonce: string;
   adminUrl: string;
@@ -45,6 +63,8 @@ export type SikshyaReactConfig = {
   initialData: Record<string, unknown>;
   query: Record<string, string>;
   licensing?: SikshyaLicensing;
+  /** Global banner row(s) under the top bar — not WordPress admin_notices. */
+  shellAlerts?: ShellAlert[];
 };
 
 declare global {

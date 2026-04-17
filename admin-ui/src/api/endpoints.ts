@@ -42,6 +42,14 @@ export const SIKSHYA_ENDPOINTS = {
     issuedCertificatesRevoke: '/admin/issued-certificates/revoke',
     /** Feature catalog + Pro gates (same payload as `config.licensing`). */
     licensing: '/admin/licensing',
+    /** Shell alerts + licensing + Pro version flags (refresh after licence changes). */
+    shellMeta: (view: string) => `/admin/shell-meta?view=${encodeURIComponent(view)}`,
+    /** Sikshya Pro license key (requires Pro plugin + `manage_options`). */
+    license: '/admin/license',
+    licenseActivate: '/admin/license/activate',
+    licenseSave: '/admin/license/save',
+    licenseDeactivate: '/admin/license/deactivate',
+    licenseCheck: '/admin/license/check',
     /** Addon catalog + enable/disable toggles (module system). */
     addons: '/admin/addons',
     addonsEnable: (id: string) => `/admin/addons/${encodeURIComponent(id)}/enable`,
@@ -51,19 +59,33 @@ export const SIKSHYA_ENDPOINTS = {
   pro: {
     dripRules: '/pro/drip-rules',
     subscriptions: '/pro/subscriptions',
+    subscriptionsCancel: '/pro/subscriptions/cancel',
+    plans: '/pro/plans',
     gradebook: (courseId?: number) =>
       courseId
         ? `/pro/gradebook?course_id=${encodeURIComponent(String(courseId))}`
         : '/pro/gradebook',
+    gradebookExport: (courseId?: number) =>
+      courseId
+        ? `/pro/gradebook/export?course_id=${encodeURIComponent(String(courseId))}`
+        : '/pro/gradebook/export',
     courseInstructors: (courseId: number) =>
       `/pro/course-instructors?course_id=${encodeURIComponent(String(courseId))}`,
     addCourseInstructor: '/pro/course-instructors',
+    earnings: (userId: number) => `/pro/earnings?user_id=${encodeURIComponent(String(userId))}`,
     advancedCertificates: '/pro/certificates/advanced',
   },
   elite: {
     vendors: '/elite/vendors',
     withdrawals: '/elite/withdrawals',
     commissionsReport: '/elite/reports/commissions',
+    /** Outgoing automation webhooks (Elite). */
+    automationWebhooks: '/elite/automation/webhooks',
+    automationWebhook: (id: number) => `/elite/automation/webhooks/${encodeURIComponent(String(id))}`,
+    /** Headless / partner API keys (Elite). */
+    publicApiKeys: '/elite/public-api/keys',
+    publicApiKey: (id: number) => `/elite/public-api/keys/${encodeURIComponent(String(id))}`,
+    publicApiPing: '/elite/public-api/ping',
   },
   curriculum: {
     chapters: '/curriculum/chapters',

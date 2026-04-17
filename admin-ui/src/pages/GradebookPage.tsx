@@ -14,14 +14,16 @@ import type { NavItem, SikshyaReactConfig } from '../types';
 
 type Row = {
   user_id: number;
-  quiz_id: number;
   course_id: number;
-  score: number;
-  status: string;
-  completed_at: string | null;
+  quizzes_taken: number;
+  avg_quiz_score: number;
+  assignments_graded: number;
+  avg_assignment_grade: number | null;
+  overall_score: number | null;
 };
 
 type Resp = { ok?: boolean; rows?: Row[] };
+type ExportResp = { ok?: boolean; csv?: string; filename?: string };
 
 export function GradebookPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
@@ -42,6 +44,30 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
 
   const { loading, data, error, refetch } = useAsyncData(loader, [courseFilter, enabled]);
   const rows = data?.rows ?? [];
+  const [exporting, setExporting] = useState(false);
+
+  const exportCsv = async () => {
+    if (!enabled) return;
+    setExporting(true);
+    try {
+      const cid = parseInt(courseFilter, 10);
+      const path = SIKSHYA_ENDPOINTS.pro.gradebookExport(Number.isFinite(cid) && cid > 0 ? cid : undefined);
+      const r = await getSikshyaApi().get<ExportResp>(path);
+      const csv = r.csv || '';
+      const name = r.filename || 'sikshya-gradebook.csv';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <AppShell
@@ -55,9 +81,14 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
       subtitle="Quiz scores and attempts for reporting and learner outcomes."
       pageActions={
         enabled ? (
-          <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
-            Refresh
-          </ButtonPrimary>
+          <div className="flex gap-2">
+            <ButtonPrimary type="button" disabled={loading || exporting} onClick={() => refetch()}>
+              Refresh
+            </ButtonPrimary>
+            <ButtonPrimary type="button" disabled={loading || exporting} onClick={() => void exportCsv()}>
+              {exporting ? 'Exporting…' : 'Export CSV'}
+            </ButtonPrimary>
+          </div>
         ) : null
       }
     >
@@ -106,19 +137,27 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                     <tr>
                       <th className="px-5 py-3.5">User</th>
                       <th className="px-5 py-3.5">Course</th>
-                      <th className="px-5 py-3.5">Quiz</th>
-                      <th className="px-5 py-3.5">Score %</th>
-                      <th className="px-5 py-3.5">Completed</th>
+                      <th className="px-5 py-3.5">Quizzes</th>
+                      <th className="px-5 py-3.5">Avg quiz %</th>
+                      <th className="px-5 py-3.5">Assignments</th>
+                      <th className="px-5 py-3.5">Avg assignment</th>
+                      <th className="px-5 py-3.5">Overall</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {rows.map((r, i) => (
-                      <tr key={`${r.user_id}-${r.quiz_id}-${i}`} className="bg-white dark:bg-slate-900">
+                      <tr key={`${r.user_id}-${r.course_id}-${i}`} className="bg-white dark:bg-slate-900">
                         <td className="px-5 py-3.5">{r.user_id}</td>
                         <td className="px-5 py-3.5">{r.course_id}</td>
-                        <td className="px-5 py-3.5">{r.quiz_id}</td>
-                        <td className="px-5 py-3.5 tabular-nums">{Number(r.score).toFixed(1)}</td>
-                        <td className="px-5 py-3.5 text-slate-600 dark:text-slate-400">{r.completed_at || '—'}</td>
+                        <td className="px-5 py-3.5 tabular-nums">{r.quizzes_taken}</td>
+                        <td className="px-5 py-3.5 tabular-nums">{Number(r.avg_quiz_score).toFixed(2)}</td>
+                        <td className="px-5 py-3.5 tabular-nums">{r.assignments_graded}</td>
+                        <td className="px-5 py-3.5 tabular-nums">
+                          {r.avg_assignment_grade === null ? '—' : Number(r.avg_assignment_grade).toFixed(2)}
+                        </td>
+                        <td className="px-5 py-3.5 tabular-nums font-semibold">
+                          {r.overall_score === null ? '—' : Number(r.overall_score).toFixed(2)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

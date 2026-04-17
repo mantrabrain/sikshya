@@ -112,6 +112,17 @@ function serializeGatewayOrder(ids: string[]): string {
   return ids.map((x) => x.trim()).filter(Boolean).join(',');
 }
 
+/** REST / filters may return a single section object or a non-list; keep render paths safe. */
+function normalizeTabSections(raw: unknown): SettingsSection[] {
+  if (Array.isArray(raw)) {
+    return raw as SettingsSection[];
+  }
+  if (raw && typeof raw === 'object' && Array.isArray((raw as SettingsSection).fields)) {
+    return [raw as SettingsSection];
+  }
+  return [];
+}
+
 function sectionIconName(raw?: string): string {
   // Settings schema icons come from PHP as FontAwesome classes (e.g. "fas fa-link").
   // React admin uses our own SVG icon set, so map common FA names to our icon keys.
@@ -228,7 +239,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   }, [tab]);
 
   const tabMeta = useMemo(() => TAB_META.find((t) => t.id === tab) || TAB_META[0], [tab]);
-  const tabSchema = (schema.data?.tabs || {})[tab] || [];
+  const tabSchema = normalizeTabSections((schema.data?.tabs || {})[tab]);
   const schemaMeta = schema.data?.meta || {};
 
   const dirty = useMemo(() => {
@@ -408,7 +419,9 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   };
 
   const PaymentTab = () => {
-    const gateways = (schemaMeta.payment_gateways || []) as PaymentGatewayMeta[];
+    const gateways = (
+      Array.isArray(schemaMeta.payment_gateways) ? schemaMeta.payment_gateways : []
+    ) as PaymentGatewayMeta[];
     const [open, setOpen] = useState<string | null>(gateways[0]?.id || 'offline');
 
     const byTitle = (t: string) => tabSchema.find((s) => (s.title || '').toLowerCase().trim() === t.toLowerCase().trim());

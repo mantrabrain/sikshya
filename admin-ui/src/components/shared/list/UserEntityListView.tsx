@@ -130,7 +130,7 @@ export function UserEntityListView({
     perPage: DEFAULT_LIST_PER_PAGE,
   });
 
-  const rows = listQuery.data?.data ?? [];
+  const rows = Array.isArray(listQuery.data?.data) ? listQuery.data.data : [];
 
   const totalLine = useMemo(() => {
     const t = listQuery.data?.total;

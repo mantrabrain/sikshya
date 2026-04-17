@@ -10,7 +10,10 @@ import { CouponsPage } from './pages/CouponsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { EnrollmentsPage } from './pages/EnrollmentsPage';
 import { GenericPlaceholderPage } from './pages/GenericPlaceholderPage';
+import { CertificateDesignerGuidePage } from './pages/CertificateDesignerGuidePage';
 import { GradebookPage } from './pages/GradebookPage';
+import { IntegrationsPage } from './pages/IntegrationsPage';
+import { LicensePage } from './pages/LicensePage';
 import { IssuedCertificatesPage } from './pages/IssuedCertificatesPage';
 import { MarketplacePage } from './pages/MarketplacePage';
 import { OrdersPage } from './pages/OrdersPage';
@@ -21,6 +24,7 @@ import { SubscriptionsProPage } from './pages/SubscriptionsProPage';
 import { ToolsPage } from './pages/ToolsPage';
 import { WpEntityListPage } from './pages/WpEntityListPage';
 import { WpUserListPage } from './pages/WpUserListPage';
+import { ShellStateProvider } from './context/ShellStateContext';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
 import { AddonsPage } from './pages/AddonsPage';
 
@@ -97,6 +101,8 @@ function RoutedApp() {
       );
     case 'issued-certificates':
       return <IssuedCertificatesPage config={config} title="Issued certificates" />;
+    case 'cert-designer-guide':
+      return <CertificateDesignerGuidePage config={config} title="Certificate designer tips" />;
     case 'orders':
       return <OrdersPage config={config} title="Orders" />;
     case 'coupons':
@@ -149,6 +155,10 @@ function RoutedApp() {
       return <ToolsPage config={config} title="Tools" />;
     case 'addons':
       return <AddonsPage config={config} title="Addons" />;
+    case 'integrations':
+      return <IntegrationsPage config={config} title="Integrations" />;
+    case 'license':
+      return <LicensePage config={config} title="License" />;
     default:
       return (
         <GenericPlaceholderPage
@@ -172,7 +182,9 @@ export default function App() {
 
   return (
     <AdminRoutingProvider baseConfig={normalizedBase}>
-      <RoutedApp />
+      <ShellStateProvider>
+        <RoutedApp />
+      </ShellStateProvider>
     </AdminRoutingProvider>
   );
 }

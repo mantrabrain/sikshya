@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useShellState } from '../context/ShellStateContext';
+import { ShellAlertStrip } from './ShellAlertStrip';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import type { NavItem } from '../types';
@@ -69,9 +71,18 @@ export function AppShell({
 
   const toolsHref = useMemo(() => navigation.find((n) => n.id === 'tools')?.href, [navigation]);
 
+  const { shellAlerts, proPluginVersion, licensing } = useShellState();
+
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <Sidebar items={navigation} currentPage={sidebarActivePage ?? page} version={version} adminUrl={adminUrl} />
+      <Sidebar
+        items={navigation}
+        currentPage={sidebarActivePage ?? page}
+        version={version}
+        proPluginVersion={proPluginVersion || undefined}
+        proLicensed={Boolean(licensing?.isProActive)}
+        adminUrl={adminUrl}
+      />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
           title={title}
@@ -85,6 +96,7 @@ export function AppShell({
           onToggleDark={onToggleDark}
         />
         <main className="flex-1 overflow-auto bg-slate-50 p-6 dark:bg-slate-950">
+          <ShellAlertStrip alerts={shellAlerts} />
           {pageActions ? (
             <div className="mb-6 flex flex-wrap items-center justify-end gap-2">{pageActions}</div>
           ) : null}

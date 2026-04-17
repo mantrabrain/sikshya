@@ -1,3 +1,4 @@
+import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
 import { NavIcon } from './NavIcon';
 
 type Props = {
@@ -26,12 +27,16 @@ export function TopBar({
   const wpIndex = `${adminUrl.replace(/\/?$/, '/')}index.php`;
 
   return (
-    <header className="sticky top-0 z-20 shrink-0 border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
+    <header
+      className={`sticky top-0 z-20 flex shrink-0 items-center border-b border-slate-200 bg-white px-6 dark:border-slate-800 dark:bg-slate-900 ${SHELL_HEADER_MIN_CLASS}`}
+    >
+      <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="min-w-0 flex-1 py-1 sm:py-0">
+          <h1 className="truncate text-xl font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">
+            {title}
+          </h1>
           {(subtitle || badge) && (
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm leading-snug text-slate-500 dark:text-slate-400">
               {subtitle}
               {badge ? (
                 <span className="ml-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
@@ -42,7 +47,7 @@ export function TopBar({
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
           <a
             href={wpIndex}
             className="hidden rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white xl:inline"

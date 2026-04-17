@@ -139,7 +139,7 @@ export function TermEntityListView({
     refreshNonce: listRefreshNonce,
   });
 
-  const apiRows = listQuery.data?.data ?? [];
+  const apiRows = Array.isArray(listQuery.data?.data) ? listQuery.data.data : [];
   const showMockRows =
     useMockPlaceholder &&
     mockPlaceholderRows.length > 0 &&

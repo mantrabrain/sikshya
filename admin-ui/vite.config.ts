@@ -12,6 +12,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../assets/admin/react'),
     emptyOutDir: true,
+    /** One CSS file so PHP can enqueue `sikshya-admin.css` (matches `AdminAssetsService`). */
+    cssCodeSplit: false,
     sourcemap: false,
     rollupOptions: {
       input: path.resolve(__dirname, 'index.html'),

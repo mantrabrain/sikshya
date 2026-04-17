@@ -4,7 +4,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
-type AddonTier = 'free' | 'pro' | 'elite';
+type AddonTier = 'free' | 'starter' | 'pro' | 'elite';
 
 type AddonRow = {
   id: string;
@@ -21,22 +21,29 @@ type AddonsResponse = {
   success: boolean;
   addons: AddonRow[];
   enabled: string[];
-  licensing?: { isProActive?: boolean; siteTier?: string; upgradeUrl?: string };
+  licensing?: { isProActive?: boolean; siteTier?: string; upgradeUrl?: string; siteTierLabel?: string };
 };
 
 function tierBadge(tier: AddonTier): { label: string; className: string } {
   if (tier === 'elite') {
     return {
-      label: 'Elite',
+      label: 'Agency',
       className:
         'bg-purple-50 text-purple-800 ring-1 ring-purple-200 dark:bg-purple-950/40 dark:text-purple-200 dark:ring-purple-900/40',
     };
   }
   if (tier === 'pro') {
     return {
-      label: 'Pro',
+      label: 'Growth',
       className:
         'bg-brand-50 text-brand-800 ring-1 ring-brand-200 dark:bg-brand-950/40 dark:text-brand-200 dark:ring-brand-900/40',
+    };
+  }
+  if (tier === 'starter') {
+    return {
+      label: 'Starter',
+      className:
+        'bg-amber-50 text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-900/40',
     };
   }
   return {
@@ -44,6 +51,17 @@ function tierBadge(tier: AddonTier): { label: string; className: string } {
     className:
       'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-900/40',
   };
+}
+
+function addonRequiresPlanLabel(tier: AddonTier): string {
+  if (tier === 'elite') return 'Agency';
+  if (tier === 'pro') return 'Growth';
+  if (tier === 'starter') return 'Starter';
+  return 'Free';
+}
+
+function addonLicenseLocked(a: AddonRow): boolean {
+  return (a.tier === 'starter' || a.tier === 'pro' || a.tier === 'elite') && !a.licenseOk;
 }
 
 export function AddonsPage(props: { config: SikshyaReactConfig; title: string }) {
@@ -68,7 +86,8 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
       setSelected((prev) => {
         // Drop selections for addons that no longer exist.
         const next: Record<string, boolean> = {};
-        (res.addons || []).forEach((a) => {
+        const list = Array.isArray(res.addons) ? res.addons : [];
+        list.forEach((a) => {
           if (prev[a.id]) next[a.id] = true;
         });
         return next;
@@ -86,7 +105,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
   }, []);
 
   const allRows = useMemo(() => {
-    const all = data?.addons ?? [];
+    const all = Array.isArray(data?.addons) ? data.addons : [];
     const needle = q.trim().toLowerCase();
     return all.filter((a) => {
       if (tierFilter !== 'all' && a.tier !== tierFilter) return false;
@@ -98,7 +117,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
   }, [data, q, groupFilter, tierFilter]);
 
   const groups = useMemo(() => {
-    const all = data?.addons ?? [];
+    const all = Array.isArray(data?.addons) ? data.addons : [];
     const set = new Set<string>();
     all.forEach((r) => set.add(r.group || 'general'));
     const list = Array.from(set).sort((a, b) => a.localeCompare(b));
@@ -110,12 +129,12 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
     if (sort === 'name_desc') {
       list.sort((a, b) => b.label.localeCompare(a.label));
     } else if (sort === 'tier') {
-      const w = (t: AddonTier) => (t === 'free' ? 0 : t === 'pro' ? 1 : 2);
+      const w = (t: AddonTier) => (t === 'free' ? 0 : t === 'starter' ? 1 : t === 'pro' ? 2 : 3);
       list.sort((a, b) => w(a.tier) - w(b.tier) || a.label.localeCompare(b.label));
     } else if (sort === 'status') {
       // Enabled first, then locked, then name.
       const key = (a: AddonRow) => {
-        const locked = (a.tier === 'pro' || a.tier === 'elite') && !a.licenseOk;
+        const locked = addonLicenseLocked(a);
         return `${a.enabled ? '0' : '1'}-${locked ? '0' : '1'}-${a.label.toLowerCase()}`;
       };
       list.sort((a, b) => key(a).localeCompare(key(b)));
@@ -125,7 +144,8 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
     return list;
   }, [allRows, sort]);
 
-  const upgradeUrl = data?.licensing?.upgradeUrl || config.licensing?.upgradeUrl || 'https://sikshya.com/pricing/';
+  const upgradeUrl =
+    data?.licensing?.upgradeUrl || config.licensing?.upgradeUrl || 'https://store.mantrabrain.com/downloads/sikshya-pro/';
 
   const toggle = async (addon: AddonRow) => {
     setBusyId(addon.id);
@@ -166,9 +186,9 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
     try {
       // Sequential to keep server load predictable and responses consistent.
       for (const id of ids) {
-        const row = (data?.addons ?? []).find((a) => a.id === id);
+        const row = (Array.isArray(data?.addons) ? data.addons : []).find((a) => a.id === id);
         if (!row) continue;
-        const locked = (row.tier === 'pro' || row.tier === 'elite') && !row.licenseOk;
+        const locked = addonLicenseLocked(row);
         if (locked) continue;
         if (mode === 'enable' && row.enabled) continue;
         if (mode === 'disable' && !row.enabled) continue;
@@ -261,8 +281,9 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
             >
               <option value="all">All tiers</option>
               <option value="free">Free</option>
-              <option value="pro">Pro</option>
-              <option value="elite">Elite</option>
+              <option value="starter">Starter</option>
+              <option value="pro">Growth</option>
+              <option value="elite">Agency</option>
             </select>
             <select
               value={sort}
@@ -295,7 +316,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {rows.map((a) => {
             const badge = tierBadge(a.tier);
-            const locked = (a.tier === 'pro' || a.tier === 'elite') && !a.licenseOk;
+            const locked = addonLicenseLocked(a);
             const busy = busyId === a.id || bulkBusy;
             const isSelected = !!selected[a.id];
             return (
@@ -345,7 +366,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
                       ) : null}
                       {locked ? (
                         <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:ring-amber-900/40">
-                          Requires {a.tier === 'elite' ? 'Elite' : 'Pro'}
+                          Requires {addonRequiresPlanLabel(a.tier)}
                         </span>
                       ) : null}
                     </div>

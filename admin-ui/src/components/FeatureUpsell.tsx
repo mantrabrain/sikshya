@@ -28,7 +28,9 @@ export function FeatureUpsell({ title, description, licensing, badgeLabel }: Pro
       >
         View plans & upgrade
       </a>
-      {licensing?.isProActive && !licensing.featureStates?.marketplace_multivendor && licensing.siteTier === 'business' ? (
+      {licensing?.isProActive &&
+      !licensing.featureStates?.marketplace_multivendor &&
+      (licensing.siteTier === 'starter' || licensing.siteTier === 'growth' || licensing.siteTier === 'business') ? (
         <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
           Your current plan does not include marketplace tools. Upgrade to unlock multi-vendor selling.
         </p>

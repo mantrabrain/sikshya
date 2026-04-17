@@ -112,7 +112,7 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
       title={title}
-      subtitle="Vendor storefronts, commissions, payouts, and withdrawal requests."
+      subtitle="Vendor profiles, platform commission tracking, and withdrawal requests — explained in everyday language on each tab."
     >
       {!featureOk ? (
         <FeatureUpsell
@@ -133,18 +133,25 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
       ) : (
         <>
           <div className="mb-4 flex flex-wrap gap-2">
-            {(['vendors', 'commissions', 'withdraw'] as const).map((t) => (
+            {(
+              [
+                { id: 'vendors' as const, label: 'Vendors', hint: 'Who can sell' },
+                { id: 'commissions' as const, label: 'Commissions', hint: 'Platform share per order' },
+                { id: 'withdraw' as const, label: 'Withdraw', hint: 'Request a payout' },
+              ] as const
+            ).map((t) => (
               <button
-                key={t}
+                key={t.id}
                 type="button"
-                onClick={() => setTab(t)}
+                title={t.hint}
+                onClick={() => setTab(t.id)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                  tab === t
+                  tab === t.id
                     ? 'bg-brand-600 text-white dark:bg-brand-500'
                     : 'border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
                 }`}
               >
-                {t === 'vendors' ? 'Vendors' : t === 'commissions' ? 'Commissions' : 'Withdraw'}
+                {t.label}
               </button>
             ))}
             <ButtonPrimary type="button" onClick={() => { v.refetch(); c.refetch(); }}>
@@ -160,6 +167,11 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
                 className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
               >
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Register vendor profile</h2>
+                <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                  A vendor is simply the WordPress user who “owns” marketplace courses. The store slug becomes part of
+                  their public URL — use lowercase letters and dashes only (for example <span className="font-mono">jane-teaches</span>
+                  ).
+                </p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-3">
                   <label className="text-sm text-slate-600 dark:text-slate-400">
                     Store slug
@@ -230,6 +242,11 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
           {tab === 'commissions' ? (
             <>
               {c.error ? <ApiErrorPanel error={c.error} title="Commissions" onRetry={() => c.refetch()} /> : null}
+              <p className="mb-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                Each row is the platform’s share of a paid order (not the full sale price). Sikshya picks the vendor from
+                the course author unless you set a custom vendor on the course. The percentage comes from course settings
+                (defaults to 10% if you leave it blank).
+              </p>
               <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-800 dark:bg-slate-900">
                 Total accrued:{' '}
                 <span className="font-semibold tabular-nums text-slate-900 dark:text-white">
@@ -240,7 +257,10 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
                 {c.loading ? (
                   <div className="p-8 text-center text-sm text-slate-500">Loading…</div>
                 ) : (c.data?.rows?.length ?? 0) === 0 ? (
-                  <ListEmptyState title="No commission rows" description="Commissions attach to marketplace orders as they are implemented." />
+                  <ListEmptyState
+                    title="No commission rows yet"
+                    description="When learners buy marketplace courses, you will see one line per order (grouped by vendor). Run a test purchase while logged out as a student to see your first row."
+                  />
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
@@ -277,6 +297,10 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
               className="max-w-md rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
             >
               <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Request withdrawal</h2>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                Use this form to tell the site owner how much you would like paid out. A human or payment processor still
+                marks it as paid — this is the paper trail.
+              </p>
               <label className="mt-4 block text-sm text-slate-600 dark:text-slate-400">
                 Amount
                 <input

@@ -71,7 +71,7 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
     refreshNonce: listNonce,
   });
 
-  const rows = listQuery.data?.data ?? [];
+  const rows = Array.isArray(listQuery.data?.data) ? listQuery.data.data : [];
 
   const startNew = useCallback(() => {
     setSelectedId(null);

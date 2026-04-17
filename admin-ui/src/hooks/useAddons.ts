@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 
-export type AddonTier = 'free' | 'pro' | 'elite';
+export type AddonTier = 'free' | 'starter' | 'pro' | 'elite';
 
 export type AddonRow = {
   id: string;

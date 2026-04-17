@@ -62,7 +62,8 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
     licensing: {
       isProActive: false,
       siteTier: 'free',
-      upgradeUrl: 'https://sikshya.com/pricing/',
+      siteTierLabel: 'Free',
+      upgradeUrl: 'https://store.mantrabrain.com/downloads/sikshya-pro/',
       featureStates: {},
       catalog: [],
     },

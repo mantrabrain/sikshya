@@ -1,4 +1,5 @@
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
 import { NavIcon } from './NavIcon';
 import type { NavItem } from '../types';
 
@@ -127,11 +128,16 @@ function NavBlock({
 type Props = {
   items: NavItem[];
   currentPage: string;
+  /** Free / main Sikshya plugin version. */
   version: string;
+  /** Installed Pro add-on semver (when the Pro plugin is loaded). */
+  proPluginVersion?: string;
+  /** True when the Pro licence is active on this site. */
+  proLicensed?: boolean;
   adminUrl: string;
 };
 
-export function Sidebar({ items, currentPage, version, adminUrl }: Props) {
+export function Sidebar({ items, currentPage, version, proPluginVersion, proLicensed, adminUrl }: Props) {
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -150,9 +156,59 @@ export function Sidebar({ items, currentPage, version, adminUrl }: Props) {
 
   return (
     <aside className="flex w-[260px] shrink-0 flex-col border-r border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-100 px-5 py-5 dark:border-slate-800">
-        <div className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">Sikshya</div>
-        <div className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">LMS v{version}</div>
+      <div
+        className={`flex shrink-0 flex-col justify-center border-b border-slate-100 px-5 dark:border-slate-800 ${SHELL_HEADER_MIN_CLASS}`}
+      >
+        <div className="text-lg font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">Sikshya</div>
+        <div className="mt-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span
+            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-slate-200/90 bg-slate-100/90 px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight text-slate-700 ring-1 ring-inset ring-slate-200/60 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700/80"
+            title={`Sikshya (free) ${version}`}
+          >
+            <span className="text-slate-500 dark:text-slate-400">Free</span>
+            <span className="mx-0.5 text-slate-300 dark:text-slate-600" aria-hidden>
+              ·
+            </span>
+            <span className="tabular-nums">v{version}</span>
+          </span>
+          {proPluginVersion ? (
+            <span
+              className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight ring-1 ring-inset ${
+                proLicensed
+                  ? 'border-emerald-200/90 bg-emerald-50 text-emerald-950 ring-emerald-100/80 dark:border-emerald-800/80 dark:bg-emerald-950/50 dark:text-emerald-100 dark:ring-emerald-900/50'
+                  : 'border-amber-200/90 bg-amber-50 text-amber-950 ring-amber-100/80 dark:border-amber-800/80 dark:bg-amber-950/50 dark:text-amber-100 dark:ring-amber-900/50'
+              }`}
+              title={
+                proLicensed
+                  ? `Sikshya Pro ${proPluginVersion} (licensed)`
+                  : `Sikshya Pro ${proPluginVersion} — activate your license for updates and paid modules`
+              }
+            >
+              <span className={proLicensed ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-200'}>
+                Pro
+              </span>
+              <span
+                className={
+                  proLicensed
+                    ? 'mx-0.5 text-emerald-300/90 dark:text-emerald-700/90'
+                    : 'mx-0.5 text-amber-300/90 dark:text-amber-800/90'
+                }
+                aria-hidden
+              >
+                ·
+              </span>
+              <span className="tabular-nums">v{proPluginVersion}</span>
+              {!proLicensed ? (
+                <>
+                  <span className="mx-0.5 text-amber-300/90 dark:text-amber-800/90" aria-hidden>
+                    ·
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wide opacity-90">Unlicensed</span>
+                </>
+              ) : null}
+            </span>
+          ) : null}
+        </div>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-2.5 py-4">
         {items.map((item) => (
