@@ -42,6 +42,10 @@ export const SIKSHYA_ENDPOINTS = {
     issuedCertificatesRevoke: '/admin/issued-certificates/revoke',
     /** Feature catalog + Pro gates (same payload as `config.licensing`). */
     licensing: '/admin/licensing',
+    /** Addon catalog + enable/disable toggles (module system). */
+    addons: '/admin/addons',
+    addonsEnable: (id: string) => `/admin/addons/${encodeURIComponent(id)}/enable`,
+    addonsDisable: (id: string) => `/admin/addons/${encodeURIComponent(id)}/disable`,
   },
   /** Registered by `sikshya-pro` on the same namespace; 403 when Pro inactive or feature locked. */
   pro: {

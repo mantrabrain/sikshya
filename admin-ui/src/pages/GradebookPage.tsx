@@ -1,12 +1,14 @@
 import { useCallback, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
+import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { FeatureUpsell } from '../components/FeatureUpsell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { useAddonEnabled } from '../hooks/useAddons';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
@@ -24,7 +26,9 @@ type Resp = { ok?: boolean; rows?: Row[] };
 export function GradebookPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const lic = getLicensing(config);
-  const enabled = isFeatureEnabled(config, 'gradebook');
+  const featureOk = isFeatureEnabled(config, 'gradebook');
+  const addon = useAddonEnabled('gradebook');
+  const enabled = featureOk && Boolean(addon.enabled);
   const [courseFilter, setCourseFilter] = useState('');
 
   const loader = useCallback(async () => {
@@ -57,11 +61,21 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
         ) : null
       }
     >
-      {!enabled ? (
+      {!featureOk ? (
         <FeatureUpsell
           title="Gradebook"
           description="View learner quiz outcomes across courses, filter by course, and use the data in your reports."
           licensing={lic}
+        />
+      ) : !enabled ? (
+        <AddonEnablePanel
+          title="Gradebook is not enabled"
+          description="Enable the Gradebook addon to register reporting routes and unlock learner outcome tables."
+          canEnable={Boolean(addon.licenseOk)}
+          enableBusy={addon.loading}
+          onEnable={() => void addon.enable()}
+          upgradeUrl={lic.upgradeUrl}
+          error={addon.error}
         />
       ) : error ? (
         <ApiErrorPanel error={error} title="Could not load gradebook" onRetry={() => refetch()} />

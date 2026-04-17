@@ -22,6 +22,7 @@ import { ToolsPage } from './pages/ToolsPage';
 import { WpEntityListPage } from './pages/WpEntityListPage';
 import { WpUserListPage } from './pages/WpUserListPage';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
+import { AddonsPage } from './pages/AddonsPage';
 
 function RoutedApp() {
   const baseConfig = getConfig();
@@ -146,6 +147,8 @@ function RoutedApp() {
       return <SettingsPage config={config} title="Settings" />;
     case 'tools':
       return <ToolsPage config={config} title="Tools" />;
+    case 'addons':
+      return <AddonsPage config={config} title="Addons" />;
     default:
       return (
         <GenericPlaceholderPage

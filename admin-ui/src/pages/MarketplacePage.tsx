@@ -1,12 +1,14 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
+import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { FeatureUpsell } from '../components/FeatureUpsell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { useAddonEnabled } from '../hooks/useAddons';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
@@ -33,7 +35,9 @@ type CommResp = { ok?: boolean; rows?: Commission[]; sum?: number };
 export function MarketplacePage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const lic = getLicensing(config);
-  const enabled = isFeatureEnabled(config, 'marketplace_multivendor');
+  const featureOk = isFeatureEnabled(config, 'marketplace_multivendor');
+  const addon = useAddonEnabled('marketplace_multivendor');
+  const enabled = featureOk && Boolean(addon.enabled);
   const [tab, setTab] = useState<'vendors' | 'commissions' | 'withdraw'>('vendors');
   const [slug, setSlug] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -110,11 +114,21 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
       title={title}
       subtitle="Vendor storefronts, commissions, payouts, and withdrawal requests."
     >
-      {!enabled ? (
+      {!featureOk ? (
         <FeatureUpsell
           title="Marketplace"
           description="Let instructors sell from storefronts, split commissions automatically, and process withdrawals with a clear audit trail."
           licensing={lic}
+        />
+      ) : !enabled ? (
+        <AddonEnablePanel
+          title="Marketplace is not enabled"
+          description="Enable the Marketplace addon to register vendor routes and unlock multi-vendor selling."
+          canEnable={Boolean(addon.licenseOk)}
+          enableBusy={addon.loading}
+          onEnable={() => void addon.enable()}
+          upgradeUrl={lic.upgradeUrl}
+          error={addon.error}
         />
       ) : (
         <>

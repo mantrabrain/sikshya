@@ -1,12 +1,14 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
+import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { FeatureUpsell } from '../components/FeatureUpsell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { useAddonEnabled } from '../hooks/useAddons';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
@@ -17,7 +19,9 @@ type ListResp = { ok?: boolean; rules?: Rule[] };
 export function ContentDripPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const lic = getLicensing(config);
-  const enabled = isFeatureEnabled(config, 'content_drip');
+  const featureOk = isFeatureEnabled(config, 'content_drip');
+  const addon = useAddonEnabled('content_drip');
+  const enabled = featureOk && Boolean(addon.enabled);
   const [courseId, setCourseId] = useState('');
   const [lessonId, setLessonId] = useState('');
   const [ruleValue, setRuleValue] = useState('7');
@@ -71,11 +75,21 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       title={title}
       subtitle="Control when lessons open—by delay, calendar, or cohort."
     >
-      {!enabled ? (
+      {!featureOk ? (
         <FeatureUpsell
           title="Scheduled access"
           description="Release lessons on a schedule, after enrollment, or for cohorts. Learner actions respect these rules when enabled for your site."
           licensing={lic}
+        />
+      ) : !enabled ? (
+        <AddonEnablePanel
+          title="Scheduled access is not enabled"
+          description="Enable the Content Drip addon to register its routes and start managing lesson unlock schedules."
+          canEnable={Boolean(addon.licenseOk)}
+          enableBusy={addon.loading}
+          onEnable={() => void addon.enable()}
+          upgradeUrl={lic.upgradeUrl}
+          error={addon.error}
         />
       ) : (
         <>

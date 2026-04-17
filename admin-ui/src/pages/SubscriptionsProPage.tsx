@@ -1,12 +1,14 @@
 import { useCallback } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
+import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { FeatureUpsell } from '../components/FeatureUpsell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { useAddonEnabled } from '../hooks/useAddons';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
@@ -24,7 +26,9 @@ type Resp = { ok?: boolean; subscriptions?: SubRow[] };
 export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const lic = getLicensing(config);
-  const enabled = isFeatureEnabled(config, 'subscriptions');
+  const featureOk = isFeatureEnabled(config, 'subscriptions');
+  const addon = useAddonEnabled('subscriptions');
+  const enabled = featureOk && Boolean(addon.enabled);
 
   const loader = useCallback(async () => {
     if (!enabled) {
@@ -54,11 +58,21 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
         ) : null
       }
     >
-      {!enabled ? (
+      {!featureOk ? (
         <FeatureUpsell
           title="Subscriptions"
           description="Sell monthly or yearly plans, sync status from payment webhooks, and expire access when billing stops."
           licensing={lic}
+        />
+      ) : !enabled ? (
+        <AddonEnablePanel
+          title="Subscriptions is not enabled"
+          description="Enable the Subscriptions addon to register recurring billing routes and show subscription settings."
+          canEnable={Boolean(addon.licenseOk)}
+          enableBusy={addon.loading}
+          onEnable={() => void addon.enable()}
+          upgradeUrl={lic.upgradeUrl}
+          error={addon.error}
         />
       ) : error ? (
         <ApiErrorPanel
