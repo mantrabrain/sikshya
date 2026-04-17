@@ -51,8 +51,47 @@ if (!is_user_logged_in()) {
     <div class="sikshya-checkout-page__body">
         <?php if (!empty($co['empty'])) : ?>
             <div class="sikshya-checkout-page__empty">
-                <p class="sikshya-checkout-page__empty-text"><?php esc_html_e('Your cart is empty.', 'sikshya'); ?></p>
-                <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u['cart']); ?>"><?php esc_html_e('Back to cart', 'sikshya'); ?></a>
+                <div class="sikshya-checkout-page__empty-copy">
+                    <h2 class="sikshya-checkout-page__empty-title"><?php esc_html_e('Nothing to check out yet', 'sikshya'); ?></h2>
+                    <p class="sikshya-checkout-page__empty-text"><?php esc_html_e('Add courses to your cart, then return here to complete checkout.', 'sikshya'); ?></p>
+                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u['cart']); ?>"><?php esc_html_e('Go to cart', 'sikshya'); ?></a>
+                </div>
+
+                <div class="sikshya-checkout-page__empty-illus" aria-hidden="true">
+                    <svg viewBox="0 0 720 420" role="presentation" focusable="false">
+                        <defs>
+                            <linearGradient id="sikEmptyCoCard" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="rgba(99,102,241,0.18)" />
+                                <stop offset="1" stop-color="rgba(99,102,241,0.06)" />
+                            </linearGradient>
+                            <linearGradient id="sikEmptyCoBg" x1="1" y1="0" x2="0" y2="1">
+                                <stop offset="0" stop-color="rgba(15,23,42,0.06)" />
+                                <stop offset="1" stop-color="rgba(15,23,42,0.02)" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- soft backdrop -->
+                        <rect x="56" y="46" width="608" height="328" rx="26" fill="url(#sikEmptyCoBg)" stroke="rgba(209,213,219,0.9)" />
+
+                        <!-- “summary card” -->
+                        <rect x="112" y="92" width="360" height="238" rx="18" fill="white" stroke="rgba(229,231,235,1)" />
+                        <rect x="112" y="92" width="360" height="60" rx="18" fill="url(#sikEmptyCoCard)" />
+                        <rect x="144" y="174" width="240" height="12" rx="6" fill="rgba(17,24,39,0.12)" />
+                        <rect x="144" y="198" width="200" height="10" rx="5" fill="rgba(17,24,39,0.10)" />
+                        <rect x="144" y="232" width="270" height="10" rx="5" fill="rgba(17,24,39,0.08)" />
+                        <rect x="144" y="256" width="160" height="10" rx="5" fill="rgba(17,24,39,0.08)" />
+                        <rect x="144" y="292" width="160" height="34" rx="17" fill="rgba(99,102,241,0.14)" stroke="rgba(99,102,241,0.30)" />
+
+                        <!-- “secure checkout” tile -->
+                        <g transform="translate(506 132)">
+                            <rect x="0" y="0" width="132" height="132" rx="22" fill="white" stroke="rgba(229,231,235,1)" />
+                            <path d="M66 46c-18 0-32 12-32 30v14c0 18 14 30 32 30s32-12 32-30V76c0-18-14-30-32-30z" fill="rgba(99,102,241,0.10)" />
+                            <path d="M48 76v-10c0-10 8-18 18-18s18 8 18 18v10" fill="none" stroke="rgba(79,70,229,0.75)" stroke-width="8" stroke-linecap="round"/>
+                            <rect x="42" y="76" width="48" height="40" rx="12" fill="none" stroke="rgba(79,70,229,0.75)" stroke-width="8" />
+                            <circle cx="66" cy="96" r="6" fill="rgba(79,70,229,0.75)" />
+                        </g>
+                    </svg>
+                </div>
             </div>
         <?php else : ?>
             <div class="sikshya-checkout-page__layout">
@@ -125,6 +164,14 @@ if (!is_user_logged_in()) {
                                 $eff = isset($pr['effective']) && $pr['effective'] !== null ? (float) $pr['effective'] : 0;
                                 ?>
                                 <li class="sikshya-checkout-page__line">
+                                    <?php if (!empty($line['thumbnail'])) : ?>
+                                        <span class="sikshya-checkout-page__line-thumb" aria-hidden="true">
+                                            <img class="sikshya-checkout-page__line-thumb-img" src="<?php echo esc_url((string) $line['thumbnail']); ?>" alt="" loading="lazy" decoding="async" />
+                                        </span>
+                                    <?php else : ?>
+                                        <span class="sikshya-checkout-page__line-thumb sikshya-checkout-page__line-thumb--placeholder" aria-hidden="true"></span>
+                                    <?php endif; ?>
+
                                     <span class="sikshya-checkout-page__line-title"><?php echo esc_html($line['title'] ?? ''); ?></span>
                                     <span class="sikshya-checkout-page__line-price">
                                         <?php

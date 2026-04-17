@@ -48,6 +48,46 @@
   color: var(--sikshya-gray-600);
 }
 
+/* Category / tag taxonomy — same shell as catalog; no sidebar */
+.sikshya-taxonomy-courses__header {
+  display: grid;
+  gap: var(--sikshya-spacing-2);
+  margin-bottom: var(--sikshya-spacing-6);
+}
+
+.sikshya-taxonomy-courses__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sikshya-gray-600);
+}
+
+.sikshya-taxonomy-courses__crumb {
+  color: var(--sikshya-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.sikshya-taxonomy-courses__crumb:hover {
+  text-decoration: underline;
+}
+
+.sikshya-taxonomy-courses__crumb--current {
+  color: var(--sikshya-gray-700);
+  font-weight: 600;
+}
+
+.sikshya-taxonomy-courses__crumb-sep {
+  color: var(--sikshya-gray-400);
+  user-select: none;
+}
+
+.sikshya-taxonomy-courses__description {
+  max-width: 70ch;
+}
+
 .sikshya-archive-courses__empty {
   padding: var(--sikshya-spacing-12) var(--sikshya-spacing-4);
   text-align: center;
@@ -241,6 +281,23 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--sikshya-spacing-6);
   margin-bottom: var(--sikshya-spacing-8);
+}
+
+/* Taxonomy & fixed 3-column layout (matches catalog cards; responsive) */
+.sikshya-course-grid--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .sikshya-course-grid--cols-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .sikshya-course-grid--cols-3 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .sikshya-course-grid--featured,

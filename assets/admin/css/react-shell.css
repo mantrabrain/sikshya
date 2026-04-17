@@ -26,6 +26,12 @@ body.sikshya-react-shell .sikshya-admin-footer {
     display: none !important;
 }
 
+/* Prevent wp-auth-check modal flash when core styles are trimmed */
+body.sikshya-react-shell #wp-auth-check-wrap,
+body.sikshya-react-shell .wp-auth-check {
+    display: none !important;
+}
+
 body.sikshya-react-shell #wpbody-content > .wrap {
     margin: 0;
     max-width: none;

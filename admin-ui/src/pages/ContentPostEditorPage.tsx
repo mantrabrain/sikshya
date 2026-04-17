@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { appViewHref } from '../lib/appUrl';
+import { useAdminRouting } from '../lib/adminRouting';
 import type { NavItem, SikshyaReactConfig } from '../types';
 import { renderContentEditor } from './content-editors/editors';
 
@@ -27,6 +28,7 @@ const TITLE_BY_POST_TYPE: Record<string, string> = {
 
 export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shellTitle: string }) {
   const { config, shellTitle } = props;
+  const { navigateHref } = useAdminRouting();
   const q = config.query || {};
   const postType = (q.post_type || '').trim();
   const postId = Number(q.post_id || q.id || 0) || 0;
@@ -37,10 +39,12 @@ export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shell
   const backHref = appViewHref(config, listView);
 
   const onSavedNewId = (newId: number) => {
-    window.location.href = appViewHref(config, 'edit-content', {
-      post_type: postType,
-      post_id: String(newId),
-    });
+    navigateHref(
+      appViewHref(config, 'edit-content', {
+        post_type: postType,
+        post_id: String(newId),
+      })
+    );
   };
 
   const subtitle = useMemo(() => {

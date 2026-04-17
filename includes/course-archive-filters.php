@@ -15,9 +15,50 @@ if (!defined('ABSPATH')) {
 function sikshya_course_archive_filters_bootstrap(): void
 {
     add_action('pre_get_posts', 'sikshya_course_archive_pre_get_posts', 10, 1);
+    add_action('pre_get_posts', 'sikshya_course_taxonomy_archives_pre_get_posts', 10, 1);
 }
 
 sikshya_course_archive_filters_bootstrap();
+
+/**
+ * Match course catalog page size on category/tag archives.
+ *
+ * @param \WP_Query $query Query.
+ */
+function sikshya_course_taxonomy_archives_pre_get_posts(\WP_Query $query): void
+{
+    if (is_admin() || !$query->is_main_query()) {
+        return;
+    }
+
+    if (
+        !$query->is_tax(
+            [
+                \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+                \Sikshya\Constants\Taxonomies::COURSE_TAG,
+            ]
+        )
+    ) {
+        return;
+    }
+
+    $query->set('posts_per_page', 12);
+}
+
+/**
+ * Query args to keep on taxonomy pagination (e.g. search keyword).
+ *
+ * @return array<string, string>
+ */
+function sikshya_course_taxonomy_get_preserved_query_args(): array
+{
+    $s = get_search_query();
+    if ($s === '') {
+        return [];
+    }
+
+    return ['s' => $s];
+}
 
 /**
  * Adjust main query on course archive from GET parameters.

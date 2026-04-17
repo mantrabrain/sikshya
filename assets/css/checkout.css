@@ -89,20 +89,65 @@
 }
 
 .sikshya-checkout-page__empty {
-  max-width: 28rem;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   padding: clamp(var(--sikshya-spacing-8), 5vw, var(--sikshya-spacing-10));
-  text-align: center;
+  text-align: left;
   border: 1px solid var(--sik-f-border);
   border-radius: var(--sik-f-radius-panel);
   background: var(--sik-f-surface);
   box-shadow: var(--sik-f-shadow-panel);
+  display: grid;
+  gap: var(--sikshya-spacing-6);
+  align-items: center;
+}
+
+.sikshya-checkout-page__empty-illus {
+  width: min(100%, 520px);
+  margin: 0 auto;
+}
+
+.sikshya-checkout-page__empty-illus svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.sikshya-checkout-page__empty-title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-size: clamp(1.125rem, 1.6vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--sik-f-text-heading);
 }
 
 .sikshya-checkout-page__empty-text {
   margin: 0 0 var(--sikshya-spacing-6);
   color: var(--sik-f-text-muted);
-  font-size: var(--sikshya-font-size-base);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.55;
+}
+
+.sikshya-checkout-page__empty-copy {
+  min-width: 0;
+}
+
+@media (min-width: 880px) {
+  .sikshya-checkout-page__empty {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10));
+  }
+  .sikshya-checkout-page__empty-illus {
+    order: 2;
+    justify-self: end;
+  }
+}
+
+@media (max-width: 879px) {
+  .sikshya-checkout-page__empty {
+    text-align: center;
+  }
 }
 
 .sikshya-checkout-page__empty .sikshya-btn {
@@ -317,6 +362,32 @@
   padding: var(--sikshya-spacing-3) 0;
   border-bottom: 1px solid var(--sikshya-gray-100);
   font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-checkout-page__line-thumb {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--sikshya-radius);
+  overflow: hidden;
+  background: var(--sik-f-surface-muted);
+  border: 1px solid var(--sikshya-gray-200);
+  flex: 0 0 auto;
+}
+
+.sikshya-checkout-page__line-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.sikshya-checkout-page__line-thumb--placeholder {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(15, 23, 42, 0.04) 100%
+  );
 }
 
 .sikshya-checkout-page__line-title {

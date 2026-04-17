@@ -280,7 +280,6 @@ class Admin
             'colors',
             'ie',
             'site-icon',
-            'wp-auth-check',
         ];
 
         foreach ($styles as $handle) {
@@ -291,7 +290,6 @@ class Admin
             'admin-bar',
             'hoverintent-js',
             'admin-widgets',
-            'wp-auth-check',
             'wp-embed',
         ];
 

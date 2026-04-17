@@ -10,7 +10,7 @@ use Sikshya\Constants\PostTypes;
 final class CartTemplateData
 {
     /**
-     * @return array{lines: array<int, array{course_id: int, title: string, permalink: string, pricing: array}>, subtotal_hint: float, currency: string, urls: array{home: string, cart: string, checkout: string, courses: string}}
+     * @return array{lines: array<int, array{course_id: int, title: string, permalink: string, thumbnail: string, instructor: string, pricing: array}>, subtotal_hint: float, currency: string, urls: array{home: string, cart: string, checkout: string, courses: string}}
      */
     public static function build(): array
     {
@@ -27,10 +27,16 @@ final class CartTemplateData
             $pricing = function_exists('sikshya_get_course_pricing') ? sikshya_get_course_pricing($cid) : [];
             $eff = isset($pricing['effective']) && $pricing['effective'] !== null ? (float) $pricing['effective'] : 0.0;
             $subtotal += $eff;
+            $thumb = get_the_post_thumbnail_url($cid, 'thumbnail');
+            $thumb = is_string($thumb) ? $thumb : '';
+            $instructor = get_the_author_meta('display_name', (int) $p->post_author);
+            $instructor = is_string($instructor) ? $instructor : '';
             $lines[] = [
                 'course_id' => $cid,
                 'title' => get_the_title($p),
                 'permalink' => get_permalink($cid) ?: '',
+                'thumbnail' => $thumb,
+                'instructor' => $instructor,
                 'pricing' => $pricing,
             ];
         }

@@ -21,9 +21,12 @@ import { SubscriptionsProPage } from './pages/SubscriptionsProPage';
 import { ToolsPage } from './pages/ToolsPage';
 import { WpEntityListPage } from './pages/WpEntityListPage';
 import { WpUserListPage } from './pages/WpUserListPage';
+import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
 
-export default function App() {
-  const config = getConfig();
+function RoutedApp() {
+  const baseConfig = getConfig();
+  const { route } = useAdminRouting();
+  const config = { ...baseConfig, page: route.page, query: route.query };
   const page = config.page;
 
   const routes = (() => {
@@ -155,4 +158,18 @@ export default function App() {
   })();
 
   return <SikshyaDialogProvider>{routes}</SikshyaDialogProvider>;
+}
+
+export default function App() {
+  const baseConfig = getConfig();
+  // Ensure the initial render respects the URL (deep links / reload).
+  // This also protects us if PHP-provided config.page lags behind the URL.
+  const initial = parseAdminRoute(baseConfig);
+  const normalizedBase = { ...baseConfig, page: initial.page, query: initial.query };
+
+  return (
+    <AdminRoutingProvider baseConfig={normalizedBase}>
+      <RoutedApp />
+    </AdminRoutingProvider>
+  );
 }

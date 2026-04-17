@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getWpApi } from '../../api';
 import { appViewHref } from '../../lib/appUrl';
+import { useAdminRouting } from '../../lib/adminRouting';
 import { ApiErrorPanel } from '../../components/shared/ApiErrorPanel';
 import { useSikshyaDialog } from '../../components/shared/SikshyaDialogContext';
 import { ButtonPrimary } from '../../components/shared/buttons';
@@ -111,6 +112,7 @@ function useMoveToTrash(
   entityLabel: string
 ) {
   const { confirm } = useSikshyaDialog();
+  const { navigateHref } = useAdminRouting();
   return useCallback(() => {
     void (async () => {
       if (editor.isNew) {
@@ -127,12 +129,12 @@ function useMoveToTrash(
       }
       try {
         await editor.remove();
-        window.location.href = backHref;
+        navigateHref(backHref);
       } catch {
         /* handled by editor error state */
       }
     })();
-  }, [editor, backHref, entityLabel, confirm]);
+  }, [editor, backHref, entityLabel, confirm, navigateHref]);
 }
 
 export function LessonEditor(props: ContentEditorProps) {

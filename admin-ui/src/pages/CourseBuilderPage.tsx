@@ -12,6 +12,7 @@ import { renderContentEditor } from './content-editors/editors';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { appViewHref } from '../lib/appUrl';
+import { useAdminRouting } from '../lib/adminRouting';
 import type { FieldConfig, NavItem, SikshyaReactConfig, TabFieldsMap } from '../types';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
@@ -1152,6 +1153,7 @@ function CourseBuilderEditor({
   title: string;
   courseId: number;
 }) {
+  const { navigateHref } = useAdminRouting();
   const [activeTab, setActiveTab] = useState('course');
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [curriculumTree, setCurriculumTree] = useState<CurriculumChapterTree[]>([]);
@@ -1336,7 +1338,7 @@ function CourseBuilderEditor({
       }
       const newId = res.data?.course_id;
       if (newId && newId !== courseId) {
-        window.location.href = appViewHref(config, 'add-course', { course_id: String(newId) });
+        navigateHref(appViewHref(config, 'add-course', { course_id: String(newId) }));
         return;
       }
       setSaveSuccess(res.message || 'Saved.');

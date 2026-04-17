@@ -13,6 +13,14 @@ $grid_classes = 'sikshya-course-grid';
 
 global $wp_query;
 $found = isset($wp_query->found_posts) ? (int) $wp_query->found_posts : 0;
+$max_pages = isset($wp_query->max_num_pages) ? (int) $wp_query->max_num_pages : 0;
+$paged = (int) get_query_var('paged');
+if ($paged < 1) {
+    $paged = (int) get_query_var('page');
+}
+if ($paged < 1) {
+    $paged = 1;
+}
 ?>
 
 <div class="sikshya-public sikshya-archive-courses">
@@ -48,24 +56,27 @@ $found = isset($wp_query->found_posts) ? (int) $wp_query->found_posts : 0;
                         ?>
                     </div>
 
-                    <div class="sikshya-pagination">
-                        <?php
-                        $links = paginate_links(
-                            [
-                                'total' => (int) $wp_query->max_num_pages,
-                                'current' => max(1, (int) get_query_var('paged')),
-                                'mid_size' => 2,
-                                'prev_text' => __('Previous', 'sikshya'),
-                                'next_text' => __('Next', 'sikshya'),
-                                'type' => 'list',
-                                'add_args' => sikshya_course_archive_get_preserved_query_args(),
-                            ]
-                        );
-                        if (!empty($links)) {
-                            echo wp_kses_post($links);
-                        }
-                        ?>
-                    </div>
+                    <?php if ($max_pages > 1) : ?>
+                        <nav class="sikshya-pagination" aria-label="<?php esc_attr_e('Courses pagination', 'sikshya'); ?>">
+                            <?php
+                            $links = paginate_links(
+                                [
+                                    'total' => $max_pages,
+                                    'current' => $paged,
+                                    'mid_size' => 2,
+                                    'end_size' => 1,
+                                    'prev_text' => __('Previous', 'sikshya'),
+                                    'next_text' => __('Next', 'sikshya'),
+                                    'type' => 'list',
+                                    'add_args' => sikshya_course_archive_get_preserved_query_args(),
+                                ]
+                            );
+                            if (!empty($links)) {
+                                echo wp_kses_post($links);
+                            }
+                            ?>
+                        </nav>
+                    <?php endif; ?>
                 <?php else : ?>
                     <div class="sikshya-archive-courses__empty">
                         <p class="sikshya-archive-courses__empty-text"><?php esc_html_e('No courses match your filters. Try adjusting filters or search.', 'sikshya'); ?></p>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Course tag archive (same grid pattern as categories).
+ * Course tag archive — same course cards as /courses, simple 3-column grid.
  *
  * @package Sikshya
  */
@@ -8,57 +8,90 @@
 use Sikshya\Constants\PostTypes;
 
 get_header();
+
+global $wp_query;
+
+$found = isset($wp_query->found_posts) ? (int) $wp_query->found_posts : 0;
+$max_pages = isset($wp_query->max_num_pages) ? (int) $wp_query->max_num_pages : 0;
+$paged = (int) get_query_var('paged');
+if ($paged < 1) {
+    $paged = (int) get_query_var('page');
+}
+if ($paged < 1) {
+    $paged = 1;
+}
 ?>
 
-<div class="sikshya-course-category-archive sikshya-public">
-    <section class="sikshya-category-header">
-        <div class="sikshya-container">
-            <div class="sikshya-category-breadcrumb">
-                <a href="<?php echo esc_url(home_url('/')); ?>" class="sikshya-breadcrumb-link"><?php esc_html_e('Home', 'sikshya'); ?></a>
-                <span class="sikshya-breadcrumb-separator">/</span>
-                <a href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>" class="sikshya-breadcrumb-link"><?php esc_html_e('Courses', 'sikshya'); ?></a>
-                <span class="sikshya-breadcrumb-separator">/</span>
-                <span class="sikshya-breadcrumb-current"><?php single_term_title(); ?></span>
-            </div>
-            <div class="sikshya-category-info">
-                <h1 class="sikshya-category-title"><?php single_term_title(); ?></h1>
-                <?php if (term_description()) : ?>
-                    <div class="sikshya-category-description"><?php echo term_description(); ?></div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </section>
+<div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--tag">
+    <div class="sikshya-container">
+        <header class="sikshya-taxonomy-courses__header">
+            <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
+                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
+                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
+                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>"><?php esc_html_e('Course Tags', 'sikshya'); ?></a>
+                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
+                <span class="sikshya-taxonomy-courses__crumb sikshya-taxonomy-courses__crumb--current"><?php single_term_title(); ?></span>
+            </nav>
 
-    <section class="sikshya-category-courses">
-        <div class="sikshya-container">
-            <?php if (have_posts()) : ?>
-                <div class="sikshya-course-grid">
-                    <?php
-                    while (have_posts()) :
-                        the_post();
-                        sikshya_render_course_card(get_post(), 'default');
-                    endwhile;
-                    ?>
+            <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
+
+            <?php if (term_description()) : ?>
+                <div class="sikshya-archive-courses__desc sikshya-taxonomy-courses__description">
+                    <?php echo term_description(); ?>
                 </div>
-                <div class="sikshya-pagination">
+            <?php endif; ?>
+
+            <p class="sikshya-archive-courses__results" role="status">
+                <?php
+                printf(
+                    /* translators: %d: number of courses */
+                    esc_html(_n('%d course found', '%d courses found', $found, 'sikshya')),
+                    (int) $found
+                );
+                ?>
+            </p>
+        </header>
+
+        <?php if (have_posts()) : ?>
+            <div class="sikshya-course-grid sikshya-course-grid--cols-3">
+                <?php
+                while (have_posts()) :
+                    the_post();
+                    sikshya_render_course_card(get_post(), 'default');
+                endwhile;
+                ?>
+            </div>
+
+            <?php if ($max_pages > 1) : ?>
+                <nav class="sikshya-pagination" aria-label="<?php esc_attr_e('Tag pagination', 'sikshya'); ?>">
                     <?php
                     $links = paginate_links(
                         [
+                            'total' => $max_pages,
+                            'current' => $paged,
+                            'mid_size' => 2,
+                            'end_size' => 1,
                             'prev_text' => __('Previous', 'sikshya'),
                             'next_text' => __('Next', 'sikshya'),
                             'type' => 'list',
+                            'add_args' => sikshya_course_taxonomy_get_preserved_query_args(),
                         ]
                     );
                     if (!empty($links)) {
                         echo wp_kses_post($links);
                     }
                     ?>
-                </div>
-            <?php else : ?>
-                <p><?php esc_html_e('No courses with this tag.', 'sikshya'); ?></p>
+                </nav>
             <?php endif; ?>
-        </div>
-    </section>
+        <?php else : ?>
+            <div class="sikshya-archive-courses__empty">
+                <p class="sikshya-archive-courses__empty-text"><?php esc_html_e('No courses use this tag yet.', 'sikshya'); ?></p>
+                <a class="sikshya-button sikshya-button--primary" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
+                    <?php esc_html_e('Browse all courses', 'sikshya'); ?>
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
 
 <?php

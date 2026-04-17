@@ -4,6 +4,7 @@ import { EntityListView, StatusBadge } from '../components/shared/list';
 import { ButtonPrimary, LinkButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
 import { appViewHref } from '../lib/appUrl';
+import { useAdminRouting } from '../lib/adminRouting';
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
@@ -101,6 +102,7 @@ export function WpEntityListPage(props: {
   restBase: string;
 }) {
   const { config, title, subtitle, restBase } = props;
+  const { navigateHref } = useAdminRouting();
 
   const newHref = appViewHref(config, 'edit-content', { post_type: restBase });
   const isLessonList = restBase === 'sik_lesson';
@@ -445,10 +447,12 @@ export function WpEntityListPage(props: {
               if (!created?.id) {
                 throw new Error('Could not create lesson.');
               }
-              window.location.href = appViewHref(config, 'edit-content', {
-                post_type: restBase,
-                post_id: String(created.id),
-              });
+              navigateHref(
+                appViewHref(config, 'edit-content', {
+                  post_type: restBase,
+                  post_id: String(created.id),
+                })
+              );
             })
             .catch((e) => {
               setAddLessonError(e);

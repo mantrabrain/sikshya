@@ -4,7 +4,6 @@ namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
-use Sikshya\Constants\Taxonomies;
 use Sikshya\Frontend\Public\PublicPageUrls;
 
 /**
@@ -104,16 +103,6 @@ class FrontendAssetsService
                 'sikshya-order',
                 $this->plugin->getAssetUrl('css/order.css'),
                 ['sikshya-public-ds', 'sikshya-frontend'],
-                SIKSHYA_VERSION
-            );
-        }
-
-        // Course Category CSS - only on course category pages
-        if (is_tax(Taxonomies::COURSE_CATEGORY)) {
-            wp_enqueue_style(
-                'sikshya-course-category',
-                $this->plugin->getAssetUrl('frontend/css/course-category.css'),
-                ['sikshya-frontend'],
                 SIKSHYA_VERSION
             );
         }

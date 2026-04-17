@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getErrorSummary } from '../../api/errors';
 import { appViewHref } from '../../lib/appUrl';
+import { useAdminRouting } from '../../lib/adminRouting';
 import { createDraftCourse } from '../../lib/createCourse';
 import { slugFromTitle } from '../../lib/slugFromTitle';
 import type { SikshyaReactConfig } from '../../types';
@@ -17,6 +18,7 @@ type Props = {
  * Shared “new course” flow: title → draft post via REST → redirect to course builder (edit mode).
  */
 export function CreateCourseModal({ config, open, onClose }: Props) {
+  const { navigateHref } = useAdminRouting();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [slugManual, setSlugManual] = useState(false);
@@ -66,7 +68,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     try {
       const id = await createDraftCourse(title, { slug: slug.trim() || undefined });
       const url = appViewHref(config, 'add-course', { course_id: String(id) });
-      window.location.href = url;
+      navigateHref(url);
     } catch (err) {
       setError(getErrorSummary(err));
       setSubmitting(false);

@@ -209,6 +209,7 @@ class AdminAssetsService
             [],
             SIKSHYA_VERSION
         );
+
     }
 
     /**
