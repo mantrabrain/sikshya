@@ -30,6 +30,211 @@
   color: var(--sikshya-gray-600);
 }
 
+/* Archive: sidebar + main */
+.sikshya-archive-courses__layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+  gap: var(--sikshya-spacing-8);
+  align-items: start;
+}
+
+.sikshya-archive-courses__main {
+  min-width: 0;
+}
+
+.sikshya-archive-courses__results {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sikshya-gray-600);
+}
+
+.sikshya-archive-courses__empty {
+  padding: var(--sikshya-spacing-12) var(--sikshya-spacing-4);
+  text-align: center;
+  background: var(--sikshya-white);
+  border: 1px dashed var(--sikshya-gray-300);
+  border-radius: var(--sikshya-radius-lg);
+}
+
+.sikshya-archive-courses__empty-text {
+  margin: 0 0 var(--sikshya-spacing-4);
+  color: var(--sikshya-gray-600);
+}
+
+/* Filter sidebar */
+.sikshya-archive-filters {
+  position: sticky;
+  top: var(--sikshya-spacing-4);
+  background: var(--sikshya-white);
+  border: 1px solid var(--sikshya-gray-200);
+  border-radius: var(--sikshya-radius-lg);
+  padding: var(--sikshya-spacing-5);
+  box-shadow: var(--sikshya-shadow);
+}
+
+.sikshya-archive-filters__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-3);
+  margin-bottom: var(--sikshya-spacing-5);
+}
+
+.sikshya-archive-filters__title {
+  margin: 0;
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 700;
+  color: var(--sikshya-gray-900);
+}
+
+.sikshya-archive-filters__clear {
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  color: var(--sikshya-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sikshya-archive-filters__clear:hover {
+  text-decoration: underline;
+}
+
+.sikshya-archive-filters__group {
+  margin-bottom: var(--sikshya-spacing-5);
+}
+
+.sikshya-archive-filters__label {
+  display: block;
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sikshya-gray-600);
+  margin-bottom: var(--sikshya-spacing-2);
+}
+
+.sikshya-archive-filters__select {
+  width: 100%;
+  padding: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
+  border: 1px solid var(--sikshya-gray-300);
+  border-radius: var(--sikshya-radius);
+  background: var(--sikshya-white);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sikshya-gray-800);
+}
+
+.sikshya-archive-filters__radios {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-archive-filters__radio {
+  display: flex;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sikshya-gray-700);
+  cursor: pointer;
+}
+
+.sikshya-archive-filters__radio input {
+  accent-color: var(--sikshya-primary);
+}
+
+/* Toolbar */
+.sikshya-archive-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-4);
+  margin-bottom: var(--sikshya-spacing-4);
+}
+
+.sikshya-archive-toolbar__search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-2);
+  align-items: stretch;
+}
+
+.sikshya-archive-toolbar__search-input {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border: 1px solid var(--sikshya-gray-300);
+  border-radius: var(--sikshya-radius);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-archive-toolbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-4);
+}
+
+.sikshya-archive-toolbar__sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sikshya-spacing-3);
+}
+
+.sikshya-archive-toolbar__sort-label {
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sikshya-gray-700);
+}
+
+.sikshya-archive-toolbar__select {
+  min-width: 200px;
+  padding: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
+  border: 1px solid var(--sikshya-gray-300);
+  border-radius: var(--sikshya-radius);
+  background: var(--sikshya-white);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-archive-toolbar__view {
+  display: inline-flex;
+  border: 1px solid var(--sikshya-gray-300);
+  border-radius: var(--sikshya-radius);
+  overflow: hidden;
+  background: var(--sikshya-white);
+}
+
+.sikshya-archive-toolbar__view-btn {
+  padding: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sikshya-gray-700);
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sikshya-spacing-2);
+  appearance: none;
+  -webkit-appearance: none;
+  line-height: 1;
+}
+
+.sikshya-archive-toolbar__view-icon {
+  display: block;
+}
+
+.sikshya-archive-toolbar__view-btn:hover {
+  background: var(--sikshya-gray-50);
+}
+
+.sikshya-archive-toolbar__view-btn.is-active {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--sikshya-primary);
+}
+
 /* Grid */
 .sikshya-course-grid {
   display: grid;
@@ -43,8 +248,101 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+/* List layout (single column, horizontal cards — reference: image | primary | meta column) */
+.sikshya-course-grid--list {
+  grid-template-columns: 1fr;
+  gap: var(--sikshya-spacing-4);
+}
+
+.sikshya-course-grid--list .sikshya-course-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(180px, 240px);
+  grid-template-areas: "image primary aside";
+  align-items: stretch;
+  column-gap: var(--sikshya-spacing-6);
+}
+
+.sikshya-course-grid--list .sikshya-course-card-body {
+  display: contents;
+}
+
+.sikshya-course-grid--list .sikshya-course-card-image {
+  grid-area: image;
+  align-self: stretch;
+  min-height: 200px;
+  aspect-ratio: auto;
+  border-radius: var(--sikshya-radius-lg) 0 0 var(--sikshya-radius-lg);
+}
+
+.sikshya-course-grid--list .sikshya-course-card-primary {
+  grid-area: primary;
+  padding: var(--sikshya-spacing-5) 0;
+  min-width: 0;
+}
+
+.sikshya-course-grid--list .sikshya-course-card-aside {
+  grid-area: aside;
+  align-self: stretch;
+  margin: 0;
+  padding: var(--sikshya-spacing-5);
+  border-left: 1px solid var(--sikshya-gray-200);
+  background: var(--sikshya-gray-50);
+  border-radius: 0 var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-4);
+  min-width: 0;
+}
+
+/* List: bottom price row is in the aside (reference layout); hide duplicate footer */
+.sikshya-course-grid--list .sikshya-course-card-footer {
+  display: none;
+}
+
+.sikshya-course-grid--list .sikshya-course-card:hover {
+  transform: none;
+}
+
+/* List: fill image cell — photo covers full thumbnail area */
+.sikshya-course-grid--list .sikshya-course-card-image {
+  position: relative;
+  overflow: hidden;
+  background: var(--sikshya-gray-200);
+}
+
+.sikshya-course-grid--list .sikshya-course-card-image-link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sikshya-course-grid--list .sikshya-course-thumbnail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: none;
+}
+
+.sikshya-course-grid--list .sikshya-course-card:hover .sikshya-course-thumbnail {
+  transform: scale(1.03);
+}
+
+.sikshya-course-grid--list .sikshya-course-placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 /* Card */
 .sikshya-course-card {
+  display: flex;
+  flex-direction: column;
   background: var(--sikshya-white);
   border: 1px solid var(--sikshya-gray-200);
   border-radius: var(--sikshya-radius-lg);
@@ -70,13 +368,19 @@
 
 .sikshya-course-card-image-link {
   display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
 }
 
+.sikshya-course-card .sikshya-course-thumbnail,
 .sikshya-course-thumbnail {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: var(--sikshya-transition);
 }
 
@@ -95,6 +399,8 @@
 }
 
 .sikshya-course-placeholder {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: flex;
@@ -108,6 +414,7 @@
   position: absolute;
   top: var(--sikshya-spacing-3);
   left: var(--sikshya-spacing-3);
+  z-index: 2;
   padding: var(--sikshya-spacing-1) var(--sikshya-spacing-2);
   border-radius: var(--sikshya-radius);
   font-size: var(--sikshya-font-size-xs);
@@ -126,8 +433,107 @@
   color: var(--sikshya-white);
 }
 
-.sikshya-course-card-content {
+.sikshya-course-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.sikshya-course-card-primary {
   padding: var(--sikshya-spacing-5);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Grid view: hide aside price + duplicate CTA (footer row is used) */
+.sikshya-course-grid:not(.sikshya-course-grid--list) .sikshya-course-aside-price,
+.sikshya-course-grid:not(.sikshya-course-grid--list) .sikshya-course-aside-cta {
+  display: none;
+}
+
+.sikshya-course-card-aside {
+  margin: 0;
+}
+
+.sikshya-course-aside-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sikshya-aside-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sikshya-spacing-2);
+  color: var(--sikshya-gray-700);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-aside-item__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--sikshya-gray-500);
+}
+
+.sikshya-aside-item__text {
+  line-height: 1.4;
+}
+
+.sikshya-course-aside-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-course-aside-cta {
+  margin-top: var(--sikshya-spacing-2);
+}
+
+/* Grid (non-list): meta reads as one compact row block above footer */
+.sikshya-course-grid:not(.sikshya-course-grid--list) .sikshya-course-card-aside {
+  padding: 0 var(--sikshya-spacing-5);
+  border-top: 1px solid var(--sikshya-gray-200);
+  margin-top: auto;
+}
+
+.sikshya-course-grid:not(.sikshya-course-grid--list) .sikshya-course-aside-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-3) var(--sikshya-spacing-5);
+  padding: var(--sikshya-spacing-4) 0;
+}
+
+.sikshya-course-grid:not(.sikshya-course-grid--list) .sikshya-aside-item {
+  align-items: center;
+}
+
+.sikshya-course-grid:not(.sikshya-course-grid--list) .sikshya-aside-item__icon {
+  margin-top: 0;
+}
+
+/* List view: stacked rows with separators (reference UI) */
+.sikshya-course-grid--list .sikshya-aside-item {
+  padding: var(--sikshya-spacing-3) 0;
+  border-bottom: 1px solid var(--sikshya-gray-200);
+}
+
+.sikshya-course-grid--list .sikshya-course-aside-list .sikshya-aside-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sikshya-course-grid--list .sikshya-course-aside-price {
+  margin-top: var(--sikshya-spacing-2);
+  padding-top: var(--sikshya-spacing-4);
+  border-top: 1px solid var(--sikshya-gray-200);
+}
+
+.sikshya-course-grid--list .sikshya-course-aside-cta {
+  width: 100%;
+  justify-content: center;
 }
 
 .sikshya-course-categories {
@@ -229,21 +635,47 @@
   color: var(--sikshya-gray-600);
 }
 
-.sikshya-course-footer {
+.sikshya-difficulty-badge {
+  padding: var(--sikshya-spacing-1) var(--sikshya-spacing-2);
+  border-radius: var(--sikshya-radius);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.sikshya-difficulty-badge--beginner {
+  background: var(--sikshya-success);
+  color: var(--sikshya-white);
+}
+
+.sikshya-difficulty-badge--intermediate {
+  background: var(--sikshya-warning);
+  color: var(--sikshya-white);
+}
+
+.sikshya-difficulty-badge--advanced {
+  background: var(--sikshya-error);
+  color: var(--sikshya-white);
+}
+
+.sikshya-course-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: var(--sikshya-spacing-4);
+  padding: var(--sikshya-spacing-4) var(--sikshya-spacing-5);
+  margin-top: auto;
   border-top: 1px solid var(--sikshya-gray-200);
 }
 
-.sikshya-course-footer .sikshya-button {
+.sikshya-course-card-footer .sikshya-button,
+.sikshya-course-aside-cta.sikshya-button {
   border: 1px solid var(--sikshya-gray-300);
   background: var(--sikshya-white);
   color: var(--sikshya-gray-800);
 }
 
-.sikshya-course-footer .sikshya-button:hover {
+.sikshya-course-card-footer .sikshya-button:hover,
+.sikshya-course-aside-cta.sikshya-button:hover {
   background: var(--sikshya-gray-50);
   border-color: var(--sikshya-gray-400);
   color: var(--sikshya-gray-900);
@@ -342,10 +774,40 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .sikshya-course-card-content {
+  .sikshya-archive-courses__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sikshya-archive-filters {
+    position: static;
+  }
+
+  .sikshya-course-grid--list .sikshya-course-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "image"
+      "primary"
+      "aside";
+  }
+
+  .sikshya-course-grid--list .sikshya-course-card-image {
+    grid-row: auto;
+    border-radius: var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0 0;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .sikshya-course-grid--list .sikshya-course-card-aside {
+    border-left: none;
+    border-top: 1px solid var(--sikshya-gray-200);
+    border-radius: 0 0 var(--sikshya-radius-lg) var(--sikshya-radius-lg);
+  }
+
+  .sikshya-course-card-primary {
     padding: var(--sikshya-spacing-4);
   }
-  .sikshya-course-footer {
+
+  .sikshya-course-card-footer {
     flex-direction: column;
     gap: var(--sikshya-spacing-3);
     align-items: stretch;
@@ -365,10 +827,11 @@
 }
 
 @media (max-width: 480px) {
-  .sikshya-course-card-content {
+  .sikshya-course-card-primary {
     padding: var(--sikshya-spacing-4);
   }
-  .sikshya-course-footer {
+
+  .sikshya-course-card-footer {
     flex-direction: column;
     gap: var(--sikshya-spacing-3);
     align-items: stretch;

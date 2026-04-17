@@ -503,11 +503,8 @@
   border-radius: var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0 0;
 }
 
+/* Thumbnail fill is defined in course-listing.css (absolute inset + object-fit: cover). */
 .sikshya-course-card .sikshya-course-thumbnail {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
   vertical-align: middle;
 }
 
@@ -548,9 +545,17 @@
   padding: 0.65rem 1.25rem;
   border-radius: var(--sikshya-radius-lg);
   font-weight: 600;
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.2;
   text-decoration: none;
   border: 1px solid transparent;
   cursor: pointer;
+}
+
+.sikshya-btn--sm {
+  padding: 0.5rem 1rem;
+  border-radius: var(--sikshya-radius-md);
+  font-size: var(--sikshya-font-size-sm);
 }
 
 .sikshya-btn--primary {
@@ -562,6 +567,17 @@
   background: transparent;
   border-color: var(--sikshya-gray-300);
   color: var(--sikshya-gray-800);
+}
+
+/* Single course page: tighter CTA sizing (avoid oversized buttons) */
+.sikshya-single-course .sikshya-course-lp__actions .sikshya-btn {
+  height: 40px !important;
+  padding: 0 16px !important;
+  border-radius: var(--sikshya-radius-md) !important;
+  font-size: var(--sikshya-font-size-sm) !important;
+  line-height: 1.2 !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
 }
 
 .sikshya-muted {
