@@ -1117,6 +1117,12 @@ export function QuizEditor(props: ContentEditorProps) {
         busy={addQuestionBusy}
         error={addQuestionError}
         submitLabel="Create and add to quiz"
+        onPickExisting={(id) => {
+          if (!id) return;
+          setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+          setAddQuestionOpen(false);
+        }}
+        pickExistingLabel="Add to quiz"
       />
       {embedded ? (
         <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />

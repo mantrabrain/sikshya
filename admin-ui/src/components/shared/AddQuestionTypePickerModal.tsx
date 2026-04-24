@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavIcon } from '../NavIcon';
 import { ButtonPrimary } from './buttons';
 import { ApiErrorPanel } from './ApiErrorPanel';
 import { Modal } from './Modal';
+import { getWpApi } from '../../api';
 
 export type QuestionType =
   | 'true_false'
@@ -86,6 +87,10 @@ type Props = {
   error?: unknown;
   submitLabel?: string;
   allowedTypes?: QuestionType[];
+  /** Optional: show a question-library picker inside the modal (Content library-like). */
+  showLibrary?: boolean;
+  onPickExisting?: (questionId: number) => void;
+  pickExistingLabel?: string;
 };
 
 export function AddQuestionTypePickerModal(props: Props) {
@@ -103,9 +108,16 @@ export function AddQuestionTypePickerModal(props: Props) {
     error,
     submitLabel = 'Create question',
     allowedTypes,
+    showLibrary = true,
+    onPickExisting,
+    pickExistingLabel = 'Add',
   } = props;
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [libraryRows, setLibraryRows] = useState<Array<{ id: number; title: string }>>([]);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libraryError, setLibraryError] = useState<unknown>(null);
 
   useEffect(() => {
     if (!open) {
@@ -134,6 +146,41 @@ export function AddQuestionTypePickerModal(props: Props) {
   }, [allowedTypes]);
 
   const active = types.find((x) => x.type === questionType) || types[0];
+
+  useEffect(() => {
+    if (!open || !showLibrary) {
+      return;
+    }
+    let cancelled = false;
+    setLibraryLoading(true);
+    setLibraryError(null);
+    const q = new URLSearchParams({ per_page: '50', status: 'any', context: 'edit' });
+    if (librarySearch.trim()) q.set('search', librarySearch.trim());
+    void getWpApi()
+      .get<{ id: number; title?: { raw?: string; rendered?: string } }[]>(`/sik_question?${q.toString()}`)
+      .then((rows) => {
+        if (cancelled || !Array.isArray(rows)) return;
+        setLibraryRows(
+          rows
+            .map((r) => ({
+              id: Number(r.id) || 0,
+              title: r.title?.raw || r.title?.rendered?.replace(/<[^>]+>/g, '') || `Question #${r.id}`,
+            }))
+            .filter((r) => r.id > 0)
+        );
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setLibraryError(e);
+        setLibraryRows([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLibraryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [librarySearch, open, showLibrary]);
 
   return (
     <Modal
@@ -235,6 +282,59 @@ export function AddQuestionTypePickerModal(props: Props) {
               Tip: Press <span className="font-mono font-semibold">Ctrl</span> + <span className="font-mono font-semibold">Enter</span> to create quickly.
             </div>
           </div>
+
+          {showLibrary ? (
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950/20">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white">Question library</div>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Search and pick an existing question (same as Content library → Questions).
+                  </p>
+                </div>
+                <div className="w-full sm:w-[280px]">
+                  <input
+                    type="search"
+                    value={librarySearch}
+                    onChange={(e) => setLibrarySearch(e.target.value)}
+                    placeholder="Search questions…"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {libraryError ? (
+                <div className="mt-3">
+                  <ApiErrorPanel error={libraryError} title="Could not load question library" onRetry={() => setLibrarySearch((s) => s)} />
+                </div>
+              ) : libraryLoading ? (
+                <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Loading questions…</p>
+              ) : libraryRows.length ? (
+                <div className="mt-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {libraryRows.map((q) => (
+                      <li key={q.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                        <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">
+                          {q.title || `Question #${q.id}`}
+                        </span>
+                        {onPickExisting ? (
+                          <button
+                            type="button"
+                            onClick={() => onPickExisting(q.id)}
+                            className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                          >
+                            {pickExistingLabel}
+                          </button>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">No questions found.</p>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
     </Modal>
