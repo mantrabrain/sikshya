@@ -254,6 +254,11 @@ class Database
             Settings::setRaw('sikshya_db_version', '1.5.0');
             $current = '1.5.0';
         }
+        if (version_compare((string) $current, '1.6.0', '<')) {
+            $this->migrateTo160();
+            Settings::setRaw('sikshya_db_version', '1.6.0');
+            $current = '1.6.0';
+        }
     }
 
     private function migrateTo110(): void
@@ -299,6 +304,55 @@ class Database
     {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($this->getAssignmentSubmissionsCreateSql());
+    }
+
+    /**
+     * Ensure issued certificate verification codes are 64-hex (URL-safe, consistent with public routing).
+     *
+     * Older installations may have short codes; these cannot resolve to public hash URLs and break QR/verify links.
+     */
+    private function migrateTo160(): void
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'sikshya_certificates';
+
+        // Table may not exist yet in fresh installs.
+        $exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table));
+        if ((string) $exists !== (string) $table) {
+            return;
+        }
+
+        $rows = $wpdb->get_results(
+            "SELECT id, verification_code FROM {$table} WHERE verification_code IS NULL OR verification_code = '' OR CHAR_LENGTH(verification_code) <> 64 LIMIT 5000"
+        );
+        if (!is_array($rows) || $rows === []) {
+            return;
+        }
+
+        foreach ($rows as $r) {
+            $id = isset($r->id) ? (int) $r->id : 0;
+            if ($id <= 0) {
+                continue;
+            }
+            $code = isset($r->verification_code) ? (string) $r->verification_code : '';
+            $clean = strtolower(preg_replace('/[^a-f0-9]/', '', $code) ?? '');
+            if (strlen($clean) === 64) {
+                // Stored value might contain non-hex; normalize to hex only.
+                if ($clean !== $code) {
+                    $wpdb->update($table, ['verification_code' => $clean], ['id' => $id], ['%s'], ['%d']);
+                }
+                continue;
+            }
+
+            // Generate a fresh 64-hex verification token.
+            try {
+                $new = bin2hex(random_bytes(32));
+            } catch (\Throwable $e) {
+                $new = bin2hex(openssl_random_pseudo_bytes(32) ?: random_bytes(32));
+            }
+
+            $wpdb->update($table, ['verification_code' => $new], ['id' => $id], ['%s'], ['%d']);
+        }
     }
 
 

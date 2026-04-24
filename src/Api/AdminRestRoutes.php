@@ -2102,7 +2102,7 @@ class AdminRestRoutes
             $verify_url = '';
             if ($code !== '') {
                 $clean = strtolower(preg_replace('/[^a-f0-9]/', '', (string) $code) ?? '');
-                if ($clean !== '') {
+                if (strlen($clean) === 64) {
                     // Prefer the shared renderer helper for consistent pretty/plain URL shape.
                     if (class_exists('\\Sikshya\\Certificates\\CertificateRenderer')) {
                         $verify_url = \Sikshya\Certificates\CertificateRenderer::publicUrlForHash($clean);
