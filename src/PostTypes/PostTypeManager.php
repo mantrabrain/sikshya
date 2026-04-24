@@ -133,6 +133,39 @@ class PostTypeManager
         $str_meta(PostTypes::COURSE, '_sikshya_duration');
         $str_meta(PostTypes::COURSE, '_sikshya_difficulty');
 
+        // Course type (free / paid / subscription / bundle) — used by pricing tab + bundle learn UX.
+        register_post_meta(
+            PostTypes::COURSE,
+            '_sikshya_course_type',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'sanitize_callback' => static function ($meta_value): string {
+                    $k = sanitize_key((string) $meta_value);
+
+                    return in_array($k, ['free', 'paid', 'subscription', 'bundle'], true) ? $k : 'paid';
+                },
+            ]
+        );
+
+        register_post_meta(
+            PostTypes::COURSE,
+            '_sikshya_bundle_visible_in_listing',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'sanitize_callback' => static function ($meta_value): string {
+                    return ($meta_value === '0' || $meta_value === 0 || $meta_value === false) ? '0' : '1';
+                },
+            ]
+        );
+
+        $int_array_meta(PostTypes::COURSE, '_sikshya_bundle_course_ids');
+
         // Quiz (sik_quiz): _sikshya_quiz_* stored as sikshya_quiz_* in forms → DB key _sikshya_quiz_*.
         $int_meta(PostTypes::LESSON, '_sikshya_lesson_course');
         $int_meta(PostTypes::QUIZ, '_sikshya_quiz_course');
@@ -181,6 +214,22 @@ class PostTypeManager
         );
         register_post_meta(
             PostTypes::CERTIFICATE,
+            '_sikshya_certificate_page_size',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'default' => 'a4',
+                'sanitize_callback' => static function ($meta_value) {
+                    $v = sanitize_key((string) $meta_value);
+
+                    return in_array($v, ['letter', 'a4', 'a5'], true) ? $v : 'a4';
+                },
+            ]
+        );
+        register_post_meta(
+            PostTypes::CERTIFICATE,
             '_sikshya_certificate_accent_color',
             [
                 'type' => 'string',
@@ -191,6 +240,83 @@ class PostTypeManager
                     $c = sanitize_hex_color((string) $meta_value);
 
                     return $c ? $c : '';
+                },
+            ]
+        );
+        register_post_meta(
+            PostTypes::CERTIFICATE,
+            '_sikshya_certificate_page_color',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'default' => '',
+                'sanitize_callback' => static function ($meta_value) {
+                    $c = sanitize_hex_color((string) $meta_value);
+
+                    return $c ? $c : '';
+                },
+            ]
+        );
+        register_post_meta(
+            PostTypes::CERTIFICATE,
+            '_sikshya_certificate_page_pattern',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'default' => 'none',
+                'sanitize_callback' => static function ($meta_value) {
+                    $s = sanitize_key((string) $meta_value);
+                    // Must match CERT_PAGE_PATTERN_ORDER in admin-ui certificateLayout.ts.
+                    $allowed = ['none', 'dots', 'microdots', 'lines', 'grid', 'diagonals', 'papergrain'];
+
+                    return in_array($s, $allowed, true) ? $s : 'none';
+                },
+            ]
+        );
+        register_post_meta(
+            PostTypes::CERTIFICATE,
+            '_sikshya_certificate_page_deco',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'default' => 'none',
+                'sanitize_callback' => static function ($meta_value) {
+                    // Must match CERT_PAGE_DECO_ORDER in admin-ui certificateLayout.ts (camelCase ids).
+                    // Do not use sanitize_key() here — it lowercases and breaks ids like paperFolio.
+                    $raw = (string) $meta_value;
+                    $s = preg_replace('/[^a-zA-Z0-9_-]/', '', $raw) ?? '';
+                    $allowed = [
+                        'none',
+                        'slate',
+                        'cream',
+                        'paperFolio',
+                        'corporateLetter',
+                        'formalBlueBand',
+                        'diplomaGold',
+                        'educationMint',
+                        'minimalFrame',
+                        'dawn',
+                        'sky',
+                        'rose',
+                        'forest',
+                        'sand',
+                        'gold',
+                        'mint',
+                        'coral',
+                        'sea',
+                        'plum',
+                        'aurora',
+                        'night',
+                        'dusk',
+                    ];
+
+                    return in_array($s, $allowed, true) ? $s : 'none';
                 },
             ]
         );
@@ -206,6 +332,27 @@ class PostTypeManager
                 'sanitize_callback' => [self::class, 'sanitize_certificate_layout_string'],
             ]
         );
+
+        // Public “View” / QR preview hash for certificate templates (not issued certificates).
+        // 64-hex chars, stored in post meta so admin UI can build stable preview URLs.
+        register_post_meta(
+            PostTypes::CERTIFICATE,
+            '_sikshya_certificate_preview_hash',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'sanitize_callback' => static function ($meta_value): string {
+                    $raw = strtolower(preg_replace('/[^a-fA-F0-9]/', '', (string) $meta_value) ?? '');
+                    if (strlen($raw) !== 64) {
+                        return '';
+                    }
+
+                    return $raw;
+                },
+            ]
+        );
     }
 
     /**
@@ -216,12 +363,18 @@ class PostTypeManager
     public static function sanitize_certificate_layout_string($meta_value): string
     {
         if (!is_string($meta_value) || $meta_value === '') {
-            return wp_json_encode(['version' => 1, 'blocks' => []]);
+            return wp_json_encode(['version' => 2, 'blocks' => []]);
+        }
+
+        // Guardrails: avoid memory blow-ups from accidental base64 blobs or huge payloads.
+        // JSON for a typical certificate is tiny (<10KB). Anything massive is likely user error.
+        if (strlen($meta_value) > 200000) {
+            return wp_json_encode(['version' => 2, 'blocks' => []]);
         }
 
         $decoded = json_decode(wp_unslash($meta_value), true);
         if (!is_array($decoded)) {
-            return wp_json_encode(['version' => 1, 'blocks' => []]);
+            return wp_json_encode(['version' => 2, 'blocks' => []]);
         }
 
         $blocks_in = isset($decoded['blocks']) && is_array($decoded['blocks']) ? $decoded['blocks'] : [];
@@ -237,9 +390,17 @@ class PostTypeManager
             }
         }
 
+        $ver_in = isset($decoded['version']) ? absint($decoded['version']) : 0;
+        if ($ver_in < 1) {
+            $ver_in = 2;
+        }
+        if ($ver_in > 100) {
+            $ver_in = 100;
+        }
+
         return wp_json_encode(
             [
-                'version' => 1,
+                'version' => $ver_in,
                 'blocks' => $blocks_out,
             ],
             JSON_UNESCAPED_UNICODE
@@ -253,7 +414,7 @@ class PostTypeManager
     private static function sanitize_certificate_block_array(array $b): ?array
     {
         $type = sanitize_key((string) $b['type']);
-        $allowed_types = ['heading', 'text', 'merge_field', 'spacer', 'divider', 'image'];
+        $allowed_types = ['heading', 'text', 'merge_field', 'spacer', 'divider', 'image', 'qr'];
 
         if (!in_array($type, $allowed_types, true)) {
             return null;
@@ -266,7 +427,8 @@ class PostTypeManager
             $id = 'b_' . wp_generate_password(8, false, false);
         }
 
-        $props = isset($b['props']) && is_array($b['props']) ? $b['props'] : [];
+        $raw_props = isset($b['props']) && is_array($b['props']) ? $b['props'] : [];
+        $props = $raw_props;
 
         switch ($type) {
             case 'heading':
@@ -279,6 +441,11 @@ class PostTypeManager
                     'fontWeight' => in_array((string) ($props['fontWeight'] ?? '700'), ['400', '500', '600', '700', 'normal', 'bold'], true)
                         ? (string) $props['fontWeight']
                         : '700',
+                    'fontFamily' => in_array((string) ($raw_props['fontFamily'] ?? 'serif'), ['sans', 'serif', 'mono'], true)
+                        ? (string) $raw_props['fontFamily']
+                        : 'serif',
+                    'lineHeight' => max(1.0, min(2.4, (float) ($raw_props['lineHeight'] ?? 1.12))),
+                    'letterSpacing' => max(-0.05, min(0.5, (float) ($raw_props['letterSpacing'] ?? 0.0))),
                 ];
                 break;
             case 'text':
@@ -287,11 +454,31 @@ class PostTypeManager
                     'align' => in_array($props['align'] ?? 'left', ['left', 'center', 'right'], true) ? $props['align'] : 'left',
                     'fontSize' => max(10, min(48, absint($props['fontSize'] ?? 14))),
                     'color' => sanitize_hex_color((string) ($props['color'] ?? '')) ?: '#334155',
+                    'fontWeight' => in_array((string) ($raw_props['fontWeight'] ?? '400'), ['400', '500', '600', '700', 'normal', 'bold'], true)
+                        ? (string) $raw_props['fontWeight']
+                        : '400',
+                    'fontFamily' => in_array((string) ($raw_props['fontFamily'] ?? 'sans'), ['sans', 'serif', 'mono'], true)
+                        ? (string) $raw_props['fontFamily']
+                        : 'sans',
+                    'lineHeight' => max(1.0, min(2.4, (float) ($raw_props['lineHeight'] ?? 1.5))),
+                    'letterSpacing' => max(-0.05, min(0.5, (float) ($raw_props['letterSpacing'] ?? 0.0))),
                 ];
                 break;
             case 'merge_field':
                 $field = sanitize_key((string) ($props['field'] ?? 'student_name'));
-                $fields = ['student_name', 'course_name', 'completion_date', 'certificate_id', 'site_name'];
+                $fields = [
+                    'student_name',
+                    'course_name',
+                    'instructor_name',
+                    'completion_date',
+                    'completion_time',
+                    'duration',
+                    'points',
+                    'grade',
+                    'certificate_number',
+                    'verification_code',
+                    'site_name',
+                ];
                 if (!in_array($field, $fields, true)) {
                     $field = 'student_name';
                 }
@@ -300,6 +487,14 @@ class PostTypeManager
                     'align' => in_array($props['align'] ?? 'center', ['left', 'center', 'right'], true) ? $props['align'] : 'center',
                     'fontSize' => max(10, min(72, absint($props['fontSize'] ?? 22))),
                     'color' => sanitize_hex_color((string) ($props['color'] ?? '')) ?: '#0f172a',
+                    'fontWeight' => in_array((string) ($raw_props['fontWeight'] ?? '600'), ['400', '500', '600', '700', 'normal', 'bold'], true)
+                        ? (string) $raw_props['fontWeight']
+                        : '600',
+                    'fontFamily' => in_array((string) ($raw_props['fontFamily'] ?? 'sans'), ['sans', 'serif', 'mono'], true)
+                        ? (string) $raw_props['fontFamily']
+                        : 'sans',
+                    'lineHeight' => max(1.0, min(2.4, (float) ($raw_props['lineHeight'] ?? 1.2))),
+                    'letterSpacing' => max(-0.05, min(0.5, (float) ($raw_props['letterSpacing'] ?? 0.0))),
                 ];
                 break;
             case 'spacer':
@@ -312,17 +507,59 @@ class PostTypeManager
                 ];
                 break;
             case 'image':
+                $src_raw = (string) ($props['src'] ?? '');
+                // Disallow data URIs; they can be enormous and are not suitable for storage in meta.
+                if (stripos($src_raw, 'data:') === 0) {
+                    $src_raw = '';
+                }
                 $props = [
-                    'src' => esc_url_raw((string) ($props['src'] ?? '')),
+                    'src' => esc_url_raw($src_raw),
                     'width' => max(20, min(800, absint($props['width'] ?? 120))),
                     'align' => in_array($props['align'] ?? 'center', ['left', 'center', 'right'], true) ? $props['align'] : 'center',
+                ];
+                break;
+            case 'qr':
+                $props = [
+                    // Used only for sizing the QR image placeholder inside the template.
+                    // The actual QR <img> is injected by server-side rendering with a real verification URL.
+                    'size' => max(80, min(260, absint($props['size'] ?? 140))),
                 ];
                 break;
             default:
                 return null;
         }
 
+        $geom = self::sanitize_certificate_block_geometry($raw_props);
+        $props = array_merge($props, $geom);
+
         return ['id' => $id, 'type' => $type, 'props' => $props];
+    }
+
+    /**
+     * @param array<string, mixed> $raw_props
+     * @return array<string, float|int>
+     */
+    private static function sanitize_certificate_block_geometry(array $raw_props): array
+    {
+        $x = isset($raw_props['x']) ? (float) $raw_props['x'] : 0.0;
+        $y = isset($raw_props['y']) ? (float) $raw_props['y'] : 0.0;
+        $w = isset($raw_props['w']) ? (float) $raw_props['w'] : 50.0;
+        $h = isset($raw_props['h']) ? (float) $raw_props['h'] : 12.0;
+        $z = isset($raw_props['z']) ? absint($raw_props['z']) : 1;
+        if ($z < 0) {
+            $z = 0;
+        }
+        if ($z > 200) {
+            $z = 200;
+        }
+
+        return [
+            'x' => (float) max(0, min(100, $x)),
+            'y' => (float) max(0, min(100, $y)),
+            'w' => (float) max(5, min(100, $w)),
+            'h' => (float) max(2, min(100, $h)),
+            'z' => (int) $z,
+        ];
     }
 
     /**
@@ -523,7 +760,7 @@ class PostTypeManager
             'menu_position'       => 9,
             'menu_icon'           => 'dashicons-editor-help',
             'hierarchical'        => false,
-            'supports'            => ['title', 'editor', 'custom-fields'],
+            'supports'            => ['title', 'editor', 'thumbnail', 'custom-fields'],
             'has_archive'         => false,
             'rewrite'             => false,
             'capability_type'     => 'post',
@@ -562,7 +799,7 @@ class PostTypeManager
             'menu_position'       => 10,
             'menu_icon'           => 'dashicons-list-view',
             'hierarchical'        => true,
-            'supports'            => ['title', 'editor', 'custom-fields'],
+            'supports'            => ['title', 'editor', 'thumbnail', 'custom-fields'],
             'has_archive'         => false,
             'rewrite'             => false,
             'capability_type'     => 'post',

@@ -31,6 +31,11 @@ final class RestCollectionQueryService
             }
             add_filter("rest_{$post_type}_query", [$this, 'includeTrashWhenStatusAny'], 10, 2);
         }
+
+        // Sikshya admin: filter courses by bundle vs regular in WP REST collections.
+        if (post_type_exists(PostTypes::COURSE)) {
+            add_filter('rest_' . PostTypes::COURSE . '_query', [$this, 'filterCoursesByType'], 11, 2);
+        }
     }
 
     /**
@@ -66,6 +71,65 @@ final class RestCollectionQueryService
         if (is_array($ps) && !in_array('trash', $ps, true)) {
             $args['post_status'][] = 'trash';
         }
+
+        return $args;
+    }
+
+    /**
+     * REST collection filter for the Courses listing:
+     * - `sikshya_course_type=bundle` => only bundles
+     * - `sikshya_course_type=subscription` => only subscription-only courses
+     * - `sikshya_course_type=regular` => anything except bundles (including missing key)
+     *
+     * @param array<string, mixed> $args
+     * @return array<string, mixed>
+     */
+    public function filterCoursesByType(array $args, WP_REST_Request $request): array
+    {
+        $raw = sanitize_key((string) $request->get_param('sikshya_course_type'));
+        if ($raw !== 'bundle' && $raw !== 'subscription' && $raw !== 'regular') {
+            return $args;
+        }
+
+        $mq = $args['meta_query'] ?? [];
+        if (!is_array($mq)) {
+            $mq = [];
+        }
+
+        if ($raw === 'bundle') {
+            $mq[] = [
+                'key' => '_sikshya_course_type',
+                'value' => 'bundle',
+                'compare' => '=',
+            ];
+            $args['meta_query'] = $mq;
+            return $args;
+        }
+
+        if ($raw === 'subscription') {
+            $mq[] = [
+                'key' => '_sikshya_course_type',
+                'value' => 'subscription',
+                'compare' => '=',
+            ];
+            $args['meta_query'] = $mq;
+            return $args;
+        }
+
+        // regular: exclude bundles; treat missing meta as regular.
+        $mq[] = [
+            'relation' => 'OR',
+            [
+                'key' => '_sikshya_course_type',
+                'compare' => 'NOT EXISTS',
+            ],
+            [
+                'key' => '_sikshya_course_type',
+                'value' => 'bundle',
+                'compare' => '!=',
+            ],
+        ];
+        $args['meta_query'] = $mq;
 
         return $args;
     }

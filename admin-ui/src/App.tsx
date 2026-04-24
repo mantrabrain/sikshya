@@ -7,18 +7,29 @@ import { CourseBuilderPage } from './pages/CourseBuilderPage';
 import { CourseTeamPage } from './pages/CourseTeamPage';
 import { CoursesPage } from './pages/CoursesPage';
 import { CouponsPage } from './pages/CouponsPage';
+import { ReviewsPage } from './pages/ReviewsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { EnrollmentsPage } from './pages/EnrollmentsPage';
 import { GenericPlaceholderPage } from './pages/GenericPlaceholderPage';
-import { CertificateDesignerGuidePage } from './pages/CertificateDesignerGuidePage';
+import { ActivityLogPage } from './pages/ActivityLogPage';
+import { BundlesPage } from './pages/BundlesPage';
+import { CalendarPage } from './pages/CalendarPage';
 import { GradebookPage } from './pages/GradebookPage';
+import { GradingPage } from './pages/GradingPage';
 import { IntegrationsPage } from './pages/IntegrationsPage';
 import { LicensePage } from './pages/LicensePage';
 import { IssuedCertificatesPage } from './pages/IssuedCertificatesPage';
 import { MarketplacePage } from './pages/MarketplacePage';
+import { PrerequisitesPage } from './pages/PrerequisitesPage';
+import { SocialLoginPage } from './pages/SocialLoginPage';
+import { WhiteLabelPage } from './pages/WhiteLabelPage';
+import { EmailMarketingPage } from './pages/EmailMarketingPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { PaymentsPage } from './pages/PaymentsPage';
 import { ReportsPage } from './pages/ReportsPage';
+import { EmailPage } from './pages/EmailPage';
+import { EmailTemplatesListPage } from './pages/EmailTemplatesListPage';
+import { EmailTemplateEditPage } from './pages/EmailTemplateEditPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SubscriptionsProPage } from './pages/SubscriptionsProPage';
 import { ToolsPage } from './pages/ToolsPage';
@@ -27,6 +38,18 @@ import { WpUserListPage } from './pages/WpUserListPage';
 import { ShellStateProvider } from './context/ShellStateContext';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
 import { AddonsPage } from './pages/AddonsPage';
+import {
+  BrandingHubPage,
+  CertificatesHubPage,
+  ContentLibraryHubPage,
+  EmailHubPage,
+  IntegrationsHubPage,
+  LearningRulesHubPage,
+  PeopleHubPage,
+  ReportsHubPage,
+  SalesHubPage,
+  ToolsHubPage,
+} from './pages/hubs/HubPages';
 
 function RoutedApp() {
   const baseConfig = getConfig();
@@ -42,6 +65,8 @@ function RoutedApp() {
       return <CoursesPage config={config} title="Courses" restBase="sik_course" />;
     case 'add-course':
       return <CourseBuilderPage config={config} title="Course builder" />;
+    case 'bundle-builder':
+      return <CourseBuilderPage config={config} title="Bundle builder" />;
     case 'edit-content':
       return <ContentPostEditorPage config={config} shellTitle="Edit content" />;
     case 'lessons':
@@ -101,14 +126,18 @@ function RoutedApp() {
       );
     case 'issued-certificates':
       return <IssuedCertificatesPage config={config} title="Issued certificates" />;
-    case 'cert-designer-guide':
-      return <CertificateDesignerGuidePage config={config} title="Certificate designer tips" />;
     case 'orders':
       return <OrdersPage config={config} title="Orders" />;
     case 'coupons':
       return <CouponsPage config={config} title="Coupons" />;
+    case 'reviews':
+      return <ReviewsPage config={config} title="Course reviews" />;
     case 'gradebook':
       return <GradebookPage config={config} title="Gradebook" />;
+    case 'grading':
+      return <GradingPage config={config} title="Grading" />;
+    case 'activity-log':
+      return <ActivityLogPage config={config} title="Activity log" />;
     case 'content-drip':
       return <ContentDripPage config={config} title="Scheduled access" />;
     case 'subscriptions':
@@ -117,6 +146,35 @@ function RoutedApp() {
       return <CourseTeamPage config={config} title="Course staff" />;
     case 'marketplace':
       return <MarketplacePage config={config} title="Marketplace" />;
+    case 'bundles':
+      return <BundlesPage config={config} title="Course bundles" />;
+    case 'prerequisites':
+      return <PrerequisitesPage config={config} title="Prerequisites" />;
+    case 'social-login':
+      return <SocialLoginPage config={config} title="Social login" />;
+    case 'white-label':
+      return <WhiteLabelPage config={config} title="White label" />;
+    case 'crm-automation':
+      return <CrmAutomationPage config={config} title="CRM & email automation" />;
+    case 'calendar':
+      return <CalendarPage config={config} title="Calendar" />;
+    /* ---- Tabbed hubs (new sidebar entries that fan out to existing pages). ---- */
+    case 'content-library':
+      return <ContentLibraryHubPage config={config} title="Content library" />;
+    case 'people':
+      return <PeopleHubPage config={config} title="People" />;
+    case 'certificates-hub':
+      return <CertificatesHubPage config={config} title="Certificates" />;
+    case 'sales':
+      return <SalesHubPage config={config} title="Sales" />;
+    case 'email-hub':
+      return <EmailHubPage config={config} title="Email" />;
+    case 'branding':
+      return <BrandingHubPage config={config} title="Branding" />;
+    case 'integrations-hub':
+      return <IntegrationsHubPage config={config} title="Integrations" />;
+    case 'learning-rules':
+      return <LearningRulesHubPage config={config} title="Learning rules" />;
     case 'course-categories':
       return (
         <CourseCategoriesPage
@@ -146,17 +204,25 @@ function RoutedApp() {
     case 'enrollments':
       return <EnrollmentsPage config={config} title="Enrollments" />;
     case 'reports':
-      return <ReportsPage config={config} title="Reports overview" />;
+      return <ReportsHubPage config={config} title="Reports" />;
     case 'payments':
       return <PaymentsPage config={config} title="Payments" />;
     case 'settings':
       return <SettingsPage config={config} title="Settings" />;
+    case 'email':
+      return <EmailPage config={config} title="Email" />;
+    case 'email-templates':
+      return <EmailTemplatesListPage config={config} title="Email templates" />;
+    case 'email-template-edit':
+      return <EmailTemplateEditPage config={config} title="Email template" />;
     case 'tools':
-      return <ToolsPage config={config} title="Tools" />;
+      return <ToolsHubPage config={config} title="Tools" />;
     case 'addons':
       return <AddonsPage config={config} title="Addons" />;
     case 'integrations':
       return <IntegrationsPage config={config} title="Integrations" />;
+    case 'email-marketing':
+      return <EmailMarketingPage config={config} title="Email marketing" />;
     case 'license':
       return <LicensePage config={config} title="License" />;
     default:

@@ -34,6 +34,34 @@ export function ButtonPrimary({
   );
 }
 
+export function ButtonSecondary({
+  children,
+  type = 'button',
+  onClick,
+  disabled,
+  className = '',
+  form,
+}: {
+  children: ReactNode;
+  type?: 'button' | 'submit';
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  form?: string;
+}) {
+  return (
+    <button
+      type={type}
+      form={form}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${baseSecondary} disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function LinkButtonPrimary({
   href,
   children,

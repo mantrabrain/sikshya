@@ -24,6 +24,7 @@ if ($paged < 1) {
 
 <div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--category">
     <div class="sikshya-container">
+        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
         <header class="sikshya-taxonomy-courses__header">
             <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
                 <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>

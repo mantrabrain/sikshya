@@ -14,11 +14,14 @@ type Props = {
   onClose: () => void;
 };
 
+type CourseKind = 'regular' | 'bundle';
+
 /**
  * Shared “new course” flow: title → draft post via REST → redirect to course builder (edit mode).
  */
 export function CreateCourseModal({ config, open, onClose }: Props) {
   const { navigateHref } = useAdminRouting();
+  const [kind, setKind] = useState<CourseKind>('regular');
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [slugManual, setSlugManual] = useState(false);
@@ -38,6 +41,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
 
   useEffect(() => {
     if (open) {
+      setKind('regular');
       setTitle('');
       setSlug('');
       setSlugManual(false);
@@ -47,6 +51,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
   }, [open]);
 
   const reset = () => {
+    setKind('regular');
     setTitle('');
     setSlug('');
     setSlugManual(false);
@@ -66,8 +71,13 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     setError(null);
     setSubmitting(true);
     try {
-      const id = await createDraftCourse(title, { slug: slug.trim() || undefined });
-      const url = appViewHref(config, 'add-course', { course_id: String(id) });
+      const id = await createDraftCourse(title, { slug: slug.trim() || undefined, kind });
+      const extra: Record<string, string> = { course_id: String(id) };
+      if (kind === 'bundle') {
+        // Show bundle UI immediately even if meta propagation is delayed.
+        extra.force_bundle_ui = '1';
+      }
+      const url = appViewHref(config, 'add-course', extra);
       navigateHref(url);
     } catch (err) {
       setError(getErrorSummary(err));
@@ -80,7 +90,11 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
       open={open}
       onClose={handleClose}
       title="Create a new course"
-      description="Give your course a working title. You can change everything later in the builder."
+      description={
+        kind === 'bundle'
+          ? 'Bundles sell several courses for one price. You will set price, included courses, and catalog visibility next.'
+          : 'Start with a name and web address. You will add lessons, price, and media in the course builder next.'
+      }
       size="md"
       footer={
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -88,21 +102,63 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
             Cancel
           </button>
           <ButtonPrimary type="submit" form="sikshya-create-course-form" disabled={submitting}>
-            {submitting ? 'Creating…' : 'Create & open builder'}
+            {submitting ? 'Creating…' : kind === 'bundle' ? 'Create bundle & open builder' : 'Create & open builder'}
           </ButtonPrimary>
         </div>
       }
     >
       <form id="sikshya-create-course-form" onSubmit={onSubmit} className="space-y-4">
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">What are you creating?</legend>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Choose now — the builder opens with the right layout (full course vs streamlined bundle).
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <label
+              className={`flex cursor-pointer flex-col rounded-xl border p-3 text-left transition ${
+                kind === 'regular'
+                  ? 'border-brand-500 bg-brand-50/80 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/30'
+                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <input type="radio" name="sik-course-kind" checked={kind === 'regular'} onChange={() => setKind('regular')} disabled={submitting} className="h-4 w-4" />
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">Regular course</span>
+              </span>
+              <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
+                Lessons, quizzes, curriculum, drip, and all course options.
+              </span>
+            </label>
+            <label
+              className={`flex cursor-pointer flex-col rounded-xl border p-3 text-left transition ${
+                kind === 'bundle'
+                  ? 'border-brand-500 bg-brand-50/80 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/30'
+                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <input type="radio" name="sik-course-kind" checked={kind === 'bundle'} onChange={() => setKind('bundle')} disabled={submitting} className="h-4 w-4" />
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">Course bundle</span>
+              </span>
+              <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
+                Package existing courses. Builder shows only bundle page + pricing (no curriculum tab).
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
         <div>
           <label htmlFor="sikshya-new-course-title" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Course title
+            {kind === 'bundle' ? 'Bundle name' : 'Working title'}
           </label>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            You can rename anytime. This becomes the public page title.
+          </p>
           <input
             id="sikshya-new-course-title"
             type="text"
@@ -118,14 +174,14 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
                 setSlug(v.trim() ? slugFromTitle(v) : '');
               }
             }}
-            placeholder="e.g. WordPress for Beginners"
+            placeholder={kind === 'bundle' ? 'e.g. Full Stack Web Dev Bundle' : 'e.g. WordPress for Beginners'}
             disabled={submitting}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
+            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
           />
         </div>
         <div>
           <label htmlFor="sikshya-new-course-slug" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Permalink
+            URL slug
           </label>
           <p className="mt-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
             {permalinkPreview}
@@ -147,10 +203,11 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
             }}
             placeholder="url-slug"
             disabled={submitting}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
+            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
           />
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Auto-filled from the title; edit to customize. WordPress may append a number if the slug is already in use.
+            Fills in from the title automatically — change it if you want a shorter link. If that address is taken, WordPress may add
+            -2, -3, etc.
           </p>
         </div>
         {error ? (
@@ -159,7 +216,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
           </div>
         ) : null}
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Your course is saved as a <strong className="font-medium text-slate-700 dark:text-slate-300">draft</strong> until you publish
+          Your {kind === 'bundle' ? 'bundle' : 'course'} is saved as a <strong className="font-medium text-slate-700 dark:text-slate-300">draft</strong> until you publish
           from the builder.
         </p>
       </form>

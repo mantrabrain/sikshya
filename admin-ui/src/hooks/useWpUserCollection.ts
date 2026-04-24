@@ -10,13 +10,15 @@ export type WpUserCollectionQuery = {
   order: 'asc' | 'desc';
   page?: number;
   perPage?: number;
+  /** Optional bump to force a refetch. */
+  refreshToken?: number;
 };
 
 /**
  * WordPress `/wp/v2/users` collection filtered by role.
  */
 export function useWpUserCollection(query: WpUserCollectionQuery) {
-  const { roleSlug, search, orderby, order, page = 1, perPage = 20 } = query;
+  const { roleSlug, search, orderby, order, page = 1, perPage = 20, refreshToken } = query;
 
   return useAsyncData(async () => {
     const params = new URLSearchParams({
@@ -33,5 +35,5 @@ export function useWpUserCollection(query: WpUserCollectionQuery) {
     }
     const path = `/users?${params.toString()}`;
     return getWpApi().getWithTotal<WpRestUser[]>(path);
-  }, [roleSlug, search, orderby, order, page, perPage]);
+  }, [roleSlug, search, orderby, order, page, perPage, refreshToken]);
 }

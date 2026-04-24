@@ -69,8 +69,12 @@ export function WPMediaPickerField(props: Props) {
   const zoneLabel = value ? 'Replace image' : 'Upload or choose image';
   const hint = placeholder || 'Opens the WordPress media library. You can upload a new file and insert it.';
 
+  const zoneClass = value
+    ? 'h-32 sm:h-36'
+    : 'min-h-[5.5rem] py-4';
+
   return (
-    <div className="mt-1.5 space-y-3">
+    <div className="mt-1.5 space-y-2">
       <button
         type="button"
         id={id}
@@ -81,34 +85,34 @@ export function WPMediaPickerField(props: Props) {
             openFrame();
           }
         }}
-        className="group relative flex w-full min-h-[11rem] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center transition hover:border-brand-300 hover:bg-brand-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800/40 dark:hover:border-brand-500/50 dark:hover:bg-brand-950/20"
+        className={`group relative flex w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/80 px-3 text-center transition hover:border-brand-300 hover:bg-brand-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800/40 dark:hover:border-brand-500/50 dark:hover:bg-brand-950/20 ${zoneClass}`}
       >
         {value ? (
-          <div className="pointer-events-none absolute inset-2 overflow-hidden rounded-xl border border-slate-200/80 bg-white dark:border-slate-700 dark:bg-slate-900">
-            <img src={value} alt="" className="h-full w-full object-contain" />
+          <div className="pointer-events-none absolute inset-1.5 overflow-hidden rounded-lg border border-slate-200/80 bg-white dark:border-slate-700 dark:bg-slate-900">
+            <img src={value} alt="" className="h-full w-full object-contain object-center" />
           </div>
         ) : (
           <>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-600">
+            <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-600">
               {zoneLabel}
             </span>
-            <span className="max-w-sm text-xs leading-relaxed text-slate-500 dark:text-slate-400">{hint}</span>
-            <span className="text-[11px] font-medium text-brand-600 group-hover:text-brand-700 dark:text-brand-400 dark:group-hover:text-brand-300">
+            <span className="max-w-[18rem] text-[11px] leading-snug text-slate-500 dark:text-slate-400">{hint}</span>
+            <span className="text-[10px] font-medium text-brand-600 group-hover:text-brand-700 dark:text-brand-400 dark:group-hover:text-brand-300">
               Click to open media library
             </span>
           </>
         )}
         {value ? (
-          <span className="relative z-[1] mt-auto rounded-lg bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 backdrop-blur-sm dark:bg-slate-900/90 dark:text-slate-100 dark:ring-slate-600">
+          <span className="relative z-[1] mt-auto mb-1 rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 backdrop-blur-sm dark:bg-slate-900/90 dark:text-slate-100 dark:ring-slate-600">
             Click to replace
           </span>
         ) : null}
       </button>
       {value ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3">
           <button
             type="button"
-            className="text-sm font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            className="shrink-0 text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
             onClick={() => {
               onAttachmentIdChange?.(0);
               onChange('');
@@ -116,7 +120,14 @@ export function WPMediaPickerField(props: Props) {
           >
             Remove image
           </button>
-          <input type="text" readOnly className={className} value={value} title="Image URL" aria-label="Image URL" />
+          <input
+            type="text"
+            readOnly
+            className={className ? `${className} max-w-full text-xs` : 'max-w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300'}
+            value={value}
+            title="Image URL"
+            aria-label="Image URL"
+          />
         </div>
       ) : (
         <span className="sr-only">{hint}</span>

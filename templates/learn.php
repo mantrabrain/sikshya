@@ -35,8 +35,9 @@ $page_title = sprintf(
 <?php
 $learn_mode = (string) ($lv['mode'] ?? 'course');
 $is_hub = $learn_mode === 'hub';
+$is_bundle = $learn_mode === 'bundle';
 $has_course = !empty($lv['course_id']);
-$is_shell_without_course = $is_hub || !$has_course;
+$is_shell_without_course = $is_hub || $is_bundle || !$has_course;
 ?>
 <body class="sikshya-learning-shell sikshya-learning-shell--learn<?php echo $is_shell_without_course ? ' sikshya-learning-shell--hub' : ''; ?>">
 <div class="sikshya-learning-app">
@@ -111,6 +112,17 @@ $is_shell_without_course = $is_hub || !$has_course;
         </header>
 
         <main class="sikshya-learnMain">
+            <?php
+            /**
+             * Fires once at the top of the learn page below the header.
+             *
+             * Pro addons (prerequisites, content drip) render lock banners and
+             * scheduled-access previews here.
+             *
+             * @param array<string, mixed> $lv Learn template view-model.
+             */
+            do_action('sikshya_learn_after_hero', $lv);
+            ?>
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
             <aside class="sikshya-learnSidebar" aria-label="<?php esc_attr_e('Course content', 'sikshya'); ?>" data-sikshya-outline>
                 <div class="sikshya-learnSidebar__inner">
@@ -128,7 +140,124 @@ $is_shell_without_course = $is_hub || !$has_course;
             </aside>
 
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
-                <?php if (($lv['mode'] ?? 'course') === 'hub' && empty($lv['error'])) : ?>
+                <?php if ($is_bundle && empty($lv['error'])) : ?>
+                    <?php
+                    $bundle_post   = ($has_course && !empty($lv['course'])) ? $lv['course'] : get_post((int) ($lv['course_id'] ?? 0));
+                    $bundle_title  = $bundle_post instanceof WP_Post ? get_the_title($bundle_post) : __('Bundle', 'sikshya');
+                    $bundle_courses = $lv['hub_courses'] ?? [];
+                    $bundle_url    = $bundle_post instanceof WP_Post ? (get_permalink($bundle_post) ?: '') : '';
+                    $total_c = count($bundle_courses);
+                    $done_c  = count(array_filter($bundle_courses, static fn($r) => ($r['progress'] ?? 0) >= 100));
+                    $avg_pct = $total_c > 0
+                        ? (int) round(array_sum(array_column($bundle_courses, 'progress')) / $total_c)
+                        : 0;
+                    ?>
+                    <div class="sikshya-contentSection">
+                        <div class="sikshya-contentPanel sikshya-contentPanel--header">
+                            <div class="sikshya-learnHeader">
+                                <div class="sikshya-learnHeader__top">
+                                    <div class="sikshya-learnHeader__titles">
+                                        <div class="sikshya-learnHeader__kicker">
+                                            <?php esc_html_e('Bundle', 'sikshya'); ?>
+                                            <?php if ($total_c > 0) : ?>
+                                                · <?php echo esc_html(sprintf(_n('%d course', '%d courses', $total_c, 'sikshya'), $total_c)); ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <h1 class="sikshya-learnHeader__title sikshya-zeroMargin"><?php echo esc_html($bundle_title); ?></h1>
+                                    </div>
+                                    <div class="sikshya-learnHeader__actions">
+                                        <?php if ($bundle_url !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($bundle_url); ?>">
+                                                <?php esc_html_e('Bundle page', 'sikshya'); ?>
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php if ($total_c > 0) : ?>
+                                    <div class="sikshya-bundleLearnProgress" aria-label="<?php echo esc_attr__('Bundle progress', 'sikshya'); ?>">
+                                        <div class="sikshya-learnHubCard__bar" style="margin-top:.75rem" role="progressbar" aria-valuenow="<?php echo esc_attr((string) $avg_pct); ?>" aria-valuemin="0" aria-valuemax="100">
+                                            <span style="<?php echo esc_attr('width:' . $avg_pct . '%'); ?>"></span>
+                                        </div>
+                                        <span class="sikshya-learnHubCard__pct">
+                                            <?php
+                                            echo esc_html(sprintf(
+                                                /* translators: 1: overall percent, 2: completed count, 3: total count */
+                                                __('%1$s%% overall · %2$d / %3$d courses completed', 'sikshya'),
+                                                $avg_pct,
+                                                $done_c,
+                                                $total_c
+                                            ));
+                                            ?>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($bundle_courses)) : ?>
+                        <div class="sikshya-learnHubGrid" role="list">
+                            <?php foreach ($bundle_courses as $row) : ?>
+                                <?php
+                                $course    = $row['course'] ?? null;
+                                if (!$course instanceof WP_Post) { continue; }
+                                $thumb     = (string) ($row['thumb'] ?? '');
+                                $progress  = (int) ($row['progress'] ?? 0);
+                                $continue  = (string) ($row['continue_url'] ?? '');
+                                $course_url = (string) ($row['course_url'] ?? '');
+                                $enrolled  = !empty($row['enrolled']);
+                                ?>
+                                <article class="sikshya-learnHubCard" role="listitem">
+                                    <div class="sikshya-learnHubCard__media" aria-hidden="true">
+                                        <?php if ($thumb !== '') : ?>
+                                            <img class="sikshya-learnHubCard__img" src="<?php echo esc_url($thumb); ?>" alt="" loading="lazy" />
+                                        <?php else : ?>
+                                            <div class="sikshya-learnHubCard__ph"></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="sikshya-learnHubCard__body">
+                                        <h2 class="sikshya-learnHubCard__title">
+                                            <a href="<?php echo esc_url($course_url); ?>"><?php echo esc_html(get_the_title($course)); ?></a>
+                                        </h2>
+                                        <?php if ($enrolled) : ?>
+                                            <div class="sikshya-learnHubCard__progress" aria-label="<?php echo esc_attr__('Progress', 'sikshya'); ?>">
+                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-valuenow="<?php echo esc_attr((string) $progress); ?>" aria-valuemin="0" aria-valuemax="100">
+                                                    <span style="<?php echo esc_attr('width:' . $progress . '%'); ?>"></span>
+                                                </div>
+                                                <span class="sikshya-learnHubCard__pct"><?php echo esc_html($progress . '%'); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div class="sikshya-learnHubCard__actions">
+                                            <?php if ($enrolled && $continue !== '') : ?>
+                                                <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm" href="<?php echo esc_url($continue); ?>">
+                                                    <?php $progress >= 100 ? esc_html_e('Review', 'sikshya') : esc_html_e('Continue', 'sikshya'); ?>
+                                                </a>
+                                            <?php endif; ?>
+                                            <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($course_url); ?>">
+                                                <?php esc_html_e('View course', 'sikshya'); ?>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else : ?>
+                        <div class="sikshya-contentSection sikshya-contentSection--centered">
+                            <div class="sikshya-contentPanel sikshya-contentPanel--emptyState" role="status">
+                                <div class="sikshya-learnEmptyState">
+                                    <div class="sikshya-learnEmptyState__icon" aria-hidden="true">
+                                        <?php echo sikshya_learn_icon('book'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                    </div>
+                                    <div class="sikshya-learnEmptyState__body">
+                                        <h2 class="sikshya-learnEmptyState__title"><?php esc_html_e('No courses in this bundle yet', 'sikshya'); ?></h2>
+                                        <p class="sikshya-learnEmptyState__message"><?php esc_html_e('The instructor has not added any courses to this bundle yet.', 'sikshya'); ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                <?php elseif (($lv['mode'] ?? 'course') === 'hub' && empty($lv['error'])) : ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
                             <div class="sikshya-learnHeader">

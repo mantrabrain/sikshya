@@ -81,6 +81,8 @@ type Props = {
   onListReady?: (api: { refresh: () => Promise<void> }) => void;
   /** WordPress-style row actions under the title; also drops a trailing `actions` column if present. */
   postRowActions?: EntityListPostRowActions;
+  /** Extra controls rendered in the search/sort toolbar (before column picker). */
+  toolbarTrailing?: ReactNode;
 };
 
 /**
@@ -104,6 +106,7 @@ export function EntityListView({
   bulkDeleteEnabled = true,
   onListReady,
   postRowActions,
+  toolbarTrailing,
 }: Props) {
   const { confirm } = useSikshyaDialog();
   const [search, setSearch] = useState('');
@@ -484,7 +487,14 @@ export function EntityListView({
         onSortFieldChange={setOrderby}
         sortOrder={order}
         onSortOrderToggle={onSortOrderToggle}
-        trailing={columnPicker}
+        trailing={
+          toolbarTrailing || columnPicker ? (
+            <>
+              {toolbarTrailing}
+              {columnPicker}
+            </>
+          ) : null
+        }
       />
 
       <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-3 dark:border-slate-800 md:flex-row md:items-center md:justify-between">

@@ -49,6 +49,7 @@ if (!is_user_logged_in()) {
     </header>
 
     <div class="sikshya-checkout-page__body">
+        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
         <?php if (!empty($co['empty'])) : ?>
             <div class="sikshya-checkout-page__empty">
                 <div class="sikshya-checkout-page__empty-copy">
@@ -131,22 +132,31 @@ if (!is_user_logged_in()) {
                         <p class="sikshya-checkout-page__panel-intro"><?php esc_html_e('Choose a payment method to continue.', 'sikshya'); ?></p>
 
                         <?php
-                        $gw = $co['gateways'] ?? ['offline' => true, 'stripe' => false, 'paypal' => false];
-                        $any_gw = !empty($gw['offline']) || !empty($gw['stripe']) || !empty($gw['paypal']);
+                        $gw_ids = isset($co['checkout_gateway_ids']) && is_array($co['checkout_gateway_ids'])
+                            ? $co['checkout_gateway_ids']
+                            : [];
+                        $gw_labels = \Sikshya\Frontend\Public\CheckoutTemplateData::gatewayCheckoutLabels();
+                        $any_gw = $gw_ids !== [];
                         ?>
                         <div class="sikshya-checkout-gateways">
-                            <?php if (!empty($gw['offline'])) : ?>
-                                <button type="button" class="sikshya-btn sikshya-btn--primary sikshya-checkout-page__gateway-btn" data-sikshya-gateway="offline"><?php esc_html_e('Offline payment', 'sikshya'); ?></button>
-                            <?php endif; ?>
-                            <?php if (!empty($gw['stripe'])) : ?>
-                                <button type="button" class="sikshya-btn sikshya-btn--ghost sikshya-checkout-page__gateway-btn" data-sikshya-gateway="stripe"><?php esc_html_e('Pay with Stripe', 'sikshya'); ?></button>
-                            <?php endif; ?>
-                            <?php if (!empty($gw['paypal'])) : ?>
-                                <button type="button" class="sikshya-btn sikshya-btn--ghost sikshya-checkout-page__gateway-btn" data-sikshya-gateway="paypal"><?php esc_html_e('Pay with PayPal', 'sikshya'); ?></button>
-                            <?php endif; ?>
+                            <?php foreach ($gw_ids as $idx => $gid) : ?>
+                                <?php
+                                $gid = sanitize_key((string) $gid);
+                                if ($gid === '') {
+                                    continue;
+                                }
+                                $btn_class = $idx === 0
+                                    ? 'sikshya-btn sikshya-btn--primary sikshya-checkout-page__gateway-btn'
+                                    : 'sikshya-btn sikshya-btn--ghost sikshya-checkout-page__gateway-btn';
+                                $label = $gw_labels[$gid] ?? ucwords(str_replace('_', ' ', $gid));
+                                ?>
+                                <button type="button" class="<?php echo esc_attr($btn_class); ?>" data-sikshya-gateway="<?php echo esc_attr($gid); ?>">
+                                    <?php echo esc_html($label); ?>
+                                </button>
+                            <?php endforeach; ?>
                             <?php if (!$any_gw) : ?>
                                 <p class="sikshya-checkout-gateways__notice">
-                                    <?php esc_html_e('No payment method is available. Enable offline payment or add Stripe or PayPal under Sikshya → Settings → Payment.', 'sikshya'); ?>
+                                    <?php esc_html_e('No payment method is available. Enable and configure gateways under Sikshya → Settings → Payment.', 'sikshya'); ?>
                                 </p>
                             <?php endif; ?>
                         </div>
@@ -185,6 +195,15 @@ if (!is_user_logged_in()) {
                                 </li>
                             <?php endforeach; ?>
                         </ul>
+                        <?php
+                        /**
+                         * Render Pro / addon blocks inside the checkout summary, above totals
+                         * (advanced coupon notice, subscription terms, etc.).
+                         *
+                         * @param array<string, mixed> $co Checkout view model.
+                         */
+                        do_action('sikshya_checkout_summary_before_totals', $co);
+                        ?>
                         <div class="sikshya-checkout-page__summary-totals">
                             <div class="sikshya-checkout-page__summary-row">
                                 <span><?php esc_html_e('Subtotal', 'sikshya'); ?></span>

@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type ToolsTab = 'status' | 'export' | 'maintenance';
 
@@ -25,8 +25,8 @@ const TAB_ACTIVE =
 const TAB_IDLE =
   'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700';
 
-export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) {
-  const { config, title } = props;
+export function ToolsPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
+  const { config, title, embedded } = props;
   const { confirm } = useSikshyaDialog();
   const [tab, setTab] = useState<ToolsTab>('status');
   const [busy, setBusy] = useState(false);
@@ -167,13 +167,9 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) 
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle="Diagnostics, exports, and maintenance for administrators"
     >
@@ -327,6 +323,6 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string }) 
           </div>
         </div>
       ) : null}
-    </AppShell>
+    </EmbeddableShell>
   );
 }

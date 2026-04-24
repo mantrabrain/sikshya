@@ -16,9 +16,11 @@ $archive_url = get_post_type_archive_link(PostTypes::COURSE);
 if (!$archive_url) {
     $archive_url = home_url('/');
 }
+$search_on = \Sikshya\Services\CourseFrontendSettings::isCourseSearchEnabled();
 ?>
 
 <div class="sikshya-archive-toolbar">
+    <?php if ($search_on) : ?>
     <form class="sikshya-archive-toolbar__search" method="get" action="<?php echo esc_url($archive_url); ?>" role="search">
         <input type="hidden" name="post_type" value="<?php echo esc_attr(PostTypes::COURSE); ?>" />
         <?php if ($f['category_slug'] !== '') : ?>
@@ -43,6 +45,7 @@ if (!$archive_url) {
         />
         <button type="submit" class="sikshya-archive-toolbar__search-btn sikshya-button sikshya-button--primary sikshya-button--small"><?php esc_html_e('Search', 'sikshya'); ?></button>
     </form>
+    <?php endif; ?>
 
     <div class="sikshya-archive-toolbar__row">
         <form class="sikshya-archive-toolbar__sort" method="get" action="<?php echo esc_url($archive_url); ?>">

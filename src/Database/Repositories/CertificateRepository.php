@@ -46,6 +46,67 @@ class CertificateRepository
         return $row ?: null;
     }
 
+    public function countByUser(int $user_id): int
+    {
+        global $wpdb;
+
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d",
+                $user_id
+            )
+        );
+    }
+
+    /**
+     * @return array<int, object>
+     */
+    public function findByUserPaged(int $user_id, int $limit = 50, int $offset = 0): array
+    {
+        global $wpdb;
+
+        $limit = max(1, min(200, $limit));
+        $offset = max(0, $offset);
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE user_id = %d ORDER BY issued_date DESC LIMIT %d OFFSET %d",
+                $user_id,
+                $limit,
+                $offset
+            )
+        );
+    }
+
+    public function findByIdForUser(int $id, int $user_id): ?object
+    {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE id = %d AND user_id = %d LIMIT 1",
+                $id,
+                $user_id
+            )
+        );
+
+        return $row ?: null;
+    }
+
+    public function findById(int $id): ?object
+    {
+        global $wpdb;
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE id = %d LIMIT 1",
+                $id
+            )
+        );
+
+        return $row ?: null;
+    }
+
     /**
      * @param array<string, mixed> $data
      */
@@ -95,6 +156,48 @@ class CertificateRepository
             ['status' => sanitize_text_field($status)],
             ['id' => $id],
             ['%s'],
+            ['%d']
+        );
+    }
+
+    /**
+     * Partial update for issued certificate rows.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function update(int $id, array $data): bool
+    {
+        global $wpdb;
+
+        $fields = [];
+        $formats = [];
+
+        if (array_key_exists('download_url', $data)) {
+            $fields['download_url'] = esc_url_raw((string) $data['download_url']);
+            $formats[] = '%s';
+        }
+        if (array_key_exists('certificate_data', $data)) {
+            $fields['certificate_data'] = $data['certificate_data'] !== null ? wp_json_encode($data['certificate_data']) : null;
+            $formats[] = '%s';
+        }
+        if (array_key_exists('certificate_number', $data)) {
+            $fields['certificate_number'] = sanitize_text_field((string) $data['certificate_number']);
+            $formats[] = '%s';
+        }
+        if (array_key_exists('status', $data)) {
+            $fields['status'] = sanitize_text_field((string) $data['status']);
+            $formats[] = '%s';
+        }
+
+        if ($fields === []) {
+            return false;
+        }
+
+        return false !== $wpdb->update(
+            $this->table_name,
+            $fields,
+            ['id' => $id],
+            $formats,
             ['%d']
         );
     }

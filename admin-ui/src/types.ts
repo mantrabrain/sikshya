@@ -1,3 +1,6 @@
+/** Set from PHP when a nav target is plan-gated or the addon toggle is off (discoverability; routes stay visible). */
+export type NavItemBadge = 'off' | 'upgrade';
+
 export type NavItem = {
   id: string;
   label: string;
@@ -5,6 +8,8 @@ export type NavItem = {
   icon?: string;
   href?: string;
   external?: boolean;
+  /** Optional shell badge next to the label (`ReactAdminConfig::navigationItems`). */
+  badge?: NavItemBadge;
   children?: NavItem[];
 };
 
@@ -23,7 +28,7 @@ export type SikshyaLicensing = {
   /** True when the Sikshya Pro plugin file is loaded (may still be unlicensed). */
   proPluginInstalled?: boolean;
   /** Mirrors PHP {@see \Sikshya\Licensing\Pro::siteTier()}. */
-  siteTier: 'free' | 'starter' | 'growth' | 'agency' | 'business' | 'elite';
+  siteTier: 'free' | 'starter' | 'growth' | 'scale';
   /** Mirrors PHP {@see \Sikshya\Licensing\Pro::siteTierLabel()}. */
   siteTierLabel?: string;
   upgradeUrl: string;
@@ -31,9 +36,11 @@ export type SikshyaLicensing = {
   catalog: Array<{
     id: string;
     label: string;
-    tier: 'free' | 'starter' | 'pro' | 'elite';
+    tier: 'free' | 'starter' | 'pro' | 'scale';
     group: string;
     description?: string;
+    /** Long help shown in licensing UI; add-ons page uses REST `detailDescription`. */
+    detailDescription?: string;
   }>;
 };
 
@@ -46,6 +53,8 @@ export type SikshyaReactConfig = {
   /** Installed Sikshya Pro add-on semver when the Pro plugin is loaded (even if not yet licensed). */
   proPluginVersion?: string;
   restUrl: string;
+  /** WordPress core REST base (`wp/v2`) — respects plain permalinks. */
+  wpRestUrl?: string;
   restNonce: string;
   adminUrl: string;
   /** Full URL to `admin.php?page=sikshya` (use {@link appViewHref} for subpages). */
@@ -65,6 +74,15 @@ export type SikshyaReactConfig = {
   licensing?: SikshyaLicensing;
   /** Global banner row(s) under the top bar — not WordPress admin_notices. */
   shellAlerts?: ShellAlert[];
+  /** Optional branding overrides from the Pro White label addon. */
+  branding?: {
+    pluginName?: string;
+    logoUrl?: string;
+    topbarBg?: string;
+    topbarText?: string;
+    sidebarBg?: string;
+    sidebarText?: string;
+  };
 };
 
 declare global {
@@ -78,6 +96,8 @@ export type FieldConfig = {
   label?: string;
   description?: string;
   placeholder?: string;
+  /** First “Choose one…” row for selects; empty selection saves as `default` (see CourseBuilder FieldInput). */
+  select_placeholder?: string;
   required?: boolean;
   options?: Record<string, string>;
   default?: string | number;
@@ -91,10 +111,19 @@ export type FieldConfig = {
   layout?: 'full' | 'two_column' | 'three_column' | string;
   depends_on?: string;
   depends_value?: string;
+  /** Show only when `values[depends_on]` is one of these values (OR). */
+  depends_in?: string[];
   depends_all?: Array<{ on: string; value?: string }>;
   media_type?: string;
   validation?: string;
   sanitization?: string;
+  /** Optional UI hint from PHP — React-only widgets. */
+  widget?: string;
+  /** Optional Pro gating hints (used by React to lock fields in-place). */
+  required_addon?: string;
+  required_feature?: string;
+  required_addon_label?: string;
+  required_plan_label?: string;
 };
 
 export type TabFieldsMap = Record<string, Record<string, { section?: { title?: string; description?: string }; fields?: Record<string, FieldConfig> }>>;
@@ -112,6 +141,10 @@ export type WpPost = {
   author?: number;
   featured_media?: number;
   meta?: Record<string, unknown>;
+  /** Computed by Sikshya REST: template permalink + ?hash=... (HMAC), for public preview. */
+  sikshya_certificate_preview_url?: string;
+  /** Sikshya REST field for course lists (bundle vs regular). */
+  sikshya_course_type?: string;
   /** Term IDs on the post (edit context). */
   sikshya_course_category?: number[];
   _embedded?: {

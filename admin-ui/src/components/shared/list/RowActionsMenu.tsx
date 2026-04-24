@@ -14,6 +14,8 @@ export type RowActionButtonItem = {
   label: string;
   onClick: () => void;
   danger?: boolean;
+  /** Renders a non-interactive row (still visible so users see the action exists). */
+  disabled?: boolean;
 };
 
 export type RowActionItem = RowActionLinkItem | RowActionButtonItem;
@@ -119,10 +121,18 @@ export function RowActionsMenu({ items, ariaLabel }: { items: RowActionItem[]; a
             key={item.key}
             type="button"
             role="menuitem"
-            className={`block w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-800 ${
-              item.danger ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'
+            disabled={Boolean(item.disabled)}
+            className={`block w-full px-3 py-2 text-left text-sm ${
+              item.disabled
+                ? 'cursor-not-allowed text-slate-400 dark:text-slate-500'
+                : `hover:bg-slate-50 dark:hover:bg-slate-800 ${
+                    item.danger ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'
+                  }`
             }`}
             onClick={() => {
+              if (item.disabled) {
+                return;
+              }
               setOpen(false);
               item.onClick();
             }}

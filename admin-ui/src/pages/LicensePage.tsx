@@ -314,6 +314,7 @@ export function LicensePage(props: { config: SikshyaReactConfig; title: string }
       adminUrl={config.adminUrl}
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
+      branding={config.branding}
       title={title}
       subtitle="Sikshya Pro licensing and updates"
     >

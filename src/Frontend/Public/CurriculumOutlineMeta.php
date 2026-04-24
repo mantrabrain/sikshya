@@ -94,6 +94,9 @@ final class CurriculumOutlineMeta
             'text' => __('Text', 'sikshya'),
             'audio' => __('Audio', 'sikshya'),
             'document' => __('Document', 'sikshya'),
+            'live' => __('Live class', 'sikshya'),
+            'scorm' => __('SCORM', 'sikshya'),
+            'h5p' => __('H5P', 'sikshya'),
         ];
         $type_label = $type !== '' && isset($type_labels[$type]) ? $type_labels[$type] : '';
 

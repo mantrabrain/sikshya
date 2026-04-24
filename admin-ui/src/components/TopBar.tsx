@@ -1,4 +1,5 @@
 import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
+import type React from 'react';
 import { NavIcon } from './NavIcon';
 
 type Props = {
@@ -11,6 +12,10 @@ type Props = {
   toolsHref?: string;
   isDark: boolean;
   onToggleDark: () => void;
+  branding?: {
+    topbarBg?: string;
+    topbarText?: string;
+  };
 };
 
 export function TopBar({
@@ -23,11 +28,20 @@ export function TopBar({
   toolsHref,
   isDark,
   onToggleDark,
+  branding,
 }: Props) {
   const wpIndex = `${adminUrl.replace(/\/?$/, '/')}index.php`;
+  const topbarStyle: React.CSSProperties | undefined =
+    branding?.topbarBg || branding?.topbarText
+      ? {
+          backgroundColor: branding?.topbarBg || undefined,
+          color: branding?.topbarText || undefined,
+        }
+      : undefined;
 
   return (
     <header
+      style={topbarStyle}
       className={`sticky top-0 z-20 flex shrink-0 items-center border-b border-slate-200 bg-white px-6 dark:border-slate-800 dark:bg-slate-900 ${SHELL_HEADER_MIN_CLASS}`}
     >
       <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">

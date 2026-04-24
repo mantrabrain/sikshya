@@ -7,9 +7,12 @@ use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Addons\Addons;
 use Sikshya\Services\CertificateIssuanceService;
+use Sikshya\Services\CourseCompletionEvaluator;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\LearnerCurriculumHelper;
+use Sikshya\Services\AssignmentService;
 use Sikshya\Services\Settings;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -85,6 +88,14 @@ class LearnerRestRoutes
                 'permission_callback' => [$this, 'requireLoginOrJwt'],
             ],
         ]);
+
+        /**
+         * Allow enabled add-ons to register learner REST routes.
+         *
+         * @param string            $namespace
+         * @param LearnerRestRoutes $routes
+         */
+        do_action('sikshya_register_addon_learner_rest_routes', $namespace, $this);
     }
 
     /**
@@ -206,11 +217,24 @@ class LearnerRestRoutes
             return $this->error('attempts_exhausted', __('No quiz attempts remaining.', 'sikshya'), 400);
         }
 
-        $question_ids = get_post_meta($quiz_id, '_sikshya_quiz_questions', true);
-        if (!is_array($question_ids)) {
-            $question_ids = [];
+        $meta_ids = get_post_meta($quiz_id, '_sikshya_quiz_questions', true);
+        if (!is_array($meta_ids)) {
+            $meta_ids = [];
         }
-        $question_ids = array_map('intval', $question_ids);
+        $meta_ids = array_map('intval', $meta_ids);
+
+        $raw_client = isset($params['question_ids']) && is_array($params['question_ids']) ? $params['question_ids'] : [];
+        $question_ids = $this->resolveGradingQuestionIds($quiz_id, $meta_ids, $raw_client);
+        if ($question_ids === null) {
+            return $this->error(
+                'invalid_questions',
+                __('This quiz could not be graded. Please reload the page and try again.', 'sikshya'),
+                400
+            );
+        }
+        if ($question_ids === []) {
+            return $this->error('no_questions', __('This quiz has no questions.', 'sikshya'), 400);
+        }
 
         $total_points = 0.0;
         $earned_points = 0.0;
@@ -319,6 +343,54 @@ class LearnerRestRoutes
         return new WP_REST_Response(['ok' => true, 'message' => __('Unenrolled.', 'sikshya')], 200);
     }
 
+    public function getMyAssignments(WP_REST_Request $request): WP_REST_Response
+    {
+        $uid = get_current_user_id();
+        $course_id = (int) $request->get_param('course_id');
+
+        $courseService = $this->getCourseService();
+        if (!$courseService->isUserEnrolled($uid, $course_id)) {
+            return $this->error('not_enrolled', __('You are not enrolled in this course.', 'sikshya'), 403);
+        }
+
+        $svc = $this->assignmentService();
+        $rows = $svc->getUserAssignments($course_id, $uid);
+
+        return new WP_REST_Response(['ok' => true, 'data' => ['assignments' => $rows]], 200);
+    }
+
+    public function submitAssignment(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $assignment_id = isset($params['assignment_id']) ? (int) $params['assignment_id'] : 0;
+        $content = isset($params['content']) ? (string) $params['content'] : '';
+
+        // File uploads for REST can come in $_FILES; keep parity with legacy controller.
+        $files = $_FILES['attachments'] ?? [];
+
+        $svc = $this->assignmentService();
+        $result = $svc->submitAssignment($assignment_id, get_current_user_id(), $content, is_array($files) ? $files : []);
+        if (empty($result['success'])) {
+            return $this->error('assignment_submit_failed', (string) ($result['message'] ?? __('Could not submit assignment.', 'sikshya')), 400);
+        }
+
+        return new WP_REST_Response(['ok' => true, 'data' => $result['submission']], 200);
+    }
+
+    public function getMyAssignmentFeedback(WP_REST_Request $request): WP_REST_Response
+    {
+        $uid = get_current_user_id();
+        $assignment_id = (int) $request->get_param('assignment_id');
+        $svc = $this->assignmentService();
+        $row = $svc->getAssignmentFeedback($assignment_id, $uid);
+
+        return new WP_REST_Response(['ok' => true, 'data' => ['feedback' => $row]], 200);
+    }
+
     private function getCourseService(): CourseService
     {
         $svc = $this->plugin->getService('course');
@@ -327,6 +399,74 @@ class LearnerRestRoutes
         }
 
         return $svc;
+    }
+
+    private function assignmentService(): AssignmentService
+    {
+        $svc = $this->plugin->getService('assignment');
+        if (!$svc instanceof AssignmentService) {
+            throw new \RuntimeException('Assignment service unavailable');
+        }
+
+        return $svc;
+    }
+
+    /**
+     * Chooses which question posts to grade. The learn UI may show a Pro “question bank”
+     * draw; the client then sends the displayed ids in `question_ids` and Pro extends the
+     * allow-list. When no client list is sent, the quiz’s saved `_sikshya_quiz_questions`
+     * list is used (backwards compatible).
+     *
+     * @param int[] $meta_ids   Question ids stored on the quiz.
+     * @param mixed $raw_client `question_ids` from the JSON body.
+     * @return int[]|null      Resolved ids, or null if the client list is not allowed.
+     */
+    private function resolveGradingQuestionIds(int $quiz_id, array $meta_ids, $raw_client): ?array
+    {
+        if (!is_array($raw_client)) {
+            $raw_client = [];
+        }
+        $client_ids = array_values(
+            array_unique(
+                array_filter(
+                    array_map('absint', $raw_client),
+                    static function (int $i): bool {
+                        return $i > 0;
+                    }
+                )
+            )
+        );
+
+        $require_client = (bool) apply_filters('sikshya_quiz_require_client_question_ids', false, $quiz_id);
+        if ($require_client && $client_ids === []) {
+            return null;
+        }
+
+        if ($client_ids === []) {
+            return array_values(
+                array_filter(
+                    array_map('absint', $meta_ids),
+                    static function (int $i): bool {
+                        return $i > 0;
+                    }
+                )
+            );
+        }
+
+        $allowed = apply_filters('sikshya_quiz_allowed_qids', $meta_ids, $quiz_id);
+        if (!is_array($allowed) || $allowed === []) {
+            $allowed = $meta_ids;
+        }
+        $allowed = array_map('absint', $allowed);
+        $allowed = array_values(array_unique(array_filter($allowed, static fn (int $i) => $i > 0)));
+
+        foreach ($client_ids as $q) {
+            if (!in_array($q, $allowed, true)) {
+                return null;
+            }
+        }
+
+        return $client_ids;
     }
 
     /**
@@ -455,27 +595,41 @@ class LearnerRestRoutes
 
     private function syncEnrollmentProgress(int $user_id, int $course_id): void
     {
-        $lessons = LearnerCurriculumHelper::lessonIdsForCourse($course_id);
-        $total = count($lessons);
-        $completed = $this->progress->countCompletedLessons($user_id, $course_id);
-        $pct = $total > 0 ? round(100 * $completed / $total, 2) : 0.0;
-
         $row = $this->enrollment->findByUserAndCourse($user_id, $course_id);
         if (!$row) {
             return;
         }
 
+        $criteria = (string) Settings::get('course_completion_criteria', 'all_lessons');
+        $pct = CourseCompletionEvaluator::computeProgressPercent($user_id, $course_id, $this->progress);
+
         $patch = ['progress' => $pct];
-        if ($pct >= 100.0 && (string) $row->status !== 'completed') {
+
+        if ($criteria === 'manual') {
+            $this->enrollment->update((int) $row->id, $patch);
+
+            return;
+        }
+
+        $was_completed = (string) $row->status === 'completed';
+        if (
+            ! $was_completed
+            && CourseCompletionEvaluator::shouldMarkEnrollmentCompleted($pct, $criteria)
+        ) {
             $patch['status'] = 'completed';
             $patch['completed_date'] = current_time('mysql');
         }
 
         $this->enrollment->update((int) $row->id, $patch);
 
-        if ($pct >= 100.0) {
+        $now_completed = ! $was_completed && isset($patch['status']) && (string) $patch['status'] === 'completed';
+        if ($now_completed) {
             $issue = new CertificateIssuanceService();
-            $issue->issueIfEnabled($user_id, $course_id);
+            $issued_id = $issue->issueIfEnabled($user_id, $course_id);
+            do_action('sikshya_course_completed', $user_id, $course_id);
+            if ($issued_id) {
+                do_action('sikshya_certificate_issued', $user_id, $course_id, $issued_id);
+            }
         }
     }
 

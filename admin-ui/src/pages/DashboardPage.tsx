@@ -169,6 +169,7 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
       adminUrl={config.adminUrl}
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
+      branding={config.branding}
       title={title}
       subtitle="Course health, learners, and shortcuts in one place"
       pageActions={
@@ -447,13 +448,13 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
                   description="Search, filter, and bulk-manage your catalog."
                 />
                 <QuickActionCard
-                  href={appViewHref(config, 'lessons')}
+                  href={appViewHref(config, 'content-library', { tab: 'lessons' })}
                   icon="bookOpen"
                   title="Lessons"
                   description="Review and edit lesson content across your site."
                 />
                 <QuickActionCard
-                  href={appViewHref(config, 'quizzes')}
+                  href={appViewHref(config, 'content-library', { tab: 'quizzes' })}
                   icon="puzzle"
                   title="Quizzes"
                   description="Manage assessments tied to your courses."
@@ -468,7 +469,7 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
                 ) : null}
                 {dashboardLinks.payments ? (
                   <QuickActionCard
-                    href={appViewHref(config, 'payments')}
+                    href={appViewHref(config, 'sales', { tab: 'payments' })}
                     icon="columns"
                     title="Payments"
                     description="Review transactions and reconciliation."
@@ -510,7 +511,7 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
                 ) : null}
                 {dashboardLinks.payments ? (
                   <a
-                    href={appViewHref(config, 'payments')}
+                    href={appViewHref(config, 'sales', { tab: 'payments' })}
                     className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                   >
                     Payments

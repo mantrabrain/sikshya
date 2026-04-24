@@ -91,6 +91,9 @@ class Admin
         // Remove all other admin notices on Sikshya pages
         add_action('admin_head', [$this, 'removeOtherNoticesOnSikshyaPages']);
 
+        // Late strip: plugins often register `admin_notices` after `admin_init`.
+        add_action('current_screen', [$this, 'stripAdminNoticesOnReactShell'], 0);
+
         // Remove WordPress notices at action level
         add_action('admin_init', [$this, 'removeWordPressNoticesOnSikshyaPages'], 1);
 
@@ -104,13 +107,16 @@ class Admin
     public function addAdminMenus(): void
     {
         // Single top-level entry: all React areas are sub-routes (`view=`). Legacy `page=sikshya-*` URLs redirect in admin_init.
+        $menu_label = (string) apply_filters('sikshya_admin_menu_label', __('Sikshya LMS', 'sikshya'));
+        $menu_icon = (string) apply_filters('sikshya_admin_menu_icon', 'dashicons-welcome-learn-more');
+
         add_menu_page(
-            __('Sikshya LMS', 'sikshya'),
-            __('Sikshya LMS', 'sikshya'),
+            $menu_label,
+            $menu_label,
             'edit_posts',
             AdminPages::DASHBOARD,
             [$this, 'renderSikshyaApp'],
-            'dashicons-welcome-learn-more',
+            $menu_icon,
             5
         );
 
@@ -190,6 +196,16 @@ class Admin
                 position: absolute !important;
                 white-space: nowrap !important;
                 border: 0 !important;
+                display: none !important;
+            }
+            /* WordPress core / third-party admin_notices must not appear inside the React shell. */
+            body.sikshya-react-shell #wpbody-content > .notice,
+            body.sikshya-react-shell #wpbody-content > div.error,
+            body.sikshya-react-shell #wpbody-content > .updated,
+            body.sikshya-react-shell #wpbody-content > #message,
+            body.sikshya-react-shell #wpbody-content > .update-nag,
+            body.sikshya-react-shell #wpbody-content > .error,
+            body.sikshya-react-shell #wpbody-content > p.notice {
                 display: none !important;
             }
         </style>';
@@ -315,6 +331,18 @@ class Admin
             'add-course',
             'course-categories',
             'edit-content',
+            // Tabbed hubs (sidebar entries):
+            'content-library',
+            'people',
+            'certificates-hub',
+            'sales',
+            'email-hub',
+            'branding',
+            'integrations-hub',
+            'learning-rules',
+            // Standalone routes — kept whitelisted so deep links and in-app cross-links
+            // (e.g. row actions, "open in builder" links) keep working even though the
+            // sidebar now points at the hubs above.
             'lessons',
             'add-lesson',
             'quizzes',
@@ -331,12 +359,25 @@ class Admin
             'orders',
             'coupons',
             'gradebook',
+            'activity-log',
             'content-drip',
             'subscriptions',
             'course-team',
             'marketplace',
+            'bundles',
+            'prerequisites',
+            'social-login',
+            'white-label',
+            'crm-automation',
+            'calendar',
             'settings',
             'tools',
+            'addons',
+            'integrations',
+            'license',
+            'email',
+            'email-templates',
+            'email-template-edit',
         ];
 
         if (!in_array($view, $allowed, true)) {
@@ -347,7 +388,7 @@ class Admin
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
-        if ($view === 'settings' && !current_user_can('manage_options')) {
+        if (in_array($view, ['settings', 'email', 'email-templates', 'email-template-edit'], true) && !current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -379,6 +420,10 @@ class Admin
         }
 
         if ($view === 'marketplace' && !current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
+        }
+
+        if (in_array($view, ['license', 'addons', 'integrations'], true) && !current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -697,35 +742,62 @@ class Admin
      */
     public function removeWordPressNoticesOnSikshyaPages(): void
     {
-        if ($this->isSikshyaAdminPage()) {
-            // Store our handler before removing all actions
-            $our_handler = [$this, 'displayAdminNotices'];
+        $is_react_shell = self::isSikshyaReactAppRequest();
+        if (!$is_react_shell && !$this->isSikshyaAdminPage()) {
+            return;
+        }
 
-            // Remove all admin notice actions
+        // Unified React app: no WordPress admin notices (custom shell alerts only).
+        if ($is_react_shell) {
             remove_all_actions('admin_notices');
             remove_all_actions('all_admin_notices');
             remove_all_actions('network_admin_notices');
             remove_all_actions('user_admin_notices');
-
-            // Re-add only our Sikshya notice handler
-            add_action('admin_notices', $our_handler);
-
-            // Remove specific WordPress update notices
-            remove_action('admin_notices', 'update_nag', 3);
-            remove_action('network_admin_notices', 'update_nag', 3);
-            remove_action('admin_notices', 'maintenance_nag', 10);
-
-            // Remove file editing warnings
-            remove_action('admin_notices', 'wp_print_file_editor_templates');
-
-            // Remove plugin update nags
-            remove_action('load-update-core.php', 'wp_update_plugins');
-            remove_action('load-plugins.php', 'wp_update_plugins');
-            remove_action('load-update.php', 'wp_update_plugins');
-
-            // Clear any existing notices in the options
             delete_option('sikshya_admin_notices');
+
+            return;
         }
+
+        // Legacy Sikshya wp-admin screens (CPT lists, etc.).
+        $our_handler = [$this, 'displayAdminNotices'];
+
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+        remove_all_actions('network_admin_notices');
+        remove_all_actions('user_admin_notices');
+
+        add_action('admin_notices', $our_handler);
+
+        remove_action('admin_notices', 'update_nag', 3);
+        remove_action('network_admin_notices', 'update_nag', 3);
+        remove_action('admin_notices', 'maintenance_nag', 10);
+
+        remove_action('admin_notices', 'wp_print_file_editor_templates');
+
+        remove_action('load-update-core.php', 'wp_update_plugins');
+        remove_action('load-plugins.php', 'wp_update_plugins');
+        remove_action('load-update.php', 'wp_update_plugins');
+
+        delete_option('sikshya_admin_notices');
+    }
+
+    /**
+     * Strip every `admin_notices` callback on the React shell screen (runs after most registrations).
+     */
+    public function stripAdminNoticesOnReactShell($screen): void
+    {
+        if (!$screen instanceof \WP_Screen) {
+            return;
+        }
+
+        if ($screen->id !== 'toplevel_page_sikshya') {
+            return;
+        }
+
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+        remove_all_actions('network_admin_notices');
+        remove_all_actions('user_admin_notices');
     }
 
     /**

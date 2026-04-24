@@ -126,9 +126,25 @@ class CourseController
             wp_send_json_error(__('Invalid course ID', 'sikshya'));
         }
 
+        if (function_exists('sikshya_get_course_pricing')) {
+            $p = sikshya_get_course_pricing($course_id);
+            $paid = null !== $p['effective'] && (float) $p['effective'] > 0.00001;
+            if ($paid) {
+                $bypass = function_exists('sikshya_enroll_paid_course_as_admin') ? sikshya_enroll_paid_course_as_admin($course_id) : 0;
+                if ($bypass <= 0) {
+                    wp_send_json_error(__('This course requires purchase.', 'sikshya'));
+                }
+                wp_send_json_success([
+                    'message' => __('Enrolled without purchase (administrator access).', 'sikshya'),
+                    'enrollment_id' => $bypass,
+                    'redirect_url' => get_permalink($course_id),
+                ]);
+            }
+        }
+
         try {
             $enrollment_id = $this->courseService->enrollUser($user_id, $course_id, [
-                'payment_method' => sanitize_text_field($_POST['payment_method'] ?? ''),
+                'payment_method' => sanitize_text_field($_POST['payment_method'] ?? 'free'),
                 'amount' => floatval($_POST['amount'] ?? 0),
             ]);
 

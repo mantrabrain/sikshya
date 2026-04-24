@@ -407,7 +407,25 @@ class CourseController
                 return;
             }
 
-            // Enroll the user
+            // Paid courses: only allow admin bypass (same rules as frontend cart + settings).
+            if (function_exists('sikshya_get_course_pricing')) {
+                $p = sikshya_get_course_pricing($course_id);
+                $paid = null !== $p['effective'] && (float) $p['effective'] > 0.00001;
+                if ($paid) {
+                    $bypass = function_exists('sikshya_enroll_paid_course_as_admin') ? sikshya_enroll_paid_course_as_admin($course_id) : 0;
+                    if ($bypass <= 0) {
+                        wp_send_json_error(__('This course requires purchase.', 'sikshya'));
+                        return;
+                    }
+                    wp_send_json_success([
+                        'enrollment_id' => $bypass,
+                        'message' => __('Enrolled without purchase (administrator access).', 'sikshya'),
+                    ]);
+                    return;
+                }
+            }
+
+            // Enroll the user (free course)
             $enrollment_id = $this->enrollmentModel->enroll($user_id, $course_id);
 
             if (is_wp_error($enrollment_id)) {

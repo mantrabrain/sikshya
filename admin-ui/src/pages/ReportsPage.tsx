@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
+import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
+import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import { useAddonEnabled } from '../hooks/useAddons';
+import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
+import type { SikshyaReactConfig } from '../types';
 
 type ChartPayload = { labels?: string[]; counts?: number[] };
 
@@ -52,6 +56,21 @@ type QuizAttemptsResponse = {
   table_missing?: boolean;
 };
 
+type AdvancedExportResp = { ok?: boolean; csv?: string; filename?: string };
+
+type EnterpriseStatusResp = {
+  ok?: boolean;
+  enabled?: boolean;
+  recipient?: string;
+  day_of_week?: number;
+  hour?: number;
+  next_run_unix?: number;
+  next_run_iso?: string;
+  last_run_unix?: number;
+  last_run_iso?: string;
+  last_status?: string;
+};
+
 function StatCard(props: { label: string; value: string; hint?: string }) {
   const { label, value, hint } = props;
   return (
@@ -70,8 +89,95 @@ function bootSnapshot(config: SikshyaReactConfig): Snapshot {
   };
 }
 
-export function ReportsPage(props: { config: SikshyaReactConfig; title: string }) {
-  const { config, title } = props;
+export function ReportsPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
+  const { config, title, embedded } = props;
+  const reportsAdvFeature = isFeatureEnabled(config, 'reports_advanced');
+  const reportsAdvAddon = useAddonEnabled('reports_advanced');
+  const reportsAdvMode = resolveGatedWorkspaceMode(
+    reportsAdvFeature,
+    reportsAdvAddon.enabled,
+    reportsAdvAddon.loading
+  );
+  const reportsExportEnabled = reportsAdvMode === 'full';
+  const [exportBusy, setExportBusy] = useState(false);
+
+  const enterpriseFeature = isFeatureEnabled(config, 'enterprise_reports');
+  const enterpriseAddon = useAddonEnabled('enterprise_reports');
+  const enterpriseMode = resolveGatedWorkspaceMode(
+    enterpriseFeature,
+    enterpriseAddon.enabled,
+    enterpriseAddon.loading
+  );
+  const enterpriseEnabled = enterpriseMode === 'full';
+  const [enterpriseStatus, setEnterpriseStatus] = useState<EnterpriseStatusResp | null>(null);
+  const [enterpriseBusy, setEnterpriseBusy] = useState(false);
+  const [enterpriseSendBusy, setEnterpriseSendBusy] = useState(false);
+  const [enterpriseMsg, setEnterpriseMsg] = useState<string | null>(null);
+  const [enterpriseRecipients, setEnterpriseRecipients] = useState('');
+  const [enterpriseDow, setEnterpriseDow] = useState(1);
+  const [enterpriseHour, setEnterpriseHour] = useState(9);
+  const [enterpriseSaveBusy, setEnterpriseSaveBusy] = useState(false);
+
+  const refreshEnterprise = useCallback(async () => {
+    if (!enterpriseEnabled) return;
+    setEnterpriseBusy(true);
+    try {
+      const r = await getSikshyaApi().get<EnterpriseStatusResp>(SIKSHYA_ENDPOINTS.pro.enterpriseReportsStatus);
+      setEnterpriseStatus(r);
+      if (typeof r.recipient === 'string') setEnterpriseRecipients(r.recipient);
+      if (typeof r.day_of_week === 'number') setEnterpriseDow(r.day_of_week);
+      if (typeof r.hour === 'number') setEnterpriseHour(r.hour);
+    } catch (e) {
+      setEnterpriseMsg(e instanceof Error ? e.message : 'Could not load status');
+    } finally {
+      setEnterpriseBusy(false);
+    }
+  }, [enterpriseEnabled]);
+
+  const sendEnterprise = async () => {
+    if (!enterpriseEnabled) return;
+    setEnterpriseMsg(null);
+    setEnterpriseSendBusy(true);
+    try {
+      const r = await getSikshyaApi().post<{ ok?: boolean; message?: string }>(
+        SIKSHYA_ENDPOINTS.pro.enterpriseReportsRun,
+        {}
+      );
+      setEnterpriseMsg(r.message || 'Sent.');
+      void refreshEnterprise();
+    } catch (e) {
+      setEnterpriseMsg(e instanceof Error ? e.message : 'Failed to send');
+    } finally {
+      setEnterpriseSendBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (enterpriseEnabled && !enterpriseStatus) {
+      void refreshEnterprise();
+    }
+  }, [enterpriseEnabled, enterpriseStatus, refreshEnterprise]);
+
+  const saveEnterpriseSettings = async () => {
+    if (!enterpriseEnabled) return;
+    setEnterpriseMsg(null);
+    setEnterpriseSaveBusy(true);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.enterpriseReportsSettings, {
+        enabled: true,
+        recipients: enterpriseRecipients,
+        day_of_week: enterpriseDow,
+        hour: enterpriseHour,
+      });
+      setEnterpriseMsg('Saved scheduling settings.');
+      void refreshEnterprise();
+    } catch (e) {
+      setEnterpriseMsg(e instanceof Error ? e.message : 'Failed to save settings');
+    } finally {
+      setEnterpriseSaveBusy(false);
+    }
+  };
+
   const boot = useMemo(() => bootSnapshot(config), [config.initialData]);
   const [snap, setSnap] = useState<Snapshot>(() => boot);
   const [busy, setBusy] = useState(false);
@@ -138,6 +244,27 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string }
     void refreshAttempts(1);
   }, [attemptsSearch, attemptsStatus, attemptsUserId, attemptsCourseId, attemptsQuizId, refreshAttempts]);
 
+  const exportAdvancedCsv = async () => {
+    if (!reportsExportEnabled) return;
+    setExportBusy(true);
+    try {
+      const r = await getSikshyaApi().get<AdvancedExportResp>(SIKSHYA_ENDPOINTS.pro.reportsExport);
+      const csv = r.csv || '';
+      const name = r.filename || 'sikshya-advanced-report.csv';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportBusy(false);
+    }
+  };
+
   const { chart, stats } = snap;
   const labels = chart?.labels ?? [];
   const counts = chart?.counts ?? [];
@@ -147,13 +274,9 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string }
   const attemptsTotal = attemptsResp.total ?? 0;
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle="Enrollment overview and completion trends"
       pageActions={
@@ -371,6 +494,168 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string }
           <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">No quiz attempts recorded yet.</p>
         )}
       </div>
-    </AppShell>
+
+      <div className="mt-4">
+        <GatedFeatureWorkspace
+          mode={reportsAdvMode}
+          featureId="reports_advanced"
+          config={config}
+          featureTitle="Advanced analytics export"
+          featureDescription="Download a CSV snapshot of headline metrics (courses, enrollments, learners, revenue) for spreadsheets and offline planning."
+          previewVariant="generic"
+          addonEnableTitle="Advanced export is not enabled"
+          addonEnableDescription="Enable the Advanced analytics add-on to unlock the downloadable export alongside your on-screen charts."
+          canEnable={Boolean(reportsAdvAddon.licenseOk)}
+          enableBusy={reportsAdvAddon.loading}
+          onEnable={() => void reportsAdvAddon.enable()}
+          addonError={reportsAdvAddon.error}
+        >
+          <ListPanel>
+            <div className="flex flex-wrap items-start justify-between gap-3 p-6">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Spreadsheet export (Growth+)</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Download a CSV of key totals for Excel or Google Sheets. This does not replace the live charts above—it adds
+                  an offline-friendly summary.
+                </p>
+              </div>
+              {reportsExportEnabled ? (
+                <ButtonPrimary type="button" disabled={exportBusy} onClick={() => void exportAdvancedCsv()}>
+                  {exportBusy ? 'Preparing…' : 'Download CSV'}
+                </ButtonPrimary>
+              ) : null}
+            </div>
+          </ListPanel>
+        </GatedFeatureWorkspace>
+      </div>
+
+      <div className="mt-4">
+        <GatedFeatureWorkspace
+          mode={enterpriseMode}
+          featureId="enterprise_reports"
+          config={config}
+          featureTitle="Enterprise weekly summary"
+          featureDescription="Schedule a weekly summary email to the site administrator with revenue, enrollments, and completion totals."
+          previewVariant="generic"
+          addonEnableTitle="Enterprise reports is not enabled"
+          addonEnableDescription="Enable the Enterprise reports add-on to schedule the weekly summary email cron."
+          canEnable={Boolean(enterpriseAddon.licenseOk)}
+          enableBusy={enterpriseAddon.loading}
+          onEnable={() => void enterpriseAddon.enable()}
+          addonError={enterpriseAddon.error}
+        >
+          <ListPanel>
+            <div className="flex flex-wrap items-start justify-between gap-3 p-6">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Weekly summary email</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Sends to{' '}
+                  <span className="font-medium text-slate-700 dark:text-slate-200">
+                    {enterpriseStatus?.recipient || 'site admin email'}
+                  </span>
+                  {enterpriseStatus?.next_run_iso ? (
+                    <>
+                      . Next scheduled run:{' '}
+                      <span className="font-medium">{enterpriseStatus.next_run_iso}</span>
+                    </>
+                  ) : (
+                    '.'
+                  )}
+                </p>
+                {enterpriseStatus?.last_run_iso ? (
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Last run: <span className="font-medium">{enterpriseStatus.last_run_iso}</span>
+                    {enterpriseStatus.last_status ? (
+                      <>
+                        {' '}
+                        · status: <span className="font-medium">{enterpriseStatus.last_status}</span>
+                      </>
+                    ) : null}
+                  </p>
+                ) : null}
+                {enterpriseMsg ? (
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{enterpriseMsg}</p>
+                ) : null}
+              </div>
+              {enterpriseEnabled ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    onClick={() => void refreshEnterprise()}
+                    disabled={enterpriseBusy}
+                  >
+                    {enterpriseBusy ? 'Refreshing…' : 'Refresh status'}
+                  </button>
+                  <ButtonPrimary type="button" disabled={enterpriseSendBusy} onClick={() => void sendEnterprise()}>
+                    {enterpriseSendBusy ? 'Sending…' : 'Send a summary now'}
+                  </ButtonPrimary>
+                </div>
+              ) : null}
+            </div>
+
+            {enterpriseEnabled ? (
+              <div className="border-t border-slate-100 px-6 py-5 dark:border-slate-800">
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <label className="block text-sm lg:col-span-2">
+                    <span className="font-medium text-slate-900 dark:text-white">Recipients</span>
+                    <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                      Comma-separated emails. Leave empty to default to the WordPress admin email.
+                    </span>
+                    <input
+                      type="text"
+                      value={enterpriseRecipients}
+                      onChange={(e) => setEnterpriseRecipients(e.target.value)}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                      placeholder="ceo@school.edu, it@school.edu"
+                    />
+                  </label>
+
+                  <label className="block text-sm">
+                    <span className="font-medium text-slate-900 dark:text-white">Day</span>
+                    <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">Weekday (site timezone).</span>
+                    <select
+                      value={enterpriseDow}
+                      onChange={(e) => setEnterpriseDow(Number(e.target.value))}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                    >
+                      <option value={0}>Sunday</option>
+                      <option value={1}>Monday</option>
+                      <option value={2}>Tuesday</option>
+                      <option value={3}>Wednesday</option>
+                      <option value={4}>Thursday</option>
+                      <option value={5}>Friday</option>
+                      <option value={6}>Saturday</option>
+                    </select>
+                  </label>
+
+                  <label className="block text-sm">
+                    <span className="font-medium text-slate-900 dark:text-white">Hour</span>
+                    <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">24h time (site timezone).</span>
+                    <select
+                      value={enterpriseHour}
+                      onChange={(e) => setEnterpriseHour(Number(e.target.value))}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                    >
+                      {Array.from({ length: 24 }).map((_, i) => (
+                        <option key={i} value={i}>
+                          {String(i).padStart(2, '0')}:00
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <div className="flex items-end">
+                    <ButtonPrimary type="button" disabled={enterpriseSaveBusy} onClick={() => void saveEnterpriseSettings()}>
+                      {enterpriseSaveBusy ? 'Saving…' : 'Save schedule'}
+                    </ButtonPrimary>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </ListPanel>
+        </GatedFeatureWorkspace>
+      </div>
+    </EmbeddableShell>
   );
 }

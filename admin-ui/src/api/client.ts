@@ -16,10 +16,46 @@ export type HttpClient = {
   delete: <T>(path: string, init?: Omit<RequestInit, 'method' | 'body'>) => Promise<T>;
 };
 
-function normalizePath(base: string, path: string): string {
-  const b = base.replace(/\/$/, '');
-  const p = path.startsWith('/') ? path : `/${path}`;
-  return `${b}${p}`;
+function splitQuery(path: string): { pathname: string; query: string } {
+  const i = path.indexOf('?');
+  if (i === -1) return { pathname: path, query: '' };
+  return { pathname: path.slice(0, i), query: path.slice(i + 1) };
+}
+
+/**
+ * Join a WP REST base with a request path.
+ *
+ * Supports both:
+ * - Pretty REST: /wp-json/sikshya/v1
+ * - Plain REST:  /index.php?rest_route=/sikshya/v1
+ *
+ * In "plain" mode, extra query params MUST be added as real query params,
+ * not embedded inside `rest_route` (otherwise WP returns `rest_no_route`).
+ */
+function buildUrl(base: string, path: string): string {
+  const { pathname, query } = splitQuery(path);
+  const cleanPath = (pathname || '').trim();
+  const baseUrl = new URL(base, window.location.origin);
+
+  // Normalize incoming path.
+  const p = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+
+  if (baseUrl.searchParams.has('rest_route')) {
+    const rr0 = baseUrl.searchParams.get('rest_route') || '';
+    const rr = rr0.replace(/\/$/, '') + p;
+    baseUrl.searchParams.set('rest_route', rr);
+  } else {
+    baseUrl.pathname = `${baseUrl.pathname.replace(/\/$/, '')}${p}`;
+  }
+
+  if (query) {
+    const extra = new URLSearchParams(query);
+    for (const [k, v] of extra.entries()) {
+      baseUrl.searchParams.set(k, v);
+    }
+  }
+
+  return baseUrl.toString();
 }
 
 function parseTotalHeader(res: Response, name: string): number | null {
@@ -43,7 +79,7 @@ export function createHttpClient(
     init: RequestInit & { method?: HttpMethod } = {}
   ): Promise<{ res: Response; data: unknown }> {
     const method = (init.method || 'GET').toUpperCase() as HttpMethod;
-    const url = normalizePath(resolveBaseUrl(), path);
+    const url = buildUrl(resolveBaseUrl(), path);
 
     const headers: Record<string, string> = {
       'X-WP-Nonce': resolveNonce(),
@@ -79,7 +115,7 @@ export function createHttpClient(
     init: RequestInit & { method?: HttpMethod } = {}
   ): Promise<T> {
     const method = (init.method || 'GET').toUpperCase() as HttpMethod;
-    const url = normalizePath(resolveBaseUrl(), path);
+    const url = buildUrl(resolveBaseUrl(), path);
     const { res, data } = await performFetch(path, init);
 
     if (!res.ok) {
@@ -104,7 +140,7 @@ export function createHttpClient(
     init: Omit<RequestInit, 'method' | 'body'> = {}
   ): Promise<{ data: T } & WpCollectionMeta> {
     const method = 'GET' as HttpMethod;
-    const url = normalizePath(resolveBaseUrl(), path);
+    const url = buildUrl(resolveBaseUrl(), path);
     const { res, data } = await performFetch(path, { ...init, method });
 
     if (!res.ok) {

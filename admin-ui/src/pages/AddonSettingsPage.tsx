@@ -1,0 +1,302 @@
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { getSikshyaApi } from '../api';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
+import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
+import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { ListPanel } from '../components/shared/list/ListPanel';
+import { ButtonPrimary } from '../components/shared/buttons';
+import { SkeletonCard } from '../components/shared/Skeleton';
+import { useAsyncData } from '../hooks/useAsyncData';
+import { useAddonEnabled } from '../hooks/useAddons';
+import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
+import type { SikshyaReactConfig } from '../types';
+
+type FieldType = 'string' | 'password' | 'textarea' | 'bool' | 'int' | 'select' | 'csv';
+
+type FieldDef = {
+  type: FieldType;
+  label: string;
+  default: unknown;
+  help?: string;
+  choices?: Record<string, string> | null;
+  min?: number | null;
+  max?: number | null;
+};
+
+type Schema = Record<string, FieldDef>;
+
+type Resp = {
+  ok?: boolean;
+  addon?: string;
+  options?: Record<string, unknown>;
+  schema?: Schema;
+};
+
+export type AddonSettingsPageProps = {
+  config: SikshyaReactConfig;
+  /** Page title rendered in the AppShell header. */
+  title: string;
+  /** Addon id, e.g. "live_classes". */
+  addonId: string;
+  /** Short subtitle under the title. */
+  subtitle: string;
+  /** Headline shown in the gated workspace. */
+  featureTitle: string;
+  /** One-paragraph "what is this" description. */
+  featureDescription: string;
+  /** Optional list of "next steps" rendered below the form to guide the noob. */
+  nextSteps?: { label: string; href?: string; description?: string }[];
+  /** Render extra section above the schema form (e.g. provider hints). */
+  preformSection?: React.ReactNode;
+  /** When true, omit the AppShell wrapper (the parent owns the shell). */
+  embedded?: boolean;
+};
+
+/**
+ * Generic schema-driven settings page for addons that previously had no React UI.
+ * Backed by `/sikshya/v1/pro/addons/<id>/settings`.
+ */
+export function AddonSettingsPage(props: AddonSettingsPageProps) {
+  const { config, title, addonId, subtitle, featureTitle, featureDescription, nextSteps, preformSection, embedded } = props;
+  const featureOk = isFeatureEnabled(config, addonId);
+  const addon = useAddonEnabled(addonId);
+  const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
+  const enabled = mode === 'full';
+
+  const [opts, setOpts] = useState<Record<string, unknown>>({});
+  const [schema, setSchema] = useState<Schema>({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+
+  const loader = useCallback(async () => {
+    if (!enabled) return { ok: true, options: {}, schema: {} } as Resp;
+    return getSikshyaApi().get<Resp>(`/pro/addons/${encodeURIComponent(addonId)}/settings`);
+  }, [enabled, addonId]);
+  const { loading, data, error, refetch } = useAsyncData(loader, [enabled, addonId]);
+
+  useEffect(() => {
+    if (data?.options) setOpts({ ...data.options });
+    if (data?.schema) setSchema(data.schema);
+  }, [data]);
+
+  const onSave = async (e: FormEvent) => {
+    e.preventDefault();
+    setMsg(null);
+    setSaving(true);
+    try {
+      await getSikshyaApi().post(`/pro/addons/${encodeURIComponent(addonId)}/settings`, opts);
+      setMsg({ kind: 'success', text: 'Settings saved.' });
+      void refetch();
+    } catch (err) {
+      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Save failed' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const setField = (name: string, value: unknown) => setOpts((prev) => ({ ...prev, [name]: value }));
+
+  const renderField = (name: string, def: FieldDef) => {
+    const value = opts[name];
+    const inputClass =
+      'mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950';
+
+    switch (def.type) {
+      case 'bool':
+        return (
+          <label key={name} className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={Boolean(value)}
+              onChange={(e) => setField(name, e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+            <span>
+              <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
+              {def.help ? <span className="block text-xs text-slate-500 dark:text-slate-400">{def.help}</span> : null}
+            </span>
+          </label>
+        );
+      case 'select':
+        return (
+          <label key={name} className="block text-sm">
+            <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
+            <select
+              value={typeof value === 'string' ? value : ''}
+              onChange={(e) => setField(name, e.target.value)}
+              className={inputClass}
+            >
+              {Object.entries(def.choices || {}).map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            {def.help ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{def.help}</span> : null}
+          </label>
+        );
+      case 'int':
+        return (
+          <label key={name} className="block text-sm">
+            <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
+            <input
+              type="number"
+              min={def.min ?? undefined}
+              max={def.max ?? undefined}
+              value={typeof value === 'number' ? value : Number(value || 0)}
+              onChange={(e) => setField(name, parseInt(e.target.value, 10) || 0)}
+              className={`${inputClass} w-40`}
+            />
+            {def.help ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{def.help}</span> : null}
+          </label>
+        );
+      case 'textarea':
+        return (
+          <label key={name} className="block text-sm">
+            <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
+            <textarea
+              rows={6}
+              value={typeof value === 'string' ? value : ''}
+              onChange={(e) => setField(name, e.target.value)}
+              className={`${inputClass} font-mono text-xs`}
+            />
+            {def.help ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{def.help}</span> : null}
+          </label>
+        );
+      case 'password':
+        return (
+          <label key={name} className="block text-sm">
+            <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
+            <input
+              type="password"
+              autoComplete="new-password"
+              value={typeof value === 'string' ? value : ''}
+              onChange={(e) => setField(name, e.target.value)}
+              className={inputClass}
+            />
+            {def.help ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{def.help}</span> : null}
+          </label>
+        );
+      case 'csv':
+      case 'string':
+      default:
+        return (
+          <label key={name} className="block text-sm">
+            <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
+            <input
+              type="text"
+              value={typeof value === 'string' ? value : ''}
+              onChange={(e) => setField(name, e.target.value)}
+              className={inputClass}
+            />
+            {def.help ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{def.help}</span> : null}
+          </label>
+        );
+    }
+  };
+
+  // Group bool fields together at the bottom for visual scan; keep schema order otherwise.
+  const fieldEntries = Object.entries(schema);
+  const inputFields = fieldEntries.filter(([, d]) => d.type !== 'bool');
+  const boolFields = fieldEntries.filter(([, d]) => d.type === 'bool');
+
+  return (
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
+      title={title}
+      subtitle={subtitle}
+    >
+      <GatedFeatureWorkspace
+        mode={mode}
+        featureId={addonId}
+        config={config}
+        featureTitle={featureTitle}
+        featureDescription={featureDescription}
+        previewVariant="form"
+        addonEnableTitle={`${featureTitle} is not enabled`}
+        addonEnableDescription={`Turn on the ${featureTitle} add-on to surface configuration and start using its features.`}
+        canEnable={Boolean(addon.licenseOk)}
+        enableBusy={addon.loading}
+        onEnable={() => void addon.enable()}
+        addonError={addon.error}
+      >
+        <div className="space-y-6">
+          {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
+
+          {preformSection ? (
+            <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
+              {preformSection}
+            </div>
+          ) : null}
+
+          <ListPanel className="p-6">
+            {loading ? (
+              <SkeletonCard rows={5} />
+            ) : (
+              <form onSubmit={onSave} className="space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2">{inputFields.map(([n, d]) => renderField(n, d))}</div>
+
+                {boolFields.length > 0 ? (
+                  <div className="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                    {boolFields.map(([n, d]) => renderField(n, d))}
+                  </div>
+                ) : null}
+
+                <div className="flex items-center gap-3">
+                  <ButtonPrimary type="submit" disabled={saving}>
+                    {saving ? 'Saving…' : 'Save settings'}
+                  </ButtonPrimary>
+                  {msg ? (
+                    <span
+                      className={
+                        msg.kind === 'success'
+                          ? 'text-sm text-emerald-700 dark:text-emerald-300'
+                          : 'text-sm text-rose-700 dark:text-rose-300'
+                      }
+                    >
+                      {msg.text}
+                    </span>
+                  ) : null}
+                </div>
+              </form>
+            )}
+          </ListPanel>
+
+          {nextSteps && nextSteps.length > 0 ? (
+            <ListPanel className="p-6">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Next steps</h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Where to actually use this add-on once it's configured.
+              </p>
+              <ul className="mt-3 space-y-2 text-sm">
+                {nextSteps.map((step, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
+                      {i + 1}
+                    </span>
+                    <span className="flex-1">
+                      {step.href ? (
+                        <a
+                          href={step.href}
+                          className="font-medium text-indigo-600 hover:underline dark:text-indigo-300"
+                        >
+                          {step.label}
+                        </a>
+                      ) : (
+                        <span className="font-medium text-slate-900 dark:text-white">{step.label}</span>
+                      )}
+                      {step.description ? (
+                        <span className="block text-xs text-slate-500 dark:text-slate-400">{step.description}</span>
+                      ) : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </ListPanel>
+          ) : null}
+        </div>
+      </GatedFeatureWorkspace>
+    </EmbeddableShell>
+  );
+}

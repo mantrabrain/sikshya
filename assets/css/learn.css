@@ -1527,6 +1527,12 @@
   background: var(--sikshya-learn-surface-3);
 }
 
+.sikshya-pill--emphasis {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.32);
+  color: var(--sikshya-learn-accent, #2563eb);
+}
+
 .sikshya-progress {
   display: grid;
   gap: 10px;
@@ -1761,6 +1767,98 @@
   margin-bottom: 10px;
 }
 
+/* Quiz landing (before questions are revealed) */
+.sikshya-contentPanel--quizIntro {
+  padding: 0;
+  border-style: dashed;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), transparent 42%);
+}
+
+.sikshya-quizIntro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(28px, 5vw, 48px) clamp(18px, 4vw, 40px) clamp(32px, 5vw, 52px);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.sikshya-quizIntro__eyebrow {
+  margin: 0 0 8px;
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sikshya-learn-accent, #2563eb);
+}
+
+.sikshya-quizIntro__title {
+  margin: 0 0 12px;
+  font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-quizIntro__lead {
+  margin: 0 0 20px;
+  font-size: var(--sikshya-learn-fs-15);
+  line-height: 1.6;
+  color: var(--sikshya-learn-muted);
+  max-width: 46ch;
+}
+
+.sikshya-quizIntro__facts {
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+  max-width: 42ch;
+  text-align: left;
+}
+
+.sikshya-quizIntro__facts li {
+  position: relative;
+  padding: 10px 0 10px 28px;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.45;
+  color: var(--sikshya-learn-text);
+  border-bottom: 1px solid var(--sikshya-learn-border);
+}
+
+.sikshya-quizIntro__facts li:last-child {
+  border-bottom: 0;
+}
+
+.sikshya-quizIntro__facts li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 15px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sikshya-learn-accent, #2563eb);
+  opacity: 0.85;
+}
+
+.sikshya-quizIntro__cta {
+  min-width: min(100%, 220px);
+  padding: 12px 28px;
+  font-size: var(--sikshya-learn-fs-15);
+  font-weight: 800;
+}
+
+.sikshya-quizIntro__hint {
+  margin: 14px 0 0;
+  max-width: 40ch;
+  font-size: var(--sikshya-learn-fs-12);
+  line-height: 1.55;
+  color: var(--sikshya-learn-muted);
+}
+
 /* Quiz preview (quiz shell) */
 .sikshya-quizMock {
   margin-top: 16px;
@@ -1806,6 +1904,96 @@
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--sikshya-learn-border);
+}
+
+/* Quiz: advanced question types (learn form) */
+.sikshya-quizQ__textarea {
+  width: 100%;
+  min-height: 88px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--sikshya-learn-radius-10, 10px);
+  border: 1px solid var(--sikshya-learn-border);
+  font-size: var(--sikshya-learn-fs-14);
+  background: #fff;
+  color: var(--sikshya-learn-text);
+  box-sizing: border-box;
+}
+
+.sikshya-ordering {
+  margin: 8px 0 0;
+  padding-left: 1.25rem;
+  list-style: decimal;
+}
+
+.sikshya-ordering__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--sikshya-learn-border);
+}
+
+.sikshya-ordering__item:last-child {
+  border-bottom: 0;
+}
+
+.sikshya-ordering__text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--sikshya-learn-fs-14);
+}
+
+.sikshya-ordering__controls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.sikshya-matching {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sikshya-matching__row {
+  display: grid;
+  grid-template-columns: 1fr minmax(120px, 1fr);
+  gap: 12px;
+  align-items: center;
+  font-size: var(--sikshya-learn-fs-14);
+}
+
+.sikshya-matching__select {
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 10px;
+  border-radius: var(--sikshya-learn-radius-10, 10px);
+  border: 1px solid var(--sikshya-learn-border);
+  background: #fff;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-quizPager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0 16px;
+  padding: 10px 12px;
+  border-radius: var(--sikshya-learn-radius-10, 10px);
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid var(--sikshya-learn-border);
+}
+
+.sikshya-quizPager__label {
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 600;
+  color: var(--sikshya-learn-muted);
 }
 
 /* Tabs (Sikshya primary = active) */
@@ -2303,6 +2491,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sikshya-curriculumOutline__dripHint {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--sikshya-learn-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .sikshya-curriculumOutline__resourcesBtn {
   appearance: none;
   flex: 0 0 auto;
@@ -2354,6 +2551,125 @@
   outline: 2px solid var(--sikshya-learn-focus);
   outline-offset: 2px;
   box-shadow: var(--sikshya-learn-focus-shadow);
+}
+
+/* -------------------------------------------------------------------
+ * Pro: SCORM / H5P embeds (sikshya-pro — scorm_h5p_pro)
+ * ------------------------------------------------------------------- */
+.sikshya-learning-shell .sik-pro-embed {
+  margin: 0 0 var(--sikshya-learn-space-16);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: var(--sikshya-learn-radius-12);
+  background: var(--sikshya-learn-surface);
+  box-shadow: var(--sikshya-learn-shadow-sm);
+  overflow: hidden;
+}
+
+.sikshya-learning-shell .sik-pro-embed--scorm {
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.sikshya-learning-shell .sik-pro-embed--h5p {
+  border-color: rgba(37, 99, 235, 0.2);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.03) 0%, var(--sikshya-learn-surface) 32%);
+}
+
+.sikshya-learning-shell .sik-pro-embed__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sikshya-learn-space-8) var(--sikshya-learn-space-12);
+  padding: var(--sikshya-learn-space-10) var(--sikshya-learn-space-12);
+  background: var(--sikshya-learn-surface-2);
+  border-bottom: 1px solid var(--sikshya-learn-border);
+}
+
+.sikshya-learning-shell .sik-pro-embed--h5p .sik-pro-embed__toolbar {
+  background: rgba(37, 99, 235, 0.06);
+  border-bottom-color: rgba(37, 99, 235, 0.12);
+}
+
+.sikshya-learning-shell .sik-pro-embed__label {
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learning-shell .sik-pro-embed__sublabel {
+  margin-left: auto;
+  font-size: var(--sikshya-learn-fs-12);
+  font-weight: 500;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-learning-shell .sik-pro-embed--h5p .sik-pro-embed__label {
+  color: #1d4ed8;
+}
+
+.sikshya-learning-shell .sik-pro-embed__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sikshya-learn-space-6);
+  flex: 0 0 auto;
+}
+
+.sikshya-learning-shell .sik-pro-embed__hint {
+  margin: 0;
+  padding: var(--sikshya-learn-space-8) var(--sikshya-learn-space-12) 0;
+  font-size: var(--sikshya-learn-fs-12);
+  line-height: 1.45;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-learning-shell .sik-pro-embed__hint--h5p {
+  padding-bottom: var(--sikshya-learn-space-6);
+}
+
+.sikshya-learning-shell .sik-pro-embed__frame {
+  position: relative;
+  width: 100%;
+  min-height: min(70vh, 800px);
+  max-height: 85vh;
+  background: #0b1220;
+  margin-top: var(--sikshya-learn-space-8);
+}
+
+.sikshya-learning-shell .sik-pro-embed__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  background: #0b1220;
+}
+
+.sikshya-learning-shell .sik-pro-embed__h5p {
+  margin: 0;
+  padding: 0 var(--sikshya-learn-space-12) var(--sikshya-learn-space-12);
+  min-height: 320px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sikshya-learning-shell .sik-pro-embed__h5p iframe,
+.sikshya-learning-shell .sik-pro-embed__h5p object,
+.sikshya-learning-shell .sik-pro-embed__h5p embed {
+  max-width: 100%;
+  border-radius: var(--sikshya-learn-radius-8);
+}
+
+.sikshya-learning-shell .sik-pro-embed__h5p :where(.h5p-iframe-wrapper, .h5p-content) {
+  max-width: 100%;
+}
+
+@media (min-width: 64rem) {
+  .sikshya-learning-shell .sik-pro-embed__h5p {
+    min-height: 400px;
+  }
 }
 
 /* Reduce motion for long sessions */

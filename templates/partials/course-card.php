@@ -26,9 +26,19 @@ if (!isset($course) || !$course instanceof \WP_Post) {
     return;
 }
 
-$course_id = (int) $course->ID;
-$type = isset($type) ? (string) $type : 'default';
-$pricing = isset($pricing) && is_array($pricing) ? $pricing : ['price' => null, 'sale_price' => null, 'currency' => 'USD', 'on_sale' => false];
+$course_id   = (int) $course->ID;
+$type        = isset($type) ? (string) $type : 'default';
+$pricing     = isset($pricing) && is_array($pricing) ? $pricing : ['price' => null, 'sale_price' => null, 'currency' => 'USD', 'on_sale' => false];
+$is_bundle   = sanitize_key((string) get_post_meta($course_id, '_sikshya_course_type', true)) === 'bundle';
+$bundle_ids  = [];
+if ($is_bundle) {
+    $raw_ids = get_post_meta($course_id, '_sikshya_bundle_course_ids', true);
+    if (is_string($raw_ids) && $raw_ids !== '') {
+        $dec = json_decode($raw_ids, true);
+        $raw_ids = is_array($dec) ? $dec : [];
+    }
+    $bundle_ids = is_array($raw_ids) ? array_filter(array_map('intval', $raw_ids)) : [];
+}
 
 $price_num = $pricing['price'] ?? null;
 $sale_num = $pricing['sale_price'] ?? null;
@@ -38,9 +48,14 @@ $currency = (string) ($pricing['currency'] ?? 'USD');
 $effective_price = $pricing['effective'] ?? null;
 $is_paid_course = null !== $effective_price && (float) $effective_price > 0.00001;
 $is_user_enrolled = function_exists('sikshya_is_user_enrolled_in_course') && sikshya_is_user_enrolled_in_course($course_id);
+$can_admin_enroll_without_purchase = $is_paid_course && !$is_user_enrolled && is_user_logged_in()
+    && function_exists('sikshya_current_user_can_admin_enroll_without_purchase')
+    && sikshya_current_user_can_admin_enroll_without_purchase();
 $course_permalink = get_permalink($course_id);
 $course_permalink = is_string($course_permalink) ? $course_permalink : '';
 $learn_entry_url = function_exists('sikshya_course_learn_entry_url') ? sikshya_course_learn_entry_url($course_id) : $course_permalink;
+
+$cta_labels = \Sikshya\Services\CourseFrontendSettings::enrollmentButtonLabels();
 
 $course_price_ui = 'free';
 if ($on_sale && null !== $price_num && null !== $sale_num) {
@@ -82,6 +97,21 @@ $card_label = sprintf(
                 <?php esc_html_e('Featured', 'sikshya'); ?>
             </div>
         <?php endif; ?>
+
+        <?php if ($is_bundle) : ?>
+            <div class="sikshya-course-badge sikshya-course-badge--bundle">
+                <?php esc_html_e('Bundle', 'sikshya'); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php
+        /**
+         * Extra badges over the course card thumbnail (bundle membership, subscription only, etc.).
+         *
+         * @param int $course_id
+         */
+        do_action('sikshya_course_card_badges', $course_id);
+        ?>
     </div>
 
     <div class="sikshya-course-card-body">
@@ -117,7 +147,29 @@ $card_label = sprintf(
                 <?php echo esc_html(wp_trim_words($course->post_excerpt ?: $course->post_content, 14)); ?>
             </p>
 
-            <div class="sikshya-course-card-meta-actions<?php echo $has_counts ? '' : ' sikshya-course-card-meta-actions--action-only'; ?>">
+            <?php
+            /**
+             * Extra meta inside the card body (multi-instructor count, prerequisites pill, etc.).
+             *
+             * @param int $course_id
+             */
+            do_action('sikshya_course_card_meta', $course_id);
+            ?>
+
+            <?php if ($is_bundle && count($bundle_ids) > 0) : ?>
+                <p class="sikshya-course-card-bundle-hint">
+                    <?php
+                    $n_bundle = count($bundle_ids);
+                    echo esc_html(sprintf(
+                        /* translators: %d: number of courses */
+                        _n('Includes %d course', 'Includes %d courses', $n_bundle, 'sikshya'),
+                        $n_bundle
+                    ));
+                    ?>
+                </p>
+            <?php endif; ?>
+
+            <div class="sikshya-course-card-meta-actions<?php echo ($has_counts || $is_bundle) ? '' : ' sikshya-course-card-meta-actions--action-only'; ?>">
                 <div class="sikshya-course-card-actions">
                     <?php if ($is_user_enrolled) : ?>
                         <a class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action" href="<?php echo esc_url($learn_entry_url); ?>">
@@ -139,6 +191,16 @@ $card_label = sprintf(
                                 <span class="sikshya-button__label"><?php esc_html_e('Buy now', 'sikshya'); ?></span>
                             </button>
                         </form>
+                        <?php if (!empty($can_admin_enroll_without_purchase)) : ?>
+                            <form method="post" action="<?php echo esc_url($course_permalink); ?>" class="sikshya-course-card-action-form sikshya-course-card-action-form--admin-enroll">
+                                <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
+                                <input type="hidden" name="sikshya_cart_action" value="admin_enroll_bypass" />
+                                <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
+                                <button type="submit" class="sikshya-button sikshya-button--ghost sikshya-button--small sikshya-course-card-action">
+                                    <span class="sikshya-button__label"><?php esc_html_e('Enroll without purchase', 'sikshya'); ?></span>
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     <?php elseif (is_user_logged_in()) : ?>
                         <form method="post" action="<?php echo esc_url($course_permalink); ?>" class="sikshya-course-card-action-form">
                             <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
@@ -148,7 +210,7 @@ $card_label = sprintf(
                                 <span class="sikshya-button__icon" aria-hidden="true">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                                 </span>
-                                <span class="sikshya-button__label"><?php esc_html_e('Enroll now', 'sikshya'); ?></span>
+                                <span class="sikshya-button__label"><?php echo esc_html($cta_labels['free']); ?></span>
                             </button>
                         </form>
                     <?php else : ?>
@@ -156,7 +218,7 @@ $card_label = sprintf(
                             <span class="sikshya-button__icon" aria-hidden="true">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                             </span>
-                            <span class="sikshya-button__label"><?php esc_html_e('Enroll now', 'sikshya'); ?></span>
+                            <span class="sikshya-button__label"><?php echo esc_html($cta_labels['enrollment']); ?></span>
                         </a>
                     <?php endif; ?>
                 </div>

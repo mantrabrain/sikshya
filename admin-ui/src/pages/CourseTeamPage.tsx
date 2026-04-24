@@ -1,15 +1,15 @@
-import { useCallback, useState, type FormEvent } from 'react';
-import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
-import { AddonEnablePanel } from '../components/AddonEnablePanel';
-import { FeatureUpsell } from '../components/FeatureUpsell';
+import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
-import { getLicensing, isFeatureEnabled } from '../lib/licensing';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
 type InstructorRow = {
@@ -23,20 +23,68 @@ type InstructorRow = {
 type Resp = { ok?: boolean; instructors?: InstructorRow[] };
 type EarningsRow = { id: number; order_item_id: number; amount: number; status: string; created_at: string };
 type EarningsResp = { ok?: boolean; rows?: EarningsRow[]; total?: number };
+type UserOpt = { id: number; name: string };
 
 export function CourseTeamPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
-  const lic = getLicensing(config);
   const featureOk = isFeatureEnabled(config, 'multi_instructor');
   const addon = useAddonEnabled('multi_instructor');
-  const enabled = featureOk && Boolean(addon.enabled);
+  const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
+  const enabled = mode === 'full';
   const qCourse = config.query?.course_id;
   const [courseId, setCourseId] = useState(qCourse || '');
   const [newUserId, setNewUserId] = useState('');
+  const [userQuery, setUserQuery] = useState('');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [share, setShare] = useState('0');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [earningsUserId, setEarningsUserId] = useState('');
+
+  const debouncedUserQuery = useDebouncedValue(userQuery, 240);
+  const userSearch = useAsyncData(
+    async () => {
+      if (!enabled) return { data: [] as UserOpt[] };
+      if (!userDropdownOpen) return { data: [] as UserOpt[] };
+      const q = debouncedUserQuery.trim();
+      const params = new URLSearchParams({
+        per_page: '20',
+        page: '1',
+        context: 'edit',
+        orderby: 'name',
+        order: 'asc',
+        role: 'sikshya_instructor',
+      });
+      if (q) {
+        params.set('search', q);
+      }
+      const r = await getWpApi().getWithTotal<Array<{ id: number; name: string }>>(`/users?${params.toString()}`);
+      const out = Array.isArray(r.data) ? r.data : [];
+      return { data: out.map((u) => ({ id: u.id, name: u.name })) };
+    },
+    [enabled, debouncedUserQuery, userDropdownOpen]
+  );
+
+  const pickedUserLabel = useMemo(() => {
+    const uid = parseInt(newUserId, 10);
+    if (!Number.isFinite(uid) || uid <= 0) return null;
+    const hit = (userSearch.data?.data || []).find((u) => u.id === uid);
+    return hit ? hit.name : `User #${uid}`;
+  }, [newUserId, userSearch.data?.data]);
+
+  useEffect(() => {
+    if (!userDropdownOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      // Close if click is outside this input/list block.
+      if (!t.closest('[data-instructor-picker="1"]')) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [userDropdownOpen]);
 
   const earningsLoader = useCallback(async () => {
     if (!enabled) return { ok: true, rows: [] as EarningsRow[], total: 0 };
@@ -103,23 +151,20 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
       title={title}
       subtitle="Co-instructors, roles, and optional revenue share by course."
     >
-      {!featureOk ? (
-        <FeatureUpsell
-          title="Course staff"
-          description="Link co-instructors to a course, set revenue share, and keep payouts aligned with your commerce data."
-          licensing={lic}
-        />
-      ) : !enabled ? (
-        <AddonEnablePanel
-          title="Course staff is not enabled"
-          description="Enable the Multi-instructor addon to register course staff routes and unlock co-instructor management."
-          canEnable={Boolean(addon.licenseOk)}
-          enableBusy={addon.loading}
-          onEnable={() => void addon.enable()}
-          upgradeUrl={lic.upgradeUrl}
-          error={addon.error}
-        />
-      ) : (
+      <GatedFeatureWorkspace
+        mode={mode}
+        featureId="multi_instructor"
+        config={config}
+        featureTitle="Course staff"
+        featureDescription="Link co-instructors to a course, set revenue share, and keep payouts aligned with your commerce data."
+        previewVariant="table"
+        addonEnableTitle="Course staff is not enabled"
+        addonEnableDescription="Enable the Multi-instructor addon to register course staff routes and unlock co-instructor management."
+        canEnable={Boolean(addon.licenseOk)}
+        enableBusy={addon.loading}
+        onEnable={() => void addon.enable()}
+        addonError={addon.error}
+      >
         <>
           {error ? <ApiErrorPanel error={error} title="Could not load team" onRetry={() => refetch()} /> : null}
 
@@ -139,16 +184,63 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
                 />
               </label>
-              <label className="text-sm text-slate-600 dark:text-slate-400">
-                User ID (instructor)
+              <div className="text-sm text-slate-600 dark:text-slate-400" data-instructor-picker="1">
+                Instructor
                 <input
-                  required
-                  type="number"
-                  value={newUserId}
-                  onChange={(e) => setNewUserId(e.target.value)}
+                  type="text"
+                  value={userQuery}
+                  onChange={(e) => setUserQuery(e.target.value)}
+                  onFocus={() => setUserDropdownOpen(true)}
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
+                  placeholder="Search by name/email…"
                 />
-              </label>
+                {pickedUserLabel ? (
+                  <div className="mt-2 flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-950">
+                    <span className="min-w-0 truncate">
+                      Selected: <span className="font-semibold">{pickedUserLabel}</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="rounded-md px-2 py-1 text-slate-500 hover:bg-red-50 hover:text-red-700 dark:text-slate-300 dark:hover:bg-red-950/30 dark:hover:text-red-200"
+                      onClick={() => setNewUserId('')}
+                      title="Clear selected instructor"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                ) : null}
+                {userSearch.loading ? (
+                  <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Searching…</div>
+                ) : userSearch.error ? (
+                  <div className="mt-2 text-xs text-red-600 dark:text-red-400">Could not search users.</div>
+                ) : userDropdownOpen ? (
+                  <div className="mt-2 max-h-56 overflow-auto rounded-lg border border-slate-200 bg-white text-sm dark:border-slate-700 dark:bg-slate-950">
+                    {(userSearch.data?.data || []).length ? (
+                      (userSearch.data?.data || []).map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-900"
+                          onClick={() => {
+                            setNewUserId(String(u.id));
+                            setUserQuery(u.name);
+                            setUserDropdownOpen(false);
+                          }}
+                          title={`Select ${u.name}`}
+                        >
+                          <span className="min-w-0 truncate">{u.name}</span>
+                          <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400">#{u.id}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">
+                        {debouncedUserQuery.trim() ? 'No matches.' : 'Start typing to search, or pick from the list.'}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                <input type="hidden" value={newUserId} required />
+              </div>
               <label className="text-sm text-slate-600 dark:text-slate-400">
                 Revenue share %
                 <input
@@ -252,7 +344,7 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
             )}
           </div>
         </>
-      )}
+      </GatedFeatureWorkspace>
     </AppShell>
   );
 }

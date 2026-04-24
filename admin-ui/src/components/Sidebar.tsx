@@ -1,7 +1,24 @@
-import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import type React from 'react';
 import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
 import { NavIcon } from './NavIcon';
-import type { NavItem } from '../types';
+import type { NavItem, NavItemBadge } from '../types';
+
+function NavBadge({ badge }: { badge: NavItemBadge }) {
+  const isOff = badge === 'off';
+  return (
+    <span
+      className={`ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+        isOff
+          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+          : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-100'
+      }`}
+      title={isOff ? 'Addon is turned off in Addons' : 'Upgrade your plan to unlock'}
+    >
+      {isOff ? 'Off' : 'Upgrade'}
+    </span>
+  );
+}
 
 /** Map builder / nested routes to a Course submenu id so the Course group stays highlighted. */
 function effectiveNavPage(currentPage: string): string {
@@ -10,6 +27,9 @@ function effectiveNavPage(currentPage: string): string {
   }
   if (currentPage === 'add-lesson') {
     return 'lessons';
+  }
+  if (currentPage === 'email-template-edit') {
+    return 'email-templates';
   }
   return currentPage;
 }
@@ -50,6 +70,7 @@ function ChildLink({ item, currentPage }: { item: NavItem; currentPage: string }
         <NavIcon name={item.icon} className="h-4 w-4 text-slate-400 dark:text-slate-500" />
       </IconSlot>
       <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      {item.badge ? <NavBadge badge={item.badge} /> : null}
     </a>
   );
 }
@@ -121,6 +142,7 @@ function NavBlock({
         />
       </IconSlot>
       <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      {item.badge ? <NavBadge badge={item.badge} /> : null}
     </a>
   );
 }
@@ -135,9 +157,15 @@ type Props = {
   /** True when the Pro licence is active on this site. */
   proLicensed?: boolean;
   adminUrl: string;
+  branding?: {
+    pluginName?: string;
+    logoUrl?: string;
+    sidebarBg?: string;
+    sidebarText?: string;
+  };
 };
 
-export function Sidebar({ items, currentPage, version, proPluginVersion, proLicensed, adminUrl }: Props) {
+export function Sidebar({ items, currentPage, version, proPluginVersion, proLicensed, adminUrl, branding }: Props) {
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -153,13 +181,36 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
   }, [currentPage, items]);
 
   const wpHome = `${adminUrl.replace(/\/?$/, '/')}index.php`;
+  const title = branding?.pluginName?.trim() ? branding.pluginName.trim() : 'Sikshya';
+  const sidebarStyle = useMemo<React.CSSProperties | undefined>(() => {
+    if (!branding?.sidebarBg && !branding?.sidebarText) return undefined;
+    return {
+      backgroundColor: branding?.sidebarBg || undefined,
+      color: branding?.sidebarText || undefined,
+    };
+  }, [branding?.sidebarBg, branding?.sidebarText]);
 
   return (
-    <aside className="flex w-[260px] shrink-0 flex-col border-r border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <aside
+      style={sidebarStyle}
+      className="flex w-[260px] shrink-0 flex-col border-r border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900"
+    >
       <div
         className={`flex shrink-0 flex-col justify-center border-b border-slate-100 px-5 dark:border-slate-800 ${SHELL_HEADER_MIN_CLASS}`}
       >
-        <div className="text-lg font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">Sikshya</div>
+        <div className="flex items-center gap-3">
+          {branding?.logoUrl ? (
+            <img
+              src={branding.logoUrl}
+              alt=""
+              className="h-8 w-8 shrink-0 rounded-md object-contain object-center"
+              referrerPolicy="no-referrer"
+            />
+          ) : null}
+          <div className="min-w-0 text-lg font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">
+            {title}
+          </div>
+        </div>
         <div className="mt-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <span
             className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-slate-200/90 bg-slate-100/90 px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight text-slate-700 ring-1 ring-inset ring-slate-200/60 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700/80"

@@ -10,11 +10,12 @@ use Sikshya\Constants\PostTypes;
 final class CartTemplateData
 {
     /**
-     * @return array{lines: array<int, array{course_id: int, title: string, permalink: string, thumbnail: string, instructor: string, pricing: array}>, subtotal_hint: float, currency: string, urls: array{home: string, cart: string, checkout: string, courses: string}}
+     * @return array{lines: array<int, array{course_id: int, title: string, permalink: string, thumbnail: string, instructor: string, pricing: array}>, subtotal_hint: float, currency: string, bundle_id: int, urls: array{home: string, cart: string, checkout: string, courses: string}}
      */
     public static function build(): array
     {
         $ids = CartStorage::getCourseIds();
+        $bundle_id = CartStorage::getBundleId();
         $lines = [];
         $subtotal = 0.0;
         $currency = function_exists('sikshya_get_store_currency_code') ? sikshya_get_store_currency_code() : 'USD';
@@ -47,6 +48,7 @@ final class CartTemplateData
                 'lines' => $lines,
                 'subtotal_hint' => round($subtotal, 2),
                 'currency' => $currency,
+                'bundle_id' => $bundle_id,
                 'urls' => [
                     'home' => home_url('/'),
                     'cart' => PublicPageUrls::url('cart'),

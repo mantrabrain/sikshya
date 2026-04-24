@@ -3,6 +3,7 @@
 namespace Sikshya\Api;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Addons\Addons;
 use WP_REST_Server;
 
 /**
@@ -44,6 +45,71 @@ class Api
     public function registerRoutes(): void
     {
         $namespace = 'sikshya/v1';
+
+        /*
+         * WP Core REST (`/wp-json/wp/v2`) does not always include underscore-prefixed meta in collections,
+         * even when registered with `show_in_rest=true` (depends on context, fields filters, and plugins).
+         * The React admin course list needs a reliable flag to show the Bundle badge and filter bundles.
+         */
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::COURSE,
+            'sikshya_course_type',
+            [
+                'get_callback' => static function (array $obj): string {
+                    $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+                    if ($id <= 0) {
+                        return '';
+                    }
+                    return sanitize_key((string) get_post_meta($id, '_sikshya_course_type', true));
+                },
+                'schema' => [
+                    'description' => 'Sikshya course type (free, paid, subscription, bundle).',
+                    'type' => 'string',
+                    'context' => ['view', 'edit'],
+                ],
+            ]
+        );
+
+        // Certificate template public preview URL (base + hash).
+        // Hash is auto-generated server-side and stored in meta (so we can resolve preview by hash
+        // without scanning templates). Admin UI should never need a manual "save once".
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::CERTIFICATE,
+            'sikshya_certificate_preview_url',
+            [
+                'get_callback' => static function (array $obj): string {
+                    $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+                    if ($id <= 0) {
+                        return '';
+                    }
+                    $hash = (string) get_post_meta($id, '_sikshya_certificate_preview_hash', true);
+                    $hash = strtolower(preg_replace('/[^a-f0-9]/', '', $hash) ?? '');
+                    if (strlen($hash) !== 64) {
+                        // Auto-generate for existing templates that predate this feature.
+                        try {
+                            $hash = bin2hex(random_bytes(32));
+                        } catch (\Throwable $e) {
+                            $hash = bin2hex(openssl_random_pseudo_bytes(32) ?: random_bytes(32));
+                        }
+                        update_post_meta($id, '_sikshya_certificate_preview_hash', $hash);
+                    }
+
+                    $p = \Sikshya\Services\PermalinkService::get();
+                    $base = isset($p['rewrite_base_certificate']) ? \Sikshya\Services\PermalinkService::sanitizeSlug((string) $p['rewrite_base_certificate']) : 'certificates';
+
+                    if (\Sikshya\Services\PermalinkService::isPlainPermalinks()) {
+                        return home_url('/' . $base . '/?hash=' . rawurlencode($hash));
+                    }
+
+                    return user_trailingslashit(home_url('/' . $base . '/' . $hash));
+                },
+                'schema' => [
+                    'description' => 'Public certificate template preview URL (?hash=...)',
+                    'type' => 'string',
+                    'context' => ['view', 'edit'],
+                ],
+            ]
+        );
 
         // Courses
         register_rest_route($namespace, '/courses', [
@@ -231,6 +297,11 @@ class Api
         $admin_rest = new AdminRestRoutes($this->plugin);
         $admin_rest->register();
 
+        AdminLicenseRestRoutes::register();
+
+        $email_templates_rest = new AdminEmailTemplateRestRoutes($this->plugin);
+        $email_templates_rest->register();
+
         $auth_rest = new AuthRestRoutes($this->plugin);
         $auth_rest->register();
 
@@ -243,11 +314,16 @@ class Api
         $checkout_rest = new CheckoutRestRoutes($this->plugin);
         $checkout_rest->register();
 
-        $webhooks_rest = new WebhooksRestRoutes($this->plugin);
-        $webhooks_rest->register();
+        /**
+         * Allow enabled add-ons to register additional REST routes.
+         *
+         * Core stays generic: add-on boot classes should hook this and register routes.
+         */
+        do_action('sikshya_register_addon_rest_routes', $this->plugin);
 
-        $cert_public = new CertificatesPublicRoutes();
-        $cert_public->register();
+        // Addons enable/disable API for React admin.
+        $addons_rest = new AdminAddonsRestRoutes($this->plugin);
+        $addons_rest->register();
     }
 
     // --- Courses ---

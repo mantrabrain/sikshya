@@ -10,14 +10,21 @@ import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
 import { CourseBuilderSkeleton, SkeletonLine } from '../components/shared/Skeleton';
 import { renderContentEditor } from './content-editors/editors';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import {
+  AddContentTypePickerModal,
+  defaultTitleFor,
+  type ContentPickerType,
+} from '../components/shared/AddContentTypePickerModal';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
 import type { FieldConfig, NavItem, SikshyaReactConfig, TabFieldsMap } from '../types';
+import { DateTimePickerField } from '../components/shared/DateTimePickerField';
+import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
 const FIELD_INPUT =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
+  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
 const FIELD_LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const FIELD_HINT = 'mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400';
 
@@ -40,6 +47,8 @@ type BootstrapData = {
   values: Record<string, unknown>;
   users: UserOpt[];
   preview_url?: string;
+  /** Server: course post is a bundle (`_sikshya_course_type` = bundle). Builder hides non-essential tabs. */
+  is_bundle?: boolean;
 };
 
 type BuilderHeaderMeta = {
@@ -62,8 +71,12 @@ export type CurriculumContentItem = {
   };
 };
 
-/** Types available when adding from a chapter (questions are created inside / for a quiz, not here). */
-export type CurriculumAddableType = 'lesson_text' | 'lesson_video' | 'quiz' | 'assignment';
+/**
+ * Types available when adding from a chapter (questions are created inside /
+ * for a quiz, not here). Aliased to the shared `ContentPickerType` so the
+ * curriculum picker and the standalone Lessons-list picker share one vocabulary.
+ */
+export type CurriculumAddableType = ContentPickerType;
 
 export type CurriculumChapterTree = {
   id: number;
@@ -106,6 +119,102 @@ function cloneCurriculumTree(tree: CurriculumChapterTree[]): CurriculumChapterTr
     ...c,
     contents: c.contents.map((x) => ({ ...x })),
   }));
+}
+
+function MultiUserPickerField(props: {
+  id: string;
+  users: UserOpt[];
+  value: number[];
+  onChange: (next: number[]) => void;
+  placeholder?: string;
+  hint?: string;
+}) {
+  const { id, users, value, onChange, placeholder, hint } = props;
+  const [q, setQ] = useState('');
+
+  const selectedIds = useMemo(() => Array.from(new Set(value.filter((n) => Number.isFinite(n) && n > 0))), [value]);
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const selectedUsers = useMemo(
+    () => selectedIds.map((sid) => users.find((u) => u.id === sid)).filter(Boolean) as UserOpt[],
+    [selectedIds, users]
+  );
+
+  const filtered = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    const base = users.filter((u) => !selectedSet.has(u.id));
+    if (!query) return base.slice(0, 25);
+    return base
+      .filter((u) => u.name.toLowerCase().includes(query) || String(u.id).includes(query))
+      .slice(0, 25);
+  }, [q, users, selectedSet]);
+
+  return (
+    <div className="mt-1.5 space-y-2">
+      <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-600 dark:bg-slate-800">
+        {selectedUsers.length ? (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {selectedUsers.map((u) => (
+              <span
+                key={u.id}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-900/40 dark:text-slate-100"
+              >
+                <span className="max-w-[16rem] truncate">{u.name}</span>
+                <button
+                  type="button"
+                  aria-label={`Remove ${u.name}`}
+                  className="rounded-full px-1 text-slate-500 hover:bg-red-50 hover:text-red-700 dark:text-slate-300 dark:hover:bg-red-950/30 dark:hover:text-red-200"
+                  onClick={() => onChange(selectedIds.filter((x) => x !== u.id))}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="mb-2 text-sm text-slate-500 dark:text-slate-400">No instructors selected.</div>
+        )}
+
+        <input
+          id={id}
+          className={`${FIELD_INPUT} mt-0`}
+          placeholder={placeholder ?? 'Search users…'}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+        />
+
+        <div className="mt-2 max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950/40">
+          {filtered.length ? (
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filtered.map((u) => (
+                <li key={u.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50 dark:text-slate-100 dark:hover:bg-slate-800/50"
+                    onClick={() => {
+                      onChange([...selectedIds, u.id]);
+                      setQ('');
+                    }}
+                  >
+                    <span className="min-w-0 truncate">{u.name}</span>
+                    <span className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+                      #{u.id}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="px-3 py-3 text-sm text-slate-500 dark:text-slate-400">
+              {users.length === selectedIds.length ? 'All users selected.' : 'No matches.'}
+            </div>
+          )}
+        </div>
+      </div>
+      {hint ? <p className="text-xs text-slate-500 dark:text-slate-400">{hint}</p> : null}
+    </div>
+  );
 }
 
 /** Reorder top-level chapters by drag-and-drop. */
@@ -211,6 +320,10 @@ function fieldIsVisible(cfg: FieldConfig, values: Record<string, unknown>): bool
   }
   if (cfg.depends_on) {
     const p = values[cfg.depends_on];
+    if (Array.isArray(cfg.depends_in) && cfg.depends_in.length > 0) {
+      const cur = String(p ?? '');
+      return cfg.depends_in.some((v) => String(v) === cur);
+    }
     if (cfg.depends_value !== undefined) {
       return String(p ?? '') === String(cfg.depends_value);
     }
@@ -280,6 +393,37 @@ function FieldInput(props: {
   const { id, fieldKey, cfg, value, onChange, users, siteUrl, onSiblingFieldChange } = props;
   const t = cfg.type || 'text';
   const base = (siteUrl || '').replace(/\/?$/, '/');
+  const scalePickerEnabled = cfg.widget === 'grade_scale_picker';
+
+  const gradeScales = useAsyncData(async () => {
+    if (!scalePickerEnabled) {
+      return { ok: true, scales: [] as Array<{ id: number; name: string }> };
+    }
+    try {
+      const r = await getSikshyaApi().get<{ ok?: boolean; scales?: Array<{ id: number; name: string }> }>(
+        SIKSHYA_ENDPOINTS.pro.gradeScales
+      );
+      return { ok: true, scales: Array.isArray(r.scales) ? r.scales : [] };
+    } catch {
+      return { ok: true, scales: [] as Array<{ id: number; name: string }> };
+    }
+  }, [scalePickerEnabled]);
+
+  const subscriptionPlanPicker = cfg.widget === 'subscription_plan_picker';
+  const subscriptionPlans = useAsyncData(async () => {
+    if (!subscriptionPlanPicker) {
+      return { ok: true, plans: [] as Array<{ id: number; name?: string; amount?: number; currency?: string; interval_unit?: string }> };
+    }
+    try {
+      const r = await getSikshyaApi().get<{
+        ok?: boolean;
+        plans?: Array<{ id: number; name?: string; amount?: number; currency?: string; interval_unit?: string }>;
+      }>(SIKSHYA_ENDPOINTS.pro.plans);
+      return { ok: true, plans: Array.isArray(r.plans) ? r.plans : [] };
+    } catch {
+      return { ok: true, plans: [] as Array<{ id: number; name?: string; amount?: number; currency?: string; interval_unit?: string }> };
+    }
+  }, [subscriptionPlanPicker]);
 
   if (t === 'textarea') {
     return (
@@ -296,13 +440,30 @@ function FieldInput(props: {
 
   if (t === 'select') {
     const opts = cfg.options || {};
+    const optKeys = Object.keys(opts).map((x) => String(x));
+    const ph = cfg.select_placeholder;
+    const raw = value === undefined || value === null ? '' : String(value);
+    const selectValue = ph && (raw === '' || !optKeys.includes(raw)) ? '' : raw;
+    const defVal = cfg.default;
     return (
       <select
         id={id}
         className={FIELD_INPUT}
-        value={(value as string) ?? ''}
-        onChange={(e) => onChange(e.target.value)}
+        value={selectValue}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (ph && v === '') {
+            if (defVal !== undefined && defVal !== null) {
+              onChange(typeof defVal === 'number' ? defVal : String(defVal));
+            } else {
+              onChange('');
+            }
+            return;
+          }
+          onChange(v);
+        }}
       >
+        {ph ? <option value="">{ph}</option> : null}
         {Object.entries(opts).map(([k, lab]) => (
           <option key={k} value={k}>
             {lab}
@@ -312,18 +473,130 @@ function FieldInput(props: {
     );
   }
 
+  if (scalePickerEnabled) {
+    const raw = Number(value || 0) || 0;
+    const scales = gradeScales.data?.scales ?? [];
+    return (
+      <div className="mt-1.5">
+        <select
+          id={id}
+          className={FIELD_INPUT}
+          value={raw > 0 ? String(raw) : ''}
+          onChange={(e) => {
+            const next = e.target.value ? Number(e.target.value) : 0;
+            onChange(next);
+          }}
+        >
+          <option value="">{cfg.select_placeholder || 'Default scale'}</option>
+          {scales.map((s) => (
+            <option key={s.id} value={String(s.id)}>
+              {s.name || `Scale #${s.id}`}
+            </option>
+          ))}
+        </select>
+        {gradeScales.loading ? (
+          <p className={FIELD_HINT}>Loading grade scales…</p>
+        ) : scales.length === 0 ? (
+          <p className={FIELD_HINT}>No grade scales yet. Create one from the Grading page.</p>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (subscriptionPlanPicker && t === 'number') {
+    const raw = Number(value || 0) || 0;
+    const plans = subscriptionPlans.data?.plans ?? [];
+    const fmt = (n: number, cur?: string) => {
+      const c = (cur || 'USD').toUpperCase();
+      return `${c} ${n.toFixed(2)}`;
+    };
+    if (subscriptionPlans.loading) {
+      return <p className={FIELD_HINT}>Loading subscription plans…</p>;
+    }
+    if (plans.length === 0) {
+      return (
+        <div className="mt-1.5 space-y-1">
+          <input
+            id={id}
+            type="number"
+            min={cfg.min}
+            max={cfg.max}
+            step={cfg.step}
+            className={FIELD_INPUT}
+            placeholder={cfg.placeholder ?? 'Plan ID'}
+            title={cfg.description}
+            value={value === undefined || value === null ? '' : String(value)}
+            onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+          />
+          <p className={FIELD_HINT}>
+            Could not load plans (enable Sikshya Pro, Subscriptions add-on, and licensing) or none exist yet. Enter the
+            numeric plan ID from Sikshya Pro → Subscriptions.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div className="mt-1.5">
+        <select
+          id={id}
+          className={FIELD_INPUT}
+          value={raw > 0 ? String(raw) : ''}
+          onChange={(e) => {
+            const next = e.target.value ? Number(e.target.value) : 0;
+            onChange(next);
+          }}
+        >
+          <option value="">{cfg.select_placeholder || 'Select a plan…'}</option>
+          {plans.map((p) => (
+            <option key={p.id} value={String(p.id)}>
+              {(p.name || `Plan #${p.id}`) +
+                (p.amount != null && p.interval_unit
+                  ? ` — ${fmt(Number(p.amount), p.currency)} / ${p.interval_unit}`
+                  : '')}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+  // Bundle course multi-picker: cfg.widget === 'multi_course_picker', field type 'array'.
+  if (cfg.widget === 'multi_course_picker') {
+    // value is stored as int[] (PHP serialised → JSON decoded by WP REST → number[]).
+    // From the course builder REST endpoint it arrives as a JSON array string or a real array.
+    let currentIds: number[] = [];
+    if (Array.isArray(value)) {
+      currentIds = (value as unknown[]).map(Number).filter(Boolean);
+    } else if (typeof value === 'string' && value.trim().startsWith('[')) {
+      try { currentIds = (JSON.parse(value) as unknown[]).map(Number).filter(Boolean); } catch { /* noop */ }
+    }
+
+    return (
+      <div className="mt-2 space-y-2">
+        <MultiCoursePicker
+          value={currentIds}
+          onChange={(ids) => onChange(ids)}
+          title="Select courses for this bundle"
+          placeholder="Click to add courses to this bundle…"
+          hint={currentIds.length === 0 ? 'No courses selected yet.' : `${currentIds.length} course${currentIds.length === 1 ? '' : 's'} selected.`}
+        />
+        {currentIds.length > 0 ? (
+          <p className={FIELD_HINT}>
+            {`${currentIds.length} course${currentIds.length === 1 ? '' : 's'} included. Buyers get access to all of them with one purchase.`}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+
   if (t === 'date') {
     const raw = value === undefined || value === null ? '' : String(value);
     const iso = raw.length >= 10 ? raw.slice(0, 10) : raw;
     return (
-      <input
-        id={id}
-        type="date"
-        className={FIELD_INPUT}
-        placeholder={cfg.placeholder || 'YYYY-MM-DD'}
-        title={cfg.description || cfg.placeholder || 'Pick a date'}
+      <DateTimePickerField
+        kind="date"
         value={iso}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(v) => onChange(v)}
       />
     );
   }
@@ -427,29 +700,14 @@ function FieldInput(props: {
   if (t === 'user_select' && cfg.multiple) {
     const ids = Array.isArray(value) ? (value as number[]) : [];
     return (
-      <div className="mt-1.5 space-y-2">
-        <select
-          id={id}
-          multiple
-          size={Math.min(8, Math.max(4, users.length + 1))}
-          className={`${FIELD_INPUT} min-h-[8rem] py-2 dark:[color-scheme:dark]`}
-          value={ids.map(String)}
-          onChange={(e) => {
-            const selected = Array.from(e.target.selectedOptions).map((o) => Number(o.value));
-            onChange(selected);
-          }}
-        >
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </select>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Hold <kbd className="rounded border border-slate-300 bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:border-slate-600 dark:bg-slate-800">⌘</kbd> or{' '}
-          <kbd className="rounded border border-slate-300 bg-slate-100 px-1 py-0.5 font-mono text-[10px] dark:border-slate-600 dark:bg-slate-800">Ctrl</kbd> to select multiple instructors.
-        </p>
-      </div>
+      <MultiUserPickerField
+        id={id}
+        users={users}
+        value={ids}
+        onChange={(next) => onChange(next)}
+        placeholder="Search instructors…"
+        hint="Type to search, click to add, and use × to remove."
+      />
     );
   }
 
@@ -637,7 +895,15 @@ function BuilderFieldBlock(props: {
         {fcfg.label || fid}
         {fcfg.required ? <span className="text-red-500"> *</span> : null}
       </label>
-      {fcfg.description ? <p className={FIELD_HINT}>{fcfg.description}</p> : null}
+      <div className="min-h-[2.75rem]">
+        {fcfg.description ? (
+          <p className={FIELD_HINT}>{fcfg.description}</p>
+        ) : (
+          <p className={`${FIELD_HINT} invisible`} aria-hidden="true">
+            placeholder
+          </p>
+        )}
+      </div>
       <FieldInput
         id={`f-${fid}`}
         fieldKey={fid}
@@ -702,20 +968,21 @@ function AddChapterModal(props: {
       />
       <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
         <h2 id="sikshya-add-chapter-title" className="text-lg font-semibold text-slate-900 dark:text-white">
-          New chapter
+          Add a chapter
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Chapters group your lessons and quizzes. You can refine details in the chapter editor anytime.
+          A chapter is a section of your course (for example “Getting started” or “Week 2”). Put lessons and quizzes inside it from
+          the outline.
         </p>
         <label htmlFor="sikshya-new-chapter-title" className={`${FIELD_LABEL} mt-5`}>
-          Chapter title
+          Chapter name
         </label>
         <input
           ref={inputRef}
           id="sikshya-new-chapter-title"
           type="text"
           className={FIELD_INPUT}
-          placeholder="e.g. Introduction"
+          placeholder="e.g. Introduction or Module 1"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           onKeyDown={(e) => {
@@ -743,17 +1010,6 @@ function AddChapterModal(props: {
   );
 }
 
-const CURRICULUM_ADD_TYPES: Array<{
-  type: CurriculumAddableType;
-  label: string;
-  icon: 'bookOpen' | 'video' | 'puzzle' | 'clipboard';
-}> = [
-  { type: 'lesson_text', label: 'Text lesson', icon: 'bookOpen' },
-  { type: 'lesson_video', label: 'Video lesson', icon: 'video' },
-  { type: 'quiz', label: 'Quiz', icon: 'puzzle' },
-  { type: 'assignment', label: 'Assignment', icon: 'clipboard' },
-];
-
 /** Outline rows: hide legacy linked questions (LMS model: questions sit under quizzes). */
 function curriculumOutlineItems(contents: CurriculumContentItem[]): CurriculumContentItem[] {
   return contents.filter((c) => c.type !== 'question');
@@ -763,6 +1019,9 @@ function curriculumItemIcon(item: CurriculumContentItem): string {
   if (item.type === 'lesson') {
     const lt = String(item.meta?.lesson_type || '').toLowerCase();
     if (lt === 'video') return 'video';
+    if (lt === 'live') return 'schedule';
+    if (lt === 'scorm') return 'layers';
+    if (lt === 'h5p') return 'puzzle';
     return 'bookOpen';
   }
   const m: Record<CurriculumContentItem['type'], string> = {
@@ -801,7 +1060,10 @@ function curriculumItemRightMeta(item: CurriculumContentItem): string {
     const dur = (item.meta?.duration || '').trim();
     if (dur) bits.push(dur);
     if (lt === 'video') bits.push('Video');
-    if (lt === 'text') bits.push('Text');
+    else if (lt === 'live') bits.push('Live');
+    else if (lt === 'scorm') bits.push('SCORM');
+    else if (lt === 'h5p') bits.push('H5P');
+    else if (lt === 'text') bits.push('Text');
     return bits.join(' • ');
   }
   if (item.type === 'quiz') {
@@ -813,148 +1075,6 @@ function curriculumItemRightMeta(item: CurriculumContentItem): string {
     return pts > 0 ? `${pts} pts` : '';
   }
   return '';
-}
-
-function AddContentModal(props: {
-  open: boolean;
-  /** Target chapter (set from the outline — no picker in the modal). */
-  chapterId: number;
-  chapterTitle: string;
-  contentType: CurriculumAddableType;
-  onContentTypeChange: (t: CurriculumAddableType) => void;
-  title: string;
-  onTitleChange: (v: string) => void;
-  onClose: () => void;
-  onSubmit: () => void;
-  busy: boolean;
-}) {
-  const {
-    open,
-    chapterId,
-    chapterTitle,
-    contentType,
-    onContentTypeChange,
-    title,
-    onTitleChange,
-    onClose,
-    onSubmit,
-    busy,
-  } = props;
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const t = window.setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    }, 50);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open, onClose]);
-
-  if (!open) {
-    return null;
-  }
-
-  const defaultTitle = (() => {
-    const lab = CURRICULUM_ADD_TYPES.find((x) => x.type === contentType)?.label || 'Content';
-    return `New ${lab.toLowerCase()}`;
-  })();
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-4 backdrop-blur-[2px] sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="sikshya-add-content-title"
-    >
-      <button type="button" className="absolute inset-0 z-0 cursor-default" aria-label="Close" onClick={onClose} />
-      <div className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-        <h2 id="sikshya-add-content-title" className="text-lg font-semibold text-slate-900 dark:text-white">
-          Add curriculum content
-        </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Add a lesson, quiz, or assignment to this chapter. Quiz questions are added inside the quiz, not here.
-        </p>
-        {chapterTitle ? (
-          <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800/60 dark:text-slate-200">
-            <span className="font-medium text-slate-500 dark:text-slate-400">Chapter: </span>
-            <span className="font-semibold">{chapterTitle}</span>
-          </p>
-        ) : null}
-
-        <div className={`${FIELD_LABEL} mt-5`}>Content type</div>
-        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-4">
-          {CURRICULUM_ADD_TYPES.map((opt) => {
-            const active = contentType === opt.type;
-            return (
-              <button
-                key={opt.type}
-                type="button"
-                onClick={() => onContentTypeChange(opt.type)}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-semibold transition sm:text-sm ${
-                  active
-                    ? 'border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-400 dark:bg-brand-950/50 dark:text-brand-200'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200'
-                }`}
-              >
-                <NavIcon name={opt.icon} className="h-5 w-5" />
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <label htmlFor="sikshya-add-content-title-input" className={`${FIELD_LABEL} mt-5`}>
-          Title
-        </label>
-        <input
-          ref={inputRef}
-          id="sikshya-add-content-title-input"
-          type="text"
-          className={FIELD_INPUT}
-          placeholder={defaultTitle}
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              onSubmit();
-            }
-          }}
-        />
-
-        <div className="mt-6 flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            onClick={onClose}
-            disabled={busy}
-          >
-            Cancel
-          </button>
-          <ButtonPrimary
-            type="button"
-            className="px-4 py-2.5"
-            disabled={busy || !title.trim() || !chapterId}
-            onClick={onSubmit}
-          >
-            {busy ? 'Adding…' : 'Add content'}
-          </ButtonPrimary>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /** Short labels for the horizontal tab strip (full title stays in `title` tooltip). */
@@ -1060,7 +1180,7 @@ function BuilderSectionMenu({
               <button
                 type="button"
                 onClick={() => onSelectSection(key)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium transition-colors ${
+                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 ${
                   active ? BUILDER_NAV_ACTIVE : BUILDER_NAV_INACTIVE
                 }`}
               >
@@ -1180,6 +1300,10 @@ function CourseBuilderEditor({
   const [chapterModalBusy, setChapterModalBusy] = useState(false);
   const bootOnceRef = useRef(false);
 
+  useEffect(() => {
+    bootOnceRef.current = false;
+  }, [initialCid]);
+
   const siteUrl = config.siteUrl || '';
 
   const bootstrap = useAsyncData(async () => {
@@ -1199,7 +1323,17 @@ function CourseBuilderEditor({
     if (!d) {
       return;
     }
-    setValues({ ...d.values, course_id: d.course_id });
+    // Ensure course_type is always 'bundle' when the server confirms it,
+    // OR when force_bundle_ui is set in the URL (newly-created bundle, meta just saved).
+    const forcedBundle =
+      d.is_bundle ||
+      String(config.query?.force_bundle_ui ?? '') === '1' ||
+      config.page === 'bundle-builder';
+    setValues({
+      ...d.values,
+      course_id: d.course_id,
+      ...(forcedBundle ? { course_type: 'bundle' } : null),
+    });
     if (!bootOnceRef.current) {
       const req = String(config.query?.tab || '').trim();
       const nextTab = req && d.tabs.some((t) => t.id === req) ? req : d.tabs[0]?.id || 'course';
@@ -1279,6 +1413,16 @@ function CourseBuilderEditor({
   const tabs = bootstrap.data?.tabs || [];
   const users = bootstrap.data?.users || [];
 
+  useEffect(() => {
+    if (tabs.length === 0) {
+      return;
+    }
+    const ids = tabs.map((t) => t.id);
+    if (!ids.includes(activeTab)) {
+      setActiveTab(ids[0] || 'course');
+    }
+  }, [tabs, activeTab]);
+
   const sections = tabFields[activeTab] || {};
 
   useEffect(() => {
@@ -1338,7 +1482,8 @@ function CourseBuilderEditor({
       }
       const newId = res.data?.course_id;
       if (newId && newId !== courseId) {
-        navigateHref(appViewHref(config, 'add-course', { course_id: String(newId) }));
+        const view = isBundleUi ? 'bundle-builder' : 'add-course';
+        navigateHref(appViewHref(config, view, { course_id: String(newId) }));
         return;
       }
       setSaveSuccess(res.message || 'Saved.');
@@ -1350,12 +1495,24 @@ function CourseBuilderEditor({
     }
   };
 
+  // Three independent signals — any one is enough to engage bundle UI:
+  // 1. Server bootstrap confirmed the post has _sikshya_course_type = bundle.
+  // 2. The saved values already carry course_type = bundle (returned by bootstrap).
+  // 3. URL carries force_bundle_ui=1 (set by the create-modal immediately after creation,
+  //    persisted in the PHP query whitelist so it survives a hard reload).
+  const isBundleUi =
+    Boolean(bootstrap.data?.is_bundle) ||
+    String(values.course_type ?? '') === 'bundle' ||
+    String(config.query?.force_bundle_ui ?? '') === '1' ||
+    config.page === 'bundle-builder';
+
   const subtitle = useMemo(() => {
-    if (values.title) {
-      return String(values.title);
+    const base = values.title ? String(values.title) : initialCid ? `Course #${initialCid}` : 'New course';
+    if (isBundleUi) {
+      return values.title ? `${base} · bundle` : `Bundle #${initialCid}`;
     }
-    return initialCid ? `Course #${initialCid}` : 'New course';
-  }, [values.title, initialCid]);
+    return base;
+  }, [values.title, values.course_type, initialCid, isBundleUi]);
 
   const activeTabMeta = tabs.find((t) => t.id === activeTab);
 
@@ -1570,7 +1727,18 @@ function CourseBuilderEditor({
     try {
       const resolvedType: 'lesson' | 'quiz' | 'assignment' =
         addContentType === 'quiz' ? 'quiz' : addContentType === 'assignment' ? 'assignment' : 'lesson';
-      const lessonKind = addContentType === 'lesson_video' ? 'video' : addContentType === 'lesson_text' ? 'text' : '';
+      const lessonKind =
+        addContentType === 'lesson_video'
+          ? 'video'
+          : addContentType === 'lesson_live'
+          ? 'live'
+          : addContentType === 'lesson_scorm'
+          ? 'scorm'
+          : addContentType === 'lesson_h5p'
+          ? 'h5p'
+          : addContentType === 'lesson_text'
+          ? 'text'
+          : '';
 
       const created = await getSikshyaApi().post<{
         success: boolean;
@@ -1625,7 +1793,7 @@ function CourseBuilderEditor({
       userAvatarUrl={config.user.avatarUrl}
       title={title}
       subtitle={subtitle}
-      badge={courseId ? 'Editing' : 'Draft'}
+      badge={isBundleUi ? 'Bundle' : courseId ? 'Editing' : 'Draft'}
       pageActions={
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
           <a
@@ -1652,15 +1820,14 @@ function CourseBuilderEditor({
         onSubmit={() => void submitNewChapter()}
         busy={chapterModalBusy}
       />
-      <AddContentModal
+      <AddContentTypePickerModal
         open={addContentOpen}
-        chapterId={addContentChapterId}
-        chapterTitle={curriculumTree.find((c) => c.id === addContentChapterId)?.title ?? ''}
+        contextLabel="Chapter"
+        contextValue={curriculumTree.find((c) => c.id === addContentChapterId)?.title ?? ''}
         contentType={addContentType}
         onContentTypeChange={(t) => {
           setAddContentType(t);
-          const lab = CURRICULUM_ADD_TYPES.find((x) => x.type === t)?.label || 'Content';
-          setAddContentTitle(`New ${lab.toLowerCase()}`);
+          setAddContentTitle(defaultTitleFor(t));
         }}
         title={addContentTitle}
         onTitleChange={setAddContentTitle}
@@ -1669,7 +1836,12 @@ function CourseBuilderEditor({
             setAddContentOpen(false);
           }
         }}
-        onSubmit={() => void submitNewContent()}
+        onSubmit={() => {
+          if (addContentChapterId <= 0) {
+            return;
+          }
+          void submitNewContent();
+        }}
         busy={addContentBusy}
       />
       {saveSuccess && (
@@ -1702,7 +1874,6 @@ function CourseBuilderEditor({
       {bootstrap.error && (
         <ApiErrorPanel error={bootstrap.error} onRetry={bootstrap.refetch} title="Could not load course" />
       )}
-
       {!bootstrap.loading && !bootstrap.error && bootstrap.data && (
         <div className="rounded-xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="rounded-t-xl border-b border-slate-100 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-900/90">
@@ -1721,7 +1892,7 @@ function CourseBuilderEditor({
                       type="button"
                       title={tab.description ? `${tab.title} — ${tab.description}` : tab.title}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`relative flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-semibold transition sm:px-4 ${
+                      className={`relative flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 sm:px-4 ${
                         active
                           ? 'border-brand-600 text-brand-700 dark:border-brand-400 dark:text-brand-300'
                           : 'border-transparent text-slate-500 hover:border-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200'
@@ -2216,9 +2387,10 @@ function CourseBuilderEditor({
                         })}
                         {!curriculumTree.length && !curriculumError && (
                           <li className="rounded-xl border border-dashed border-slate-200 bg-white/50 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">No chapters yet</p>
-                            <p className="mx-auto mt-2 max-w-[14rem] text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                              Add a chapter, expand it, then use “Add content” inside that chapter.
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Start with a chapter</p>
+                            <p className="mx-auto mt-2 max-w-[16rem] text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                              Chapters are sections (like “Week 1”). Use “Add chapter” below, open the chapter, then “Add content”
+                              for lessons and quizzes.
                             </p>
                           </li>
                         )}
@@ -2254,6 +2426,11 @@ function CourseBuilderEditor({
 
             {/* Center: main editor */}
             <main className="order-1 min-w-0 bg-white px-3 py-5 sm:px-5 lg:order-none lg:px-6 lg:py-6 xl:px-8 dark:bg-slate-900">
+              {activeTab !== 'curriculum' && activeTabMeta?.description ? (
+                <div className="mb-6 rounded-xl border border-slate-100 bg-slate-50/90 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:bg-slate-800/45 dark:text-slate-300">
+                  {activeTabMeta.description}
+                </div>
+              ) : null}
               {activeTab === 'curriculum' ? (
                 <div className="w-full max-w-none">
                   {!curriculumSelection ? (
@@ -2263,11 +2440,11 @@ function CourseBuilderEditor({
                         className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600"
                       />
                       <p className="mt-4 text-sm font-medium text-slate-700 dark:text-slate-200">
-                        Select a chapter or content item
+                        Choose something from the outline
                       </p>
                       <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                        Lessons, quizzes, and assignments open here. Quiz questions are managed inside each quiz or from
-                        Questions.
+                        Click a chapter to edit its title, or click a lesson, quiz, or assignment to edit its content here. Add
+                        quiz questions inside each quiz — not from this empty state.
                       </p>
                     </div>
                   ) : curriculumSelection.kind === 'chapter' ? (

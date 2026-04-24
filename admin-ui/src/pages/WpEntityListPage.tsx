@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { EntityListView, StatusBadge } from '../components/shared/list';
 import { ButtonPrimary, LinkButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
@@ -7,92 +7,44 @@ import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { formatPostDate } from '../lib/formatPostDate';
-import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
+import type { SikshyaReactConfig, WpPost } from '../types';
 import { getWpApi } from '../api';
-import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { NavIcon } from '../components/NavIcon';
+import {
+  AddContentTypePickerModal,
+  type ContentPickerType,
+  defaultTitleFor,
+} from '../components/shared/AddContentTypePickerModal';
+import { CreateCertificateModal } from '../components/shared/CreateCertificateModal';
 
 function certificatePreviewSrc(r: WpPost): string | null {
   const url = r._embedded?.['wp:featuredmedia']?.[0]?.source_url;
   return typeof url === 'string' && url.length > 0 ? url : null;
 }
 
-function AddLessonTypeModal(props: {
-  open: boolean;
-  busy: boolean;
-  error: unknown;
-  onClose: () => void;
-  onCreate: (lessonType: 'text' | 'video') => void;
-}) {
-  const { open, busy, error, onClose, onCreate } = props;
-  if (!open) {
-    return null;
+/** Map a picker selection to the WordPress post type the new item lives under. */
+function postTypeForPickerType(t: ContentPickerType): 'sik_lesson' | 'sik_quiz' | 'sik_assignment' {
+  if (t === 'quiz') return 'sik_quiz';
+  if (t === 'assignment') return 'sik_assignment';
+  return 'sik_lesson';
+}
+
+/** Lesson sub-kind written into `_sikshya_lesson_type` meta (empty for non-lessons). */
+function lessonSubtypeForPickerType(t: ContentPickerType): '' | 'text' | 'video' | 'live' | 'scorm' | 'h5p' {
+  switch (t) {
+    case 'lesson_text':
+      return 'text';
+    case 'lesson_video':
+      return 'video';
+    case 'lesson_live':
+      return 'live';
+    case 'lesson_scorm':
+      return 'scorm';
+    case 'lesson_h5p':
+      return 'h5p';
+    default:
+      return '';
   }
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-4 backdrop-blur-[2px] sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="sikshya-add-lesson-type-title"
-    >
-      <button type="button" className="absolute inset-0 z-0 cursor-default" aria-label="Close" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-        <h2 id="sikshya-add-lesson-type-title" className="text-lg font-semibold text-slate-900 dark:text-white">
-          Add lesson
-        </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose the lesson type to start with.</p>
-        {error ? (
-          <div className="mt-4">
-            <ApiErrorPanel error={error} title="Could not create lesson" onRetry={() => void 0} />
-          </div>
-        ) : null}
-        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => onCreate('text')}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-4 text-left text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-          >
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-100">
-                <NavIcon name="bookOpen" className="h-4 w-4" />
-              </span>
-              <span>Text lesson</span>
-            </div>
-            <div className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-              Written content, notes, and resources.
-            </div>
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => onCreate('video')}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-4 text-left text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-          >
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-100">
-                <NavIcon name="video" className="h-4 w-4" />
-              </span>
-              <span>Video lesson</span>
-            </div>
-            <div className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-              Video URL plus transcript/notes.
-            </div>
-          </button>
-        </div>
-        <div className="mt-6 flex justify-end">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export function WpEntityListPage(props: {
@@ -100,8 +52,9 @@ export function WpEntityListPage(props: {
   title: string;
   subtitle: string;
   restBase: string;
+  embedded?: boolean;
 }) {
-  const { config, title, subtitle, restBase } = props;
+  const { config, title, subtitle, restBase, embedded } = props;
   const { navigateHref } = useAdminRouting();
 
   const newHref = appViewHref(config, 'edit-content', { post_type: restBase });
@@ -114,6 +67,50 @@ export function WpEntityListPage(props: {
   const [addLessonOpen, setAddLessonOpen] = useState(false);
   const [addLessonBusy, setAddLessonBusy] = useState(false);
   const [addLessonError, setAddLessonError] = useState<unknown>(null);
+  const [addLessonType, setAddLessonType] = useState<ContentPickerType>('lesson_text');
+  const [addLessonTitle, setAddLessonTitle] = useState<string>(defaultTitleFor('lesson_text'));
+  const [addCertificateOpen, setAddCertificateOpen] = useState(false);
+
+  const openAddLesson = () => {
+    setAddLessonError(null);
+    setAddLessonType('lesson_text');
+    setAddLessonTitle(defaultTitleFor('lesson_text'));
+    setAddLessonOpen(true);
+  };
+
+  const submitNewLesson = () => {
+    const name = addLessonTitle.trim();
+    if (!name) {
+      return;
+    }
+    const targetPostType = postTypeForPickerType(addLessonType);
+    const lessonKind = lessonSubtypeForPickerType(addLessonType);
+    setAddLessonBusy(true);
+    setAddLessonError(null);
+    void getWpApi()
+      .post<{ id: number }>(`/${targetPostType}`, {
+        title: name,
+        status: 'draft',
+        ...(lessonKind ? { meta: { _sikshya_lesson_type: lessonKind } } : null),
+      })
+      .then((created) => {
+        if (!created?.id) {
+          throw new Error('Could not create item.');
+        }
+        navigateHref(
+          appViewHref(config, 'edit-content', {
+            post_type: targetPostType,
+            post_id: String(created.id),
+          })
+        );
+      })
+      .catch((e) => {
+        setAddLessonError(e);
+      })
+      .finally(() => {
+        setAddLessonBusy(false);
+      });
+  };
 
   const columns: Column<WpPost>[] = useMemo(
     () => {
@@ -384,84 +381,81 @@ export function WpEntityListPage(props: {
 
   const postRowActions = useMemo(
     () => ({
-      buildLeadingItems: (r: WpPost) => [
-        {
-          key: 'edit',
-          label: 'Edit',
-          href: appViewHref(config, 'edit-content', { post_type: restBase, post_id: String(r.id) }),
-        },
-      ],
+      buildLeadingItems: (r: WpPost) => {
+        const items = [
+          {
+            key: 'edit',
+            label: 'Edit',
+            href: appViewHref(config, 'edit-content', { post_type: restBase, post_id: String(r.id) }),
+          },
+        ];
+
+        if (isCertificateList) {
+          const href = String(r.sikshya_certificate_preview_url || '').trim();
+          if (href) {
+            items.push({ key: 'preview', label: 'Preview', href, external: true as const });
+          }
+        }
+
+        return items;
+      },
+      // Certificate templates should “View” as a public hash link (preview hash stored in meta).
+      buildViewHref: (r: WpPost) => {
+        if (!isCertificateList) {
+          return r.link;
+        }
+        const href = String(r.sikshya_certificate_preview_url || '').trim();
+        return href || null;
+      },
     }),
-    [config, restBase]
+    [config, restBase, isCertificateList]
   );
 
   const searchPh = `Search ${title.toLowerCase()}…`;
   const pickerKey = `post_${restBase.replace(/[^a-z0-9_-]/gi, '_')}`;
+  const openAddCertificate = () => setAddCertificateOpen(true);
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle={subtitle}
       pageActions={
         isLessonList ? (
-          <ButtonPrimary
-            onClick={() => {
-              setAddLessonError(null);
-              setAddLessonOpen(true);
-            }}
-          >
-            + Add lesson
-          </ButtonPrimary>
+          <ButtonPrimary onClick={openAddLesson}>+ Add lesson</ButtonPrimary>
+        ) : isCertificateList ? (
+          <ButtonPrimary onClick={openAddCertificate}>+ Add new certificate</ButtonPrimary>
         ) : (
           <LinkButtonPrimary href={newHref}>+ Add new</LinkButtonPrimary>
         )
       }
     >
-      <AddLessonTypeModal
-        open={addLessonOpen}
-        busy={addLessonBusy}
-        error={addLessonError}
-        onClose={() => {
-          if (!addLessonBusy) {
-            setAddLessonOpen(false);
-          }
-        }}
-        onCreate={(lessonType) => {
-          setAddLessonBusy(true);
-          setAddLessonError(null);
-          void getWpApi()
-            .post<{ id: number }>(`/${restBase}`, {
-              title: lessonType === 'video' ? 'New video lesson' : 'New text lesson',
-              status: 'draft',
-              meta: {
-                _sikshya_lesson_type: lessonType,
-              },
-            })
-            .then((created) => {
-              if (!created?.id) {
-                throw new Error('Could not create lesson.');
-              }
-              navigateHref(
-                appViewHref(config, 'edit-content', {
-                  post_type: restBase,
-                  post_id: String(created.id),
-                })
-              );
-            })
-            .catch((e) => {
-              setAddLessonError(e);
-            })
-            .finally(() => {
-              setAddLessonBusy(false);
-            });
-        }}
-      />
+      {isCertificateList ? (
+        <CreateCertificateModal config={config} open={addCertificateOpen} onClose={() => setAddCertificateOpen(false)} />
+      ) : null}
+      {isLessonList ? (
+        <AddContentTypePickerModal
+          open={addLessonOpen}
+          heading="Add a lesson, quiz, or assignment"
+          description="Pick a type, give it a clear name, then open it to add the actual teaching material. Quiz questions are created inside the quiz editor after you add the quiz here."
+          contentType={addLessonType}
+          onContentTypeChange={(t) => {
+            setAddLessonType(t);
+            setAddLessonTitle(defaultTitleFor(t));
+          }}
+          title={addLessonTitle}
+          onTitleChange={setAddLessonTitle}
+          onClose={() => {
+            if (!addLessonBusy) {
+              setAddLessonOpen(false);
+            }
+          }}
+          onSubmit={submitNewLesson}
+          busy={addLessonBusy}
+          error={addLessonError}
+        />
+      ) : null}
       <EntityListView
         restBase={restBase}
         searchPlaceholder={searchPh}
@@ -481,14 +475,9 @@ export function WpEntityListPage(props: {
         emptyStateDescription="Try another status or search term, or add a new item."
         emptyStateAction={
           isLessonList ? (
-            <ButtonPrimary
-              onClick={() => {
-                setAddLessonError(null);
-                setAddLessonOpen(true);
-              }}
-            >
-              + Add lesson
-            </ButtonPrimary>
+            <ButtonPrimary onClick={openAddLesson}>+ Add lesson</ButtonPrimary>
+          ) : isCertificateList ? (
+            <ButtonPrimary onClick={openAddCertificate}>+ Add new certificate</ButtonPrimary>
           ) : (
             <LinkButtonPrimary href={newHref}>+ Add new</LinkButtonPrimary>
           )
@@ -503,6 +492,6 @@ export function WpEntityListPage(props: {
                 : ['ID', 'Title', 'Published', 'Updated', 'Status']
         }
       />
-    </AppShell>
+    </EmbeddableShell>
   );
 }

@@ -1,72 +1,187 @@
-# Sikshya: Legacy AJAX → REST route map
+# Sikshya REST route map
 
-WordPress REST base: `/wp-json/sikshya/v1/`
+WordPress REST base: **`/wp-json/sikshya/v1/`** (namespace `sikshya/v1`).
 
-Admin routes use cookie session + `X-WP-Nonce: wp_rest` (via `wp.apiFetch`).  
-Mobile uses `Authorization: Bearer <jwt>` from `POST /sikshya/v1/auth/login`.
+- **Auth (admin):** cookie session + `X-WP-Nonce` (e.g. `wp.apiFetch` / React admin).
+- **Auth (headless):** `Authorization: Bearer <jwt>` from `POST /sikshya/v1/auth/login` where applicable.
 
-## Course builder & curriculum (CourseAjax)
+## Gating (Pro + Addons)
+
+Routes registered by **`sikshya-pro`** are **always present** when the Pro plugin is loaded. Access is denied with **HTTP 403** instead of omitting the route (avoids ambiguous **404** for API clients).
+
+| Error code (`code` in JSON) | When |
+|-----------------------------|------|
+| `rest_forbidden` | Logged-in user lacks capability (`manage_sikshya`, `edit_sikshya_courses`, `manage_options`, etc.). |
+| `sikshya_pro_required` | Plan does not include the catalog feature (`Pro::feature( $id )` is false). |
+| `sikshya_addon_disabled` | Plan includes the feature, but the module is **off** in **Addons** (`Addons::isEnabled( $id )` is false). |
+
+React admin paths are centralized in `admin-ui/src/api/endpoints.ts` (`SIKSHYA_ENDPOINTS`).
+
+---
+
+## Free plugin (`sikshya`) — `src/Api/*`
+
+| Route | Methods | Source | Notes |
+|-------|---------|--------|-------|
+| `/course-builder/save` | POST | `AdminRestRoutes` | Course builder |
+| `/course-builder/bootstrap` | GET | `AdminRestRoutes` | `?course_id=` |
+| `/admin/course-chapters` | GET | `AdminRestRoutes` | |
+| `/admin/course-curriculum-tree` | GET | `AdminRestRoutes` | |
+| `/curriculum/content` | POST | `AdminRestRoutes` | Create content |
+| `/curriculum/content/link` | POST | `AdminRestRoutes` | |
+| `/curriculum/content-item` | POST | `AdminRestRoutes` | |
+| `/curriculum/chapter-order` | POST | `AdminRestRoutes` | |
+| `/curriculum/lesson-order` | POST | `AdminRestRoutes` | |
+| `/curriculum/outline-structure` | POST | `AdminRestRoutes` | |
+| `/curriculum/bulk-delete` | POST | `AdminRestRoutes` | |
+| `/curriculum/chapters` | POST | `AdminRestRoutes` | Create |
+| `/curriculum/chapters/(?P<id>\d+)` | GET, PUT, DELETE | `AdminRestRoutes` | |
+| `/taxonomies/course-category` | GET, POST | `AdminRestRoutes` | |
+| `/taxonomies/course-category/(?P<id>\d+)` | GET, PUT, DELETE | `AdminRestRoutes` | |
+| `/settings/schema` | GET | `AdminRestRoutes` | |
+| `/settings/values` | GET | `AdminRestRoutes` | `?tab=` |
+| `/settings/save` | POST | `AdminRestRoutes` | |
+| `/settings/reset` | POST | `AdminRestRoutes` | |
+| `/tools` | POST | `AdminRestRoutes` | Maintainer tools (`permissionTools`) |
+| `/admin/post-status-counts` | GET | `AdminRestRoutes` | |
+| `/admin/overview` | GET | `AdminRestRoutes` | Dashboard |
+| `/admin/licensing` | GET | `AdminRestRoutes` | Same catalog/gates as `window.sikshyaReact.licensing` |
+| `/admin/shell-meta` | GET | `AdminRestRoutes` | `?view=` — shell refresh |
+| `/admin/reports-snapshot` | GET | `AdminRestRoutes` | |
+| `/admin/enrollments` | GET | `AdminRestRoutes` | |
+| `/admin/quiz-attempts` | GET | `AdminRestRoutes` | |
+| `/admin/payments` | GET | `AdminRestRoutes` | |
+| `/admin/issued-certificates` | GET | `AdminRestRoutes` | |
+| `/admin/issued-certificates/revoke` | POST | `AdminRestRoutes` | |
+| `/admin/orders` | GET | `AdminRestRoutes` | |
+| `/admin/orders/(?P<id>\d+)/mark-paid` | POST | `AdminRestRoutes` | Offline / manual fulfill |
+| `/admin/coupons` | GET, POST | `AdminRestRoutes` | List + create |
+| `/admin/addons` | GET | `AdminAddonsRestRoutes` | Catalog + `enabled[]` |
+| `/admin/addons/(?P<id>…)/enable` | POST | `AdminAddonsRestRoutes` | 403 if plan lacks feature |
+| `/admin/addons/(?P<id>…)/disable` | POST | `AdminAddonsRestRoutes` | |
+| `/admin/license` | GET | `AdminLicenseRestRoutes` | Pro plugin |
+| `/admin/license/activate` | POST | `AdminLicenseRestRoutes` | |
+| `/admin/license/save` | POST | `AdminLicenseRestRoutes` | |
+| `/admin/license/deactivate` | POST | `AdminLicenseRestRoutes` | |
+| `/admin/license/check` | POST | `AdminLicenseRestRoutes` | |
+| `/courses`, `/courses/(?P<id>\d+)` | CRUD | `Api.php` | CPT-backed |
+| `/lessons`, `/lessons/(?P<id>\d+)` | CRUD | `Api.php` | |
+| `/quizzes`, `/quizzes/(?P<id>\d+)` | CRUD | `Api.php` | |
+| `/users`, `/users/(?P<id>\d+)` | CRUD | `Api.php` | |
+| `/enrollments`, `/enrollments/(?P<id>\d+)` | CRUD | `Api.php` | |
+| `/progress` | — | `Api.php` | |
+| `/certificates` | — | `Api.php` | |
+| `/payments` | — | `Api.php` | |
+| `/me/progress` | — | `LearnerRestRoutes` | |
+| `/me/lesson-complete` | — | `LearnerRestRoutes` | |
+| `/me/quiz-submit` | — | `LearnerRestRoutes` | |
+| `/me/unenroll` | — | `LearnerRestRoutes` | |
+| `/me/assignments` | — | `LearnerRestRoutes` | If `assignments_basic` addon |
+| `/me/assignment-submit` | — | `LearnerRestRoutes` | |
+| `/me/assignment-feedback` | — | `LearnerRestRoutes` | |
+| `/me/enroll` | — | `PublicRestRoutes` | |
+| `/checkout/session`, `/checkout/quote`, `/checkout/confirm` | — | `CheckoutRestRoutes` | |
+| `/webhooks/stripe`, `/webhooks/paypal` | POST | `WebhooksRestRoutes` | Gateway callbacks (`__return_true`) |
+| `/public/certificates/verify` | GET | `CertificatesPublicRoutes` | Public verify |
+| `/auth/login` | POST | `AuthRestRoutes` | JWT |
+
+---
+
+## Pro plugin (`sikshya-pro`) — `src/Rest/*`
+
+Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists. Each route checks **plan** (`Pro::feature`) and **addon** (`Addons::isEnabled`) in its `permission_callback` (see **Gating** above).
+
+**Scale**-tier paths use the **`/scale/`** prefix (`ScaleAutomationRoutes`, `ScaleMarketplaceRoutes`).
+
+| Route | Methods | `FeatureRegistry` id (primary) |
+|-------|---------|--------------------------------|
+| `/pro/drip-rules` | GET, POST | `content_drip` |
+| `/pro/subscriptions` | GET, POST | `subscriptions` |
+| `/pro/subscriptions/cancel` | POST | `subscriptions` |
+| `/pro/plans` | GET, POST | `subscriptions` |
+| `/pro/gradebook` | GET | `gradebook` |
+| `/pro/gradebook/export` | GET | `gradebook` |
+| `/pro/course-instructors` | GET, POST | `multi_instructor` |
+| `/pro/earnings` | GET | `multi_instructor` |
+| `/pro/certificates/advanced` | GET | `certificates_advanced` |
+| `/scale/vendors` | GET, POST | `marketplace_multivendor` |
+| `/scale/withdrawals` | POST | `marketplace_multivendor` |
+| `/scale/reports/commissions` | GET | `marketplace_multivendor` |
+| `/scale/automation/webhooks` | GET, POST | `automation_zapier_webhooks` |
+| `/scale/automation/webhooks/(?P<id>\d+)` | DELETE | `automation_zapier_webhooks` |
+| `/scale/public-api/keys` | GET, POST | `public_api_keys` |
+| `/scale/public-api/keys/(?P<id>\d+)` | DELETE | `public_api_keys` |
+| `/scale/public-api/ping` | GET | `public_api_keys` (validated inside callback; unauthenticated ping with Bearer key) |
+
+---
+
+## Cron (Pro)
+
+| Hook | Purpose | When unscheduled / skipped |
+|------|---------|----------------------------|
+| `sikshya_pro_drip_cron` | Content drip unlock grants | `DripCron::maybeSchedule()` clears the schedule when `content_drip` is not licensed or addon is off. |
+
+---
+
+## Legacy AJAX → REST (historical)
+
+Older admin code referred to AJAX actions; many are mapped below for migration reference.
+
+### Course builder & curriculum (CourseAjax)
 
 | Legacy `action` | Target REST route | Method |
 |----------------|-------------------|--------|
-| `sikshya_save_course_builder` | `/admin/course-builder/save` | POST |
-| `sikshya_save_course` | `/admin/course-builder/save` | POST |
-| `sikshya_create_content` | `/admin/curriculum/content` | POST |
-| `sikshya_link_content_to_chapter` | `/admin/curriculum/content/link` | POST |
+| `sikshya_save_course_builder` | `/course-builder/save` | POST |
+| `sikshya_save_course` | `/course-builder/save` | POST |
+| `sikshya_create_content` | `/curriculum/content` | POST |
+| `sikshya_link_content_to_chapter` | `/curriculum/content/link` | POST |
 | `sikshya_load_curriculum` | `/admin/curriculum` | GET `?course_id=` |
-| `sikshya_save_content_type` | `/admin/curriculum/content-item` | POST |
-| `sikshya_save_chapter_order` | `/admin/curriculum/chapter-order` | POST |
-| `sikshya_save_lesson_order` | `/admin/curriculum/lesson-order` | POST |
-| `sikshya_create_chapter` | `/admin/curriculum/chapters` | POST |
-| `sikshya_update_chapter` | `/admin/curriculum/chapters` | PUT |
-| `sikshya_load_chapter_data` | `/admin/curriculum/chapters/(?P<id>\\d+)` | GET |
-| `sikshya_bulk_delete_items` | `/admin/curriculum/bulk-delete` | POST |
+| `sikshya_save_content_type` | `/curriculum/content-item` | POST |
+| `sikshya_save_chapter_order` | `/curriculum/chapter-order` | POST |
+| `sikshya_save_lesson_order` | `/curriculum/lesson-order` | POST |
+| `sikshya_create_chapter` | `/curriculum/chapters` | POST |
+| `sikshya_update_chapter` | `/curriculum/chapters` | PUT |
+| `sikshya_load_chapter_data` | `/curriculum/chapters/(?P<id>\d+)` | GET |
+| `sikshya_bulk_delete_items` | `/curriculum/bulk-delete` | POST |
 | `sikshya_course_list` | `/admin/courses` | GET |
-| `sikshya_course_delete` | `/admin/courses/(?P<id>\\d+)` | DELETE |
+| `sikshya_course_delete` | `/admin/courses/(?P<id>\d+)` | DELETE |
 | Template/modal loaders | `/admin/templates/(?P<name>[a-z0-9_-]+)` | GET/POST (future) |
 
-## Categories (CategoriesAjax)
+### Categories (CategoriesAjax)
 
 | Legacy | Target |
 |--------|--------|
-| `sikshya_save_category` | `/admin/taxonomies/course-category` | POST |
-| `sikshya_delete_category` | `/admin/taxonomies/course-category/(?P<id>\\d+)` | DELETE |
+| `sikshya_save_category` | `/taxonomies/course-category` | POST |
+| `sikshya_delete_category` | `/taxonomies/course-category/(?P<id>\d+)` | DELETE |
 
-## Settings (SettingsAjax)
-
-| Legacy | Target |
-|--------|--------|
-| `sikshya_save_settings` | `/admin/settings` | POST |
-| `sikshya_load_settings_tab` | `/admin/settings/tab/(?P<tab>[a-z0-9_-]+)` | GET |
-| `sikshya_reset_settings` | `/admin/settings/reset` | POST |
-| `sikshya_export_settings` | `/admin/settings/export` | GET |
-| `sikshya_import_settings` | `/admin/settings/import` | POST |
-
-## Lessons admin (LessonController / LessonAjax)
+### Settings (SettingsAjax)
 
 | Legacy | Target |
 |--------|--------|
-| `sikshya_lesson_*` | `/admin/lessons` CRUD | |
-| `sikshya_save_lesson` etc. | `/admin/lessons` | POST/PUT/DELETE |
+| `sikshya_save_settings` | `/settings/save` | POST |
+| `sikshya_load_settings_tab` | `/settings/values?tab=` | GET |
+| `sikshya_reset_settings` | `/settings/reset` | POST |
+| `sikshya_export_settings` | `/settings/export` | GET |
+| `sikshya_import_settings` | `/settings/import` | POST |
 
-## Licensing (React admin / refresh)
+### Licensing (React admin / refresh)
 
 | Purpose | Target | Method |
-|--------|--------|--------|
-| Feature catalog + Pro gates (same as `window.sikshyaReact.licensing`) | `/admin/licensing` | GET |
+|---------|--------|--------|
+| Feature catalog + Pro gates | `/admin/licensing` | GET |
 
-## List tables / misc
+### List tables / misc
 
 | Legacy | Target |
 |--------|--------|
 | `sikshya_delete_course` (list-table.js) | `/admin/courses/{id}` | DELETE |
-| `sikshya_tools_action` | `/admin/tools` | POST |
+| `sikshya_tools_action` | `/tools` | POST |
 | `sikshya_user_action` | `/admin/users` | POST |
 | `sikshya_report_action` | `/admin/reports` | POST |
 | `sikshya_admin_action` | `/admin/misc` | POST |
 | `sikshya_load_table_data` | `/admin/datatable` | POST |
 
-## Frontend (CourseController / FrontendAjax)
+### Frontend (CourseController / FrontendAjax)
 
 | Legacy | Target |
 |--------|--------|
@@ -74,6 +189,10 @@ Mobile uses `Authorization: Bearer <jwt>` from `POST /sikshya/v1/auth/login`.
 | `sikshya_search_courses` | `/courses?search=` | GET |
 | `sikshya_frontend_action` | `/public/*` | per sub-action |
 
-## Controllers/CourseController (duplicate REST)
+### Controllers/CourseController (duplicate REST)
 
 Consolidate under `src/Api/Api.php`; remove duplicate `register_rest_route` from `src/Controllers/CourseController.php` when unified.
+
+---
+
+**Maintenance:** Update this file when adding or removing `register_rest_route` registrations, especially under `sikshya-pro`. See `docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md` Part H.

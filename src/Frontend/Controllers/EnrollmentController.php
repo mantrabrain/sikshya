@@ -129,7 +129,9 @@ class EnrollmentController
         );
         $max_students = is_numeric($max_raw) ? (int) $max_raw : 0;
         if ($max_students > 0) {
-            $current_enrollments = $this->plugin->getService('enrollment')->getCourseEnrollmentsCount($course_id);
+            $course_svc = $this->plugin->getService('course');
+            $stats = $course_svc instanceof \Sikshya\Services\CourseService ? $course_svc->getCourseStats($course_id) : [];
+            $current_enrollments = isset($stats['total_enrollments']) ? (int) $stats['total_enrollments'] : 0;
             if ($current_enrollments >= $max_students) {
                 wp_send_json_error(__('Course enrollment limit reached.', 'sikshya'));
             }
@@ -138,13 +140,21 @@ class EnrollmentController
         $pricing = sikshya_get_course_pricing($course_id);
         $final_price = $pricing['effective'];
 
+        $courseService = $this->plugin->getService('course');
+        if (!$courseService instanceof \Sikshya\Services\CourseService) {
+            wp_send_json_error(__('Enrollment is unavailable.', 'sikshya'));
+        }
+
         // If course is free, enroll directly
         if (!$final_price || $final_price == 0) {
-            $enrollment_id = $this->plugin->getService('enrollment')->enrollUser($course_id, $user_id, [
-                'payment_method' => 'free',
-                'amount' => 0,
-                'status' => 'completed',
-            ]);
+            try {
+                $enrollment_id = $courseService->enrollUser($user_id, $course_id, [
+                    'payment_method' => 'free',
+                    'amount' => 0,
+                ]);
+            } catch (\Exception $e) {
+                wp_send_json_error($e->getMessage());
+            }
 
             if ($enrollment_id) {
                 wp_send_json_success([
@@ -154,6 +164,18 @@ class EnrollmentController
                 ]);
             } else {
                 wp_send_json_error(__('Failed to enroll in course.', 'sikshya'));
+            }
+        }
+
+        // Paid course: optional admin bypass (same rules as cart POST handler).
+        if (function_exists('sikshya_enroll_paid_course_as_admin')) {
+            $bypass_id = sikshya_enroll_paid_course_as_admin($course_id);
+            if ($bypass_id > 0) {
+                wp_send_json_success([
+                    'enrollment_id' => $bypass_id,
+                    'redirect_url' => get_permalink($course_id),
+                    'message' => __('Enrolled without purchase (administrator access).', 'sikshya'),
+                ]);
             }
         }
 

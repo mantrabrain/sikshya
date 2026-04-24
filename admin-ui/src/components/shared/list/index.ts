@@ -1,4 +1,5 @@
 export { BulkActionsBar } from './BulkActionsBar';
+export type { BulkActionOption } from './BulkActionsBar';
 export { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 export type { ColumnToggleDef } from './ColumnVisibilityMenu';
 export { EntityListView } from './EntityListView';

@@ -103,6 +103,80 @@
 		return answers;
 	}
 
+	function collectQuestionOrder(form) {
+		var out = [];
+		var blocks = form.querySelectorAll('.sikshya-q');
+		Array.prototype.forEach.call(blocks, function (b) {
+			var id = b.getAttribute('data-qid');
+			if (id) {
+				out.push(parseInt(id, 10));
+			}
+		});
+		return out;
+	}
+
+	function setupOnePerPage(form) {
+		var cfg = getConfig();
+		if (!cfg.advanced || !cfg.advanced.one_per_page) {
+			return;
+		}
+		var blocks = form.querySelectorAll('.sikshya-q');
+		if (blocks.length <= 1) {
+			return;
+		}
+		form.classList.add('sikshya-quizForm--onePage');
+		var cur = 0;
+		var submit = form.querySelector('.sikshya-quiz-submit');
+		var resultEl = form.querySelector('.sikshya-quiz-result');
+		var actions = form.querySelector('.sikshya-quizActions');
+		var nav = document.createElement('div');
+		nav.className = 'sikshya-quizPager';
+		nav.setAttribute('data-sikshya-quiz-pager', '');
+		var prev = document.createElement('button');
+		prev.type = 'button';
+		prev.className = 'sikshya-btn sikshya-btn--outline sikshya-btn--sm sikshya-quizPager__prev';
+		prev.textContent = 'Previous';
+		var next = document.createElement('button');
+		next.type = 'button';
+		next.className = 'sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-quizPager__next';
+		next.textContent = 'Next';
+		var label = document.createElement('p');
+		label.className = 'sikshya-quizPager__label';
+		nav.appendChild(prev);
+		nav.appendChild(label);
+		nav.appendChild(next);
+		if (resultEl) {
+			form.insertBefore(nav, resultEl);
+		} else if (actions) {
+			form.insertBefore(nav, actions);
+		} else {
+			form.appendChild(nav);
+		}
+		function show(i) {
+			for (var j = 0; j < blocks.length; j++) {
+				blocks[j].hidden = j !== i;
+			}
+			cur = i;
+			prev.disabled = cur <= 0;
+			next.disabled = cur >= blocks.length - 1;
+			label.textContent = cur + 1 + ' / ' + blocks.length;
+			if (submit) {
+				submit.hidden = cur !== blocks.length - 1;
+			}
+		}
+		show(0);
+		prev.addEventListener('click', function () {
+			if (cur > 0) {
+				show(cur - 1);
+			}
+		});
+		next.addEventListener('click', function () {
+			if (cur < blocks.length - 1) {
+				show(cur + 1);
+			}
+		});
+	}
+
 	function bindOrdering(form) {
 		form.addEventListener('click', function (e) {
 			var t = e.target;
@@ -165,6 +239,7 @@
 		var body = {
 			quiz_id: parseInt(cfg.quizId, 10),
 			answers: collectAnswers(form),
+			question_ids: collectQuestionOrder(form),
 			time_taken: 0,
 		};
 
@@ -210,6 +285,7 @@
 		var forms = document.querySelectorAll('form.sikshya-quiz-form[data-quiz-id]');
 		Array.prototype.forEach.call(forms, function (form) {
 			bindOrdering(form);
+			setupOnePerPage(form);
 			form.addEventListener('submit', onSubmit);
 		});
 	}

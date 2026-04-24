@@ -78,11 +78,16 @@ export function useWpContentPost(restBase: string, postId: number) {
       setSaving(true);
       setError(null);
       try {
+        // context=edit ensures WP returns registered meta (incl. `_` prefixed keys)
+        // in the response so callers can verify what actually persisted.
         if (isNew) {
-          const created = await getWpApi().post<WpPostRest & { id: number }>(`${path}`, body);
+          const created = await getWpApi().post<WpPostRest & { id: number }>(
+            `${path}?context=edit`,
+            body
+          );
           return created;
         }
-        return await getWpApi().put<WpPostRest>(`${path}/${postId}`, body);
+        return await getWpApi().put<WpPostRest>(`${path}/${postId}?context=edit`, body);
       } catch (e) {
         setError(e);
         throw e;

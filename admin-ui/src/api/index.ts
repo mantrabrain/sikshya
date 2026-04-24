@@ -29,7 +29,9 @@ export function getSikshyaApi(): HttpClient {
 export function getWpApi(): HttpClient {
   if (!wpV2Client) {
     wpV2Client = createHttpClient(
-      () => `${getConfig().siteUrl.replace(/\/$/, '')}/wp-json/wp/v2`,
+      () =>
+        String(getConfig().wpRestUrl || '').trim() ||
+        `${getConfig().siteUrl.replace(/\/$/, '')}/wp-json/wp/v2`,
       () => getConfig().restNonce
     );
   }

@@ -2,7 +2,10 @@
 
 namespace Sikshya\Admin\Settings;
 
+use Sikshya\Addons\Addons;
 use Sikshya\Core\Plugin;
+use Sikshya\Licensing\FeatureRegistry;
+use Sikshya\Licensing\Pro;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 
@@ -27,6 +30,13 @@ class SettingsManager
      * @var array
      */
     protected array $settings = [];
+
+    /**
+     * Ensures one-time option migrations run before settings arrays are built.
+     *
+     * @var bool
+     */
+    private $settings_migrations_ran = false;
 
     /**
      * Constructor
@@ -56,10 +66,13 @@ class SettingsManager
      */
     public function getAllSettings(): array
     {
+        $this->maybeRunSettingsMigrations();
+
         if (empty($this->settings)) {
             $this->settings = [
                 'general' => $this->getGeneralSettings(),
                 'courses' => $this->getCoursesSettings(),
+                'lessons' => $this->getLessonsSettings(),
                 'enrollment' => $this->getEnrollmentSettings(),
                 'payment' => $this->getPaymentSettings(),
                 'certificates' => $this->getCertificatesSettings(),
@@ -84,7 +97,47 @@ class SettingsManager
         return $this->settings;
     }
 
+    /**
+     * One-time migrations for renamed or split option keys.
+     */
+    private function maybeRunSettingsMigrations(): void
+    {
+        if ($this->settings_migrations_ran) {
+            return;
+        }
+        $this->settings_migrations_ran = true;
 
+        // Legacy: assignments reused `max_file_size` with general uploads — split into `assignment_max_file_size`.
+        $assignment_key = Settings::PREFIX . 'assignment_max_file_size';
+        if (get_option($assignment_key, false) === false) {
+            $legacy = get_option(Settings::PREFIX . 'max_file_size', false);
+            if ($legacy !== false && $legacy !== '') {
+                update_option($assignment_key, $legacy);
+            }
+        }
+    }
+
+    /**
+     * Find a field definition within a tab (first match).
+     *
+     * @return array<string, mixed>|null
+     */
+    private function findFieldInTab(string $tab, string $key): ?array
+    {
+        $tab_settings = $this->getTabSettings($tab);
+        foreach ($tab_settings as $section) {
+            if (empty($section['fields']) || !is_array($section['fields'])) {
+                continue;
+            }
+            foreach ($section['fields'] as $field) {
+                if (($field['key'] ?? '') === $key) {
+                    return $field;
+                }
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Get settings for a specific tab
@@ -196,6 +249,21 @@ class SettingsManager
             }
         }
 
+        // Selects with `select_placeholder`: empty choice means “use default” (avoids invalid stored "").
+        foreach (array_keys($settings_to_save) as $key) {
+            $field = $this->findFieldInTab($tab, $key);
+            if (
+                $field
+                && ($field['type'] ?? '') === 'select'
+                && !empty($field['select_placeholder'])
+                && ($settings_to_save[$key] === '' || $settings_to_save[$key] === null)
+            ) {
+                $settings_to_save[$key] = $field['default'] ?? '';
+            }
+        }
+
+        $settings_to_save = $this->stripLockedFieldsOnSave($tab, $settings_to_save);
+
         // Save the settings
         $ok = $this->saveSettings($settings_to_save);
         if ($ok && $tab === 'permalinks') {
@@ -220,19 +288,243 @@ class SettingsManager
 
         $success = true;
         foreach ($tab_settings as $section) {
+            $section_locked = $this->isSectionLocked($section);
             if (isset($section['fields']) && is_array($section['fields'])) {
                 foreach ($section['fields'] as $field) {
-                    if (isset($field['key'])) {
-                        $default = $field['default'] ?? '';
-                        if (!$this->saveSetting($field['key'], $default)) {
-                            $success = false;
-                        }
+                    if (!isset($field['key'])) {
+                        continue;
+                    }
+                    if ($section_locked || $this->isFieldLocked($field)) {
+                        // Don't reset gated fields — leave stored value untouched so upgrading
+                        // the addon later brings back the admin's previous configuration.
+                        continue;
+                    }
+                    $default = $field['default'] ?? '';
+                    if (!$this->saveSetting($field['key'], $default)) {
+                        $success = false;
                     }
                 }
             }
         }
 
         return $success;
+    }
+
+    /**
+     * Decide whether a section is currently gated (addon disabled or feature off).
+     *
+     * A section may opt-in by declaring either `required_addon` (Addon Manager key)
+     * or `required_feature` (Pro catalog entitlement).  Both are checked; any one
+     * being off locks the section.
+     *
+     * @param array<string, mixed> $section
+     */
+    private function isSectionLocked(array $section): bool
+    {
+        return $this->isGateMet(
+            (string) ($section['required_addon'] ?? ''),
+            (string) ($section['required_feature'] ?? '')
+        ) === false;
+    }
+
+    /**
+     * @param array<string, mixed> $field
+     */
+    private function isFieldLocked(array $field): bool
+    {
+        return $this->isGateMet(
+            (string) ($field['required_addon'] ?? ''),
+            (string) ($field['required_feature'] ?? '')
+        ) === false;
+    }
+
+    /**
+     * Returns true when either the required addon is enabled OR the required
+     * feature is available (nothing configured = always unlocked).
+     */
+    private function isGateMet(string $addon, string $feature): bool
+    {
+        if ($addon === '' && $feature === '') {
+            return true;
+        }
+        if ($addon !== '' && !Addons::isEnabled($addon)) {
+            return false;
+        }
+        if ($feature !== '' && !Pro::feature($feature)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Strip values for fields/sections whose Pro gate is not met.  This guards
+     * the REST save path so callers can't bypass the UI lock and persist values
+     * for disabled addons.
+     *
+     * @param array<string, mixed> $settings_to_save
+     * @return array<string, mixed>
+     */
+    private function stripLockedFieldsOnSave(string $tab, array $settings_to_save): array
+    {
+        $tab_settings = $this->getTabSettings($tab);
+        foreach ($tab_settings as $section) {
+            $section_locked = $this->isSectionLocked($section);
+            if (empty($section['fields']) || !is_array($section['fields'])) {
+                continue;
+            }
+            foreach ($section['fields'] as $field) {
+                if (!isset($field['key'])) {
+                    continue;
+                }
+                if ($section_locked || $this->isFieldLocked($field)) {
+                    unset($settings_to_save[(string) $field['key']]);
+                }
+            }
+        }
+
+        return $settings_to_save;
+    }
+
+    /**
+     * Decorate the tabs array with `locked` flags and propagate section-level
+     * gates down to fields so React can render a consistent Pro overlay without
+     * having to re-evaluate licensing state on the client.
+     *
+     * @param array<string, array<int, array<string, mixed>>> $tabs
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public function decorateSchemaGating(array $tabs): array
+    {
+        foreach ($tabs as $tab_key => $sections) {
+            if (!is_array($sections)) {
+                continue;
+            }
+            foreach ($sections as $si => $section) {
+                if (!is_array($section)) {
+                    continue;
+                }
+                $section_locked = $this->isSectionLocked($section);
+                $section_gate = $this->gateLabels(
+                    (string) ($section['required_addon'] ?? ''),
+                    (string) ($section['required_feature'] ?? '')
+                );
+                $section_reason = $this->lockReason(
+                    (string) ($section['required_addon'] ?? ''),
+                    (string) ($section['required_feature'] ?? '')
+                );
+                if ($section_locked) {
+                    $sections[$si]['locked'] = true;
+                    $sections[$si]['locked_reason'] = $section_reason;
+                    if (!empty($section_gate['required_addon_label'])) {
+                        $sections[$si]['required_addon_label'] = $section_gate['required_addon_label'];
+                    }
+                    if (!empty($section_gate['required_plan_label'])) {
+                        $sections[$si]['required_plan_label'] = $section_gate['required_plan_label'];
+                    }
+                }
+                if (!empty($section['fields']) && is_array($section['fields'])) {
+                    foreach ($section['fields'] as $fi => $field) {
+                        if (!is_array($field)) {
+                            continue;
+                        }
+                        $field_addon = (string) ($field['required_addon'] ?? ($section['required_addon'] ?? ''));
+                        $field_feature = (string) ($field['required_feature'] ?? ($section['required_feature'] ?? ''));
+                        $is_locked = $section_locked || $this->isFieldLocked($field);
+                        if ($is_locked) {
+                            $sections[$si]['fields'][$fi]['locked'] = true;
+                            $sections[$si]['fields'][$fi]['locked_reason'] = $this->lockReason($field_addon, $field_feature);
+                            $field_gate = $this->gateLabels($field_addon, $field_feature);
+                            if (!empty($field_gate['required_addon_label'])) {
+                                $sections[$si]['fields'][$fi]['required_addon_label'] = $field_gate['required_addon_label'];
+                            }
+                            if (!empty($field_gate['required_plan_label'])) {
+                                $sections[$si]['fields'][$fi]['required_plan_label'] = $field_gate['required_plan_label'];
+                            }
+                            if ($field_addon !== '' && empty($field['required_addon'])) {
+                                $sections[$si]['fields'][$fi]['required_addon'] = $field_addon;
+                            }
+                            if ($field_feature !== '' && empty($field['required_feature'])) {
+                                $sections[$si]['fields'][$fi]['required_feature'] = $field_feature;
+                            }
+                        }
+                    }
+                }
+            }
+            $tabs[$tab_key] = $sections;
+        }
+
+        return $tabs;
+    }
+
+    /**
+     * Provide user-facing labels to explain what is required for a locked field/section.
+     *
+     * @return array{required_addon_label: string, required_plan_label: string}
+     */
+    private function gateLabels(string $addon, string $feature): array
+    {
+        $addon_label = '';
+        $plan_label = '';
+
+        $id = $feature !== '' ? $feature : $addon;
+        if ($id !== '') {
+            $def = FeatureRegistry::get($id);
+            if (is_array($def)) {
+                if (isset($def['label'])) {
+                    $addon_label = (string) $def['label'];
+                }
+                $tier = isset($def['tier']) ? (string) $def['tier'] : '';
+                $plan_label = match ($tier) {
+                    'starter' => __('Starter', 'sikshya'),
+                    // Product copy: `pro` tier maps to the "Growth" plan in UI/marketing.
+                    'pro' => __('Growth', 'sikshya'),
+                    'scale' => __('Scale', 'sikshya'),
+                    default => '',
+                };
+            }
+        }
+
+        return [
+            'required_addon_label' => $addon_label,
+            'required_plan_label' => $plan_label,
+        ];
+    }
+
+    /**
+     * Produce a short, human-readable reason for why a field/section is locked.
+     */
+    private function lockReason(string $addon, string $feature): string
+    {
+        $labels = $this->gateLabels($addon, $feature);
+        $addon_label = $labels['required_addon_label'] !== '' ? $labels['required_addon_label'] : $addon;
+        $plan_label = $labels['required_plan_label'];
+
+        if ($addon !== '' && !Addons::isEnabled($addon)) {
+            if ($feature !== '' && !Pro::feature($feature)) {
+                return sprintf(
+                    /* translators: 1: plan label, 2: addon label */
+                    __('Requires Sikshya Pro (%1$s+) and the addon “%2$s” to be enabled.', 'sikshya'),
+                    $plan_label !== '' ? $plan_label : __('Pro', 'sikshya'),
+                    $addon_label
+                );
+            }
+            return sprintf(
+                /* translators: %s: addon label */
+                __('Enable the addon “%s” under Addons to unlock.', 'sikshya'),
+                $addon_label
+            );
+        }
+        if ($feature !== '' && !Pro::feature($feature)) {
+            return $plan_label !== ''
+                ? sprintf(
+                    /* translators: %s: plan label */
+                    __('Available on Sikshya Pro (%s+) plans.', 'sikshya'),
+                    $plan_label
+                )
+                : __('Available on a higher Sikshya Pro plan.', 'sikshya');
+        }
+
+        return '';
     }
 
     /**
@@ -307,12 +599,17 @@ class SettingsManager
         $success = true;
 
         foreach ($data as $tab => $tab_data) {
-            if (is_array($tab_data)) {
-                foreach ($tab_data as $key => $value) {
-                    if ($overwrite || $this->getSetting($key) === '') {
-                        if (!$this->saveSetting($key, $value)) {
-                            $success = false;
-                        }
+            if (!is_array($tab_data)) {
+                continue;
+            }
+            if ($tab === 'assignments' && isset($tab_data['max_file_size']) && !isset($tab_data['assignment_max_file_size'])) {
+                $tab_data['assignment_max_file_size'] = $tab_data['max_file_size'];
+                unset($tab_data['max_file_size']);
+            }
+            foreach ($tab_data as $key => $value) {
+                if ($overwrite || $this->getSetting($key) === '') {
+                    if (!$this->saveSetting($key, $value)) {
+                        $success = false;
                     }
                 }
             }
@@ -552,9 +849,9 @@ class SettingsManager
                     [
                         'key' => 'site_title',
                         'type' => 'text',
-                        'label' => __('LMS Site Title', 'sikshya'),
-                        'description' => __('The title of your learning management system', 'sikshya'),
-                        'placeholder' => __('Enter your LMS site title', 'sikshya'),
+                        'label' => __('School or course area name', 'sikshya'),
+                        'description' => __('Shown in the browser tab and in Sikshya emails where a site name is needed. Usually matches your WordPress site name.', 'sikshya'),
+                        'placeholder' => __('e.g. Acme Online Academy', 'sikshya'),
                         'default' => get_bloginfo('name'),
                         'required' => true,
                         'sanitize_callback' => 'sanitize_text_field',
@@ -565,9 +862,9 @@ class SettingsManager
                     [
                         'key' => 'site_description',
                         'type' => 'textarea',
-                        'label' => __('LMS Description', 'sikshya'),
-                        'description' => __('A brief description of your learning platform', 'sikshya'),
-                        'placeholder' => __('Enter a description for your LMS', 'sikshya'),
+                        'label' => __('Short description (tagline)', 'sikshya'),
+                        'description' => __('One or two sentences about what learners will find here. Some themes may show this near the top of course pages.', 'sikshya'),
+                        'placeholder' => __('e.g. Practical video courses for small business owners.', 'sikshya'),
                         'default' => get_bloginfo('description'),
                         'sanitize_callback' => 'sanitize_textarea_field',
                         'validate_callback' => function ($value) {
@@ -576,10 +873,10 @@ class SettingsManager
                     ],
                     [
                         'key' => 'admin_email',
-                        'type' => 'text',
-                        'label' => __('Admin Email', 'sikshya'),
-                        'description' => __('Primary email address for system notifications', 'sikshya'),
-                        'placeholder' => __('admin@example.com', 'sikshya'),
+                        'type' => 'email',
+                        'label' => __('Main contact email', 'sikshya'),
+                        'description' => __('Where Sikshya sends important notices for this plugin (orders, errors, etc.). Use an address you check often.', 'sikshya'),
+                        'placeholder' => __('you@example.com', 'sikshya'),
                         'default' => Settings::getRaw('admin_email'),
                         'required' => true,
                         'sanitize_callback' => 'sanitize_email',
@@ -590,9 +887,9 @@ class SettingsManager
                     [
                         'key' => 'max_file_size',
                         'type' => 'number',
-                        'label' => __('Maximum File Upload Size (MB)', 'sikshya'),
-                        'description' => __('Maximum allowed file size for course materials', 'sikshya'),
-                        'placeholder' => __('10', 'sikshya'),
+                        'label' => __('Largest upload size (MB)', 'sikshya'),
+                        'description' => __('Upper limit for a single file learners or staff can upload (lessons, assignments). Your host may also impose a lower limit.', 'sikshya'),
+                        'placeholder' => __('e.g. 10', 'sikshya'),
                         'default' => 10,
                         'min' => 1,
                         'max' => 100,
@@ -618,7 +915,8 @@ class SettingsManager
                         'key' => 'currency',
                         'type' => 'select',
                         'label' => __('Currency', 'sikshya'),
-                        'description' => __('Used for all course prices, cart, and checkout.', 'sikshya'),
+                        'description' => __('Which money unit prices use everywhere: course prices, cart, checkout, and receipts.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'USD',
                         'options' => [
                             'USD' => __('United States (US) dollar ($)', 'sikshya'),
@@ -642,7 +940,8 @@ class SettingsManager
                         'key' => 'currency_position',
                         'type' => 'select',
                         'label' => __('Currency Position', 'sikshya'),
-                        'description' => __('How the amount and symbol are shown together.', 'sikshya'),
+                        'description' => __('Whether the $ or € appears before or after the number, and whether there is a space.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'left',
                         'options' => [
                             'left' => __('Left ($99.99)', 'sikshya'),
@@ -660,7 +959,7 @@ class SettingsManager
                         'key' => 'currency_thousand_separator',
                         'type' => 'text',
                         'label' => __('Thousand Separator', 'sikshya'),
-                        'description' => __('Character between thousands groups (often comma).', 'sikshya'),
+                        'description' => __('Symbol between groups of three digits (for example 1,000). In many regions this is a comma.', 'sikshya'),
                         'placeholder' => ',',
                         'default' => ',',
                         'sanitize_callback' => 'sanitize_text_field',
@@ -669,7 +968,7 @@ class SettingsManager
                         'key' => 'currency_decimal_separator',
                         'type' => 'text',
                         'label' => __('Decimal Separator', 'sikshya'),
-                        'description' => __('Character before fractional digits (often a period).', 'sikshya'),
+                        'description' => __('Symbol between whole and cents (for example 10.99). In many regions this is a period.', 'sikshya'),
                         'placeholder' => '.',
                         'default' => '.',
                         'sanitize_callback' => 'sanitize_text_field',
@@ -678,7 +977,8 @@ class SettingsManager
                         'key' => 'currency_decimal_places',
                         'type' => 'select',
                         'label' => __('Number of Decimals', 'sikshya'),
-                        'description' => __('Decimal places shown for money amounts.', 'sikshya'),
+                        'description' => __('How many digits after the decimal point prices show (for example two for cents).', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 2,
                         'options' => [
                             0 => __('0 (whole numbers)', 'sikshya'),
@@ -696,7 +996,7 @@ class SettingsManager
                         'key' => 'timezone',
                         'type' => 'select',
                         'label' => __('Timezone', 'sikshya'),
-                        'description' => __('Timezone for displaying dates and times', 'sikshya'),
+                        'description' => __('Your local time zone so lesson times, deadlines, and emails show the correct clock time.', 'sikshya'),
                         'default' => Settings::getRaw('timezone_string'),
                         'options' => $this->getTimezoneOptions(),
                         'sanitize_callback' => 'sanitize_text_field',
@@ -708,7 +1008,8 @@ class SettingsManager
                         'key' => 'date_format',
                         'type' => 'select',
                         'label' => __('Date Format', 'sikshya'),
-                        'description' => __('Format for displaying dates throughout the LMS', 'sikshya'),
+                        'description' => __('How day, month, and year are ordered and separated across Sikshya screens.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => Settings::getRaw('date_format'),
                         'options' => [
                             'F j, Y' => date('F j, Y'),
@@ -727,7 +1028,8 @@ class SettingsManager
                         'key' => 'time_format',
                         'type' => 'select',
                         'label' => __('Time Format', 'sikshya'),
-                        'description' => __('Format for displaying times throughout the LMS', 'sikshya'),
+                        'description' => __('12-hour with am/pm or 24-hour clock for times shown in Sikshya.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => Settings::getRaw('time_format'),
                         'options' => [
                             'g:i a' => date('g:i a'),
@@ -749,7 +1051,8 @@ class SettingsManager
                         'key' => 'language',
                         'type' => 'select',
                         'label' => __('Default Language', 'sikshya'),
-                        'description' => __('Default language for the LMS interface', 'sikshya'),
+                        'description' => __('Preferred language label for Sikshya where a single default is stored. Your WordPress site language still controls most of the admin.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'en',
                         'options' => [
                             'en' => __('English', 'sikshya'),
@@ -780,14 +1083,20 @@ class SettingsManager
     {
         return [
             [
+                'section_key' => 'course_display',
                 'title' => __('Course Display', 'sikshya'),
                 'icon' => 'fas fa-list',
+                'description' => __(
+                    'Controls how the public “all courses” listing looks: how many courses load at once and the page layout.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'courses_per_page',
                         'type' => 'number',
-                        'label' => __('Courses per Page', 'sikshya'),
-                        'description' => __('Number of courses to display per page in course listings', 'sikshya'),
+                        'label' => __('Courses per page', 'sikshya'),
+                        'description' => __('How many course cards appear before “next page” on the course catalog.', 'sikshya'),
+                        'placeholder' => __('e.g. 12', 'sikshya'),
                         'default' => 12,
                         'min' => 1,
                         'max' => 50
@@ -795,8 +1104,9 @@ class SettingsManager
                     [
                         'key' => 'course_archive_layout',
                         'type' => 'select',
-                        'label' => __('Course Archive Layout', 'sikshya'),
-                        'description' => __('Layout style for course archive pages', 'sikshya'),
+                        'label' => __('Course catalog layout', 'sikshya'),
+                        'description' => __('Grid shows multiple columns; list is stacked rows; masonry fits cards of different heights.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'grid',
                         'options' => [
                             'grid' => __('Grid Layout', 'sikshya'),
@@ -807,8 +1117,9 @@ class SettingsManager
                     [
                         'key' => 'course_single_layout',
                         'type' => 'select',
-                        'label' => __('Single Course Layout', 'sikshya'),
-                        'description' => __('Layout style for individual course pages', 'sikshya'),
+                        'label' => __('Single course page layout', 'sikshya'),
+                        'description' => __('How one course’s sales page is arranged: sidebar, full width, or the default theme layout.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'default',
                         'options' => [
                             'default' => __('Default Layout', 'sikshya'),
@@ -819,59 +1130,34 @@ class SettingsManager
                 ]
             ],
             [
-                'title' => __('Reviews & Ratings', 'sikshya'),
-                'icon' => 'fas fa-star',
-                'fields' => [
-                    [
-                        'key' => 'enable_reviews',
-                        'type' => 'checkbox',
-                        'label' => __('Enable Course Reviews', 'sikshya'),
-                        'description' => __('Allow students to write detailed reviews for courses', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'enable_ratings',
-                        'type' => 'checkbox',
-                        'label' => __('Enable Course Ratings', 'sikshya'),
-                        'description' => __('Allow students to rate courses with stars', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'review_approval',
-                        'type' => 'select',
-                        'label' => __('Review Approval', 'sikshya'),
-                        'description' => __('Whether reviews need manual approval before being published', 'sikshya'),
-                        'default' => 'auto',
-                        'options' => [
-                            'auto' => __('Auto-approve', 'sikshya'),
-                            'manual' => __('Manual approval required', 'sikshya')
-                        ]
-                    ]
-                ]
-            ],
-            [
+                'section_key' => 'course_tax',
                 'title' => __('Categories & Tags', 'sikshya'),
                 'icon' => 'fas fa-tags',
+                'description' => __(
+                    'Categories group courses into broad topics; tags add flexible labels. Both help learners browse and search.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_course_categories',
                         'type' => 'checkbox',
-                        'label' => __('Enable Course Categories', 'sikshya'),
-                        'description' => __('Allow organizing courses into categories', 'sikshya'),
+                        'label' => __('Use course categories', 'sikshya'),
+                        'description' => __('Turns on hierarchical topics (for example “Design”, “Development”).', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'enable_course_tags',
                         'type' => 'checkbox',
-                        'label' => __('Enable Course Tags', 'sikshya'),
-                        'description' => __('Allow tagging courses for better organization', 'sikshya'),
+                        'label' => __('Use course tags', 'sikshya'),
+                        'description' => __('Optional keywords you can attach to courses (like blog tags).', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'category_display',
                         'type' => 'select',
-                        'label' => __('Category Display', 'sikshya'),
-                        'description' => __('How to display course categories on the frontend', 'sikshya'),
+                        'label' => __('How categories appear on the site', 'sikshya'),
+                        'description' => __('Pick list, grid, or a compact dropdown—whatever fits your theme best.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'list',
                         'options' => [
                             'list' => __('List View', 'sikshya'),
@@ -882,124 +1168,118 @@ class SettingsManager
                 ]
             ],
             [
+                'section_key' => 'course_search',
                 'title' => __('Search & Filters', 'sikshya'),
                 'icon' => 'fas fa-search',
+                'description' => __(
+                    'Control the course search box and optional filters (price, level, etc.) on your public catalog.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_course_search',
                         'type' => 'checkbox',
-                        'label' => __('Enable Course Search', 'sikshya'),
-                        'description' => __('Allow users to search through available courses', 'sikshya'),
+                        'label' => __('Show course search', 'sikshya'),
+                        'description' => __('Visitors can type keywords to find courses.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'enable_course_filters',
                         'type' => 'checkbox',
-                        'label' => __('Enable Course Filters', 'sikshya'),
-                        'description' => __('Allow filtering courses by price, level, duration, etc.', 'sikshya'),
+                        'label' => __('Show filter controls', 'sikshya'),
+                        'description' => __('Adds ways to narrow the list (for example by price or level), if your theme supports it.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'search_title',
                         'type' => 'checkbox',
-                        'label' => __('Search Course Title', 'sikshya'),
-                        'description' => __('Include course title in search results', 'sikshya'),
+                        'label' => __('Match course titles', 'sikshya'),
+                        'description' => __('Include each course’s name when someone searches.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'search_description',
                         'type' => 'checkbox',
-                        'label' => __('Search Course Description', 'sikshya'),
-                        'description' => __('Include course description in search results', 'sikshya'),
+                        'label' => __('Match course descriptions', 'sikshya'),
+                        'description' => __('Include the long description text in search (helps find topics mentioned only there).', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'search_instructor',
                         'type' => 'checkbox',
-                        'label' => __('Search Instructor Name', 'sikshya'),
-                        'description' => __('Include instructor name in search results', 'sikshya'),
+                        'label' => __('Match instructor names', 'sikshya'),
+                        'description' => __('Include the teacher’s display name so learners can search by instructor.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'search_categories',
                         'type' => 'checkbox',
-                        'label' => __('Search Categories & Tags', 'sikshya'),
-                        'description' => __('Include categories and tags in search results', 'sikshya'),
+                        'label' => __('Match categories and tags', 'sikshya'),
+                        'description' => __('Include category and tag names so searches like “beginner” find tagged courses.', 'sikshya'),
                         'default' => true
                     ]
                 ]
-            ],
+            ]
+        ];
+    }
+
+    /**
+     * Lesson-level defaults (player, previews, progress). Option keys unchanged — fields relocated from Courses / Progress tabs.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getLessonsSettings(): array
+    {
+        return [
             [
-                'title' => __('Enrollment Settings', 'sikshya'),
-                'icon' => 'fas fa-user-plus',
+                'section_key' => 'lesson_progress',
+                'title' => __('Lesson progress', 'sikshya'),
+                'icon' => 'fas fa-chart-line',
+                'description' => __(
+                    'Decide whether Sikshya records each lesson as “done” so you can show progress bars and completion rules.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
-                        'key' => 'auto_enroll',
+                        'key' => 'track_lesson_progress',
                         'type' => 'checkbox',
-                        'label' => __('Auto-enroll on Purchase', 'sikshya'),
-                        'description' => __('Automatically enroll students when they purchase a course', 'sikshya'),
-                        'default' => true
+                        'label' => __('Track lesson progress', 'sikshya'),
+                        'description' => __('Record when learners complete individual lessons (used in the player and reports).', 'sikshya'),
+                        'default' => '1',
                     ],
-                    [
-                        'key' => 'enrollment_button_text',
-                        'type' => 'text',
-                        'label' => __('Enrollment Button Text', 'sikshya'),
-                        'description' => __('Text to display on course enrollment buttons', 'sikshya'),
-                        'default' => 'Enroll Now'
-                    ],
-                    [
-                        'key' => 'free_course_text',
-                        'type' => 'text',
-                        'label' => __('Free Course Button Text', 'sikshya'),
-                        'description' => __('Text to display on free course enrollment buttons', 'sikshya'),
-                        'default' => 'Start Learning'
-                    ]
-                ]
+                ],
             ],
             [
-                'title' => __('Advanced Course Settings', 'sikshya'),
-                'icon' => 'fas fa-cog',
+                'section_key' => 'lesson_preview',
+                'title' => __('Free preview', 'sikshya'),
+                'icon' => 'fas fa-eye',
+                'description' => __(
+                    'Let visitors try part of a course before paying. You can mark specific lessons as preview in each course.',
+                    'sikshya'
+                ),
                 'fields' => [
-                    [
-                        'key' => 'course_completion_criteria',
-                        'type' => 'select',
-                        'label' => __('Completion Criteria', 'sikshya'),
-                        'description' => __('Criteria for marking a course as completed', 'sikshya'),
-                        'default' => 'all_lessons',
-                        'options' => [
-                            'all_lessons' => __('All Lessons Completed', 'sikshya'),
-                            'all_lessons_quizzes' => __('All Lessons + Quizzes', 'sikshya'),
-                            'percentage' => __('Percentage Based', 'sikshya'),
-                            'manual' => __('Manual Completion', 'sikshya')
-                        ]
-                    ],
-                    [
-                        'key' => 'completion_percentage',
-                        'type' => 'number',
-                        'label' => __('Completion Percentage (%)', 'sikshya'),
-                        'description' => __('Percentage of course content that must be completed', 'sikshya'),
-                        'default' => 80,
-                        'min' => 1,
-                        'max' => 100
-                    ],
                     [
                         'key' => 'enable_course_preview',
                         'type' => 'checkbox',
-                        'label' => __('Enable Course Preview', 'sikshya'),
-                        'description' => __('Allow non-enrolled users to preview course content', 'sikshya'),
-                        'default' => true
+                        'label' => __('Enable lesson preview for visitors', 'sikshya'),
+                        'description' => __('Allow non-enrolled users to open previewable lessons (subject to per-course settings and the limit below).', 'sikshya'),
+                        'default' => true,
                     ],
                     [
                         'key' => 'preview_lessons_count',
                         'type' => 'number',
-                        'label' => __('Preview Lessons Count', 'sikshya'),
-                        'description' => __('Number of lessons available for preview (0 = disabled)', 'sikshya'),
+                        'label' => __('How many lessons can be free previews', 'sikshya'),
+                        'description' => __(
+                            'From the beginning of the course outline, up to this many lessons may open for guests when preview is enabled on the course. Use 0 to require enrollment for all lessons.',
+                            'sikshya'
+                        ),
+                        'placeholder' => __('e.g. 3', 'sikshya'),
                         'default' => 3,
                         'min' => 0,
-                        'max' => 10
-                    ]
-                ]
-            ]
+                        'max' => 100,
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -1012,41 +1292,131 @@ class SettingsManager
     {
         return [
             [
-                'title' => __('Enrollment Access', 'sikshya'),
+                'section_key' => 'enrollment_checkout',
+                'title' => __('Purchase & enrollment buttons', 'sikshya'),
+                'icon' => 'fas fa-shopping-cart',
+                'description' => __(
+                    'Words shown on course pages for buying or joining, and whether checkout immediately adds the learner to the course.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'auto_enroll',
+                        'type' => 'checkbox',
+                        'label' => __('Auto-enroll on purchase', 'sikshya'),
+                        'description' => __('When someone pays successfully, add them to the course right away without an extra step.', 'sikshya'),
+                        'default' => true,
+                    ],
+                    [
+                        'key' => 'enrollment_button_text',
+                        'type' => 'text',
+                        'label' => __('Button text for paid courses', 'sikshya'),
+                        'description' => __('The label on the main action for courses that cost money (for example “Enroll now” or “Buy now”).', 'sikshya'),
+                        'placeholder' => __('Enroll Now', 'sikshya'),
+                        'default' => 'Enroll Now',
+                    ],
+                    [
+                        'key' => 'free_course_text',
+                        'type' => 'text',
+                        'label' => __('Button text for free courses', 'sikshya'),
+                        'description' => __('Shown when the course price is zero—usually something like “Start learning”.', 'sikshya'),
+                        'placeholder' => __('Start Learning', 'sikshya'),
+                        'default' => 'Start Learning',
+                    ],
+                    [
+                        'key' => 'allow_admin_enroll_without_purchase',
+                        'type' => 'checkbox',
+                        'label' => __('Let administrators enroll without purchase', 'sikshya'),
+                        'description' => __(
+                            'When enabled, site managers can use “Enroll without purchase” on paid courses (testing or demos). Keep off on public sites unless needed.',
+                            'sikshya'
+                        ),
+                        'default' => false,
+                    ],
+                ],
+            ],
+            [
+                'section_key' => 'enrollment_completion',
+                'title' => __('Course completion', 'sikshya'),
+                'icon' => 'fas fa-check-circle',
+                'description' => __(
+                    'Defines when a learner is marked “finished” for certificates, reports, and prerequisite rules.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'course_completion_criteria',
+                        'type' => 'select',
+                        'label' => __('When is a course “complete”?', 'sikshya'),
+                        'description' => __('Pick the rule that best matches how you grade completion (lessons only, lessons + quizzes, a percentage, or staff marking done by hand).', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
+                        'default' => 'all_lessons',
+                        'options' => [
+                            'all_lessons' => __('All lessons completed', 'sikshya'),
+                            'all_lessons_quizzes' => __('All lessons and quizzes', 'sikshya'),
+                            'percentage' => __('Percentage based', 'sikshya'),
+                            'manual' => __('Manual completion', 'sikshya'),
+                        ],
+                    ],
+                    [
+                        'key' => 'completion_percentage',
+                        'type' => 'number',
+                        'label' => __('Minimum progress (%)', 'sikshya'),
+                        'description' => __('Only used when you chose percentage-based completion: the learner must reach at least this much of the course.', 'sikshya'),
+                        'placeholder' => __('e.g. 80', 'sikshya'),
+                        'default' => 80,
+                        'min' => 1,
+                        'max' => 100,
+                    ],
+                ],
+            ],
+            [
+                'section_key' => 'enrollment_access',
+                'title' => __('Who can enroll & access content', 'sikshya'),
                 'icon' => 'fas fa-user-plus',
+                'description' => __(
+                    'Control guest checkout, login requirements, and waitlists. Stricter settings reduce spam; looser settings reduce friction.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'allow_guest_enrollment',
                         'type' => 'checkbox',
-                        'label' => __('Allow Guest Enrollment', 'sikshya'),
-                        'description' => __('Allow guests to enroll in courses without registration', 'sikshya'),
-                        'default' => false
+                        'label' => __('Allow guest enrollment', 'sikshya'),
+                        'description' => __('Allow visitors to enroll without creating an account (if your theme supports it).', 'sikshya'),
+                        'default' => false,
                     ],
                     [
                         'key' => 'require_login',
                         'type' => 'checkbox',
-                        'label' => __('Require Login for Course Access', 'sikshya'),
-                        'description' => __('Require users to be logged in to access course content', 'sikshya'),
-                        'default' => true
+                        'label' => __('Require login for course access', 'sikshya'),
+                        'description' => __('Require users to be logged in to view course content after enrolling.', 'sikshya'),
+                        'default' => true,
                     ],
                     [
                         'key' => 'enable_waitlist',
                         'type' => 'checkbox',
-                        'label' => __('Enable Waitlist', 'sikshya'),
-                        'description' => __('Allow students to join waitlist for full courses', 'sikshya'),
-                        'default' => false
-                    ]
-                ]
+                        'label' => __('Enable waitlist', 'sikshya'),
+                        'description' => __('Let students join a waitlist when a course is full.', 'sikshya'),
+                        'default' => false,
+                    ],
+                ],
             ],
             [
-                'title' => __('Enrollment Limits', 'sikshya'),
+                'section_key' => 'enrollment_limits',
+                'title' => __('Enrollment limits', 'sikshya'),
                 'icon' => 'fas fa-users',
+                'description' => __(
+                    'Optional caps on class size, how long access lasts, and how many courses one account may take at once. Use 0 where it means “no limit”.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'max_students_per_course',
                         'type' => 'number',
-                        'label' => __('Max Students per Course', 'sikshya'),
-                        'description' => __('Maximum number of students per course (0 = unlimited)', 'sikshya'),
+                        'label' => __('Maximum learners per course', 'sikshya'),
+                        'description' => __('Stops new sign-ups when the class is full. 0 means no cap.', 'sikshya'),
+                        'placeholder' => __('0 = unlimited', 'sikshya'),
                         'default' => 0,
                         'min' => 0,
                         'max' => 10000
@@ -1054,8 +1424,9 @@ class SettingsManager
                     [
                         'key' => 'enrollment_expiry_days',
                         'type' => 'number',
-                        'label' => __('Enrollment Expiry (days)', 'sikshya'),
-                        'description' => __('Days until enrollment expires (0 = never expires)', 'sikshya'),
+                        'label' => __('Access length after enroll (days)', 'sikshya'),
+                        'description' => __('After this many days from enrollment, access can end (depending on your setup). 0 usually means lifetime access—confirm with your theme or extensions.', 'sikshya'),
+                        'placeholder' => __('0 = no expiry', 'sikshya'),
                         'default' => 0,
                         'min' => 0,
                         'max' => 3650
@@ -1063,8 +1434,9 @@ class SettingsManager
                     [
                         'key' => 'max_courses_per_student',
                         'type' => 'number',
-                        'label' => __('Max Courses per Student', 'sikshya'),
-                        'description' => __('Maximum courses a student can enroll in (0 = unlimited)', 'sikshya'),
+                        'label' => __('Maximum active courses per student', 'sikshya'),
+                        'description' => __('Limit how many courses one person may be enrolled in at the same time. 0 means unlimited.', 'sikshya'),
+                        'placeholder' => __('0 = unlimited', 'sikshya'),
                         'default' => 0,
                         'min' => 0,
                         'max' => 1000
@@ -1072,28 +1444,34 @@ class SettingsManager
                 ]
             ],
             [
-                'title' => __('Unenrollment Settings', 'sikshya'),
+                'section_key' => 'enrollment_unenroll',
+                'title' => __('Unenrollment', 'sikshya'),
                 'icon' => 'fas fa-sign-out-alt',
+                'description' => __(
+                    'Whether learners can leave a course on their own, and what happens to payments.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'allow_unenroll',
                         'type' => 'checkbox',
-                        'label' => __('Allow Unenrollment', 'sikshya'),
-                        'description' => __('Allow students to unenroll from courses', 'sikshya'),
+                        'label' => __('Let students leave (unenroll)', 'sikshya'),
+                        'description' => __('If enabled, learners can remove themselves from the course roster when your theme provides that control.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'unenroll_refund',
                         'type' => 'checkbox',
-                        'label' => __('Auto Refund on Unenrollment', 'sikshya'),
-                        'description' => __('Automatically refund payment when student unenrolls', 'sikshya'),
+                        'label' => __('Try to refund automatically when they leave', 'sikshya'),
+                        'description' => __('When supported by the payment method, issue a refund if someone unenrolls. Verify behavior with your gateway.', 'sikshya'),
                         'default' => false
                     ],
                     [
                         'key' => 'unenroll_deadline_days',
                         'type' => 'number',
-                        'label' => __('Unenrollment Deadline (days)', 'sikshya'),
-                        'description' => __('Days after enrollment when unenrollment is no longer allowed', 'sikshya'),
+                        'label' => __('Days after signup they can still drop', 'sikshya'),
+                        'description' => __('After this many days from enrollment, self-service unenroll may be disabled. Use 0 only if your policy allows dropping anytime.', 'sikshya'),
+                        'placeholder' => __('e.g. 7', 'sikshya'),
                         'default' => 7,
                         'min' => 0,
                         'max' => 365
@@ -1101,62 +1479,35 @@ class SettingsManager
                 ]
             ],
             [
-                'title' => __('Prerequisites & Restrictions', 'sikshya'),
-                'icon' => 'fas fa-lock',
-                'fields' => [
-                    [
-                        'key' => 'enable_prerequisites',
-                        'type' => 'checkbox',
-                        'label' => __('Enable Prerequisites', 'sikshya'),
-                        'description' => __('Allow setting course prerequisites', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'prerequisite_check_type',
-                        'type' => 'select',
-                        'label' => __('Prerequisite Check Type', 'sikshya'),
-                        'description' => __('How to check if prerequisites are met', 'sikshya'),
-                        'default' => 'completion',
-                        'options' => [
-                            'completion' => __('Course Completion', 'sikshya'),
-                            'enrollment' => __('Course Enrollment', 'sikshya'),
-                            'grade' => __('Minimum Grade', 'sikshya')
-                        ]
-                    ],
-                    [
-                        'key' => 'minimum_grade_prerequisite',
-                        'type' => 'number',
-                        'label' => __('Minimum Grade (%)', 'sikshya'),
-                        'description' => __('Minimum grade required in prerequisite courses', 'sikshya'),
-                        'default' => 70,
-                        'min' => 0,
-                        'max' => 100
-                    ]
-                ]
-            ],
-            [
-                'title' => __('Enrollment Periods', 'sikshya'),
+                'section_key' => 'enrollment_periods',
+                'title' => __('Enrollment periods', 'sikshya'),
                 'icon' => 'fas fa-calendar-alt',
+                'description' => __(
+                    'Optional default window when new students may join. Individual courses can still override these dates.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_enrollment_periods',
                         'type' => 'checkbox',
-                        'label' => __('Enable Enrollment Periods', 'sikshya'),
-                        'description' => __('Restrict enrollment to specific time periods', 'sikshya'),
+                        'label' => __('Limit enrollment to date ranges', 'sikshya'),
+                        'description' => __('Turn on to use start/end times below as site-wide defaults for new enrollments.', 'sikshya'),
                         'default' => false
                     ],
                     [
                         'key' => 'default_enrollment_start',
                         'type' => 'datetime-local',
-                        'label' => __('Default Enrollment Start', 'sikshya'),
-                        'description' => __('Default start date for course enrollment periods', 'sikshya'),
+                        'label' => __('Default enrollment opens', 'sikshya'),
+                        'description' => __('First moment sign-up is allowed, using your WordPress timezone. Leave empty for no default start.', 'sikshya'),
+                        'placeholder' => __('YYYY-MM-DD — pick from calendar', 'sikshya'),
                         'default' => ''
                     ],
                     [
                         'key' => 'default_enrollment_end',
                         'type' => 'datetime-local',
-                        'label' => __('Default Enrollment End', 'sikshya'),
-                        'description' => __('Default end date for course enrollment periods', 'sikshya'),
+                        'label' => __('Default enrollment closes', 'sikshya'),
+                        'description' => __('Last moment new students can join. Leave empty for no default end.', 'sikshya'),
+                        'placeholder' => __('YYYY-MM-DD — pick from calendar', 'sikshya'),
                         'default' => ''
                     ]
                 ]
@@ -1175,13 +1526,17 @@ class SettingsManager
             [
                 'title' => __('Payment Gateways', 'sikshya'),
                 'icon' => 'fas fa-credit-card',
+                'description' => __(
+                    'Choose how students pay. Turn each method on below and paste keys from your payment provider’s dashboard. Pro features need Sikshya Pro.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'payment_gateway',
                         'type' => 'select',
-                        'label' => __('Primary Payment Gateway', 'sikshya'),
+                        'label' => __('Preferred gateway', 'sikshya'),
                         'description' => __(
-                            'Default preference for integrations. Checkout shows enabled gateways based on your configuration and license.',
+                            'A default for the system; checkout may still show every gateway you enable and configure.',
                             'sikshya'
                         ),
                         'default' => 'offline',
@@ -1192,17 +1547,21 @@ class SettingsManager
                             'stripe' => __('Stripe (Pro)', 'sikshya'),
                             'razorpay' => __('Razorpay (Pro)', 'sikshya'),
                             'mollie' => __('Mollie (Pro)', 'sikshya'),
-                            'manual' => __('Manual Payment (legacy label)', 'sikshya'),
+                            'paystack' => __('Paystack (Pro)', 'sikshya'),
+                            'square' => __('Square (Pro)', 'sikshya'),
+                            'authorize_net' => __('Authorize.Net (Pro)', 'sikshya'),
+                            'bank_transfer' => __('Bank transfer (Pro)', 'sikshya'),
                         ]
                     ],
                     [
                         'key' => 'payment_gateways_order',
                         'type' => 'text',
-                        'label' => __('Gateway order', 'sikshya'),
+                        'label' => __('Gateway order (advanced)', 'sikshya'),
                         'description' => __(
-                            'Controls the display order of gateways at checkout. (Managed by the Payment tab UI.)',
+                            'Optional internal order for checkout. Usually leave blank unless support gave you a specific list.',
                             'sikshya'
                         ),
+                        'placeholder' => __('e.g. stripe,paypal', 'sikshya'),
                         'default' => '',
                     ],
                     [
@@ -1239,42 +1598,42 @@ class SettingsManager
                         'key' => 'enable_razorpay_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Razorpay at checkout (Pro)', 'sikshya'),
-                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'description' => __('Popular in India—requires Sikshya Pro and keys below.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_mollie_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Mollie at checkout (Pro)', 'sikshya'),
-                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'description' => __('Common in Europe—requires Sikshya Pro and API key.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_paystack_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Paystack at checkout (Pro)', 'sikshya'),
-                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'description' => __('Popular in Africa—requires Sikshya Pro and keys.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_square_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Square at checkout (Pro)', 'sikshya'),
-                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'description' => __('In-person and online—requires Sikshya Pro and Square credentials.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_authorize_net_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Authorize.Net at checkout (Pro)', 'sikshya'),
-                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'description' => __('US-focused gateway—requires Sikshya Pro and merchant API keys.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_bank_transfer_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Bank Transfer at checkout (Pro)', 'sikshya'),
-                        'description' => __('Available in Sikshya Pro.', 'sikshya'),
+                        'description' => __('Structured bank transfer flow—requires Sikshya Pro and instructions below.', 'sikshya'),
                         'default' => false,
                     ],
                     [
@@ -1282,9 +1641,10 @@ class SettingsManager
                         'type' => 'textarea',
                         'label' => __('Offline payment instructions', 'sikshya'),
                         'description' => __(
-                            'Shown on the order page while payment is awaiting confirmation (e.g. bank name, IBAN, reference to use). Basic HTML allowed.',
+                            'Tell the buyer exactly how to pay offline: bank name, account number, what to put in the reference field, and who to email the receipt to. Simple HTML is allowed.',
                             'sikshya'
                         ),
+                        'placeholder' => __('e.g. Pay to: … Reference: your order number …', 'sikshya'),
                         'default' => ''
                     ],
                     [
@@ -1298,122 +1658,239 @@ class SettingsManager
                         'default' => false
                     ],
                     [
+                        'key' => 'paypal_client_id',
+                        'type' => 'text',
+                        'label' => __('PayPal — Client ID', 'sikshya'),
+                        'description' => __('From developer.paypal.com → your REST app → Client ID (public).', 'sikshya'),
+                        'placeholder' => __('Starts with A…', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'paypal_secret',
+                        'type' => 'password',
+                        'label' => __('PayPal — Secret', 'sikshya'),
+                        'description' => __('Same app’s secret key—never share or paste into public pages.', 'sikshya'),
+                        'placeholder' => __('Paste secret from PayPal', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'paypal_mode',
+                        'type' => 'select',
+                        'label' => __('PayPal — API mode', 'sikshya'),
+                        'description' => __('Sandbox for testing; Live for production.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
+                        'default' => 'sandbox',
+                        'options' => [
+                            'sandbox' => __('Sandbox (Test)', 'sikshya'),
+                            'live' => __('Live (Production)', 'sikshya'),
+                        ],
+                    ],
+                    [
+                        'key' => 'paypal_webhook_id',
+                        'type' => 'text',
+                        'label' => __('PayPal — Webhook ID', 'sikshya'),
+                        'description' => __('Optional ID from PayPal webhooks so this site can confirm events really came from PayPal.', 'sikshya'),
+                        'placeholder' => __('Webhook ID if you use instant payment notifications', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'stripe_publishable_key',
+                        'type' => 'text',
+                        'label' => __('Stripe — Publishable key', 'sikshya'),
+                        'description' => __('Starts with pk_.', 'sikshya'),
+                        'placeholder' => 'pk_test_...',
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'stripe_secret_key',
+                        'type' => 'password',
+                        'label' => __('Stripe — Secret key', 'sikshya'),
+                        'description' => __('Starts with sk_. Server-side only.', 'sikshya'),
+                        'placeholder' => 'sk_test_...',
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'stripe_webhook_secret',
+                        'type' => 'password',
+                        'label' => __('Stripe — Webhook secret', 'sikshya'),
+                        'description' => __('Signing secret from the Stripe webhook endpoint (whsec_...).', 'sikshya'),
+                        'placeholder' => 'whsec_...',
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'razorpay_key_id',
+                        'type' => 'text',
+                        'label' => __('Razorpay — Key ID', 'sikshya'),
+                        'description' => __('Dashboard → Account & Settings → API Keys → Key ID (publishable).', 'sikshya'),
+                        'placeholder' => __('rzp_live_… or rzp_test_…', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'razorpay_key_secret',
+                        'type' => 'password',
+                        'label' => __('Razorpay — Key secret', 'sikshya'),
+                        'description' => __('The secret key from the same page—treat like a password.', 'sikshya'),
+                        'placeholder' => __('Paste key secret', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'razorpay_webhook_secret',
+                        'type' => 'password',
+                        'label' => __('Razorpay — Webhook secret', 'sikshya'),
+                        'description' => __('From Webhooks section—used to verify payment events.', 'sikshya'),
+                        'placeholder' => __('Webhook signing secret', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'mollie_api_key',
+                        'type' => 'password',
+                        'label' => __('Mollie — API key', 'sikshya'),
+                        'description' => __('Profile → Developers → API keys. Use test_… while experimenting.', 'sikshya'),
+                        'placeholder' => __('live_… or test_…', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'mollie_webhook_secret',
+                        'type' => 'password',
+                        'label' => __('Mollie — Webhook secret', 'sikshya'),
+                        'description' => __('Only if your integration verifies webhook signatures.', 'sikshya'),
+                        'placeholder' => __('Optional webhook secret', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'paystack_public_key',
+                        'type' => 'text',
+                        'label' => __('Paystack — Public key', 'sikshya'),
+                        'description' => __('Dashboard → Settings → API Keys & Webhooks → Public key.', 'sikshya'),
+                        'placeholder' => __('pk_test_… or pk_live_…', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'paystack_secret_key',
+                        'type' => 'password',
+                        'label' => __('Paystack — Secret key', 'sikshya'),
+                        'description' => __('Secret key from the same screen—never expose to browsers.', 'sikshya'),
+                        'placeholder' => __('sk_test_… or sk_live_…', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'paystack_webhook_secret',
+                        'type' => 'password',
+                        'label' => __('Paystack — Webhook secret', 'sikshya'),
+                        'description' => __('Signing secret for Paystack webhook URL in your dashboard.', 'sikshya'),
+                        'placeholder' => __('Webhook secret if configured', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'square_access_token',
+                        'type' => 'password',
+                        'label' => __('Square — Access token', 'sikshya'),
+                        'description' => __('Square Developer → Applications → Credentials. Use sandbox token while testing.', 'sikshya'),
+                        'placeholder' => __('EAAA… or sandbox token', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'square_location_id',
+                        'type' => 'text',
+                        'label' => __('Square — Location ID', 'sikshya'),
+                        'description' => __('Which store or branch receives the payment—copy from Locations in Square.', 'sikshya'),
+                        'placeholder' => __('e.g. LXXXXXXX', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'square_webhook_signature_key',
+                        'type' => 'password',
+                        'label' => __('Square — Webhook signature key', 'sikshya'),
+                        'description' => __('From your webhook subscription in Square—proves events are genuine.', 'sikshya'),
+                        'placeholder' => __('Signature key from Square webhooks', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'authorize_net_login_id',
+                        'type' => 'text',
+                        'label' => __('Authorize.Net — API Login ID', 'sikshya'),
+                        'description' => __('Merchant Interface → Account → API Credentials & Keys.', 'sikshya'),
+                        'placeholder' => __('Your API Login ID', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'authorize_net_transaction_key',
+                        'type' => 'password',
+                        'label' => __('Authorize.Net — Transaction key', 'sikshya'),
+                        'description' => __('Generated with the Login ID—keep confidential.', 'sikshya'),
+                        'placeholder' => __('Transaction key', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'authorize_net_signature_key',
+                        'type' => 'password',
+                        'label' => __('Authorize.Net — Signature key', 'sikshya'),
+                        'description' => __('Only if you verify silent posts or webhooks with Authorize.Net.', 'sikshya'),
+                        'placeholder' => __('Optional signature key', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'bank_transfer_instructions',
+                        'type' => 'textarea',
+                        'label' => __('Bank transfer — Instructions', 'sikshya'),
+                        'description' => __(
+                            'Step-by-step text after checkout: bank name, IBAN, SWIFT, reference, and what to email you. Basic HTML allowed.',
+                            'sikshya'
+                        ),
+                        'placeholder' => __('e.g. Transfer to … use order ID as reference …', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
                         'key' => 'enable_test_mode',
                         'type' => 'checkbox',
-                        'label' => __('Enable Test Mode', 'sikshya'),
-                        'description' => __('Use test/sandbox mode for payment gateways', 'sikshya'),
+                        'label' => __('Test mode (sandbox)', 'sikshya'),
+                        'description' => __('Use fake money and test keys until you go live—recommended while setting up.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'accept_credit_cards',
                         'type' => 'checkbox',
-                        'label' => __('Credit/Debit Cards', 'sikshya'),
-                        'description' => __('Accept credit and debit card payments', 'sikshya'),
+                        'label' => __('Offer card payments', 'sikshya'),
+                        'description' => __('Visa, Mastercard, etc., when your gateway supports cards.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'accept_bank_transfer',
                         'type' => 'checkbox',
-                        'label' => __('Bank Transfer', 'sikshya'),
-                        'description' => __('Accept bank transfer payments', 'sikshya'),
+                        'label' => __('Offer bank transfer', 'sikshya'),
+                        'description' => __('Let buyers pay manually from their bank (slower but no card fees).', 'sikshya'),
                         'default' => false
                     ],
                     [
                         'key' => 'accept_digital_wallets',
                         'type' => 'checkbox',
-                        'label' => __('Digital Wallets', 'sikshya'),
-                        'description' => __('Accept digital wallet payments (PayPal, Apple Pay, etc.)', 'sikshya'),
+                        'label' => __('Offer digital wallets', 'sikshya'),
+                        'description' => __('Apple Pay, Google Pay, PayPal balance, etc., depending on the gateway.', 'sikshya'),
                         'default' => false
                     ],
                     [
                         'key' => 'accept_cryptocurrency',
                         'type' => 'checkbox',
-                        'label' => __('Cryptocurrency', 'sikshya'),
-                        'description' => __('Accept cryptocurrency payments', 'sikshya'),
+                        'label' => __('Offer cryptocurrency', 'sikshya'),
+                        'description' => __('Only if your payment provider supports crypto—most schools leave this off.', 'sikshya'),
                         'default' => false
-                    ]
-                ]
-            ],
-            [
-                'title' => __('Stripe Settings', 'sikshya'),
-                'icon' => 'fas fa-stripe',
-                'fields' => [
-                    [
-                        'key' => 'stripe_publishable_key',
-                        'type' => 'text',
-                        'label' => __('Publishable Key', 'sikshya'),
-                        'description' => __('Your Stripe publishable key (starts with pk_)', 'sikshya'),
-                        'placeholder' => 'pk_test_...',
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'stripe_secret_key',
-                        'type' => 'password',
-                        'label' => __('Secret Key', 'sikshya'),
-                        'description' => __('Your Stripe secret key (starts with sk_)', 'sikshya'),
-                        'placeholder' => 'sk_test_...',
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'stripe_webhook_secret',
-                        'type' => 'password',
-                        'label' => __('Webhook Secret', 'sikshya'),
-                        'description' => __('Stripe webhook endpoint secret for payment confirmations', 'sikshya'),
-                        'placeholder' => 'whsec_...',
-                        'default' => ''
-                    ]
-                ]
-            ],
-            [
-                'title' => __('PayPal Settings', 'sikshya'),
-                'icon' => 'fab fa-paypal',
-                'fields' => [
-                    [
-                        'key' => 'paypal_client_id',
-                        'type' => 'text',
-                        'label' => __('Client ID', 'sikshya'),
-                        'description' => __('Your PayPal application client ID', 'sikshya'),
-                        'placeholder' => 'Your PayPal Client ID',
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'paypal_secret',
-                        'type' => 'password',
-                        'label' => __('Secret', 'sikshya'),
-                        'description' => __('Your PayPal application secret key', 'sikshya'),
-                        'placeholder' => 'Your PayPal Secret',
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'paypal_mode',
-                        'type' => 'select',
-                        'label' => __('PayPal Mode', 'sikshya'),
-                        'description' => __('PayPal environment mode', 'sikshya'),
-                        'default' => 'sandbox',
-                        'options' => [
-                            'sandbox' => __('Sandbox (Test)', 'sikshya'),
-                            'live' => __('Live (Production)', 'sikshya')
-                        ]
-                    ],
-                    [
-                        'key' => 'paypal_webhook_id',
-                        'type' => 'text',
-                        'label' => __('Webhook ID', 'sikshya'),
-                        'description' => __('PayPal webhook ID used to verify webhook signatures (recommended).', 'sikshya'),
-                        'placeholder' => 'A PayPal Webhook ID',
-                        'default' => ''
                     ]
                 ]
             ],
             [
                 'title' => __('Pricing & Taxes', 'sikshya'),
                 'icon' => 'fas fa-percentage',
+                'description' => __(
+                    'Simple tax defaults for course prices. For complex VAT rules, confirm with your accountant or a tax extension.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'tax_rate',
                         'type' => 'number',
-                        'label' => __('Tax Rate (%)', 'sikshya'),
-                        'description' => __('Default tax rate applied to course prices', 'sikshya'),
+                        'label' => __('Tax rate (%)', 'sikshya'),
+                        'description' => __('Percent added to the price (or included in it, see next option). Use 0 if you do not charge tax.', 'sikshya'),
+                        'placeholder' => __('e.g. 0 or 8.25', 'sikshya'),
                         'default' => 0,
                         'min' => 0,
                         'max' => 100,
@@ -1422,8 +1899,11 @@ class SettingsManager
                     [
                         'key' => 'tax_inclusive',
                         'type' => 'checkbox',
-                        'label' => __('Tax Inclusive Pricing', 'sikshya'),
-                        'description' => __('Course prices include tax (vs. tax added on top)', 'sikshya'),
+                        'label' => __('Prices already include tax', 'sikshya'),
+                        'description' => __(
+                            'On: the listed course price contains tax. Off: tax is calculated on top of the listed price.',
+                            'sikshya'
+                        ),
                         'default' => false
                     ]
                 ]
@@ -1431,19 +1911,24 @@ class SettingsManager
             [
                 'title' => __('Discounts & Coupons', 'sikshya'),
                 'icon' => 'fas fa-tags',
+                'description' => __(
+                    'Promo codes reduce the price at checkout. Set sensible limits so staff cannot create 100% off codes by mistake.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_coupons',
                         'type' => 'checkbox',
-                        'label' => __('Enable Coupons', 'sikshya'),
-                        'description' => __('Allow students to use discount coupons', 'sikshya'),
+                        'label' => __('Allow coupon codes', 'sikshya'),
+                        'description' => __('Learners can enter a code at checkout to get a discount.', 'sikshya'),
                         'default' => false
                     ],
                     [
                         'key' => 'max_discount_percentage',
                         'type' => 'number',
-                        'label' => __('Max Discount (%)', 'sikshya'),
-                        'description' => __('Maximum discount percentage allowed', 'sikshya'),
+                        'label' => __('Largest discount allowed (%)', 'sikshya'),
+                        'description' => __('No coupon can reduce the price by more than this percentage.', 'sikshya'),
+                        'placeholder' => __('e.g. 50', 'sikshya'),
                         'default' => 50,
                         'min' => 0,
                         'max' => 100
@@ -1451,8 +1936,9 @@ class SettingsManager
                     [
                         'key' => 'coupon_expiry_days',
                         'type' => 'number',
-                        'label' => __('Coupon Expiry (days)', 'sikshya'),
-                        'description' => __('Default expiry period for new coupons', 'sikshya'),
+                        'label' => __('Default coupon lifetime (days)', 'sikshya'),
+                        'description' => __('When you create a new coupon, it can expire after this many days unless you override it.', 'sikshya'),
+                        'placeholder' => __('e.g. 30', 'sikshya'),
                         'default' => 30,
                         'min' => 1,
                         'max' => 365
@@ -1462,27 +1948,31 @@ class SettingsManager
             [
                 'title' => __('Invoicing & Receipts', 'sikshya'),
                 'icon' => 'fas fa-receipt',
+                'description' => __(
+                    'Paper trail for accounting: invoices and emailed receipts after successful payments.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'auto_generate_invoices',
                         'type' => 'checkbox',
-                        'label' => __('Auto-generate Invoices', 'sikshya'),
-                        'description' => __('Automatically generate invoices for successful payments', 'sikshya'),
+                        'label' => __('Create invoices automatically', 'sikshya'),
+                        'description' => __('Generate a numbered invoice when a payment succeeds (if your setup supports it).', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'send_payment_receipts',
                         'type' => 'checkbox',
-                        'label' => __('Send Payment Receipts', 'sikshya'),
-                        'description' => __('Email payment receipts to students', 'sikshya'),
+                        'label' => __('Email payment receipts', 'sikshya'),
+                        'description' => __('Send the buyer a confirmation email with amount and order details.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'invoice_prefix',
                         'type' => 'text',
-                        'label' => __('Invoice Number Prefix', 'sikshya'),
-                        'description' => __('Prefix for invoice numbers (e.g., INV-2024-001)', 'sikshya'),
-                        'placeholder' => 'INV-',
+                        'label' => __('Invoice number prefix', 'sikshya'),
+                        'description' => __('Text before the automatic number (for example INV-2026-0001).', 'sikshya'),
+                        'placeholder' => __('INV-', 'sikshya'),
                         'default' => 'INV-'
                     ]
                 ]
@@ -1501,19 +1991,24 @@ class SettingsManager
             [
                 'title' => __('Certificate Settings', 'sikshya'),
                 'icon' => 'fas fa-certificate',
+                'description' => __(
+                    'Completion certificates prove that a learner finished a course. Pick a default look; individual courses may override later.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_certificates',
                         'type' => 'checkbox',
-                        'label' => __('Enable Certificates', 'sikshya'),
-                        'description' => __('Enable certificate generation for completed courses', 'sikshya'),
+                        'label' => __('Issue completion certificates', 'sikshya'),
+                        'description' => __('When off, Sikshya will not create or show certificates (only turn off if you truly do not need them).', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'certificate_template',
                         'type' => 'select',
-                        'label' => __('Default Certificate Template', 'sikshya'),
-                        'description' => __('Default template for certificate design', 'sikshya'),
+                        'label' => __('Default certificate style', 'sikshya'),
+                        'description' => __('Layout and decoration of the PDF or image learners receive.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'default',
                         'options' => [
                             'default' => __('Default Template', 'sikshya'),
@@ -1525,8 +2020,9 @@ class SettingsManager
                     [
                         'key' => 'certificate_format',
                         'type' => 'select',
-                        'label' => __('Certificate Format', 'sikshya'),
-                        'description' => __('Format for generated certificates', 'sikshya'),
+                        'label' => __('File type learners download', 'sikshya'),
+                        'description' => __('PDF is best for printing; PNG/JPG are easy to share online.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'pdf',
                         'options' => [
                             'pdf' => __('PDF', 'sikshya'),
@@ -1539,28 +2035,33 @@ class SettingsManager
             [
                 'title' => __('Certificate Design', 'sikshya'),
                 'icon' => 'fas fa-image',
+                'description' => __(
+                    'Optional branding: upload images to your Media Library, then paste their full links here.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'certificate_logo',
                         'type' => 'url',
-                        'label' => __('Certificate Logo', 'sikshya'),
-                        'description' => __('Logo to display on certificates', 'sikshya'),
-                        'placeholder' => 'https://example.com/logo.png',
+                        'label' => __('Logo image URL', 'sikshya'),
+                        'description' => __('Direct link to your school logo (PNG or SVG with transparent background works well).', 'sikshya'),
+                        'placeholder' => 'https://yoursite.com/wp-content/uploads/logo.png',
                         'default' => ''
                     ],
                     [
                         'key' => 'certificate_signature',
                         'type' => 'url',
-                        'label' => __('Certificate Signature', 'sikshya'),
-                        'description' => __('Signature image for certificates', 'sikshya'),
-                        'placeholder' => 'https://example.com/signature.png',
+                        'label' => __('Signature image URL', 'sikshya'),
+                        'description' => __('Scanned signature or stamp image shown on the certificate.', 'sikshya'),
+                        'placeholder' => 'https://yoursite.com/wp-content/uploads/signature.png',
                         'default' => ''
                     ],
                     [
                         'key' => 'certificate_font',
                         'type' => 'select',
-                        'label' => __('Certificate Font', 'sikshya'),
-                        'description' => __('Font family for certificate text', 'sikshya'),
+                        'label' => __('Font for names and text', 'sikshya'),
+                        'description' => __('Readable serif or sans-serif for the learner name and course title.', 'sikshya'),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'Arial',
                         'options' => [
                             'Arial' => __('Arial', 'sikshya'),
@@ -1573,8 +2074,9 @@ class SettingsManager
                     [
                         'key' => 'certificate_font_size',
                         'type' => 'number',
-                        'label' => __('Font Size', 'sikshya'),
-                        'description' => __('Base font size for certificate text', 'sikshya'),
+                        'label' => __('Base font size (points)', 'sikshya'),
+                        'description' => __('Larger numbers make text bigger on the PDF or image. Try 12–18 for body text.', 'sikshya'),
+                        'placeholder' => __('e.g. 12', 'sikshya'),
                         'default' => 12,
                         'min' => 8,
                         'max' => 72
@@ -1582,8 +2084,8 @@ class SettingsManager
                     [
                         'key' => 'certificate_color',
                         'type' => 'color',
-                        'label' => __('Text Color', 'sikshya'),
-                        'description' => __('Primary text color for certificates', 'sikshya'),
+                        'label' => __('Main text color', 'sikshya'),
+                        'description' => __('Usually black or dark gray for printing on white paper.', 'sikshya'),
                         'default' => '#000000'
                     ]
                 ]
@@ -1591,26 +2093,31 @@ class SettingsManager
             [
                 'title' => __('Certificate Behavior', 'sikshya'),
                 'icon' => 'fas fa-cog',
+                'description' => __(
+                    'Automation: when to create the file and whether to email it. Expiry is rare—use 0 for certificates that never expire.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'auto_generate_certificates',
                         'type' => 'checkbox',
-                        'label' => __('Auto-generate Certificates', 'sikshya'),
-                        'description' => __('Automatically generate certificates when students complete courses', 'sikshya'),
+                        'label' => __('Create certificate when course is finished', 'sikshya'),
+                        'description' => __('As soon as a learner meets your completion rules, generate their certificate.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'email_certificates',
                         'type' => 'checkbox',
-                        'label' => __('Email Certificates', 'sikshya'),
-                        'description' => __('Automatically email certificates to students upon completion', 'sikshya'),
+                        'label' => __('Email the certificate to the learner', 'sikshya'),
+                        'description' => __('Sends a download link or attachment when the certificate is ready.', 'sikshya'),
                         'default' => true
                     ],
                     [
                         'key' => 'certificate_expiry_days',
                         'type' => 'number',
-                        'label' => __('Certificate Expiry (days)', 'sikshya'),
-                        'description' => __('Days until certificates expire (0 = never expire)', 'sikshya'),
+                        'label' => __('Certificate validity (days)', 'sikshya'),
+                        'description' => __('Some programs require re-certification after a period. 0 means the credential does not expire.', 'sikshya'),
+                        'placeholder' => __('0 = never expires', 'sikshya'),
                         'default' => 0,
                         'min' => 0,
                         'max' => 3650
@@ -1627,93 +2134,52 @@ class SettingsManager
      */
     protected function getEmailSettings(): array
     {
+        $admin_default = (string) Settings::getRaw('admin_email', get_option('admin_email', ''));
+
         return [
             [
+                'section_key' => 'email_config',
                 'title' => __('Email Configuration', 'sikshya'),
                 'icon' => 'fas fa-envelope',
+                'description' => __(
+                    'Who receives admin alerts and how outbound mail looks to learners. Match your domain to reduce spam folder issues.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
-                        'key' => 'from_name',
-                        'type' => 'text',
-                        'label' => __('From Name', 'sikshya'),
-                        'description' => __('Name to use in email "From" field', 'sikshya'),
-                        'placeholder' => __('Your LMS Name', 'sikshya'),
-                        'default' => get_bloginfo('name')
+                        'key' => 'admin_notification_email',
+                        'type' => 'email',
+                        'label' => __('Where to send admin notices', 'sikshya'),
+                        'description' => __('Orders, enrollment alerts, and similar messages go here.', 'sikshya'),
+                        'placeholder' => 'admin@yoursite.com',
+                        'default' => $admin_default,
                     ],
                     [
                         'key' => 'from_email',
                         'type' => 'email',
-                        'label' => __('From Email', 'sikshya'),
-                        'description' => __('Email address to use in "From" field', 'sikshya'),
+                        'label' => __('“From” address for learners', 'sikshya'),
+                        'description' => __('What students see in the sender field. Use an address on your domain if possible.', 'sikshya'),
                         'placeholder' => 'noreply@yoursite.com',
-                        'default' => Settings::getRaw('admin_email')
+                        'default' => $admin_default,
+                    ],
+                    [
+                        'key' => 'from_name',
+                        'type' => 'text',
+                        'label' => __('“From” name for learners', 'sikshya'),
+                        'description' => __('Friendly label next to the address (your school or site name).', 'sikshya'),
+                        'placeholder' => 'Your LMS Name',
+                        'default' => get_bloginfo('name'),
                     ],
                     [
                         'key' => 'reply_to_email',
                         'type' => 'email',
-                        'label' => __('Reply-To Email', 'sikshya'),
-                        'description' => __('Email address for replies', 'sikshya'),
+                        'label' => __('Reply address (optional)', 'sikshya'),
+                        'description' => __('When a student hits “Reply”, mail goes here—often support or helpdesk.', 'sikshya'),
                         'placeholder' => 'support@yoursite.com',
-                        'default' => Settings::getRaw('admin_email')
-                    ]
-                ]
+                        'default' => $admin_default,
+                    ],
+                ],
             ],
-            [
-                'title' => __('Email Notifications', 'sikshya'),
-                'icon' => 'fas fa-bell',
-                'fields' => [
-                    [
-                        'key' => 'enable_welcome_email',
-                        'type' => 'checkbox',
-                        'label' => __('Welcome Email', 'sikshya'),
-                        'description' => __('Send welcome email to new students', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'enable_enrollment_email',
-                        'type' => 'checkbox',
-                        'label' => __('Enrollment Email', 'sikshya'),
-                        'description' => __('Send confirmation email when students enroll', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'enable_completion_email',
-                        'type' => 'checkbox',
-                        'label' => __('Completion Email', 'sikshya'),
-                        'description' => __('Send email when students complete courses', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'enable_reminder_email',
-                        'type' => 'checkbox',
-                        'label' => __('Progress Reminder Emails', 'sikshya'),
-                        'description' => __('Send reminder emails to inactive students', 'sikshya'),
-                        'default' => false
-                    ]
-                ]
-            ],
-            [
-                'title' => __('Email Templates', 'sikshya'),
-                'icon' => 'fas fa-edit',
-                'fields' => [
-                    [
-                        'key' => 'email_template_header',
-                        'type' => 'textarea',
-                        'label' => __('Email Header', 'sikshya'),
-                        'description' => __('HTML header for all LMS emails', 'sikshya'),
-                        'placeholder' => __('Enter your email header HTML...', 'sikshya'),
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'email_template_footer',
-                        'type' => 'textarea',
-                        'label' => __('Email Footer', 'sikshya'),
-                        'description' => __('HTML footer for all LMS emails', 'sikshya'),
-                        'placeholder' => __('Enter your email footer HTML...', 'sikshya'),
-                        'default' => ''
-                    ]
-                ]
-            ]
         ];
     }
 
@@ -1728,26 +2194,30 @@ class SettingsManager
             [
                 'title' => __('Instructor Permissions', 'sikshya'),
                 'icon' => 'fas fa-chalkboard-teacher',
+                'description' => __(
+                    'Control what teachers with the instructor role may do. Tighter permissions reduce accidents on shared sites.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'instructors_can_create_courses',
                         'type' => 'checkbox',
-                        'label' => __('Can Create Courses', 'sikshya'),
-                        'description' => __('Allow instructors to create new courses', 'sikshya'),
+                        'label' => __('Teachers can create new courses', 'sikshya'),
+                        'description' => __('Allow adding blank courses from the dashboard.', 'sikshya'),
                         'default' => '1'
                     ],
                     [
                         'key' => 'instructors_can_edit_courses',
                         'type' => 'checkbox',
-                        'label' => __('Can Edit Courses', 'sikshya'),
-                        'description' => __('Allow instructors to edit their courses', 'sikshya'),
+                        'label' => __('Teachers can edit their own courses', 'sikshya'),
+                        'description' => __('Lessons, pricing, and settings for courses they own.', 'sikshya'),
                         'default' => '1'
                     ],
                     [
                         'key' => 'instructors_can_delete_courses',
                         'type' => 'checkbox',
-                        'label' => __('Can Delete Courses', 'sikshya'),
-                        'description' => __('Allow instructors to delete their courses', 'sikshya'),
+                        'label' => __('Teachers can delete their own courses', 'sikshya'),
+                        'description' => __('Dangerous on production—only enable if you trust every instructor.', 'sikshya'),
                         'default' => '0'
                     ]
                 ]
@@ -1766,19 +2236,23 @@ class SettingsManager
             [
                 'title' => __('Student Features', 'sikshya'),
                 'icon' => 'fas fa-users',
+                'description' => __(
+                    'What enrolled learners see in their account: progress bars and certificate downloads.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'students_can_see_progress',
                         'type' => 'checkbox',
-                        'label' => __('Show Progress to Students', 'sikshya'),
-                        'description' => __('Allow students to see their course progress', 'sikshya'),
+                        'label' => __('Show progress to learners', 'sikshya'),
+                        'description' => __('Bars or percentages for lessons and quizzes completed.', 'sikshya'),
                         'default' => '1'
                     ],
                     [
                         'key' => 'students_can_download_certificates',
                         'type' => 'checkbox',
-                        'label' => __('Download Certificates', 'sikshya'),
-                        'description' => __('Allow students to download their certificates', 'sikshya'),
+                        'label' => __('Let learners download certificates', 'sikshya'),
+                        'description' => __('PDF or image files for completed courses from their profile.', 'sikshya'),
                         'default' => '1'
                     ]
                 ]
@@ -1797,28 +2271,34 @@ class SettingsManager
             [
                 'title' => __('Quiz Settings', 'sikshya'),
                 'icon' => 'fas fa-question-circle',
+                'description' => __(
+                    'Defaults for new quizzes. You can still change each quiz individually when editing.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'quiz_time_limit',
                         'type' => 'number',
-                        'label' => __('Default Time Limit (minutes)', 'sikshya'),
-                        'description' => __('Default time limit for quizzes in minutes (0 for no limit)', 'sikshya'),
+                        'label' => __('Default time limit (minutes)', 'sikshya'),
+                        'description' => __('How long the learner has to submit once they start. 0 means no timer.', 'sikshya'),
+                        'placeholder' => __('e.g. 30', 'sikshya'),
                         'default' => 30,
                         'min' => 0
                     ],
                     [
                         'key' => 'quiz_attempts_limit',
                         'type' => 'number',
-                        'label' => __('Default Attempts Limit', 'sikshya'),
-                        'description' => __('Default number of attempts allowed for quizzes (0 for unlimited)', 'sikshya'),
+                        'label' => __('Default number of attempts', 'sikshya'),
+                        'description' => __('How many times they may retake the quiz. 0 means unlimited tries.', 'sikshya'),
+                        'placeholder' => __('e.g. 3', 'sikshya'),
                         'default' => 3,
                         'min' => 0
                     ],
                     [
                         'key' => 'show_quiz_results',
                         'type' => 'checkbox',
-                        'label' => __('Show Quiz Results', 'sikshya'),
-                        'description' => __('Show quiz results to students after completion', 'sikshya'),
+                        'label' => __('Show score after submission', 'sikshya'),
+                        'description' => __('Let students see correct answers or scores when they finish (per-quiz settings may add detail).', 'sikshya'),
                         'default' => '1'
                     ]
                 ]
@@ -1837,20 +2317,25 @@ class SettingsManager
             [
                 'title' => __('Assignment Settings', 'sikshya'),
                 'icon' => 'fas fa-tasks',
+                'description' => __(
+                    'When learners upload homework, these limits reduce oversized or risky files.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'assignment_file_types',
                         'type' => 'text',
-                        'label' => __('Allowed File Types', 'sikshya'),
-                        'description' => __('Comma-separated list of allowed file extensions (e.g., pdf,doc,docx)', 'sikshya'),
+                        'label' => __('Allowed file extensions', 'sikshya'),
+                        'description' => __('Comma-separated, no dots: only these types can be uploaded (lowercase).', 'sikshya'),
                         'default' => 'pdf,doc,docx,txt,jpg,jpeg,png',
                         'placeholder' => __('pdf,doc,docx,txt,jpg,jpeg,png', 'sikshya')
                     ],
                     [
-                        'key' => 'max_file_size',
+                        'key' => 'assignment_max_file_size',
                         'type' => 'number',
-                        'label' => __('Max File Size (MB)', 'sikshya'),
-                        'description' => __('Maximum file size for assignment submissions in MB', 'sikshya'),
+                        'label' => __('Largest upload for one assignment (MB)', 'sikshya'),
+                        'description' => __('Per submission cap. Your host may force a lower maximum. Separate from “Largest upload size” under General.', 'sikshya'),
+                        'placeholder' => __('e.g. 10', 'sikshya'),
                         'default' => 10,
                         'min' => 1,
                         'max' => 100
@@ -1861,7 +2346,7 @@ class SettingsManager
     }
 
     /**
-     * Get Progress Settings
+     * Quiz and assignment progress toggles. Lesson progress lives under {@see getLessonsSettings()}.
      *
      * @return array
      */
@@ -1871,26 +2356,23 @@ class SettingsManager
             [
                 'title' => __('Progress Tracking', 'sikshya'),
                 'icon' => 'fas fa-chart-line',
+                'description' => __(
+                    'Whether Sikshya records quiz and assignment activity for reports and completion rules. Lesson progress is under Lessons settings.',
+                    'sikshya'
+                ),
                 'fields' => [
-                    [
-                        'key' => 'track_lesson_progress',
-                        'type' => 'checkbox',
-                        'label' => __('Track Lesson Progress', 'sikshya'),
-                        'description' => __('Track individual lesson completion', 'sikshya'),
-                        'default' => '1'
-                    ],
                     [
                         'key' => 'track_quiz_progress',
                         'type' => 'checkbox',
-                        'label' => __('Track Quiz Progress', 'sikshya'),
-                        'description' => __('Track quiz completion and scores', 'sikshya'),
+                        'label' => __('Record quiz completion and scores', 'sikshya'),
+                        'description' => __('Needed for gradebooks and “complete all quizzes” type rules.', 'sikshya'),
                         'default' => '1'
                     ],
                     [
                         'key' => 'track_assignment_progress',
                         'type' => 'checkbox',
-                        'label' => __('Track Assignment Progress', 'sikshya'),
-                        'description' => __('Track assignment submissions and grades', 'sikshya'),
+                        'label' => __('Record assignment uploads and grades', 'sikshya'),
+                        'description' => __('Tracks submitted files and instructor feedback.', 'sikshya'),
                         'default' => '1'
                     ]
                 ]
@@ -1909,19 +2391,23 @@ class SettingsManager
             [
                 'title' => __('Notification Settings', 'sikshya'),
                 'icon' => 'fas fa-bell',
+                'description' => __(
+                    'How Sikshya nudges learners and staff: in-browser alerts vs. email. Email usually works everywhere.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_browser_notifications',
                         'type' => 'checkbox',
-                        'label' => __('Browser Notifications', 'sikshya'),
-                        'description' => __('Enable browser push notifications', 'sikshya'),
+                        'label' => __('Browser pop-up notices', 'sikshya'),
+                        'description' => __('Short messages in the browser when the tab is open—learners must allow permission.', 'sikshya'),
                         'default' => '0'
                     ],
                     [
                         'key' => 'enable_email_notifications',
                         'type' => 'checkbox',
-                        'label' => __('Email Notifications', 'sikshya'),
-                        'description' => __('Enable email notifications', 'sikshya'),
+                        'label' => __('Email notices', 'sikshya'),
+                        'description' => __('Sends messages to the inbox for enrollments, reminders, etc.', 'sikshya'),
                         'default' => '1'
                     ]
                 ]
@@ -1940,19 +2426,23 @@ class SettingsManager
             [
                 'title' => __('Third-party Integrations', 'sikshya'),
                 'icon' => 'fas fa-plug',
+                'description' => __(
+                    'Optional marketing tags. Only paste IDs if you use these tools and understand privacy rules (cookies, GDPR).',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'google_analytics_id',
                         'type' => 'text',
-                        'label' => __('Google Analytics ID', 'sikshya'),
-                        'description' => __('Google Analytics tracking ID (e.g., GA_MEASUREMENT_ID)', 'sikshya'),
+                        'label' => __('Google Analytics measurement ID', 'sikshya'),
+                        'description' => __('From Google Analytics → Admin → Data streams. Looks like G-XXXXXXXXXX.', 'sikshya'),
                         'placeholder' => __('G-XXXXXXXXXX', 'sikshya')
                     ],
                     [
                         'key' => 'facebook_pixel_id',
                         'type' => 'text',
-                        'label' => __('Facebook Pixel ID', 'sikshya'),
-                        'description' => __('Facebook Pixel tracking ID', 'sikshya'),
+                        'label' => __('Meta (Facebook) Pixel ID', 'sikshya'),
+                        'description' => __('From Meta Events Manager → your Pixel → ID number.', 'sikshya'),
                         'placeholder' => __('XXXXXXXXXX', 'sikshya')
                     ]
                 ]
@@ -1971,19 +2461,24 @@ class SettingsManager
             [
                 'title' => __('Security Options', 'sikshya'),
                 'icon' => 'fas fa-shield-alt',
+                'description' => __(
+                    'Reduce bots and idle logins. CAPTCHA needs extra setup in many cases—enable only when spam is a problem.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_captcha',
                         'type' => 'checkbox',
-                        'label' => __('Enable CAPTCHA', 'sikshya'),
-                        'description' => __('Enable CAPTCHA for forms', 'sikshya'),
+                        'label' => __('Use CAPTCHA on forms', 'sikshya'),
+                        'description' => __('Adds “I am human” challenges where the theme supports it—may need API keys elsewhere.', 'sikshya'),
                         'default' => '0'
                     ],
                     [
                         'key' => 'session_timeout',
                         'type' => 'number',
-                        'label' => __('Session Timeout (minutes)', 'sikshya'),
-                        'description' => __('User session timeout in minutes', 'sikshya'),
+                        'label' => __('Log out inactive users after (minutes)', 'sikshya'),
+                        'description' => __('For shared computers, shorter times are safer; longer times are more convenient at home.', 'sikshya'),
+                        'placeholder' => __('e.g. 120', 'sikshya'),
                         'default' => 120,
                         'min' => 15,
                         'max' => 1440
@@ -2012,15 +2507,16 @@ class SettingsManager
                 'title' => __('Learner pages (URL segment)', 'sikshya'),
                 'icon' => 'fas fa-link',
                 'description' => __(
-                    'With pretty permalinks, these become paths like example.com/cart. With plain permalinks, URLs use ?sikshya_page=cart instead.',
+                    'Short word in the address bar after your domain (for example …/cart). Use lowercase letters, numbers, and hyphens only. With plain WordPress permalinks, URLs may use query strings instead.',
                     'sikshya'
                 ),
                 'fields' => [
                     [
                         'key' => 'permalink_cart',
                         'type' => 'text',
-                        'label' => __('Cart permalink', 'sikshya'),
-                        'description' => __('Slug for the shopping cart page.', 'sikshya'),
+                        'label' => __('Cart page slug', 'sikshya'),
+                        'description' => __('URL segment for the shopping cart (where items are reviewed before paying).', 'sikshya'),
+                        'placeholder' => __('cart', 'sikshya'),
                         'default' => $defaults['permalink_cart'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2028,8 +2524,9 @@ class SettingsManager
                     [
                         'key' => 'permalink_checkout',
                         'type' => 'text',
-                        'label' => __('Checkout permalink', 'sikshya'),
-                        'description' => __('Slug for the checkout page.', 'sikshya'),
+                        'label' => __('Checkout page slug', 'sikshya'),
+                        'description' => __('Where buyers enter payment details.', 'sikshya'),
+                        'placeholder' => __('checkout', 'sikshya'),
                         'default' => $defaults['permalink_checkout'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2037,8 +2534,9 @@ class SettingsManager
                     [
                         'key' => 'permalink_account',
                         'type' => 'text',
-                        'label' => __('Account permalink', 'sikshya'),
-                        'description' => __('Slug for the learner account / dashboard page.', 'sikshya'),
+                        'label' => __('Student account / dashboard slug', 'sikshya'),
+                        'description' => __('Where enrolled learners see courses, orders, and profile.', 'sikshya'),
+                        'placeholder' => __('account', 'sikshya'),
                         'default' => $defaults['permalink_account'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2046,8 +2544,9 @@ class SettingsManager
                     [
                         'key' => 'permalink_learn',
                         'type' => 'text',
-                        'label' => __('Learn page permalink', 'sikshya'),
-                        'description' => __('Slug for the course learn / curriculum page.', 'sikshya'),
+                        'label' => __('Course player / learn area slug', 'sikshya'),
+                        'description' => __('Base path for lessons and the course player.', 'sikshya'),
+                        'placeholder' => __('learn', 'sikshya'),
                         'default' => $defaults['permalink_learn'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2055,8 +2554,12 @@ class SettingsManager
                     [
                         'key' => 'permalink_order',
                         'type' => 'text',
-                        'label' => __('Order / receipt permalink', 'sikshya'),
-                        'description' => __('Slug for viewing an order receipt. The URL uses a private order_key (32-character hex token), not the numeric database ID.', 'sikshya'),
+                        'label' => __('Order receipt slug', 'sikshya'),
+                        'description' => __(
+                            'Path to the “thank you” / receipt page. The full URL still includes a secret key so orders are not guessable.',
+                            'sikshya'
+                        ),
+                        'placeholder' => __('order', 'sikshya'),
                         'default' => $defaults['permalink_order'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2067,7 +2570,7 @@ class SettingsManager
                 'title' => __('Learn player URL format', 'sikshya'),
                 'icon' => 'fas fa-route',
                 'description' => __(
-                    'Controls whether Learn URLs include a stable public id segment. Keeping it enabled is recommended for long-term compatibility when titles/slugs change and when content is reused across courses.',
+                    'Recommended: include a stable ID in lesson URLs so links keep working if you rename a lesson or reuse it in another course.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -2087,7 +2590,7 @@ class SettingsManager
                 'title' => __('Content type bases', 'sikshya'),
                 'icon' => 'fas fa-folder-open',
                 'description' => __(
-                    'URL prefix for single posts and archives. Changing these updates rewrite rules; save and visit Settings → Permalinks if URLs do not update immediately.',
+                    'WordPress uses these words in URLs for courses, lessons, and related content. After changing, save here and visit Settings → Permalinks in WordPress once if links break.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -2095,7 +2598,8 @@ class SettingsManager
                         'key' => 'rewrite_base_course',
                         'type' => 'text',
                         'label' => __('Course base', 'sikshya'),
-                        'description' => __('Archive and single course URLs use this segment.', 'sikshya'),
+                        'description' => __('Appears in course URLs and the course archive (e.g. …/courses/…).', 'sikshya'),
+                        'placeholder' => __('courses', 'sikshya'),
                         'default' => $defaults['rewrite_base_course'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2104,7 +2608,8 @@ class SettingsManager
                         'key' => 'rewrite_base_lesson',
                         'type' => 'text',
                         'label' => __('Lesson base', 'sikshya'),
-                        'description' => __('Single lesson URLs use this segment.', 'sikshya'),
+                        'description' => __('Single lesson addresses contain this word.', 'sikshya'),
+                        'placeholder' => __('lessons', 'sikshya'),
                         'default' => $defaults['rewrite_base_lesson'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2113,7 +2618,8 @@ class SettingsManager
                         'key' => 'rewrite_base_quiz',
                         'type' => 'text',
                         'label' => __('Quiz base', 'sikshya'),
-                        'description' => __('Single quiz URLs use this segment.', 'sikshya'),
+                        'description' => __('Single quiz addresses contain this word.', 'sikshya'),
+                        'placeholder' => __('quizzes', 'sikshya'),
                         'default' => $defaults['rewrite_base_quiz'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2122,7 +2628,8 @@ class SettingsManager
                         'key' => 'rewrite_base_assignment',
                         'type' => 'text',
                         'label' => __('Assignment base', 'sikshya'),
-                        'description' => __('Single assignment URLs use this segment.', 'sikshya'),
+                        'description' => __('Single assignment URLs contain this word.', 'sikshya'),
+                        'placeholder' => __('assignments', 'sikshya'),
                         'default' => $defaults['rewrite_base_assignment'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2131,7 +2638,8 @@ class SettingsManager
                         'key' => 'rewrite_base_certificate',
                         'type' => 'text',
                         'label' => __('Certificate base', 'sikshya'),
-                        'description' => __('Single certificate URLs use this segment.', 'sikshya'),
+                        'description' => __('Public certificate view URLs contain this word.', 'sikshya'),
+                        'placeholder' => __('certificates', 'sikshya'),
                         'default' => $defaults['rewrite_base_certificate'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2141,15 +2649,20 @@ class SettingsManager
             [
                 'title' => __('Taxonomy bases', 'sikshya'),
                 'icon' => 'fas fa-tags',
+                'description' => __(
+                    'URLs for browsing all courses in a category or tag. Pick slugs that do not clash with normal WordPress pages.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'rewrite_tax_course_category',
                         'type' => 'text',
                         'label' => __('Course category base', 'sikshya'),
                         'description' => __(
-                            'URL segment for course category archives. Avoid the same slug as WordPress post categories if both are used.',
+                            'Segment for category archive pages (lists of courses in a topic).',
                             'sikshya'
                         ),
+                        'placeholder' => __('course-category', 'sikshya'),
                         'default' => $defaults['rewrite_tax_course_category'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2158,7 +2671,8 @@ class SettingsManager
                         'key' => 'rewrite_tax_course_tag',
                         'type' => 'text',
                         'label' => __('Course tag base', 'sikshya'),
-                        'description' => __('URL segment for course tag archives.', 'sikshya'),
+                        'description' => __('Segment for tag archive pages (courses sharing a keyword).', 'sikshya'),
+                        'placeholder' => __('course-tag', 'sikshya'),
                         'default' => $defaults['rewrite_tax_course_tag'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
@@ -2179,26 +2693,31 @@ class SettingsManager
             [
                 'title' => __('Advanced Options', 'sikshya'),
                 'icon' => 'fas fa-tools',
+                'description' => __(
+                    'For troubleshooting and performance tuning. Leave debug off on live sites unless support asks for it.',
+                    'sikshya'
+                ),
                 'fields' => [
                     [
                         'key' => 'enable_debug_mode',
                         'type' => 'checkbox',
-                        'label' => __('Debug Mode', 'sikshya'),
-                        'description' => __('Enable debug mode for development', 'sikshya'),
+                        'label' => __('Debug mode (developers)', 'sikshya'),
+                        'description' => __('Logs extra detail—can slow the site and expose information. Use on staging only.', 'sikshya'),
                         'default' => '0'
                     ],
                     [
                         'key' => 'cache_enabled',
                         'type' => 'checkbox',
-                        'label' => __('Enable Caching', 'sikshya'),
-                        'description' => __('Enable caching for better performance', 'sikshya'),
+                        'label' => __('Use Sikshya caching', 'sikshya'),
+                        'description' => __('Stores prepared data in memory or transients to speed repeat page loads.', 'sikshya'),
                         'default' => '1'
                     ],
                     [
                         'key' => 'cache_duration',
                         'type' => 'number',
-                        'label' => __('Cache Duration (hours)', 'sikshya'),
-                        'description' => __('How long to cache data in hours', 'sikshya'),
+                        'label' => __('Keep cached data for (hours)', 'sikshya'),
+                        'description' => __('How long before Sikshya refreshes cached lists and settings. Lower if you need changes to appear instantly.', 'sikshya'),
+                        'placeholder' => __('e.g. 24', 'sikshya'),
                         'default' => 24,
                         'min' => 1,
                         'max' => 168

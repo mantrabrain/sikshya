@@ -49,6 +49,23 @@ final class LessonTemplateData
                     ? __('Please log in to access this lesson.', 'sikshya')
                     : __('You are not enrolled in this course.', 'sikshya');
             } else {
+                if ($error === '' && $enrolled && !$is_preview) {
+                    $access = apply_filters(
+                        'sikshya_access_check',
+                        ['ok' => true, 'message' => ''],
+                        [
+                            'type' => 'lesson',
+                            'user_id' => $uid,
+                            'course_id' => $course_id,
+                            'content_id' => $lesson_id,
+                        ]
+                    );
+                    if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
+                        $msg = isset($access['message']) ? (string) $access['message'] : '';
+                        $error = $msg !== '' ? $msg : __('This content is not available yet.', 'sikshya');
+                    }
+                }
+
                 $blocks = self::enrichBlocks(
                     $uid,
                     $course_id,
@@ -175,14 +192,16 @@ final class LessonTemplateData
     /**
      * Effective course features for Learn UI (global + per-course).
      *
-     * @return array{reviews: bool, discussions: bool, qa: bool, certificate: bool}
+     * @return array{reviews: bool, ratings: bool, discussions: bool, qa: bool, certificate: bool}
      */
     private static function courseFeatures(int $course_id): array
     {
         $global_reviews = Settings::isTruthy(Settings::get('enable_reviews', true));
+        $global_ratings = Settings::isTruthy(Settings::get('enable_ratings', true));
 
         return [
             'reviews' => $global_reviews && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
+            'ratings' => $global_ratings,
             'discussions' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
             'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
             'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),

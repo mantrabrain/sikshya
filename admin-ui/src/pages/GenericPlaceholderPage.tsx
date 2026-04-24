@@ -15,6 +15,7 @@ export function GenericPlaceholderPage(props: {
       adminUrl={config.adminUrl}
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
+      branding={config.branding}
       title={title}
       subtitle={description}
     >

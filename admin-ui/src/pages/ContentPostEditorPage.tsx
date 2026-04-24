@@ -6,14 +6,20 @@ import { useAdminRouting } from '../lib/adminRouting';
 import type { NavItem, SikshyaReactConfig } from '../types';
 import { renderContentEditor } from './content-editors/editors';
 
-const LIST_VIEW_BY_POST_TYPE: Record<string, string> = {
-  sik_course: 'courses',
-  sik_lesson: 'lessons',
-  sik_quiz: 'quizzes',
-  sik_assignment: 'assignments',
-  sik_question: 'questions',
-  sik_chapter: 'chapters',
-  sikshya_certificate: 'certificates',
+/**
+ * Where the editor should send the user when they click "back" / "all". For the
+ * five lesson-like CPTs we route through the Content library hub with the
+ * matching tab pre-selected; for certificates we use the Certificates hub.
+ * `sidebarKey` mirrors the sidebar nav id so the rail stays correctly highlighted.
+ */
+const POST_TYPE_HOMES: Record<string, { view: string; tab?: string; sidebarKey: string }> = {
+  sik_course: { view: 'courses', sidebarKey: 'courses' },
+  sik_lesson: { view: 'content-library', tab: 'lessons', sidebarKey: 'content-library' },
+  sik_quiz: { view: 'content-library', tab: 'quizzes', sidebarKey: 'content-library' },
+  sik_assignment: { view: 'content-library', tab: 'assignments', sidebarKey: 'content-library' },
+  sik_question: { view: 'content-library', tab: 'questions', sidebarKey: 'content-library' },
+  sik_chapter: { view: 'content-library', tab: 'chapters', sidebarKey: 'content-library' },
+  sikshya_certificate: { view: 'certificates-hub', tab: 'templates', sidebarKey: 'certificates-hub' },
 };
 
 const TITLE_BY_POST_TYPE: Record<string, string> = {
@@ -34,9 +40,11 @@ export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shell
   const postId = Number(q.post_id || q.id || 0) || 0;
   const isNew = postId <= 0;
 
-  const listView = LIST_VIEW_BY_POST_TYPE[postType] || 'dashboard';
+  const home = POST_TYPE_HOMES[postType] || { view: 'dashboard', sidebarKey: 'dashboard' };
+  const listView = home.sidebarKey;
   const entityLabel = TITLE_BY_POST_TYPE[postType] || 'Content';
-  const backHref = appViewHref(config, listView);
+  const backHref = appViewHref(config, home.view, home.tab ? { tab: home.tab } : {});
+  const isCertificateEditor = postType === 'sikshya_certificate';
 
   const onSavedNewId = (newId: number) => {
     navigateHref(
@@ -73,6 +81,21 @@ export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shell
           title="Cannot load editor"
         />
       </AppShell>
+    );
+  }
+
+  if (isCertificateEditor) {
+    return (
+      <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        {renderContentEditor(postType, {
+          config,
+          postType,
+          postId,
+          backHref,
+          entityLabel,
+          onSavedNewId,
+        })}
+      </div>
     );
   }
 

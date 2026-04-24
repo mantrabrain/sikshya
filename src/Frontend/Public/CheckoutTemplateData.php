@@ -80,6 +80,59 @@ final class CheckoutTemplateData
     }
 
     /**
+     * Enabled gateways in display order (payment_gateways_order then remainder).
+     *
+     * @return list<string>
+     */
+    public static function checkoutGatewayIdsOrdered(): array
+    {
+        $configured = self::gatewaysConfigured();
+        $orderRaw = trim((string) Settings::get('payment_gateways_order', ''));
+        $parts = $orderRaw === '' ? [] : array_map('trim', explode(',', $orderRaw));
+        $order = [];
+        foreach ($parts as $p) {
+            $k = sanitize_key($p);
+            if ($k !== '') {
+                $order[] = $k;
+            }
+        }
+
+        $out = [];
+        foreach ($order as $id) {
+            if (!empty($configured[$id])) {
+                $out[] = $id;
+            }
+        }
+        foreach ($configured as $id => $on) {
+            if ($on && !in_array($id, $out, true)) {
+                $out[] = $id;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Button labels for checkout (translate in template).
+     *
+     * @return array<string, string>
+     */
+    public static function gatewayCheckoutLabels(): array
+    {
+        return [
+            'offline' => __('Offline payment', 'sikshya'),
+            'paypal' => __('Pay with PayPal', 'sikshya'),
+            'stripe' => __('Pay with card (Stripe)', 'sikshya'),
+            'razorpay' => __('Pay with Razorpay', 'sikshya'),
+            'mollie' => __('Pay with Mollie', 'sikshya'),
+            'paystack' => __('Pay with Paystack', 'sikshya'),
+            'square' => __('Pay with Square', 'sikshya'),
+            'authorize_net' => __('Pay with Authorize.Net', 'sikshya'),
+            'bank_transfer' => __('Bank transfer', 'sikshya'),
+        ];
+    }
+
+    /**
      * @return array{lines: array<int, array<string, mixed>>, course_ids: array<int, int>, empty: bool, subtotal_hint: float, currency: string, rest_nonce: string, rest_url: string, gateways: array{offline: bool, stripe: bool, paypal: bool}, urls: array{home: string, cart: string, checkout: string, account: string}, viewer: array{display_name: string, email: string}}
      */
     public static function build(): array
@@ -105,10 +158,12 @@ final class CheckoutTemplateData
                 'course_ids' => $course_ids,
                 'subtotal_hint' => $cart['subtotal_hint'],
                 'currency' => $cart['currency'],
+                'bundle_id' => isset($cart['bundle_id']) ? (int) $cart['bundle_id'] : CartStorage::getBundleId(),
                 'empty' => $cart['lines'] === [],
                 'rest_nonce' => wp_create_nonce('wp_rest'),
                 'rest_url' => esc_url_raw(rest_url('sikshya/v1/')),
                 'gateways' => self::gatewaysConfigured(),
+                'checkout_gateway_ids' => self::checkoutGatewayIdsOrdered(),
                 'urls' => [
                     'home' => home_url('/'),
                     'cart' => PublicPageUrls::url('cart'),

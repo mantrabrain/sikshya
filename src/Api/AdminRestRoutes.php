@@ -8,6 +8,7 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Admin\CourseBuilder\BundleBuilderFieldFilter;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\ReactAdminConfig;
@@ -24,9 +25,12 @@ use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\CurriculumService;
 use Sikshya\Services\SampleDataImporter;
+use Sikshya\Addons\Addons;
 use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Licensing\Pro;
+use Sikshya\Services\EmailNotificationService;
 use Sikshya\Services\Settings;
+use Sikshya\Services\PermalinkService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -50,6 +54,31 @@ class AdminRestRoutes
     {
         $namespace = 'sikshya/v1';
 
+        register_rest_route($namespace, '/admin/certificates/(?P<id>\d+)/preview', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'previewCertificate'],
+                'permission_callback' => [$this, 'permissionAdminOrCanEditCertificate'],
+                'args' => [
+                    'id' => [
+                        'required' => true,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'previewCertificate'],
+                'permission_callback' => [$this, 'permissionAdminOrCanEditCertificate'],
+                'args' => [
+                    'id' => [
+                        'required' => true,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
         register_rest_route($namespace, '/course-builder/save', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -67,6 +96,27 @@ class AdminRestRoutes
                     'course_id' => [
                         'default' => 0,
                         'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/course-builder/set-type', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'setCourseType'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+                'args' => [
+                    'course_id' => [
+                        'required' => true,
+                        'sanitize_callback' => 'absint',
+                    ],
+                    'course_type' => [
+                        'required' => true,
+                        'sanitize_callback' => 'sanitize_key',
+                        'validate_callback' => static function ($v): bool {
+                            return in_array((string) $v, ['free', 'paid', 'subscription', 'bundle'], true);
+                        },
                     ],
                 ],
             ],
@@ -237,6 +287,14 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/settings/email/test-delivery', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'postSettingsEmailTestDelivery'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+        ]);
+
         register_rest_route($namespace, '/tools', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -273,6 +331,22 @@ class AdminRestRoutes
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getLicensingPayload'],
                 'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/shell-meta', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getShellMeta'],
+                /** Same gate as the unified React admin screen (`edit_posts`). */
+                'permission_callback' => [$this, 'permissionReactApp'],
+                'args' => [
+                    'view' => [
+                        'type' => 'string',
+                        'default' => 'dashboard',
+                        'sanitize_callback' => 'sanitize_key',
+                    ],
+                ],
             ],
         ]);
 
@@ -451,6 +525,63 @@ class AdminRestRoutes
         ]);
     }
 
+    /**
+     * Full-page certificate preview payload (HTML only; no theme styling).
+     *
+     * @return WP_REST_Response|WP_Error
+     */
+    public function previewCertificate(WP_REST_Request $request)
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_Error('invalid_id', __('Invalid certificate id.', 'sikshya'), ['status' => 400]);
+        }
+
+        $post = get_post($id);
+        if (!$post || $post->post_type !== PostTypes::CERTIFICATE) {
+            return new WP_Error('not_found', __('Certificate not found.', 'sikshya'), ['status' => 404]);
+        }
+
+        if (!current_user_can('edit_post', $id)) {
+            return new WP_Error('rest_forbidden', __('You cannot preview this certificate.', 'sikshya'), ['status' => 403]);
+        }
+
+        $title = wp_strip_all_tags(get_the_title($id));
+        $html = (string) $post->post_content;
+        $html = is_string($html) ? str_replace("\0", '', (string) wp_check_invalid_utf8($html, true)) : '';
+
+        if ($request->get_method() === 'POST') {
+            $params = $request->get_json_params();
+            if (is_array($params)) {
+                if (isset($params['title']) && is_string($params['title']) && $params['title'] !== '') {
+                    $title = sanitize_text_field($params['title']);
+                }
+                if (isset($params['html']) && is_string($params['html']) && $params['html'] !== '') {
+                    $inline = (string) wp_unslash($params['html']);
+                    if (strlen($inline) > 400000) {
+                        return new WP_Error(
+                            'payload_too_large',
+                            __('Preview HTML is too large.', 'sikshya'),
+                            ['status' => 413]
+                        );
+                    }
+                    $inline = str_replace("\0", '', (string) wp_check_invalid_utf8($inline, true));
+                    $html = $inline;
+                }
+            }
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'id' => (int) $id,
+                'title' => $title,
+                'html' => $html,
+            ],
+            200
+        );
+    }
+
     public function canManageCourseBuilder(): bool
     {
         return current_user_can('manage_sikshya')
@@ -462,6 +593,16 @@ class AdminRestRoutes
      *
      * @return bool|WP_Error
      */
+    /**
+     * Anyone who can open the Sikshya React app (`admin.php?page=sikshya`).
+     *
+     * @return bool
+     */
+    public function permissionReactApp()
+    {
+        return current_user_can('edit_posts');
+    }
+
     public function permissionAdmin(WP_REST_Request $request)
     {
         if ($this->canManageCourseBuilder()) {
@@ -488,6 +629,65 @@ class AdminRestRoutes
         return $this->canManageCourseBuilder()
             ? true
             : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
+    }
+
+    /**
+     * Certificate preview: allow course builder admins, or any user who can edit that certificate
+     * (wp-admin with cookie+nonce, without manage_sikshya / course caps).
+     *
+     * @return bool|WP_Error
+     */
+    public function permissionAdminOrCanEditCertificate(WP_REST_Request $request)
+    {
+        if ($this->canManageCourseBuilder()) {
+            return true;
+        }
+
+        $id = (int) $request->get_param('id');
+        if ($id > 0) {
+            $post = get_post($id);
+            if (
+                $post
+                && $post->post_type === PostTypes::CERTIFICATE
+                && current_user_can('edit_post', $id)
+            ) {
+                return true;
+            }
+        }
+
+        $jwt = JwtAuthService::bearerFromRequest($request);
+        if ($jwt === '') {
+            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
+        }
+
+        $svc = $this->plugin->getService('jwtAuth');
+        if (!$svc instanceof JwtAuthService) {
+            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
+        }
+
+        $uid = $svc->validateToken($jwt);
+        if (is_wp_error($uid)) {
+            return $uid;
+        }
+
+        wp_set_current_user($uid);
+
+        if ($this->canManageCourseBuilder()) {
+            return true;
+        }
+
+        if ($id > 0) {
+            $post = get_post($id);
+            if (
+                $post
+                && $post->post_type === PostTypes::CERTIFICATE
+                && current_user_can('edit_post', $id)
+            ) {
+                return true;
+            }
+        }
+
+        return new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
     }
 
     /**
@@ -673,16 +873,43 @@ class AdminRestRoutes
             $preview_url = is_string($link) ? $link : '';
         }
 
+        $is_bundle = $course_id > 0
+            && sanitize_key((string) get_post_meta($course_id, '_sikshya_course_type', true)) === 'bundle';
+
+        $tabs = $manager->getTabsForBootstrap();
+        $tab_fields = $manager->getTabFieldsForJs();
+
+        // Bundles are commercial packages + landing page — hide curriculum/settings/Pro tabs; trim fields in Course + Pricing.
+        if ($is_bundle) {
+            $keep = ['course', 'pricing'];
+            $tabs = array_values(
+                array_filter(
+                    $tabs,
+                    static function ($t) use ($keep): bool {
+                        return in_array((string) ($t['id'] ?? ''), $keep, true);
+                    }
+                )
+            );
+            foreach (array_keys($tab_fields) as $tid) {
+                if (!in_array($tid, $keep, true)) {
+                    unset($tab_fields[$tid]);
+                }
+            }
+            $tab_fields = BundleBuilderFieldFilter::filterTabFields($tab_fields);
+            $tabs = BundleBuilderFieldFilter::adjustTabSummariesForBundle($tabs);
+        }
+
         return new WP_REST_Response(
             [
                 'success' => true,
                 'data' => [
                     'course_id' => $course_id,
-                    'tabs' => $manager->getTabsForBootstrap(),
-                    'tabFields' => $manager->getTabFieldsForJs(),
+                    'tabs' => $tabs,
+                    'tabFields' => $tab_fields,
                     'values' => $values,
                     'users' => $users,
                     'preview_url' => $preview_url,
+                    'is_bundle' => $is_bundle,
                 ],
             ],
             200
@@ -836,6 +1063,42 @@ class AdminRestRoutes
             ],
             200
         );
+    }
+
+    /**
+     * Directly set the course type meta (e.g. marking a new draft as a bundle).
+     * Bypasses the full builder save/validate cycle — used immediately after post creation.
+     */
+    public function setCourseType(WP_REST_Request $request): WP_REST_Response
+    {
+        $course_id = (int) $request->get_param('course_id');
+        $type = sanitize_key((string) $request->get_param('course_type'));
+
+        if ($course_id <= 0) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Invalid course ID.', 'sikshya')], 400);
+        }
+
+        $post = get_post($course_id);
+        if (!$post || $post->post_type !== \Sikshya\Constants\PostTypes::COURSE) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Course not found.', 'sikshya')], 404);
+        }
+
+        update_post_meta($course_id, '_sikshya_course_type', $type);
+
+        if ($type === 'bundle') {
+            if (get_post_meta($course_id, '_sikshya_bundle_visible_in_listing', true) === '') {
+                update_post_meta($course_id, '_sikshya_bundle_visible_in_listing', '1');
+            }
+        }
+
+        return new WP_REST_Response([
+            'success' => true,
+            'data' => [
+                'course_id' => $course_id,
+                'course_type' => $type,
+                'is_bundle' => $type === 'bundle',
+            ],
+        ], 200);
     }
 
     public function createContent(WP_REST_Request $request): WP_REST_Response
@@ -996,7 +1259,9 @@ class AdminRestRoutes
         }
 
         $tabs = $svc->getAllSettings();
-        // Return settings config (sections + fields) as-is; React client renders it.
+        // Annotate locked sections/fields (addons disabled, feature gate off) so the
+        // React client can visually gate them without duplicating licensing state.
+        $tabs = $svc->decorateSchemaGating($tabs);
         return new WP_REST_Response(
             [
                 'success' => true,
@@ -1102,6 +1367,66 @@ class AdminRestRoutes
         return new WP_REST_Response(
             ['success' => (bool) $ok, 'message' => $ok ? __('Settings reset to default.', 'sikshya') : __('Reset failed.', 'sikshya')],
             $ok ? 200 : 400
+        );
+    }
+
+    /**
+     * Send a test HTML message through wp_mail (respects From/reply, optional SMTP, branded wrappers when licensed + add-on on).
+     */
+    public function postSettingsEmailTestDelivery(WP_REST_Request $request)
+    {
+        if (!Pro::feature('email_advanced_customization')) {
+            return Pro::restFeatureRequired('email_advanced_customization');
+        }
+        if (!Addons::isEnabled('email_advanced_customization')) {
+            return Pro::restAddonDisabled('email_advanced_customization');
+        }
+
+        $p = $this->jsonBody($request);
+        $raw = isset($p['to']) ? (string) $p['to'] : '';
+        $to = sanitize_email($raw);
+
+        if ($to === '') {
+            $user = wp_get_current_user();
+            $to = $user && !empty($user->user_email) ? (string) $user->user_email : '';
+        }
+
+        if ($to === '' || !is_email($to)) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'message' => __('Enter a valid recipient email address, or leave the field empty to use your account email.', 'sikshya'),
+                ],
+                400
+            );
+        }
+
+        $mailer = $this->plugin->getService('mailer');
+        if (!$mailer instanceof EmailNotificationService) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable.', 'sikshya')], 500);
+        }
+
+        $ok = $mailer->sendTestDeliveryEmail($to);
+        if (!$ok) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'message' => __('Could not send the test email. Check From / SMTP settings and your host mail logs.', 'sikshya'),
+                ],
+                500
+            );
+        }
+
+        return new WP_REST_Response(
+            [
+                'success' => true,
+                'message' => sprintf(
+                    /* translators: %s: recipient email address */
+                    __('Test email sent to %s.', 'sikshya'),
+                    $to
+                ),
+            ],
+            200
         );
     }
 
@@ -1411,6 +1736,17 @@ class AdminRestRoutes
     public function getLicensingPayload(): WP_REST_Response
     {
         return new WP_REST_Response(Pro::getClientPayload(), 200);
+    }
+
+    /**
+     * Alerts, licensing, and Pro version flags for the React shell (refresh after licence changes).
+     */
+    public function getShellMeta(WP_REST_Request $request): WP_REST_Response
+    {
+        $view = $request->get_param('view');
+        $page_key = is_string($view) && $view !== '' ? sanitize_key($view) : 'dashboard';
+
+        return new WP_REST_Response(ReactAdminConfig::shellBootstrap($page_key), 200);
     }
 
     /**
@@ -1756,7 +2092,23 @@ class AdminRestRoutes
 
         $rows = $repo->findAllPaged($per_page, $offset);
         $out = [];
+
+        $permalinks = PermalinkService::get();
+        $base = isset($permalinks['rewrite_base_certificate']) ? PermalinkService::sanitizeSlug((string) $permalinks['rewrite_base_certificate']) : 'certificates';
+
         foreach ($rows as $row) {
+            $code = (string) ($row->verification_code ?? '');
+            $template_post_id = isset($row->template_post_id) ? (int) $row->template_post_id : 0;
+            $verify_url = '';
+            if ($code !== '') {
+                $clean = strtolower(preg_replace('/[^a-f0-9]/', '', (string) $code) ?? '');
+                if ($clean !== '') {
+                    $verify_url = PermalinkService::isPlainPermalinks()
+                        ? home_url('/' . $base . '/?hash=' . rawurlencode($clean))
+                        : user_trailingslashit(home_url('/' . $base . '/' . $clean));
+                }
+            }
+
             $out[] = [
                 'id' => (int) $row->id,
                 'user_id' => (int) $row->user_id,
@@ -1764,8 +2116,10 @@ class AdminRestRoutes
                 'certificate_number' => (string) $row->certificate_number,
                 'issued_date' => (string) $row->issued_date,
                 'status' => (string) $row->status,
-                'verification_code' => (string) ($row->verification_code ?? ''),
-                'template_post_id' => isset($row->template_post_id) ? (int) $row->template_post_id : null,
+                'verification_code' => $code,
+                'template_post_id' => $template_post_id > 0 ? $template_post_id : null,
+                'verify_url' => $verify_url,
+                'document_url' => $verify_url,
             ];
         }
 

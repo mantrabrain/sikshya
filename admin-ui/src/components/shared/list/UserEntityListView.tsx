@@ -16,6 +16,8 @@ import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
 
 type Props = {
   roleSlug: string;
+  /** Increment to force refetch (e.g. after creating a user). */
+  refreshToken?: number;
   /** Shown on the toolbar row (e.g. “WordPress users with the Student role”). */
   contextHint: string;
   searchPlaceholder: string;
@@ -35,6 +37,7 @@ type Props = {
  */
 export function UserEntityListView({
   roleSlug,
+  refreshToken,
   contextHint,
   searchPlaceholder,
   sortFieldOptions,
@@ -128,6 +131,7 @@ export function UserEntityListView({
     order,
     page,
     perPage: DEFAULT_LIST_PER_PAGE,
+    refreshToken,
   });
 
   const rows = Array.isArray(listQuery.data?.data) ? listQuery.data.data : [];

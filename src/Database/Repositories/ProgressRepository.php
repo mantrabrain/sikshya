@@ -243,7 +243,19 @@ class ProgressRepository implements RepositoryInterface
             'completed_date' => current_time('mysql'),
         ];
 
-        return $this->create($progress_data) > 0;
+        $ok = $this->create($progress_data) > 0;
+        if ($ok) {
+            /**
+             * Fires when a learner completes a lesson (new progress row saved).
+             *
+             * @param int $user_id     User ID.
+             * @param int $course_id   Course ID.
+             * @param int $lesson_id   Lesson post ID.
+             */
+            do_action('sikshya_lesson_completed', $user_id, $course_id, $lesson_id);
+        }
+
+        return $ok;
     }
 
     /**
@@ -308,6 +320,27 @@ class ProgressRepository implements RepositoryInterface
         );
     }
 
+    /**
+     * How many curriculum quizzes in $quiz_ids are completed for this learner.
+     *
+     * @param array<int, int> $quiz_ids
+     */
+    public function countCompletedQuizzesAmong(int $user_id, int $course_id, array $quiz_ids): int
+    {
+        $n = 0;
+        foreach ($quiz_ids as $qid) {
+            $qid = (int) $qid;
+            if ($qid <= 0) {
+                continue;
+            }
+            if ($this->hasQuizCompletion($user_id, $course_id, $qid)) {
+                $n++;
+            }
+        }
+
+        return $n;
+    }
+
     public function markQuizComplete(int $user_id, int $course_id, int $quiz_id, float $score): bool
     {
         $progress_data = [
@@ -319,7 +352,20 @@ class ProgressRepository implements RepositoryInterface
             'completed_date' => current_time('mysql'),
         ];
 
-        return $this->create($progress_data) > 0;
+        $ok = $this->create($progress_data) > 0;
+        if ($ok) {
+            /**
+             * Fires when a learner completes a curriculum quiz (progress row saved).
+             *
+             * @param int   $user_id   User ID.
+             * @param int   $course_id Course ID.
+             * @param int   $quiz_id   Quiz post ID.
+             * @param float $score     Score percentage.
+             */
+            do_action('sikshya_quiz_completed', $user_id, $course_id, $quiz_id, $score);
+        }
+
+        return $ok;
     }
 
     public function getOverallProgress(int $user_id, int $course_id): float

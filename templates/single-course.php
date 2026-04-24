@@ -21,8 +21,10 @@ while (have_posts()) :
     $category_trail = $vm['category_trail'] ?? [];
     $tag_pills = $vm['tag_pills'] ?? [];
     $learning_outcomes = $vm['learning_outcomes'] ?? [];
-    $includes_lines = $vm['includes_lines'] ?? [];
-    $curriculum_stats = $vm['curriculum_stats'] ?? ['chapters' => 0, 'items' => 0, 'lessons' => 0];
+    $includes_lines    = $vm['includes_lines'] ?? [];
+    $curriculum_stats  = $vm['curriculum_stats'] ?? ['chapters' => 0, 'items' => 0, 'lessons' => 0];
+    $is_bundle         = !empty($vm['is_bundle']);
+    $bundle_courses    = $vm['bundle_courses'] ?? [];
     $video_preview = $vm['video_preview'] ?? null;
     $subtitle = isset($vm['subtitle']) ? (string) $vm['subtitle'] : '';
     $instructor_profiles = $vm['instructor_profiles'] ?? [];
@@ -70,6 +72,36 @@ while (have_posts()) :
             <h1 class="sikshya-course-lp__title"><?php the_title(); ?></h1>
             <?php if ($subtitle !== '') : ?>
                 <p class="sikshya-course-lp__subtitle"><?php echo esc_html($subtitle); ?></p>
+            <?php endif; ?>
+
+            <?php
+            $reviews_vm = $vm['reviews_vm'] ?? ['enabled' => false];
+            $rev_aggregate = $reviews_vm['enabled'] ? ($reviews_vm['aggregate'] ?? null) : null;
+            if (is_array($rev_aggregate) && (int) ($rev_aggregate['count'] ?? 0) > 0) :
+                $avg = (float) $rev_aggregate['average'];
+                $rev_count = (int) $rev_aggregate['count'];
+                ?>
+                <a href="#sikshya-reviews" class="sikshya-course-lp__rating" aria-label="<?php echo esc_attr(sprintf(_n('%1$s out of 5 stars based on %2$s review', '%1$s out of 5 stars based on %2$s reviews', $rev_count, 'sikshya'), number_format_i18n($avg, 1), number_format_i18n($rev_count))); ?>">
+                    <span class="sikshya-rating-stars" aria-hidden="true" data-rating="<?php echo esc_attr((string) $avg); ?>">
+                        <?php
+                        $full = (int) floor($avg);
+                        $half = ($avg - $full) >= 0.5;
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($i <= $full) {
+                                echo '<span class="sikshya-rating-star sikshya-rating-star--full">★</span>';
+                            } elseif ($i === $full + 1 && $half) {
+                                echo '<span class="sikshya-rating-star sikshya-rating-star--half">★</span>';
+                            } else {
+                                echo '<span class="sikshya-rating-star">☆</span>';
+                            }
+                        }
+                        ?>
+                    </span>
+                    <span class="sikshya-rating-avg"><?php echo esc_html(number_format_i18n($avg, 1)); ?></span>
+                    <span class="sikshya-rating-count">
+                        (<?php echo esc_html(sprintf(_n('%s rating', '%s ratings', $rev_count, 'sikshya'), number_format_i18n($rev_count))); ?>)
+                    </span>
+                </a>
             <?php endif; ?>
 
             <div class="sikshya-course-lp__stats">
@@ -140,7 +172,42 @@ while (have_posts()) :
                 <?php endif; ?>
 
                 <?php if (is_array($curriculum) && $curriculum !== []) : ?>
-                    <section class="sikshya-course-lp__panel sikshya-course-lp__curriculum" aria-labelledby="sikshya-curriculum-heading">
+                    <?php if ($is_bundle && !empty($bundle_courses)) : ?>
+                    <section class="sikshya-course-lp__panel sikshya-course-lp__bundle-courses" aria-labelledby="sikshya-bundle-courses-heading">
+                        <h2 id="sikshya-bundle-courses-heading" class="sikshya-course-lp__heading">
+                            <?php
+                            echo esc_html(sprintf(
+                                /* translators: %d: course count */
+                                _n('This bundle includes %d course', 'This bundle includes %d courses', count($bundle_courses), 'sikshya'),
+                                count($bundle_courses)
+                            ));
+                            ?>
+                        </h2>
+                        <ul class="sikshya-bundle-course-list">
+                            <?php foreach ($bundle_courses as $bc) : ?>
+                                <li class="sikshya-bundle-course-item">
+                                    <?php if (!empty($bc['thumb'])) : ?>
+                                        <img class="sikshya-bundle-course-item__thumb" src="<?php echo esc_url($bc['thumb']); ?>" alt="" loading="lazy" />
+                                    <?php else : ?>
+                                        <span class="sikshya-bundle-course-item__thumb-ph" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                        </span>
+                                    <?php endif; ?>
+                                    <div class="sikshya-bundle-course-item__body">
+                                        <a class="sikshya-bundle-course-item__title" href="<?php echo esc_url($bc['url']); ?>">
+                                            <?php echo esc_html($bc['title']); ?>
+                                        </a>
+                                    </div>
+                                    <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm sikshya-bundle-course-item__cta" href="<?php echo esc_url($bc['url']); ?>">
+                                        <?php esc_html_e('Preview', 'sikshya'); ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </section>
+                    <?php endif; ?>
+
+                    <section class="sikshya-course-lp__panel sikshya-course-lp__curriculum<?php echo $is_bundle ? ' sikshya-course-lp__curriculum--hidden-for-bundle' : ''; ?>" aria-labelledby="sikshya-curriculum-heading"<?php echo $is_bundle ? ' hidden' : ''; ?>>
                         <div class="sikshya-course-lp__curriculum-head">
                             <h2 id="sikshya-curriculum-heading" class="sikshya-course-lp__heading"><?php esc_html_e('Course content', 'sikshya'); ?></h2>
                             <p class="sikshya-course-lp__curriculum-meta">
@@ -309,6 +376,12 @@ while (have_posts()) :
                 <?php endif; ?>
 
                 <?php
+                if (!empty($reviews_vm['enabled'])) {
+                    include __DIR__ . '/partials/single-course-reviews.php';
+                }
+                ?>
+
+                <?php
                 $faq = $vm['course_faq'] ?? [];
                 if (is_array($faq) && $faq !== []) :
                     ?>
@@ -411,6 +484,15 @@ while (have_posts()) :
                                     <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full"><?php esc_html_e('Add to cart', 'sikshya'); ?></button>
                                 </form>
                                 <a class="sikshya-course-lp__sub-link" href="<?php echo esc_url($urls['cart']); ?>"><?php esc_html_e('View cart', 'sikshya'); ?></a>
+                                <?php if (!empty($vm['can_admin_enroll_without_purchase'])) : ?>
+                                    <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form sikshya-course-lp__form--admin-enroll">
+                                        <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
+                                        <input type="hidden" name="sikshya_cart_action" value="admin_enroll_bypass" />
+                                        <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
+                                        <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full"><?php esc_html_e('Enroll without purchase', 'sikshya'); ?></button>
+                                    </form>
+                                    <p class="sikshya-course-lp__admin-enroll-hint"><?php esc_html_e('Administrator: access this course without checkout.', 'sikshya'); ?></p>
+                                <?php endif; ?>
                             <?php elseif (is_user_logged_in()) : ?>
                                 <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form">
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>

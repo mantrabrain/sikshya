@@ -4,12 +4,33 @@ import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { EntityListView, StatusBadge } from '../components/shared/list';
 import { ButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
+import { NavIcon } from '../components/NavIcon';
 import { appViewHref } from '../lib/appUrl';
+import { isFeatureEnabled } from '../lib/licensing';
 import { courseMetaString, coursePriceLabel, embeddedAuthorName } from '../lib/courseListMeta';
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { embeddedTermNames } from '../lib/wpPostTerms';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
+
+function isBundleRow(r: WpPost): boolean {
+  const m = r.meta as Record<string, unknown> | undefined;
+  const v =
+    (m && (m._sikshya_course_type ?? (m as Record<string, unknown>).sikshya_course_type)) ??
+    r.sikshya_course_type ??
+    // Defensive: some WP setups/plugins flatten meta unexpectedly.
+    (r as unknown as { _sikshya_course_type?: unknown })._sikshya_course_type;
+  return String(v || '') === 'bundle';
+}
+
+function isSubscriptionRow(r: WpPost): boolean {
+  const m = r.meta as Record<string, unknown> | undefined;
+  const v =
+    (m && (m._sikshya_course_type ?? (m as Record<string, unknown>).sikshya_course_type)) ??
+    r.sikshya_course_type ??
+    (r as unknown as { _sikshya_course_type?: unknown })._sikshya_course_type;
+  return String(v || '') === 'subscription';
+}
 
 function stripTags(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
@@ -33,6 +54,8 @@ const COURSE_CAT_TAX = 'sikshya_course_category';
 export function CoursesPage(props: { config: SikshyaReactConfig; title: string; restBase: string }) {
   const { config, title, restBase } = props;
   const [createOpen, setCreateOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<'any' | 'regular' | 'subscription' | 'bundle'>('any');
+  const showCourseStaff = isFeatureEnabled(config, 'multi_instructor');
 
   const columns: Column<WpPost>[] = useMemo(
     () => [
@@ -70,12 +93,28 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         sortKey: 'title',
         render: (r) => (
           <div className="max-w-md">
-            <a
-              href={appViewHref(config, 'add-course', { course_id: String(r.id) })}
-              className="font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
-            >
-              <span dangerouslySetInnerHTML={{ __html: r.title.rendered }} />
-            </a>
+            <div className="flex min-w-0 items-center gap-2">
+              <a
+                href={appViewHref(config, 'add-course', {
+                  course_id: String(r.id),
+                  ...(isBundleRow(r) ? { force_bundle_ui: '1' } : null),
+                })}
+                className="min-w-0 truncate font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                <span dangerouslySetInnerHTML={{ __html: r.title.rendered }} />
+              </a>
+              {isBundleRow(r) ? (
+                <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-violet-300 bg-violet-100 px-2 text-[11px] font-semibold leading-none text-violet-900 dark:border-violet-600/80 dark:bg-violet-950/55 dark:text-violet-100">
+                  <NavIcon name="bundleBox" className="h-3.5 w-3.5 text-violet-800 dark:text-violet-100" />
+                  Bundle
+                </span>
+              ) : isSubscriptionRow(r) ? (
+                <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-sky-300 bg-sky-100 px-2 text-[11px] font-semibold leading-none text-sky-900 dark:border-sky-600/80 dark:bg-sky-950/55 dark:text-sky-100">
+                  <NavIcon name="plusCircle" className="h-3.5 w-3.5 text-sky-800 dark:text-sky-100" />
+                  Subscription
+                </span>
+              ) : null}
+            </div>
             {r.slug ? (
               <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                 {formatDisplaySlug(r.slug, r.status)}
@@ -162,6 +201,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
       adminUrl={config.adminUrl}
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
+      branding={config.branding}
       title={title}
       subtitle="Live data from your site. Create a draft, then finish details in the builder."
       pageActions={
@@ -181,15 +221,54 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         ]}
         defaultSortField="title"
         columnPickerStorageKey="course"
-        collectionQueryExtras={{ embed: '1' }}
+        collectionQueryExtras={{
+          embed: '1',
+          // Ensure bundle type meta is present in the collection response so the badge renders reliably.
+          fields: 'id,title,slug,status,meta,sikshya_course_type,_embedded,date,modified,excerpt,author',
+          ...(typeFilter !== 'any' ? { sikshya_course_type: typeFilter } : null),
+        }}
+        toolbarTrailing={
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="sr-only" htmlFor="sikshya-course-type-filter">
+              Course type
+            </label>
+            <select
+              id="sikshya-course-type-filter"
+              value={typeFilter}
+              onChange={(e) =>
+                setTypeFilter(e.target.value as 'any' | 'regular' | 'subscription' | 'bundle')
+              }
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+              title="Filter by course type"
+            >
+              <option value="any">All types</option>
+              <option value="regular">Regular courses</option>
+              <option value="subscription">Subscription courses</option>
+              <option value="bundle">Bundle courses</option>
+            </select>
+          </div>
+        }
         postRowActions={{
-          buildLeadingItems: (r) => [
-            {
-              key: 'builder',
-              label: 'Edit in builder',
-              href: appViewHref(config, 'add-course', { course_id: String(r.id) }),
-            },
-          ],
+          buildLeadingItems: (r) => {
+            const items = [
+              {
+                key: 'builder',
+                label: isBundleRow(r) ? 'Edit bundle' : 'Edit in builder',
+                href: appViewHref(config, 'add-course', {
+                  course_id: String(r.id),
+                  ...(isBundleRow(r) ? { force_bundle_ui: '1' } : null),
+                }),
+              },
+            ];
+            if (showCourseStaff) {
+              items.push({
+                key: 'course-team',
+                label: 'Manage staff',
+                href: appViewHref(config, 'course-team', { course_id: String(r.id) }),
+              });
+            }
+            return items;
+          },
         }}
         columns={columns}
         emptyMessage="No courses match your filters. Try clearing search or choosing another status."

@@ -242,7 +242,7 @@
   root.querySelectorAll('[data-sikshya-gateway]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var g = btn.getAttribute('data-sikshya-gateway');
-      if (g === 'stripe' || g === 'paypal' || g === 'offline') {
+      if (g) {
         startGateway(g);
       }
     });
@@ -253,6 +253,10 @@
 
   // Handle Stripe redirect return by confirming + enrolling, then redirecting to receipt.
   confirmStripeReturnIfNeeded();
+
+  confirmMollieReturnIfNeeded();
+  confirmPaystackReturnIfNeeded();
+  confirmRazorpayReturnIfNeeded();
 
   function confirmStripeReturnIfNeeded() {
     try {
@@ -320,6 +324,133 @@
         });
     } catch (e) {
       // ignore parsing errors
+    }
+  }
+
+  function confirmMollieReturnIfNeeded() {
+    try {
+      var u = new URL(window.location.href);
+      if (u.searchParams.get('sikshya_mollie_return') !== '1') {
+        return;
+      }
+      var orderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
+      var paymentId = u.searchParams.get('id') || '';
+      if (!orderId) {
+        return;
+      }
+      setStatus(t('confirmingPayment', 'Confirming payment…'));
+      fetch(restUrl + 'checkout/confirm', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': nonce,
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          gateway: 'mollie',
+          mollie_payment_id: paymentId,
+        }),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (json) {
+          if (json && json.ok && json.data && json.data.redirect_url) {
+            window.location.href = json.data.redirect_url;
+            return;
+          }
+          setStatus((json && json.message) || t('confirmFailed', 'Could not confirm payment.'));
+        })
+        .catch(function () {
+          setStatus(t('networkError', 'Network error. Please try again.'));
+        });
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function confirmPaystackReturnIfNeeded() {
+    try {
+      var u = new URL(window.location.href);
+      if (u.searchParams.get('sikshya_paystack_return') !== '1') {
+        return;
+      }
+      var orderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
+      var ref = u.searchParams.get('reference') || u.searchParams.get('trxref') || '';
+      if (!orderId || !ref) {
+        return;
+      }
+      setStatus(t('confirmingPayment', 'Confirming payment…'));
+      fetch(restUrl + 'checkout/confirm', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': nonce,
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          gateway: 'paystack',
+          paystack_reference: ref,
+        }),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (json) {
+          if (json && json.ok && json.data && json.data.redirect_url) {
+            window.location.href = json.data.redirect_url;
+            return;
+          }
+          setStatus((json && json.message) || t('confirmFailed', 'Could not confirm payment.'));
+        })
+        .catch(function () {
+          setStatus(t('networkError', 'Network error. Please try again.'));
+        });
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function confirmRazorpayReturnIfNeeded() {
+    try {
+      var u = new URL(window.location.href);
+      if (u.searchParams.get('sikshya_razorpay_return') !== '1') {
+        return;
+      }
+      var orderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
+      if (!orderId) {
+        return;
+      }
+      setStatus(t('confirmingPayment', 'Confirming payment…'));
+      fetch(restUrl + 'checkout/confirm', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': nonce,
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          gateway: 'razorpay',
+        }),
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (json) {
+          if (json && json.ok && json.data && json.data.redirect_url) {
+            window.location.href = json.data.redirect_url;
+            return;
+          }
+          setStatus((json && json.message) || t('confirmFailed', 'Could not confirm payment.'));
+        })
+        .catch(function () {
+          setStatus(t('networkError', 'Network error. Please try again.'));
+        });
+    } catch (e) {
+      /* ignore */
     }
   }
 })();

@@ -25,7 +25,7 @@
 /* Standardize public page width (exclude Learn + Account) */
 .sikshya-public:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-container,
 body:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .sikshya-container {
-  max-width: 70rem;
+  max-width: 1200px;
 }
 
 /* Hero Section */
@@ -643,6 +643,17 @@ body:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .si
   line-height: 1.2 !important;
   box-sizing: border-box !important;
   white-space: nowrap !important;
+}
+
+.sikshya-course-lp__form--admin-enroll {
+  margin-top: 10px;
+}
+
+.sikshya-course-lp__admin-enroll-hint {
+  margin: 6px 0 0;
+  font-size: var(--sikshya-font-size-xs);
+  color: var(--sikshya-gray-500);
+  line-height: 1.45;
 }
 
 .sikshya-muted {

@@ -14,13 +14,24 @@ export type WpPostCollectionQuery = {
   perPage?: number;
   /** WordPress REST `_embed` (e.g. `1` loads embedded resources such as featured media). */
   embed?: string;
+  /**
+   * WordPress REST `_fields` selector — use when you need meta/embedded fields reliably in collections.
+   * Example: `id,title,slug,status,meta,_embedded,date,modified,excerpt,author`
+   */
+  fields?: string;
+  /**
+   * Sikshya admin filter: course type for `sik_course` collections.
+   * - `bundle`: only bundles
+   * - `regular`: everything except bundles
+   */
+  sikshya_course_type?: 'bundle' | 'subscription' | 'regular' | '';
 };
 
 /**
  * Fetches a WP `/wp/v2/{restBase}` collection with filters (used by entity list pages).
  */
 export function useWpPostCollection(restBase: string, query: WpPostCollectionQuery) {
-  const { search, status, orderby, order, page = 1, perPage = 20, embed } = query;
+  const { search, status, orderby, order, page = 1, perPage = 20, embed, fields, sikshya_course_type } = query;
 
   return useAsyncData(async () => {
     const params: Record<string, string | number | boolean> = {
@@ -38,8 +49,16 @@ export function useWpPostCollection(restBase: string, query: WpPostCollectionQue
     if (embed && embed !== '') {
       params._embed = embed;
     }
+    const f = (fields || '').trim();
+    if (f) {
+      params._fields = f;
+    }
+    const ct = (sikshya_course_type || '').trim();
+    if (ct) {
+      params.sikshya_course_type = ct;
+    }
 
     const path = WP_ENDPOINTS.postTypeCollection(restBase, params);
     return getWpApi().getWithTotal<WpPost[]>(path);
-  }, [restBase, search, status, orderby, order, page, perPage, embed]);
+  }, [restBase, search, status, orderby, order, page, perPage, embed, fields, sikshya_course_type]);
 }

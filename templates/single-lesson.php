@@ -220,7 +220,25 @@ while (have_posts()) :
                                     <div class="sikshya-learnHeader__titles">
                                         <?php
                                         $lesson_type = sanitize_key((string) get_post_meta((int) get_the_ID(), '_sikshya_lesson_type', true));
-                                        $lesson_icon = $lesson_type === 'video' ? 'play-video' : ($lesson_type === 'audio' ? 'audio' : 'doc');
+                                        switch ($lesson_type) {
+                                            case 'video':
+                                            case 'live':
+                                                // Live sessions and recorded video both lead with a "play" affordance.
+                                                $lesson_icon = 'play-video';
+                                                break;
+                                            case 'audio':
+                                                $lesson_icon = 'audio';
+                                                break;
+                                            case 'scorm':
+                                            case 'h5p':
+                                                // Reuse the document icon for packaged interactives — keeps the
+                                                // template free of new SVG payloads while still hinting at "container".
+                                                $lesson_icon = 'doc';
+                                                break;
+                                            default:
+                                                $lesson_icon = 'doc';
+                                                break;
+                                        }
                                         ?>
                                         <div class="sikshya-learnHeader__titleRow">
                                             <span class="sikshya-learnHeader__typeIcon" aria-hidden="true">
@@ -290,17 +308,40 @@ while (have_posts()) :
                         </div>
                         <div class="sikshya-tabPanel is-active" data-sikshya-panel="overview">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                                <?php
+                                /**
+                                 * Render Pro / addon blocks above the lesson body
+                                 * (live class join, SCORM/H5P launcher, etc.).
+                                 *
+                                 * @param array<string, mixed> $vm Lesson view model.
+                                 */
+                                do_action('sikshya_lesson_before_content', $vm);
+                                ?>
                                 <?php if (trim((string) get_the_content()) !== '') : ?>
-                                    <?php the_content(); ?>
+            <?php the_content(); ?>
                                 <?php else : ?>
                                     <p class="sikshya-zeroMargin"><?php esc_html_e('This lesson does not have content yet.', 'sikshya'); ?></p>
                                 <?php endif; ?>
+                                <?php
+                                /**
+                                 * Render Pro / addon blocks below the lesson body.
+                                 *
+                                 * @param array<string, mixed> $vm Lesson view model.
+                                 */
+                                do_action('sikshya_lesson_after_content', $vm);
+                                ?>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="resources">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
-                                <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
-                                <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this lesson yet.', 'sikshya'); ?></p>
+                                <?php
+                                $lesson_resources_rendered = apply_filters('sikshya_lesson_resources_rendered', false, $vm);
+                                if (!$lesson_resources_rendered) :
+                                    ?>
+                                    <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this lesson yet.', 'sikshya'); ?></p>
+                                <?php endif; ?>
+                                <?php do_action('sikshya_lesson_resources_after', $vm); ?>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="notes">
@@ -331,7 +372,7 @@ while (have_posts()) :
                                 </div>
                             </div>
                         <?php endif; ?>
-                    </div>
+        </div>
 
                     <?php
                     // Sticky Prev/Next: derive from curriculum blocks.

@@ -176,6 +176,7 @@ while (have_posts()) {
                     'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
                     'restNonce' => wp_create_nonce('wp_rest'),
                     'quizId' => (string) $quiz_id,
+                    'advanced' => (!empty($vm['advanced']) && is_array($vm['advanced'])) ? $vm['advanced'] : null,
                     'i18n' => [
                         'score' => __('Your score: %s%%', 'sikshya'),
                         'passed' => __('You passed this quiz.', 'sikshya'),
@@ -266,6 +267,7 @@ while (have_posts()) {
                                                 <?php endif; ?>
                                             </div>
                                             <div class="sikshya-learnHeader__metaInline" aria-label="<?php echo esc_attr__('Quiz details', 'sikshya'); ?>">
+                                                <span class="sikshya-pill sikshya-pill--emphasis"><?php esc_html_e('Assessment', 'sikshya'); ?></span>
                                                 <span class="sikshya-pill"><?php echo esc_html(sprintf(__('%d questions', 'sikshya'), (int) $question_count)); ?></span>
                                                 <?php if ($duration_mins > 0) : ?>
                                                     <span class="sikshya-pill"><?php echo esc_html(sprintf(__('%d min', 'sikshya'), (int) $duration_mins)); ?></span>
@@ -283,6 +285,8 @@ while (have_posts()) {
                                                 type="button"
                                                 class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
                                                 data-sikshya-quiz-start
+                                                aria-expanded="false"
+                                                aria-controls="sikshya-learn-quiz-form"
                                             ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
                                         <?php else : ?>
                                             <?php
@@ -307,9 +311,112 @@ while (have_posts()) {
                             </div>
                         </div>
 
+                        <?php
+                        $show_quiz_intro = !$attempts_exhausted && $question_count > 0;
+                        $intro_lead = '';
+                        if ($show_quiz_intro) {
+                            $ex = trim(get_the_excerpt());
+                            if ($ex !== '') {
+                                $intro_lead = $ex;
+                            } else {
+                                $raw = isset($vm['post']) && $vm['post'] instanceof WP_Post
+                                    ? (string) $vm['post']->post_content
+                                    : '';
+                                $plain = trim(preg_replace('/\s+/', ' ', wp_strip_all_tags($raw)));
+                                if (strlen($plain) > 40) {
+                                    if (function_exists('mb_substr')) {
+                                        $intro_lead = mb_substr($plain, 0, 320) . (mb_strlen($plain) > 320 ? '…' : '');
+                                    } else {
+                                        $intro_lead = substr($plain, 0, 320) . (strlen($plain) > 320 ? '…' : '');
+                                    }
+                                }
+                            }
+                            if ($intro_lead === '') {
+                                $intro_lead = __(
+                                    'This short quiz helps lock in what you learned. You can change your answers any time before you press Submit.',
+                                    'sikshya'
+                                );
+                            }
+                        }
+                        ?>
+                        <?php if ($show_quiz_intro) : ?>
+                            <div class="sikshya-contentPanel sikshya-contentPanel--quizIntro" data-sikshya-quiz-intro>
+                                <div class="sikshya-quizIntro">
+                                    <p class="sikshya-quizIntro__eyebrow"><?php esc_html_e('Your next step', 'sikshya'); ?></p>
+                                    <h2 class="sikshya-quizIntro__title"><?php esc_html_e('Ready when you are', 'sikshya'); ?></h2>
+                                    <p class="sikshya-quizIntro__lead"><?php echo esc_html($intro_lead); ?></p>
+                                    <ul class="sikshya-quizIntro__facts">
+                                        <li>
+                                            <?php
+                                            echo esc_html(
+                                                sprintf(
+                                                    /* translators: %d: number of questions */
+                                                    _n('%d question in this attempt', '%d questions in this attempt', $question_count, 'sikshya'),
+                                                    $question_count
+                                                )
+                                            );
+                                            ?>
+                                        </li>
+                                        <li>
+                                            <?php
+                                            echo esc_html(
+                                                sprintf(
+                                                    /* translators: %d: passing score percentage */
+                                                    __('You need %d%% or higher to pass.', 'sikshya'),
+                                                    (int) $passing_score
+                                                )
+                                            );
+                                            ?>
+                                        </li>
+                                        <?php if ($attempts_max > 0) : ?>
+                                            <li>
+                                                <?php
+                                                if ((int) $attempts_max === 1) {
+                                                    esc_html_e('You have one attempt for this quiz.', 'sikshya');
+                                                } else {
+                                                    echo esc_html(
+                                                        sprintf(
+                                                            /* translators: %d: max attempts */
+                                                            __('You can try up to %d times if you need another shot.', 'sikshya'),
+                                                            (int) $attempts_max
+                                                        )
+                                                    );
+                                                }
+                                                ?>
+                                            </li>
+                                        <?php endif; ?>
+                                        <?php if ($duration_mins > 0) : ?>
+                                            <li>
+                                                <?php
+                                                echo esc_html(
+                                                    sprintf(
+                                                        /* translators: %d: minutes */
+                                                        __('Time limit: about %d minutes.', 'sikshya'),
+                                                        (int) $duration_mins
+                                                    )
+                                                );
+                                                ?>
+                                            </li>
+                                        <?php endif; ?>
+                                    </ul>
+                                    <button
+                                        type="button"
+                                        class="sikshya-btn sikshya-btn--primary sikshya-quizIntro__cta"
+                                        data-sikshya-quiz-start
+                                        aria-expanded="false"
+                                        aria-controls="sikshya-learn-quiz-form"
+                                    ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                    <p class="sikshya-quizIntro__hint">
+                                        <?php esc_html_e('Questions will open in this area. Extra study tips live in the Overview tab below.', 'sikshya'); ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                             <?php if (!empty($vm['questions']) && is_array($vm['questions'])) : ?>
                                 <form
+                                    id="sikshya-learn-quiz-form"
                                     class="sikshya-quiz-form"
                                     data-quiz-id="<?php echo esc_attr((string) $quiz_id); ?>"
                                     action="#"
@@ -322,31 +429,11 @@ while (have_posts()) {
                                     <?php endif; ?>
                                     <?php foreach ($vm['questions'] as $qi => $q) : ?>
                                         <?php
-                                        if (!is_array($q)) {
+                                        if (!is_array($q) || (isset($q['id']) ? (int) $q['id'] : 0) <= 0) {
                                             continue;
                                         }
-                                        $qid = isset($q['id']) ? (int) $q['id'] : 0;
-                                        $qtitle = isset($q['title']) ? (string) $q['title'] : '';
-                                        $opts = isset($q['options']) && is_array($q['options']) ? $q['options'] : [];
-                                        if ($qid <= 0) {
-                                            continue;
-                                        }
+                                        require __DIR__ . '/partials/quiz-question-fieldset.php';
                                         ?>
-                                        <fieldset class="sikshya-quizQ sikshya-q" data-qid="<?php echo esc_attr((string) $qid); ?>" data-qtype="single_choice">
-                                            <legend class="sikshya-quizQ__title sikshya-q__title">
-                                                <?php echo esc_html(sprintf(__('%1$d) %2$s', 'sikshya'), (int) ($qi + 1), $qtitle)); ?>
-                                            </legend>
-                                            <?php foreach ($opts as $oi => $opt) : ?>
-                                                <label class="sikshya-quizQ__opt">
-                                                    <input
-                                                        type="radio"
-                                                        name="<?php echo esc_attr('question_' . $qid); ?>"
-                                                        value="<?php echo esc_attr((string) $oi); ?>"
-                                                    />
-                                                    <span><?php echo esc_html((string) $opt); ?></span>
-                                                </label>
-                                                <?php endforeach; ?>
-                                        </fieldset>
                                     <?php endforeach; ?>
                                     <?php if ($attempts_exhausted) : ?>
                                         </fieldset>
@@ -616,18 +703,30 @@ while (have_posts()) {
     });
   }
 
-  // Quiz start: reveal the form and focus first question.
-  const startBtn = document.querySelector('[data-sikshya-quiz-start]');
+  // Quiz start: reveal the form, hide the intro landing, focus first question.
+  const startBtns = document.querySelectorAll('[data-sikshya-quiz-start]');
   const quizForm = document.querySelector('[data-sikshya-quiz-form]');
-  if (startBtn && quizForm) {
-    startBtn.addEventListener('click', () => {
-      if (startBtn.hasAttribute('disabled') || startBtn.getAttribute('aria-disabled') === 'true') {
-        return;
-      }
-      quizForm.hidden = false;
-      const first = quizForm.querySelector('input, textarea, select, button');
-      if (first && first.focus) first.focus();
-      quizForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const quizIntro = document.querySelector('[data-sikshya-quiz-intro]');
+  if (quizForm && startBtns.length) {
+    startBtns.forEach((startBtn) => {
+      startBtn.addEventListener('click', () => {
+        if (startBtn.hasAttribute('disabled') || startBtn.getAttribute('aria-disabled') === 'true') {
+          return;
+        }
+        quizForm.hidden = false;
+        if (quizIntro) {
+          quizIntro.setAttribute('hidden', '');
+        }
+        startBtns.forEach((b) => {
+          b.setAttribute('hidden', '');
+          b.setAttribute('aria-expanded', 'true');
+        });
+        const first = quizForm.querySelector('input, textarea, select, button');
+        if (first && first.focus) {
+          first.focus({ preventScroll: true });
+        }
+        quizForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     });
   }
 })();

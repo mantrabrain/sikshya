@@ -107,6 +107,15 @@ $courses_query = new WP_Query($args);
                             <?php _e('Premium', 'sikshya'); ?>
                         </span>
                     <?php endif; ?>
+
+                    <?php
+                    /**
+                     * Extra badges on a course listing card (bundle membership, subscription only, multi-instructor count).
+                     *
+                     * @param int $course_id
+                     */
+                    do_action('sikshya_course_card_badges', (int) $course_id);
+                    ?>
                     
                     <!-- Course Content -->
                     <div class="sikshya-course-card__content">
@@ -152,6 +161,15 @@ $courses_query = new WP_Query($args);
                             <?php endif; ?>
                         </div>
                         
+                        <?php
+                        /**
+                         * Extra meta row inside a course listing card (instructor list, prerequisites pill, etc.).
+                         *
+                         * @param int $course_id
+                         */
+                        do_action('sikshya_course_card_meta', (int) $course_id);
+                        ?>
+
                         <!-- Course Categories -->
                         <?php if (!empty($categories)) : ?>
                             <div class="sikshya-course-card__categories">

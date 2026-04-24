@@ -2,6 +2,9 @@
 
 namespace Sikshya\Frontend\Public;
 
+use Sikshya\Addons\Addons;
+use Sikshya\Licensing\Pro;
+
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\EnrollmentRepository;
@@ -34,6 +37,11 @@ final class SingleCourseTemplateData
         $enrolled = $uid > 0 && $repo->findByUserAndCourse($uid, $course_id) !== null;
 
         $is_paid = null !== $pricing['effective'] && (float) $pricing['effective'] > 0;
+
+        $can_admin_enroll_without_purchase = false;
+        if ($uid > 0 && !$enrolled && $is_paid && function_exists('sikshya_current_user_can_admin_enroll_without_purchase')) {
+            $can_admin_enroll_without_purchase = sikshya_current_user_can_admin_enroll_without_purchase();
+        }
 
         $primary = 'login';
         if ($enrolled) {
@@ -96,6 +104,30 @@ final class SingleCourseTemplateData
         $includes_lines = self::buildIncludesLines($duration_hours, $curriculum_stats, $course_highlights);
         $first_content_url = self::firstContentUrl($curriculum, $course_id);
 
+        // Bundle support: detect via meta, build included-course list.
+        $is_bundle = sanitize_key((string) get_post_meta($course_id, '_sikshya_course_type', true)) === 'bundle';
+        $bundle_courses = [];
+        if ($is_bundle) {
+            $raw_ids = get_post_meta($course_id, '_sikshya_bundle_course_ids', true);
+            if (is_string($raw_ids) && $raw_ids !== '') {
+                $dec = json_decode($raw_ids, true);
+                $raw_ids = is_array($dec) ? $dec : [];
+            }
+            foreach ((array) $raw_ids as $bid) {
+                $bid = (int) $bid;
+                if ($bid <= 0) { continue; }
+                $bp = get_post($bid);
+                if (!$bp instanceof \WP_Post) { continue; }
+                $bundle_courses[] = [
+                    'id'    => $bid,
+                    'post'  => $bp,
+                    'title' => get_the_title($bp),
+                    'thumb' => get_the_post_thumbnail_url($bid, 'thumbnail') ?: '',
+                    'url'   => get_permalink($bid) ?: '',
+                ];
+            }
+        }
+
         $discount_percent = null;
         if (!empty($pricing['on_sale']) && isset($pricing['price'], $pricing['sale_price'])) {
             $reg = (float) $pricing['price'];
@@ -113,6 +145,7 @@ final class SingleCourseTemplateData
             'pricing' => $pricing,
             'is_paid' => $is_paid,
             'is_enrolled' => $enrolled,
+            'can_admin_enroll_without_purchase' => $can_admin_enroll_without_purchase,
             'primary_action' => $primary,
             'curriculum' => $curriculum,
             'curriculum_stats' => $curriculum_stats,
@@ -135,7 +168,9 @@ final class SingleCourseTemplateData
             'target_audience_html' => $target_audience_html,
             'last_updated' => $last_updated,
             'discount_percent' => $discount_percent,
-            'includes_lines' => $includes_lines,
+            'includes_lines'  => $includes_lines,
+            'is_bundle'       => $is_bundle,
+            'bundle_courses'  => $bundle_courses,
             'money_back_text' => (string) apply_filters(
                 'sikshya_course_money_back_text',
                 __('30-day money-back guarantee', 'sikshya'),
@@ -150,6 +185,15 @@ final class SingleCourseTemplateData
                 'courses_archive' => get_post_type_archive_link(PostTypes::COURSE) ?: '',
                 'login' => wp_login_url(get_permalink($course_id)),
             ],
+        ];
+
+        // `reviews_vm` is populated by the `course_reviews` Pro addon when active
+        // (see SikshyaPro\Frontend\ProReviewTemplateHooks). Default keeps the
+        // template silent when the addon is disabled.
+        $data['reviews_vm'] = ['enabled' => false];
+        $data['rest'] = [
+            'url' => esc_url_raw(rest_url('sikshya/v1/')),
+            'nonce' => wp_create_nonce('wp_rest'),
         ];
 
         return apply_filters('sikshya_single_course_template_data', $data, $post);
@@ -497,21 +541,6 @@ final class SingleCourseTemplateData
      */
     private static function cartFlashFromRequest(): ?array
     {
-        if (!isset($_GET['sikshya_cart'])) {
-            return null;
-        }
-
-        $code = sanitize_key(wp_unslash((string) $_GET['sikshya_cart']));
-        $map = [
-            'added' => ['type' => 'success', 'message' => __('Course added to your cart.', 'sikshya')],
-            'exists' => ['type' => 'info', 'message' => __('This course is already in your cart.', 'sikshya')],
-            'removed' => ['type' => 'success', 'message' => __('Course removed from your cart.', 'sikshya')],
-            'cleared' => ['type' => 'success', 'message' => __('Your cart was cleared.', 'sikshya')],
-            'enrolled' => ['type' => 'success', 'message' => __('You are now enrolled in this course.', 'sikshya')],
-            'enroll_failed' => ['type' => 'error', 'message' => __('Could not complete enrollment. Please try again.', 'sikshya')],
-            'login_required' => ['type' => 'info', 'message' => __('Log in to enroll in this course.', 'sikshya')],
-        ];
-
-        return $map[$code] ?? null;
+        return CartFlashResolver::fromRequest();
     }
 }

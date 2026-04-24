@@ -893,8 +893,8 @@ class CoursesListTable extends AbstractListTable
             'posts_per_page' => -1,
             'meta_query' => [
                 [
-                    'key' => '_sikshya_lesson_course_id',
-                    'value' => $course_id,
+                    'key' => '_sikshya_lesson_course',
+                    'value' => (string) $course_id,
                     'compare' => '=',
                 ],
             ],

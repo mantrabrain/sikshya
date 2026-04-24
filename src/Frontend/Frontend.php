@@ -354,6 +354,23 @@ class Frontend
         if (is_singular(PostTypes::COURSE)) {
             wp_enqueue_script('sikshya-course-viewer');
             wp_enqueue_style('sikshya-course-viewer');
+
+            wp_enqueue_script(
+                'sikshya-course-reviews',
+                $this->plugin->getAssetUrl('js/course-reviews.js'),
+                [],
+                $this->plugin->version,
+                true
+            );
+            wp_localize_script('sikshya-course-reviews', 'sikshyaReviewsL10n', [
+                'submitting' => __('Submitting…', 'sikshya'),
+                'confirmDelete' => __('Delete your review? This cannot be undone.', 'sikshya'),
+                'pickRating' => __('Please choose a rating before submitting.', 'sikshya'),
+                'genericError' => __('Something went wrong. Please try again.', 'sikshya'),
+                'loadMore' => __('Load more reviews', 'sikshya'),
+                'loading' => __('Loading…', 'sikshya'),
+                'youLabel' => __('You', 'sikshya'),
+            ]);
         }
 
         if (is_singular(PostTypes::LESSON)) {

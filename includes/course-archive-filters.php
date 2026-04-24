@@ -21,6 +21,14 @@ function sikshya_course_archive_filters_bootstrap(): void
 sikshya_course_archive_filters_bootstrap();
 
 /**
+ * Default archive page size from LMS settings (Courses → Course Display).
+ */
+function sikshya_course_archive_default_per_page(): int
+{
+    return \Sikshya\Services\CourseFrontendSettings::coursesPerPageDefault();
+}
+
+/**
  * Match course catalog page size on category/tag archives.
  *
  * @param \WP_Query $query Query.
@@ -42,7 +50,7 @@ function sikshya_course_taxonomy_archives_pre_get_posts(\WP_Query $query): void
         return;
     }
 
-    $query->set('posts_per_page', 12);
+    $query->set('posts_per_page', sikshya_course_archive_default_per_page());
 }
 
 /**
@@ -82,9 +90,9 @@ function sikshya_course_archive_pre_get_posts(\WP_Query $query): void
         $query->set('s', $filters['s']);
     }
 
-    // Posts per page (bounded).
+    // Posts per page (bounded; matches Settings → Courses).
     $ppp = (int) $filters['per_page'];
-    if ($ppp >= 6 && $ppp <= 48) {
+    if ($ppp >= 1 && $ppp <= 50) {
         $query->set('posts_per_page', $ppp);
     }
 
@@ -210,24 +218,36 @@ function sikshya_course_archive_get_filter_request(): array
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only filter query args.
     $get = isset($_GET) ? wp_unslash($_GET) : [];
 
+    $default_per = sikshya_course_archive_default_per_page();
+    $search_on = \Sikshya\Services\CourseFrontendSettings::isCourseSearchEnabled();
+    $filters_on = \Sikshya\Services\CourseFrontendSettings::areCourseFiltersEnabled();
+
     $s = isset($get['s']) ? sanitize_text_field((string) $get['s']) : '';
-
-    $cat = isset($get['sikshya_cat']) ? sanitize_title((string) $get['sikshya_cat']) : '';
-    if ($cat === '') {
-        $cat = isset($get['course_cat']) ? sanitize_title((string) $get['course_cat']) : '';
+    if (!$search_on) {
+        $s = '';
     }
 
-    $level = isset($get['sikshya_level']) ? sanitize_key((string) $get['sikshya_level']) : '';
-    if (!in_array($level, ['beginner', 'intermediate', 'advanced'], true)) {
-        $level = '';
-    }
+    $cat = '';
+    $level = '';
+    $price = '';
+    if ($filters_on) {
+        $cat = isset($get['sikshya_cat']) ? sanitize_title((string) $get['sikshya_cat']) : '';
+        if ($cat === '') {
+            $cat = isset($get['course_cat']) ? sanitize_title((string) $get['course_cat']) : '';
+        }
 
-    $price = isset($get['sikshya_price']) ? sanitize_key((string) $get['sikshya_price']) : '';
-    if (!in_array($price, ['free', 'paid', 'all', ''], true)) {
-        $price = '';
-    }
-    if ($price === 'all' || $price === '') {
-        $price = '';
+        $level = isset($get['sikshya_level']) ? sanitize_key((string) $get['sikshya_level']) : '';
+        if (!in_array($level, ['beginner', 'intermediate', 'advanced'], true)) {
+            $level = '';
+        }
+
+        $price = isset($get['sikshya_price']) ? sanitize_key((string) $get['sikshya_price']) : '';
+        if (!in_array($price, ['free', 'paid', 'all', ''], true)) {
+            $price = '';
+        }
+        if ($price === 'all' || $price === '') {
+            $price = '';
+        }
     }
 
     $sort = isset($get['sikshya_sort']) ? sanitize_key((string) $get['sikshya_sort']) : 'date_desc';
@@ -241,9 +261,9 @@ function sikshya_course_archive_get_filter_request(): array
         $view = 'grid';
     }
 
-    $per_page = isset($get['sikshya_per_page']) ? (int) $get['sikshya_per_page'] : 12;
-    if ($per_page < 6 || $per_page > 48) {
-        $per_page = 12;
+    $per_page = isset($get['sikshya_per_page']) ? (int) $get['sikshya_per_page'] : $default_per;
+    if ($per_page < 1 || $per_page > 50) {
+        $per_page = $default_per;
     }
 
     return [
@@ -266,6 +286,7 @@ function sikshya_course_archive_get_preserved_query_args(): array
 {
     $f = sikshya_course_archive_get_filter_request();
     $out = [];
+    $def_per = sikshya_course_archive_default_per_page();
 
     if ($f['s'] !== '') {
         $out['s'] = $f['s'];
@@ -285,8 +306,8 @@ function sikshya_course_archive_get_preserved_query_args(): array
     if ($f['view'] !== 'grid') {
         $out['sikshya_view'] = $f['view'];
     }
-    if ($f['per_page'] !== 12) {
-        $out['sikshya_per_page'] = (string) $f['per_page'];
+    if ((int) $f['per_page'] !== $def_per) {
+        $out['sikshya_per_page'] = (string) (int) $f['per_page'];
     }
 
     return $out;
@@ -301,6 +322,7 @@ function sikshya_course_archive_get_preserved_query_args(): array
 function sikshya_course_archive_build_url(array $overrides = []): string
 {
     $f = array_merge(sikshya_course_archive_get_filter_request(), $overrides);
+    $def_per = sikshya_course_archive_default_per_page();
 
     $args = [];
     if ($f['s'] !== '') {
@@ -321,7 +343,7 @@ function sikshya_course_archive_build_url(array $overrides = []): string
     if (($f['view'] ?? 'grid') !== 'grid') {
         $args['sikshya_view'] = $f['view'];
     }
-    if ((int) ($f['per_page'] ?? 12) !== 12) {
+    if ((int) ($f['per_page'] ?? $def_per) !== $def_per) {
         $args['sikshya_per_page'] = (string) (int) $f['per_page'];
     }
 
@@ -332,3 +354,30 @@ function sikshya_course_archive_build_url(array $overrides = []): string
 
     return add_query_arg($args, $url);
 }
+
+/**
+ * Body classes for course archive / single layouts from settings.
+ *
+ * @param array<int, string> $classes Classes.
+ * @return array<int, string>
+ */
+function sikshya_course_settings_body_class(array $classes): array
+{
+    if (is_admin()) {
+        return $classes;
+    }
+
+    if (is_singular(\Sikshya\Constants\PostTypes::COURSE)) {
+        $layout = \Sikshya\Services\CourseFrontendSettings::singleLayout();
+        $classes[] = 'sikshya-course-layout--' . $layout;
+    }
+
+    if (is_post_type_archive(\Sikshya\Constants\PostTypes::COURSE)) {
+        $layout = \Sikshya\Services\CourseFrontendSettings::archiveLayout();
+        $classes[] = 'sikshya-course-archive-layout--' . $layout;
+    }
+
+    return $classes;
+}
+
+add_filter('body_class', 'sikshya_course_settings_body_class');

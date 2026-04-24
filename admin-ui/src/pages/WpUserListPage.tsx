@@ -1,11 +1,14 @@
-import { useMemo } from 'react';
-import { AppShell } from '../components/AppShell';
+import { useMemo, useState } from 'react';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { UserEntityListView } from '../components/shared/list/UserEntityListView';
 import { InlineRowActions } from '../components/shared/list/InlineRowActions';
-import { LinkButtonPrimary } from '../components/shared/buttons';
+import { ButtonPrimary, LinkButtonPrimary } from '../components/shared/buttons';
+import { Modal } from '../components/shared/Modal';
+import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { getWpApi } from '../api';
 import type { Column } from '../components/shared/DataTable';
 import { formatPostDate } from '../lib/formatPostDate';
-import type { NavItem, SikshyaReactConfig, WpRestUser } from '../types';
+import type { SikshyaReactConfig, WpRestUser } from '../types';
 
 type Variant = 'students' | 'instructors';
 
@@ -14,12 +17,22 @@ export function WpUserListPage(props: {
   title: string;
   subtitle: string;
   variant: Variant;
+  embedded?: boolean;
 }) {
-  const { config, title, subtitle, variant } = props;
+  const { config, title, subtitle, variant, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
 
   const roleSlug = variant === 'students' ? 'sikshya_student' : 'sikshya_instructor';
   const newUrl = `${adminBase}user-new.php`;
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createErr, setCreateErr] = useState<unknown>(null);
+  const [refreshSeq, setRefreshSeq] = useState(0);
+
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [password, setPassword] = useState('');
 
   const columns: Column<WpRestUser>[] = useMemo(
     () => [
@@ -72,20 +85,140 @@ export function WpUserListPage(props: {
     [adminBase]
   );
 
+  async function createUser() {
+    setCreateErr(null);
+    setCreating(true);
+    try {
+      const uname = username.trim();
+      const em = email.trim();
+      const nm = displayName.trim();
+      const pw = password.trim();
+
+      // WordPress requires username, email and password for `/wp/v2/users` create.
+      if (!uname || !em || !pw) {
+        throw new Error('Username, email, and password are required.');
+      }
+
+      await getWpApi().post('/users', {
+        username: uname,
+        email: em,
+        password: pw,
+        name: nm || undefined,
+        roles: [roleSlug],
+      });
+
+      setCreateOpen(false);
+      setUsername('');
+      setEmail('');
+      setDisplayName('');
+      setPassword('');
+      setRefreshSeq((n) => n + 1);
+    } catch (e) {
+      setCreateErr(e);
+    } finally {
+      setCreating(false);
+    }
+  }
+
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle={subtitle}
-      pageActions={<LinkButtonPrimary href={newUrl}>+ Add user</LinkButtonPrimary>}
+      pageActions={
+        <div className="flex flex-wrap items-center gap-2">
+          <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
+            + Add {variant === 'students' ? 'student' : 'instructor'}
+          </ButtonPrimary>
+          <LinkButtonPrimary href={newUrl} title="WordPress user creation screen">
+            Add in WordPress
+          </LinkButtonPrimary>
+        </div>
+      }
     >
+      <Modal
+        open={createOpen}
+        title={`Add ${variant === 'students' ? 'student' : 'instructor'}`}
+        description="Creates a WordPress user and assigns the appropriate Sikshya role."
+        onClose={() => (creating ? null : setCreateOpen(false))}
+        size="md"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+              onClick={() => setCreateOpen(false)}
+              disabled={creating}
+            >
+              Cancel
+            </button>
+            <ButtonPrimary type="button" onClick={() => void createUser()} disabled={creating}>
+              {creating ? 'Creating…' : 'Create'}
+            </ButtonPrimary>
+          </div>
+        }
+      >
+        {createErr ? <ApiErrorPanel error={createErr} title="Could not create user" /> : null}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block text-sm text-slate-700 dark:text-slate-300">
+            Username
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              placeholder="e.g. john_doe"
+              autoComplete="off"
+              disabled={creating}
+              required
+            />
+          </label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300">
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              placeholder="name@example.com"
+              autoComplete="off"
+              disabled={creating}
+              required
+            />
+          </label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 sm:col-span-2">
+            Display name (optional)
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              placeholder="Shown publicly as the author/teacher"
+              autoComplete="off"
+              disabled={creating}
+            />
+          </label>
+          <label className="block text-sm text-slate-700 dark:text-slate-300 sm:col-span-2">
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              placeholder="Set an initial password"
+              autoComplete="new-password"
+              disabled={creating}
+              required
+            />
+          </label>
+        </div>
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          Requires the current admin user to have permission to create WordPress users.
+        </p>
+      </Modal>
+
       <UserEntityListView
         roleSlug={roleSlug}
+        refreshToken={refreshSeq}
         contextHint={
           variant === 'students'
             ? 'Users with the Sikshya student role.'
@@ -103,10 +236,14 @@ export function WpUserListPage(props: {
         columns={columns}
         emptyMessage="No users match your search."
         emptyStateTitle="No users found"
-        emptyStateDescription="Try another search or add a user from WordPress."
-        emptyStateAction={<LinkButtonPrimary href={newUrl}>+ Add user</LinkButtonPrimary>}
+        emptyStateDescription="Try another search or create one here."
+        emptyStateAction={
+          <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
+            + Add {variant === 'students' ? 'student' : 'instructor'}
+          </ButtonPrimary>
+        }
         skeletonHeaders={['ID', 'Name', 'Email', 'Registered']}
       />
-    </AppShell>
+    </EmbeddableShell>
   );
 }

@@ -114,6 +114,21 @@ class LessonController
             wp_send_json_error(__('You must be enrolled in this course.', 'sikshya'));
         }
 
+        $course_id = (int) $course_id;
+        $access = apply_filters(
+            'sikshya_access_check',
+            ['ok' => true, 'message' => ''],
+            [
+                'type' => 'lesson',
+                'user_id' => (int) $user_id,
+                'course_id' => $course_id,
+                'content_id' => (int) $lesson_id,
+            ]
+        );
+        if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
+            wp_send_json_error((string) ($access['message'] ?? __('This lesson is not available yet.', 'sikshya')));
+        }
+
         // Mark lesson as complete
         $result = $this->plugin->getService('progress')->markLessonComplete($lesson_id, $user_id);
 
@@ -197,6 +212,21 @@ class LessonController
         $course_id = get_post_meta($lesson_id, 'sikshya_lesson_course', true);
         if (!$this->plugin->getService('enrollment')->isEnrolled($course_id, $user_id)) {
             wp_send_json_error(__('You must be enrolled in this course.', 'sikshya'));
+        }
+
+        $course_id = (int) $course_id;
+        $access = apply_filters(
+            'sikshya_access_check',
+            ['ok' => true, 'message' => ''],
+            [
+                'type' => 'lesson',
+                'user_id' => (int) $user_id,
+                'course_id' => $course_id,
+                'content_id' => (int) $lesson_id,
+            ]
+        );
+        if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
+            wp_send_json_error((string) ($access['message'] ?? __('This lesson is not available yet.', 'sikshya')));
         }
 
         $content = $this->getLessonContent($lesson_id);

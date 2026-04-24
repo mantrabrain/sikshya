@@ -1,15 +1,14 @@
 import { useCallback, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
-import { AddonEnablePanel } from '../components/AddonEnablePanel';
-import { FeatureUpsell } from '../components/FeatureUpsell';
+import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
-import { getLicensing, isFeatureEnabled } from '../lib/licensing';
+import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
 type Vendor = {
@@ -34,10 +33,10 @@ type CommResp = { ok?: boolean; rows?: Commission[]; sum?: number };
 
 export function MarketplacePage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
-  const lic = getLicensing(config);
   const featureOk = isFeatureEnabled(config, 'marketplace_multivendor');
   const addon = useAddonEnabled('marketplace_multivendor');
-  const enabled = featureOk && Boolean(addon.enabled);
+  const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
+  const enabled = mode === 'full';
   const [tab, setTab] = useState<'vendors' | 'commissions' | 'withdraw'>('vendors');
   const [slug, setSlug] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -52,14 +51,14 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
     if (!enabled) {
       return { ok: true, vendors: [] as Vendor[] };
     }
-    return getSikshyaApi().get<VendorsResp>(SIKSHYA_ENDPOINTS.elite.vendors);
+    return getSikshyaApi().get<VendorsResp>(SIKSHYA_ENDPOINTS.scale.vendors);
   }, [enabled]);
 
   const commLoader = useCallback(async () => {
     if (!enabled) {
       return { ok: true, rows: [] as Commission[], sum: 0 };
     }
-    return getSikshyaApi().get<CommResp>(SIKSHYA_ENDPOINTS.elite.commissionsReport);
+    return getSikshyaApi().get<CommResp>(SIKSHYA_ENDPOINTS.scale.commissionsReport);
   }, [enabled]);
 
   const v = useAsyncData(vendorsLoader, [enabled]);
@@ -70,7 +69,7 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
     setVendorMsg(null);
     setSaving(true);
     try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.elite.vendors, {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.vendors, {
         store_slug: slug.trim(),
         display_name: displayName.trim(),
         bio: bio.trim(),
@@ -89,7 +88,7 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
     setWithdrawMsg(null);
     setSaving(true);
     try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.elite.withdrawals, {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.withdrawals, {
         amount: parseFloat(withdrawAmount) || 0,
         notes: withdrawNotes,
       });
@@ -114,23 +113,20 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
       title={title}
       subtitle="Vendor profiles, platform commission tracking, and withdrawal requests — explained in everyday language on each tab."
     >
-      {!featureOk ? (
-        <FeatureUpsell
-          title="Marketplace"
-          description="Let instructors sell from storefronts, split commissions automatically, and process withdrawals with a clear audit trail."
-          licensing={lic}
-        />
-      ) : !enabled ? (
-        <AddonEnablePanel
-          title="Marketplace is not enabled"
-          description="Enable the Marketplace addon to register vendor routes and unlock multi-vendor selling."
-          canEnable={Boolean(addon.licenseOk)}
-          enableBusy={addon.loading}
-          onEnable={() => void addon.enable()}
-          upgradeUrl={lic.upgradeUrl}
-          error={addon.error}
-        />
-      ) : (
+      <GatedFeatureWorkspace
+        mode={mode}
+        featureId="marketplace_multivendor"
+        config={config}
+        featureTitle="Marketplace"
+        featureDescription="Let instructors sell from storefronts, split commissions automatically, and process withdrawals with a clear audit trail."
+        previewVariant="cards"
+        addonEnableTitle="Marketplace is not enabled"
+        addonEnableDescription="Enable the Marketplace addon to register vendor routes and unlock multi-vendor selling."
+        canEnable={Boolean(addon.licenseOk)}
+        enableBusy={addon.loading}
+        onEnable={() => void addon.enable()}
+        addonError={addon.error}
+      >
         <>
           <div className="mb-4 flex flex-wrap gap-2">
             {(
@@ -329,7 +325,7 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
             </form>
           ) : null}
         </>
-      )}
+      </GatedFeatureWorkspace>
     </AppShell>
   );
 }

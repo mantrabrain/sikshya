@@ -9,6 +9,7 @@ use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Public\CartStorage;
 use Sikshya\Frontend\Public\CheckoutTemplateData;
 use Sikshya\Services\CourseService;
 use WP_REST_Request;
@@ -87,6 +88,14 @@ class CheckoutRestRoutes
         $gateway = isset($params['gateway']) ? sanitize_key((string) $params['gateway']) : '';
         $coupon = isset($params['coupon_code']) ? trim(sanitize_text_field((string) $params['coupon_code'])) : '';
 
+        $bundle_id = (int) CartStorage::getBundleId();
+        if (class_exists(\SikshyaPro\Services\BundleCatalogService::class)) {
+            $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $bundle_id, $course_ids);
+        } elseif ($bundle_id > 0) {
+            CartStorage::setBundleIdOnly(0);
+            $bundle_id = 0;
+        }
+
         $has_courses = $course_ids !== [] || $course_id > 0;
         $configured = CheckoutTemplateData::gatewaysConfigured();
         $allowed_gateways = array_keys($configured);
@@ -102,7 +111,7 @@ class CheckoutRestRoutes
         try {
             $checkout = $this->checkoutService();
             if ($course_ids !== []) {
-                $order = $checkout->createPendingOrderForCourses($uid, $course_ids, $coupon);
+                $order = $checkout->createPendingOrderForCourses($uid, $course_ids, $coupon, $bundle_id);
             } else {
                 $order = $checkout->createPendingOrder($uid, $course_id, $coupon);
             }
@@ -112,6 +121,15 @@ class CheckoutRestRoutes
                 $oid = (int) $order['order_id'];
                 $total = (float) $order['total'];
                 if ($checkout->isOfflineAutoFulfillEnabled() || $total <= 0.00001) {
+                    $this->fulfillmentService()->fulfillPaidOrder($oid);
+                } else {
+                    (new OrderRepository())->updateOrder($oid, ['status' => 'on-hold']);
+                }
+                $gateway_payload['redirect_url'] = PublicPageUrls::orderView((string) ($order['public_token'] ?? ''));
+            } elseif ($gateway === 'bank_transfer') {
+                $oid = (int) $order['order_id'];
+                $total = (float) $order['total'];
+                if ($total <= 0.00001) {
                     $this->fulfillmentService()->fulfillPaidOrder($oid);
                 } else {
                     (new OrderRepository())->updateOrder($oid, ['status' => 'on-hold']);
@@ -167,8 +185,16 @@ class CheckoutRestRoutes
 
         $uid = get_current_user_id();
 
+        $bundle_id = (int) CartStorage::getBundleId();
+        if (class_exists(\SikshyaPro\Services\BundleCatalogService::class)) {
+            $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $bundle_id, $course_ids);
+        } elseif ($bundle_id > 0) {
+            CartStorage::setBundleIdOnly(0);
+            $bundle_id = 0;
+        }
+
         try {
-            $quote = $this->checkoutService()->quoteTotalsForCourses($uid, $course_ids, $coupon);
+            $quote = $this->checkoutService()->quoteTotalsForCourses($uid, $course_ids, $coupon, $bundle_id);
         } catch (\Exception $e) {
             return new WP_REST_Response(
                 ['ok' => false, 'code' => 'quote_error', 'message' => $e->getMessage()],
@@ -190,6 +216,9 @@ class CheckoutRestRoutes
         $gateway = isset($params['gateway']) ? sanitize_key((string) $params['gateway']) : '';
         $pi = isset($params['payment_intent_id']) ? (string) $params['payment_intent_id'] : '';
         $paypal_order = isset($params['paypal_order_id']) ? (string) $params['paypal_order_id'] : '';
+        $mollie_payment_id = isset($params['mollie_payment_id']) ? (string) $params['mollie_payment_id'] : '';
+        $paystack_reference = isset($params['paystack_reference']) ? (string) $params['paystack_reference'] : '';
+        $razorpay_payment_link_id = isset($params['razorpay_payment_link_id']) ? (string) $params['razorpay_payment_link_id'] : '';
 
         if ($order_id <= 0) {
             return new WP_REST_Response(
@@ -234,6 +263,53 @@ class CheckoutRestRoutes
             if ($cap_status !== 'COMPLETED') {
                 return new WP_REST_Response(
                     ['ok' => false, 'code' => 'payment_pending', 'message' => __('PayPal capture failed.', 'sikshya')],
+                    400
+                );
+            }
+        } elseif ($gateway === 'mollie') {
+            $pid = $mollie_payment_id !== '' ? $mollie_payment_id : (string) ($order->gateway_intent_id ?? '');
+            if ($pid === '') {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'missing_mollie', 'message' => __('Missing Mollie payment id.', 'sikshya')],
+                    400
+                );
+            }
+            $m = $this->checkoutService()->getMolliePayment($pid);
+            $status = is_array($m) ? (string) ($m['status'] ?? '') : '';
+            if ($status !== 'paid') {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'payment_pending', 'message' => __('Mollie payment not completed.', 'sikshya')],
+                    400
+                );
+            }
+        } elseif ($gateway === 'paystack') {
+            $ref = $paystack_reference !== '' ? $paystack_reference : (string) ($order->gateway_intent_id ?? '');
+            if ($ref === '') {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'missing_paystack', 'message' => __('Missing Paystack reference.', 'sikshya')],
+                    400
+                );
+            }
+            $data = $this->checkoutService()->verifyPaystackReference($ref);
+            if (!$data || (string) ($data['status'] ?? '') !== 'success') {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'payment_pending', 'message' => __('Paystack payment not verified.', 'sikshya')],
+                    400
+                );
+            }
+        } elseif ($gateway === 'razorpay') {
+            $lid = $razorpay_payment_link_id !== '' ? $razorpay_payment_link_id : (string) ($order->gateway_intent_id ?? '');
+            if ($lid === '') {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'missing_razorpay', 'message' => __('Missing Razorpay payment link.', 'sikshya')],
+                    400
+                );
+            }
+            $link = $this->checkoutService()->getRazorpayPaymentLink($lid);
+            $st = is_array($link) ? (string) ($link['status'] ?? '') : '';
+            if ($st !== 'paid') {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'payment_pending', 'message' => __('Razorpay payment link not paid yet.', 'sikshya')],
                     400
                 );
             }

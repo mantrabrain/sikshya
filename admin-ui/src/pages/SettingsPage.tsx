@@ -8,26 +8,13 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
+import { useAdminRouting } from '../lib/adminRouting';
 import type { NavItem, SikshyaReactConfig } from '../types';
-
-type SettingsField = {
-  key: string;
-  type?: string;
-  label?: string;
-  description?: string;
-  default?: string | number;
-  placeholder?: string;
-  options?: Record<string, string>;
-  min?: number;
-  max?: number;
-};
-
-type SettingsSection = {
-  title?: string;
-  icon?: string;
-  description?: string;
-  fields?: SettingsField[];
-};
+import type { SettingsField, SettingsSection } from '../types/settingsSchema';
+import { CourseSettingsTab } from '../components/CourseSettingsTab';
+import { EnrollmentSettingsTab } from '../components/EnrollmentSettingsTab';
+import { isTruthyCheckboxValue, renderSettingsField } from './settingsRenderField';
+import { normalizeTabSections } from './settingsTabUtils';
 
 type SettingsSchema = Record<string, SettingsSection[]>;
 
@@ -47,21 +34,36 @@ type SettingsSchemaMeta = {
   payment_gateways?: PaymentGatewayMeta[];
 };
 
+/** Sidebar order: store → join/pay → content types → people → polish → system. */
 const TAB_META: SettingsTabMeta[] = [
   { id: 'general', label: 'General', description: 'Core plugin behavior and defaults.', icon: 'puzzle' },
-  { id: 'courses', label: 'Courses', description: 'Catalog and course-level defaults.', icon: 'course' },
-  { id: 'lessons', label: 'Lessons', description: 'Lesson display and learning flow.', icon: 'bookOpen' },
+  {
+    id: 'courses',
+    label: 'Courses',
+    description: 'How the catalog and course pages look — layout, reviews, categories, search.',
+    icon: 'course',
+  },
+  {
+    id: 'enrollment',
+    label: 'Enrollment',
+    description: 'Joining courses, checkout, buttons, completion, limits, and policies.',
+    icon: 'layers',
+  },
+  { id: 'payment', label: 'Payment', description: 'Gateways, currency, and checkout.', icon: 'chart' },
+  { id: 'lessons', label: 'Lessons', description: 'Lesson player, previews, and lesson progress.', icon: 'bookOpen' },
   { id: 'quizzes', label: 'Quizzes', description: 'Scoring, timing, and quiz behavior.', icon: 'clipboard' },
   { id: 'assignments', label: 'Assignments', description: 'Submission and grading defaults.', icon: 'badge' },
+  { id: 'progress', label: 'Progress', description: 'Quiz and assignment tracking.', icon: 'chart' },
+  { id: 'certificates', label: 'Certificates', description: 'Templates and issuance rules.', icon: 'badge' },
   { id: 'students', label: 'Students', description: 'Learner experience and access.', icon: 'users' },
   { id: 'instructors', label: 'Instructors', description: 'Instructor permissions and workflow.', icon: 'users' },
-  { id: 'enrollment', label: 'Enrollment', description: 'Access rules and enrollment rules.', icon: 'layers' },
-  { id: 'progress', label: 'Progress', description: 'Completion, tracking, and certificates.', icon: 'chart' },
-  { id: 'certificates', label: 'Certificates', description: 'Templates and issuance rules.', icon: 'badge' },
-  { id: 'payment', label: 'Payment', description: 'Monetization and checkout settings.', icon: 'chart' },
-  { id: 'email', label: 'Email', description: 'Email sender and templates.', icon: 'plusDocument' },
   { id: 'notifications', label: 'Notifications', description: 'In-app and email notifications.', icon: 'helpCircle' },
-  { id: 'integrations', label: 'Integrations', description: 'Third-party connections.', icon: 'puzzle' },
+  {
+    id: 'integrations',
+    label: 'Connected services',
+    description: 'reCAPTCHA, analytics, and other third-party services bundled into Sikshya. (Outbound automation lives under Integrations in the sidebar.)',
+    icon: 'puzzle',
+  },
   { id: 'permalinks', label: 'Permalinks', description: 'Cart, checkout, account, and content URL bases.', icon: 'tag' },
   { id: 'security', label: 'Security', description: 'Roles, access, and data safety.', icon: 'cog' },
   { id: 'advanced', label: 'Advanced', description: 'Developer and system options.', icon: 'cog' },
@@ -73,15 +75,6 @@ type ToastState = {
   title: string;
   message?: string;
 };
-
-function fieldToStringValue(v: unknown): string {
-  if (v === null || v === undefined) return '';
-  return String(v);
-}
-
-function isTruthyCheckboxValue(v: unknown): boolean {
-  return v === true || v === 1 || v === '1' || v === 'yes' || v === 'on';
-}
 
 function normalizeForDirtyCompare(v: unknown): string {
   if (v === null || v === undefined) return '';
@@ -112,17 +105,6 @@ function serializeGatewayOrder(ids: string[]): string {
   return ids.map((x) => x.trim()).filter(Boolean).join(',');
 }
 
-/** REST / filters may return a single section object or a non-list; keep render paths safe. */
-function normalizeTabSections(raw: unknown): SettingsSection[] {
-  if (Array.isArray(raw)) {
-    return raw as SettingsSection[];
-  }
-  if (raw && typeof raw === 'object' && Array.isArray((raw as SettingsSection).fields)) {
-    return [raw as SettingsSection];
-  }
-  return [];
-}
-
 function sectionIconName(raw?: string): string {
   // Settings schema icons come from PHP as FontAwesome classes (e.g. "fas fa-link").
   // React admin uses our own SVG icon set, so map common FA names to our icon keys.
@@ -151,6 +133,8 @@ function sectionIconName(raw?: string): string {
       return 'cog';
     case 'tools':
       return 'cog';
+    case 'eye':
+      return 'bookOpen';
     default:
       return fa || 'cog';
   }
@@ -161,23 +145,65 @@ function SectionCard({
   title,
   description,
   icon,
+  locked,
+  lockedReason,
+  onUpgrade,
 }: {
   children: React.ReactNode;
   title?: string;
   description?: string;
   icon?: string;
+  locked?: boolean;
+  lockedReason?: string;
+  onUpgrade?: () => void;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/30">
+    <section
+      className={`rounded-2xl border p-6 shadow-sm ${
+        locked
+          ? 'border-violet-200 bg-violet-50/50 dark:border-violet-900/50 dark:bg-violet-950/25'
+          : 'border-slate-200/80 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/30'
+      }`}
+    >
       {title ? (
         <div className="mb-5 flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            <NavIcon name={sectionIconName(icon)} className="h-5 w-5" />
+          <span
+            className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg ${
+              locked
+                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200'
+                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+            }`}
+          >
+            <NavIcon name={locked ? 'badge' : sectionIconName(icon)} className="h-5 w-5" />
           </span>
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
+              {locked ? (
+                <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-200">
+                  <span aria-hidden>★</span> Pro
+                </span>
+              ) : null}
+            </div>
             {description ? (
               <p className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{description}</p>
+            ) : null}
+            {locked ? (
+              <p className="mt-2 text-xs leading-relaxed text-violet-700 dark:text-violet-200">
+                {lockedReason || 'Turn on the matching addon to edit these settings.'}
+                {onUpgrade ? (
+                  <>
+                    {' '}
+                    <button
+                      type="button"
+                      onClick={onUpgrade}
+                      className="font-semibold underline-offset-2 hover:underline"
+                    >
+                      Open Addons →
+                    </button>
+                  </>
+                ) : null}
+              </p>
             ) : null}
           </div>
         </div>
@@ -190,9 +216,18 @@ function SectionCard({
 export function SettingsPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const { confirm } = useSikshyaDialog();
+  const { navigateView } = useAdminRouting();
   const qTab = config.query?.tab;
-  const initialTab = qTab && qTab.length ? qTab : 'general';
+  /** Email moved to its own admin screen; avoid flashing the wrong tab. */
+  const initialTab =
+    qTab === 'email' ? 'general' : qTab && qTab.length ? qTab : 'general';
   const [tab, setTab] = useState<string>(initialTab);
+
+  useEffect(() => {
+    if (qTab === 'email') {
+      navigateView('email', {}, { replace: true });
+    }
+  }, [qTab, navigateView]);
 
   const schema = useAsyncData(async () => {
     const res = await getSikshyaApi().get<{ success: boolean; data?: { tabs?: SettingsSchema; meta?: SettingsSchemaMeta } }>(
@@ -326,97 +361,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
     }
   };
 
-  const renderField = (f: SettingsField) => {
-    const k = f.key;
-    const type = f.type || 'text';
-    const cur = draft[k];
-
-    const label = f.label || k;
-    const desc = f.description || '';
-
-    if (type === 'checkbox') {
-      const checked = isTruthyCheckboxValue(cur);
-      return (
-        <div key={k} className="lg:col-span-2">
-          <label className="flex items-start gap-3 rounded-xl border border-slate-200/70 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <input
-              type="checkbox"
-              className="mt-1 h-4 w-4"
-              checked={checked}
-              onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.checked ? '1' : '0' }))}
-            />
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
-              {desc ? <span className="mt-1 block text-xs text-slate-400/90 dark:text-slate-500/80">{desc}</span> : null}
-            </span>
-          </label>
-        </div>
-      );
-    }
-
-    if (type === 'select') {
-      const opts = f.options || {};
-      return (
-        <div key={k}>
-          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-            {label}
-          </label>
-          {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
-          <select
-            id={k}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-            value={fieldToStringValue(cur ?? f.default ?? '')}
-            onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
-          >
-            {Object.entries(opts).map(([ov, ol]) => (
-              <option key={ov} value={ov}>
-                {ol}
-              </option>
-            ))}
-          </select>
-        </div>
-      );
-    }
-
-    if (type === 'textarea') {
-      return (
-        <div key={k} className="lg:col-span-2">
-          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-            {label}
-          </label>
-          {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
-          <textarea
-            id={k}
-            rows={4}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-            value={fieldToStringValue(cur ?? f.default ?? '')}
-            onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
-            placeholder={f.placeholder || ''}
-          />
-        </div>
-      );
-    }
-
-    const inputType = type === 'number' ? 'number' : type === 'email' ? 'email' : type === 'password' ? 'password' : 'text';
-    return (
-      <div key={k}>
-        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-          {label}
-        </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
-        <input
-          id={k}
-          type={inputType}
-          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-          value={fieldToStringValue(cur ?? f.default ?? '')}
-          onChange={(e) => setDraft((p) => ({ ...p, [k]: e.target.value }))}
-          placeholder={f.placeholder || ''}
-          min={typeof f.min === 'number' ? f.min : undefined}
-          max={typeof f.max === 'number' ? f.max : undefined}
-        />
-      </div>
-    );
-  };
+  const renderField = (f: SettingsField) => renderSettingsField(draft, setDraft, f);
 
   const PaymentTab = () => {
     const gateways = (
@@ -499,7 +444,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
         <button
           type="button"
           onClick={() => setOpen((o) => (o === id ? null : id))}
-          className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+          className={`w-full rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 ${
             selected
               ? 'border-brand-200 bg-white shadow-sm dark:border-brand-900/60 dark:bg-slate-900'
               : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-900'
@@ -559,13 +504,13 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
               {enabledKey ? (
                 <label
                   className={`flex items-center gap-2 text-xs font-semibold ${
-                    pro || locked ? 'opacity-60' : 'text-slate-700 dark:text-slate-200'
+                    locked ? 'opacity-60' : 'text-slate-700 dark:text-slate-200'
                   }`}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <input
                     type="checkbox"
-                    disabled={!!pro || !!locked}
+                    disabled={!!locked}
                     checked={!!enabled}
                     onChange={(e) => setDraft((p) => ({ ...p, [enabledKey]: e.target.checked ? '1' : '0' }))}
                   />
@@ -673,7 +618,15 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
         </SectionCard>
 
         {otherSections.map((sec, i) => (
-          <SectionCard key={i} title={sec.title} description={sec.description} icon={sec.icon}>
+          <SectionCard
+            key={i}
+            title={sec.title}
+            description={sec.description}
+            icon={sec.icon}
+            locked={!!sec.locked}
+            lockedReason={sec.locked_reason}
+            onUpgrade={sec.locked ? () => navigateView('addons', {}) : undefined}
+          >
             <div className="grid gap-6 lg:grid-cols-2">{(sec.fields || []).map(renderField)}</div>
           </SectionCard>
         ))}
@@ -689,6 +642,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
       adminUrl={config.adminUrl}
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
+      branding={config.branding}
       title={title}
       subtitle="Global settings"
     >
@@ -762,7 +716,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                       <button
                         type="button"
                         onClick={() => setTab(t.id)}
-                        className={`w-full rounded-xl px-3 py-2 text-left transition ${
+                        className={`w-full rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
                           selected
                             ? 'bg-brand-600 text-white'
                             : 'text-slate-700 hover:bg-white/70 dark:text-slate-200 dark:hover:bg-slate-900/50'
@@ -804,7 +758,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
           >
             <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/35">
               <div className="border-b border-slate-200/60 px-6 py-5 dark:border-slate-800/70">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       <NavIcon name={tabMeta.icon} className="h-4 w-4" />
@@ -816,7 +770,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                       <p className="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">{saveMsg}</p>
                     ) : null}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:min-w-[200px]">
                     <button
                       type="button"
                       disabled={saving}
@@ -838,10 +792,14 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                 </div>
               ) : null}
 
-              <div className="px-6 py-6">
+              <div className={tab === 'courses' || tab === 'enrollment' ? 'py-6' : 'px-6 py-6'}>
                 {tabSchema.length ? (
                   tab === 'payment' ? (
                     <PaymentTab />
+                  ) : tab === 'courses' ? (
+                    <CourseSettingsTab tabSchema={tabSchema} renderField={renderField} />
+                  ) : tab === 'enrollment' ? (
+                    <EnrollmentSettingsTab tabSchema={tabSchema} renderField={renderField} />
                   ) : (
                     <div className="space-y-8">
                       {tabSchema.map((sec, i) => {
@@ -850,7 +808,15 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                           return null;
                         }
                         return (
-                          <SectionCard key={i} title={sec.title} description={sec.description} icon={sec.icon}>
+                          <SectionCard
+                            key={i}
+                            title={sec.title}
+                            description={sec.description}
+                            icon={sec.icon}
+                            locked={!!sec.locked}
+                            lockedReason={sec.locked_reason}
+                            onUpgrade={sec.locked ? () => navigateView('addons', {}) : undefined}
+                          >
                             <div className="grid gap-6 lg:grid-cols-2">{fields.map(renderField)}</div>
                           </SectionCard>
                         );

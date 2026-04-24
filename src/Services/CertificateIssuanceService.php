@@ -45,7 +45,15 @@ final class CertificateIssuanceService
         }
 
         $number = sprintf('SK-%d-%d-%s', $user_id, $course_id, gmdate('Ymd'));
-        $verification = strtolower(wp_generate_password(24, false, false));
+        // 64-char URL-safe verification hash (hex): good for QR + verifiable links.
+        // 32 random bytes -> 64 hex chars.
+        $verification = '';
+        try {
+            $verification = bin2hex(random_bytes(32));
+        } catch (\Throwable $e) {
+            // Fallback: still URL-safe, but keep length stable.
+            $verification = bin2hex(openssl_random_pseudo_bytes(32) ?: random_bytes(32));
+        }
 
         $id = $this->certificates->create(
             [
@@ -65,6 +73,20 @@ final class CertificateIssuanceService
                 'verification_code' => $verification,
             ]
         );
+
+        if ($id > 0) {
+            /**
+             * After a certificate row is stored (Pro may attach download URLs, QR assets, etc.).
+             *
+             * @param int $id Certificate row id.
+             * @param int $user_id Learner.
+             * @param int $course_id Course.
+             * @param string $certificate_number Human-readable serial.
+             * @param string $verification_code Secret verification token.
+             * @param int $template_post_id Certificate template post (0 if none).
+             */
+            do_action('sikshya_certificate_row_created', $id, $user_id, $course_id, $number, $verification, $template_post_id > 0 ? $template_post_id : 0);
+        }
 
         return $id > 0 ? $id : null;
     }

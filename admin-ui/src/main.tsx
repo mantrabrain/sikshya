@@ -8,7 +8,9 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
   window.sikshyaReact = {
     page: 'dashboard',
     version: 'dev',
-    restUrl: '/wp-json/sikshya/v1/',
+    // Match WordPress behavior for plain permalinks in dev too.
+    restUrl: '/?rest_route=/sikshya/v1/',
+    wpRestUrl: '/?rest_route=/wp/v2/',
     restNonce: '',
     adminUrl: '/wp-admin/',
     appAdminBase: 'http://localhost/wp-admin/admin.php?page=sikshya',
@@ -65,7 +67,18 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
       siteTierLabel: 'Free',
       upgradeUrl: 'https://store.mantrabrain.com/downloads/sikshya-pro/',
       featureStates: {},
-      catalog: [],
+      /** Minimal rows so `isFeatureEnabled` + overlays behave like production in Vite dev */
+      catalog: [
+        { id: 'core_course_builder', label: 'Course builder', tier: 'free', group: 'core', description: '' },
+        { id: 'gradebook', label: 'Gradebook', tier: 'pro', group: 'analytics', description: '' },
+        { id: 'content_drip', label: 'Content drip', tier: 'starter', group: 'course', description: '' },
+        { id: 'subscriptions', label: 'Subscriptions', tier: 'pro', group: 'commerce', description: '' },
+        { id: 'multi_instructor', label: 'Multi-instructor', tier: 'pro', group: 'course', description: '' },
+        { id: 'marketplace_multivendor', label: 'Marketplace', tier: 'scale', group: 'commerce', description: '' },
+        { id: 'certificates_advanced', label: 'Advanced certificates', tier: 'pro', group: 'certificates', description: '' },
+        { id: 'automation_zapier_webhooks', label: 'Webhooks', tier: 'scale', group: 'integrations', description: '' },
+        { id: 'public_api_keys', label: 'API keys', tier: 'scale', group: 'platform', description: '' },
+      ],
     },
   } satisfies SikshyaReactConfig;
 }

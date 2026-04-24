@@ -8,7 +8,9 @@
 get_header();
 
 $f = sikshya_course_archive_get_filter_request();
-$grid_classes = 'sikshya-course-grid';
+$archive_layout = \Sikshya\Services\CourseFrontendSettings::archiveLayout();
+$grid_classes = 'sikshya-course-grid sikshya-course-grid--' . sanitize_html_class($archive_layout);
+$show_sidebar = \Sikshya\Services\CourseFrontendSettings::areCourseFiltersEnabled();
 // View is toggled client-side (localStorage) to avoid changing the URL.
 
 global $wp_query;
@@ -25,13 +27,16 @@ if ($paged < 1) {
 
 <div class="sikshya-public sikshya-archive-courses">
     <div class="sikshya-container">
+        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
         <header class="sikshya-archive-courses__header">
             <h1 class="sikshya-archive-courses__title"><?php post_type_archive_title(); ?></h1>
             <?php the_archive_description('<div class="sikshya-archive-courses__desc">', '</div>'); ?>
         </header>
 
-        <div class="sikshya-archive-courses__layout">
-            <?php require __DIR__ . '/partials/course-archive-sidebar.php'; ?>
+        <div class="sikshya-archive-courses__layout<?php echo $show_sidebar ? '' : ' sikshya-archive-courses__layout--no-sidebar'; ?>">
+            <?php if ($show_sidebar) : ?>
+                <?php require __DIR__ . '/partials/course-archive-sidebar.php'; ?>
+            <?php endif; ?>
 
             <div class="sikshya-archive-courses__main">
                 <?php require __DIR__ . '/partials/course-archive-toolbar.php'; ?>

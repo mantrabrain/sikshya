@@ -4,12 +4,14 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
-type AddonTier = 'free' | 'starter' | 'pro' | 'elite';
+type AddonTier = 'free' | 'starter' | 'pro' | 'scale';
 
 type AddonRow = {
   id: string;
   label: string;
   description: string;
+  /** Longer help for hover/focus popover (plain language). */
+  detailDescription?: string;
   tier: AddonTier;
   group: string;
   dependencies: string[];
@@ -21,13 +23,59 @@ type AddonsResponse = {
   success: boolean;
   addons: AddonRow[];
   enabled: string[];
-  licensing?: { isProActive?: boolean; siteTier?: string; upgradeUrl?: string; siteTierLabel?: string };
+  licensing?: {
+    isProActive?: boolean;
+    proPluginInstalled?: boolean;
+    siteTier?: string;
+    upgradeUrl?: string;
+    siteTierLabel?: string;
+  };
 };
 
+/**
+ * Default list order (most → least important). Must match
+ * {@see \Sikshya\Api\AdminAddonsRestRoutes::addonImportanceOrder}.
+ */
+const ADDON_IMPORTANCE_ORDER: readonly string[] = [
+  'email_advanced_customization',
+  'subscriptions',
+  'content_drip',
+  'course_bundles',
+  'coupons_advanced',
+  'multi_instructor',
+  'prerequisites',
+  'drip_notifications',
+  'reports_advanced',
+  'gradebook',
+  'certificates_advanced',
+  'activity_log',
+  'assignments_advanced',
+  'quiz_advanced',
+  'instructor_dashboard',
+  'email_marketing',
+  'live_classes',
+  'calendar',
+  'social_login',
+  'scorm_h5p_pro',
+  'marketplace_multivendor',
+  'white_label',
+  'webhooks',
+  'zapier',
+  'public_api_keys',
+  'enterprise_reports',
+  'multilingual_enterprise',
+  'multisite_scale',
+];
+
+function addonImportanceRank(id: string): number {
+  const i = ADDON_IMPORTANCE_ORDER.indexOf(id);
+  return i === -1 ? ADDON_IMPORTANCE_ORDER.length : i;
+}
+
 function tierBadge(tier: AddonTier): { label: string; className: string } {
-  if (tier === 'elite') {
+  if (tier === 'scale') {
     return {
-      label: 'Agency',
+      label: 'Scale',
       className:
         'bg-purple-50 text-purple-800 ring-1 ring-purple-200 dark:bg-purple-950/40 dark:text-purple-200 dark:ring-purple-900/40',
     };
@@ -54,14 +102,80 @@ function tierBadge(tier: AddonTier): { label: string; className: string } {
 }
 
 function addonRequiresPlanLabel(tier: AddonTier): string {
-  if (tier === 'elite') return 'Agency';
+  if (tier === 'scale') return 'Scale';
   if (tier === 'pro') return 'Growth';
   if (tier === 'starter') return 'Starter';
   return 'Free';
 }
 
 function addonLicenseLocked(a: AddonRow): boolean {
-  return (a.tier === 'starter' || a.tier === 'pro' || a.tier === 'elite') && !a.licenseOk;
+  return (a.tier === 'starter' || a.tier === 'pro' || a.tier === 'scale') && !a.licenseOk;
+}
+
+/** Human label for which commercial plan unlocks this catalog tier (matches PHP FeatureRegistry tiers). */
+function tierPlanLabel(tier: AddonTier): string {
+  if (tier === 'starter') return 'Starter';
+  if (tier === 'pro') return 'Growth';
+  if (tier === 'scale') return 'Scale';
+  return 'Free';
+}
+
+/**
+ * Card preview: PHP sends blocks separated by blank lines; showing that with `pre-line` created a large gap
+ * between “what it is” and “when to enable”. We join blocks with spaces for a tight 3-line clamp.
+ */
+function addonCardPreviewText(raw: string): string {
+  return raw
+    .replace(/\r\n/g, '\n')
+    .split(/\n\s*\n/)
+    .map((block) => block.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** Hover the short description to read the full add-on guide (popover). */
+function AddonDescriptionWithHelp(props: { addonId: string; label: string; description: string; detailDescription?: string }) {
+  const panelId = `sikshya-addon-detail-${props.addonId}`;
+  const longText = (props.detailDescription && props.detailDescription.trim()) || props.description;
+  const paragraphs = longText
+    .split(/\n\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const preview = addonCardPreviewText(props.description);
+  const hasPopover = paragraphs.length > 0;
+
+  return (
+    <div className="group/addonhelp relative mt-2 w-full min-w-0">
+      <p
+        className={`min-w-0 text-xs leading-snug text-slate-600 dark:text-slate-300 ${
+          hasPopover ? 'line-clamp-3 cursor-help' : 'line-clamp-3'
+        }`}
+        aria-describedby={hasPopover ? panelId : undefined}
+      >
+        {preview}
+      </p>
+      {hasPopover ? (
+        <div
+          id={panelId}
+          role="tooltip"
+          className="pointer-events-none invisible absolute left-0 top-full z-50 -mt-1 w-full max-w-[min(calc(100vw-2rem),24rem)] max-h-[min(70vh,24rem)] translate-y-1 overflow-y-auto rounded-2xl border border-slate-300/90 bg-white p-4 text-left text-[13px] leading-relaxed text-slate-900 opacity-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition duration-150 group-hover/addonhelp:visible group-hover/addonhelp:translate-y-0 group-hover/addonhelp:opacity-100 group-hover/addonhelp:pointer-events-auto group-focus-within/addonhelp:visible group-focus-within/addonhelp:translate-y-0 group-focus-within/addonhelp:opacity-100 group-focus-within/addonhelp:pointer-events-auto dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
+        >
+          <div className="mb-3 border-b border-slate-200 pb-2 dark:border-slate-600">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+              About this add-on
+            </p>
+          </div>
+          <div className="space-y-3 text-slate-900 dark:text-slate-100">
+            {paragraphs.map((p, i) => (
+              <p key={i} className="text-slate-900 dark:text-slate-100">
+                {p}
+              </p>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function AddonsPage(props: { config: SikshyaReactConfig; title: string }) {
@@ -74,7 +188,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
   const [q, setQ] = useState('');
   const [groupFilter, setGroupFilter] = useState<string>('all');
   const [tierFilter, setTierFilter] = useState<'all' | AddonTier>('all');
-  const [sort, setSort] = useState<'name_asc' | 'name_desc' | 'tier' | 'status'>('name_asc');
+  const [sort, setSort] = useState<'importance' | 'name_asc' | 'name_desc' | 'tier' | 'status'>('importance');
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   const refetch = async () => {
@@ -111,7 +225,8 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
       if (tierFilter !== 'all' && a.tier !== tierFilter) return false;
       if (groupFilter !== 'all' && (a.group || 'general') !== groupFilter) return false;
       if (!needle) return true;
-      const s = `${a.label} ${a.description} ${a.group} ${a.tier} ${a.id}`.toLowerCase();
+      const s =
+        `${a.label} ${a.description} ${a.detailDescription ?? ''} ${a.group} ${a.tier} ${a.id}`.toLowerCase();
       return s.includes(needle);
     });
   }, [data, q, groupFilter, tierFilter]);
@@ -126,10 +241,13 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
 
   const rows = useMemo(() => {
     const list = [...allRows];
-    if (sort === 'name_desc') {
+    if (sort === 'importance') {
+      list.sort((a, b) => addonImportanceRank(a.id) - addonImportanceRank(b.id) || a.label.localeCompare(b.label));
+    } else if (sort === 'name_desc') {
       list.sort((a, b) => b.label.localeCompare(a.label));
     } else if (sort === 'tier') {
-      const w = (t: AddonTier) => (t === 'free' ? 0 : t === 'starter' ? 1 : t === 'pro' ? 2 : 3);
+      const w = (t: AddonTier) =>
+        t === 'free' ? 0 : t === 'starter' ? 1 : t === 'pro' ? 2 : t === 'scale' ? 3 : 0;
       list.sort((a, b) => w(a.tier) - w(b.tier) || a.label.localeCompare(b.label));
     } else if (sort === 'status') {
       // Enabled first, then locked, then name.
@@ -146,6 +264,16 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
 
   const upgradeUrl =
     data?.licensing?.upgradeUrl || config.licensing?.upgradeUrl || 'https://store.mantrabrain.com/downloads/sikshya-pro/';
+
+  const licensing = data?.licensing;
+  const isProActive = licensing?.isProActive === true;
+  const proPluginInstalled = licensing?.proPluginInstalled === true;
+  const siteTierLabel = licensing?.siteTierLabel || config.licensing?.siteTierLabel || 'Free';
+
+  const lockedCount = useMemo(() => {
+    const list = Array.isArray(data?.addons) ? data.addons : [];
+    return list.filter((a) => addonLicenseLocked(a)).length;
+  }, [data?.addons]);
 
   const toggle = async (addon: AddonRow) => {
     setBusyId(addon.id);
@@ -212,11 +340,49 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
       adminUrl={config.adminUrl}
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
+      branding={config.branding}
       title={title}
-      subtitle="Enable modules to load their settings, routes, and UI. Disabled addons do not execute."
+      subtitle="Free core features stay on. This page lists paid add-ons only — turn each one on to load its settings, screens, and site features."
       pageActions={null}
     >
       {error ? <ApiErrorPanel error={error} title="Could not load addons" onRetry={() => void refetch()} /> : null}
+
+      {data && !isProActive ? (
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-slate-900">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">Upgrade to Sikshya Pro</p>
+              <p className="mt-1 text-sm leading-relaxed text-amber-900/90 dark:text-amber-200/90">
+                Starter, Growth, and Scale add-ons on this page need an active Sikshya Pro license. After you purchase a
+                plan, install and activate the Sikshya Pro plugin — then you can turn each add-on on here and use its admin
+                screens and learner-facing features.
+              </p>
+              {!proPluginInstalled ? (
+                <p className="mt-2 text-xs text-amber-800/80 dark:text-amber-300/80">
+                  The Sikshya Pro plugin is not detected on this site yet. Use the download from your purchase email or
+                  account to install it.
+                </p>
+              ) : null}
+            </div>
+            <a
+              href={upgradeUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+            >
+              View plans &amp; upgrade
+            </a>
+          </div>
+        </div>
+      ) : null}
+
+      {data && isProActive && lockedCount > 0 ? (
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+          Your site is on <span className="font-semibold">{siteTierLabel}</span>. Add-ons marked “Requires …” need a
+          higher plan — use <span className="font-semibold">Upgrade to unlock</span> on each card or visit the store to
+          upgrade.
+        </div>
+      ) : null}
 
       <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -249,7 +415,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
             </button>
 
             <span className="ml-1 text-sm text-slate-500 dark:text-slate-400">
-              Showing <span className="font-semibold text-slate-700 dark:text-slate-200">{rows.length}</span> modules
+              Showing <span className="font-semibold text-slate-700 dark:text-slate-200">{rows.length}</span> add-ons
             </span>
           </div>
 
@@ -257,7 +423,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search modules…"
+              placeholder="Search add-ons…"
               className="w-full max-w-[360px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
             <select
@@ -280,17 +446,17 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
               aria-label="Filter by tier"
             >
               <option value="all">All tiers</option>
-              <option value="free">Free</option>
               <option value="starter">Starter</option>
               <option value="pro">Growth</option>
-              <option value="elite">Agency</option>
+              <option value="scale">Scale</option>
             </select>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as typeof sort)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:w-[160px]"
-              aria-label="Sort modules"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:w-[180px]"
+              aria-label="Sort add-ons"
             >
+              <option value="importance">Priority (most → least)</option>
               <option value="name_asc">Name A → Z</option>
               <option value="name_desc">Name Z → A</option>
               <option value="status">Enabled first</option>
@@ -322,7 +488,11 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
             return (
               <div
                 key={a.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600"
+                className={`rounded-2xl border p-4 shadow-sm transition dark:bg-slate-900 ${
+                  locked
+                    ? 'border-amber-200/90 bg-amber-50/50 hover:border-amber-300 dark:border-amber-800/60 dark:bg-amber-950/25 dark:hover:border-amber-700'
+                    : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+                }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -338,10 +508,12 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
                             return next;
                           })
                         }
-                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800"
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800"
                         aria-label={`Select ${a.label}`}
                       />
-                      <div className="min-w-0 truncate text-sm font-semibold text-slate-900 dark:text-white">{a.label}</div>
+                      <div className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900 dark:text-white">
+                        {a.label}
+                      </div>
                       <span
                         className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.className}`}
                       >
@@ -350,9 +522,12 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
                     </div>
 
                     {a.description ? (
-                      <div className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                        {a.description}
-                      </div>
+                      <AddonDescriptionWithHelp
+                        addonId={a.id}
+                        label={a.label}
+                        description={a.description}
+                        detailDescription={a.detailDescription}
+                      />
                     ) : null}
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -392,11 +567,20 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
                 </div>
 
                 {locked ? (
-                  <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                    <a className="font-semibold underline" href={upgradeUrl} target="_blank" rel="noreferrer noopener">
-                      Upgrade
-                    </a>{' '}
-                    to enable this module.
+                  <div className="mt-3 flex flex-col gap-2 border-t border-amber-200/70 pt-3 dark:border-amber-900/50">
+                    <p className="text-xs font-medium text-amber-950 dark:text-amber-100">
+                      {isProActive
+                        ? `Requires ${tierPlanLabel(a.tier)} plan or higher — upgrade your subscription to enable.`
+                        : 'Requires Sikshya Pro — purchase a plan, install the Pro plugin, then enable this add-on.'}
+                    </p>
+                    <a
+                      href={upgradeUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex w-fit items-center rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
+                    >
+                      Upgrade to unlock
+                    </a>
                   </div>
                 ) : null}
               </div>

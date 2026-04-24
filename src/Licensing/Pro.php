@@ -1,9 +1,14 @@
 <?php
 
 /**
- * Free vs Pro / Elite — activation and per-feature gates.
+ * Free vs commercial tiers — activation and per-feature gates.
  *
  * Sikshya Pro (separate plugin) sets filters; core never ships license keys.
+ *
+ * Commercial ladder (EDD variable prices map here via Sikshya Pro):
+ * - starter — Starter plan (subset of Growth features).
+ * - growth — Growth plan (full “Pro” catalog / former Business).
+ * - scale — Scale plan (Growth + Scale-tier catalog features).
  *
  * @package Sikshya\Licensing
  */
@@ -22,14 +27,19 @@ final class Pro
 {
     public const TIER_FREE = 'free';
 
-    public const TIER_BUSINESS = 'business';
+    public const TIER_STARTER = 'starter';
 
-    public const TIER_AGENCY = 'agency';
+    public const TIER_GROWTH = 'growth';
 
-    public const TIER_ELITE = 'elite';
+    public const TIER_SCALE = 'scale';
 
     /**
-     * True when Sikshya Pro (or another add-on) asserts an active paid license.
+     * @deprecated Use TIER_GROWTH (same value: "growth").
+     */
+    public const TIER_BUSINESS = 'growth';
+
+    /**
+     * Whether a commercial Sikshya tier is active for this site.
      */
     public static function isActive(): bool
     {
@@ -42,7 +52,22 @@ final class Pro
     }
 
     /**
-     * Paid SKU tier: business ≈ Pro roadmap; agency/elite unlock Elite features.
+     * Normalize store / alias tier strings to current slugs.
+     */
+    public static function normalizeSiteTierString(string $tier): string
+    {
+        $tier = strtolower(trim($tier));
+        $map = [
+            'business' => self::TIER_GROWTH,
+            'pro' => self::TIER_GROWTH,
+            'agency' => self::TIER_SCALE,
+        ];
+
+        return $map[$tier] ?? $tier;
+    }
+
+    /**
+     * Paid SKU tier from license / filters: starter | growth | scale.
      */
     public static function siteTier(): string
     {
@@ -51,18 +76,64 @@ final class Pro
         }
 
         /**
-         * Commercial plan: business | agency | elite
+         * Commercial plan slug (after normalization).
          *
-         * @param string $tier Default business when Pro is active but filter unset.
+         * @param string $tier Default **starter** when Pro is active but no tier resolved yet — Growth/Scale unlock only from license data.
          */
-        $tier = apply_filters('sikshya_pro_site_tier', self::TIER_BUSINESS);
-        $tier = is_string($tier) ? strtolower(trim($tier)) : self::TIER_BUSINESS;
+        $tier = apply_filters('sikshya_pro_site_tier', self::TIER_STARTER);
+        $tier = is_string($tier) ? self::normalizeSiteTierString($tier) : self::TIER_STARTER;
 
-        if (in_array($tier, [self::TIER_AGENCY, self::TIER_ELITE], true)) {
-            return $tier;
+        $allowed = [self::TIER_STARTER, self::TIER_GROWTH, self::TIER_SCALE];
+        if (!in_array($tier, $allowed, true)) {
+            return self::TIER_STARTER;
         }
 
-        return self::TIER_BUSINESS;
+        return $tier;
+    }
+
+    /**
+     * Human-readable plan name for admin UI.
+     */
+    public static function siteTierLabel(): string
+    {
+        return match (self::siteTier()) {
+            self::TIER_STARTER => __('Starter', 'sikshya'),
+            self::TIER_GROWTH => __('Growth', 'sikshya'),
+            self::TIER_SCALE => __('Scale', 'sikshya'),
+            default => __('Free', 'sikshya'),
+        };
+    }
+
+    /**
+     * Numeric rank for tier gating (higher = more features).
+     */
+    private static function siteTierRank(string $site): int
+    {
+        $site = self::normalizeSiteTierString($site);
+
+        return match ($site) {
+            self::TIER_FREE => 0,
+            self::TIER_STARTER => 1,
+            self::TIER_GROWTH => 2,
+            self::TIER_SCALE => 3,
+            default => 0,
+        };
+    }
+
+    /**
+     * Minimum rank required for a FeatureRegistry `tier` value.
+     */
+    private static function catalogTierRequiredRank(string $need): int
+    {
+        $need = strtolower(trim($need));
+
+        return match ($need) {
+            'free' => 0,
+            'starter' => 1,
+            'pro' => 2,
+            'scale' => 3,
+            default => 99,
+        };
     }
 
     /**
@@ -75,7 +146,7 @@ final class Pro
             return true;
         }
 
-        $need = $def['tier'];
+        $need = isset($def['tier']) ? strtolower((string) $def['tier']) : 'free';
         if ($need === 'free') {
             return true;
         }
@@ -86,15 +157,7 @@ final class Pro
 
         $site = self::siteTier();
 
-        if ($need === 'pro') {
-            return in_array($site, [self::TIER_BUSINESS, self::TIER_AGENCY, self::TIER_ELITE], true);
-        }
-
-        if ($need === 'elite') {
-            return in_array($site, [self::TIER_AGENCY, self::TIER_ELITE], true);
-        }
-
-        return false;
+        return self::siteTierRank($site) >= self::catalogTierRequiredRank($need);
     }
 
     /**
@@ -126,13 +189,15 @@ final class Pro
     {
         $upgradeUrl = apply_filters(
             'sikshya_pro_upgrade_url',
-            'https://sikshya.com/pricing/'
+            'https://store.mantrabrain.com/downloads/sikshya-pro/'
         );
 
         return [
             'isProActive' => self::isActive(),
+            'proPluginInstalled' => defined('SIKSHYA_PRO_VERSION'),
             'siteTier' => self::siteTier(),
-            'upgradeUrl' => is_string($upgradeUrl) ? $upgradeUrl : 'https://sikshya.com/pricing/',
+            'siteTierLabel' => self::siteTierLabel(),
+            'upgradeUrl' => is_string($upgradeUrl) ? $upgradeUrl : 'https://store.mantrabrain.com/downloads/sikshya-pro/',
             'featureStates' => self::featureStates(),
             'catalog' => FeatureRegistry::catalogForClient(),
         ];
@@ -153,6 +218,21 @@ final class Pro
                 __('This action requires Sikshya Pro: %s', 'sikshya'),
                 $label
             ),
+            [
+                'status' => 403,
+                'feature' => $featureId,
+            ]
+        );
+    }
+
+    /**
+     * REST error when the catalog feature is licensed but the site toggle is off in Addons.
+     */
+    public static function restAddonDisabled(string $featureId): \WP_Error
+    {
+        return new \WP_Error(
+            'sikshya_addon_disabled',
+            __('This module is turned off in Addons.', 'sikshya'),
             [
                 'status' => 403,
                 'feature' => $featureId,

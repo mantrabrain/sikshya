@@ -40,6 +40,13 @@ final class LearnTemplateData
             $mode = 'hub';
             $hub_courses = self::buildHubCourses($uid);
             $hub_recommended = self::buildRecommendedCourses();
+        } elseif (sanitize_key((string) get_post_meta($course_id, '_sikshya_course_type', true)) === 'bundle') {
+            // Bundle learn page: progress dashboard across all courses in the bundle.
+            $mode = 'bundle';
+            $hub_courses = self::buildBundleCourses($uid, $course_id);
+            if ($hub_courses === [] && !current_user_can('edit_posts')) {
+                $error = __('You have not purchased this bundle yet.', 'sikshya');
+            }
         } else {
             $repo = new EnrollmentRepository();
             $enrolled = $repo->findByUserAndCourse($uid, $course_id) !== null;
@@ -213,7 +220,7 @@ final class LearnTemplateData
                     ? (string) $pto->labels->singular_name
                     : $p->post_type;
 
-                $items[] = [
+                $item = [
                     'post'        => $p,
                     'permalink'   => self::learnPermalinkFor($p, $type_key),
                     'title'       => get_the_title($p),
@@ -225,6 +232,35 @@ final class LearnTemplateData
                     'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
                     'index_in_section' => $idx,
                     'completed'   => self::isItemCompleted($progress, $user_id, $course_id, $p),
+                    'locked'      => false,
+                    'lock_reason' => '',
+                ];
+
+                $item = apply_filters(
+                    'sikshya_learn_outline_item',
+                    $item,
+                    [
+                        'user_id' => $user_id,
+                        'course_id' => $course_id,
+                        'content_id' => (int) $p->ID,
+                        'type' => $type_key,
+                    ]
+                );
+
+                $items[] = is_array($item) ? $item : [
+                    'post' => $p,
+                    'permalink' => self::learnPermalinkFor($p, $type_key),
+                    'title' => get_the_title($p),
+                    'type_key' => $type_key,
+                    'type_label' => $type_label,
+                    'lesson_type' => $type_key === 'lesson' ? sanitize_key((string) get_post_meta((int) $p->ID, '_sikshya_lesson_type', true)) : '',
+                    'meta_line' => CurriculumOutlineMeta::itemMetaLine($p, $type_key),
+                    'duration_minutes' => CurriculumOutlineMeta::itemDurationMinutes($p, $type_key),
+                    'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
+                    'index_in_section' => $idx,
+                    'completed' => self::isItemCompleted($progress, $user_id, $course_id, $p),
+                    'locked' => false,
+                    'lock_reason' => '',
                 ];
             }
 
@@ -376,6 +412,66 @@ final class LearnTemplateData
         }
 
         return PublicPageUrls::learnForCourse($course_id);
+    }
+
+    /**
+     * Bundle learn page: one card per course in the bundle, with per-course progress.
+     * Admins/instructors see all courses; learners only see courses they are enrolled in.
+     *
+     * @return array<int, array{course:\WP_Post,progress:int,continue_url:string,course_url:string,thumb:string}>
+     */
+    private static function buildBundleCourses(int $user_id, int $bundle_id): array
+    {
+        $raw = get_post_meta($bundle_id, '_sikshya_bundle_course_ids', true);
+
+        if (empty($raw)) {
+            return [];
+        }
+
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : [];
+        }
+
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $repo = new EnrollmentRepository();
+        $out  = [];
+
+        foreach ($raw as $cid) {
+            $cid = (int) $cid;
+            if ($cid <= 0) {
+                continue;
+            }
+            $course = get_post($cid);
+            if (!$course instanceof \WP_Post || $course->post_status !== 'publish') {
+                continue;
+            }
+
+            $enrollment = $repo->findByUserAndCourse($user_id, $cid);
+            $progress   = 0;
+            if ($enrollment !== null && isset($enrollment->progress) && is_numeric($enrollment->progress)) {
+                $progress = (int) max(0, min(100, round((float) $enrollment->progress)));
+            }
+
+            // Allow admins / instructors to preview the bundle learn page even without enrollment.
+            if ($enrollment === null && !current_user_can('edit_posts')) {
+                continue;
+            }
+
+            $out[] = [
+                'course'       => $course,
+                'progress'     => $progress,
+                'continue_url' => self::firstItemUrlForCourse($cid),
+                'course_url'   => get_permalink($cid) ?: '',
+                'thumb'        => get_the_post_thumbnail_url($cid, 'medium') ?: '',
+                'enrolled'     => $enrollment !== null,
+            ];
+        }
+
+        return $out;
     }
 
     /**

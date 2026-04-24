@@ -189,12 +189,14 @@ class AdminAssetsService
 
         $react_css = SIKSHYA_PLUGIN_DIR . 'assets/admin/react/sikshya-admin.css';
         $react_js = SIKSHYA_PLUGIN_DIR . 'assets/admin/react/sikshya-admin.js';
-        wp_register_style(
-            'sikshya-react-admin',
-            $this->plugin->getAssetUrl('admin/react/sikshya-admin.css'),
-            [],
-            file_exists($react_css) ? (string) filemtime($react_css) : SIKSHYA_VERSION
-        );
+        if (file_exists($react_css)) {
+            wp_register_style(
+                'sikshya-react-admin',
+                $this->plugin->getAssetUrl('admin/react/sikshya-admin.css'),
+                [],
+                (string) filemtime($react_css)
+            );
+        }
         wp_register_script(
             'sikshya-react-admin',
             $this->plugin->getAssetUrl('admin/react/sikshya-admin.js'),
@@ -244,7 +246,9 @@ class AdminAssetsService
             wp_enqueue_media();
 
             wp_enqueue_style('sikshya-react-shell');
-            wp_enqueue_style('sikshya-react-admin');
+            if (wp_style_is('sikshya-react-admin', 'registered')) {
+                wp_enqueue_style('sikshya-react-admin');
+            }
             wp_enqueue_script('sikshya-react-admin');
 
             wp_enqueue_style('sikshya-toast');

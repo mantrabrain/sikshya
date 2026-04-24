@@ -45,9 +45,10 @@ final class CheckoutService
      * Price lines + subtotal + optional coupon (no DB). Used for checkout quote UI.
      *
      * @param array<int, int> $course_ids
+     * @param int               $bundle_id Optional Pro bundle: pricing may be replaced via {@see 'sikshya_bundle_pricing_for_cart'}.
      * @return array{line_amounts: array<int, float>, subtotal: float, discount: float, total: float, currency: string, coupon_id: int|null}
      */
-    public function computePricingForCourses(array $course_ids, string $coupon_code = ''): array
+    public function computePricingForCourses(array $course_ids, string $coupon_code = '', int $bundle_id = 0): array
     {
         $course_ids = array_values(array_unique(array_filter(array_map('intval', $course_ids))));
         if ($course_ids === []) {
@@ -59,6 +60,23 @@ final class CheckoutService
             $currency = 'USD';
         }
 
+        /**
+         * Subscription-only checkout mode (Pro add-on):
+         * - the cart must contain only subscription courses
+         * - all courses must require the same plan id
+         * - pricing is derived from the plan, not per-course price
+         *
+         * This keeps core unaware of plans/subscriptions tables: the add-on supplies pricing via a filter.
+         *
+         * @param array|null $pricing Null or array{ line_amounts: array<int,float>, subtotal: float }.
+         * @param int[]      $course_ids
+         * @param string     $currency
+         */
+        $subPricing = apply_filters('sikshya_checkout_subscription_pricing', null, $course_ids, $currency);
+        if (is_array($subPricing) && isset($subPricing['line_amounts'], $subPricing['subtotal']) && is_array($subPricing['line_amounts'])) {
+            $line_amounts = $subPricing['line_amounts'];
+            $subtotal = round(max(0.0, (float) $subPricing['subtotal']), 2);
+        } else {
         $line_amounts = [];
         $subtotal = 0.0;
         foreach ($course_ids as $cid) {
@@ -68,6 +86,23 @@ final class CheckoutService
             $subtotal += $line;
         }
         $subtotal = round($subtotal, 2);
+        }
+
+        if ($bundle_id > 0) {
+            /**
+             * Replace per-course line amounts with bundle pricing (Pro). Return null to keep summed course prices.
+             *
+             * @param array|null $pricing     Null or array{ line_amounts: array<int,float>, subtotal: float }.
+             * @param int        $bundle_id   Bundle primary key.
+             * @param int[]      $course_ids  Cart course IDs.
+             * @param string     $currency    Store currency (ISO).
+             */
+            $adjusted = apply_filters('sikshya_bundle_pricing_for_cart', null, $bundle_id, $course_ids, $currency);
+            if (is_array($adjusted) && isset($adjusted['line_amounts'], $adjusted['subtotal']) && is_array($adjusted['line_amounts'])) {
+                $line_amounts = $adjusted['line_amounts'];
+                $subtotal = round(max(0.0, (float) $adjusted['subtotal']), 2);
+            }
+        }
 
         $discount = 0.00;
         $total = $subtotal;
@@ -77,6 +112,20 @@ final class CheckoutService
         if ($coupon_code !== '') {
             $coupon = $this->coupons->findActiveByCode($coupon_code);
             if ($coupon) {
+                /**
+                 * Allow Pro / extensions to block a coupon for this cart (min spend, course scope, etc.).
+                 * Return a non-empty string to block checkout with that message.
+                 *
+                 * @param string   $blocked     Empty to allow, or error message.
+                 * @param object   $coupon      Coupon row.
+                 * @param int[]    $course_ids  Course IDs in the cart.
+                 * @param float    $subtotal    Cart subtotal before discount.
+                 */
+                $blocked = apply_filters('sikshya_coupon_blocked_message', '', $coupon, $course_ids, $subtotal);
+                if (is_string($blocked) && $blocked !== '') {
+                    throw new \InvalidArgumentException($blocked);
+                }
+
                 [$discount, $total] = $this->coupons->applyToAmount($coupon, $subtotal);
                 $coupon_id = (int) $coupon->id;
             } else {
@@ -98,15 +147,18 @@ final class CheckoutService
      * Cart totals preview (no order row). Same math as {@see createPendingOrderForCourses}.
      *
      * @param array<int, int> $course_ids
+     * @param int               $bundle_id Optional bundle id (see {@see computePricingForCourses}).
      * @return array{subtotal: float, discount: float, total: float, currency: string, formatted: array{subtotal: string, discount: string, total: string}}
      */
-    public function quoteTotalsForCourses(int $user_id, array $course_ids, string $coupon_code = ''): array
+    public function quoteTotalsForCourses(int $user_id, array $course_ids, string $coupon_code = '', int $bundle_id = 0): array
     {
         if ($user_id <= 0) {
             throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
         }
 
-        $p = $this->computePricingForCourses($course_ids, $coupon_code);
+        $this->assertCheckoutOrderEligibility($user_id, $course_ids);
+
+        $p = $this->computePricingForCourses($course_ids, $coupon_code, $bundle_id);
         $cur = $p['currency'];
 
         return [
@@ -128,21 +180,37 @@ final class CheckoutService
      * One order with multiple course line items (cart checkout).
      *
      * @param array<int, int> $course_ids
+     * @param int               $bundle_id Optional bundle id for order meta / pricing.
      * @return array{order_id: int, public_token: string, subtotal: float, discount: float, total: float, currency: string}
      */
-    public function createPendingOrderForCourses(int $user_id, array $course_ids, string $coupon_code = ''): array
+    public function createPendingOrderForCourses(int $user_id, array $course_ids, string $coupon_code = '', int $bundle_id = 0): array
     {
         if ($user_id <= 0) {
             throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
         }
 
-        $p = $this->computePricingForCourses($course_ids, $coupon_code);
+        $this->assertCheckoutOrderEligibility($user_id, $course_ids);
+
+        $p = $this->computePricingForCourses($course_ids, $coupon_code, $bundle_id);
         $line_amounts = $p['line_amounts'];
         $subtotal = $p['subtotal'];
         $discount = $p['discount'];
         $total = $p['total'];
         $currency = $p['currency'];
         $coupon_id = $p['coupon_id'];
+
+        $meta = ['course_ids' => array_keys($line_amounts)];
+        if ($bundle_id > 0) {
+            $meta['bundle_id'] = $bundle_id;
+        }
+        /**
+         * Allow add-ons to attach checkout-mode metadata (eg. subscription plan id).
+         *
+         * @param array<string, mixed> $meta
+         * @param int[]                $course_ids
+         * @param string               $currency
+         */
+        $meta = apply_filters('sikshya_checkout_order_meta', $meta, array_keys($line_amounts), $currency);
 
         $order_id = $this->orders->createOrder(
             [
@@ -154,7 +222,7 @@ final class CheckoutService
                 'total' => $total,
                 'gateway' => '',
                 'coupon_id' => $coupon_id,
-                'meta' => ['course_ids' => array_keys($line_amounts)],
+                'meta' => $meta,
             ]
         );
 
@@ -220,6 +288,48 @@ final class CheckoutService
         return Pro::isActive() && $this->isTruthySetting($this->settings()->getSetting('enable_stripe_payment', '0'));
     }
 
+    public function isBankTransferEnabled(): bool
+    {
+        if (!Pro::isActive()) {
+            return false;
+        }
+
+        return $this->isTruthySetting($this->settings()->getSetting('enable_bank_transfer_payment', '0'))
+            && trim((string) $this->settings()->getSetting('bank_transfer_instructions', '')) !== '';
+    }
+
+    public function isMollieEnabled(): bool
+    {
+        if (!Pro::isActive()) {
+            return false;
+        }
+
+        return $this->isTruthySetting($this->settings()->getSetting('enable_mollie_payment', '0'))
+            && (string) $this->settings()->getSetting('mollie_api_key', '') !== '';
+    }
+
+    public function isPaystackEnabled(): bool
+    {
+        if (!Pro::isActive()) {
+            return false;
+        }
+
+        return $this->isTruthySetting($this->settings()->getSetting('enable_paystack_payment', '0'))
+            && (string) $this->settings()->getSetting('paystack_public_key', '') !== ''
+            && (string) $this->settings()->getSetting('paystack_secret_key', '') !== '';
+    }
+
+    public function isRazorpayEnabled(): bool
+    {
+        if (!Pro::isActive()) {
+            return false;
+        }
+
+        return $this->isTruthySetting($this->settings()->getSetting('enable_razorpay_payment', '0'))
+            && (string) $this->settings()->getSetting('razorpay_key_id', '') !== ''
+            && (string) $this->settings()->getSetting('razorpay_key_secret', '') !== '';
+    }
+
     /**
      * When true, choosing offline immediately enrolls (honor system). When false, order stays on-hold until an admin marks it paid.
      */
@@ -260,6 +370,18 @@ final class CheckoutService
             return ['offline' => true];
         }
 
+        if ($gateway === 'bank_transfer') {
+            if (!$this->isBankTransferEnabled()) {
+                throw new \RuntimeException(__('Bank transfer is not available.', 'sikshya'));
+            }
+            $this->orders->updateOrder($order_id, [
+                'gateway' => 'bank_transfer',
+                'gateway_intent_id' => 'bank-transfer-' . $order_id,
+            ]);
+
+            return ['offline' => true, 'bank_transfer' => true];
+        }
+
         $this->orders->updateOrder($order_id, ['gateway' => $gateway]);
 
         if ($gateway === 'stripe') {
@@ -276,6 +398,30 @@ final class CheckoutService
             return $this->createPayPalOrder($order);
         }
 
+        if ($gateway === 'mollie') {
+            if (!$this->isMollieEnabled()) {
+                throw new \RuntimeException(__('Mollie is not available.', 'sikshya'));
+            }
+
+            return $this->createMolliePayment($order);
+        }
+
+        if ($gateway === 'paystack') {
+            if (!$this->isPaystackEnabled()) {
+                throw new \RuntimeException(__('Paystack is not available.', 'sikshya'));
+            }
+
+            return $this->createPaystackTransaction($order);
+        }
+
+        if ($gateway === 'razorpay') {
+            if (!$this->isRazorpayEnabled()) {
+                throw new \RuntimeException(__('Razorpay is not available.', 'sikshya'));
+            }
+
+            return $this->createRazorpayPaymentLink($order);
+        }
+
         /**
          * Pro/addons can start sessions for additional gateways.
          *
@@ -284,6 +430,15 @@ final class CheckoutService
         $payload = apply_filters('sikshya_checkout_start_gateway_session', null, $order, $gateway, $order_id, $this);
         if (is_array($payload)) {
             return $payload;
+        }
+
+        if (in_array($gateway, ['square', 'authorize_net'], true)) {
+            throw new \RuntimeException(
+                __(
+                    'Checkout for Square and Authorize.Net is not wired in core yet. Use another gateway or extend via sikshya_checkout_start_gateway_session.',
+                    'sikshya'
+                )
+            );
         }
 
         throw new \InvalidArgumentException(__('Unsupported gateway.', 'sikshya'));
@@ -538,5 +693,341 @@ final class CheckoutService
         $json = json_decode((string) wp_remote_retrieve_body($cap), true);
 
         return is_array($json) ? $json : null;
+    }
+
+    /**
+     * @return array{approval_url: string, mollie_payment_id: string}
+     */
+    private function createMolliePayment(object $order): array
+    {
+        $key = (string) $this->settings()->getSetting('mollie_api_key', '');
+        $amount = number_format((float) $order->total, 2, '.', '');
+        $currency = strtoupper((string) $order->currency);
+        if (strlen($currency) !== 3) {
+            $currency = 'EUR';
+        }
+
+        $returnUrl = add_query_arg(
+            [
+                'sikshya_mollie_return' => '1',
+                'order_id' => (string) $order->id,
+            ],
+            PublicPageUrls::url('checkout')
+        );
+
+        $body = [
+            'amount' => [
+                'currency' => $currency,
+                'value' => $amount,
+            ],
+            'description' => sprintf(
+                /* translators: %d: order id */
+                __('Sikshya order %d', 'sikshya'),
+                (int) $order->id
+            ),
+            'redirectUrl' => $returnUrl,
+            'metadata' => [
+                'order_id' => (string) $order->id,
+            ],
+        ];
+
+        $response = wp_remote_post(
+            'https://api.mollie.com/v2/payments',
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $key,
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => wp_json_encode($body),
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            throw new \RuntimeException($response->get_error_message());
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($json) || empty($json['id'])) {
+            $msg = is_array($json) && isset($json['detail']) ? (string) $json['detail'] : __('Mollie payment creation failed.', 'sikshya');
+            throw new \RuntimeException($msg);
+        }
+
+        $payId = (string) $json['id'];
+        $href = '';
+        if (!empty($json['_links']['checkout']['href'])) {
+            $href = (string) $json['_links']['checkout']['href'];
+        }
+
+        if ($href === '') {
+            throw new \RuntimeException(__('Mollie did not return a checkout URL.', 'sikshya'));
+        }
+
+        $this->orders->updateOrder((int) $order->id, ['gateway_intent_id' => $payId]);
+
+        return [
+            'approval_url' => $href,
+            'mollie_payment_id' => $payId,
+        ];
+    }
+
+    /**
+     * @return array{approval_url: string, paystack_reference: string}
+     */
+    private function createPaystackTransaction(object $order): array
+    {
+        $secret = (string) $this->settings()->getSetting('paystack_secret_key', '');
+        $user = wp_get_current_user();
+        $email = ($user && $user->exists()) ? (string) $user->user_email : '';
+        if ($email === '' || !is_email($email)) {
+            throw new \RuntimeException(__('A valid account email is required for Paystack.', 'sikshya'));
+        }
+
+        $currency = strtoupper((string) $order->currency);
+        if (strlen($currency) !== 3) {
+            $currency = 'NGN';
+        }
+
+        $reference = 'skord_' . (int) $order->id . '_' . strtolower(wp_generate_password(8, false, false));
+        $amountMinor = (int) round((float) $order->total * 100);
+        if ($amountMinor < 1) {
+            throw new \RuntimeException(__('Order total is too small for Paystack.', 'sikshya'));
+        }
+
+        $callback = add_query_arg(
+            [
+                'sikshya_paystack_return' => '1',
+                'order_id' => (string) $order->id,
+            ],
+            PublicPageUrls::url('checkout')
+        );
+
+        $response = wp_remote_post(
+            'https://api.paystack.co/transaction/initialize',
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $secret,
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => wp_json_encode([
+                    'email' => $email,
+                    'amount' => $amountMinor,
+                    'currency' => $currency,
+                    'reference' => $reference,
+                    'callback_url' => $callback,
+                    'metadata' => [
+                        'order_id' => (string) $order->id,
+                    ],
+                ]),
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            throw new \RuntimeException($response->get_error_message());
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+        $data = is_array($json) && isset($json['data']) && is_array($json['data']) ? $json['data'] : null;
+        if (!$data || empty($data['authorization_url'])) {
+            $msg = is_array($json) && isset($json['message']) ? (string) $json['message'] : __('Paystack initialization failed.', 'sikshya');
+            throw new \RuntimeException($msg);
+        }
+
+        $this->orders->updateOrder((int) $order->id, [
+            'gateway_intent_id' => $reference,
+        ]);
+
+        return [
+            'approval_url' => (string) $data['authorization_url'],
+            'paystack_reference' => $reference,
+        ];
+    }
+
+    /**
+     * @return array{approval_url: string, razorpay_payment_link_id: string}
+     */
+    private function createRazorpayPaymentLink(object $order): array
+    {
+        $keyId = (string) $this->settings()->getSetting('razorpay_key_id', '');
+        $keySecret = (string) $this->settings()->getSetting('razorpay_key_secret', '');
+        $currency = strtoupper((string) $order->currency);
+        if (strlen($currency) !== 3) {
+            $currency = 'INR';
+        }
+
+        $amountMinor = (int) round((float) $order->total * 100);
+        if ($amountMinor < 1) {
+            throw new \RuntimeException(__('Order total is too small for Razorpay.', 'sikshya'));
+        }
+
+        $callback = add_query_arg(
+            [
+                'sikshya_razorpay_return' => '1',
+                'order_id' => (string) $order->id,
+            ],
+            PublicPageUrls::url('checkout')
+        );
+
+        $body = [
+            'amount' => $amountMinor,
+            'currency' => $currency,
+            'description' => sprintf(
+                /* translators: %d: order id */
+                __('Sikshya order %d', 'sikshya'),
+                (int) $order->id
+            ),
+            'callback_url' => $callback,
+            'callback_method' => 'get',
+        ];
+
+        $response = wp_remote_post(
+            'https://api.razorpay.com/v1/payment_links',
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($keyId . ':' . $keySecret),
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => wp_json_encode($body),
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            throw new \RuntimeException($response->get_error_message());
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($json) || empty($json['id']) || empty($json['short_url'])) {
+            $msg = is_array($json) && isset($json['error']['description'])
+                ? (string) $json['error']['description']
+                : __('Razorpay payment link creation failed.', 'sikshya');
+            throw new \RuntimeException($msg);
+        }
+
+        $linkId = (string) $json['id'];
+        $this->orders->updateOrder((int) $order->id, ['gateway_intent_id' => $linkId]);
+
+        return [
+            'approval_url' => (string) $json['short_url'],
+            'razorpay_payment_link_id' => $linkId,
+        ];
+    }
+
+    /**
+     * Fetch Mollie payment JSON for status checks.
+     */
+    public function getMolliePayment(string $payment_id): ?array
+    {
+        $key = (string) $this->settings()->getSetting('mollie_api_key', '');
+        if ($key === '' || $payment_id === '') {
+            return null;
+        }
+
+        $response = wp_remote_get(
+            'https://api.mollie.com/v2/payments/' . rawurlencode($payment_id),
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $key,
+                ],
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+
+        return is_array($json) ? $json : null;
+    }
+
+    /**
+     * Verify Paystack transaction by reference.
+     */
+    public function verifyPaystackReference(string $reference): ?array
+    {
+        $secret = (string) $this->settings()->getSetting('paystack_secret_key', '');
+        if ($secret === '' || $reference === '') {
+            return null;
+        }
+
+        $url = 'https://api.paystack.co/transaction/verify/' . rawurlencode($reference);
+        $response = wp_remote_get(
+            $url,
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $secret,
+                ],
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+        if (!is_array($json) || empty($json['status']) || !$json['status']) {
+            return null;
+        }
+
+        $data = isset($json['data']) && is_array($json['data']) ? $json['data'] : null;
+
+        return is_array($data) ? $data : null;
+    }
+
+    /**
+     * Fetch Razorpay payment link JSON.
+     */
+    public function getRazorpayPaymentLink(string $link_id): ?array
+    {
+        $keyId = (string) $this->settings()->getSetting('razorpay_key_id', '');
+        $keySecret = (string) $this->settings()->getSetting('razorpay_key_secret', '');
+        if ($keyId === '' || $link_id === '') {
+            return null;
+        }
+
+        $response = wp_remote_get(
+            'https://api.razorpay.com/v1/payment_links/' . rawurlencode($link_id),
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($keyId . ':' . $keySecret),
+                ],
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+
+        return is_array($json) ? $json : null;
+    }
+
+    /**
+     * @param array<int, int> $course_ids
+     */
+    private function assertCheckoutOrderEligibility(int $user_id, array $course_ids): void
+    {
+        $course_ids = array_values(array_unique(array_filter(array_map('intval', $course_ids))));
+        if ($course_ids === []) {
+            return;
+        }
+
+        /**
+         * Allow add-ons to block checkout before an order row is created (e.g. prerequisites).
+         *
+         * @param null|\WP_Error $reject     Return WP_Error to block; message is shown in REST/UI.
+         * @param int            $user_id
+         * @param int[]          $course_ids Normalized positive course IDs.
+         */
+        $reject = apply_filters('sikshya_checkout_validate_order_eligibility', null, $user_id, $course_ids);
+        if ($reject instanceof \WP_Error) {
+            throw new \InvalidArgumentException($reject->get_error_message());
+        }
     }
 }

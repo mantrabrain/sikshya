@@ -14,6 +14,64 @@ use Sikshya\Constants\PostTypes;
 final class PublicPageUrls
 {
     /**
+     * Core account sections. Extend via {@see 'sikshya_account_allowed_views'} (Pro / addons).
+     *
+     * @return string[]
+     */
+    public static function allowedAccountViews(): array
+    {
+        $core = ['dashboard', 'learning', 'payments', 'quiz-attempts'];
+        $merged = apply_filters('sikshya_account_allowed_views', $core);
+        if (!is_array($merged)) {
+            return $core;
+        }
+        $out = [];
+        foreach ($merged as $v) {
+            $k = sanitize_key((string) $v);
+            if ($k !== '') {
+                $out[] = $k;
+            }
+        }
+
+        return array_values(array_unique($out));
+    }
+
+    /**
+     * Current account sub-view (defaults to dashboard).
+     */
+    public static function currentAccountView(): string
+    {
+        $raw = (string) get_query_var(PermalinkService::ACCOUNT_VIEW_VAR);
+        $v   = sanitize_key($raw);
+
+        return in_array($v, self::allowedAccountViews(), true) ? $v : 'dashboard';
+    }
+
+    /**
+     * URL for a learner account section (pretty: /account/learning/, plain: query args).
+     */
+    public static function accountViewUrl(string $view): string
+    {
+        $v = sanitize_key($view);
+        if (!in_array($v, self::allowedAccountViews(), true)) {
+            $v = 'dashboard';
+        }
+
+        $base = PermalinkService::virtualPageUrl('account');
+        if (PermalinkService::isPlainPermalinks()) {
+            return add_query_arg(PermalinkService::ACCOUNT_VIEW_VAR, $v, $base);
+        }
+
+        if ($v === 'dashboard') {
+            return $base;
+        }
+
+        $base = untrailingslashit($base);
+
+        return user_trailingslashit($base . '/' . rawurlencode($v));
+    }
+
+    /**
      * Whether the main request is a Sikshya virtual page (see PermalinkService::QUERY_VAR).
      */
     public static function isCurrentVirtualPage(string $key): bool

@@ -5,6 +5,7 @@ namespace Sikshya\Admin;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Addons\Addons;
 use Sikshya\Licensing\Pro;
 use Sikshya\Services\PermalinkService;
 
@@ -13,6 +14,24 @@ use Sikshya\Services\PermalinkService;
  */
 final class ReactAdminConfig
 {
+    /**
+     * Volatile shell payload (alerts, licensing, Pro version flags) for REST refresh without full reload.
+     *
+     * @return array{shellAlerts: array<int, array<string, mixed>>, licensing: array<string, mixed>, proVersion: string, proPluginVersion: string}
+     */
+    public static function shellBootstrap(string $pageKey): array
+    {
+        $pro_plugin_version = defined('SIKSHYA_PRO_VERSION') ? (string) constant('SIKSHYA_PRO_VERSION') : '';
+        $pro_version = ($pro_plugin_version !== '' && Pro::isActive()) ? $pro_plugin_version : '';
+
+        return [
+            'shellAlerts' => apply_filters('sikshya_react_shell_alerts', [], $pageKey),
+            'licensing' => Pro::getClientPayload(),
+            'proVersion' => $pro_version,
+            'proPluginVersion' => $pro_plugin_version,
+        ];
+    }
+
     /**
      * Build config for window.sikshyaReact.
      *
@@ -24,7 +43,7 @@ final class ReactAdminConfig
     {
         $user = wp_get_current_user();
         $query = [];
-        foreach (['tab', 'course_id', 'id', 'view', 'post_type', 'post_id'] as $key) {
+        foreach (['tab', 'course_id', 'id', 'view', 'post_type', 'post_id', 'template_id', 'force_bundle_ui'] as $key) {
             if (isset($_GET[$key])) {
                 $query[$key] = sanitize_text_field(wp_unslash((string) $_GET[$key]));
             }
@@ -32,10 +51,20 @@ final class ReactAdminConfig
 
         $avatar = get_avatar_url($user->ID, ['size' => 64]);
 
-        return [
+        $shell = self::shellBootstrap($pageKey);
+
+        $config = [
             'page' => $pageKey,
             'version' => SIKSHYA_VERSION,
+            /**
+             * Pro add-on semver when the licence is active (empty when Pro is inactive or unlicensed).
+             * @deprecated Prefer {@see self::shellBootstrap()} `proPluginVersion` + `licensing.isProActive` for UI.
+             */
+            'proVersion' => $shell['proVersion'],
+            /** Pro add-on semver when the Pro plugin is present (even before licence activation). */
+            'proPluginVersion' => $shell['proPluginVersion'],
             'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
+            'wpRestUrl' => esc_url_raw(rest_url('wp/v2/')),
             'restNonce' => wp_create_nonce('wp_rest'),
             'adminUrl' => admin_url('/'),
             /** `admin.php?page=sikshya` (append `&view=` for subpages). */
@@ -59,8 +88,22 @@ final class ReactAdminConfig
             'initialData' => $initialData,
             'query' => $query,
             /** Feature catalog + gates; all admin UIs read this for upsell / locks. */
-            'licensing' => Pro::getClientPayload(),
+            'licensing' => $shell['licensing'],
+            /**
+             * Full-width in-shell alerts (below the React header). Not WordPress {@see admin_notices()}.
+             *
+             * @var array<int, array<string, mixed>>
+             */
+            'shellAlerts' => $shell['shellAlerts'],
         ];
+
+        /**
+         * Allow Pro add-ons and custom code to inject extra config keys.
+         *
+         * @param array<string, mixed> $config
+         * @param string $pageKey
+         */
+        return (array) apply_filters('sikshya_react_admin_config', $config, $pageKey);
     }
 
     /**
@@ -107,6 +150,10 @@ final class ReactAdminConfig
             ];
         }
 
+        // Course group: replaces 9 children (Courses + Categories + Lessons/Quizzes/
+        // Assignments/Questions/Chapters + Drip + Prerequisites) with 4 — five of those
+        // are now tabs inside the Content library hub, and the two access-rules pages
+        // are tabs inside the Learning rules hub.
         $course_children = [
             [
                 'id' => 'courses',
@@ -123,54 +170,28 @@ final class ReactAdminConfig
                 'cap' => 'manage_categories',
             ],
             [
-                'id' => 'lessons',
-                'label' => __('Lessons', 'sikshya'),
+                'id' => 'content-library',
+                'label' => __('Content library', 'sikshya'),
                 'icon' => 'bookOpen',
-                'href' => self::reactAppUrl('lessons'),
+                'href' => self::reactAppUrl('content-library'),
                 'cap' => 'edit_posts',
             ],
-            [
-                'id' => 'quizzes',
-                'label' => __('Quizzes', 'sikshya'),
-                'icon' => 'puzzle',
-                'href' => self::reactAppUrl('quizzes'),
+            self::withLearningRulesNavBadge(
+                [
+                    'id' => 'learning-rules',
+                    'label' => __('Learning rules', 'sikshya'),
+                    'icon' => 'schedule',
+                    'href' => self::reactAppUrl('learning-rules'),
+                    'cap' => 'edit_posts',
+                ]
+            ),
+            self::withNavGate([
+                'id' => 'reviews',
+                'label' => __('Reviews', 'sikshya'),
+                'icon' => 'star',
+                'href' => self::reactAppUrl('reviews'),
                 'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'assignments',
-                'label' => __('Assignments', 'sikshya'),
-                'icon' => 'clipboard',
-                'href' => self::reactAppUrl('assignments'),
-                'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'questions',
-                'label' => __('Questions', 'sikshya'),
-                'icon' => 'helpCircle',
-                'href' => self::reactAppUrl('questions'),
-                'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'chapters',
-                'label' => __('Chapters', 'sikshya'),
-                'icon' => 'layers',
-                'href' => self::reactAppUrl('chapters'),
-                'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'content-drip',
-                'label' => __('Scheduled access', 'sikshya'),
-                'icon' => 'schedule',
-                'href' => self::reactAppUrl('content-drip'),
-                'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'course-team',
-                'label' => __('Course staff', 'sikshya'),
-                'icon' => 'users',
-                'href' => self::reactAppUrl('course-team'),
-                'cap' => 'edit_posts',
-            ],
+            ], 'course_reviews'),
         ];
 
         $children = self::filterNavChildren($course_children);
@@ -183,45 +204,25 @@ final class ReactAdminConfig
             ];
         }
 
-        $cert_children = [
-            [
-                'id' => 'certificates',
-                'label' => __('Templates', 'sikshya'),
-                'icon' => 'badge',
-                'href' => self::reactAppUrl('certificates'),
-                'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'issued-certificates',
-                'label' => __('Issued', 'sikshya'),
-                'icon' => 'clipboard',
-                'href' => self::reactAppUrl('issued-certificates'),
-                'cap' => 'edit_posts',
-            ],
-        ];
-        $cert_children = self::filterNavChildren($cert_children);
-        if ($cert_children !== []) {
+        // Certificates: was a 2-child group (Templates + Issued) — now a single hub
+        // entry with those as tabs.
+        if (current_user_can('edit_posts')) {
             $items[] = [
-                'id' => 'certificates-group',
+                'id' => 'certificates-hub',
                 'label' => __('Certificates', 'sikshya'),
                 'icon' => 'badge',
-                'children' => $cert_children,
+                'href' => self::reactAppUrl('certificates-hub'),
             ];
         }
 
+        // People: Students/Instructors collapse into the People hub (tabs). Enrollments
+        // is a different entity (per-course join table) so it stays separate.
         $people_children = [
             [
-                'id' => 'students',
-                'label' => __('Students', 'sikshya'),
+                'id' => 'people',
+                'label' => __('Students & instructors', 'sikshya'),
                 'icon' => 'users',
-                'href' => self::reactAppUrl('students'),
-                'cap' => 'edit_posts',
-            ],
-            [
-                'id' => 'instructors',
-                'label' => __('Instructors', 'sikshya'),
-                'icon' => 'userCircle',
-                'href' => self::reactAppUrl('instructors'),
+                'href' => self::reactAppUrl('people'),
                 'cap' => 'edit_posts',
             ],
             [
@@ -242,6 +243,9 @@ final class ReactAdminConfig
             ];
         }
 
+        // Reports: Calendar moves into the Reports hub as a tab; Activity log moves to
+        // Tools (it's an audit trail, not a report). Gradebook keeps its own entry —
+        // grading is a different daily job from "view metrics".
         $reports_children = [
             [
                 'id' => 'reports',
@@ -258,6 +262,13 @@ final class ReactAdminConfig
                 'cap' => 'edit_posts',
             ],
         ];
+
+        foreach ($reports_children as $i => $row) {
+            $id = isset($row['id']) ? (string) $row['id'] : '';
+            if ($id === 'gradebook') {
+                $reports_children[ $i ] = self::withNavGate($row, 'gradebook');
+            }
+        }
         $reports_children = self::filterNavChildren($reports_children);
         if ($reports_children !== []) {
             $items[] = [
@@ -268,19 +279,15 @@ final class ReactAdminConfig
             ];
         }
 
+        // Commerce: Payments + Orders are the same job (transactions) so they collapse
+        // into the Sales hub. Coupons / Subscriptions / Marketplace / bundle tools are
+        // separate entries. Primary bundle creation is Courses → Add course → “Course bundle”.
         $commerce_children = [
             [
-                'id' => 'payments',
-                'label' => __('Payments', 'sikshya'),
+                'id' => 'sales',
+                'label' => __('Sales', 'sikshya'),
                 'icon' => 'columns',
-                'href' => self::reactAppUrl('payments'),
-                'cap' => 'manage_options',
-            ],
-            [
-                'id' => 'orders',
-                'label' => __('Orders', 'sikshya'),
-                'icon' => 'table',
-                'href' => self::reactAppUrl('orders'),
+                'href' => self::reactAppUrl('sales'),
                 'cap' => 'manage_options',
             ],
             [
@@ -305,6 +312,15 @@ final class ReactAdminConfig
                 'cap' => 'manage_options',
             ],
         ];
+
+        foreach ($commerce_children as $i => $row) {
+            $id = isset($row['id']) ? (string) $row['id'] : '';
+            if ($id === 'subscriptions') {
+                $commerce_children[ $i ] = self::withNavGate($row, 'subscriptions');
+            } elseif ($id === 'marketplace') {
+                $commerce_children[ $i ] = self::withNavGate($row, 'marketplace_multivendor');
+            }
+        }
         $commerce_children = self::filterNavChildren($commerce_children);
         if ($commerce_children !== []) {
             $items[] = [
@@ -312,6 +328,60 @@ final class ReactAdminConfig
                 'label' => __('Commerce', 'sikshya'),
                 'icon' => 'columns',
                 'children' => $commerce_children,
+            ];
+        }
+
+        if (current_user_can('manage_options')) {
+            $items[] = [
+                'id' => 'addons',
+                'label' => __('Addons', 'sikshya'),
+                'icon' => 'plusCircle',
+                'href' => self::reactAppUrl('addons'),
+            ];
+        }
+
+        if (current_user_can('manage_options')) {
+            $items[] = [
+                'id' => 'license',
+                'label' => __('License', 'sikshya'),
+                'icon' => 'licenseKey',
+                'href' => self::reactAppUrl('license'),
+            ];
+        }
+
+        // Integrations: Webhooks/API + CRM automation are the same domain (outbound
+        // automation) so they collapse into one tabbed hub entry.
+        if (current_user_can('manage_options')) {
+            $items[] = self::withIntegrationsHubNavBadge(
+                [
+                    'id' => 'integrations-hub',
+                    'label' => __('Integrations', 'sikshya'),
+                    'icon' => 'columns',
+                    'href' => self::reactAppUrl('integrations-hub'),
+                ]
+            );
+        }
+
+        // Branding: White label + Social login both shape the public-facing brand /
+        // auth surface, so they collapse into one tabbed hub entry.
+        if (current_user_can('manage_options')) {
+            $items[] = self::withBrandingHubNavBadge(
+                [
+                    'id' => 'branding',
+                    'label' => __('Branding', 'sikshya'),
+                    'icon' => 'badge',
+                    'href' => self::reactAppUrl('branding'),
+                ]
+            );
+        }
+
+        // Email: Delivery + Templates collapse into one Email hub entry (tabs).
+        if (current_user_can('manage_options')) {
+            $items[] = [
+                'id' => 'email-hub',
+                'label' => __('Email', 'sikshya'),
+                'icon' => 'plusDocument',
+                'href' => self::reactAppUrl('email-hub'),
             ];
         }
 
@@ -325,6 +395,18 @@ final class ReactAdminConfig
         }
 
         if (current_user_can('manage_options')) {
+            $items[] = self::withNavGate(
+                [
+                    'id' => 'grading',
+                    'label' => __('Grading', 'sikshya'),
+                    'icon' => 'badge',
+                    'href' => self::reactAppUrl('grading'),
+                ],
+                'gradebook'
+            );
+        }
+
+        if (current_user_can('manage_options')) {
             $items[] = [
                 'id' => 'tools',
                 'label' => __('Tools', 'sikshya'),
@@ -334,6 +416,149 @@ final class ReactAdminConfig
         }
 
         return $items;
+    }
+
+    /**
+     * Optional sidebar badge for gated features (routes stay visible).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private static function withNavGate(array $row, string $feature_id): array
+    {
+        if (! Pro::feature($feature_id)) {
+            $row['badge'] = 'upgrade';
+        } elseif (! Addons::isEnabled($feature_id)) {
+            $row['badge'] = 'off';
+        }
+
+        return $row;
+    }
+
+    /**
+     * Integrations combines webhooks + API keys (Scale-tier features).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private static function withIntegrationsNavBadge(array $row): array
+    {
+        $webhooks_ok = Pro::feature('webhooks');
+        $zapier_ok = Pro::feature('zapier');
+        $keys_ok = Pro::feature('public_api_keys');
+        if ((! $webhooks_ok && ! $zapier_ok) || ! $keys_ok) {
+            $row['badge'] = 'upgrade';
+        } elseif (
+            (! Addons::isEnabled('webhooks') && ! Addons::isEnabled('zapier'))
+            || ! Addons::isEnabled('public_api_keys')
+        ) {
+            $row['badge'] = 'off';
+        }
+
+        return $row;
+    }
+
+    /**
+     * Single-entry Integrations hub badge: shows "upgrade" if NEITHER webhooks/api nor
+     * CRM is licensed (so the entire hub is locked), and "off" if all licensed
+     * integrations have their addons turned off.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private static function withIntegrationsHubNavBadge(array $row): array
+    {
+        $webhooks_ok = Pro::feature('webhooks');
+        $zapier_ok = Pro::feature('zapier');
+        $keys_ok = Pro::feature('public_api_keys');
+        $mkt_ok = Pro::feature('email_marketing');
+
+        if (! $webhooks_ok && ! $zapier_ok && ! $keys_ok && ! $mkt_ok) {
+            $row['badge'] = 'upgrade';
+
+            return $row;
+        }
+
+        $any_on = false;
+        if ($webhooks_ok && Addons::isEnabled('webhooks')) {
+            $any_on = true;
+        }
+        if ($zapier_ok && Addons::isEnabled('zapier')) {
+            $any_on = true;
+        }
+        if ($keys_ok && Addons::isEnabled('public_api_keys')) {
+            $any_on = true;
+        }
+        if ($mkt_ok && Addons::isEnabled('email_marketing')) {
+            $any_on = true;
+        }
+        if (! $any_on) {
+            $row['badge'] = 'off';
+        }
+
+        return $row;
+    }
+
+    /**
+     * Branding hub badge: covers white label + social login. We surface the badge if
+     * neither addon is licensed; "off" if licensed but both turned off.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private static function withBrandingHubNavBadge(array $row): array
+    {
+        $wl_ok = Pro::feature('white_label');
+        $sl_ok = Pro::feature('social_login');
+        if (! $wl_ok && ! $sl_ok) {
+            $row['badge'] = 'upgrade';
+
+            return $row;
+        }
+
+        $any_on = false;
+        if ($wl_ok && Addons::isEnabled('white_label')) {
+            $any_on = true;
+        }
+        if ($sl_ok && Addons::isEnabled('social_login')) {
+            $any_on = true;
+        }
+        if (! $any_on) {
+            $row['badge'] = 'off';
+        }
+
+        return $row;
+    }
+
+    /**
+     * Learning rules hub badge: covers content drip + prerequisites. Same model as
+     * the branding hub above.
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private static function withLearningRulesNavBadge(array $row): array
+    {
+        $drip_ok = Pro::feature('content_drip');
+        $prereq_ok = Pro::feature('prerequisites');
+        if (! $drip_ok && ! $prereq_ok) {
+            $row['badge'] = 'upgrade';
+
+            return $row;
+        }
+
+        $any_on = false;
+        if ($drip_ok && Addons::isEnabled('content_drip')) {
+            $any_on = true;
+        }
+        if ($prereq_ok && Addons::isEnabled('prerequisites')) {
+            $any_on = true;
+        }
+        if (! $any_on) {
+            $row['badge'] = 'off';
+        }
+
+        return $row;
     }
 
     /**

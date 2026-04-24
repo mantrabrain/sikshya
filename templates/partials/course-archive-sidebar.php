@@ -20,14 +20,19 @@ if (!$archive_url) {
     $archive_url = home_url('/');
 }
 
-$categories = get_terms(
-    [
-        'taxonomy' => Taxonomies::COURSE_CATEGORY,
-        'hide_empty' => true,
-    ]
-);
-if (is_wp_error($categories)) {
-    $categories = [];
+$cats_on = \Sikshya\Services\CourseFrontendSettings::areCategoriesEnabled();
+
+$categories = [];
+if ($cats_on) {
+    $categories = get_terms(
+        [
+            'taxonomy' => Taxonomies::COURSE_CATEGORY,
+            'hide_empty' => true,
+        ]
+    );
+    if (is_wp_error($categories)) {
+        $categories = [];
+    }
 }
 ?>
 
@@ -46,6 +51,7 @@ if (is_wp_error($categories)) {
             <a class="sikshya-archive-filters__clear" href="<?php echo esc_url($archive_url); ?>"><?php esc_html_e('Clear all', 'sikshya'); ?></a>
         </div>
 
+        <?php if ($cats_on) : ?>
         <div class="sikshya-archive-filters__group">
             <label class="sikshya-archive-filters__label" for="sikshya-filter-cat"><?php esc_html_e('Category', 'sikshya'); ?></label>
             <select class="sikshya-archive-filters__select" id="sikshya-filter-cat" name="sikshya_cat" onchange="this.form.submit()">
@@ -57,6 +63,7 @@ if (is_wp_error($categories)) {
                 <?php endforeach; ?>
             </select>
         </div>
+        <?php endif; ?>
 
         <div class="sikshya-archive-filters__group">
             <span class="sikshya-archive-filters__label"><?php esc_html_e('Level', 'sikshya'); ?></span>

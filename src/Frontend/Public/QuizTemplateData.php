@@ -54,6 +54,23 @@ final class QuizTemplateData
                     ? __('Please log in to access this quiz.', 'sikshya')
                     : __('You are not enrolled in this course.', 'sikshya');
             } else {
+                if ($error === '' && $enrolled && !$is_preview) {
+                    $access = apply_filters(
+                        'sikshya_access_check',
+                        ['ok' => true, 'message' => ''],
+                        [
+                            'type' => 'quiz',
+                            'user_id' => $uid,
+                            'course_id' => $course_id,
+                            'content_id' => $quiz_id,
+                        ]
+                    );
+                    if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
+                        $msg = isset($access['message']) ? (string) $access['message'] : '';
+                        $error = $msg !== '' ? $msg : __('This content is not available yet.', 'sikshya');
+                    }
+                }
+
                 $blocks = self::enrichBlocks(
                     $uid,
                     $course_id,
@@ -139,14 +156,16 @@ final class QuizTemplateData
     }
 
     /**
-     * @return array{reviews: bool, discussions: bool, qa: bool, certificate: bool}
+     * @return array{reviews: bool, ratings: bool, discussions: bool, qa: bool, certificate: bool}
      */
     private static function courseFeatures(int $course_id): array
     {
         $global_reviews = Settings::isTruthy(Settings::get('enable_reviews', true));
+        $global_ratings = Settings::isTruthy(Settings::get('enable_ratings', true));
 
         return [
             'reviews' => $global_reviews && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
+            'ratings' => $global_ratings,
             'discussions' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
             'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
             'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),
@@ -350,6 +369,72 @@ final class QuizTemplateData
     }
 
     /**
+     * Build one learner-facing question row (types, options, matching/ordering data).
+     * Exposes no correct-answer data to the template. Used by the learn quiz and by Pro
+     * question-bank runtime so the UI and REST grading stay consistent.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function buildQuestionViewRowForId(int $qid): ?array
+    {
+        if ($qid <= 0) {
+            return null;
+        }
+
+        $qp = get_post($qid);
+        if (!$qp || $qp->post_type !== PostTypes::QUESTION) {
+            return null;
+        }
+
+        $type = (string) get_post_meta($qid, '_sikshya_question_type', true);
+        if ($type === '') {
+            $type = 'multiple_choice';
+        }
+
+        $opts = get_post_meta($qid, '_sikshya_question_options', true);
+        if (!is_array($opts)) {
+            $opts = [];
+        }
+        $opts = array_values(array_map('strval', $opts));
+
+        $row = [
+            'id' => $qid,
+            'type' => $type,
+            'title' => wp_strip_all_tags((string) $qp->post_title),
+            'options' => $opts,
+        ];
+
+        if ($type === 'matching') {
+            $raw = (string) get_post_meta($qid, '_sikshya_question_correct_answer', true);
+            $dec = json_decode($raw, true);
+            $left = [];
+            $right = [];
+            if (is_array($dec) && !empty($dec['matching']) && is_array($dec['matching'])) {
+                $m = $dec['matching'];
+                if (!empty($m['left']) && is_array($m['left'])) {
+                    $left = array_values(array_map('strval', $m['left']));
+                }
+                if (!empty($m['right']) && is_array($m['right'])) {
+                    $right = array_values(array_map('strval', $m['right']));
+                }
+            }
+            $row['matching_left'] = $left;
+            $row['matching_right'] = $right;
+        }
+
+        if ($type === 'ordering' && $opts !== []) {
+            $pairs = [];
+            foreach ($opts as $i => $text) {
+                $pairs[] = ['index' => (int) $i, 'text' => $text];
+            }
+            shuffle($pairs);
+            $row['ordering_display'] = $pairs;
+        }
+
+        return $row;
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private static function buildQuestionsForQuiz(int $quiz_id): array
@@ -362,62 +447,10 @@ final class QuizTemplateData
         $out = [];
 
         foreach ($ids as $qid) {
-            $qid = (int) $qid;
-            if ($qid <= 0) {
-                continue;
+            $row = self::buildQuestionViewRowForId((int) $qid);
+            if ($row !== null) {
+                $out[] = $row;
             }
-
-            $qp = get_post($qid);
-            if (!$qp || $qp->post_type !== PostTypes::QUESTION) {
-                continue;
-            }
-
-            $type = (string) get_post_meta($qid, '_sikshya_question_type', true);
-            if ($type === '') {
-                $type = 'multiple_choice';
-            }
-
-            $opts = get_post_meta($qid, '_sikshya_question_options', true);
-            if (!is_array($opts)) {
-                $opts = [];
-            }
-            $opts = array_values(array_map('strval', $opts));
-
-            $row = [
-                'id' => $qid,
-                'type' => $type,
-                'title' => wp_strip_all_tags((string) $qp->post_title),
-                'options' => $opts,
-            ];
-
-            if ($type === 'matching') {
-                $raw = (string) get_post_meta($qid, '_sikshya_question_correct_answer', true);
-                $dec = json_decode($raw, true);
-                $left = [];
-                $right = [];
-                if (is_array($dec) && !empty($dec['matching']) && is_array($dec['matching'])) {
-                    $m = $dec['matching'];
-                    if (!empty($m['left']) && is_array($m['left'])) {
-                        $left = array_values(array_map('strval', $m['left']));
-                    }
-                    if (!empty($m['right']) && is_array($m['right'])) {
-                        $right = array_values(array_map('strval', $m['right']));
-                    }
-                }
-                $row['matching_left'] = $left;
-                $row['matching_right'] = $right;
-            }
-
-            if ($type === 'ordering' && $opts !== []) {
-                $pairs = [];
-                foreach ($opts as $i => $text) {
-                    $pairs[] = ['index' => (int) $i, 'text' => $text];
-                }
-                shuffle($pairs);
-                $row['ordering_display'] = $pairs;
-            }
-
-            $out[] = $row;
         }
 
         return $out;

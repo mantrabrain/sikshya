@@ -47,6 +47,7 @@ final class PaymentGatewayRegistry
                     'paypal_client_id',
                     'paypal_secret',
                     'paypal_mode',
+                    'paypal_webhook_id',
                 ],
             ],
             [

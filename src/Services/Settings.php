@@ -23,7 +23,33 @@ final class Settings
     {
         $key = sanitize_key($key);
 
-        return get_option(self::PREFIX . $key, $default);
+        $value = get_option(self::PREFIX . $key, $default);
+
+        // Avoid runaway recursion: some filters may call back into Settings::get().
+        static $inFilter = 0;
+        if ($inFilter > 0) {
+            return $value;
+        }
+
+        // Never filter the addon enablement option; callers often check addons inside filters.
+        if ($key === 'addons_enabled') {
+            return $value;
+        }
+
+        /**
+         * Filter a Sikshya setting value after load.
+         *
+         * Allows add-ons (e.g. multilingual) to translate user-configurable labels.
+         *
+         * @param mixed  $value Loaded option value (may be non-string).
+         * @param string $key   Unprefixed Sikshya setting key (sanitized).
+         */
+        $inFilter++;
+        try {
+            return apply_filters('sikshya_setting_value', $value, $key);
+        } finally {
+            $inFilter--;
+        }
     }
 
     /**

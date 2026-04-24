@@ -111,6 +111,19 @@ class CourseService
             throw new \InvalidArgumentException('Course not found');
         }
 
+        /**
+         * Allow add-ons to prevent enrollment (e.g. subscription-only access).
+         *
+         * Return true to allow, false to block, or WP_Error for a message.
+         */
+        $allowed = apply_filters('sikshya_can_enroll_user_in_course', true, $user_id, $course_id, $enrollment_data);
+        if ($allowed instanceof \WP_Error) {
+            throw new \InvalidArgumentException($allowed->get_error_message());
+        }
+        if ($allowed === false) {
+            throw new \InvalidArgumentException('Enrollment is not allowed for this course');
+        }
+
         // Check if user is already enrolled
         $existing_enrollment = $this->enrollmentRepository->findByUserAndCourse($user_id, $course_id);
         if ($existing_enrollment) {
@@ -193,7 +206,16 @@ class CourseService
     public function isUserEnrolled(int $user_id, int $course_id): bool
     {
         $enrollment = $this->enrollmentRepository->findByUserAndCourse($user_id, $course_id);
-        return $enrollment !== null;
+        if ($enrollment !== null) {
+            return true;
+        }
+
+        /**
+         * Allow add-ons to grant access without an enrollment row (e.g. active subscription).
+         *
+         * @param bool $has_access
+         */
+        return (bool) apply_filters('sikshya_user_has_course_access', false, $user_id, $course_id);
     }
 
     public function getCourseStats(int $course_id): array

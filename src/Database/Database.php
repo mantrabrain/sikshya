@@ -15,7 +15,7 @@ class Database
     /**
      * Bump when schema or migrations change (incremental upgrades via maybeUpgrade).
      */
-    public const SCHEMA_VERSION = '1.4.0';
+    public const SCHEMA_VERSION = '1.5.0';
 
     /**
      * Plugin instance
@@ -207,6 +207,7 @@ class Database
         dbDelta($this->getEnrollmentsCreateSql());
         dbDelta($sql_progress);
         dbDelta($this->getCertificatesCreateSql());
+        dbDelta($this->getAssignmentSubmissionsCreateSql());
         dbDelta($sql_payments);
         dbDelta($sql_quiz_attempts);
         dbDelta($sql_quiz_questions);
@@ -246,6 +247,12 @@ class Database
         if (version_compare((string) $current, '1.4.0', '<')) {
             $this->migrateTo140();
             Settings::setRaw('sikshya_db_version', '1.4.0');
+            $current = '1.4.0';
+        }
+        if (version_compare((string) $current, '1.5.0', '<')) {
+            $this->migrateTo150();
+            Settings::setRaw('sikshya_db_version', '1.5.0');
+            $current = '1.5.0';
         }
     }
 
@@ -287,6 +294,13 @@ class Database
             $repo->ensurePublicToken((int) $id);
         }
     }
+
+    private function migrateTo150(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($this->getAssignmentSubmissionsCreateSql());
+    }
+
 
     private function getEnrollmentsCreateSql(): string
     {
@@ -342,6 +356,35 @@ class Database
             KEY verification_code (verification_code),
             KEY status (status),
             UNIQUE KEY unique_certificate (user_id, course_id)
+        ) $charset_collate;";
+    }
+
+    private function getAssignmentSubmissionsCreateSql(): string
+    {
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        return "CREATE TABLE {$wpdb->prefix}sikshya_assignment_submissions (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            assignment_id bigint(20) NOT NULL,
+            course_id bigint(20) NOT NULL,
+            user_id bigint(20) NOT NULL,
+            content longtext NULL,
+            attachment_ids longtext NULL,
+            status varchar(32) NOT NULL DEFAULT 'submitted',
+            grade decimal(8,2) NULL,
+            feedback longtext NULL,
+            submitted_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            graded_at datetime NULL,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY assignment_id (assignment_id),
+            KEY course_id (course_id),
+            KEY user_id (user_id),
+            KEY status (status),
+            KEY submitted_at (submitted_at),
+            UNIQUE KEY unique_submission (assignment_id, user_id)
         ) $charset_collate;";
     }
 

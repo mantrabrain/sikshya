@@ -1,3 +1,5 @@
+export type BulkActionOption = { value: string; label: string };
+
 export type BulkActionsBarProps = {
   /** When true (e.g. sample data), bulk UI is disabled. */
   disabled?: boolean;
@@ -6,8 +8,12 @@ export type BulkActionsBarProps = {
   onChange: (value: string) => void;
   onApply: () => void;
   applyBusy?: boolean;
-  /** Trash tab: only permanent delete is offered. */
+  /** Trash tab: only permanent delete is offered (ignored when `customOptions` is set). */
   trashMode: boolean;
+  /** Pro / custom lists: replaces WP post bulk options. */
+  customOptions?: BulkActionOption[];
+  /** `id`/`htmlFor` for the select (avoid duplicate ids when multiple bars exist). */
+  selectId?: string;
 };
 
 /**
@@ -21,24 +27,33 @@ export function BulkActionsBar({
   onApply,
   applyBusy = false,
   trashMode,
+  customOptions,
+  selectId = 'sikshya-bulk',
 }: BulkActionsBarProps) {
   const blocked = disabled || applyBusy;
   const canApply = !blocked && selectedCount > 0 && value !== '';
+  const useCustom = Array.isArray(customOptions) && customOptions.length > 0;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="sikshya-bulk" className="sr-only">
+      <label htmlFor={selectId} className="sr-only">
         Bulk actions
       </label>
       <select
-        id="sikshya-bulk"
+        id={selectId}
         disabled={blocked}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:disabled:bg-slate-800/50"
       >
         <option value="">Bulk actions</option>
-        {trashMode ? (
+        {useCustom ? (
+          customOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))
+        ) : trashMode ? (
           <>
             <option value="restore_draft">Restore to draft</option>
             <option value="delete_permanent">Delete permanently</option>

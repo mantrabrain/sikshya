@@ -95,4 +95,5 @@ class PublicRestRoutes
             return new WP_REST_Response(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
 }

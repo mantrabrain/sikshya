@@ -19,8 +19,18 @@ type Props = {
   title: string;
   subtitle?: string;
   badge?: string;
+  branding?: {
+    pluginName?: string;
+    logoUrl?: string;
+    topbarBg?: string;
+    topbarText?: string;
+    sidebarBg?: string;
+    sidebarText?: string;
+  };
   /** Primary actions (e.g. Add new) — rendered in the gray content area, not the white top bar. */
   pageActions?: React.ReactNode;
+  /** Optional override for pages that need full-bleed workspace layouts. */
+  contentClassName?: string;
   children: React.ReactNode;
 };
 
@@ -35,7 +45,9 @@ export function AppShell({
   title,
   subtitle,
   badge,
+  branding,
   pageActions,
+  contentClassName,
   children,
 }: Props) {
   const [isDark, setIsDark] = useState(false);
@@ -82,6 +94,7 @@ export function AppShell({
         proPluginVersion={proPluginVersion || undefined}
         proLicensed={Boolean(licensing?.isProActive)}
         adminUrl={adminUrl}
+        branding={branding}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
@@ -94,8 +107,9 @@ export function AppShell({
           toolsHref={toolsHref}
           isDark={isDark}
           onToggleDark={onToggleDark}
+          branding={branding}
         />
-        <main className="flex-1 overflow-auto bg-slate-50 p-6 dark:bg-slate-950">
+        <main className={contentClassName ?? 'flex-1 overflow-auto bg-slate-50 p-6 dark:bg-slate-950'}>
           <ShellAlertStrip alerts={shellAlerts} />
           {pageActions ? (
             <div className="mb-6 flex flex-wrap items-center justify-end gap-2">{pageActions}</div>

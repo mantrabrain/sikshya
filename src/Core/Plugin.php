@@ -18,6 +18,9 @@ use Sikshya\Services\FrontendAssetsService;
 use Sikshya\Services\AdminAssetsService;
 use Sikshya\Services\RestCollectionQueryService;
 use Sikshya\Services\Settings;
+use Sikshya\Services\WpMailSmtpBridge;
+use Sikshya\Addons\AddonManager;
+use Sikshya\Frontend\Public\InstructorAccountView;
 
 /**
  * Main Plugin Class
@@ -125,9 +128,11 @@ final class Plugin
             $this->services['progress'] = new \Sikshya\Services\LearningProgressService();
             $this->services['user'] = new \Sikshya\Services\FrontendUserService();
             $this->services['activity'] = new \Sikshya\Services\LearnerActivityStub();
-            $this->services['certificate'] = new \Sikshya\Services\LearnerCertificateStub();
+            $this->services['assignment'] = new \Sikshya\Services\AssignmentService($this->services['courseRepository']);
+            $this->services['mailer'] = new \Sikshya\Services\EmailNotificationService();
+            $this->services['certificate'] = new \Sikshya\Services\LearnerCertificateService();
             $this->services['achievement'] = new \Sikshya\Services\LearnerAchievementStub();
-            $this->services['quiz'] = new \Sikshya\Services\LearnerQuizStatsStub();
+            $this->services['quiz'] = new \Sikshya\Services\QuizService();
 
             // Course builder orchestration (admin UI + REST)
             $this->services['courseBuilder'] = new \Sikshya\Services\CourseBuilderService(
@@ -165,6 +170,9 @@ final class Plugin
                 $this->services['courseRepository'],
                 $this->services['contentPostRepository']
             );
+
+            // Addon system (core + Pro plugin extensions).
+            $this->services['addons'] = new AddonManager();
         } catch (\Exception $e) {
             error_log('Sikshya Plugin Error: ' . $e->getMessage());
             error_log('Sikshya Plugin Error Stack: ' . $e->getTraceAsString());
@@ -202,6 +210,8 @@ final class Plugin
     public function init(): void
     {
         PermalinkService::boot();
+        // Public hash-based certificate preview/document page (works in free; Pro can override).
+        \Sikshya\Certificates\CertificatePublic::boot();
 
         $stored_ver = (string) Settings::getRaw('sikshya_plugin_version', '');
         if ($stored_ver !== $this->version) {
@@ -223,6 +233,15 @@ final class Plugin
         if (isset($this->services['restCollectionQuery']) && $this->services['restCollectionQuery'] instanceof RestCollectionQueryService) {
             $this->services['restCollectionQuery']->init();
         }
+
+        // Boot enabled addons only (register hooks/routes/services lazily).
+        if (isset($this->services['addons']) && $this->services['addons'] instanceof AddonManager) {
+            $this->services['addons']->bootEnabledAddons($this);
+        }
+
+        WpMailSmtpBridge::register();
+
+        InstructorAccountView::init();
 
         // Hook into WordPress
         do_action('sikshya_init', $this);

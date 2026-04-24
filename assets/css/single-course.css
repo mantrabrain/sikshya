@@ -809,3 +809,277 @@ span.sikshya-course-lp__instructor-name {
     break-inside: avoid;
   }
 }
+
+/* -------------------------------------------------------------------------
+   Reviews & ratings
+   ------------------------------------------------------------------------- */
+
+.sikshya-rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #f5a623;
+  line-height: 1;
+  font-size: 1.05rem;
+}
+.sikshya-rating-star { color: #d1d5db; display: inline-block; }
+.sikshya-rating-star--full { color: #f5a623; }
+.sikshya-rating-star--half {
+  background: linear-gradient(90deg, #f5a623 50%, #d1d5db 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sikshya-course-lp__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  margin: var(--sikshya-spacing-2) 0 var(--sikshya-spacing-3);
+  text-decoration: none;
+  color: inherit;
+  font-size: 0.9375rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.sikshya-course-lp__rating:hover { background: var(--sik-f-surface-muted); }
+.sikshya-rating-avg { font-weight: 700; }
+.sikshya-rating-count { color: var(--sik-f-text-muted); font-size: 0.875rem; }
+
+.sikshya-course-reviews__summary {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr;
+  gap: clamp(var(--sikshya-spacing-4), 3vw, var(--sikshya-spacing-6));
+  padding: var(--sikshya-spacing-4) 0 var(--sikshya-spacing-5);
+  border-bottom: 1px solid var(--sik-f-border);
+  margin-bottom: var(--sikshya-spacing-5);
+}
+@media (max-width: 640px) {
+  .sikshya-course-reviews__summary { grid-template-columns: 1fr; }
+}
+
+.sikshya-course-reviews__avg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.sikshya-course-reviews__avg-number {
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--sik-f-text, #0f172a);
+}
+.sikshya-course-reviews__avg-count {
+  color: var(--sik-f-text-muted);
+  font-size: 0.875rem;
+}
+
+.sikshya-course-reviews__breakdown {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+.sikshya-course-reviews__breakdown-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 40px;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  font-size: 0.875rem;
+}
+.sikshya-course-reviews__breakdown-label { color: var(--sik-f-text-muted); font-weight: 600; }
+.sikshya-course-reviews__breakdown-track {
+  display: block;
+  height: 8px;
+  background: var(--sik-f-surface-muted);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.sikshya-course-reviews__breakdown-fill {
+  display: block;
+  height: 100%;
+  background: #f5a623;
+  transition: width 240ms ease;
+}
+.sikshya-course-reviews__breakdown-count {
+  text-align: right;
+  color: var(--sik-f-text-muted);
+}
+
+/* Form -------------------------------------------------------------- */
+.sikshya-course-reviews__form-wrap {
+  border: 1px solid var(--sik-f-border);
+  border-radius: 12px;
+  padding: var(--sikshya-spacing-4);
+  background: var(--sik-f-surface, #fff);
+  margin-bottom: var(--sikshya-spacing-5);
+}
+.sikshya-course-reviews__form.is-hidden,
+.sikshya-course-reviews__own.is-hidden,
+.sikshya-course-reviews__form .is-hidden,
+.sikshya-btn.is-hidden { display: none !important; }
+
+.sikshya-course-reviews__form-title {
+  margin: 0 0 var(--sikshya-spacing-3);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.sikshya-course-reviews__field-label {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin-bottom: 6px;
+  color: var(--sik-f-text, #0f172a);
+}
+.sikshya-required { color: #dc2626; margin-left: 2px; }
+
+.sikshya-course-reviews__rating-field {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--sikshya-spacing-3);
+}
+.sikshya-rating-input {
+  display: inline-flex;
+  gap: 4px;
+}
+.sikshya-rating-input__star {
+  font-size: 1.8rem;
+  line-height: 1;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 4px;
+  color: #d1d5db;
+  transition: color 120ms ease, transform 120ms ease;
+}
+.sikshya-rating-input__star:hover,
+.sikshya-rating-input__star:focus { color: #f5a623; transform: scale(1.08); outline: none; }
+.sikshya-rating-input__star.is-selected { color: #f5a623; }
+
+.sikshya-course-reviews__field { display: block; margin-bottom: var(--sikshya-spacing-3); }
+.sikshya-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid var(--sik-f-border);
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  background: var(--sik-f-surface, #fff);
+  resize: vertical;
+}
+.sikshya-textarea:focus {
+  outline: 2px solid var(--sikshya-primary, #2563eb);
+  outline-offset: 1px;
+  border-color: var(--sikshya-primary, #2563eb);
+}
+
+.sikshya-course-reviews__form-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-2);
+  margin-top: var(--sikshya-spacing-2);
+}
+.sikshya-course-reviews__form-hint {
+  flex: 1 1 100%;
+  margin: 0 0 6px;
+  color: var(--sik-f-text-muted);
+  font-size: 0.8125rem;
+}
+.sikshya-course-reviews__status {
+  margin-top: var(--sikshya-spacing-2);
+  font-size: 0.875rem;
+  min-height: 1.2em;
+}
+.sikshya-course-reviews__status.is-error { color: #b91c1c; }
+.sikshya-course-reviews__status.is-success { color: #047857; }
+
+.sikshya-course-reviews__notice {
+  padding: var(--sikshya-spacing-3);
+  border-radius: 8px;
+  background: var(--sik-f-surface-muted);
+  color: var(--sik-f-text-muted);
+  font-size: 0.9375rem;
+}
+.sikshya-course-reviews__notice .sikshya-btn { margin-top: 0; }
+
+/* Own review card --------------------------------------------------- */
+.sikshya-course-reviews__own {
+  padding: var(--sikshya-spacing-3);
+  background: var(--sik-f-surface-muted);
+  border-radius: 8px;
+  margin-bottom: var(--sikshya-spacing-3);
+}
+.sikshya-course-reviews__own-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  margin-bottom: 6px;
+}
+.sikshya-course-reviews__own-title { font-weight: 700; }
+.sikshya-course-reviews__own-actions {
+  display: flex;
+  gap: var(--sikshya-spacing-2);
+  margin-top: var(--sikshya-spacing-2);
+}
+.sikshya-chip {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.sikshya-chip--warning { background: #fef3c7; color: #92400e; }
+
+/* Review list ------------------------------------------------------- */
+.sikshya-course-reviews__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--sikshya-spacing-4);
+}
+.sikshya-course-reviews__item {
+  padding: var(--sikshya-spacing-4) 0;
+  border-top: 1px solid var(--sik-f-border);
+}
+.sikshya-course-reviews__item:first-child { border-top: 0; padding-top: 0; }
+.sikshya-course-reviews__item-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  margin-bottom: 6px;
+}
+.sikshya-course-reviews__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.sikshya-course-reviews__item-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.sikshya-course-reviews__author { font-weight: 600; font-size: 0.9375rem; }
+.sikshya-course-reviews__time { color: var(--sik-f-text-muted); font-size: 0.8125rem; }
+.sikshya-course-reviews__item-rating { font-size: 0.95rem; }
+.sikshya-course-reviews__item-body { font-size: 0.95rem; color: var(--sik-f-text, #0f172a); }
+
+.sikshya-course-reviews__load-more {
+  margin-top: var(--sikshya-spacing-4);
+  text-align: center;
+}
+.sikshya-course-reviews__empty {
+  padding: var(--sikshya-spacing-5);
+  text-align: center;
+  color: var(--sik-f-text-muted);
+  border: 1px dashed var(--sik-f-border);
+  border-radius: 8px;
+}

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
@@ -9,7 +9,7 @@ import { ButtonPrimary } from '../components/shared/buttons';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type PaymentRow = {
   id: number;
@@ -36,8 +36,8 @@ type ListResponse = {
   table_missing?: boolean;
 };
 
-export function PaymentsPage(props: { config: SikshyaReactConfig; title: string }) {
-  const { config, title } = props;
+export function PaymentsPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
+  const { config, title, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const [page, setPage] = useState(1);
 
@@ -54,13 +54,9 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string 
   const tableMissing = Boolean(data?.table_missing);
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle="Recorded transactions linked to courses (when the payments table is present)"
       pageActions={
@@ -169,6 +165,6 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string 
           </>
         )}
       </ListPanel>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

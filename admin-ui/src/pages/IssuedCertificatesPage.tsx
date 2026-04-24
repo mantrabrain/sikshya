@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
@@ -9,7 +9,7 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type CertRow = {
   id: number;
@@ -20,6 +20,8 @@ type CertRow = {
   status: string;
   verification_code: string;
   template_post_id: number | null;
+  verify_url?: string;
+  document_url?: string;
 };
 
 type ListResponse = {
@@ -29,8 +31,8 @@ type ListResponse = {
   per_page?: number;
 };
 
-export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; title: string }) {
-  const { config, title } = props;
+export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
+  const { config, title, embedded } = props;
   const { confirm } = useSikshyaDialog();
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const [page, setPage] = useState(1);
@@ -42,8 +44,6 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
 
   const { loading, data, error, refetch } = useAsyncData(loader, [page]);
   const rows = data?.certificates ?? [];
-
-  const verifyBase = `${config.siteUrl.replace(/\/$/, '')}/wp-json/sikshya/v1/public/certificates/verify`;
 
   const revoke = async (id: number) => {
     const ok = await confirm({
@@ -60,13 +60,9 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle="Learner certificates issued when courses are completed (table-backed records)."
       pageActions={
@@ -127,9 +123,19 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
                     </td>
                     <td className="px-5 py-3.5 font-mono text-xs text-slate-700 dark:text-slate-300">{r.certificate_number}</td>
                     <td className="max-w-[220px] px-5 py-3.5">
-                      {r.verification_code ? (
-                        <code className="break-all text-xs text-slate-600 dark:text-slate-400">
-                          {`${verifyBase}?code=${encodeURIComponent(r.verification_code)}`}
+                      {r.verify_url ? (
+                        <a
+                          href={r.verify_url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="break-all font-mono text-xs text-brand-600 hover:underline dark:text-brand-400"
+                          title="Open public verification URL"
+                        >
+                          {r.verify_url}
+                        </a>
+                      ) : r.verification_code ? (
+                        <code className="break-all font-mono text-xs text-slate-600 dark:text-slate-400">
+                          {r.verification_code}
                         </code>
                       ) : (
                         '—'
@@ -156,6 +162,6 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
           </div>
         )}
       </ListPanel>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Standalone learner account shell (no theme header/footer). Dashboard-style layout.
+ * Standalone learner account shell (no theme header/footer). Separate URLs per section.
  *
  * @package Sikshya
  */
@@ -9,6 +9,26 @@ use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\AccountTemplateData;
 use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Services\PermalinkService;
+
+// Legacy single-page anchors: ?section=orders|quiz-attempts
+if (!empty($_GET['section'])) {
+    $sec = sanitize_key((string) wp_unslash($_GET['section']));
+    $legacy_map = [
+        'orders' => 'payments',
+        'quiz-attempts' => 'quiz-attempts',
+    ];
+    if (isset($legacy_map[$sec])) {
+        wp_safe_redirect(PublicPageUrls::accountViewUrl($legacy_map[$sec]));
+        exit;
+    }
+}
+
+$raw_account_view = sanitize_key((string) get_query_var(PermalinkService::ACCOUNT_VIEW_VAR));
+if ($raw_account_view !== '' && !in_array($raw_account_view, PublicPageUrls::allowedAccountViews(), true)) {
+    wp_safe_redirect(PublicPageUrls::accountViewUrl('dashboard'));
+    exit;
+}
 
 $plugin = Plugin::getInstance();
 $acc = AccountTemplateData::build();
@@ -38,12 +58,59 @@ $initial = $display_name !== '' ? strtoupper(function_exists('mb_substr') ? mb_s
 $sheet_ver = rawurlencode((string) $plugin->version);
 $sheet_href = esc_url($plugin->getAssetUrl('css/account-shell.css')) . '?ver=' . $sheet_ver;
 
+$view = (string) ($acc['account_view'] ?? 'dashboard');
+
+$view_headlines = [
+    'dashboard' => [
+        'title' => __('Overview', 'sikshya'),
+        'subtitle' => __('Summary, metrics, and quick links.', 'sikshya'),
+    ],
+    'learning' => [
+        'title' => __('My learning', 'sikshya'),
+        'subtitle' => __('Courses in progress and completed.', 'sikshya'),
+    ],
+    'payments' => [
+        'title' => __('Payments', 'sikshya'),
+        'subtitle' => __('Orders, receipts, and payment records.', 'sikshya'),
+    ],
+    'quiz-attempts' => [
+        'title' => __('Quiz attempts', 'sikshya'),
+        'subtitle' => __('Usage and limits for quizzes in your courses.', 'sikshya'),
+    ],
+    'instructor' => [
+        'title' => __('Instructor overview', 'sikshya'),
+        'subtitle' => __('Your authored courses, enrollments, and teaching tools.', 'sikshya'),
+    ],
+];
+$head = $view_headlines[ $view ] ?? $view_headlines['dashboard'];
+
 $page_title = sprintf(
     /* translators: 1: page name, 2: site name */
     '%1$s — %2$s',
-    __('My account', 'sikshya'),
+    $view === 'dashboard' ? __('My account', 'sikshya') : (string) $head['title'],
     get_bloginfo('name')
 );
+
+$partial_map = [
+    'dashboard' => 'dashboard',
+    'learning' => 'learning',
+    'payments' => 'payments',
+    'quiz-attempts' => 'quiz-attempts',
+    'instructor' => 'instructor',
+];
+$partial_name = $partial_map[ $view ] ?? 'dashboard';
+$default_partial = $plugin->getTemplatePath('partials/account-view-' . $partial_name . '.php');
+/**
+ * Override path for an account section template (Pro / addons).
+ *
+ * @param string               $path Absolute path to PHP partial.
+ * @param string               $view Current view slug.
+ * @param array<string, mixed> $acc  Account data (same keys as {@see AccountTemplateData::build()}).
+ */
+$partial_path = apply_filters('sikshya_account_view_template', $default_partial, $view, $acc);
+if (!is_string($partial_path) || !is_readable($partial_path)) {
+    $partial_path = $plugin->getTemplatePath('partials/account-view-dashboard.php');
+}
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -54,7 +121,7 @@ $page_title = sprintf(
     <title><?php echo esc_html($page_title); ?></title>
     <link rel="stylesheet" href="<?php echo $sheet_href; ?>">
 </head>
-<body class="sikshya-account-shell">
+<body class="sikshya-account-shell" data-sikshya-account-view="<?php echo esc_attr($view); ?>">
 <div class="sik-acc-app">
     <aside class="sik-acc-sidebar" aria-label="<?php esc_attr_e('Account navigation', 'sikshya'); ?>">
         <div class="sik-acc-sidebar__brand">
@@ -63,23 +130,31 @@ $page_title = sprintf(
         </div>
         <nav class="sik-acc-nav" aria-label="<?php esc_attr_e('Primary', 'sikshya'); ?>">
             <p class="sik-acc-nav__label"><?php esc_html_e('Learn', 'sikshya'); ?></p>
-            <a class="is-active" href="<?php echo esc_url($acc['urls']['account']); ?>">
+            <a class="<?php echo $view === 'dashboard' ? 'is-active' : ''; ?>" href="<?php echo esc_url($acc['urls']['account_dashboard']); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◉</span>
-                <?php esc_html_e('Account', 'sikshya'); ?>
+                <?php esc_html_e('Overview', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url(add_query_arg('section', 'quiz-attempts', $acc['urls']['account'])); ?>">
+            <a class="<?php echo $view === 'learning' ? 'is-active' : ''; ?>" href="<?php echo esc_url($acc['urls']['account_learning']); ?>">
+                <span class="sik-acc-nav__icon" aria-hidden="true">▣</span>
+                <?php esc_html_e('My learning', 'sikshya'); ?>
+            </a>
+            <a class="<?php echo $view === 'quiz-attempts' ? 'is-active' : ''; ?>" href="<?php echo esc_url($acc['urls']['account_quiz_attempts']); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◎</span>
                 <?php esc_html_e('Quiz attempts', 'sikshya'); ?>
             </a>
             <a href="<?php echo esc_url($acc['urls']['courses']); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▣</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true">▤</span>
                 <?php esc_html_e('Courses', 'sikshya'); ?>
             </a>
             <a href="<?php echo esc_url($acc['urls']['learn']); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
-                <?php esc_html_e('Learn', 'sikshya'); ?>
+                <?php esc_html_e('Learning hub', 'sikshya'); ?>
             </a>
             <p class="sik-acc-nav__label"><?php esc_html_e('Commerce', 'sikshya'); ?></p>
+            <a class="<?php echo $view === 'payments' ? 'is-active' : ''; ?>" href="<?php echo esc_url($acc['urls']['account_payments']); ?>">
+                <span class="sik-acc-nav__icon" aria-hidden="true">≡</span>
+                <?php esc_html_e('Payments', 'sikshya'); ?>
+            </a>
             <a href="<?php echo esc_url($acc['urls']['cart']); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◇</span>
                 <?php esc_html_e('Cart', 'sikshya'); ?>
@@ -88,11 +163,16 @@ $page_title = sprintf(
                 <span class="sik-acc-nav__icon" aria-hidden="true">✓</span>
                 <?php esc_html_e('Checkout', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url(add_query_arg('section', 'orders', $acc['urls']['account'])); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">≡</span>
-                <?php esc_html_e('Orders', 'sikshya'); ?>
-            </a>
         </nav>
+        <?php
+        /**
+         * Extra sidebar links (Pro / addons). Echo anchor rows matching `.sik-acc-nav a`.
+         *
+         * @param array<string, mixed> $acc Account template data.
+         * @param string $view Current account view slug.
+         */
+        do_action('sikshya_account_sidebar_nav', $acc, $view);
+        ?>
         <div class="sik-acc-sidebar__footer">
             <a href="<?php echo esc_url($acc['urls']['home']); ?>">
                 <span aria-hidden="true">←</span>
@@ -104,8 +184,8 @@ $page_title = sprintf(
     <div class="sik-acc-main">
         <header class="sik-acc-topbar">
             <div class="sik-acc-topbar__titles">
-                <h1><?php esc_html_e('Account', 'sikshya'); ?></h1>
-                <p><?php esc_html_e('Your enrollments, orders, and shortcuts in one place.', 'sikshya'); ?></p>
+                <h1><?php echo esc_html((string) $head['title']); ?></h1>
+                <p><?php echo esc_html((string) $head['subtitle']); ?></p>
             </div>
             <div class="sik-acc-topbar__actions">
                 <a class="sik-acc-btn" href="<?php echo esc_url($acc['urls']['home']); ?>"><?php esc_html_e('Back to site', 'sikshya'); ?></a>
@@ -127,305 +207,9 @@ $page_title = sprintf(
         </header>
 
         <main class="sik-acc-content">
-            <section class="sik-acc-hero" aria-label="<?php esc_attr_e('Welcome', 'sikshya'); ?>">
-                <p class="sik-acc-hero__date"><?php echo esc_html($today_line); ?></p>
-                <h2 class="sik-acc-hero__greet">
-                    <?php
-                    printf(
-                        /* translators: 1: time-of-day greeting, 2: display name */
-                        esc_html__('%1$s, %2$s', 'sikshya'),
-                        esc_html($greeting),
-                        esc_html($display_name)
-                    );
-                    ?>
-                </h2>
-                <p class="sik-acc-hero__lead">
-                    <?php esc_html_e('Pick up where you left off, review purchases, or explore new courses from your catalog.', 'sikshya'); ?>
-                </p>
-            </section>
-
-            <section class="sik-acc-metrics" aria-label="<?php esc_attr_e('Summary', 'sikshya'); ?>">
-                <div class="sik-acc-metric">
-                    <div class="sik-acc-metric__value"><?php echo esc_html((string) (int) $acc['enrollment_count']); ?></div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Enrolled courses', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Active seats in your library', 'sikshya'); ?></div>
-                </div>
-                <div class="sik-acc-metric">
-                    <div class="sik-acc-metric__value"><?php echo esc_html((string) (int) $acc['orders_count']); ?></div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Orders', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Receipts and payment history', 'sikshya'); ?></div>
-                </div>
-                <a class="sik-acc-metric sik-acc-metric--link" href="<?php echo esc_url($acc['urls']['courses']); ?>">
-                    <div class="sik-acc-metric__value"><?php esc_html_e('Browse', 'sikshya'); ?> →</div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Course catalog', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Discover your next lesson', 'sikshya'); ?></div>
-                </a>
-                <a class="sik-acc-metric sik-acc-metric--link" href="<?php echo esc_url($acc['urls']['learn']); ?>">
-                    <div class="sik-acc-metric__value"><?php esc_html_e('Continue', 'sikshya'); ?> →</div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Learning hub', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Resume progress', 'sikshya'); ?></div>
-                </a>
-            </section>
-
-            <section class="sik-acc-library" aria-label="<?php esc_attr_e('Shortcuts', 'sikshya'); ?>">
-                <a class="sik-acc-lib-card" href="<?php echo esc_url($acc['urls']['account']); ?>#courses">
-                    <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--blue" aria-hidden="true">▣</div>
-                    <div class="sik-acc-lib-card__num"><?php echo esc_html((string) (int) $acc['enrollment_count']); ?></div>
-                    <div class="sik-acc-lib-card__lbl"><?php esc_html_e('My courses', 'sikshya'); ?></div>
-                </a>
-                <a class="sik-acc-lib-card" href="<?php echo esc_url($acc['urls']['account']); ?>#orders">
-                    <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--green" aria-hidden="true">≡</div>
-                    <div class="sik-acc-lib-card__num"><?php echo esc_html((string) (int) $acc['orders_count']); ?></div>
-                    <div class="sik-acc-lib-card__lbl"><?php esc_html_e('Orders', 'sikshya'); ?></div>
-                </a>
-                <a class="sik-acc-lib-card" href="<?php echo esc_url($acc['urls']['cart']); ?>">
-                    <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--slate" aria-hidden="true">◇</div>
-                    <div class="sik-acc-lib-card__num">→</div>
-                    <div class="sik-acc-lib-card__lbl"><?php esc_html_e('Cart', 'sikshya'); ?></div>
-                </a>
-                <a class="sik-acc-lib-card" href="<?php echo esc_url($acc['urls']['checkout']); ?>">
-                    <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--blue" aria-hidden="true">✓</div>
-                    <div class="sik-acc-lib-card__num">→</div>
-                    <div class="sik-acc-lib-card__lbl"><?php esc_html_e('Checkout', 'sikshya'); ?></div>
-                </a>
-            </section>
-
-            <div class="sik-acc-grid sik-acc-grid--split">
-                <div class="sik-acc-panel" id="courses">
-                    <div class="sik-acc-panel__head">
-                        <h2 class="sik-acc-panel__title"><?php esc_html_e('My courses', 'sikshya'); ?></h2>
-                        <a class="sik-acc-panel__link" href="<?php echo esc_url($acc['urls']['courses']); ?>"><?php esc_html_e('Browse all', 'sikshya'); ?></a>
-                    </div>
-                    <?php if ($acc['enrollments'] === []) : ?>
-                        <div class="sik-acc-empty">
-                            <?php esc_html_e('You are not enrolled in any courses yet.', 'sikshya'); ?>
-                            <p style="margin-top:0.75rem;">
-                                <a class="sik-acc-btn sik-acc-btn--primary" href="<?php echo esc_url($acc['urls']['courses']); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
-                            </p>
-                        </div>
-                    <?php else : ?>
-                        <div class="sik-acc-table-wrap">
-                            <table class="sik-acc-table">
-                                <thead>
-                                <tr>
-                                    <th scope="col"><?php esc_html_e('Course', 'sikshya'); ?></th>
-                                    <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
-                                    <th scope="col"><?php esc_html_e('Enrolled', 'sikshya'); ?></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <?php foreach ($acc['enrollments'] as $row) : ?>
-                                    <?php
-                                    $cid = is_object($row) ? (int) ($row->course_id ?? 0) : (int) ($row['course_id'] ?? 0);
-                                    if ($cid <= 0) {
-                                        continue;
-                                    }
-                                    $estatus = is_object($row) ? (string) ($row->status ?? '') : (string) ($row['status'] ?? '');
-                                    $enrolled_raw = is_object($row) ? ($row->enrolled_date ?? '') : ($row['enrolled_date'] ?? '');
-                                    $enrolled_ts = $enrolled_raw ? strtotime((string) $enrolled_raw) : false;
-                                    $enrolled_disp = $enrolled_ts ? wp_date(get_option('date_format'), $enrolled_ts) : '—';
-                                    ?>
-                                    <tr>
-                                        <td>
-                                            <a href="<?php echo esc_url(get_permalink($cid)); ?>"><?php echo esc_html(get_the_title($cid)); ?></a>
-                                            <br>
-                                            <a href="<?php echo esc_url(PublicPageUrls::learnForCourse($cid)); ?>"><?php esc_html_e('Open player', 'sikshya'); ?></a>
-                                        </td>
-                                        <td>
-                                            <?php if ($estatus === 'completed') : ?>
-                                                <span class="sik-acc-badge"><?php esc_html_e('Completed', 'sikshya'); ?></span>
-                                            <?php else : ?>
-                                                <span class="sik-acc-badge sik-acc-badge--muted"><?php echo esc_html($estatus !== '' ? ucfirst($estatus) : __('Active', 'sikshya')); ?></span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?php echo esc_html($enrolled_disp); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <div>
-                    <div class="sik-acc-panel" id="quiz-attempts" style="margin-bottom: 1rem;">
-                        <div class="sik-acc-panel__head">
-                            <h2 class="sik-acc-panel__title"><?php esc_html_e('Quiz attempts', 'sikshya'); ?></h2>
-                        </div>
-                        <?php if (empty($acc['quiz_attempts']) || !is_array($acc['quiz_attempts'])) : ?>
-                            <div class="sik-acc-empty"><?php esc_html_e('No quizzes found in your enrolled courses yet.', 'sikshya'); ?></div>
-                        <?php else : ?>
-                            <div class="sik-acc-table-wrap">
-                                <table class="sik-acc-table">
-                                    <thead>
-                                    <tr>
-                                        <th scope="col"><?php esc_html_e('Quiz', 'sikshya'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Course', 'sikshya'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Attempts', 'sikshya'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php foreach ((array) $acc['quiz_attempts'] as $qa) : ?>
-                                        <?php
-                                        if (!is_array($qa)) {
-                                            continue;
-                                        }
-                                        $quiz_title = (string) ($qa['quiz_title'] ?? '');
-                                        $course_title = (string) ($qa['course_title'] ?? '');
-                                        $used = isset($qa['attempts_used']) ? (int) $qa['attempts_used'] : 0;
-                                        $limit = isset($qa['attempts_limit']) ? (int) $qa['attempts_limit'] : 0;
-                                        $remaining = array_key_exists('attempts_remaining', $qa) ? $qa['attempts_remaining'] : null;
-                                        $locked = !empty($qa['is_locked']);
-                                        $url = (string) ($qa['url'] ?? '');
-                                        ?>
-                                        <tr>
-                                            <td>
-                                                <?php if ($url !== '') : ?>
-                                                    <a href="<?php echo esc_url($url); ?>"><?php echo esc_html($quiz_title !== '' ? $quiz_title : __('Quiz', 'sikshya')); ?></a>
-                                                <?php else : ?>
-                                                    <?php echo esc_html($quiz_title !== '' ? $quiz_title : __('Quiz', 'sikshya')); ?>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td><?php echo esc_html($course_title); ?></td>
-                                            <td>
-                                                <?php
-                                                if ($limit > 0) {
-                                                    echo esc_html(sprintf(__('%1$d / %2$d', 'sikshya'), $used, $limit));
-                                                    if (is_int($remaining)) {
-                                                        echo esc_html(sprintf(__(' (%d left)', 'sikshya'), $remaining));
-                                                    }
-                                                } else {
-                                                    echo esc_html(sprintf(__('%d (unlimited)', 'sikshya'), $used));
-                                                }
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php if ($locked) : ?>
-                                                    <span class="sik-acc-badge sik-acc-badge--muted"><?php esc_html_e('Locked', 'sikshya'); ?></span>
-                                                <?php else : ?>
-                                                    <span class="sik-acc-badge"><?php esc_html_e('Available', 'sikshya'); ?></span>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="sik-acc-panel" id="orders">
-                        <div class="sik-acc-panel__head">
-                            <h2 class="sik-acc-panel__title"><?php esc_html_e('Orders', 'sikshya'); ?></h2>
-                        </div>
-                        <?php if ($acc['orders'] === []) : ?>
-                            <div class="sik-acc-empty"><?php esc_html_e('No orders yet.', 'sikshya'); ?></div>
-                        <?php else : ?>
-                            <div class="sik-acc-table-wrap">
-                                <table class="sik-acc-table">
-                                    <thead>
-                                    <tr>
-                                        <th scope="col"><?php esc_html_e('Order', 'sikshya'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Date', 'sikshya'); ?></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php foreach ($acc['orders'] as $ord) : ?>
-                                        <?php
-                                        $otok = isset($ord->public_token) ? OrderRepository::sanitizePublicToken((string) $ord->public_token) : '';
-                                        if ($otok === '') {
-                                            $otok = $order_repo->ensurePublicToken((int) $ord->id);
-                                        }
-                                        $order_href = $otok !== '' ? PublicPageUrls::orderView($otok) : PublicPageUrls::url('order');
-                                        $created = isset($ord->created_at) ? strtotime((string) $ord->created_at) : false;
-                                        $created_disp = $created ? wp_date(get_option('date_format'), $created) : '—';
-                                        $ostatus = strtolower((string) ($ord->status ?? ''));
-                                        ?>
-                                        <tr>
-                                            <td>
-                                                <a href="<?php echo esc_url($order_href); ?>">
-                                                    <?php printf(esc_html__('Order #%d', 'sikshya'), (int) $ord->id); ?>
-                                                </a>
-                                            </td>
-                                            <td>
-                                                <?php if (in_array($ostatus, ['paid', 'completed'], true)) : ?>
-                                                    <span class="sik-acc-badge"><?php echo esc_html(ucfirst($ostatus)); ?></span>
-                                                <?php else : ?>
-                                                    <span class="sik-acc-badge sik-acc-badge--muted"><?php echo esc_html($ostatus !== '' ? ucfirst($ostatus) : __('Unknown', 'sikshya')); ?></span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td><?php echo esc_html($created_disp); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="sik-acc-panel" style="margin-top:1.25rem;">
-                        <div class="sik-acc-panel__head">
-                            <h2 class="sik-acc-panel__title"><?php esc_html_e('Shortcuts', 'sikshya'); ?></h2>
-                        </div>
-                        <div class="sik-acc-shortcuts">
-                            <a class="sik-acc-shortcut" href="<?php echo esc_url($acc['urls']['courses']); ?>">
-                                <span class="sik-acc-shortcut__icon" aria-hidden="true">+</span>
-                                <div>
-                                    <p class="sik-acc-shortcut__title"><?php esc_html_e('Browse courses', 'sikshya'); ?></p>
-                                    <p class="sik-acc-shortcut__desc"><?php esc_html_e('Open the public course catalog.', 'sikshya'); ?></p>
-                                </div>
-                            </a>
-                            <a class="sik-acc-shortcut" href="<?php echo esc_url($acc['urls']['learn']); ?>">
-                                <span class="sik-acc-shortcut__icon" aria-hidden="true">▶</span>
-                                <div>
-                                    <p class="sik-acc-shortcut__title"><?php esc_html_e('Learning hub', 'sikshya'); ?></p>
-                                    <p class="sik-acc-shortcut__desc"><?php esc_html_e('Jump into the lesson player.', 'sikshya'); ?></p>
-                                </div>
-                            </a>
-                            <a class="sik-acc-shortcut" href="<?php echo esc_url($acc['urls']['cart']); ?>">
-                                <span class="sik-acc-shortcut__icon" aria-hidden="true">◇</span>
-                                <div>
-                                    <p class="sik-acc-shortcut__title"><?php esc_html_e('Shopping cart', 'sikshya'); ?></p>
-                                    <p class="sik-acc-shortcut__desc"><?php esc_html_e('Review items before checkout.', 'sikshya'); ?></p>
-                                </div>
-                            </a>
-                            <a class="sik-acc-shortcut" href="<?php echo esc_url($acc['urls']['checkout']); ?>">
-                                <span class="sik-acc-shortcut__icon" aria-hidden="true">✓</span>
-                                <div>
-                                    <p class="sik-acc-shortcut__title"><?php esc_html_e('Checkout', 'sikshya'); ?></p>
-                                    <p class="sik-acc-shortcut__desc"><?php esc_html_e('Complete a purchase securely.', 'sikshya'); ?></p>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="sik-acc-tipbox">
-                            <h3><?php esc_html_e('Keep learning', 'sikshya'); ?></h3>
-                            <ul>
-                                <li><?php esc_html_e('Use the learning hub to resume the last lesson.', 'sikshya'); ?></li>
-                                <li><?php esc_html_e('Orders include a receipt link you can revisit anytime.', 'sikshya'); ?></li>
-                                <li><?php esc_html_e('New courses appear in the catalog as your school publishes them.', 'sikshya'); ?></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <?php include $partial_path; ?>
         </main>
     </div>
 </div>
 </body>
 </html>
-
-<script>
-(() => {
-  const params = new URLSearchParams(window.location.search || '');
-  const section = params.get('section');
-  if (!section) return;
-  const el = document.getElementById(section);
-  if (!el) return;
-  // Let layout settle first.
-  window.requestAnimationFrame(() => {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-})();
-</script>

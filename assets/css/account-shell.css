@@ -663,3 +663,103 @@ body.sikshya-account-shell {
   border: 1px solid var(--sik-acc-border);
   flex-shrink: 0;
 }
+
+.sik-acc-muted {
+  font-size: 0.75rem;
+  color: var(--sik-acc-muted);
+  margin-top: 0.2rem;
+}
+
+.sik-acc-panel__lead {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: var(--sik-acc-muted);
+  max-width: 42rem;
+}
+
+.sik-acc-code {
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.sik-acc-table--wide {
+  min-width: 720px;
+}
+
+/* Calendar add-on (Pro): learner schedule on dashboard */
+.sik-acc-cal__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--sik-acc-muted);
+  font-weight: 400;
+  max-width: 40rem;
+}
+
+.sik-acc-cal__empty {
+  margin: 0;
+  padding: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-cal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sik-acc-cal__item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--sik-acc-border);
+  align-items: flex-start;
+}
+
+.sik-acc-cal__item:last-child {
+  border-bottom: none;
+}
+
+.sik-acc-cal__date {
+  flex: 0 0 7.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-cal__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sik-acc-cal__badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sik-acc-brand);
+}
+
+.sik-acc-cal__soon {
+  font-weight: 600;
+  color: var(--sik-acc-muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.sik-acc-cal__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-cal__sub {
+  font-size: 0.75rem;
+  color: var(--sik-acc-muted);
+}

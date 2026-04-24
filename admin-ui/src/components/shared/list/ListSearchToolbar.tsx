@@ -7,6 +7,8 @@ type Props = {
   searchValue: string;
   onSearchChange: (v: string) => void;
   searchPlaceholder: string;
+  /** Grey out search (e.g. when another filter makes search unavailable). */
+  searchDisabled?: boolean;
   sortField: string;
   sortFieldOptions: SortFieldOption[];
   onSortFieldChange: (v: string) => void;
@@ -26,6 +28,7 @@ export function ListSearchToolbar({
   searchValue,
   onSearchChange,
   searchPlaceholder,
+  searchDisabled = false,
   sortField,
   sortFieldOptions,
   onSortFieldChange,
@@ -34,8 +37,8 @@ export function ListSearchToolbar({
   trailing,
 }: Props) {
   return (
-    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 dark:border-slate-800 lg:flex-row lg:items-center lg:gap-4">
-      <div className="relative min-w-0 flex-1">
+    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 dark:border-slate-800 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-4 lg:gap-y-3">
+      <div className="relative min-w-0 flex-1 lg:min-w-[12rem]">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
           <NavIcon name="search" className="h-4 w-4" />
         </span>
@@ -44,11 +47,12 @@ export function ListSearchToolbar({
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
+          disabled={searchDisabled}
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-slate-800"
           autoComplete="off"
         />
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex w-full flex-wrap items-center gap-2 lg:ml-auto lg:w-auto lg:flex-nowrap lg:justify-end">
         <label className="sr-only" htmlFor="sikshya-list-sort-by">
           Sort by
         </label>
@@ -73,7 +77,9 @@ export function ListSearchToolbar({
           {sortOrder === 'asc' ? 'Asc' : 'Desc'}
           <NavIcon name="chevronDown" className="h-3.5 w-3.5 opacity-60" />
         </button>
-        {trailing ? <div className="flex w-full flex-wrap items-center gap-2 lg:ml-auto lg:w-auto">{trailing}</div> : null}
+        {trailing ? (
+          <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-nowrap">{trailing}</div>
+        ) : null}
       </div>
     </div>
   );

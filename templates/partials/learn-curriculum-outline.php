@@ -96,17 +96,25 @@ if ($outline_blocks === []) {
                     $current = !empty($item['current']);
                     $icon = (string) ($item['type_key'] ?? 'content');
                     $completed = $outline_show_progress && !empty($item['completed']);
+                    $locked = !empty($item['locked']);
+                    $lock_reason = trim((string) ($item['lock_reason'] ?? ''));
                     $lesson_type = sanitize_key((string) ($item['lesson_type'] ?? ''));
                     $idx = isset($item['index_in_section']) ? (int) $item['index_in_section'] : 0;
                     $sub = trim((string) ($item['subtitle_compact'] ?? ''));
                     if ($sub === '') {
                         $sub = trim((string) ($item['meta_line'] ?? ''));
                     }
+                    $drip_hint = trim((string) ($item['drip_unlock_hint'] ?? ''));
                     $item_title = (string) ($item['title'] ?? '');
                     ?>
                     <li class="sikshya-curriculumOutline__item" <?php echo $current ? ' data-sikshya-current="1"' : ''; ?>>
                         <div class="sikshya-curriculumOutline__row<?php echo $current ? ' is-current' : ''; ?>">
-                            <a class="sikshya-curriculumOutline__link" href="<?php echo esc_url((string) ($item['permalink'] ?? '')); ?>" <?php echo $current ? 'aria-current="page"' : ''; ?>>
+                            <a
+                                class="sikshya-curriculumOutline__link<?php echo $locked ? ' is-locked' : ''; ?>"
+                                href="<?php echo esc_url((string) ($item['permalink'] ?? '')); ?>"
+                                <?php echo $current ? 'aria-current="page"' : ''; ?>
+                                <?php echo $locked && $lock_reason !== '' ? 'aria-label="' . esc_attr($item_title . ' — ' . $lock_reason) . '"' : ''; ?>
+                            >
                                 <span class="sikshya-curriculumOutline__check<?php echo $completed ? ' is-done' : ''; ?>" aria-hidden="true">
                                     <?php if ($completed) : ?>
                                         <svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true" focusable="false">
@@ -145,7 +153,17 @@ if ($outline_blocks === []) {
                                             <span class="sikshya-curriculumOutline__dur"><?php echo esc_html($sub); ?></span>
                                         </span>
                                     <?php endif; ?>
+                                    <?php if ($drip_hint !== '') : ?>
+                                        <span class="sikshya-curriculumOutline__lessonSub sikshya-curriculumOutline__dripHint" title="<?php echo esc_attr($drip_hint); ?>">
+                                            <?php echo esc_html($drip_hint); ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </span>
+                                <?php if ($locked) : ?>
+                                    <span class="sikshya-curriculumOutline__lock" aria-hidden="true">
+                                        <?php echo sikshya_learn_icon('lock'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                    </span>
+                                <?php endif; ?>
                             </a>
                         </div>
                     </li>

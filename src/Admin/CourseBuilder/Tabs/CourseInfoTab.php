@@ -37,7 +37,7 @@ class CourseInfoTab extends AbstractTab
      */
     public function getTitle(): string
     {
-        return __('Course Information', 'sikshya');
+        return __('Course details', 'sikshya');
     }
 
     /**
@@ -47,7 +47,7 @@ class CourseInfoTab extends AbstractTab
      */
     public function getDescription(): string
     {
-        return __('Title, description, and basic details', 'sikshya');
+        return __('Name your course, write the sales description, set difficulty, and add images or a trailer — what learners see before they enroll.', 'sikshya');
     }
 
     /**
@@ -111,8 +111,8 @@ class CourseInfoTab extends AbstractTab
         $fields = [
             'basic_info' => [
                 'section' => [
-                    'title' => __('Basic Information', 'sikshya'),
-                    'description' => __('Set up the fundamental details of your course', 'sikshya'),
+                    'title' => __('Basic information', 'sikshya'),
+                    'description' => __('Title, summary, and topic tags — the first things people read on your course page.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>',
@@ -120,81 +120,83 @@ class CourseInfoTab extends AbstractTab
                 'fields' => [
                 'title' => [
                 'type' => 'text',
-                'label' => __('Course Title', 'sikshya'),
-                'placeholder' => __('Enter an engaging course title', 'sikshya'),
+                'label' => __('Course title', 'sikshya'),
+                'placeholder' => __('e.g. WordPress for Beginners — Build Your First Site', 'sikshya'),
                 'required' => true,
-                'description' => __('The main title of your course', 'sikshya'),
+                'description' => __('Shown at the top of the course page and in search results.', 'sikshya'),
                         'validation' => 'required|min:3|max:200',
                         'sanitization' => 'sanitize_text_field',
                     ],
                     'slug' => [
                         'type' => 'permalink',
-                        'label' => __('Permalink', 'sikshya'),
-                        'description' => __('URL-friendly version of the course title', 'sikshya'),
+                        'label' => __('URL slug (permalink)', 'sikshya'),
+                        'description' => __('The short part of the web address after your site name. Use lowercase words and hyphens.', 'sikshya'),
                         'validation' => 'required|alpha_dash',
                         'sanitization' => 'sanitize_title',
                 ],
                 'short_description' => [
                 'type' => 'text',
-                'label' => __('Short Description', 'sikshya'),
-                'placeholder' => __('Brief one-line description for course cards', 'sikshya'),
-                'description' => __('A concise description for course listings', 'sikshya'),
+                'label' => __('Short teaser (one line)', 'sikshya'),
+                'placeholder' => __('e.g. Learn WP step by step — no coding required', 'sikshya'),
+                'description' => __('A single sentence for course cards and previews where space is tight.', 'sikshya'),
                         'validation' => 'max:255',
                         'sanitization' => 'sanitize_text_field',
                 ],
                 'description' => [
                 'type' => 'textarea',
-                'label' => __('Detailed Description', 'sikshya'),
-                'placeholder' => __('Detailed description of what students will learn, course benefits, and outcomes', 'sikshya'),
+                'label' => __('Full description', 'sikshya'),
+                'placeholder' => __('Explain who the course is for, what they will build or achieve, and what topics you cover. You can use headings and lists.', 'sikshya'),
                 'required' => true,
-                'description' => __('Comprehensive description of your course content and objectives', 'sikshya'),
+                'description' => __('Main sales copy on the course page. Be specific about outcomes and format (video, projects, etc.).', 'sikshya'),
                         'validation' => 'required|min:10',
                         'sanitization' => 'wp_kses_post',
                 ],
                 'category' => [
                 'type' => 'select',
-                'label' => __('Course category', 'sikshya'),
+                'label' => __('Primary category', 'sikshya'),
                 'options' => $category_options,
-                'description' => __('Uses your course categories (manage under Sikshya LMS → Categories).', 'sikshya'),
+                'description' => __('Groups your course in the catalog. Create categories under Sikshya LMS → Categories if needed.', 'sikshya'),
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
                 ],
                 'course_tags' => [
                 'type' => 'text',
-                'label' => __('Tags', 'sikshya'),
-                'placeholder' => __('e.g. javascript, beginner, career', 'sikshya'),
-                'description' => __('Comma-separated tags for search and filtering.', 'sikshya'),
+                'label' => __('Tags (optional)', 'sikshya'),
+                'placeholder' => __('wordpress, beginner, business', 'sikshya'),
+                'description' => __('Comma-separated keywords to help people find this course. No # symbols needed.', 'sikshya'),
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
                 ],
                 'difficulty' => [
                 'type' => 'select',
-                'label' => __('Difficulty Level', 'sikshya'),
+                'label' => __('Difficulty level', 'sikshya'),
+                'select_placeholder' => __('Choose one…', 'sikshya'),
                 'options' => [
                     'beginner' => __('Beginner', 'sikshya'),
                     'intermediate' => __('Intermediate', 'sikshya'),
                     'advanced' => __('Advanced', 'sikshya'),
                 ],
                 'default' => 'beginner',
-                'description' => __('The skill level required for this course', 'sikshya'),
+                'description' => __('Sets learner expectations (shown on the course page where your theme supports it).', 'sikshya'),
                         'validation' => 'required|in:beginner,intermediate,advanced',
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
                 ],
                 'duration' => [
                 'type' => 'number',
-                'label' => __('Estimated Duration (hours)', 'sikshya'),
-                'placeholder' => '10',
+                'label' => __('Estimated length (hours)', 'sikshya'),
+                'placeholder' => __('e.g. 8', 'sikshya'),
                 'min' => 0.5,
                 'step' => 0.5,
-                'description' => __('Estimated time to complete the course', 'sikshya'),
+                'description' => __('Rough total time to finish all lessons — helps learners plan.', 'sikshya'),
                         'validation' => 'numeric|min:0.5',
                         'sanitization' => 'floatval',
                         'layout' => 'two_column',
                 ],
                 'language' => [
                 'type' => 'select',
-                'label' => __('Course Language', 'sikshya'),
+                'label' => __('Instruction language', 'sikshya'),
+                'select_placeholder' => __('Choose one…', 'sikshya'),
                 'options' => [
                     'en' => __('English', 'sikshya'),
                     'es' => __('Spanish', 'sikshya'),
@@ -205,7 +207,7 @@ class CourseInfoTab extends AbstractTab
                     'other' => __('Other', 'sikshya'),
                 ],
                 'default' => 'en',
-                'description' => __('Primary language of instruction', 'sikshya'),
+                'description' => __('Language the lessons are taught in (for filters and learner expectations).', 'sikshya'),
                         'validation' => 'required',
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
@@ -221,8 +223,8 @@ class CourseInfoTab extends AbstractTab
             ],
             'media_visuals' => [
                 'section' => [
-                    'title' => __('Media & Visuals', 'sikshya'),
-                    'description' => __('Add visual elements to make your course more engaging', 'sikshya'),
+                    'title' => __('Images & video', 'sikshya'),
+                    'description' => __('Cover image and optional promo video — what catches attention in listings.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>',
@@ -252,8 +254,8 @@ class CourseInfoTab extends AbstractTab
             ],
             'learning_outcomes' => [
                 'section' => [
-                    'title' => __('Learning Outcomes', 'sikshya'),
-                    'description' => __('What will students learn from this course?', 'sikshya'),
+                    'title' => __('Learning outcomes', 'sikshya'),
+                    'description' => __('Bullet points that answer: “After this course I can…” — specific and measurable is best.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>',
@@ -272,8 +274,8 @@ class CourseInfoTab extends AbstractTab
             ],
             'instructors_section' => [
                 'section' => [
-                    'title' => __('Instructors', 'sikshya'),
-                    'description' => __('Who teaches this course? Shown on the course page when your theme supports it.', 'sikshya'),
+                    'title' => __('Instructor', 'sikshya'),
+                    'description' => __('Select the primary instructor for this course. (Multiple instructors require Sikshya Pro.)', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>',
@@ -281,18 +283,18 @@ class CourseInfoTab extends AbstractTab
                 'fields' => [
                     'instructors' => [
                         'type' => 'user_select',
-                        'label' => __('Instructors', 'sikshya'),
-                        'multiple' => true,
+                        'label' => __('Who teaches this course?', 'sikshya'),
+                        'multiple' => false,
                         'role_filter' => ['administrator', 'editor', 'author'],
-                        'description' => __('Hold Cmd/Ctrl (Mac/Windows) to select multiple users.', 'sikshya'),
+                        'description' => __('Choose a single instructor. Pro can enable multi-instructor.', 'sikshya'),
                         'sanitization' => 'sanitize_text_field',
                     ],
                 ],
             ],
             'marketing' => [
                 'section' => [
-                    'title' => __('Highlights, FAQ & resources', 'sikshya'),
-                    'description' => __('Optional content for the course landing page.', 'sikshya'),
+                    'title' => __('Highlights, FAQ & downloads', 'sikshya'),
+                    'description' => __('Optional extras: selling points, common questions, and links to PDFs or files.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>',

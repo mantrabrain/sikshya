@@ -46,7 +46,7 @@ function sikshya_normalize_currency_code(string $code): string
 }
 
 /**
- * Symbol / prefix for common currencies (fallback when WooCommerce is not used).
+ * Symbol / prefix for common currencies.
  *
  * @param string $code ISO 4217 code.
  * @return string
@@ -137,12 +137,6 @@ function sikshya_format_price($amount, ?string $currency_code = null, ?int $cour
     $code = $currency_code
         ? sikshya_normalize_currency_code($currency_code)
         : sikshya_get_store_currency_code();
-
-    $wc_currency = function_exists('get_woocommerce_currency') ? strtoupper((string) get_woocommerce_currency()) : '';
-
-    if (function_exists('wc_price') && ($wc_currency === '' || $code === $wc_currency)) {
-        return wp_kses_post(wc_price($amount));
-    }
 
     return wp_kses_post(sikshya_format_price_plain($amount, $code));
 }
@@ -284,6 +278,22 @@ function sikshya_cart_clear(): void
 }
 
 /**
+ * When > 0, checkout should use the Pro bundle price if the cart still matches that bundle’s courses.
+ */
+function sikshya_cart_get_bundle_id(): int
+{
+    return \Sikshya\Frontend\Public\CartStorage::getBundleId();
+}
+
+/**
+ * @param array<int, int> $course_ids Course IDs included in the bundle (same as admin-defined bundle).
+ */
+function sikshya_cart_set_bundle(array $course_ids, int $bundle_id): void
+{
+    \Sikshya\Frontend\Public\CartStorage::setBundleCart($course_ids, $bundle_id);
+}
+
+/**
  * Permalink for a Sikshya frontend page (cart, checkout, …).
  */
 function sikshya_frontend_page_url(string $key): string
@@ -418,5 +428,81 @@ function sikshya_public_content_type_icon_html(string $post_type): string
 
         default:
             return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="none"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>';
+    }
+}
+
+/**
+ * Whether the site allows privileged users to enroll in paid courses without checkout.
+ *
+ * Requires option "allow_admin_enroll_without_purchase" and a user with {@see manage_options} or {@see manage_sikshya}.
+ */
+function sikshya_current_user_can_admin_enroll_without_purchase(): bool
+{
+    if (!is_user_logged_in()) {
+        return false;
+    }
+    if (!class_exists('\Sikshya\Services\Settings')) {
+        return false;
+    }
+    $on = \Sikshya\Services\Settings::get('allow_admin_enroll_without_purchase', '');
+    if (!\Sikshya\Services\Settings::isTruthy($on)) {
+        return false;
+    }
+    $can = current_user_can('manage_options') || current_user_can('manage_sikshya');
+
+    /**
+     * Filters whether the current user may use admin enrollment without purchase.
+     *
+     * @param bool $can Whether the user passes capability + setting checks.
+     * @param int  $user_id Current user ID.
+     */
+    return (bool) apply_filters('sikshya_user_can_admin_enroll_without_purchase', $can, get_current_user_id());
+}
+
+/**
+ * Enroll the current user in a paid course without payment (admin bypass). Does not run for free courses.
+ *
+ * @return int Enrollment ID on success, 0 on failure.
+ */
+function sikshya_enroll_paid_course_as_admin(int $course_id): int
+{
+    if ($course_id <= 0 || !is_user_logged_in()) {
+        return 0;
+    }
+    if (!function_exists('sikshya_get_course_pricing') || !function_exists('sikshya_current_user_can_admin_enroll_without_purchase')) {
+        return 0;
+    }
+    if (!sikshya_current_user_can_admin_enroll_without_purchase()) {
+        return 0;
+    }
+    $p = sikshya_get_course_pricing($course_id);
+    $paid = null !== $p['effective'] && (float) $p['effective'] > 0.00001;
+    if (!$paid) {
+        return 0;
+    }
+    if (!class_exists('\Sikshya\Core\Plugin')) {
+        return 0;
+    }
+    $plugin = \Sikshya\Core\Plugin::getInstance();
+    $courseService = $plugin->getService('course');
+    if (!$courseService instanceof \Sikshya\Services\CourseService) {
+        return 0;
+    }
+    $uid = get_current_user_id();
+    try {
+        $eid = (int) $courseService->enrollUser($uid, $course_id, [
+            'payment_method' => 'admin_bypass',
+            'amount' => 0,
+            'transaction_id' => 'admin:' . $uid . ':' . time(),
+            'notes' => sprintf(
+                /* translators: %d: WordPress user ID */
+                __('Administrator enrollment without purchase (user %d).', 'sikshya'),
+                $uid
+            ),
+        ]);
+
+        return $eid > 0 ? $eid : 0;
+    } catch (\Exception $e) {
+        return 0;
     }
 }

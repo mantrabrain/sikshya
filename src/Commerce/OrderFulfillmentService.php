@@ -5,6 +5,7 @@ namespace Sikshya\Commerce;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Services\CourseService;
+use Sikshya\Services\Settings;
 
 /**
  * Marks orders paid, enrolls learners, writes legacy payment rows.
@@ -40,24 +41,28 @@ final class OrderFulfillmentService
             return false;
         }
 
+        $auto_enroll = Settings::isTruthy(Settings::get('auto_enroll', true));
+
         foreach ($items as $item) {
             $course_id = (int) $item->course_id;
             if ($course_id <= 0) {
                 continue;
             }
 
-            try {
-                $this->courseService->enrollUser(
-                    $user_id,
-                    $course_id,
-                    [
-                        'payment_method' => (string) $order->gateway,
-                        'amount' => (float) $item->line_total,
-                        'transaction_id' => (string) ($order->gateway_intent_id ?? ''),
-                    ]
-                );
-            } catch (\InvalidArgumentException $e) {
-                // Already enrolled or invalid — continue.
+            if ($auto_enroll) {
+                try {
+                    $this->courseService->enrollUser(
+                        $user_id,
+                        $course_id,
+                        [
+                            'payment_method' => (string) $order->gateway,
+                            'amount' => (float) $item->line_total,
+                            'transaction_id' => (string) ($order->gateway_intent_id ?? ''),
+                        ]
+                    );
+                } catch (\InvalidArgumentException $e) {
+                    // Already enrolled or invalid — continue.
+                }
             }
 
             if ($this->payments->tableExists()) {
@@ -78,6 +83,13 @@ final class OrderFulfillmentService
         }
 
         $this->orders->updateOrder($order_id, ['status' => 'paid']);
+
+        /**
+         * Fired after an order is fulfilled and marked paid.
+         *
+         * Pro / Scale modules may attach revenue share, commissions, etc.
+         */
+        do_action('sikshya_order_fulfilled', $order_id, $order);
 
         return true;
     }
