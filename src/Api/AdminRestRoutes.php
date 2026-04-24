@@ -20,6 +20,7 @@ use Sikshya\Services\CategoryService;
 use Sikshya\Services\CourseBuilderService;
 use Sikshya\Services\CourseCurriculumActions;
 use Sikshya\Database\Repositories\OrderRepository;
+use Sikshya\Database\Repositories\AdminTablesRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Services\CourseService;
@@ -31,6 +32,7 @@ use Sikshya\Licensing\Pro;
 use Sikshya\Services\EmailNotificationService;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
+use Sikshya\Services\SystemInfoService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -1446,30 +1448,10 @@ class AdminRestRoutes
                 delete_option('sikshya_settings');
                 return new WP_REST_Response(['success' => true, 'message' => __('Settings reset to default', 'sikshya')], 200);
             case 'system_info':
-                global $wpdb;
-                $theme = wp_get_theme();
-                $plugins = (array) Settings::getRaw('active_plugins', []);
-
                 return new WP_REST_Response(
                     [
                         'success' => true,
-                        'data' => [
-                            'site_url' => home_url('/'),
-                            'is_multisite' => is_multisite(),
-                            'wordpress_version' => get_bloginfo('version'),
-                            'php_version' => PHP_VERSION,
-                            'mysql_version' => $wpdb->db_version(),
-                            'sikshya_version' => defined('SIKSHYA_VERSION') ? SIKSHYA_VERSION : '',
-                            'timezone' => function_exists('wp_timezone_string') ? wp_timezone_string() : '',
-                            'memory_limit' => ini_get('memory_limit'),
-                            'wp_memory_limit' => defined('WP_MEMORY_LIMIT') ? WP_MEMORY_LIMIT : '',
-                            'max_execution_time' => ini_get('max_execution_time'),
-                            'upload_max_filesize' => ini_get('upload_max_filesize'),
-                            'post_max_size' => ini_get('post_max_size'),
-                            'theme_name' => $theme->get('Name'),
-                            'theme_stylesheet' => get_stylesheet(),
-                            'active_plugins_count' => count($plugins),
-                        ],
+                        'data' => (new SystemInfoService())->get(),
                     ],
                     200
                 );
@@ -1764,98 +1746,24 @@ class AdminRestRoutes
      */
     public function getAdminEnrollments(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'sikshya_enrollments';
-        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
-            return new WP_REST_Response(
-                [
-                    'success' => true,
-                    'enrollments' => [],
-                    'total' => 0,
-                    'pages' => 0,
-                    'page' => 1,
-                    'per_page' => 20,
-                    'table_missing' => true,
-                ],
-                200
-            );
-        }
-
-        $per_page = max(1, min(100, absint($request->get_param('per_page') ?: 20)));
-        $page = max(1, absint($request->get_param('page') ?: 1));
-        $offset = ($page - 1) * $per_page;
-        $status = $request->get_param('status');
-        $course_id = $request->get_param('course_id');
-        $search = sanitize_text_field((string) $request->get_param('search'));
-
-        $users_table = $wpdb->users;
-        $posts_table = $wpdb->posts;
-        $course_type = PostTypes::COURSE;
-
-        $where = ['1=1'];
-        $prepare = [];
-
-        if ($status !== null && $status !== '') {
-            $where[] = 'e.status = %s';
-            $prepare[] = sanitize_key((string) $status);
-        }
-        if ($course_id) {
-            $where[] = 'e.course_id = %d';
-            $prepare[] = (int) $course_id;
-        }
-        if ($search !== '') {
-            $like = '%' . $wpdb->esc_like($search) . '%';
-            $where[] = '(u.user_login LIKE %s OR u.user_email LIKE %s OR u.display_name LIKE %s OR p.post_title LIKE %s)';
-            array_push($prepare, $like, $like, $like, $like);
-        }
-
-        $where_sql = implode(' AND ', $where);
-
-        $count_sql = "SELECT COUNT(DISTINCT e.id) FROM {$table} e
-            LEFT JOIN {$users_table} u ON e.user_id = u.ID
-            LEFT JOIN {$posts_table} p ON e.course_id = p.ID AND p.post_type = %s
-            WHERE {$where_sql}";
-        $count_prepare = array_merge([$course_type], $prepare);
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- built from validated fragments above.
-        $total = (int) $wpdb->get_var($wpdb->prepare($count_sql, $count_prepare));
-
-        $list_prepare = array_merge([$course_type], $prepare, [$per_page, $offset]);
-        $list_sql = "SELECT e.id, e.user_id, e.course_id, e.status, e.enrolled_date, e.payment_method, e.amount,
-            u.display_name AS learner_name, u.user_email AS learner_email, p.post_title AS course_title
-            FROM {$table} e
-            LEFT JOIN {$users_table} u ON e.user_id = u.ID
-            LEFT JOIN {$posts_table} p ON e.course_id = p.ID AND p.post_type = %s
-            WHERE {$where_sql}
-            ORDER BY e.enrolled_date DESC
-            LIMIT %d OFFSET %d";
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- built from validated fragments above.
-        $rows = $wpdb->get_results($wpdb->prepare($list_sql, $list_prepare));
-
-        $items = [];
-        foreach ($rows as $row) {
-            $items[] = [
-                'id' => (int) $row->id,
-                'user_id' => (int) $row->user_id,
-                'course_id' => (int) $row->course_id,
-                'status' => (string) $row->status,
-                'enrolled_date' => (string) $row->enrolled_date,
-                'payment_method' => (string) $row->payment_method,
-                'amount' => isset($row->amount) ? (float) $row->amount : 0.0,
-                'learner_name' => (string) ($row->learner_name ?? ''),
-                'learner_email' => (string) ($row->learner_email ?? ''),
-                'course_title' => (string) ($row->course_title ?? ''),
-            ];
-        }
+        $repo = new AdminTablesRepository();
+        $r = $repo->enrollmentsPaged([
+            'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 20))),
+            'page' => max(1, absint($request->get_param('page') ?: 1)),
+            'status' => (string) ($request->get_param('status') ?? ''),
+            'course_id' => (int) ($request->get_param('course_id') ?: 0),
+            'search' => (string) $request->get_param('search'),
+        ]);
 
         return new WP_REST_Response(
             [
                 'success' => true,
-                'enrollments' => $items,
-                'total' => $total,
-                'pages' => $per_page > 0 ? (int) ceil($total / $per_page) : 0,
-                'page' => $page,
-                'per_page' => $per_page,
+                'enrollments' => $r['items'],
+                'total' => (int) $r['total'],
+                'pages' => (int) $r['pages'],
+                'page' => (int) $r['page'],
+                'per_page' => (int) $r['per_page'],
+                'table_missing' => !empty($r['table_missing']),
             ],
             200
         );
@@ -1866,140 +1774,26 @@ class AdminRestRoutes
      */
     public function getAdminQuizAttempts(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'sikshya_quiz_attempts';
-        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
-            return new WP_REST_Response(
-                [
-                    'success' => true,
-                    'attempts' => [],
-                    'total' => 0,
-                    'pages' => 0,
-                    'page' => 1,
-                    'per_page' => 30,
-                    'table_missing' => true,
-                ],
-                200
-            );
-        }
-
-        $per_page = max(1, min(100, absint($request->get_param('per_page') ?: 30)));
-        $page = max(1, absint($request->get_param('page') ?: 1));
-        $offset = ($page - 1) * $per_page;
-
-        $quiz_id = (int) ($request->get_param('quiz_id') ?: 0);
-        $course_id = (int) ($request->get_param('course_id') ?: 0);
-        $user_id = (int) ($request->get_param('user_id') ?: 0);
-        $status = sanitize_key((string) ($request->get_param('status') ?: ''));
-        $search = sanitize_text_field((string) $request->get_param('search'));
-
-        $users_table = $wpdb->users;
-        $posts_table = $wpdb->posts;
-
-        $where = ['1=1'];
-        $prepare = [];
-
-        if ($quiz_id > 0) {
-            $where[] = 'a.quiz_id = %d';
-            $prepare[] = $quiz_id;
-        }
-        if ($course_id > 0) {
-            $where[] = 'a.course_id = %d';
-            $prepare[] = $course_id;
-        }
-        if ($user_id > 0) {
-            $where[] = 'a.user_id = %d';
-            $prepare[] = $user_id;
-        }
-        if ($status !== '') {
-            $where[] = 'a.status = %s';
-            $prepare[] = $status;
-        }
-        if ($search !== '') {
-            // Match by learner name/email or quiz/course title.
-            $like = '%' . $wpdb->esc_like($search) . '%';
-            $where[] = '(u.display_name LIKE %s OR u.user_email LIKE %s OR q.post_title LIKE %s OR c.post_title LIKE %s)';
-            array_push($prepare, $like, $like, $like, $like);
-        }
-
-        $where_sql = implode(' AND ', $where);
-        $table_sql = esc_sql($table);
-
-        // Total count.
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name escaped; values bound.
-        $total = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$table_sql}` a LEFT JOIN {$users_table} u ON u.ID = a.user_id LEFT JOIN {$posts_table} q ON q.ID = a.quiz_id LEFT JOIN {$posts_table} c ON c.ID = a.course_id WHERE {$where_sql}", ...$prepare));
-        $pages = $total > 0 ? (int) ceil($total / $per_page) : 0;
-
-        // Rows.
-        $prepare_rows = array_merge($prepare, [$per_page, $offset]);
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name escaped; values bound.
-        $rows = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT a.id, a.user_id, a.quiz_id, a.course_id, a.attempt_number, a.score, a.status, a.started_at, a.completed_at,
-                        u.display_name AS user_name, u.user_email AS user_email,
-                        q.post_title AS quiz_title,
-                        c.post_title AS course_title
-                 FROM `{$table_sql}` a
-                 LEFT JOIN {$users_table} u ON u.ID = a.user_id
-                 LEFT JOIN {$posts_table} q ON q.ID = a.quiz_id
-                 LEFT JOIN {$posts_table} c ON c.ID = a.course_id
-                 WHERE {$where_sql}
-                 ORDER BY a.completed_at DESC, a.id DESC
-                 LIMIT %d OFFSET %d",
-                ...$prepare_rows
-            ),
-            ARRAY_A
-        );
-
-        $global_attempts_limit = (int) Settings::get('quiz_attempts_limit', 1);
-        if ($global_attempts_limit < 0) {
-            $global_attempts_limit = 0;
-        }
-        $repo = new QuizAttemptRepository();
-
-        $out = [];
-        foreach ($rows as $r) {
-            $qid = isset($r['quiz_id']) ? (int) $r['quiz_id'] : 0;
-            $uid = isset($r['user_id']) ? (int) $r['user_id'] : 0;
-            $per_quiz = $qid > 0 ? (int) get_post_meta($qid, '_sikshya_quiz_attempts_allowed', true) : 0;
-            $limit = $per_quiz > 0 ? $per_quiz : $global_attempts_limit;
-            if ($limit < 0) {
-                $limit = 0;
-            }
-            $used = ($uid > 0 && $qid > 0) ? $repo->countAttemptsForUserQuiz($uid, $qid) : 0;
-            $remaining = $limit > 0 ? max(0, $limit - $used) : null;
-
-            $out[] = [
-                'id' => (int) ($r['id'] ?? 0),
-                'user_id' => $uid,
-                'user_name' => (string) ($r['user_name'] ?? ''),
-                'user_email' => (string) ($r['user_email'] ?? ''),
-                'quiz_id' => $qid,
-                'quiz_title' => (string) ($r['quiz_title'] ?? ''),
-                'course_id' => (int) ($r['course_id'] ?? 0),
-                'course_title' => (string) ($r['course_title'] ?? ''),
-                'attempt_number' => (int) ($r['attempt_number'] ?? 0),
-                'score' => (float) ($r['score'] ?? 0),
-                'status' => (string) ($r['status'] ?? ''),
-                'started_at' => (string) ($r['started_at'] ?? ''),
-                'completed_at' => (string) ($r['completed_at'] ?? ''),
-                'attempts_used' => (int) $used,
-                'attempts_limit' => (int) $limit,
-                'attempts_remaining' => $remaining,
-                'is_locked' => $limit > 0 ? $used >= $limit : false,
-            ];
-        }
+        $repo = new AdminTablesRepository();
+        $r = $repo->quizAttemptsPaged([
+            'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 30))),
+            'page' => max(1, absint($request->get_param('page') ?: 1)),
+            'quiz_id' => (int) ($request->get_param('quiz_id') ?: 0),
+            'course_id' => (int) ($request->get_param('course_id') ?: 0),
+            'user_id' => (int) ($request->get_param('user_id') ?: 0),
+            'status' => (string) ($request->get_param('status') ?: ''),
+            'search' => (string) $request->get_param('search'),
+        ]);
 
         return new WP_REST_Response(
             [
                 'success' => true,
-                'attempts' => $out,
-                'total' => $total,
-                'pages' => $pages,
-                'page' => $page,
-                'per_page' => $per_page,
-                'table_missing' => false,
+                'attempts' => $r['items'],
+                'total' => (int) $r['total'],
+                'pages' => (int) $r['pages'],
+                'page' => (int) $r['page'],
+                'per_page' => (int) $r['per_page'],
+                'table_missing' => !empty($r['table_missing']),
             ],
             200
         );
@@ -2010,71 +1804,21 @@ class AdminRestRoutes
      */
     public function getAdminPayments(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'sikshya_payments';
-        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
-            return new WP_REST_Response(
-                [
-                    'success' => true,
-                    'payments' => [],
-                    'total' => 0,
-                    'pages' => 0,
-                    'page' => 1,
-                    'per_page' => 30,
-                    'table_missing' => true,
-                ],
-                200
-            );
-        }
-
-        $per_page = max(1, min(100, absint($request->get_param('per_page') ?: 30)));
-        $page = max(1, absint($request->get_param('page') ?: 1));
-        $offset = ($page - 1) * $per_page;
-
-        $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
-        $course_type = PostTypes::COURSE;
-
-        $sql = $wpdb->prepare(
-            "SELECT py.id, py.user_id, py.course_id, py.amount, py.currency, py.payment_method, py.transaction_id, py.status, py.payment_date,
-                u.display_name AS payer_name, u.user_email AS payer_email, p.post_title AS course_title
-            FROM {$table} py
-            LEFT JOIN {$wpdb->users} u ON py.user_id = u.ID
-            LEFT JOIN {$wpdb->posts} p ON py.course_id = p.ID AND p.post_type = %s
-            ORDER BY py.payment_date DESC
-            LIMIT %d OFFSET %d",
-            $course_type,
-            $per_page,
-            $offset
-        );
-
-        $rows = $wpdb->get_results($sql);
-        $items = [];
-        foreach ($rows as $row) {
-            $items[] = [
-                'id' => (int) $row->id,
-                'user_id' => (int) $row->user_id,
-                'course_id' => (int) $row->course_id,
-                'amount' => isset($row->amount) ? (float) $row->amount : 0.0,
-                'currency' => (string) ($row->currency ?? ''),
-                'payment_method' => (string) ($row->payment_method ?? ''),
-                'transaction_id' => (string) ($row->transaction_id ?? ''),
-                'status' => (string) ($row->status ?? ''),
-                'payment_date' => (string) ($row->payment_date ?? ''),
-                'payer_name' => (string) ($row->payer_name ?? ''),
-                'payer_email' => (string) ($row->payer_email ?? ''),
-                'course_title' => (string) ($row->course_title ?? ''),
-            ];
-        }
+        $repo = new AdminTablesRepository();
+        $r = $repo->paymentsPaged([
+            'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 30))),
+            'page' => max(1, absint($request->get_param('page') ?: 1)),
+        ]);
 
         return new WP_REST_Response(
             [
                 'success' => true,
-                'payments' => $items,
-                'total' => $total,
-                'pages' => $per_page > 0 ? (int) ceil($total / $per_page) : 0,
-                'page' => $page,
-                'per_page' => $per_page,
+                'payments' => $r['items'],
+                'total' => (int) $r['total'],
+                'pages' => (int) $r['pages'],
+                'page' => (int) $r['page'],
+                'per_page' => (int) $r['per_page'],
+                'table_missing' => !empty($r['table_missing']),
             ],
             200
         );

@@ -2,6 +2,7 @@
 
 namespace Sikshya\Services;
 
+use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
 
 /**
@@ -12,10 +13,12 @@ use Sikshya\Database\Repositories\ProgressRepository;
 final class LearningProgressService
 {
     private ProgressRepository $progress;
+    private EnrollmentRepository $enrollments;
 
     public function __construct()
     {
         $this->progress = new ProgressRepository();
+        $this->enrollments = new EnrollmentRepository();
     }
 
     /**
@@ -102,16 +105,7 @@ final class LearningProgressService
 
     public function getCompletedCoursesCount(int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_enrollments';
-
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$t} WHERE user_id = %d AND status = %s",
-                $user_id,
-                'completed'
-            )
-        );
+        return $this->enrollments->countForUserByStatus($user_id, 'completed');
     }
 
     public function getTotalLessonsCount(int $user_id): int
@@ -128,17 +122,7 @@ final class LearningProgressService
 
     public function getTotalLearningTime(int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_progress';
-
-        $sum = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COALESCE(SUM(time_spent), 0) FROM {$t} WHERE user_id = %d",
-                $user_id
-            )
-        );
-
-        return (int) $sum;
+        return $this->progress->sumTimeSpentForUser($user_id);
     }
 
     /**
@@ -146,16 +130,7 @@ final class LearningProgressService
      */
     private function countCompletedLessonsGlobal(int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_progress';
-
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(DISTINCT lesson_id) FROM {$t} WHERE user_id = %d AND lesson_id IS NOT NULL AND quiz_id IS NULL AND status = %s",
-                $user_id,
-                'completed'
-            )
-        );
+        return $this->progress->countDistinctCompletedLessonsForUser($user_id);
     }
 
     private function lessonCourseId(int $lesson_id): int

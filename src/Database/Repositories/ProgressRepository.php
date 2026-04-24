@@ -3,6 +3,7 @@
 namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
+use Sikshya\Database\Tables\ProgressTable;
 
 class ProgressRepository implements RepositoryInterface
 {
@@ -10,8 +11,50 @@ class ProgressRepository implements RepositoryInterface
 
     public function __construct()
     {
+        $this->table_name = ProgressTable::getTableName();
+    }
+
+    public function tableExists(): bool
+    {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'sikshya_progress';
+
+        return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
+    }
+
+    /**
+     * Query progress rows by user/course filters.
+     *
+     * @return array<int, object>
+     */
+    public function listFiltered(int $user_id = 0, int $course_id = 0, int $limit = 200, int $offset = 0): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+
+        $limit = max(1, min(500, $limit));
+        $offset = max(0, $offset);
+
+        global $wpdb;
+        $where = [];
+        $args = [];
+        if ($user_id > 0) {
+            $where[] = 'user_id = %d';
+            $args[] = $user_id;
+        }
+        if ($course_id > 0) {
+            $where[] = 'course_id = %d';
+            $args[] = $course_id;
+        }
+        $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $sql = "SELECT * FROM {$this->table_name} {$where_sql} ORDER BY updated_at DESC LIMIT %d OFFSET %d";
+        $args[] = $limit;
+        $args[] = $offset;
+
+        $rows = $wpdb->get_results($wpdb->prepare($sql, ...$args));
+
+        return is_array($rows) ? $rows : [];
     }
 
     public function findAll(array $args = []): array
@@ -410,6 +453,30 @@ class ProgressRepository implements RepositoryInterface
         $sql = $wpdb->prepare("SELECT COUNT(*) FROM {$this->table_name} WHERE status = %s", $status);
 
         return (int) $wpdb->get_var($sql);
+    }
+
+    public function sumTimeSpentForUser(int $user_id): int
+    {
+        global $wpdb;
+        $sum = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COALESCE(SUM(time_spent), 0) FROM {$this->table_name} WHERE user_id = %d",
+                $user_id
+            )
+        );
+        return (int) $sum;
+    }
+
+    public function countDistinctCompletedLessonsForUser(int $user_id): int
+    {
+        global $wpdb;
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(DISTINCT lesson_id) FROM {$this->table_name} WHERE user_id = %d AND lesson_id IS NOT NULL AND quiz_id IS NULL AND status = %s",
+                $user_id,
+                'completed'
+            )
+        );
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
+use Sikshya\Database\Tables\EnrollmentsTable;
 
 class EnrollmentRepository implements RepositoryInterface
 {
@@ -10,8 +11,14 @@ class EnrollmentRepository implements RepositoryInterface
 
     public function __construct()
     {
+        $this->table_name = EnrollmentsTable::getTableName();
+    }
+
+    public function tableExists(): bool
+    {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'sikshya_enrollments';
+
+        return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
     }
 
     public function findAll(array $args = []): array
@@ -79,6 +86,18 @@ class EnrollmentRepository implements RepositoryInterface
         $result = $wpdb->insert($this->table_name, $insert);
 
         return $result ? $wpdb->insert_id : 0;
+    }
+
+    public function countForUserByStatus(int $user_id, string $status): int
+    {
+        global $wpdb;
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND status = %s",
+                $user_id,
+                $status
+            )
+        );
     }
 
     public function update(int $id, array $data): bool
@@ -206,6 +225,79 @@ class EnrollmentRepository implements RepositoryInterface
         $result = $wpdb->get_row($sql);
 
         return $result ?: null;
+    }
+
+    /**
+     * @param int[] $course_ids
+     * @return array<int, object> rows with user_id, course_id, enrolled_date
+     */
+    public function listRecentByCourses(array $course_ids, int $limit = 10, int $days = 30): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+
+        $course_ids = array_values(array_filter(array_map('intval', $course_ids), static fn($v) => $v > 0));
+        if ($course_ids === []) {
+            return [];
+        }
+
+        $limit = max(1, min(200, $limit));
+        $days = max(1, min(3650, $days));
+
+        global $wpdb;
+        $placeholders = implode(',', array_fill(0, count($course_ids), '%d'));
+
+        $sql = "SELECT user_id, course_id, enrolled_date
+                FROM {$this->table_name}
+                WHERE course_id IN ({$placeholders})
+                  AND enrolled_date >= DATE_SUB(NOW(), INTERVAL {$days} DAY)
+                ORDER BY enrolled_date DESC
+                LIMIT %d";
+
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                $sql,
+                array_merge($course_ids, [$limit])
+            )
+        );
+
+        return is_array($rows) ? $rows : [];
+    }
+
+    public function countAll(): int
+    {
+        if (!$this->tableExists()) {
+            return 0;
+        }
+
+        global $wpdb;
+
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name}");
+    }
+
+    /**
+     * @return array<int, object>
+     */
+    public function listPaged(int $per_page, int $offset): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+
+        $per_page = max(1, min(200, $per_page));
+        $offset = max(0, $offset);
+
+        global $wpdb;
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} ORDER BY enrolled_date DESC LIMIT %d OFFSET %d",
+                $per_page,
+                $offset
+            )
+        );
+
+        return is_array($rows) ? $rows : [];
     }
 
     public function countByUser(int $user_id): int

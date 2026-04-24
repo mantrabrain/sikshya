@@ -2,6 +2,7 @@
 
 namespace Sikshya\Core;
 
+use Sikshya\Database\Repositories\PluginLifecycleRepository;
 use Sikshya\Services\Settings;
 
 /**
@@ -110,24 +111,7 @@ class Uninstaller
      */
     private static function removeTables(): void
     {
-        global $wpdb;
-
-        $tables = [
-            $wpdb->prefix . 'sikshya_enrollments',
-            $wpdb->prefix . 'sikshya_progress',
-            $wpdb->prefix . 'sikshya_certificates',
-            $wpdb->prefix . 'sikshya_payments',
-            $wpdb->prefix . 'sikshya_quiz_attempts',
-            $wpdb->prefix . 'sikshya_quiz_questions',
-            $wpdb->prefix . 'sikshya_lesson_content',
-            $wpdb->prefix . 'sikshya_achievements',
-            $wpdb->prefix . 'sikshya_notifications',
-            $wpdb->prefix . 'sikshya_reviews',
-        ];
-
-        foreach ($tables as $table) {
-            $wpdb->query("DROP TABLE IF EXISTS {$table}");
-        }
+        (new PluginLifecycleRepository())->dropAllFreeCustomTables();
     }
 
     /**
@@ -198,10 +182,7 @@ class Uninstaller
             wp_cache_flush_group('sikshya');
         }
 
-        // Clear transients
-        global $wpdb;
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_sikshya_%'");
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_sikshya_%'");
+        (new PluginLifecycleRepository())->deleteSikshyaTransients();
     }
 
     /**

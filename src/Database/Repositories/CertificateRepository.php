@@ -2,6 +2,8 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Database\Tables\CertificatesTable;
+
 /**
  * Issued certificates (custom table).
  *
@@ -13,8 +15,46 @@ class CertificateRepository
 
     public function __construct()
     {
+        $this->table_name = CertificatesTable::getTableName();
+    }
+
+    public function tableExists(): bool
+    {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'sikshya_certificates';
+
+        return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
+    }
+
+    /**
+     * @return array<int, object>
+     */
+    public function listFiltered(int $user_id = 0, int $course_id = 0, int $limit = 200): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+
+        $limit = max(1, min(500, $limit));
+
+        global $wpdb;
+        $where = [];
+        $args = [];
+        if ($user_id > 0) {
+            $where[] = 'user_id = %d';
+            $args[] = $user_id;
+        }
+        if ($course_id > 0) {
+            $where[] = 'course_id = %d';
+            $args[] = $course_id;
+        }
+        $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $sql = "SELECT * FROM {$this->table_name} {$where_sql} ORDER BY issued_date DESC LIMIT %d";
+        $args[] = $limit;
+
+        $rows = $wpdb->get_results($wpdb->prepare($sql, ...$args));
+
+        return is_array($rows) ? $rows : [];
     }
 
     public function findByVerificationCode(string $code): ?object

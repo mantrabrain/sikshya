@@ -2,7 +2,7 @@
 
 namespace Sikshya\Frontend\Public;
 
-use Sikshya\Constants\PostTypes;
+use Sikshya\Database\Repositories\InstructorMetricsRepository;
 
 /**
  * Determines whether a user should see the instructor (teaching) account experience.
@@ -72,15 +72,6 @@ final class InstructorContext
             return true;
         }
 
-        global $wpdb;
-        $count = (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(ID) FROM {$wpdb->posts} WHERE post_author = %d AND post_type = %s AND post_status NOT IN ('trash', 'auto-draft') LIMIT 1",
-                $user_id,
-                PostTypes::COURSE
-            )
-        );
-
-        return $count > 0;
+        return (new InstructorMetricsRepository())->userHasAuthoredCourse($user_id);
     }
 }

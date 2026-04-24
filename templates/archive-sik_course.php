@@ -13,16 +13,10 @@ $grid_classes = 'sikshya-course-grid sikshya-course-grid--' . sanitize_html_clas
 $show_sidebar = \Sikshya\Services\CourseFrontendSettings::areCourseFiltersEnabled();
 // View is toggled client-side (localStorage) to avoid changing the URL.
 
-global $wp_query;
-$found = isset($wp_query->found_posts) ? (int) $wp_query->found_posts : 0;
-$max_pages = isset($wp_query->max_num_pages) ? (int) $wp_query->max_num_pages : 0;
-$paged = (int) get_query_var('paged');
-if ($paged < 1) {
-    $paged = (int) get_query_var('page');
-}
-if ($paged < 1) {
-    $paged = 1;
-}
+$ctx = \Sikshya\Frontend\Public\ArchiveContextTemplateData::fromWpQuery();
+$found = (int) $ctx['found'];
+$max_pages = (int) $ctx['max_pages'];
+$paged = (int) $ctx['paged'];
 ?>
 
 <div class="sikshya-public sikshya-archive-courses">

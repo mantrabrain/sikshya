@@ -2,6 +2,8 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Database\Tables\AssignmentSubmissionsTable;
+
 /**
  * Assignment submissions (custom table).
  *
@@ -13,8 +15,7 @@ final class AssignmentSubmissionRepository
 
     public function __construct()
     {
-        global $wpdb;
-        $this->table_name = $wpdb->prefix . 'sikshya_assignment_submissions';
+        $this->table_name = AssignmentSubmissionsTable::getTableName();
     }
 
     public function tableExists(): bool

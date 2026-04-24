@@ -2,139 +2,103 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Services\EnrollmentCrudService;
 use WP_REST_Request;
 use WP_REST_Response;
+use WP_Error;
 
 class EnrollmentService
 {
-    private function enrollmentsTableExists(): bool
-    {
-        global $wpdb;
-        $table = $wpdb->prefix . 'sikshya_enrollments';
+    private EnrollmentCrudService $svc;
 
-        return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table;
+    public function __construct(?EnrollmentCrudService $svc = null)
+    {
+        $this->svc = $svc ?: new EnrollmentCrudService();
     }
 
     public function getEnrollments(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'sikshya_enrollments';
+        $per_page = (int) ($request->get_param('per_page') ?: 10);
+        $page = (int) ($request->get_param('page') ?: 1);
 
-        if (!$this->enrollmentsTableExists()) {
+        $result = $this->svc->listPaged($page, $per_page);
+        if ($result instanceof WP_Error) {
             return new WP_REST_Response(
                 [
                     'enrollments' => [],
                     'total' => 0,
                     'pages' => 0,
-                    'message' => 'Enrollments table not found.',
+                    'message' => $result->get_error_message(),
                 ],
                 200
             );
         }
 
-        $per_page = $request->get_param('per_page') ?: 10;
-        $page = $request->get_param('page') ?: 1;
-        $offset = ($page - 1) * $per_page;
-
-        $enrollments = $wpdb->get_results(
-            $wpdb->prepare("SELECT * FROM {$table} LIMIT %d OFFSET %d", $per_page, $offset)
-        );
-
-        $total = $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
-
         return new WP_REST_Response([
-            'enrollments' => array_map([$this, 'formatEnrollment'], $enrollments),
-            'total' => $total,
-            'pages' => ceil($total / $per_page),
+            'enrollments' => array_map([$this, 'formatEnrollment'], $result['rows']),
+            'total' => (int) $result['total'],
+            'pages' => (int) $result['pages'],
+            'page' => (int) $result['page'],
+            'per_page' => (int) $result['per_page'],
         ]);
     }
 
     public function createEnrollment(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
         $data = $request->get_json_params();
-        $table = $wpdb->prefix . 'sikshya_enrollments';
+        $data = is_array($data) ? $data : [];
 
-        if (!$this->enrollmentsTableExists()) {
-            return new WP_REST_Response(['error' => 'Enrollments table not found'], 503);
+        $id = $this->svc->create($data);
+        if ($id instanceof WP_Error) {
+            return new WP_REST_Response(['error' => $id->get_error_message()], 400);
         }
 
-        $result = $wpdb->insert($table, [
-            'user_id' => intval($data['user_id'] ?? 0),
-            'course_id' => intval($data['course_id'] ?? 0),
-            'status' => sanitize_text_field($data['status'] ?? 'enrolled'),
-            'enrolled_date' => current_time('mysql'),
-            'payment_method' => sanitize_text_field($data['payment_method'] ?? ''),
-            'amount' => floatval($data['amount'] ?? 0),
-        ]);
+        $req = new WP_REST_Request('GET');
+        $req->set_param('id', $id);
 
-        if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to create enrollment'], 400);
-        }
-
-        return $this->getEnrollment(new WP_REST_Request('GET', '', ['id' => $wpdb->insert_id]));
+        return $this->getEnrollment($req);
     }
 
     public function getEnrollment(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $id = $request->get_param('id');
-        $table = $wpdb->prefix . 'sikshya_enrollments';
+        $id = (int) $request->get_param('id');
+        $row = $this->svc->getById($id);
+        if ($row instanceof WP_Error) {
+            $status = (int) (($row->get_error_data()['status'] ?? 400));
+            $status = $status > 0 ? $status : 400;
 
-        if (!$this->enrollmentsTableExists()) {
-            return new WP_REST_Response(['error' => 'Enrollments table not found'], 503);
+            return new WP_REST_Response(['error' => $row->get_error_message()], $status);
         }
 
-        $enrollment = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id));
-
-        if (!$enrollment) {
-            return new WP_REST_Response(['error' => 'Enrollment not found'], 404);
-        }
-
-        return new WP_REST_Response($this->formatEnrollment($enrollment));
+        return new WP_REST_Response($this->formatEnrollment($row));
     }
 
     public function updateEnrollment(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $id = $request->get_param('id');
+        $id = (int) $request->get_param('id');
         $data = $request->get_json_params();
-        $table = $wpdb->prefix . 'sikshya_enrollments';
+        $data = is_array($data) ? $data : [];
 
-        if (!$this->enrollmentsTableExists()) {
-            return new WP_REST_Response(['error' => 'Enrollments table not found'], 503);
+        $ok = $this->svc->update($id, $data);
+        if ($ok instanceof WP_Error) {
+            return new WP_REST_Response(['error' => $ok->get_error_message()], 400);
         }
 
-        $result = $wpdb->update($table, [
-            'status' => sanitize_text_field($data['status'] ?? ''),
-            'payment_method' => sanitize_text_field($data['payment_method'] ?? ''),
-            'amount' => floatval($data['amount'] ?? 0),
-        ], ['id' => $id]);
+        $req = new WP_REST_Request('GET');
+        $req->set_param('id', $id);
 
-        if ($result === false) {
-            return new WP_REST_Response(['error' => 'Failed to update enrollment'], 400);
-        }
-
-        return $this->getEnrollment(new WP_REST_Request('GET', '', ['id' => $id]));
+        return $this->getEnrollment($req);
     }
 
     public function deleteEnrollment(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $id = $request->get_param('id');
-        $table = $wpdb->prefix . 'sikshya_enrollments';
-
-        if (!$this->enrollmentsTableExists()) {
-            return new WP_REST_Response(['error' => 'Enrollments table not found'], 503);
+        $id = (int) $request->get_param('id');
+        $ok = $this->svc->delete($id);
+        if ($ok instanceof WP_Error) {
+            return new WP_REST_Response(['error' => $ok->get_error_message()], 400);
         }
 
-        $result = $wpdb->delete($table, ['id' => $id]);
-
-        if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to delete enrollment'], 400);
-        }
-
-        return new WP_REST_Response(['success' => true]);
+        return new WP_REST_Response(['success' => (bool) $ok]);
     }
 
     private function formatEnrollment($enrollment): array

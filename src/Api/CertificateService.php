@@ -2,39 +2,24 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Services\CertificateQueryService;
 use WP_REST_Request;
 use WP_REST_Response;
 
 class CertificateService
 {
+    private CertificateQueryService $svc;
+
+    public function __construct(?CertificateQueryService $svc = null)
+    {
+        $this->svc = $svc ?: new CertificateQueryService();
+    }
+
     public function getCertificates(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'sikshya_certificates';
-        $user_id = $request->get_param('user_id');
-        $course_id = $request->get_param('course_id');
-
-        $where = [];
-        $prepare_values = [];
-
-        if ($user_id) {
-            $where[] = 'user_id = %d';
-            $prepare_values[] = $user_id;
-        }
-
-        if ($course_id) {
-            $where[] = 'course_id = %d';
-            $prepare_values[] = $course_id;
-        }
-
-        $where_clause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        $query = "SELECT * FROM {$table} {$where_clause} ORDER BY issued_date DESC";
-
-        if (!empty($prepare_values)) {
-            $query = $wpdb->prepare($query, ...$prepare_values);
-        }
-
-        $certificates = $wpdb->get_results($query);
+        $user_id = (int) $request->get_param('user_id');
+        $course_id = (int) $request->get_param('course_id');
+        $certificates = $this->svc->list($user_id, $course_id);
 
         return new WP_REST_Response([
             'certificates' => array_map([$this, 'formatCertificate'], $certificates),

@@ -60,15 +60,28 @@ import {
 } from './ProIntegrationFields';
 import { useAddonEnabled } from '../../hooks/useAddons';
 import {
-  AddQuestionTypePickerModal,
+  AddQuestionAuthoringModal,
   QUESTION_PICKER_TYPES,
   type QuestionType,
-} from '../../components/shared/AddQuestionTypePickerModal';
+} from '../../components/shared/AddQuestionAuthoringModal';
 
 const FIELD =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
 const LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const HINT = 'mt-1 text-xs text-slate-500 dark:text-slate-400';
+
+function FormSection(props: { title: string; description?: string; children: React.ReactNode }) {
+  const { title, description, children } = props;
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+      <header className="mb-3">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
+        {description ? <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p> : null}
+      </header>
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
 
 /** Resolve attachment URL for the WordPress media picker preview. */
 function useAttachmentPreviewUrl(attachmentId: number): string {
@@ -488,53 +501,55 @@ export function LessonEditor(props: ContentEditorProps) {
             </div>
           ) : (
             <div className="space-y-6" role="tabpanel">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Publishing, duration label, and visibility — lesson text, media, and type are under <span className="font-medium">Content</span>.
-              </p>
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div>
-                  <label className={LABEL} htmlFor="sik-lesson-duration">
-                    Duration
-                  </label>
-                  <p className={HINT}>Any text you like (e.g. 12 min, 1h 20m) — shown next to the lesson in the outline.</p>
-                  <input
-                    id="sik-lesson-duration"
-                    className={FIELD}
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    placeholder="e.g. 12 min"
-                  />
+              <FormSection
+                title="Publishing"
+                description="Controls whether this lesson is visible to learners when the course is published."
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={LABEL} htmlFor="sik-lesson-status">
+                      Status
+                    </label>
+                    <select
+                      id="sik-lesson-status"
+                      className={FIELD}
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="publish">Published</option>
+                      <option value="private">Private</option>
+                      <option value="pending">Pending review</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={LABEL} htmlFor="sik-lesson-duration">
+                      Duration
+                    </label>
+                    <p className={HINT}>Shown next to the lesson in the outline (optional).</p>
+                    <input
+                      id="sik-lesson-duration"
+                      className={FIELD}
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      placeholder="e.g. 12 min"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className={LABEL} htmlFor="sik-lesson-status">
-                    Status
-                  </label>
-                  <p className={HINT}>Controls whether this lesson is visible to learners when the course is published.</p>
-                  <select
-                    id="sik-lesson-status"
-                    className={FIELD}
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="publish">Published</option>
-                    <option value="private">Private</option>
-                    <option value="pending">Pending review</option>
-                  </select>
-                </div>
-              </div>
+              </FormSection>
             </div>
           )}
         </div>
       </section>
       {embedded ? (
-        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />
+        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
         <EditorActions
           backHref={backHref}
           entityLabel={entityLabel}
           saving={editor.saving}
           isNew={editor.isNew}
+          canSave={Boolean(title.trim())}
           onSave={() => void onSave()}
           onTrash={moveToTrash}
         />
@@ -544,8 +559,8 @@ export function LessonEditor(props: ContentEditorProps) {
 }
 
 /** Course builder side panel: save CPT only; no trash / no full-width action bar. */
-function EmbeddedSaveBar(props: { saving: boolean; entityLabel: string; onSave: () => void }) {
-  const { saving, entityLabel, onSave } = props;
+function EmbeddedSaveBar(props: { saving: boolean; entityLabel: string; canSave?: boolean; onSave: () => void }) {
+  const { saving, entityLabel, canSave = true, onSave } = props;
   return (
     <div id="sikshya-embedded-save" className="mt-6 border-t border-slate-100/90 pt-4 dark:border-slate-800/90">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -554,13 +569,16 @@ function EmbeddedSaveBar(props: { saving: boolean; entityLabel: string; onSave: 
         </p>
         <button
           type="button"
-          disabled={saving}
+          disabled={saving || !canSave}
           onClick={onSave}
           className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
         >
           {saving ? 'Saving…' : `Save ${entityLabel.toLowerCase()}`}
         </button>
       </div>
+      {!canSave ? (
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Add the required fields (usually title) to enable saving.</p>
+      ) : null}
     </div>
   );
 }
@@ -570,10 +588,11 @@ function EditorActions(props: {
   entityLabel: string;
   saving: boolean;
   isNew: boolean;
+  canSave?: boolean;
   onSave: () => void;
   onTrash: () => void;
 }) {
-  const { backHref, saving, isNew, onSave, onTrash } = props;
+  const { backHref, saving, isNew, canSave = true, onSave, onTrash } = props;
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6 dark:border-slate-800">
       <a
@@ -583,7 +602,7 @@ function EditorActions(props: {
         ← Back to list
       </a>
       <div className="flex flex-wrap gap-2">
-        <ButtonPrimary type="button" disabled={saving} onClick={onSave} className="rounded-xl px-5 py-2.5">
+        <ButtonPrimary type="button" disabled={saving || !canSave} onClick={onSave} className="rounded-xl px-5 py-2.5">
           {saving ? 'Saving…' : 'Save'}
         </ButtonPrimary>
         {!isNew ? (
@@ -597,6 +616,9 @@ function EditorActions(props: {
         </button>
         ) : null}
       </div>
+      {!canSave ? (
+        <p className="w-full text-[11px] text-slate-500 dark:text-slate-400">Add the required fields (usually title) to enable saving.</p>
+      ) : null}
     </div>
   );
 }
@@ -618,10 +640,6 @@ export function QuizEditor(props: ContentEditorProps) {
   const [questionError, setQuestionError] = useState<unknown>(null);
   const [questionRefresh, setQuestionRefresh] = useState(0);
   const [addQuestionOpen, setAddQuestionOpen] = useState(false);
-  const [addQuestionBusy, setAddQuestionBusy] = useState(false);
-  const [addQuestionError, setAddQuestionError] = useState<unknown>(null);
-  const [addQuestionType, setAddQuestionType] = useState<QuestionType>('multiple_choice');
-  const [addQuestionTitle, setAddQuestionTitle] = useState('New question');
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [featured, setFeatured] = useState(0);
   const [editorTab, setEditorTab] = useState<'content' | 'settings' | 'questions'>('content');
@@ -728,45 +746,7 @@ export function QuizEditor(props: ContentEditorProps) {
   }, [editorTab, questionSearch, questionRefresh]);
 
   const openAddQuestion = () => {
-    setAddQuestionError(null);
-    setAddQuestionType('multiple_choice');
-    setAddQuestionTitle('New question');
     setAddQuestionOpen(true);
-  };
-
-  const submitNewQuestion = () => {
-    const name = addQuestionTitle.trim();
-    if (!name) {
-      return;
-    }
-    setAddQuestionBusy(true);
-    setAddQuestionError(null);
-    void getWpApi()
-      .post<{ id: number }>(`/sik_question`, {
-        title: name,
-        status: 'draft',
-        meta: {
-          _sikshya_question_type: addQuestionType,
-          _sikshya_question_points: 1,
-        },
-      })
-      .then((created) => {
-        if (!created?.id) {
-          throw new Error('Could not create question.');
-        }
-        const id = Number(created.id) || 0;
-        if (id > 0) {
-          setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-        }
-        setAddQuestionOpen(false);
-        setQuestionRefresh((n) => n + 1);
-      })
-      .catch((e) => {
-        setAddQuestionError(e);
-      })
-      .finally(() => {
-        setAddQuestionBusy(false);
-      });
   };
 
   const onSave = async () => {
@@ -895,62 +875,65 @@ export function QuizEditor(props: ContentEditorProps) {
             </div>
           ) : editorTab === 'settings' ? (
             <div className="space-y-6" role="tabpanel">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <label className={LABEL} htmlFor="sik-quiz-time">
-                    Time limit (minutes)
-                  </label>
-                  <p className={HINT}>Countdown while the quiz is open. Use 0 for no time limit.</p>
-                  <input
-                    id="sik-quiz-time"
-                    type="number"
-                    min={0}
-                    className={FIELD}
-                    value={timeLimit}
-                    onChange={(e) => setTimeLimit(Number(e.target.value))}
-                  />
+              <FormSection title="Grading & timing" description="How the quiz is scored and constrained for learners.">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label className={LABEL} htmlFor="sik-quiz-time">
+                      Time limit (minutes)
+                    </label>
+                    <p className={HINT}>Use 0 for no time limit.</p>
+                    <input
+                      id="sik-quiz-time"
+                      type="number"
+                      min={0}
+                      className={FIELD}
+                      value={timeLimit}
+                      onChange={(e) => setTimeLimit(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL} htmlFor="sik-quiz-pass">
+                      Passing score (%)
+                    </label>
+                    <p className={HINT}>Based on total points across questions.</p>
+                    <input
+                      id="sik-quiz-pass"
+                      type="number"
+                      min={0}
+                      max={100}
+                      className={FIELD}
+                      value={passing}
+                      onChange={(e) => setPassing(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL} htmlFor="sik-quiz-attempts">
+                      Attempts allowed
+                    </label>
+                    <p className={HINT}>Minimum 1.</p>
+                    <input
+                      id="sik-quiz-attempts"
+                      type="number"
+                      min={1}
+                      className={FIELD}
+                      value={attempts}
+                      onChange={(e) => setAttempts(Number(e.target.value))}
+                    />
+                  </div>
                 </div>
+              </FormSection>
+              <FormSection title="Publishing" description="Draft hides the quiz from learners until you publish.">
                 <div>
-                  <label className={LABEL} htmlFor="sik-quiz-pass">
-                    Passing score (%)
+                  <label className={LABEL} htmlFor="sik-quiz-status">
+                    Status
                   </label>
-                  <p className={HINT}>Minimum percentage to mark the quiz as passed (based on question points).</p>
-                  <input
-                    id="sik-quiz-pass"
-                    type="number"
-                    min={0}
-                    max={100}
-                    className={FIELD}
-                    value={passing}
-                    onChange={(e) => setPassing(Number(e.target.value))}
-                  />
+                  <select id="sik-quiz-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="draft">Draft</option>
+                    <option value="publish">Published</option>
+                    <option value="private">Private</option>
+                  </select>
                 </div>
-                <div>
-                  <label className={LABEL} htmlFor="sik-quiz-attempts">
-                    Attempts allowed
-                  </label>
-                  <p className={HINT}>How many times a learner can submit this quiz (minimum 1).</p>
-                  <input
-                    id="sik-quiz-attempts"
-                    type="number"
-                    min={1}
-                    className={FIELD}
-                    value={attempts}
-                    onChange={(e) => setAttempts(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className={LABEL} htmlFor="sik-quiz-status">
-                  Status
-                </label>
-                <p className={HINT}>Draft hides the quiz from the public course until you publish.</p>
-                <select id="sik-quiz-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="draft">Draft</option>
-                  <option value="publish">Published</option>
-                  <option value="private">Private</option>
-                </select>
-              </div>
+              </FormSection>
               <ProQuizFields values={proQuizValues} onChange={setProQuizValues} />
               <ProGradebookQuizWeightFields
                 gradeWeight={proQuizValues.gradeWeight}
@@ -1074,6 +1057,15 @@ export function QuizEditor(props: ContentEditorProps) {
                                 <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">
                                   {row?.title || `Question #${qid}`}
                                 </span>
+                                <a
+                                  href={appViewHref(config, 'edit-content', { post_type: 'sik_question', post_id: String(qid) })}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                  className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                  title="Edit this question in a new tab"
+                                >
+                                  Edit
+                                </a>
                                 <button
                                   type="button"
                                   className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:text-red-400 dark:hover:bg-red-950/30"
@@ -1102,21 +1094,14 @@ export function QuizEditor(props: ContentEditorProps) {
           )}
         </div>
       </section>
-      <AddQuestionTypePickerModal
+      <AddQuestionAuthoringModal
         open={addQuestionOpen}
-        questionType={addQuestionType}
-        onQuestionTypeChange={(t) => setAddQuestionType(t)}
-        title={addQuestionTitle}
-        onTitleChange={setAddQuestionTitle}
-        onClose={() => {
-          if (!addQuestionBusy) {
-            setAddQuestionOpen(false);
-          }
+        onClose={() => setAddQuestionOpen(false)}
+        onCreated={(id) => {
+          if (!id) return;
+          setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+          setQuestionRefresh((n) => n + 1);
         }}
-        onSubmit={submitNewQuestion}
-        busy={addQuestionBusy}
-        error={addQuestionError}
-        submitLabel="Create and add to quiz"
         onPickExisting={(id) => {
           if (!id) return;
           setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -1125,13 +1110,14 @@ export function QuizEditor(props: ContentEditorProps) {
         pickExistingLabel="Add to quiz"
       />
       {embedded ? (
-        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />
+        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
         <EditorActions
           backHref={backHref}
           entityLabel={entityLabel}
           saving={editor.saving}
           isNew={editor.isNew}
+          canSave={Boolean(title.trim())}
           onSave={() => void onSave()}
           onTrash={moveToTrash}
         />
@@ -1959,13 +1945,19 @@ export function QuestionEditor(props: ContentEditorProps) {
         </div>
       ) : null}
       {embedded ? (
-        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />
+        <EmbeddedSaveBar
+          saving={editor.saving}
+          entityLabel={entityLabel}
+          canSave={Boolean(title.trim() && qType.trim())}
+          onSave={() => void onSave()}
+        />
       ) : (
         <EditorActions
           backHref={backHref}
           entityLabel={entityLabel}
           saving={editor.saving}
           isNew={editor.isNew}
+          canSave={Boolean(title.trim() && qType.trim())}
           onSave={() => void onSave()}
           onTrash={moveToTrash}
         />
@@ -2133,52 +2125,53 @@ export function AssignmentEditor(props: ContentEditorProps) {
             </div>
           ) : (
             <div className="space-y-6" role="tabpanel">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Scheduling, scoring, and how learners submit their work.
-              </p>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <label className={LABEL} htmlFor="sik-as-due">
-                    Due (datetime)
-                  </label>
-                  <p className={HINT}>Optional. Sets the deadline in your site timezone.</p>
-                  <DateTimePickerField kind="datetime" value={due} onChange={setDue} />
+              <FormSection title="Submission" description="Scheduling and what learners submit.">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label className={LABEL} htmlFor="sik-as-due">
+                      Due (datetime)
+                    </label>
+                    <p className={HINT}>Optional. Uses your site timezone.</p>
+                    <DateTimePickerField kind="datetime" value={due} onChange={setDue} />
+                  </div>
+                  <div>
+                    <label className={LABEL} htmlFor="sik-as-points">
+                      Points
+                    </label>
+                    <p className={HINT}>Maximum score when graded.</p>
+                    <input
+                      id="sik-as-points"
+                      type="number"
+                      min={0}
+                      className={FIELD}
+                      value={apoints}
+                      onChange={(e) => setApoints(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <label className={LABEL} htmlFor="sik-as-type">
+                      Submission type
+                    </label>
+                    <select id="sik-as-type" className={FIELD} value={atype} onChange={(e) => setAtype(e.target.value)}>
+                      <option value="">Choose how learners submit…</option>
+                      <option value="essay">Essay</option>
+                      <option value="file_upload">File upload</option>
+                      <option value="url_submission">URL</option>
+                    </select>
+                  </div>
                 </div>
+              </FormSection>
+              <FormSection title="Publishing">
                 <div>
-                  <label className={LABEL} htmlFor="sik-as-points">
-                    Points
+                  <label className={LABEL} htmlFor="sik-as-status">
+                    Status
                   </label>
-                  <p className={HINT}>Maximum score for this assignment when graded.</p>
-                  <input
-                    id="sik-as-points"
-                    type="number"
-                    min={0}
-                    className={FIELD}
-                    value={apoints}
-                    onChange={(e) => setApoints(Number(e.target.value))}
-                  />
-                </div>
-                <div>
-                  <label className={LABEL} htmlFor="sik-as-type">
-                    Submission type
-                  </label>
-                  <select id="sik-as-type" className={FIELD} value={atype} onChange={(e) => setAtype(e.target.value)}>
-                    <option value="">Choose how learners submit…</option>
-                    <option value="essay">Essay</option>
-                    <option value="file_upload">File upload</option>
-                    <option value="url_submission">URL</option>
+                  <select id="sik-as-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="draft">Draft</option>
+                    <option value="publish">Published</option>
                   </select>
                 </div>
-              </div>
-              <div>
-                <label className={LABEL} htmlFor="sik-as-status">
-                  Status
-                </label>
-                <select id="sik-as-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="draft">Draft</option>
-                  <option value="publish">Published</option>
-                </select>
-              </div>
+              </FormSection>
               <ProAssignmentFields values={proAsgValues} onChange={setProAsgValues} />
               <ProGradebookAssignmentWeightFields
                 gradeWeight={proAsgValues.gradeWeight}
@@ -2189,13 +2182,14 @@ export function AssignmentEditor(props: ContentEditorProps) {
         </div>
       </section>
       {embedded ? (
-        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />
+        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
         <EditorActions
           backHref={backHref}
           entityLabel={entityLabel}
           saving={editor.saving}
           isNew={editor.isNew}
+          canSave={Boolean(title.trim())}
           onSave={() => void onSave()}
           onTrash={moveToTrash}
         />
@@ -2382,15 +2376,11 @@ export function ChapterEditor(props: ContentEditorProps) {
             </div>
           ) : (
             <div className="space-y-6" role="tabpanel">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Course placement, ordering, and visibility — titles and descriptions are under <span className="font-medium">Content</span>.
-              </p>
-              <div className="grid gap-6 sm:grid-cols-2">
+              <FormSection title="Placement" description="Which course outline this chapter belongs to.">
                 <div>
                   <label className={LABEL} htmlFor="sik-ch-course">
                     Parent course
                   </label>
-                  <p className={HINT}>Which course outline this chapter belongs to.</p>
                   {forcedCourseId && forcedCourseId > 0 ? (
                     <div
                       id="sik-ch-course"
@@ -2414,11 +2404,12 @@ export function ChapterEditor(props: ContentEditorProps) {
                     </select>
                   )}
                 </div>
+              </FormSection>
+              <FormSection title="Ordering" description="Lower numbers appear first in the course outline.">
                 <div>
                   <label className={LABEL} htmlFor="sik-ch-order">
                     Sort order
                   </label>
-                  <p className={HINT}>Lower numbers appear first in the course outline (0 is fine).</p>
                   <input
                     id="sik-ch-order"
                     type="number"
@@ -2428,28 +2419,31 @@ export function ChapterEditor(props: ContentEditorProps) {
                     onChange={(e) => setOrder(Number(e.target.value))}
                   />
                 </div>
-              </div>
-              <div>
-                <label className={LABEL} htmlFor="sik-ch-status">
-                  Status
-                </label>
-                <select id="sik-ch-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="draft">Draft</option>
-                  <option value="publish">Published</option>
-                </select>
-              </div>
+              </FormSection>
+              <FormSection title="Publishing">
+                <div>
+                  <label className={LABEL} htmlFor="sik-ch-status">
+                    Status
+                  </label>
+                  <select id="sik-ch-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="draft">Draft</option>
+                    <option value="publish">Published</option>
+                  </select>
+                </div>
+              </FormSection>
             </div>
           )}
         </div>
       </section>
       {embedded ? (
-        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />
+        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
         <EditorActions
           backHref={backHref}
           entityLabel={entityLabel}
           saving={editor.saving}
           isNew={editor.isNew}
+          canSave={Boolean(title.trim())}
           onSave={() => void onSave()}
           onTrash={moveToTrash}
         />
@@ -2978,7 +2972,9 @@ export function CertificateEditor(props: ContentEditorProps) {
           </div>
         </GatedFeatureWorkspace>
       </section>
-      {embedded ? <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} /> : null}
+      {embedded ? (
+        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
+      ) : null}
     </EditorFormShell>
   );
 }
@@ -3111,13 +3107,14 @@ export function DefaultContentEditor(props: ContentEditorProps) {
         </div>
       </section>
       {embedded ? (
-        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} onSave={() => void onSave()} />
+        <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
         <EditorActions
           backHref={backHref}
           entityLabel={entityLabel}
           saving={editor.saving}
           isNew={editor.isNew}
+          canSave={Boolean(title.trim())}
           onSave={() => void onSave()}
           onTrash={moveToTrash}
         />

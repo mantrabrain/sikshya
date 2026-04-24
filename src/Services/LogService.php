@@ -3,6 +3,7 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Database\Repositories\LogRepository;
 
 /**
  * Logging Service
@@ -40,18 +41,12 @@ class LogService
         if (!Settings::getRaw('sikshya_enable_logging', 'yes')) {
             return;
         }
-
-        global $wpdb;
-
-        $wpdb->insert(
-            $wpdb->prefix . 'sikshya_logs',
-            [
-                'level' => $level,
-                'message' => $message,
-                'context' => json_encode($context),
-                'created_at' => current_time('mysql'),
-            ]
-        );
+        (new LogRepository())->insert([
+            'level' => $level,
+            'message' => $message,
+            'context' => (string) wp_json_encode($context),
+            'created_at' => (string) current_time('mysql'),
+        ]);
     }
 
     /**

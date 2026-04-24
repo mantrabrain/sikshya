@@ -4,6 +4,7 @@ namespace Sikshya\Frontend\Public;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
+use Sikshya\Database\Repositories\InstructorMetricsRepository;
 
 /**
  * Wires the "Teaching" (instructor) account view + sidebar group on the learner
@@ -179,65 +180,13 @@ final class InstructorAccountView
      */
     private static function buildInstructorData(int $uid): array
     {
-        global $wpdb;
-
-        $published = (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(ID) FROM {$wpdb->posts} WHERE post_author = %d AND post_type = %s AND post_status = 'publish'",
-                $uid,
-                PostTypes::COURSE
-            )
-        );
-
-        $course_ids = $wpdb->get_col(
-            $wpdb->prepare(
-                "SELECT ID FROM {$wpdb->posts} WHERE post_author = %d AND post_type = %s AND post_status NOT IN ('trash', 'auto-draft')",
-                $uid,
-                PostTypes::COURSE
-            )
-        );
-        $course_ids = array_values(array_filter(array_map('intval', (array) $course_ids)));
-
-        $enr_table = $wpdb->prefix . 'sikshya_enrollments';
-        $enrollments_total = 0;
-        $enrollments_completed = 0;
-        $recent_courses = [];
-
-        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $enr_table)) === $enr_table && $course_ids !== []) {
-            $placeholders = implode(',', array_fill(0, count($course_ids), '%d'));
-            $enrollments_total = (int) $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$enr_table} WHERE course_id IN ({$placeholders})",
-                    ...$course_ids
-                )
-            );
-            $enrollments_completed = (int) $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$enr_table} WHERE status = 'completed' AND course_id IN ({$placeholders})",
-                    ...$course_ids
-                )
-            );
-
-            $recent_rows = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT course_id, COUNT(*) AS total FROM {$enr_table} WHERE course_id IN ({$placeholders}) GROUP BY course_id ORDER BY total DESC LIMIT 6",
-                    ...$course_ids
-                )
-            );
-            foreach ((array) $recent_rows as $row) {
-                $cid = isset($row->course_id) ? (int) $row->course_id : 0;
-                if ($cid <= 0) {
-                    continue;
-                }
-                $recent_courses[] = [
-                    'course_id' => $cid,
-                    'title' => get_the_title($cid),
-                    'enrollments' => isset($row->total) ? (int) $row->total : 0,
-                    'edit_url' => current_user_can('edit_post', $cid) ? get_edit_post_link($cid, '') : '',
-                    'view_url' => (string) get_permalink($cid),
-                ];
-            }
-        }
+        $metrics = new InstructorMetricsRepository();
+        $published = $metrics->countPublishedCoursesByAuthor($uid);
+        $course_ids = $metrics->getAuthoredCourseIds($uid);
+        $enroll = $metrics->getEnrollmentStatsForCourseIds($course_ids);
+        $enrollments_total = $enroll['enrollments_total'];
+        $enrollments_completed = $enroll['enrollments_completed'];
+        $recent_courses = $enroll['recent_courses'];
 
         $data = [
             'user_id' => $uid,

@@ -3,6 +3,7 @@
 namespace Sikshya\Models;
 
 use Sikshya\Constants\PostTypes;
+use Sikshya\Database\Tables\EnrollmentsTable;
 
 /**
  * Enrollment Model
@@ -30,6 +31,7 @@ class Enrollment
     public function getAll(array $args = []): array
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $defaults = [
             'user_id' => 0,
@@ -76,7 +78,7 @@ class Enrollment
             }
         }
 
-        $query = "SELECT * FROM {$wpdb->prefix}sikshya_enrollments {$where_clause} {$order_clause} {$limit_clause}";
+        $query = "SELECT * FROM {$t} {$where_clause} {$order_clause} {$limit_clause}";
 
         if (!empty($where_values)) {
             $query = $wpdb->prepare($query, $where_values);
@@ -94,9 +96,10 @@ class Enrollment
     public function getById(int $enrollment_id)
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $query = $wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}sikshya_enrollments WHERE id = %d",
+            "SELECT * FROM {$t} WHERE id = %d",
             $enrollment_id
         );
 
@@ -113,9 +116,10 @@ class Enrollment
     public function getByUserAndCourse(int $user_id, int $course_id)
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $query = $wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}sikshya_enrollments WHERE user_id = %d AND course_id = %d",
+            "SELECT * FROM {$t} WHERE user_id = %d AND course_id = %d",
             $user_id,
             $course_id
         );
@@ -132,6 +136,7 @@ class Enrollment
     public function create(array $data)
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $defaults = [
             'user_id' => 0,
@@ -173,7 +178,7 @@ class Enrollment
         ];
 
         $result = $wpdb->insert(
-            $wpdb->prefix . 'sikshya_enrollments',
+            $t,
             $insert,
             ['%d', '%d', '%s', '%s', '%s', '%s', '%f', '%s', '%f', '%s']
         );
@@ -195,9 +200,10 @@ class Enrollment
     public function update(int $enrollment_id, array $data): bool
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $result = $wpdb->update(
-            $wpdb->prefix . 'sikshya_enrollments',
+            $t,
             $data,
             ['id' => $enrollment_id],
             null,
@@ -216,9 +222,10 @@ class Enrollment
     public function delete(int $enrollment_id): bool
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $result = $wpdb->delete(
-            $wpdb->prefix . 'sikshya_enrollments',
+            $t,
             ['id' => $enrollment_id],
             ['%d']
         );
@@ -231,7 +238,7 @@ class Enrollment
      *
      * @param int $user_id User ID
      * @param int $course_id Course ID
-     * @return int|WP_Error Enrollment ID or error
+     * @return int|\WP_Error Enrollment ID or error
      */
     public function enroll(int $user_id, int $course_id)
     {
@@ -275,7 +282,7 @@ class Enrollment
      *
      * @param int $user_id User ID
      * @param int $course_id Course ID
-     * @return bool|WP_Error Success or error
+     * @return bool|\WP_Error Success or error
      */
     public function unenroll(int $user_id, int $course_id)
     {
@@ -397,6 +404,7 @@ class Enrollment
     public function getCourseStatistics(int $course_id): array
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $query = $wpdb->prepare(
             "SELECT 
@@ -404,7 +412,7 @@ class Enrollment
                 SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_enrollments,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_enrollments,
                 AVG(progress) as average_progress
-            FROM {$wpdb->prefix}sikshya_enrollments 
+            FROM {$t} 
             WHERE course_id = %d",
             $course_id
         );
@@ -428,6 +436,7 @@ class Enrollment
     public function getUserStatistics(int $user_id): array
     {
         global $wpdb;
+        $t = EnrollmentsTable::getTableName();
 
         $query = $wpdb->prepare(
             "SELECT 
@@ -435,7 +444,7 @@ class Enrollment
                 SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_enrollments,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_enrollments,
                 AVG(progress) as average_progress
-            FROM {$wpdb->prefix}sikshya_enrollments 
+            FROM {$t} 
             WHERE user_id = %d",
             $user_id
         );

@@ -2,6 +2,9 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Database\Tables\CouponsTable;
+use Sikshya\Database\Tables\CouponRedemptionsTable;
+
 /**
  * Coupons + redemptions.
  *
@@ -15,9 +18,8 @@ class CouponRepository
 
     public function __construct()
     {
-        global $wpdb;
-        $this->coupons = $wpdb->prefix . 'sikshya_coupons';
-        $this->redemptions = $wpdb->prefix . 'sikshya_coupon_redemptions';
+        $this->coupons = CouponsTable::getTableName();
+        $this->redemptions = CouponRedemptionsTable::getTableName();
     }
 
     public function findActiveByCode(string $code): ?object

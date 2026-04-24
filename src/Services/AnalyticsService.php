@@ -3,6 +3,7 @@
 namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Database\Repositories\AnalyticsRepository;
 
 /**
  * Analytics Service
@@ -42,21 +43,16 @@ class AnalyticsService
             return;
         }
 
-        global $wpdb;
-
-        $wpdb->insert(
-            $wpdb->prefix . 'sikshya_analytics',
-            [
-                'event_type' => $eventType,
-                'event_data' => json_encode($eventData),
-                'user_id' => $userId,
-                'course_id' => $courseId,
-                'session_id' => session_id(),
-                'ip_address' => $this->getClientIp(),
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-                'created_at' => current_time('mysql'),
-            ]
-        );
+        (new AnalyticsRepository())->insert([
+            'event_type' => $eventType,
+            'event_data' => (string) wp_json_encode($eventData),
+            'user_id' => $userId,
+            'course_id' => $courseId,
+            'session_id' => (string) session_id(),
+            'ip_address' => $this->getClientIp(),
+            'user_agent' => (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
+            'created_at' => (string) current_time('mysql'),
+        ]);
     }
 
     /**

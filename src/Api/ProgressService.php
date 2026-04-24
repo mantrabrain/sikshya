@@ -2,39 +2,24 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Services\ProgressQueryService;
 use WP_REST_Request;
 use WP_REST_Response;
 
 class ProgressService
 {
+    private ProgressQueryService $svc;
+
+    public function __construct(?ProgressQueryService $svc = null)
+    {
+        $this->svc = $svc ?: new ProgressQueryService();
+    }
+
     public function getProgress(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'sikshya_progress';
-        $user_id = $request->get_param('user_id');
-        $course_id = $request->get_param('course_id');
-
-        $where = [];
-        $prepare_values = [];
-
-        if ($user_id) {
-            $where[] = 'user_id = %d';
-            $prepare_values[] = $user_id;
-        }
-
-        if ($course_id) {
-            $where[] = 'course_id = %d';
-            $prepare_values[] = $course_id;
-        }
-
-        $where_clause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        $query = "SELECT * FROM {$table} {$where_clause} ORDER BY updated_at DESC";
-
-        if (!empty($prepare_values)) {
-            $query = $wpdb->prepare($query, ...$prepare_values);
-        }
-
-        $progress = $wpdb->get_results($query);
+        $user_id = (int) $request->get_param('user_id');
+        $course_id = (int) $request->get_param('course_id');
+        $progress = $this->svc->list($user_id, $course_id);
 
         return new WP_REST_Response([
             'progress' => array_map([$this, 'formatProgress'], $progress),

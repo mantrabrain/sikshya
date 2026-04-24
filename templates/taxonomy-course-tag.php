@@ -9,17 +9,10 @@ use Sikshya\Constants\PostTypes;
 
 get_header();
 
-global $wp_query;
-
-$found = isset($wp_query->found_posts) ? (int) $wp_query->found_posts : 0;
-$max_pages = isset($wp_query->max_num_pages) ? (int) $wp_query->max_num_pages : 0;
-$paged = (int) get_query_var('paged');
-if ($paged < 1) {
-    $paged = (int) get_query_var('page');
-}
-if ($paged < 1) {
-    $paged = 1;
-}
+$ctx = \Sikshya\Frontend\Public\ArchiveContextTemplateData::fromWpQuery();
+$found = (int) $ctx['found'];
+$max_pages = (int) $ctx['max_pages'];
+$paged = (int) $ctx['paged'];
 ?>
 
 <div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--tag">

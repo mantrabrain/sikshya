@@ -3,6 +3,7 @@
 namespace Sikshya\Services;
 
 use Sikshya\Constants\PostTypes;
+use Sikshya\Database\Repositories\QuizAttemptRepository;
 
 /**
  * Learner quiz runtime + stats (table-backed).
@@ -15,33 +16,14 @@ final class QuizService
 {
     public function getUserQuizzesCount(int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(DISTINCT quiz_id) FROM {$t} WHERE user_id = %d",
-                $user_id
-            )
-        );
+        return (new QuizAttemptRepository())->countDistinctQuizzesForUser($user_id);
     }
 
     public function getPassedQuizzesCount(int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
         // "Passed" means completed attempt at/above passing score for that quiz.
         // We approximate by using the attempt score and quiz passing score meta.
-        $rows = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT quiz_id, MAX(score) AS best_score FROM {$t} WHERE user_id = %d GROUP BY quiz_id",
-                $user_id
-            )
-        );
-        if (!is_array($rows)) {
-            return 0;
-        }
+        $rows = (new QuizAttemptRepository())->bestScoresByQuizForUser($user_id);
 
         $passed = 0;
         foreach ($rows as $r) {
@@ -63,17 +45,8 @@ final class QuizService
 
     public function getAverageQuizScore(int $user_id): float
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
-        $avg = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT AVG(score) FROM {$t} WHERE user_id = %d",
-                $user_id
-            )
-        );
-
-        return $avg !== null ? round((float) $avg, 2) : 0.0;
+        $avg = (new QuizAttemptRepository())->averageScoreForUser($user_id);
+        return $avg !== 0.0 ? round($avg, 2) : 0.0;
     }
 
     /**
@@ -83,19 +56,7 @@ final class QuizService
      */
     public function getUserAttempts(int $quiz_id, int $user_id): array
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
-        $rows = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM {$t} WHERE user_id = %d AND quiz_id = %d ORDER BY created_at DESC LIMIT 50",
-                $user_id,
-                $quiz_id
-            )
-        );
-        if (!is_array($rows)) {
-            return [];
-        }
+        $rows = (new QuizAttemptRepository())->listAttemptsForUserQuiz($user_id, $quiz_id, 50);
 
         $out = [];
         foreach ($rows as $r) {
@@ -117,9 +78,6 @@ final class QuizService
      */
     public function startAttempt(int $quiz_id, int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
         $quiz_id = absint($quiz_id);
         $user_id = absint($user_id);
         if ($quiz_id <= 0 || $user_id <= 0) {
@@ -131,25 +89,20 @@ final class QuizService
 
         $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
         $attempt_number = $this->countCompletedAttempts($quiz_id, $user_id) + 1;
-        $wpdb->insert(
-            $t,
-            [
-                'user_id' => $user_id,
-                'quiz_id' => $quiz_id,
-                'course_id' => $course_id,
-                'attempt_number' => $attempt_number,
-                'score' => 0.00,
-                'total_questions' => 0,
-                'correct_answers' => 0,
-                'time_taken' => 0,
-                'status' => 'in_progress',
-                'started_at' => current_time('mysql'),
-                'completed_at' => null,
-                'answers_data' => null,
-            ]
-        );
-
-        return (int) $wpdb->insert_id;
+        return (new QuizAttemptRepository())->createAttempt([
+            'user_id' => $user_id,
+            'quiz_id' => $quiz_id,
+            'course_id' => $course_id,
+            'attempt_number' => $attempt_number,
+            'score' => 0.00,
+            'total_questions' => 0,
+            'correct_answers' => 0,
+            'time_taken' => 0,
+            'status' => 'in_progress',
+            'started_at' => current_time('mysql'),
+            'completed_at' => null,
+            'answers_data' => null,
+        ]);
     }
 
     /**
@@ -160,22 +113,13 @@ final class QuizService
      */
     public function saveProgress(int $attempt_id, int $user_id, array $answers): array
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
         $attempt_id = absint($attempt_id);
         $user_id = absint($user_id);
         if ($attempt_id <= 0 || $user_id <= 0) {
             return ['success' => false, 'message' => __('Invalid request.', 'sikshya')];
         }
 
-        $ok = false !== $wpdb->update(
-            $t,
-            ['answers_data' => wp_json_encode($answers)],
-            ['id' => $attempt_id, 'user_id' => $user_id],
-            ['%s'],
-            ['%d', '%d']
-        );
+        $ok = (new QuizAttemptRepository())->updateAnswersData($attempt_id, $user_id, (string) wp_json_encode($answers));
 
         return $ok ? ['success' => true] : ['success' => false, 'message' => __('Could not save quiz progress.', 'sikshya')];
     }
@@ -188,16 +132,8 @@ final class QuizService
      */
     public function submitAttempt(int $attempt_id, int $user_id, array $answers): array
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
-        $row = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM {$t} WHERE id = %d AND user_id = %d LIMIT 1",
-                $attempt_id,
-                $user_id
-            )
-        );
+        $repo = new QuizAttemptRepository();
+        $row = $repo->getAttemptForUser($attempt_id, $user_id);
         if (!$row) {
             return ['success' => false, 'message' => __('Attempt not found.', 'sikshya')];
         }
@@ -237,20 +173,14 @@ final class QuizService
 
         $score_percent = $total_points > 0 ? round($earned_points / $total_points * 100, 2) : 0.0;
 
-        $wpdb->update(
-            $t,
-            [
-                'score' => $score_percent,
-                'total_questions' => count($question_ids),
-                'correct_answers' => $correct_count,
-                'status' => 'completed',
-                'completed_at' => current_time('mysql'),
-                'answers_data' => wp_json_encode($answers),
-            ],
-            ['id' => (int) $row->id],
-            ['%f', '%d', '%d', '%s', '%s', '%s'],
-            ['%d']
-        );
+        $repo->updateAttempt((int) $row->id, $user_id, [
+            'score' => $score_percent,
+            'total_questions' => count($question_ids),
+            'correct_answers' => $correct_count,
+            'status' => 'completed',
+            'completed_at' => current_time('mysql'),
+            'answers_data' => wp_json_encode($answers),
+        ]);
 
         // Mark quiz complete if passed.
         $passing = (float) get_post_meta($quiz_id, '_sikshya_quiz_passing_score', true);
@@ -320,16 +250,7 @@ final class QuizService
      */
     public function getResultDetails(int $result_id, int $user_id): array
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-
-        $row = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM {$t} WHERE id = %d AND user_id = %d LIMIT 1",
-                $result_id,
-                $user_id
-            )
-        );
+        $row = (new QuizAttemptRepository())->getAttemptForUser($result_id, $user_id);
         if (!$row) {
             return [];
         }
@@ -357,15 +278,7 @@ final class QuizService
 
     private function countCompletedAttempts(int $quiz_id, int $user_id): int
     {
-        global $wpdb;
-        $t = $wpdb->prefix . 'sikshya_quiz_attempts';
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$t} WHERE user_id = %d AND quiz_id = %d AND status IN ('completed','graded')",
-                $user_id,
-                $quiz_id
-            )
-        );
+        return (new QuizAttemptRepository())->countAttemptsForUserQuiz($user_id, $quiz_id);
     }
 
     /**

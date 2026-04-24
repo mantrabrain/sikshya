@@ -2,6 +2,7 @@
 
 namespace Sikshya\Core;
 
+use Sikshya\Database\Repositories\PluginLifecycleRepository;
 use Sikshya\Services\Settings;
 
 /**
@@ -64,9 +65,6 @@ class Deactivator
             wp_cache_flush_group('sikshya');
         }
 
-        // Clear transients
-        global $wpdb;
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_sikshya_%'");
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_sikshya_%'");
+        (new PluginLifecycleRepository())->deleteSikshyaTransients();
     }
 }

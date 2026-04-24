@@ -2,6 +2,8 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Database\Tables\PaymentsTable;
+
 /**
  * Legacy payment rows (sikshya_payments).
  *
@@ -13,8 +15,7 @@ class PaymentRepository
 
     public function __construct()
     {
-        global $wpdb;
-        $this->table_name = $wpdb->prefix . 'sikshya_payments';
+        $this->table_name = PaymentsTable::getTableName();
     }
 
     public function tableExists(): bool

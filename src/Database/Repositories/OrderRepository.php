@@ -2,6 +2,9 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Database\Tables\OrdersTable;
+use Sikshya\Database\Tables\OrderItemsTable;
+
 /**
  * Checkout orders + line items.
  *
@@ -15,9 +18,8 @@ class OrderRepository
 
     public function __construct()
     {
-        global $wpdb;
-        $this->orders = $wpdb->prefix . 'sikshya_orders';
-        $this->items = $wpdb->prefix . 'sikshya_order_items';
+        $this->orders = OrdersTable::getTableName();
+        $this->items = OrderItemsTable::getTableName();
     }
 
     /**

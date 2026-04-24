@@ -2,6 +2,9 @@
 
 namespace Sikshya\Database\Repositories;
 
+use Sikshya\Database\Tables\QuizAttemptsTable;
+use Sikshya\Database\Tables\QuizAttemptItemsTable;
+
 /**
  * Table-backed quiz attempts + per-question rows.
  *
@@ -15,9 +18,15 @@ class QuizAttemptRepository
 
     public function __construct()
     {
+        $this->attempts_table = QuizAttemptsTable::getTableName();
+        $this->items_table = QuizAttemptItemsTable::getTableName();
+    }
+
+    public function tableExists(): bool
+    {
         global $wpdb;
-        $this->attempts_table = $wpdb->prefix . 'sikshya_quiz_attempts';
-        $this->items_table = $wpdb->prefix . 'sikshya_quiz_attempt_items';
+
+        return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->attempts_table)) === $this->attempts_table;
     }
 
     public function countAttemptsForUserQuiz(int $user_id, int $quiz_id): int
@@ -30,6 +39,141 @@ class QuizAttemptRepository
                 $user_id,
                 $quiz_id
             )
+        );
+    }
+
+    public function countDistinctQuizzesForUser(int $user_id): int
+    {
+        global $wpdb;
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(DISTINCT quiz_id) FROM {$this->attempts_table} WHERE user_id = %d",
+                $user_id
+            )
+        );
+    }
+
+    /**
+     * @return array<int, object> rows with quiz_id, best_score
+     */
+    public function bestScoresByQuizForUser(int $user_id): array
+    {
+        global $wpdb;
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT quiz_id, MAX(score) AS best_score FROM {$this->attempts_table} WHERE user_id = %d GROUP BY quiz_id",
+                $user_id
+            )
+        );
+        return is_array($rows) ? $rows : [];
+    }
+
+    public function averageScoreForUser(int $user_id): float
+    {
+        global $wpdb;
+        $avg = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT AVG(score) FROM {$this->attempts_table} WHERE user_id = %d",
+                $user_id
+            )
+        );
+        return $avg !== null ? (float) $avg : 0.0;
+    }
+
+    /**
+     * Recent completed attempts for account dashboard panels (newest first).
+     *
+     * @return array<int, object>
+     */
+    public function listRecentCompletedForUser(int $user_id, int $limit = 5): array
+    {
+        global $wpdb;
+        $limit = max(1, min(50, $limit));
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT quiz_id, course_id, score, status, completed_at
+                 FROM {$this->attempts_table}
+                 WHERE user_id = %d AND completed_at IS NOT NULL
+                 ORDER BY completed_at DESC
+                 LIMIT %d",
+                $user_id,
+                $limit
+            )
+        );
+        return is_array($rows) ? $rows : [];
+    }
+
+    /**
+     * @param int[] $course_ids
+     */
+    public function countPassedInCourses(array $course_ids): int
+    {
+        if ($course_ids === [] || !$this->tableExists()) {
+            return 0;
+        }
+        $course_ids = array_values(array_filter(array_map('intval', $course_ids), static fn($id) => $id > 0));
+        if ($course_ids === []) {
+            return 0;
+        }
+        global $wpdb;
+        $placeholders = implode(',', array_fill(0, count($course_ids), '%d'));
+        $sql = "SELECT COUNT(*) FROM {$this->attempts_table} WHERE course_id IN ({$placeholders}) AND status = 'passed'";
+
+        return (int) $wpdb->get_var($wpdb->prepare($sql, ...$course_ids));
+    }
+
+    /**
+     * @return array<int, object>
+     */
+    public function listAttemptsForUserQuiz(int $user_id, int $quiz_id, int $limit = 50): array
+    {
+        global $wpdb;
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->attempts_table} WHERE user_id = %d AND quiz_id = %d ORDER BY created_at DESC LIMIT %d",
+                $user_id,
+                $quiz_id,
+                max(1, min(200, $limit))
+            )
+        );
+        return is_array($rows) ? $rows : [];
+    }
+
+    public function updateAnswersData(int $attempt_id, int $user_id, string $answers_json): bool
+    {
+        global $wpdb;
+        return false !== $wpdb->update(
+            $this->attempts_table,
+            ['answers_data' => $answers_json],
+            ['id' => $attempt_id, 'user_id' => $user_id],
+            ['%s'],
+            ['%d', '%d']
+        );
+    }
+
+    public function getAttemptForUser(int $attempt_id, int $user_id): ?object
+    {
+        global $wpdb;
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->attempts_table} WHERE id = %d AND user_id = %d LIMIT 1",
+                $attempt_id,
+                $user_id
+            )
+        );
+        return $row ?: null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function updateAttempt(int $attempt_id, int $user_id, array $data): bool
+    {
+        global $wpdb;
+        return false !== $wpdb->update(
+            $this->attempts_table,
+            $data,
+            ['id' => $attempt_id, 'user_id' => $user_id]
         );
     }
 
