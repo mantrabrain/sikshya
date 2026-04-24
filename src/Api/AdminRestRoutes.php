@@ -2103,9 +2103,14 @@ class AdminRestRoutes
             if ($code !== '') {
                 $clean = strtolower(preg_replace('/[^a-f0-9]/', '', (string) $code) ?? '');
                 if ($clean !== '') {
-                    $verify_url = PermalinkService::isPlainPermalinks()
-                        ? home_url('/' . $base . '/?hash=' . rawurlencode($clean))
-                        : user_trailingslashit(home_url('/' . $base . '/' . $clean));
+                    // Prefer the shared renderer helper for consistent pretty/plain URL shape.
+                    if (class_exists('\\Sikshya\\Certificates\\CertificateRenderer')) {
+                        $verify_url = \Sikshya\Certificates\CertificateRenderer::publicUrlForHash($clean);
+                    } else {
+                        $verify_url = PermalinkService::isPlainPermalinks()
+                            ? home_url('/' . $base . '/?hash=' . rawurlencode($clean))
+                            : user_trailingslashit(home_url('/' . $base . '/' . $clean));
+                    }
                 }
             }
 
