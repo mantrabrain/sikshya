@@ -155,11 +155,13 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
       return null;
     }
     const q = new URLSearchParams();
-    q.set('course_id', String(courseId));
     if (search.trim()) q.set('search', search.trim());
     q.set('page', String(page));
     q.set('per_page', '30');
-    return getSikshyaApi().get<GridResp>(`${SIKSHYA_ENDPOINTS.pro.gradebookGrid(courseId)}&${q.toString()}`);
+    const base = SIKSHYA_ENDPOINTS.pro.gradebookGrid(courseId);
+    const s = q.toString();
+    const path = s ? `${base}${base.includes('?') ? '&' : '?'}${s}` : base;
+    return getSikshyaApi().get<GridResp>(path);
   }, [courseId, enabled, page, search, view]);
 
   const gridState = useAsyncData(gridLoader, [courseId, enabled, page, search, view]);
