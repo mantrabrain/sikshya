@@ -43,6 +43,12 @@ class Activator
         // Set activation time
         Settings::setRaw('sikshya_activation_time', current_time('timestamp'));
 
+        // One-time admin setup wizard redirect (first activation only).
+        if (!Settings::isTruthy(Settings::get('setup_completed', '0'))) {
+            // Raw option (no prefix) so it can be deleted without touching user settings export/import.
+            Settings::setRaw('sikshya_setup_redirect', 1, false);
+        }
+
         // Trigger activation hook
         do_action('sikshya_activated');
     }

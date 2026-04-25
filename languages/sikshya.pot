@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-25T06:38:40+00:00\n"
+"POT-Creation-Date: 2026-04-25T07:07:39+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -214,12 +214,12 @@ msgstr ""
 #: src/Api/AdminRestRoutes.php:633
 #: src/Api/AdminRestRoutes.php:692
 #: src/Api/AdminRestRoutes.php:706
-#: src/Controllers/CourseController.php:137
-#: src/Controllers/CourseController.php:172
-#: src/Controllers/CourseController.php:207
-#: src/Controllers/CourseController.php:252
-#: src/Controllers/CourseController.php:282
-#: src/Controllers/CourseController.php:334
+#: src/Controllers/CourseController.php:113
+#: src/Controllers/CourseController.php:148
+#: src/Controllers/CourseController.php:183
+#: src/Controllers/CourseController.php:228
+#: src/Controllers/CourseController.php:258
+#: src/Controllers/CourseController.php:310
 #: src/Services/CategoryService.php:41
 #: src/Services/CategoryService.php:73
 #: src/Services/CategoryService.php:135
@@ -1522,8 +1522,8 @@ msgstr ""
 #: src/Admin/ListTable/CoursesListTable.php:38
 #: src/Admin/ListTable/StudentsListTable.php:33
 #: src/Admin/ReactAdminConfig.php:160
+#: src/Controllers/CourseController.php:90
 #: src/Controllers/CourseController.php:91
-#: src/Controllers/CourseController.php:92
 #: src/PostTypes/PostTypeManager.php:584
 #: src/PostTypes/PostTypeManager.php:586
 #: src/Services/PostTypeService.php:337
@@ -4744,19 +4744,19 @@ msgstr ""
 msgid "Accept manual bank transfer payments."
 msgstr ""
 
-#: src/Controllers/CourseController.php:154
+#: src/Controllers/CourseController.php:130
 msgid "Course created successfully"
 msgstr ""
 
-#: src/Controllers/CourseController.php:189
+#: src/Controllers/CourseController.php:165
 msgid "Course updated successfully"
 msgstr ""
 
-#: src/Controllers/CourseController.php:216
+#: src/Controllers/CourseController.php:192
 msgid "Invalid security token"
 msgstr ""
 
-#: src/Controllers/CourseController.php:222
+#: src/Controllers/CourseController.php:198
 #: src/Frontend/Controllers/CourseController.php:126
 #: src/Services/CourseCurriculumActions.php:130
 #: src/Services/CurriculumService.php:104
@@ -4764,61 +4764,61 @@ msgstr ""
 msgid "Invalid course ID"
 msgstr ""
 
-#: src/Controllers/CourseController.php:228
-#: src/Controllers/CourseController.php:263
-#: src/Controllers/CourseController.php:345
-#: src/Controllers/CourseController.php:400
+#: src/Controllers/CourseController.php:204
+#: src/Controllers/CourseController.php:239
+#: src/Controllers/CourseController.php:321
+#: src/Controllers/CourseController.php:376
 #: src/Frontend/Controllers/CourseController.php:53
 msgid "Course not found"
 msgstr ""
 
-#: src/Controllers/CourseController.php:233
+#: src/Controllers/CourseController.php:209
 #: src/Services/CurriculumService.php:286
 msgid "Failed to delete course"
 msgstr ""
 
-#: src/Controllers/CourseController.php:238
+#: src/Controllers/CourseController.php:214
 #: src/Services/CurriculumService.php:285
 msgid "Course deleted successfully"
 msgstr ""
 
-#: src/Controllers/CourseController.php:370
+#: src/Controllers/CourseController.php:346
 msgid "Course duplicated successfully"
 msgstr ""
 
-#: src/Controllers/CourseController.php:388
+#: src/Controllers/CourseController.php:364
 msgid "You must be logged in to enroll"
 msgstr ""
 
-#: src/Controllers/CourseController.php:406
+#: src/Controllers/CourseController.php:382
 msgid "You are already enrolled in this course"
 msgstr ""
 
-#: src/Controllers/CourseController.php:417
+#: src/Controllers/CourseController.php:393
 #: src/Frontend/Controllers/CourseController.php:135
 msgid "This course requires purchase."
 msgstr ""
 
-#: src/Controllers/CourseController.php:422
+#: src/Controllers/CourseController.php:398
 #: src/Frontend/Controllers/CourseController.php:138
 #: src/Frontend/Controllers/EnrollmentController.php:169
 msgid "Enrolled without purchase (administrator access)."
 msgstr ""
 
-#: src/Controllers/CourseController.php:441
+#: src/Controllers/CourseController.php:417
 #: src/Frontend/Controllers/CourseController.php:152
 msgid "Successfully enrolled in course"
 msgstr ""
 
-#: src/Controllers/CourseController.php:455
+#: src/Controllers/CourseController.php:431
 msgid "You must be logged in to unenroll"
 msgstr ""
 
-#: src/Controllers/CourseController.php:472
+#: src/Controllers/CourseController.php:448
 msgid "Successfully unenrolled from course"
 msgstr ""
 
-#: src/Controllers/CourseController.php:486
+#: src/Controllers/CourseController.php:462
 msgid "You must be logged in"
 msgstr ""
 

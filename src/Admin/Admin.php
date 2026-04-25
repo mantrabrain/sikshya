@@ -18,6 +18,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Admin\ReactAdminView;
 use Sikshya\Services\Settings;
+use Sikshya\Admin\SetupWizardController;
 
 /**
  * Admin Management Class
@@ -67,6 +68,7 @@ class Admin
         $this->controllers['setting'] = new \Sikshya\Admin\Controllers\SettingController($this->plugin);
         $this->controllers['tools'] = new \Sikshya\Admin\Controllers\ToolsController($this->plugin);
         $this->controllers['sample_data'] = new \Sikshya\Admin\Controllers\SampleDataController($this->plugin);
+        $this->controllers['setup_wizard'] = new SetupWizardController($this->plugin);
     }
 
     /**
@@ -77,6 +79,7 @@ class Admin
         add_action('admin_menu', [$this, 'addAdminMenus']);
         add_action('admin_init', [$this, 'initAdmin']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
+        add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectToWizard'], 0);
         if (LegacyAjax::hooksEnabled()) {
             add_action('wp_ajax_sikshya_admin_action', [$this, 'handleAjaxRequest']);
             add_action('wp_ajax_sikshya_categories_action', [$this, 'handleCategoriesAjaxRequest']);
@@ -119,6 +122,16 @@ class Admin
             [$this, 'renderSikshyaApp'],
             $menu_icon,
             5
+        );
+
+        // Hidden one-time setup wizard (not shown in menu; redirects on first activation).
+        add_submenu_page(
+            null,
+            __('Sikshya setup', 'sikshya'),
+            __('Setup', 'sikshya'),
+            'manage_options',
+            SetupWizardController::MENU_SLUG,
+            [$this->controllers['setup_wizard'], 'renderWizard']
         );
 
         // Core editor lists (no duplicate top-level CPT menus — all live under Sikshya LMS).

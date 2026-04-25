@@ -98,6 +98,22 @@ class AdminAssetsService
             true
         );
 
+        // Setup wizard (one-time admin onboarding).
+        wp_register_style(
+            'sikshya-setup-wizard',
+            $this->plugin->getAssetUrl('admin/css/setup-wizard.css'),
+            [],
+            SIKSHYA_VERSION
+        );
+
+        wp_register_script(
+            'sikshya-setup-wizard',
+            $this->plugin->getAssetUrl('admin/js/setup-wizard.js'),
+            [],
+            SIKSHYA_VERSION,
+            true
+        );
+
         $react_css = SIKSHYA_PLUGIN_DIR . 'assets/admin/react/sikshya-admin.css';
         $react_js = SIKSHYA_PLUGIN_DIR . 'assets/admin/react/sikshya-admin.js';
         if (file_exists($react_css)) {
@@ -151,6 +167,16 @@ class AdminAssetsService
 
         $screen_id = (string) ($screen->id ?? '');
         $screen_base = (string) ($screen->base ?? '');
+
+        if ($screen_id === 'admin_page_sikshya-setup') {
+            if (wp_style_is('sikshya-setup-wizard', 'registered')) {
+                wp_enqueue_style('sikshya-setup-wizard');
+            }
+            if (wp_script_is('sikshya-setup-wizard', 'registered')) {
+                wp_enqueue_script('sikshya-setup-wizard');
+            }
+            return;
+        }
 
         // React shell bundle: only the unified Sikshya app screen (subpages use `view=`).
         if ($screen_id === 'toplevel_page_sikshya') {
