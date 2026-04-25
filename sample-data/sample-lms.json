@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "label": "Sikshya five-course sample (Free)",
-  "description": "One course each for: quizzes, assignments, text+video only, all content types, and a structured showcase. Safe to import on staging or after a reset.",
+  "label": "Sikshya seven-course sample (Free)",
+  "description": "Seven free courses: quizzes, assignments, text+video only, full mixed path, structured showcase, plus two extra beginner-friendly courses to make your catalog look real right after install.",
   "course_categories": [
     { "name": "Sample: Assessments", "slug": "sample-assessments" },
     { "name": "Sample: Practice", "slug": "sample-practice" },
@@ -57,11 +57,11 @@
                   "correct_answer": "0"
                 },
                 {
-                  "title": "Fill in: WordPress content is often stored in a __ database.",
-                  "question_type": "fill_blank",
+                  "title": "WordPress content is most commonly stored in which database?",
+                  "question_type": "multiple_choice",
                   "points": 1,
-                  "options": [],
-                  "correct_answer": "MySQL|mysql|SQL|sql|relational"
+                  "options": ["MySQL", "MongoDB", "Redis", "SQLite"],
+                  "correct_answer": "0"
                 },
                 {
                   "title": "Which is best for measuring recall on facts?",
@@ -189,7 +189,7 @@
       "status": "publish",
       "categories": ["sample-mixed"],
       "meta": {
-        "_sikshya_price": "29",
+        "_sikshya_price": "0",
         "_sikshya_duration": "4",
         "_sikshya_difficulty": "beginner"
       },
@@ -322,6 +322,112 @@
                     "Hide every payment option forever"
                   ],
                   "correct_answer": "0"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Sample: Getting started (quick wins)",
+      "excerpt": "A short, friendly course for first-time learners. Great for previewing the Learn page and progress without assessments.",
+      "content": "<p>This is a simple starter course with <strong>short lessons only</strong>. Use it to preview the learner experience (outline, progress, completion) with minimal setup.</p>",
+      "status": "publish",
+      "categories": ["sample-lessons"],
+      "meta": {
+        "_sikshya_price": "0",
+        "_sikshya_duration": "1",
+        "_sikshya_difficulty": "beginner"
+      },
+      "chapters": [
+        {
+          "title": "Welcome",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Welcome to Sikshya",
+              "content": "<p>You’re ready to learn. Use the left outline to move between lessons and track progress.</p>",
+              "lesson_type": "text",
+              "duration": 3
+            },
+            {
+              "type": "lesson",
+              "title": "How to complete a lesson",
+              "content": "<p>Scroll, read/watch, then mark complete. Your progress updates instantly.</p>",
+              "lesson_type": "text",
+              "duration": 4
+            }
+          ]
+        },
+        {
+          "title": "Next steps",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Find your next course",
+              "content": "<p>Use the course listing filters to browse by category and level. Add paid courses to cart when you’re ready.</p>",
+              "lesson_type": "text",
+              "duration": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Sample: Mini course with one quiz",
+      "excerpt": "A very short course with a single quiz using only free question types.",
+      "content": "<p>Includes two lessons and a quick quiz using <strong>multiple choice</strong> and <strong>true/false</strong> only.</p>",
+      "status": "publish",
+      "categories": ["sample-assessments"],
+      "meta": {
+        "_sikshya_price": "0",
+        "_sikshya_duration": "2",
+        "_sikshya_difficulty": "beginner"
+      },
+      "chapters": [
+        {
+          "title": "Short module",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Lesson: Learn the basics",
+              "content": "<p>This lesson exists to show a realistic curriculum flow in the Learn page.</p>",
+              "lesson_type": "text",
+              "duration": 5
+            },
+            {
+              "type": "lesson",
+              "title": "Lesson: One key idea",
+              "content": "<p>Keep lessons short and scannable. Use headings and small paragraphs.</p>",
+              "lesson_type": "text",
+              "duration": 4
+            },
+            {
+              "type": "quiz",
+              "title": "Quick quiz",
+              "content": "<p>Two questions. This quiz is intentionally short.</p>",
+              "passing_score": 50,
+              "time_limit": 10,
+              "attempts_allowed": 0,
+              "randomize": false,
+              "questions": [
+                {
+                  "title": "Sikshya courses are WordPress posts.",
+                  "question_type": "true_false",
+                  "points": 1,
+                  "options": ["True", "False"],
+                  "correct_answer": "0"
+                },
+                {
+                  "title": "Which content type can appear in a chapter?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": ["Lesson", "Quiz", "Assignment", "All of the above"],
+                  "correct_answer": "3"
                 }
               ]
             }
