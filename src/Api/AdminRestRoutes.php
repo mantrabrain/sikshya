@@ -1458,7 +1458,7 @@ class AdminRestRoutes
                 ['status' => 400]
             );
         }
-        $r = SetupWizardController::processStep($step, $params);
+        $r = SetupWizardController::processStep($step, $params, $this->plugin);
         if (!$r['success']) {
             return new WP_REST_Response(
                 [

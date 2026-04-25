@@ -2,6 +2,7 @@
 
 namespace Sikshya\Admin;
 
+use Sikshya\Admin\Controllers\SampleDataController;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\Settings;
@@ -11,6 +12,9 @@ final class SetupWizardController
     public const MENU_SLUG = 'sikshya-setup';
 
     public const STEP_QUERY = 'step';
+
+    /** Per-user transient that carries the optional sample-import result to the celebration screen. */
+    private const SAMPLE_RESULT_TRANSIENT_PREFIX = 'sikshya_setup_wizard_sample_import_';
 
     private Plugin $plugin;
 
@@ -79,7 +83,7 @@ final class SetupWizardController
      * @param array<string, mixed> $data
      * @return array{success: bool, errors: string[]}
      */
-    public static function processStep(int $step, array $data): array
+    public static function processStep(int $step, array $data, ?Plugin $plugin = null): array
     {
         $errors = [];
         if ($step === 1) {
@@ -114,6 +118,12 @@ final class SetupWizardController
             Settings::set('setup_completed', '1');
             flush_rewrite_rules(false);
             do_action('sikshya_usage_setup_wizard_completed');
+            // Optional sample-data import is non-blocking: a failure does not
+            // prevent the wizard from completing — the result is surfaced on
+            // the celebration screen instead.
+            if ($plugin !== null) {
+                self::maybeImportSampleData($data, $plugin);
+            }
 
             return ['success' => true, 'errors' => []];
         }
@@ -236,6 +246,68 @@ final class SetupWizardController
         Settings::set('currency_decimal_places', $dec);
         Settings::set('currency_thousand_separator', $thousand);
         Settings::set('currency_decimal_separator', $decimal);
+    }
+
+    /**
+     * Optional “Add sample course” checkbox on the Finish step.
+     *
+     * Imports the bundled `sample-data/sample-lms.json` pack via the existing
+     * Tools importer and stashes the result in a per-user transient so the
+     * celebration screen can show "Sample course added — created N lessons…".
+     *
+     * Failures are NEVER fatal: the wizard always completes, and any error
+     * message from the import service is surfaced as a quiet notice on the
+     * celebration screen.
+     *
+     * @param array<string, mixed> $data
+     */
+    private static function maybeImportSampleData(array $data, Plugin $plugin): void
+    {
+        $raw = isset($data['import_sample_data']) ? wp_unslash((string) $data['import_sample_data']) : '0';
+        $val = sanitize_key((string) $raw);
+        $wants = ($val === '1' || $val === 'yes' || $val === 'on' || $val === 'true');
+        if (!$wants) {
+            return;
+        }
+
+        // Pack key is fixed for the wizard: ships with `sample-data/sample-lms.json`.
+        try {
+            $result = (new SampleDataController($plugin))->importByPackKey('default');
+        } catch (\Throwable $e) {
+            $result = [
+                'success' => false,
+                'message' => __('Sample data could not be imported.', 'sikshya'),
+            ];
+        }
+
+        $payload = [
+            'success' => !empty($result['success']),
+            'message' => isset($result['message']) ? (string) $result['message'] : '',
+            'counts' => isset($result['counts']) && is_array($result['counts']) ? $result['counts'] : [],
+        ];
+
+        // 5 minutes is plenty for the redirect-to-celebration round-trip; we also
+        // delete it explicitly after rendering so it never lingers across logins.
+        set_transient(self::SAMPLE_RESULT_TRANSIENT_PREFIX . get_current_user_id(), $payload, 5 * MINUTE_IN_SECONDS);
+    }
+
+    /**
+     * Pop the sample-import result for the current user (read-once).
+     *
+     * @return array<string, mixed>
+     */
+    private static function popSampleImportResult(): array
+    {
+        $key = self::SAMPLE_RESULT_TRANSIENT_PREFIX . get_current_user_id();
+        $stored = get_transient($key);
+        if ($stored !== false) {
+            delete_transient($key);
+        }
+        if (!is_array($stored)) {
+            return [];
+        }
+
+        return $stored;
     }
 
     /**
@@ -399,6 +471,11 @@ final class SetupWizardController
             $initial_step = max(1, min(5, (int) wp_unslash((string) $_POST['return_step'])));
         }
 
+        $show_done = ($step_key === 'done' && $is_done);
+        // Only the celebration screen consumes sample_import; reading it here
+        // also pops the transient so it never bleeds into a re-visit.
+        $sample_import = $show_done ? self::popSampleImportResult() : [];
+
         $this->plugin->getView()->render(
             'admin/setup-wizard',
             [
@@ -414,7 +491,8 @@ final class SetupWizardController
                 'permalinks' => $permalinks,
                 'learn_use_public_id' => $learn_use_pid,
                 'initial_step' => $initial_step,
-                'show_done' => ($step_key === 'done' && $is_done),
+                'show_done' => $show_done,
+                'sample_import' => $sample_import,
             ]
         );
     }
@@ -434,6 +512,8 @@ final class SetupWizardController
         Settings::set('setup_completed', '1');
         flush_rewrite_rules(false);
         do_action('sikshya_usage_setup_wizard_completed');
+        // Optional: import the bundled sample course on Finish (noscript path).
+        self::maybeImportSampleData($_POST, $this->plugin);
     }
 }
 

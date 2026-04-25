@@ -173,6 +173,7 @@ class AdminAssetsService
                     'siteUrl' => esc_url_raw(home_url('/')),
                     'strings' => [
                         'saving' => __('Saving…', 'sikshya'),
+                        'importing' => __('Importing sample data…', 'sikshya'),
                         'confirmSkipAll' => __('Skip setup? You can re-run the wizard anytime from Sikshya → Tools.', 'sikshya'),
                     ],
                 ]

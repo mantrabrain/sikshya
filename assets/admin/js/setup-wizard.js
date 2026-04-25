@@ -82,13 +82,22 @@
       return { step: 4, learn_permalink_use_public_id: r ? r.value : '1' };
     }
     if (step === 5) {
-      return { step: 5 };
+      const sample = form.querySelector('[name="import_sample_data"]');
+      const wantsSample = sample && 'checked' in sample ? !!sample.checked : false;
+      return { step: 5, import_sample_data: wantsSample ? '1' : '0' };
     }
     return { step };
   }
 
   function getBusyButton() {
     return current >= 5 ? btnFinish : btnNext;
+  }
+
+  function getBusyLabel(payload) {
+    if (current >= 5 && payload && payload.import_sample_data === '1') {
+      return (cfg.strings && cfg.strings.importing) || 'Importing sample data…';
+    }
+    return (cfg.strings && cfg.strings.saving) || 'Saving…';
   }
 
   async function saveAndGo() {
@@ -100,7 +109,7 @@
     const prevLabel = bus ? bus.textContent : '';
     if (bus) {
       bus.disabled = true;
-      bus.textContent = (cfg.strings && cfg.strings.saving) || 'Saving…';
+      bus.textContent = getBusyLabel(payload);
     }
     if (current < 5) btnFinish.disabled = true;
 

@@ -15,6 +15,9 @@
  * @var bool                 $learn_use_public_id
  * @var int                  $initial_step
  * @var bool                 $show_done
+ * @var array<string,mixed>  $sample_import   Optional. Result of optional sample-data import.
+ *                                            Shape: ['success' => bool, 'message' => string,
+ *                                            'counts' => array<string,int>].
  */
 
 if (!defined('ABSPATH')) {
@@ -98,6 +101,66 @@ if ($show_done) {
                     <p class="sikshya-setup__celebrate-lead">
                         <?php esc_html_e('Sikshya saved your choices. Next, create your first course and try a test purchase.', 'sikshya'); ?>
                     </p>
+
+                    <?php
+                    // Show feedback for the optional sample-data import (success or failure).
+                    $sample_import = isset($sample_import) && is_array($sample_import) ? $sample_import : [];
+                    $sample_ok = !empty($sample_import['success']);
+                    $sample_counts = isset($sample_import['counts']) && is_array($sample_import['counts']) ? $sample_import['counts'] : [];
+                    if ($sample_import !== []) :
+                        if ($sample_ok) :
+                            $courses_link = admin_url('admin.php?page=sikshya&view=courses');
+                            $count_pairs = [
+                                'courses' => __('courses', 'sikshya'),
+                                'chapters' => __('chapters', 'sikshya'),
+                                'lessons' => __('lessons', 'sikshya'),
+                                'quizzes' => __('quizzes', 'sikshya'),
+                                'questions' => __('questions', 'sikshya'),
+                                'assignments' => __('assignments', 'sikshya'),
+                            ];
+                            ?>
+                            <div class="sikshya-setup__sample-result sikshya-setup__sample-result--ok" role="status">
+                                <span class="sikshya-setup__sample-result-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </span>
+                                <span class="sikshya-setup__sample-result-body">
+                                    <strong><?php esc_html_e('Sample course added.', 'sikshya'); ?></strong>
+                                    <?php
+                                    $bits = [];
+                                    foreach ($count_pairs as $k => $label) {
+                                        $n = isset($sample_counts[ $k ]) ? (int) $sample_counts[ $k ] : 0;
+                                        if ($n > 0) {
+                                            $bits[] = sprintf('%d %s', $n, $label);
+                                        }
+                                    }
+                                    if ($bits !== []) {
+                                        echo ' ' . esc_html(sprintf(
+                                            /* translators: %s: comma-separated list of imported items, e.g. "1 courses, 3 chapters". */
+                                            __('Created %s.', 'sikshya'),
+                                            implode(', ', $bits)
+                                        ));
+                                    }
+                                    ?>
+                                    <a class="sikshya-setup__inline-link" href="<?php echo esc_url($courses_link); ?>"><?php esc_html_e('View courses', 'sikshya'); ?></a>
+                                </span>
+                            </div>
+                        <?php else : ?>
+                            <div class="sikshya-setup__sample-result sikshya-setup__sample-result--warn" role="status">
+                                <span class="sikshya-setup__sample-result-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" width="14" height="14"><path d="M8 3.5v5M8 11.5v.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                </span>
+                                <span class="sikshya-setup__sample-result-body">
+                                    <strong><?php esc_html_e('Sample data was not added.', 'sikshya'); ?></strong>
+                                    <?php
+                                    $msg = isset($sample_import['message']) ? (string) $sample_import['message'] : '';
+                                    if ($msg !== '') {
+                                        echo ' ' . esc_html($msg);
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
 
                     <div class="sikshya-setup__celebrate-actions">
                         <a class="sikshya-setup__btn sikshya-setup__btn--primary sikshya-setup__cta" href="<?php echo esc_url(admin_url('admin.php?page=sikshya&view=courses')); ?>">
@@ -444,6 +507,23 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
                         <span class="sikshya-setup__summary-value"><?php echo $learn_use_public_id ? esc_html__('Stable (recommended)', 'sikshya') : esc_html__('Shorter URL', 'sikshya'); ?></span>
                     </div>
                 </div>
+
+                <label class="sikshya-setup__sample">
+                    <input type="checkbox" name="import_sample_data" value="1" />
+                    <span class="sikshya-setup__sample-body">
+                        <span class="sikshya-setup__sample-head">
+                            <span class="sikshya-setup__sample-title">
+                                <?php esc_html_e('Add a sample course (optional)', 'sikshya'); ?>
+                            </span>
+                            <span class="sikshya-setup__sample-tag">
+                                <?php esc_html_e('Great for first-time setup', 'sikshya'); ?>
+                            </span>
+                        </span>
+                        <span class="sikshya-setup__sample-text">
+                            <?php esc_html_e('Creates one demo course with chapters, lessons, a quiz, and an assignment so you can click around immediately. You can delete it anytime from Courses.', 'sikshya'); ?>
+                        </span>
+                    </span>
+                </label>
 
                 <p class="sikshya-setup__tip">
                     <?php esc_html_e('Tip: enable Offline payment first to test checkout without API keys.', 'sikshya'); ?>
