@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-use Sikshya\Frontend\Public\QuizTemplateData;
+use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Core\Plugin;
 
 $plugin = Plugin::getInstance();
@@ -20,8 +20,8 @@ $quiz_js = esc_url($plugin->getAssetUrl('js/quiz-taker.js')) . '?ver=' . $sheet_
 
 while (have_posts()) {
     the_post();
-    $vm = QuizTemplateData::forPost(get_post());
-    $quiz_id = (int) $vm['post']->ID;
+    $page = QuizPageService::forPost(get_post());
+    $quiz_id = (int) $page->getPost()->ID;
     $page_title = sprintf(
         /* translators: 1: quiz title, 2: site name */
         '%1$s — %2$s',
@@ -95,17 +95,17 @@ while (have_posts()) {
                     <?php echo esc_html(get_bloginfo('name')); ?>
                 </a>
                 <?php
-                $course_title = !empty($vm['course']) && $vm['course'] instanceof WP_Post
-                    ? get_the_title($vm['course'])
+                $course_title = $page->getCourse() instanceof WP_Post
+                    ? get_the_title($page->getCourse())
                     : __('Learn', 'sikshya');
                 ?>
                 <span class="sikshya-learnTopbar__title" title="<?php echo esc_attr($course_title); ?>"><?php echo esc_html($course_title); ?></span>
             </div>
-            <?php if (!empty($vm['show_progress'])) : ?>
+            <?php if ($page->getShowProgress()) : ?>
                 <?php
-                $pct = isset($vm['stats']['percent']) ? (int) $vm['stats']['percent'] : 0;
-                $done = isset($vm['stats']['completed_items']) ? (int) $vm['stats']['completed_items'] : 0;
-                $total = isset($vm['stats']['total_items']) ? (int) $vm['stats']['total_items'] : 0;
+                $pct = $page->getStatsPercent();
+                $done = $page->getStatsCompletedItems();
+                $total = $page->getStatsTotalItems();
                 ?>
                 <div class="sikshya-learnTopbar__middle">
                     <div class="sikshya-learnHeader__progressWrap">
@@ -159,8 +159,8 @@ while (have_posts()) {
                 </div>
             <?php endif; ?>
             <div class="sikshya-learnTopbar__right">
-                <?php if (!empty($vm['urls']['account'])) : ?>
-                    <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($vm['urls']['account']); ?>">
+                <?php if ($page->getUrlAccount() !== '') : ?>
+                    <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($page->getUrlAccount()); ?>">
                         <?php echo sikshya_learn_icon('x'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <?php esc_html_e('Exit', 'sikshya'); ?>
                     </a>
@@ -168,7 +168,7 @@ while (have_posts()) {
             </div>
         </header>
 
-            <?php if (!empty($vm['logged_in']) && !empty($vm['enrolled']) && empty($vm['error'])) : ?>
+            <?php if ($page->isLoggedIn() && $page->isEnrolled() && !$page->hasError()) : ?>
         <script>
             window.sikshyaQuizTaker = <?php
             echo wp_json_encode(
@@ -176,7 +176,7 @@ while (have_posts()) {
                     'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
                     'restNonce' => wp_create_nonce('wp_rest'),
                     'quizId' => (string) $quiz_id,
-                    'advanced' => (!empty($vm['advanced']) && is_array($vm['advanced'])) ? $vm['advanced'] : null,
+                    'advanced' => $page->getAdvanced(),
                     'i18n' => [
                         'score' => __('Your score: %s%%', 'sikshya'),
                         'passed' => __('You passed this quiz.', 'sikshya'),
@@ -200,8 +200,8 @@ while (have_posts()) {
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
-                        $outline_blocks = $vm['blocks'];
-                        $outline_show_progress = !empty($vm['show_progress']);
+                        $outline_blocks = $page->getBlocks();
+                        $outline_show_progress = $page->getShowProgress();
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
@@ -209,7 +209,7 @@ while (have_posts()) {
             </aside>
 
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
-                <?php if (!empty($vm['error'])) : ?>
+                <?php if ($page->hasError()) : ?>
                     <div class="sikshya-contentSection sikshya-contentSection--centered">
                         <div class="sikshya-contentPanel sikshya-contentPanel--emptyState" role="alert" aria-live="polite">
                             <div class="sikshya-learnEmptyState">
@@ -218,15 +218,15 @@ while (have_posts()) {
                                 </div>
                                 <div class="sikshya-learnEmptyState__body">
                                     <h2 class="sikshya-learnEmptyState__title"><?php esc_html_e('Access required', 'sikshya'); ?></h2>
-                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html((string) $vm['error']); ?></p>
+                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($page->getError()); ?></p>
                                     <div class="sikshya-learnEmptyState__actions">
-                                        <?php if (!empty($vm['course']) && $vm['course'] instanceof WP_Post) : ?>
-                                            <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_permalink($vm['course'])); ?>">
+                                        <?php if ($page->getCourse() instanceof WP_Post) : ?>
+                                            <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_permalink($page->getCourse())); ?>">
                                                 <?php esc_html_e('View course', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if (!empty($vm['urls']['account'])) : ?>
-                                            <a class="sikshya-btn sikshya-btn--outline" href="<?php echo esc_url($vm['urls']['account']); ?>">
+                                        <?php if ($page->getUrlAccount() !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--outline" href="<?php echo esc_url($page->getUrlAccount()); ?>">
                                                 <?php esc_html_e('Go to account', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
@@ -237,14 +237,14 @@ while (have_posts()) {
                     </div>
                 <?php else : ?>
                     <?php
-                    $quiz_id = !empty($vm['post']) && $vm['post'] instanceof WP_Post ? (int) $vm['post']->ID : 0;
-                    $question_count = !empty($vm['questions']) && is_array($vm['questions']) ? count($vm['questions']) : 0;
+                    $quiz_id = (int) $page->getPost()->ID;
+                    $question_count = count($page->getQuestions());
                     $duration_mins = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true) : 0;
                     $passing_score = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_passing_score', true) : 0;
                     $passing_score = $passing_score > 0 ? $passing_score : 70;
-                    $attempts_max = isset($vm['attempts_max']) ? (int) $vm['attempts_max'] : 0;
-                    $attempts_exhausted = !empty($vm['attempts_exhausted']);
-                    $attempts_message = !empty($vm['attempts_message']) ? (string) $vm['attempts_message'] : '';
+                    $attempts_max = $page->getAttemptsMax();
+                    $attempts_exhausted = $page->isAttemptsExhausted();
+                    $attempts_message = $page->getAttemptsMessage();
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
@@ -257,12 +257,12 @@ while (have_posts()) {
                                                     <?php echo sikshya_learn_icon('clipboard'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                                 </span>
                                                 <h1 class="sikshya-learnHeader__title sikshya-zeroMargin"><?php echo esc_html(get_the_title()); ?></h1>
-                                                <?php if (!empty($vm['current_chapter']) && $vm['current_chapter'] instanceof WP_Post) : ?>
-                                                    <span class="sikshya-learnHeader__chapterInline" title="<?php echo esc_attr(get_the_title($vm['current_chapter'])); ?>">
+                                                <?php if ($page->getCurrentChapter() instanceof WP_Post) : ?>
+                                                    <span class="sikshya-learnHeader__chapterInline" title="<?php echo esc_attr($page->getCurrentChapter() ? get_the_title($page->getCurrentChapter()) : ''); ?>">
                                                         <span class="sikshya-learnHeader__chapterIcon" aria-hidden="true">
                                                             <?php echo sikshya_learn_icon('book'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                                         </span>
-                                                        <?php echo esc_html(get_the_title($vm['current_chapter'])); ?>
+                                                        <?php echo esc_html($page->getCurrentChapter() ? get_the_title($page->getCurrentChapter()) : ''); ?>
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
@@ -319,9 +319,7 @@ while (have_posts()) {
                             if ($ex !== '') {
                                 $intro_lead = $ex;
                             } else {
-                                $raw = isset($vm['post']) && $vm['post'] instanceof WP_Post
-                                    ? (string) $vm['post']->post_content
-                                    : '';
+                                $raw = $page->getPostContentRaw();
                                 $plain = trim(preg_replace('/\s+/', ' ', wp_strip_all_tags($raw)));
                                 if (strlen($plain) > 40) {
                                     if (function_exists('mb_substr')) {
@@ -414,7 +412,7 @@ while (have_posts()) {
                         <?php endif; ?>
 
                         <div class="sikshya-contentPanel sikshya-contentPanel--plain">
-                            <?php if (!empty($vm['questions']) && is_array($vm['questions'])) : ?>
+                            <?php if ($page->getQuestions() !== []) : ?>
                                 <form
                                     id="sikshya-learn-quiz-form"
                                     class="sikshya-quiz-form"
@@ -427,7 +425,7 @@ while (have_posts()) {
                                     <?php if ($attempts_exhausted) : ?>
                                         <fieldset disabled aria-disabled="true">
                                     <?php endif; ?>
-                                    <?php foreach ($vm['questions'] as $qi => $q) : ?>
+                                    <?php foreach ($page->getQuestions() as $qi => $q) : ?>
                                         <?php
                                         if (!is_array($q) || (isset($q['id']) ? (int) $q['id'] : 0) <= 0) {
                                             continue;
@@ -459,10 +457,10 @@ while (have_posts()) {
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="resources"><?php esc_html_e('Resources', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
-                            <?php if (!empty($vm['course_features']['discussions'])) : ?>
+                            <?php if ($page->isCourseFeatureDiscussions()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="discussions"><?php esc_html_e('Discussions', 'sikshya'); ?></button>
                             <?php endif; ?>
-                            <?php if (!empty($vm['course_features']['reviews'])) : ?>
+                            <?php if ($page->isCourseFeatureReviews()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
                             <?php endif; ?>
                         </div>
@@ -529,7 +527,7 @@ while (have_posts()) {
                                 </div>
                             </div>
                         </div>
-                        <?php if (!empty($vm['course_features']['discussions'])) : ?>
+                        <?php if ($page->isCourseFeatureDiscussions()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="discussions">
                                 <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Discussions', 'sikshya'); ?></h3>
@@ -537,7 +535,7 @@ while (have_posts()) {
                                 </div>
                             </div>
                         <?php endif; ?>
-                        <?php if (!empty($vm['course_features']['reviews'])) : ?>
+                        <?php if ($page->isCourseFeatureReviews()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
                                 <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Reviews', 'sikshya'); ?></h3>
@@ -550,7 +548,7 @@ while (have_posts()) {
                     <?php
                     // Sticky Prev/Next: derive from curriculum blocks.
                     $flat = [];
-                    foreach ((array) ($vm['blocks'] ?? []) as $block) {
+                    foreach ($page->getBlocks() as $block) {
                         foreach ((array) ($block['items'] ?? []) as $it) {
                             if (!is_array($it)) {
                                 continue;

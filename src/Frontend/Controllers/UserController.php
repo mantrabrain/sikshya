@@ -3,6 +3,7 @@
 namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Frontend\Public\PublicPageUrls;
 
 /**
  * Frontend User Controller
@@ -40,29 +41,9 @@ class UserController
             exit;
         }
 
-        // Get user data
-        $user_data = $this->getUserData($user_id);
-
-        // Get enrolled courses
-        $enrolled_courses = $this->plugin->getService('enrollment')->getUserCourses($user_id);
-
-        // Get course progress
-        $course_progress = [];
-        foreach ($enrolled_courses as $course) {
-            $course_progress[$course['id']] = $this->plugin->getService('progress')->getCourseProgress($course['id'], $user_id);
-        }
-
-        // Get recent activities
-        $activities = $this->plugin->getService('activity')->getUserActivities($user_id, 10);
-
-        // Get certificates
-        $certificates = $this->plugin->getService('certificate')->getUserCertificates($user_id);
-
-        // Get achievements
-        $achievements = $this->plugin->getService('achievement')->getUserAchievements($user_id);
-
-        // Load template
-        include $this->plugin->getTemplatePath('frontend/dashboard.php');
+        // Learner hub is the account shell (/account/).
+        wp_safe_redirect(PublicPageUrls::url('account'));
+        exit;
     }
 
     /**
@@ -77,14 +58,8 @@ class UserController
             exit;
         }
 
-        // Get user data
-        $user_data = $this->getUserData($user_id);
-
-        // Get user statistics
-        $stats = $this->getUserStats($user_id);
-
-        // Load template
-        include $this->plugin->getTemplatePath('frontend/profile.php');
+        wp_safe_redirect(PublicPageUrls::url('account'));
+        exit;
     }
 
     /**
@@ -264,83 +239,5 @@ class UserController
         $achievements = $this->plugin->getService('achievement')->getUserAchievements($user_id);
 
         wp_send_json_success($achievements);
-    }
-
-    /**
-     * Get user data
-     */
-    private function getUserData(int $user_id): array
-    {
-        $user = get_userdata($user_id);
-
-        if (!$user) {
-            return [];
-        }
-
-        return [
-            'id' => $user_id,
-            'username' => $user->user_login,
-            'email' => $user->user_email,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'display_name' => $user->display_name,
-            'bio' => get_user_meta($user_id, 'sikshya_user_bio', true),
-            'avatar' => get_avatar_url($user_id, ['size' => 150]),
-            'website' => $user->user_url,
-            'phone' => get_user_meta($user_id, 'sikshya_user_phone', true),
-            'location' => get_user_meta($user_id, 'sikshya_user_location', true),
-            'social_links' => [
-                'facebook' => get_user_meta($user_id, 'sikshya_user_facebook', true),
-                'twitter' => get_user_meta($user_id, 'sikshya_user_twitter', true),
-                'linkedin' => get_user_meta($user_id, 'sikshya_user_linkedin', true),
-                'instagram' => get_user_meta($user_id, 'sikshya_user_instagram', true),
-            ],
-            'role' => $this->getUserRole($user_id),
-            'registration_date' => $user->user_registered,
-            'last_login' => get_user_meta($user_id, 'sikshya_last_login', true),
-        ];
-    }
-
-    /**
-     * Get user statistics
-     */
-    private function getUserStats(int $user_id): array
-    {
-        return [
-            'enrolled_courses' => $this->plugin->getService('enrollment')->getUserCoursesCount($user_id),
-            'completed_courses' => $this->plugin->getService('progress')->getCompletedCoursesCount($user_id),
-            'total_lessons' => $this->plugin->getService('progress')->getTotalLessonsCount($user_id),
-            'completed_lessons' => $this->plugin->getService('progress')->getCompletedLessonsCount($user_id),
-            'total_quizzes' => $this->plugin->getService('quiz')->getUserQuizzesCount($user_id),
-            'passed_quizzes' => $this->plugin->getService('quiz')->getPassedQuizzesCount($user_id),
-            'certificates' => $this->plugin->getService('certificate')->getUserCertificatesCount($user_id),
-            'achievements' => $this->plugin->getService('achievement')->getUserAchievementsCount($user_id),
-            'total_time' => $this->plugin->getService('progress')->getTotalLearningTime($user_id),
-            'average_score' => $this->plugin->getService('quiz')->getAverageQuizScore($user_id),
-        ];
-    }
-
-    /**
-     * Get user role
-     */
-    private function getUserRole(int $user_id): string
-    {
-        $user = get_userdata($user_id);
-
-        if (!$user) {
-            return '';
-        }
-
-        $roles = $user->roles;
-
-        if (in_array('sikshya_instructor', $roles)) {
-            return 'instructor';
-        } elseif (in_array('sikshya_student', $roles)) {
-            return 'student';
-        } elseif (in_array('administrator', $roles)) {
-            return 'administrator';
-        } else {
-            return 'subscriber';
-        }
     }
 }

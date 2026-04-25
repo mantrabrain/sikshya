@@ -5,7 +5,8 @@ namespace Sikshya\Admin\Controllers;
 use Sikshya\Core\Plugin;
 
 /**
- * Placeholder for admin controller registry. Tools UI is React + REST `/tools`.
+ * Tools area shell. Maintenance actions (e.g. import sample data) are handled by REST and
+ * {@see \Sikshya\Admin\Controllers\SampleDataController} → {@see \Sikshya\Services\SampleDataImportService}.
  *
  * @package Sikshya\Admin\Controllers
  */

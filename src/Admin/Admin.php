@@ -66,6 +66,7 @@ class Admin
         $this->controllers['report'] = new \Sikshya\Admin\Controllers\ReportController($this->plugin);
         $this->controllers['setting'] = new \Sikshya\Admin\Controllers\SettingController($this->plugin);
         $this->controllers['tools'] = new \Sikshya\Admin\Controllers\ToolsController($this->plugin);
+        $this->controllers['sample_data'] = new \Sikshya\Admin\Controllers\SampleDataController($this->plugin);
     }
 
     /**

@@ -63,7 +63,7 @@ class QuizController
         $can_take = $this->canTakeQuiz($quiz_id, $user_id);
 
         // Load template
-        include $this->plugin->getTemplatePath('frontend/single-quiz.php');
+        include $this->plugin->getTemplatePath('single-quiz.php');
     }
 
     /**

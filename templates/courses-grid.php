@@ -8,16 +8,16 @@
  * @since 1.0.0
  */
 
-use Sikshya\Frontend\Public\CoursesGridTemplateData;
+use Sikshya\Services\Frontend\CoursesGridPageService;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
     exit;
 }
 
-$vm = CoursesGridTemplateData::forBrowseGrid();
-$courses_query = $vm['courses_query'];
-$filter_categories = $vm['filter_categories'];
+$page = CoursesGridPageService::forBrowseGrid();
+$courses_query = $page->getCoursesQuery();
+$filter_categories = $page->getFilterCategories();
 ?>
 
 <div class="sikshya-container">

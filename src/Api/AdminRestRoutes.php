@@ -25,7 +25,7 @@ use Sikshya\Database\Repositories\PaymentRepository;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\CurriculumService;
-use Sikshya\Services\SampleDataImporter;
+use Sikshya\Admin\Controllers\SampleDataController;
 use Sikshya\Addons\Addons;
 use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Licensing\Pro;
@@ -1503,28 +1503,8 @@ class AdminRestRoutes
                     );
                 }
 
-                $pack_key = sanitize_key((string) ($p['pack'] ?? 'default'));
-                $filename = $pack_key === 'default' ? 'sample-lms.json' : $pack_key . '.json';
-                $path = dirname(SIKSHYA_PLUGIN_FILE) . '/sample-data/' . $filename;
-                $data = SampleDataImporter::loadJsonFile($path);
-                if ($data === null) {
-                    return new WP_REST_Response(
-                        ['success' => false, 'message' => __('Sample data file not found or invalid.', 'sikshya')],
-                        400
-                    );
-                }
-
-                $curriculum = $this->plugin->getService('curriculum');
-                $actions = $this->plugin->getService('courseBuilderUi');
-                if (!$curriculum instanceof CurriculumService || !$actions instanceof CourseCurriculumActions) {
-                    return new WP_REST_Response(
-                        ['success' => false, 'message' => __('Service unavailable.', 'sikshya')],
-                        500
-                    );
-                }
-
-                $importer = new SampleDataImporter($curriculum, $actions);
-                $out = $importer->importPack($data);
+                $pack_key = sanitize_key((string) ($p['pack'] ?? 'default')) ?: 'default';
+                $out = (new SampleDataController($this->plugin))->importByPackKey($pack_key);
 
                 return new WP_REST_Response(
                     [

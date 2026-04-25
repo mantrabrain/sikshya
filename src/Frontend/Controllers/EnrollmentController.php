@@ -59,17 +59,9 @@ class EnrollmentController
             exit;
         }
 
-        // Get course data
-        $course_data = $this->getCourseData($course_id);
-
-        // Get payment methods
-        $payment_methods = $this->plugin->getService('payment')->getAvailableMethods();
-
-        // Get user data
-        $user_data = $this->getUserData($user_id);
-
-        // Load template
-        include $this->plugin->getTemplatePath('frontend/enroll.php');
+        // Enrollment UX lives on the course page (cart / free enroll). Legacy virtual page kept for bookmarks.
+        wp_safe_redirect(get_permalink($course_id));
+        exit;
     }
 
     /**
@@ -312,124 +304,5 @@ class EnrollmentController
         } else {
             wp_send_json_error($payment_result['message'] ?? __('Payment failed.', 'sikshya'));
         }
-    }
-
-    /**
-     * Get course data
-     */
-    private function getCourseData(int $course_id): array
-    {
-        $pricing = sikshya_get_course_pricing($course_id);
-
-        return [
-            'id' => $course_id,
-            'title' => get_the_title($course_id),
-            'excerpt' => get_post_field('post_excerpt', $course_id),
-            'thumbnail' => get_the_post_thumbnail_url($course_id, 'large'),
-            'price' => $pricing['price'],
-            'sale_price' => $pricing['sale_price'],
-            'currency' => $pricing['currency'],
-            'price_html' => null !== $pricing['effective'] && (float) $pricing['effective'] > 0
-                ? sikshya_format_price((float) $pricing['effective'], $pricing['currency'])
-                : '',
-            'duration' => sikshya_first_nonempty_post_meta(
-                $course_id,
-                ['_sikshya_duration', '_sikshya_course_duration', 'sikshya_course_duration']
-            ),
-            'level' => sikshya_first_nonempty_post_meta(
-                $course_id,
-                ['_sikshya_difficulty', '_sikshya_course_level', 'sikshya_course_level']
-            ),
-            'instructor' => $this->getCourseInstructor($course_id),
-            'lessons_count' => $this->getCourseLessonsCount($course_id),
-            'students_count' => $this->getCourseStudentsCount($course_id),
-            'rating' => $this->getCourseRating($course_id),
-        ];
-    }
-
-    /**
-     * Get user data
-     */
-    private function getUserData(int $user_id): array
-    {
-        $user = get_userdata($user_id);
-
-        if (!$user) {
-            return [];
-        }
-
-        return [
-            'id' => $user_id,
-            'name' => $user->display_name,
-            'email' => $user->user_email,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-        ];
-    }
-
-    /**
-     * Get course instructor
-     */
-    private function getCourseInstructor(int $course_id): array
-    {
-        $instructor_id = get_post_meta($course_id, 'sikshya_course_instructor', true);
-
-        if (!$instructor_id) {
-            return [];
-        }
-
-        $instructor = get_userdata($instructor_id);
-
-        if (!$instructor) {
-            return [];
-        }
-
-        return [
-            'id' => $instructor_id,
-            'name' => $instructor->display_name,
-            'bio' => get_user_meta($instructor_id, 'sikshya_instructor_bio', true),
-            'avatar' => get_avatar_url($instructor_id, ['size' => 100]),
-        ];
-    }
-
-    /**
-     * Get course lessons count
-     */
-    private function getCourseLessonsCount(int $course_id): int
-    {
-        $args = [
-            'post_type' => 'sikshya_lesson',
-            'post_status' => 'publish',
-            'posts_per_page' => -1,
-            'meta_query' => [
-                [
-                    'key' => 'sikshya_lesson_course',
-                    'value' => $course_id,
-                    'compare' => '=',
-                ],
-            ],
-        ];
-
-        $lessons_query = new \WP_Query($args);
-        $count = $lessons_query->found_posts;
-        wp_reset_postdata();
-
-        return $count;
-    }
-
-    /**
-     * Get course students count
-     */
-    private function getCourseStudentsCount(int $course_id): int
-    {
-        return intval(get_post_meta($course_id, 'sikshya_enrollment_count', true));
-    }
-
-    /**
-     * Get course rating
-     */
-    private function getCourseRating(int $course_id): array
-    {
-        return $this->plugin->getService('review')->getCourseRating($course_id);
     }
 }

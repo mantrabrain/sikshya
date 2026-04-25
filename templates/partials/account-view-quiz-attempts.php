@@ -4,7 +4,8 @@
  *
  * @package Sikshya
  *
- * @var array<string, mixed> $acc
+ * @var array<string, mixed>                         $acc Back-compat view array for hooks.
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page
  */
 
 ?>
@@ -12,7 +13,7 @@
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Quiz attempts', 'sikshya'); ?></h2>
                 </div>
-                <?php if (empty($acc['quiz_attempts']) || !is_array($acc['quiz_attempts'])) : ?>
+                <?php if ($page->getQuizAttempts() === []) : ?>
                     <div class="sik-acc-empty"><?php esc_html_e('No quizzes found in your enrolled courses yet.', 'sikshya'); ?></div>
                 <?php else : ?>
                     <div class="sik-acc-table-wrap">
@@ -26,7 +27,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ((array) $acc['quiz_attempts'] as $qa) : ?>
+                            <?php foreach ($page->getQuizAttempts() as $qa) : ?>
                                 <?php
                                 if (!is_array($qa)) {
                                     continue;

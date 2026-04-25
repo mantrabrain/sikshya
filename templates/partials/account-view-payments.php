@@ -4,20 +4,19 @@
  *
  * @package Sikshya
  *
- * @var array<string, mixed> $acc
- * @var \Sikshya\Database\Repositories\OrderRepository $order_repo
+ * @var array<string, mixed>                         $acc Back-compat view array for hooks.
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page
  */
 
-use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 
 ?>
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Orders', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Orders', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($acc['urls']['checkout']); ?>"><?php esc_html_e('Checkout', 'sikshya'); ?></a>
+                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page->getUrls()->getCheckoutUrl()); ?>"><?php esc_html_e('Checkout', 'sikshya'); ?></a>
                 </div>
-                <?php if (empty($acc['orders']) || !is_array($acc['orders'])) : ?>
+                <?php if ($page->getOrders() === []) : ?>
                     <div class="sik-acc-empty"><?php esc_html_e('No orders yet.', 'sikshya'); ?></div>
                 <?php else : ?>
                     <div class="sik-acc-table-wrap">
@@ -32,12 +31,9 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($acc['orders'] as $ord) : ?>
+                            <?php foreach ($page->getOrders() as $ord) : ?>
                                 <?php
-                                $otok = isset($ord->public_token) ? OrderRepository::sanitizePublicToken((string) $ord->public_token) : '';
-                                if ($otok === '') {
-                                    $otok = $order_repo->ensurePublicToken((int) $ord->id);
-                                }
+                                $otok = isset($ord->public_token) ? \Sikshya\Database\Repositories\OrderRepository::sanitizePublicToken((string) $ord->public_token) : '';
                                 $order_href = $otok !== '' ? PublicPageUrls::orderView($otok) : PublicPageUrls::url('order');
                                 $created = isset($ord->created_at) ? strtotime((string) $ord->created_at) : false;
                                 $created_disp = $created ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $created) : '—';
@@ -71,7 +67,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                 <?php endif; ?>
             </section>
 
-            <?php if (!empty($acc['legacy_payments']) && is_array($acc['legacy_payments'])) : ?>
+            <?php if ($page->getLegacyPayments() !== []) : ?>
             <section class="sik-acc-panel" style="margin-top:1.25rem;" aria-label="<?php esc_attr_e('Payment records', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Payment records', 'sikshya'); ?></h2>
@@ -89,7 +85,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ((array) $acc['legacy_payments'] as $lp) : ?>
+                        <?php foreach ($page->getLegacyPayments() as $lp) : ?>
                             <?php
                             if (!is_array($lp)) {
                                 continue;

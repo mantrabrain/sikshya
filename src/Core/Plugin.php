@@ -171,6 +171,13 @@ final class Plugin
                 $this->services['contentPostRepository']
             );
 
+            $this->services['sampleDataPackRepository'] = new \Sikshya\Database\Repositories\SampleDataPackRepository();
+            $this->services['sampleDataImport'] = new \Sikshya\Services\SampleDataImportService(
+                $this->services['sampleDataPackRepository'],
+                $this->services['curriculum'],
+                $this->services['courseBuilderUi']
+            );
+
             // Addon system (core + Pro plugin extensions).
             $this->services['addons'] = new AddonManager();
         } catch (\Exception $e) {

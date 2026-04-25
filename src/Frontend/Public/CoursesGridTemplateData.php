@@ -15,7 +15,7 @@ final class CoursesGridTemplateData
     /**
      * @return array{courses_query: \WP_Query, filter_categories: array<int, \WP_Term>}
      */
-    public static function forBrowseGrid(): array
+    public static function legacyArrayForBrowseGrid(): array
     {
         $paged = get_query_var('paged') ? (int) get_query_var('paged') : 1;
 
@@ -39,5 +39,13 @@ final class CoursesGridTemplateData
             'courses_query' => $courses_query,
             'filter_categories' => $filter_categories,
         ];
+    }
+
+    /**
+     * @deprecated Use {@see \Sikshya\Services\Frontend\CoursesGridPageService::forBrowseGrid()} and {@see \Sikshya\Presentation\Models\CoursesGridPageModel}.
+     */
+    public static function forBrowseGrid(): array
+    {
+        return self::legacyArrayForBrowseGrid();
     }
 }

@@ -4,14 +4,12 @@
  *
  * @package Sikshya
  *
- * @var array<string, mixed> $acc
+ * @var array<string, mixed>                         $acc Back-compat view array for hooks.
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page
  */
 
 use Sikshya\Frontend\Public\PublicPageUrls;
 
-/**
- * @param mixed $row Enrollment row.
- */
 $render_enrollment_row = static function ($row): void {
     $cid = is_object($row) ? (int) ($row->course_id ?? 0) : (int) ($row['course_id'] ?? 0);
     if ($cid <= 0) {
@@ -43,9 +41,9 @@ $render_enrollment_row = static function ($row): void {
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Ongoing courses', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Ongoing', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($acc['urls']['courses']); ?>"><?php esc_html_e('Browse all courses', 'sikshya'); ?></a>
+                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page->getUrls()->getCoursesUrl()); ?>"><?php esc_html_e('Browse all courses', 'sikshya'); ?></a>
                 </div>
-                <?php if (empty($acc['enrollments_ongoing'])) : ?>
+                <?php if ($page->getEnrollmentsOngoing() === []) : ?>
                     <div class="sik-acc-empty">
                         <?php esc_html_e('You have no courses in progress.', 'sikshya'); ?>
                     </div>
@@ -61,7 +59,7 @@ $render_enrollment_row = static function ($row): void {
                             </thead>
                             <tbody>
                             <?php
-                            foreach ((array) $acc['enrollments_ongoing'] as $row) {
+                            foreach ($page->getEnrollmentsOngoing() as $row) {
                                 $render_enrollment_row($row);
                             }
                             ?>
@@ -75,7 +73,7 @@ $render_enrollment_row = static function ($row): void {
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Completed', 'sikshya'); ?></h2>
                 </div>
-                <?php if (empty($acc['enrollments_completed'])) : ?>
+                <?php if ($page->getEnrollmentsCompleted() === []) : ?>
                     <div class="sik-acc-empty">
                         <?php esc_html_e('No completed courses yet.', 'sikshya'); ?>
                     </div>
@@ -91,7 +89,7 @@ $render_enrollment_row = static function ($row): void {
                             </thead>
                             <tbody>
                             <?php
-                            foreach ((array) $acc['enrollments_completed'] as $row) {
+                            foreach ($page->getEnrollmentsCompleted() as $row) {
                                 $render_enrollment_row($row);
                             }
                             ?>

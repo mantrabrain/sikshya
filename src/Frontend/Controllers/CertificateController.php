@@ -3,6 +3,7 @@
 namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Frontend\Public\PublicPageUrls;
 
 /**
  * Frontend Certificate Controller
@@ -38,8 +39,8 @@ class CertificateController
             wp_redirect(wp_login_url());
             exit;
         }
-        $certificates = $this->plugin->getService('certificate')->getUserCertificates($user_id);
-        include $this->plugin->getTemplatePath('frontend/certificates.php');
+        wp_safe_redirect(PublicPageUrls::url('account'));
+        exit;
     }
 
     /**

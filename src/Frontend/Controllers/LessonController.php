@@ -66,7 +66,7 @@ class LessonController
         $content = $this->getLessonContent($lesson_id);
 
         // Load template
-        include $this->plugin->getTemplatePath('frontend/single-lesson.php');
+        include $this->plugin->getTemplatePath('single-lesson.php');
     }
 
     /**

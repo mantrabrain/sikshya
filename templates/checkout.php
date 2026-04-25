@@ -5,12 +5,15 @@
  * @package Sikshya
  */
 
-use Sikshya\Frontend\Public\CheckoutTemplateData;
+use Sikshya\Services\Frontend\CheckoutPageService;
+use Sikshya\Presentation\Models\CheckoutPageModel;
 
-$co = CheckoutTemplateData::build();
-$u = $co['urls'];
-$vw = $co['viewer'] ?? ['display_name' => '', 'email' => ''];
-$fmt_subtotal = number_format_i18n($co['subtotal_hint'], 2) . ' ' . $co['currency'];
+/** @var CheckoutPageModel $page */
+$page = CheckoutPageService::build();
+$co = $page->toLegacyViewArray();
+$u = $page->getUrls();
+$vw = $page->getViewer();
+$fmt_subtotal = number_format_i18n($page->getSubtotalHint(), 2) . ' ' . $page->getCurrency();
 $fmt_total = $fmt_subtotal;
 
 get_header();
@@ -24,22 +27,22 @@ if (!is_user_logged_in()) {
 <div
     class="sikshya-public sikshya-checkout sikshya-checkout-page sik-f-scope"
     id="sikshya-checkout-root"
-    data-rest-url="<?php echo esc_attr($co['rest_url']); ?>"
-    data-rest-nonce="<?php echo esc_attr($co['rest_nonce']); ?>"
-    data-course-ids="<?php echo esc_attr(wp_json_encode($co['course_ids'])); ?>"
+    data-rest-url="<?php echo esc_attr($page->getRestUrl()); ?>"
+    data-rest-nonce="<?php echo esc_attr($page->getRestNonce()); ?>"
+    data-course-ids="<?php echo esc_attr(wp_json_encode($page->getCourseIds())); ?>"
 >
     <header class="sikshya-checkout-page__masthead">
         <div class="sikshya-checkout-page__masthead-inner">
             <nav class="sikshya-checkout-page__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a href="<?php echo esc_url($u['home']); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
+                <a href="<?php echo esc_url($u->getHomeUrl()); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
                 <span class="sikshya-checkout-page__bc-sep" aria-hidden="true">›</span>
-                <a href="<?php echo esc_url($u['cart']); ?>"><?php esc_html_e('Cart', 'sikshya'); ?></a>
+                <a href="<?php echo esc_url($u->getCartUrl()); ?>"><?php esc_html_e('Cart', 'sikshya'); ?></a>
                 <span class="sikshya-checkout-page__bc-sep" aria-hidden="true">›</span>
                 <span class="sikshya-checkout-page__breadcrumb-current"><?php esc_html_e('Checkout', 'sikshya'); ?></span>
             </nav>
             <h1 class="sikshya-checkout-page__title"><?php esc_html_e('Checkout', 'sikshya'); ?></h1>
             <p class="sikshya-checkout-page__lead">
-                <?php if (!empty($co['empty'])) : ?>
+                <?php if ($page->isEmpty()) : ?>
                     <?php esc_html_e('Add courses to your cart to continue.', 'sikshya'); ?>
                 <?php else : ?>
                     <?php esc_html_e('Complete your purchase securely.', 'sikshya'); ?>
@@ -50,12 +53,12 @@ if (!is_user_logged_in()) {
 
     <div class="sikshya-checkout-page__body">
         <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <?php if (!empty($co['empty'])) : ?>
+        <?php if ($page->isEmpty()) : ?>
             <div class="sikshya-checkout-page__empty">
                 <div class="sikshya-checkout-page__empty-copy">
                     <h2 class="sikshya-checkout-page__empty-title"><?php esc_html_e('Nothing to check out yet', 'sikshya'); ?></h2>
                     <p class="sikshya-checkout-page__empty-text"><?php esc_html_e('Add courses to your cart, then return here to complete checkout.', 'sikshya'); ?></p>
-                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u['cart']); ?>"><?php esc_html_e('Go to cart', 'sikshya'); ?></a>
+                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getCartUrl()); ?>"><?php esc_html_e('Go to cart', 'sikshya'); ?></a>
                 </div>
 
                 <div class="sikshya-checkout-page__empty-illus" aria-hidden="true">
@@ -132,9 +135,7 @@ if (!is_user_logged_in()) {
                         <p class="sikshya-checkout-page__panel-intro"><?php esc_html_e('Choose a payment method to continue.', 'sikshya'); ?></p>
 
                         <?php
-                        $gw_ids = isset($co['checkout_gateway_ids']) && is_array($co['checkout_gateway_ids'])
-                            ? $co['checkout_gateway_ids']
-                            : [];
+                        $gw_ids = $page->getCheckoutGatewayIds();
                         $gw_labels = \Sikshya\Frontend\Public\CheckoutTemplateData::gatewayCheckoutLabels();
                         $any_gw = $gw_ids !== [];
                         ?>
@@ -168,7 +169,7 @@ if (!is_user_logged_in()) {
                     <div class="sikshya-checkout-page__summary sik-f-card">
                         <p class="sikshya-checkout-page__summary-head"><?php esc_html_e('Order summary', 'sikshya'); ?></p>
                         <ul class="sikshya-checkout-page__lines">
-                            <?php foreach ($co['lines'] as $line) : ?>
+                            <?php foreach ($page->getLines() as $line) : ?>
                                 <?php
                                 $pr = $line['pricing'] ?? [];
                                 $eff = isset($pr['effective']) && $pr['effective'] !== null ? (float) $pr['effective'] : 0;
@@ -186,7 +187,7 @@ if (!is_user_logged_in()) {
                                     <span class="sikshya-checkout-page__line-price">
                                         <?php
                                         if ($eff > 0) {
-                                            echo wp_kses_post(sikshya_format_price($eff, $pr['currency'] ?? $co['currency']));
+                                            echo wp_kses_post(sikshya_format_price($eff, $pr['currency'] ?? $page->getCurrency()));
                                         } else {
                                             esc_html_e('Free', 'sikshya');
                                         }
@@ -199,8 +200,6 @@ if (!is_user_logged_in()) {
                         /**
                          * Render Pro / addon blocks inside the checkout summary, above totals
                          * (advanced coupon notice, subscription terms, etc.).
-                         *
-                         * @param array<string, mixed> $co Checkout view model.
                          */
                         do_action('sikshya_checkout_summary_before_totals', $co);
                         ?>
@@ -218,7 +217,7 @@ if (!is_user_logged_in()) {
                                 <span class="sikshya-checkout-page__total-value" id="sikshya-checkout-total-value"><?php echo esc_html($fmt_total); ?></span>
                             </div>
                         </div>
-                        <a class="sikshya-checkout-page__edit-cart" href="<?php echo esc_url($u['cart']); ?>"><?php esc_html_e('Edit cart', 'sikshya'); ?></a>
+                        <a class="sikshya-checkout-page__edit-cart" href="<?php echo esc_url($u->getCartUrl()); ?>"><?php esc_html_e('Edit cart', 'sikshya'); ?></a>
                     </div>
                 </aside>
             </div>

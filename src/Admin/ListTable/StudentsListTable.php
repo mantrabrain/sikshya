@@ -77,56 +77,8 @@ class StudentsListTable extends AbstractListTable
      */
     public function get_items(): array
     {
-        // For demo purposes, return dummy data
+        // Placeholder until wired to UserRepository + enrollment aggregates.
         return $this->getDummyData();
-
-        // TODO: Implement actual database query
-        /*
-        global $wpdb;
-
-        $per_page = $this->get_items_per_page();
-        $current_page = $this->get_pagenum();
-        $offset = ($current_page - 1) * $per_page;
-
-        $where_clauses = [];
-        $args = [];
-
-        // Apply filters
-        if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
-            $where_clauses[] = 'um_status.meta_value = %s';
-            $args[] = sanitize_text_field($_GET['status']);
-        }
-
-        $where_sql = '';
-        if (!empty($where_clauses)) {
-            $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
-        }
-
-        $query = "
-            SELECT
-                u.*,
-                um_status.meta_value as student_status,
-                COUNT(DISTINCT e.course_id) as enrolled_courses,
-                AVG(e.progress) as avg_progress
-            FROM {$wpdb->users} u
-            LEFT JOIN {$wpdb->usermeta} um_status ON u.ID = um_status.user_id AND um_status.meta_key = '_sikshya_student_status'
-            LEFT JOIN {$wpdb->prefix}sikshya_enrollments e ON u.ID = e.student_id
-            {$where_sql}
-            GROUP BY u.ID
-            ORDER BY u.user_registered DESC
-            LIMIT %d OFFSET %d
-        ";
-
-        $args = array_merge($args, [$per_page, $offset]);
-
-        if (!empty($args)) {
-            $results = $wpdb->get_results($wpdb->prepare($query, $args));
-        } else {
-            $results = $wpdb->get_results($query);
-        }
-
-        return $results ?: [];
-        */
     }
 
     /**
@@ -136,40 +88,7 @@ class StudentsListTable extends AbstractListTable
      */
     public function get_total_items(): int
     {
-        // For demo purposes, return dummy count
         return count($this->getDummyData());
-
-        // TODO: Implement actual count query
-        /*
-        global $wpdb;
-
-        $where_clauses = [];
-        $args = [];
-
-        // Apply filters
-        if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
-            $where_clauses[] = 'um_status.meta_value = %s';
-            $args[] = sanitize_text_field($_GET['status']);
-        }
-
-        $where_sql = '';
-        if (!empty($where_clauses)) {
-            $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
-        }
-
-        $query = "
-            SELECT COUNT(DISTINCT u.ID)
-            FROM {$wpdb->users} u
-            LEFT JOIN {$wpdb->usermeta} um_status ON u.ID = um_status.user_id AND um_status.meta_key = '_sikshya_student_status'
-            {$where_sql}
-        ";
-
-        if (!empty($args)) {
-            return (int) $wpdb->get_var($wpdb->prepare($query, $args));
-        } else {
-            return (int) $wpdb->get_var($query);
-        }
-        */
     }
 
     /**

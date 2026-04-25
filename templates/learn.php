@@ -1,6 +1,6 @@
 <?php
 /**
- * Course curriculum / learn hub — view; data from {@see \Sikshya\Frontend\Public\LearnTemplateData}.
+ * Course curriculum / learn hub — view; data from {@see \Sikshya\Presentation\Models\LearnPageModel}.
  *
  * @package Sikshya
  */
@@ -8,7 +8,8 @@
 use Sikshya\Frontend\Public\LearnTemplateData;
 use Sikshya\Core\Plugin;
 
-$lv = LearnTemplateData::fromRequest();
+$page = LearnTemplateData::fromRequest();
+$urls = $page->getUrls();
 
 $plugin = Plugin::getInstance();
 $sheet_ver = rawurlencode((string) $plugin->version);
@@ -33,10 +34,10 @@ $page_title = sprintf(
     <link rel="stylesheet" href="<?php echo $learn_href; ?>">
 </head>
 <?php
-$learn_mode = (string) ($lv['mode'] ?? 'course');
+$learn_mode = $page->getMode();
 $is_hub = $learn_mode === 'hub';
 $is_bundle = $learn_mode === 'bundle';
-$has_course = !empty($lv['course_id']);
+$has_course = $page->getCourseId() > 0;
 $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
 ?>
 <body class="sikshya-learning-shell sikshya-learning-shell--learn<?php echo $is_shell_without_course ? ' sikshya-learning-shell--hub' : ''; ?>">
@@ -93,17 +94,16 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                     <?php echo esc_html(get_bloginfo('name')); ?>
                 </a>
                 <?php
-                $learn_topbar_label = !empty($lv['course']) && $lv['course'] instanceof WP_Post
-                    ? get_the_title($lv['course'])
-                    : __('Learn', 'sikshya');
+                $top_label = $page->getLearnTopbarLabel();
+                $learn_topbar_label = $top_label !== '' ? $top_label : __('Learn', 'sikshya');
                 ?>
                 <span class="sikshya-learnTopbar__title" title="<?php echo esc_attr($learn_topbar_label); ?>">
                     <?php echo esc_html($learn_topbar_label); ?>
                 </span>
             </div>
             <div class="sikshya-learnTopbar__right">
-                <?php if (!empty($lv['urls']['account'])) : ?>
-                    <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($lv['urls']['account']); ?>">
+                <?php if ($urls->getAccountUrl() !== '') : ?>
+                    <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($urls->getAccountUrl()); ?>">
                         <?php echo sikshya_learn_icon('x'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <?php esc_html_e('Exit', 'sikshya'); ?>
                     </a>
@@ -115,13 +115,13 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
             <?php
             /**
              * Fires once at the top of the learn page below the header.
+             * 1) Legacy view array (same as `sikshya_learn_template_data` / Pro hooks).
+             * 2) {@see \Sikshya\Presentation\Models\LearnPageModel} (optional; use in new add-ons).
              *
-             * Pro addons (prerequisites, content drip) render lock banners and
-             * scheduled-access previews here.
-             *
-             * @param array<string, mixed> $lv Learn template view-model.
+             * @param array<string, mixed> $legacy
+             * @param \Sikshya\Presentation\Models\LearnPageModel $page
              */
-            do_action('sikshya_learn_after_hero', $lv);
+            do_action('sikshya_learn_after_hero', $page->toLegacyViewArray(), $page);
             ?>
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
             <aside class="sikshya-learnSidebar" aria-label="<?php esc_attr_e('Course content', 'sikshya'); ?>" data-sikshya-outline>
@@ -131,8 +131,8 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
-                        $outline_blocks = $lv['blocks'];
-                        $outline_show_progress = !empty($lv['show_progress']);
+                        $outline_blocks = $page->getCurriculumBlocks();
+                        $outline_show_progress = $page->isShowProgress();
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
@@ -140,17 +140,15 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
             </aside>
 
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
-                <?php if ($is_bundle && empty($lv['error'])) : ?>
+                <?php if ($is_bundle && !$page->hasError()) : ?>
                     <?php
-                    $bundle_post   = ($has_course && !empty($lv['course'])) ? $lv['course'] : get_post((int) ($lv['course_id'] ?? 0));
-                    $bundle_title  = $bundle_post instanceof WP_Post ? get_the_title($bundle_post) : __('Bundle', 'sikshya');
-                    $bundle_courses = $lv['hub_courses'] ?? [];
-                    $bundle_url    = $bundle_post instanceof WP_Post ? (get_permalink($bundle_post) ?: '') : '';
-                    $total_c = count($bundle_courses);
-                    $done_c  = count(array_filter($bundle_courses, static fn($r) => ($r['progress'] ?? 0) >= 100));
-                    $avg_pct = $total_c > 0
-                        ? (int) round(array_sum(array_column($bundle_courses, 'progress')) / $total_c)
-                        : 0;
+                    $bpc = $page->getBundleProgressCounts() ?? ['total' => 0, 'done' => 0, 'average' => 0];
+                    $total_c = (int) $bpc['total'];
+                    $done_c  = (int) $bpc['done'];
+                    $avg_pct = (int) $bpc['average'];
+                    $bundle_courses = $page->getHubOrBundleRows();
+                    $bundle_url     = $page->getBundlePermalinkForActions();
+                    $bundle_title   = $page->getBundleHeadlineTitle();
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
@@ -195,17 +193,19 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         </div>
                     </div>
 
-                    <?php if (!empty($bundle_courses)) : ?>
+                    <?php if ($bundle_courses !== []) : ?>
                         <div class="sikshya-learnHubGrid" role="list">
-                            <?php foreach ($bundle_courses as $row) : ?>
+                            <?php foreach ($bundle_courses as $brow) : ?>
                                 <?php
-                                $course    = $row['course'] ?? null;
-                                if (!$course instanceof WP_Post) { continue; }
-                                $thumb     = (string) ($row['thumb'] ?? '');
-                                $progress  = (int) ($row['progress'] ?? 0);
-                                $continue  = (string) ($row['continue_url'] ?? '');
-                                $course_url = (string) ($row['course_url'] ?? '');
-                                $enrolled  = !empty($row['enrolled']);
+                                $course     = $brow->getCoursePost();
+                                if (!$course instanceof WP_Post) {
+                                    continue;
+                                }
+                                $thumb     = $brow->getThumbUrl();
+                                $progress  = $brow->getProgressPercent();
+                                $continue  = $brow->getContinueUrl();
+                                $course_url = $brow->getViewCourseUrl();
+                                $enrolled  = $brow->isEnrolled();
                                 ?>
                                 <article class="sikshya-learnHubCard" role="listitem">
                                     <div class="sikshya-learnHubCard__media" aria-hidden="true">
@@ -217,7 +217,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                     </div>
                                     <div class="sikshya-learnHubCard__body">
                                         <h2 class="sikshya-learnHubCard__title">
-                                            <a href="<?php echo esc_url($course_url); ?>"><?php echo esc_html(get_the_title($course)); ?></a>
+                                            <a href="<?php echo esc_url($course_url); ?>"><?php echo esc_html($brow->getTitle()); ?></a>
                                         </h2>
                                         <?php if ($enrolled) : ?>
                                             <div class="sikshya-learnHubCard__progress" aria-label="<?php echo esc_attr__('Progress', 'sikshya'); ?>">
@@ -257,7 +257,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         </div>
                     <?php endif; ?>
 
-                <?php elseif (($lv['mode'] ?? 'course') === 'hub' && empty($lv['error'])) : ?>
+                <?php elseif ($page->getMode() === 'hub' && !$page->hasError()) : ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
                             <div class="sikshya-learnHeader">
@@ -267,8 +267,8 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                         <h1 class="sikshya-learnHeader__title sikshya-zeroMargin"><?php esc_html_e('My learning', 'sikshya'); ?></h1>
                                     </div>
                                     <div class="sikshya-learnHeader__actions">
-                                        <?php if (!empty($lv['urls']['courses_archive'])) : ?>
-                                            <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($lv['urls']['courses_archive']); ?>">
+                                        <?php if ($urls->getCoursesArchiveUrl() !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($urls->getCoursesArchiveUrl()); ?>">
                                                 <?php esc_html_e('Browse courses', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
@@ -277,42 +277,44 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                             </div>
                         </div>
 
-                        <?php if (!empty($lv['hub_courses']) && is_array($lv['hub_courses'])) : ?>
+                        <?php
+                        $hub_courses = $page->getHubOrBundleRows();
+                        if ($hub_courses !== []) : ?>
                             <div class="sikshya-learnHubGrid" role="list">
-                                <?php foreach ($lv['hub_courses'] as $row) : ?>
+                                <?php foreach ($hub_courses as $brow) : ?>
                                     <?php
-                                    $course = $row['course'] ?? null;
-                                    if (!$course instanceof WP_Post) {
+                                    $hcourse = $brow->getCoursePost();
+                                    if (!$hcourse instanceof WP_Post) {
                                         continue;
                                     }
-                                    $thumb = (string) ($row['thumb'] ?? '');
-                                    $progress = (int) ($row['progress'] ?? 0);
-                                    $continue = (string) ($row['continue_url'] ?? '');
-                                    $course_url = (string) ($row['course_url'] ?? '');
+                                    $hthumb     = $brow->getThumbUrl();
+                                    $hprogress  = $brow->getProgressPercent();
+                                    $hcontinue  = $brow->getContinueUrl();
+                                    $hcourse_url = $brow->getViewCourseUrl();
                                     ?>
                                     <article class="sikshya-learnHubCard" role="listitem">
                                         <div class="sikshya-learnHubCard__media" aria-hidden="true">
-                                            <?php if ($thumb !== '') : ?>
-                                                <img class="sikshya-learnHubCard__img" src="<?php echo esc_url($thumb); ?>" alt="" loading="lazy" />
+                                            <?php if ($hthumb !== '') : ?>
+                                                <img class="sikshya-learnHubCard__img" src="<?php echo esc_url($hthumb); ?>" alt="" loading="lazy" />
                                             <?php else : ?>
                                                 <div class="sikshya-learnHubCard__ph"></div>
                                             <?php endif; ?>
                                         </div>
                                         <div class="sikshya-learnHubCard__body">
                                             <h2 class="sikshya-learnHubCard__title">
-                                                <a href="<?php echo esc_url($course_url); ?>"><?php echo esc_html(get_the_title($course)); ?></a>
+                                                <a href="<?php echo esc_url($hcourse_url); ?>"><?php echo esc_html($brow->getTitle()); ?></a>
                                             </h2>
                                             <div class="sikshya-learnHubCard__progress" aria-label="<?php echo esc_attr__('Progress', 'sikshya'); ?>">
-                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-valuenow="<?php echo esc_attr((string) $progress); ?>" aria-valuemin="0" aria-valuemax="100">
-                                                    <span style="<?php echo esc_attr('width:' . $progress . '%'); ?>"></span>
+                                                <div class="sikshya-learnHubCard__bar" role="progressbar" aria-valuenow="<?php echo esc_attr((string) $hprogress); ?>" aria-valuemin="0" aria-valuemax="100">
+                                                    <span style="<?php echo esc_attr('width:' . $hprogress . '%'); ?>"></span>
                                                 </div>
-                                                <span class="sikshya-learnHubCard__pct"><?php echo esc_html($progress . '%'); ?></span>
+                                                <span class="sikshya-learnHubCard__pct"><?php echo esc_html($hprogress . '%'); ?></span>
                                             </div>
                                             <div class="sikshya-learnHubCard__actions">
-                                                <?php if ($continue !== '') : ?>
-                                                    <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm" href="<?php echo esc_url($continue); ?>"><?php esc_html_e('Continue', 'sikshya'); ?></a>
+                                                <?php if ($hcontinue !== '') : ?>
+                                                    <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm" href="<?php echo esc_url($hcontinue); ?>"><?php esc_html_e('Continue', 'sikshya'); ?></a>
                                                 <?php endif; ?>
-                                                <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($course_url); ?>"><?php esc_html_e('View course', 'sikshya'); ?></a>
+                                                <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($hcourse_url); ?>"><?php esc_html_e('View course', 'sikshya'); ?></a>
                                             </div>
                                         </div>
                                     </article>
@@ -329,8 +331,8 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                             <h2 class="sikshya-learnEmptyState__title"><?php esc_html_e('No enrolled courses yet', 'sikshya'); ?></h2>
                                             <p class="sikshya-learnEmptyState__message"><?php esc_html_e('You haven’t enrolled in any courses yet. Browse the catalog to find something to start today.', 'sikshya'); ?></p>
                                             <div class="sikshya-learnEmptyState__actions">
-                                                <?php if (!empty($lv['urls']['courses_archive'])) : ?>
-                                                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($lv['urls']['courses_archive']); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
+                                                <?php if ($urls->getCoursesArchiveUrl() !== '') : ?>
+                                                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($urls->getCoursesArchiveUrl()); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -338,41 +340,35 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                 </div>
                             </div>
 
-                            <?php if (!empty($lv['hub_recommended']) && is_array($lv['hub_recommended'])) : ?>
+                            <?php
+                            $recs = $page->getRecommendedCourses();
+                            if ($recs !== []) : ?>
                                 <div class="sikshya-learnHubSection" aria-label="<?php echo esc_attr__('Recommended courses', 'sikshya'); ?>">
                                     <div class="sikshya-learnHubSection__head">
                                         <h2 class="sikshya-learnHubSection__title"><?php esc_html_e('Recommended courses', 'sikshya'); ?></h2>
-                                        <?php if (!empty($lv['urls']['courses_archive'])) : ?>
-                                            <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($lv['urls']['courses_archive']); ?>">
+                                        <?php if ($urls->getCoursesArchiveUrl() !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($urls->getCoursesArchiveUrl()); ?>">
                                                 <?php esc_html_e('View all', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
                                     </div>
 
                                     <div class="sikshya-learnHubGrid" role="list">
-                                        <?php foreach ($lv['hub_recommended'] as $row) : ?>
-                                            <?php
-                                            $course = $row['course'] ?? null;
-                                            if (!$course instanceof WP_Post) {
-                                                continue;
-                                            }
-                                            $thumb = (string) ($row['thumb'] ?? '');
-                                            $course_url = (string) ($row['course_url'] ?? '');
-                                            ?>
+                                        <?php foreach ($recs as $rec) : ?>
                                             <article class="sikshya-learnHubCard" role="listitem">
                                                 <div class="sikshya-learnHubCard__media" aria-hidden="true">
-                                                    <?php if ($thumb !== '') : ?>
-                                                        <img class="sikshya-learnHubCard__img" src="<?php echo esc_url($thumb); ?>" alt="" loading="lazy" />
+                                                    <?php if ($rec->getThumbUrl() !== '') : ?>
+                                                        <img class="sikshya-learnHubCard__img" src="<?php echo esc_url($rec->getThumbUrl()); ?>" alt="" loading="lazy" />
                                                     <?php else : ?>
                                                         <div class="sikshya-learnHubCard__ph"></div>
                                                     <?php endif; ?>
                                                 </div>
                                                 <div class="sikshya-learnHubCard__body">
                                                     <h3 class="sikshya-learnHubCard__title">
-                                                        <a href="<?php echo esc_url($course_url); ?>"><?php echo esc_html(get_the_title($course)); ?></a>
+                                                        <a href="<?php echo esc_url($rec->getCourseUrl()); ?>"><?php echo esc_html($rec->getTitle()); ?></a>
                                                     </h3>
                                                     <div class="sikshya-learnHubCard__actions">
-                                                        <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm" href="<?php echo esc_url($course_url); ?>"><?php esc_html_e('View course', 'sikshya'); ?></a>
+                                                        <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm" href="<?php echo esc_url($rec->getCourseUrl()); ?>"><?php esc_html_e('View course', 'sikshya'); ?></a>
                                                     </div>
                                                 </div>
                                             </article>
@@ -382,7 +378,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
-                <?php elseif ($lv['error'] !== '') : ?>
+                <?php elseif ($page->hasError()) : ?>
                     <div class="sikshya-contentSection sikshya-contentSection--centered">
                         <div class="sikshya-contentPanel sikshya-contentPanel--emptyState" role="alert" aria-live="polite">
                             <div class="sikshya-learnEmptyState">
@@ -391,25 +387,27 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                 </div>
                                 <div class="sikshya-learnEmptyState__body">
                                     <h2 class="sikshya-learnEmptyState__title"><?php esc_html_e('Access required', 'sikshya'); ?></h2>
-                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($lv['error']); ?></p>
+                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($page->getErrorMessage()); ?></p>
                                     <div class="sikshya-learnEmptyState__actions">
-                                        <?php if (!empty($lv['course']) && $lv['course'] instanceof WP_Post) : ?>
-                                            <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_permalink($lv['course'])); ?>">
+                                        <?php
+                                        $em = $page->getCourseModel();
+                                        if ($em !== null) : ?>
+                                            <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($em->getPermalink()); ?>">
                                                 <?php esc_html_e('View course', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if (!empty($lv['urls']['login'])) : ?>
-                                            <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($lv['urls']['login']); ?>">
+                                        <?php if ($urls->getLoginUrl() !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($urls->getLoginUrl()); ?>">
                                                 <?php esc_html_e('Log in', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if (!empty($lv['urls']['courses_archive'])) : ?>
-                                            <a class="sikshya-btn sikshya-btn--outline" href="<?php echo esc_url($lv['urls']['courses_archive']); ?>">
+                                        <?php if ($urls->getCoursesArchiveUrl() !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--outline" href="<?php echo esc_url($urls->getCoursesArchiveUrl()); ?>">
                                                 <?php esc_html_e('Browse courses', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if (!empty($lv['urls']['account'])) : ?>
-                                            <a class="sikshya-btn sikshya-btn--outline" href="<?php echo esc_url($lv['urls']['account']); ?>">
+                                        <?php if ($urls->getAccountUrl() !== '') : ?>
+                                            <a class="sikshya-btn sikshya-btn--outline" href="<?php echo esc_url($urls->getAccountUrl()); ?>">
                                                 <?php esc_html_e('Go to account', 'sikshya'); ?>
                                             </a>
                                         <?php endif; ?>
@@ -420,9 +418,9 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                     </div>
                 <?php else : ?>
                     <?php
-                    $course = (!empty($lv['course']) && $lv['course'] instanceof WP_Post) ? $lv['course'] : null;
-                    $course_title = $course ? get_the_title($course) : __('Course', 'sikshya');
-                    $continue_url = !empty($lv['urls']['learn']) ? (string) $lv['urls']['learn'] : '#';
+                    $cm = $page->getCourseModel();
+                    $course_title = $cm ? $cm->getTitle() : __('Course', 'sikshya');
+                    $continue_url = $page->getContinueLearnUrlForHero();
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
@@ -442,15 +440,15 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
 
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel">
-                            <?php if ($course) : ?>
+                            <?php if ($cm) : ?>
                                 <?php
-                                $excerpt = trim((string) get_the_excerpt($course));
+                                $excerpt = $cm->getExcerptText();
                                 if ($excerpt !== '') :
                                     ?>
                                     <p class="sikshya-zeroMargin"><?php echo esc_html($excerpt); ?></p>
                                 <?php endif; ?>
 
-                                <?php echo wp_kses_post(apply_filters('the_content', (string) $course->post_content)); ?>
+                                <?php echo wp_kses_post($cm->getContentHtml()); ?>
                             <?php else : ?>
                                 <p class="sikshya-zeroMargin"><?php esc_html_e('Course not found.', 'sikshya'); ?></p>
                             <?php endif; ?>

@@ -1,280 +1,78 @@
 {
-  "version": 1,
-  "label": "Sikshya starter catalog",
+  "version": 2,
+  "label": "Sikshya five-course sample (Free)",
+  "description": "One course each for: quizzes, assignments, text+video only, all content types, and a structured showcase. Safe to import on staging or after a reset.",
   "course_categories": [
-    { "name": "Web Development", "slug": "web-development" },
-    { "name": "WordPress", "slug": "wordpress" },
-    { "name": "Data & Analytics", "slug": "data-analytics" },
-    { "name": "Design", "slug": "design" },
-    { "name": "Capstone", "slug": "capstone" }
+    { "name": "Sample: Assessments", "slug": "sample-assessments" },
+    { "name": "Sample: Practice", "slug": "sample-practice" },
+    { "name": "Sample: Lessons", "slug": "sample-lessons" },
+    { "name": "Sample: Mixed", "slug": "sample-mixed" },
+    { "name": "Sample: Showcase", "slug": "sample-showcase" }
   ],
   "courses": [
     {
-      "title": "Introduction to Web Development",
-      "content": "<p>Build a solid foundation with HTML, CSS, and JavaScript. You will create small pages and understand how browsers render content.</p>",
+      "title": "Sample: Quizzes & knowledge checks",
+      "excerpt": "A short read plus a full quiz. Ideal for testing grading and pass scores.",
+      "content": "<p>Focus: <strong>quizzes and questions</strong> only. Work through the intro, then take the end-of-chapter check.</p>",
       "status": "publish",
-      "categories": ["web-development"],
+      "categories": ["sample-assessments"],
       "meta": {
-        "_sikshya_price": "49",
-        "_sikshya_difficulty": "beginner",
-        "_sikshya_duration": "8"
+        "_sikshya_price": "0",
+        "_sikshya_duration": "1",
+        "_sikshya_difficulty": "beginner"
       },
       "chapters": [
         {
-          "title": "How the web works",
-          "content": "",
+          "title": "What to expect",
+          "content": "<p>Read the lesson, then start the quiz when you are ready. You can re-run import to add a fresh copy on another site.</p>",
           "contents": [
             {
               "type": "lesson",
-              "title": "Clients, servers, and HTTP",
-              "content": "<p>Learn how requests flow from the browser to a server and back.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "lesson",
-              "title": "Developer tools overview",
-              "content": "<p>Use the inspector, console, and network tab effectively.</p>",
-              "lesson_type": "text"
+              "title": "How this sample quiz is structured",
+              "content": "<p>Questions include multiple choice, true/false, and fill in the blank. The quiz uses a passing score and a time limit set in the pack.</p>",
+              "lesson_type": "text",
+              "duration": 5
             },
             {
               "type": "quiz",
-              "title": "Web foundations quiz",
-              "content": "",
+              "title": "Knowledge check",
+              "content": "<p>Answer every question. Submit when you are done.</p>",
               "passing_score": 70,
-              "time_limit": 15,
+              "time_limit": 20,
+              "attempts_allowed": 0,
+              "randomize": true,
               "questions": [
                 {
-                  "title": "Which language describes the structure of a page?",
+                  "title": "Which of these is a learning management system term?",
                   "question_type": "multiple_choice",
                   "points": 1,
-                  "options": ["HTML", "Python", "SQL", "Bash"],
+                  "options": ["Course", "Coral", "Compiler", "Courier"],
                   "correct_answer": "0"
                 },
                 {
-                  "title": "CSS is responsible for visual presentation.",
+                  "title": "A passing score is a percentage the learner should meet or exceed.",
                   "question_type": "true_false",
                   "points": 1,
-                  "options": [],
-                  "correct_answer": "true"
+                  "options": ["True", "False"],
+                  "correct_answer": "0"
                 },
                 {
-                  "title": "The capital of France is _____.",
+                  "title": "Fill in: WordPress content is often stored in a __ database.",
                   "question_type": "fill_blank",
                   "points": 1,
                   "options": [],
-                  "correct_answer": "Paris|paris"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "HTML & accessibility",
-          "content": "",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Semantic markup",
-              "content": "<p>Use headings, landmarks, and forms that screen readers understand.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "assignment",
-              "title": "Markup a short article",
-              "content": "<p>Submit semantic HTML for a two-section article with a navigation skip link.</p>",
-              "meta": {
-                "_sikshya_assignment_points": 10,
-                "_sikshya_assignment_type": "file"
-              }
-            },
-            {
-              "type": "lesson",
-              "title": "Forms and labels (with real-world accessibility patterns)",
-              "content": "<p>Learn label associations, fieldsets, error messages, and keyboard navigation.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "quiz",
-              "title": "HTML & a11y quick check",
-              "content": "",
-              "passing_score": 70,
-              "time_limit": 10,
-              "questions": [
-                {
-                  "title": "Which attribute connects a <label> to an <input>?",
-                  "question_type": "multiple_choice",
-                  "points": 1,
-                  "options": ["for/id", "name/value", "role/aria", "class/style"],
-                  "correct_answer": "0"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "CSS foundations",
-          "content": "",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Selectors, specificity, and the cascade (the parts that actually bite you)",
-              "content": "<p>Understand how rules win, why styles override, and how to debug confidently.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "lesson",
-              "title": "Layout with Flexbox",
-              "content": "<p>Build common UI rows, columns, and alignment patterns with flex.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "lesson",
-              "title": "Layout with Grid",
-              "content": "<p>Create 2D layouts, responsive columns, and consistent gaps.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "quiz",
-              "title": "CSS basics quiz",
-              "content": "",
-              "passing_score": 70,
-              "time_limit": 15,
-              "questions": [
-                {
-                  "title": "Which property controls the space between grid tracks?",
-                  "question_type": "multiple_choice",
-                  "points": 1,
-                  "options": ["gap", "margin", "padding", "outline"],
-                  "correct_answer": "0"
+                  "correct_answer": "MySQL|mysql|SQL|sql|relational"
                 },
                 {
-                  "title": "Specificity matters when two rules target the same element.",
-                  "question_type": "true_false",
-                  "points": 1,
-                  "options": [],
-                  "correct_answer": "true"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "JavaScript essentials",
-          "content": "",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Variables, types, and the mental model (what changes, what doesn’t)",
-              "content": "<p>Learn the basics and the gotchas that show up in real apps.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "lesson",
-              "title": "DOM manipulation and events",
-              "content": "<p>Select elements, react to clicks, and update the page safely.</p>",
-              "lesson_type": "video"
-            },
-            {
-              "type": "lesson",
-              "title": "Async JavaScript: promises and fetch",
-              "content": "<p>Make network requests and handle loading and errors.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "assignment",
-              "title": "Build a tiny interactive checklist (stretch: persist to localStorage)",
-              "content": "<p>Create a checklist UI with add/remove/toggle actions.</p>",
-              "meta": {
-                "_sikshya_assignment_points": 20,
-                "_sikshya_assignment_type": "file"
-              }
-            },
-            {
-              "type": "quiz",
-              "title": "JavaScript fundamentals quiz",
-              "content": "",
-              "passing_score": 70,
-              "time_limit": 20,
-              "questions": [
-                {
-                  "title": "Which method converts JSON text into a JavaScript value?",
+                  "title": "Which is best for measuring recall on facts?",
                   "question_type": "multiple_choice",
                   "points": 1,
-                  "options": ["JSON.parse", "JSON.stringify", "toString", "parseInt"],
-                  "correct_answer": "0"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Responsive UI and media",
-          "content": "",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Responsive typography and comfortable reading widths",
-              "content": "<p>Line length, scale, and spacing for long-session readability.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "lesson",
-              "title": "Images and video embeds (aspect ratio done right)",
-              "content": "<p>Keep media responsive, avoid layout shifts, and preserve aspect ratios.</p>",
-              "lesson_type": "video"
-            },
-            {
-              "type": "lesson",
-              "title": "Audio lessons: clarity and pacing",
-              "content": "<p>How to structure audio-first content for learning.</p>",
-              "lesson_type": "audio"
-            },
-            {
-              "type": "quiz",
-              "title": "Responsive basics quiz",
-              "content": "",
-              "passing_score": 70,
-              "time_limit": 12,
-              "questions": [
-                {
-                  "title": "Which unit is relative to the viewport width?",
-                  "question_type": "multiple_choice",
-                  "points": 1,
-                  "options": ["vw", "em", "rem", "px"],
-                  "correct_answer": "0"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Ship it: deployment & next steps",
-          "content": "",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "From local files to a live site (a practical deployment overview)",
-              "content": "<p>Domains, hosting, and what actually happens when you deploy.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "lesson",
-              "title": "Performance basics: measure first, then optimize",
-              "content": "<p>Learn the key metrics that affect perceived speed.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "quiz",
-              "title": "Deployment wrap-up quiz",
-              "content": "",
-              "passing_score": 70,
-              "time_limit": 10,
-              "questions": [
-                {
-                  "title": "A CDN primarily helps with…",
-                  "question_type": "multiple_choice",
-                  "points": 1,
-                  "options": ["Serving assets closer to users", "Writing database queries", "Compiling JavaScript", "Replacing hosting"],
+                  "options": [
+                    "Short auto-graded questions",
+                    "A painting contest",
+                    "A physical mailing address",
+                    "A radio frequency"
+                  ],
                   "correct_answer": "0"
                 }
               ]
@@ -284,221 +82,246 @@
       ]
     },
     {
-      "title": "WordPress for Educators",
-      "content": "<p>Publish courses, pages, and media with WordPress. Ideal for instructors moving lessons online.</p>",
+      "title": "Sample: Practice with assignments",
+      "excerpt": "Written tasks with points and type meta—no quiz in this course.",
+      "content": "<p>Focus: <strong>assignments</strong>. Learners upload or paste work. Use this to style submission flows and review queues.</p>",
       "status": "publish",
-      "categories": ["wordpress"],
-      "meta": {
-        "_sikshya_price": "59",
-        "_sikshya_difficulty": "beginner",
-        "_sikshya_duration": "6"
-      },
-      "chapters": [
-        {
-          "title": "Site setup",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Themes and the block editor",
-              "content": "<p>Choose a theme and edit pages with blocks.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "quiz",
-              "title": "WordPress basics",
-              "passing_score": 75,
-              "questions": [
-                {
-                  "title": "Where do you usually add plugins?",
-                  "question_type": "multiple_choice",
-                  "points": 1,
-                  "options": ["Dashboard → Plugins", "wp-config.php only", "Robots.txt", "FTP root only"],
-                  "correct_answer": "0"
-                },
-                {
-                  "title": "Select all that are common post types.",
-                  "question_type": "multiple_response",
-                  "points": 2,
-                  "options": ["Post", "Order receipt", "Page", "Attachment"],
-                  "correct_answer": [0, 2, 3]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Media and learners",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Uploading video and captions",
-              "content": "<p>Host on YouTube or Vimeo and embed responsibly.</p>",
-              "lesson_type": "video"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Data Literacy Essentials",
-      "content": "<p>Read charts, understand averages, and avoid common statistical traps.</p>",
-      "status": "publish",
-      "categories": ["data-analytics"],
-      "meta": {
-        "_sikshya_price": "39",
-        "_sikshya_difficulty": "intermediate",
-        "_sikshya_duration": "5"
-      },
-      "chapters": [
-        {
-          "title": "Describing data",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Mean, median, and when they lie",
-              "content": "<p>Skewed distributions and outliers.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "quiz",
-              "title": "Statistics warm-up",
-              "passing_score": 60,
-              "questions": [
-                {
-                  "title": "Match the concept to the definition.",
-                  "question_type": "matching",
-                  "points": 2,
-                  "options": [],
-                  "correct_answer": {
-                    "matching": {
-                      "left": ["Median", "Mode", "Mean"],
-                      "right": ["Middle value when sorted", "Most frequent value", "Sum divided by count"],
-                      "map": [0, 1, 2]
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Visualization",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Choosing the right chart",
-              "content": "<p>Bar, line, and scatter plots at a glance.</p>",
-              "lesson_type": "text"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "UX Design Fundamentals",
-      "content": "<p>User research, wireframes, and usable interfaces for learning products.</p>",
-      "status": "publish",
-      "categories": ["design"],
-      "meta": {
-        "_sikshya_price": "69",
-        "_sikshya_difficulty": "beginner",
-        "_sikshya_duration": "10"
-      },
-      "chapters": [
-        {
-          "title": "Research",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Interviewing learners",
-              "content": "<p>Open questions, note-taking, and synthesis.</p>",
-              "lesson_type": "text"
-            },
-            {
-              "type": "quiz",
-              "title": "UX vocabulary",
-              "passing_score": 70,
-              "questions": [
-                {
-                  "title": "Put the design process steps in the correct order.",
-                  "question_type": "ordering",
-                  "points": 2,
-                  "options": ["Test with users", "Define the problem", "Sketch solutions", "Ship and measure"],
-                  "correct_answer": [1, 2, 0, 3]
-                },
-                {
-                  "title": "Explain why contrast matters for readability (short answer).",
-                  "question_type": "short_answer",
-                  "points": 1,
-                  "options": [],
-                  "correct_answer": "contrast"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "title": "Prototyping",
-          "contents": [
-            {
-              "type": "lesson",
-              "title": "Low-fidelity wireframes",
-              "content": "<p>Boxes, flows, and happy paths.</p>",
-              "lesson_type": "text"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Capstone: Launch Your Mini-Course",
-      "content": "<p>Apply everything: outline, record one lesson, and publish a quiz.</p>",
-      "status": "publish",
-      "categories": ["capstone", "design"],
+      "categories": ["sample-practice"],
       "meta": {
         "_sikshya_price": "0",
-        "_sikshya_difficulty": "advanced",
-        "_sikshya_duration": "12"
+        "_sikshya_duration": "2",
+        "_sikshya_difficulty": "intermediate"
       },
       "chapters": [
         {
-          "title": "Planning",
+          "title": "Assignments",
+          "content": "",
           "contents": [
             {
               "type": "lesson",
-              "title": "Learning outcomes checklist",
-              "content": "<p>Write three measurable outcomes for your topic.</p>",
-              "lesson_type": "text"
+              "title": "Before you submit",
+              "content": "<p>Read the brief, then open each assignment. Follow the word limits and use clear filenames if you upload files.</p>",
+              "lesson_type": "text",
+              "duration": 6
+            },
+            {
+              "type": "assignment",
+              "title": "Assignment: Reflect on a lesson you teach",
+              "content": "<p>Write 150–200 words. Describe the learning outcome, one activity, and how you would know it worked.</p>",
+              "meta": {
+                "_sikshya_assignment_points": 10,
+                "_sikshya_assignment_type": "written"
+              }
+            },
+            {
+              "type": "assignment",
+              "title": "Assignment: Checklist for your next course",
+              "content": "<p>Create a 5–7 item checklist (bullet list) for publishing a new course. Include at least one item about accessibility.</p>",
+              "meta": {
+                "_sikshya_assignment_points": 10,
+                "_sikshya_assignment_type": "checklist"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Sample: Text and video lessons (no quiz or assignment)",
+      "excerpt": "Chapters of reading and short videos only.",
+      "content": "<p>Focus: <strong>text and video</strong> lessons. No assessments—use this to preview navigation and the lesson player only.</p>",
+      "status": "publish",
+      "categories": ["sample-lessons"],
+      "meta": {
+        "_sikshya_price": "0",
+        "_sikshya_duration": "3",
+        "_sikshya_difficulty": "beginner"
+      },
+      "chapters": [
+        {
+          "title": "Reading path",
+          "content": "",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Text: Learning objectives",
+              "content": "<p>Good objectives are specific and measurable. Write them from the learner’s point of view (what they will be able to do).</p>",
+              "lesson_type": "text",
+              "duration": 8
             },
             {
               "type": "lesson",
-              "title": "Recording your first video",
-              "content": "<p>Lighting, audio, and simple editing.</p>",
-              "lesson_type": "video"
+              "title": "Text: Pacing a module",
+              "content": "<p>Shorter steps reduce cognitive load. Group related ideas in one screen, and break long text into scannable subheads.</p>",
+              "lesson_type": "text",
+              "duration": 7
             }
           ]
         },
         {
-          "title": "Assessment",
+          "title": "Video path",
+          "content": "",
           "contents": [
             {
+              "type": "lesson",
+              "title": "Video: Public domain example (YouTube)",
+              "content": "<p>This placeholder URL points to a well-known public sample video. Replace with your own embed in production.</p>",
+              "lesson_type": "video",
+              "duration": 10,
+              "video_url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+            },
+            {
+              "type": "lesson",
+              "title": "Video: How learners use the player",
+              "content": "<p>Test captions, quality switching, and keyboard focus on your theme. The URL below is a second copy for variety.</p>",
+              "lesson_type": "video",
+              "duration": 6,
+              "video_url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Sample: All content types in one place",
+      "excerpt": "Lessons, one quiz, and one assignment in a single short chapter.",
+      "content": "<p>Every core content type: <strong>text lesson, video lesson, assignment, and quiz</strong>—use this to sanity-check a full path.</p>",
+      "status": "publish",
+      "categories": ["sample-mixed"],
+      "meta": {
+        "_sikshya_price": "29",
+        "_sikshya_duration": "4",
+        "_sikshya_difficulty": "beginner"
+      },
+      "chapters": [
+        {
+          "title": "Complete path",
+          "content": "<p>Go in order. Finish the two lessons, then submit the assignment, then take the short quiz.</p>",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Text: The flow for this course",
+              "content": "<p>Each item is short on purpose. Your theme should list them in the course curriculum.</p>",
+              "lesson_type": "text",
+              "duration": 4
+            },
+            {
+              "type": "lesson",
+              "title": "Video: One clip",
+              "content": "<p>After this video, complete the small assignment, then the quiz below.</p>",
+              "lesson_type": "video",
+              "duration": 5,
+              "video_url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+            },
+            {
+              "type": "assignment",
+              "title": "Assignment: One-paragraph plan",
+              "content": "<p>Write a single paragraph describing how you would add a new lesson to an existing course.</p>",
+              "meta": {
+                "_sikshya_assignment_points": 5,
+                "_sikshya_assignment_type": "written"
+              }
+            },
+            {
               "type": "quiz",
-              "title": "Course launch quiz",
-              "passing_score": 80,
+              "title": "Quick check",
+              "content": "<p>Two quick questions. Pass score is 50% for this sample.</p>",
+              "passing_score": 50,
+              "time_limit": 10,
+              "attempts_allowed": 0,
               "questions": [
                 {
-                  "title": "A clear learning outcome should be observable.",
+                  "title": "A chapter can contain more than one lesson.",
                   "question_type": "true_false",
                   "points": 1,
-                  "options": [],
-                  "correct_answer": "true"
+                  "options": ["True", "False"],
+                  "correct_answer": "0"
                 },
                 {
-                  "title": "Describe one way to gather learner feedback after launch.",
-                  "question_type": "essay",
-                  "points": 3,
-                  "options": [],
-                  "correct_answer": ""
+                  "title": "The sample video URL is stored in lesson video meta for playback.",
+                  "question_type": "true_false",
+                  "points": 1,
+                  "options": ["True", "False"],
+                  "correct_answer": "0"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Sample: Structured learning path (showcase)",
+      "excerpt": "Two chapters, balanced content, and catalog meta—good default for demos and screenshots.",
+      "content": "<p>This course combines <strong>readings, a video, practice, and checks</strong> in two chapters. Pricing and level meta match typical free-plugin demos.</p>",
+      "status": "publish",
+      "categories": ["sample-showcase"],
+      "meta": {
+        "_sikshya_price": "0",
+        "_sikshya_duration": "6",
+        "_sikshya_difficulty": "intermediate"
+      },
+      "chapters": [
+        {
+          "title": "Orientation",
+          "content": "<p>Get comfortable with the layout. Short lessons; no grades yet in this part.</p>",
+          "contents": [
+            {
+              "type": "lesson",
+              "title": "Welcome: how to use the catalog",
+              "content": "<p>Categories help learners browse. Use clear titles, excerpts, and difficulty labels so the catalog stays scannable.</p>",
+              "lesson_type": "text",
+              "duration": 5
+            },
+            {
+              "type": "lesson",
+              "title": "Onboarding: video place-holder",
+              "content": "<p>Swap this for your own hosted video or a licensed clip when you go live.</p>",
+              "lesson_type": "video",
+              "duration": 8,
+              "video_url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+            }
+          ]
+        },
+        {
+          "title": "Check your understanding",
+          "content": "<p>One assignment, then a quiz, so reviewers see grading paths end to end.</p>",
+          "contents": [
+            {
+              "type": "assignment",
+              "title": "Project: improve one lesson",
+              "content": "<p>Pick any lesson in your own site. List three improvements (clarity, media, assessment). 100–150 words.</p>",
+              "meta": {
+                "_sikshya_assignment_points": 12,
+                "_sikshya_assignment_type": "project"
+              }
+            },
+            {
+              "type": "quiz",
+              "title": "Module wrap-up",
+              "content": "<p>Covers the ideas in Orientation and the assignment.</p>",
+              "passing_score": 60,
+              "time_limit": 15,
+              "attempts_allowed": 0,
+              "questions": [
+                {
+                  "title": "A course excerpt is shown in the catalog to summarize the value.",
+                  "question_type": "true_false",
+                  "points": 1,
+                  "options": ["True", "False"],
+                  "correct_answer": "0"
+                },
+                {
+                  "title": "Which is a good first step when publishing sample content?",
+                  "question_type": "multiple_choice",
+                  "points": 1,
+                  "options": [
+                    "Test on a staging site first",
+                    "Delete all media",
+                    "Disable all users",
+                    "Hide every payment option forever"
+                  ],
+                  "correct_answer": "0"
                 }
               ]
             }

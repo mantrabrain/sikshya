@@ -8,6 +8,8 @@ use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PublicCurriculumService;
+use Sikshya\Presentation\Models\SingleQuizPageModel;
+use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Services\Settings;
 
 /**
@@ -20,7 +22,7 @@ final class QuizTemplateData
      *
      * @return array<string, mixed>
      */
-    public static function forPost(\WP_Post $post): array
+    public static function legacyArrayForPost(\WP_Post $post): array
     {
         $quiz_id = (int) $post->ID;
         $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
@@ -140,6 +142,11 @@ final class QuizTemplateData
             ],
             $post
         );
+    }
+
+    public static function forPost(\WP_Post $post): SingleQuizPageModel
+    {
+        return QuizPageService::forPost($post);
     }
 
     private static function canPreviewQuiz(int $course_id, int $quiz_id): bool

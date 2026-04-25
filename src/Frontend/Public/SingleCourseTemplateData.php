@@ -10,6 +10,8 @@ use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\Settings;
+use Sikshya\Presentation\Models\SingleCoursePageModel;
+use Sikshya\Services\Frontend\SingleCoursePageService;
 
 /**
  * View-model for {@see templates/single-course.php} (no business logic in the template file).
@@ -19,9 +21,19 @@ use Sikshya\Services\Settings;
 final class SingleCourseTemplateData
 {
     /**
+     * Deprecated: templates should consume {@see SingleCoursePageModel}.
+     */
+    public static function forPost(\WP_Post $post): SingleCoursePageModel
+    {
+        return SingleCoursePageService::forPost($post);
+    }
+
+    /**
+     * Legacy array payload for hooks/filters.
+     *
      * @return array<string, mixed>
      */
-    public static function forPost(\WP_Post $post): array
+    public static function legacyArrayForPost(\WP_Post $post): array
     {
         $course_id = (int) $post->ID;
         $pricing = function_exists('sikshya_get_course_pricing') ? sikshya_get_course_pricing($course_id) : [
@@ -115,9 +127,13 @@ final class SingleCourseTemplateData
             }
             foreach ((array) $raw_ids as $bid) {
                 $bid = (int) $bid;
-                if ($bid <= 0) { continue; }
+                if ($bid <= 0) {
+                    continue;
+                }
                 $bp = get_post($bid);
-                if (!$bp instanceof \WP_Post) { continue; }
+                if (!$bp instanceof \WP_Post) {
+                    continue;
+                }
                 $bundle_courses[] = [
                     'id'    => $bid,
                     'post'  => $bp,

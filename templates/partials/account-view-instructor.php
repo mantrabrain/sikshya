@@ -6,12 +6,13 @@
  *
  * @package Sikshya
  *
- * @var array<string, mixed> $acc
+ * @var array<string, mixed>                         $acc Back-compat view array for hooks.
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page
  */
 
 use Sikshya\Frontend\Public\PublicPageUrls;
 
-$inst = is_array($acc['instructor'] ?? null) ? $acc['instructor'] : [];
+$inst = $page->getInstructorVm();
 $published = (int) ($inst['published_courses'] ?? 0);
 $enrolls = (int) ($inst['enrollments_total'] ?? 0);
 $completed = (int) ($inst['enrollments_completed'] ?? 0);
@@ -19,13 +20,13 @@ $recent = is_array($inst['recent_courses'] ?? null) ? $inst['recent_courses'] : 
 $pro_blocks = is_array($inst['pro_blocks'] ?? null) ? $inst['pro_blocks'] : [];
 $completion_rate = $enrolls > 0 ? round(100 * ($completed / $enrolls), 1) : 0.0;
 
-$add_url = (string) ($acc['urls']['add_new_course'] ?? '');
-$manage_url = (string) ($acc['urls']['edit_courses'] ?? '');
-$learn_url = (string) ($acc['urls']['account_learning'] ?? '');
-$dash_url = (string) ($acc['urls']['account_dashboard'] ?? '');
-$learner_n = (int) ($acc['enrollment_count'] ?? 0);
-$ongoing_n = (int) ($acc['ongoing_count'] ?? 0);
-$done_n = (int) ($acc['completed_count'] ?? 0);
+$add_url = $page->getUrls()->getAddNewCourseUrl();
+$manage_url = $page->getUrls()->getEditCoursesUrl();
+$learn_url = $page->getUrls()->getLearningUrl();
+$dash_url = $page->getUrls()->getDashboardUrl();
+$learner_n = $page->getEnrollmentCount();
+$ongoing_n = $page->getOngoingCount();
+$done_n = $page->getCompletedCount();
 ?>
             <section class="sik-acc-hero" aria-label="<?php esc_attr_e('Teaching', 'sikshya'); ?>">
                 <p class="sik-acc-hero__date"><?php esc_html_e('Instructor view', 'sikshya'); ?></p>
@@ -168,7 +169,6 @@ $done_n = (int) ($acc['completed_count'] ?? 0);
             /**
              * Slot for Pro / addon-rendered teaching widgets (gradebook health, revenue charts, etc.).
              *
-             * @param array<string, mixed> $acc Account template data.
              */
             do_action('sikshya_account_instructor_after', $acc);
             ?>

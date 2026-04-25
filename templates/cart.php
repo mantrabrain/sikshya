@@ -5,10 +5,13 @@
  * @package Sikshya
  */
 
-use Sikshya\Frontend\Public\CartTemplateData;
+use Sikshya\Services\Frontend\CartPageService;
+use Sikshya\Presentation\Models\CartPageModel;
 
-$cart = CartTemplateData::build();
-$u = $cart['urls'];
+/** @var CartPageModel $page */
+$page = CartPageService::build();
+$cart = $page->toLegacyViewArray();
+$u = $page->getUrls();
 
 get_header();
 ?>
@@ -17,7 +20,7 @@ get_header();
     <header class="sikshya-cart-page__masthead">
         <div class="sikshya-cart-page__masthead-inner">
             <nav class="sikshya-cart-page__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a href="<?php echo esc_url($u['home']); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
+                <a href="<?php echo esc_url($u->getHomeUrl()); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
                 <span class="sikshya-cart-page__bc-sep" aria-hidden="true">›</span>
                 <span class="sikshya-cart-page__breadcrumb-current"><?php esc_html_e('Cart', 'sikshya'); ?></span>
             </nav>
@@ -28,12 +31,12 @@ get_header();
 
     <div class="sikshya-cart-page__body">
         <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <?php if ($cart['lines'] === []) : ?>
+        <?php if ($page->isEmpty()) : ?>
             <div class="sikshya-cart-page__empty">
                 <div class="sikshya-cart-page__empty-copy">
                     <h2 class="sikshya-cart-page__empty-title"><?php esc_html_e('Your cart is empty', 'sikshya'); ?></h2>
                     <p class="sikshya-cart-page__empty-text"><?php esc_html_e('Browse courses and add the ones you want to learn next.', 'sikshya'); ?></p>
-                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u['courses']); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
+                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getCoursesUrl()); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
                 </div>
 
                 <div class="sikshya-cart-page__empty-illus" aria-hidden="true">
@@ -75,22 +78,20 @@ get_header();
             /**
              * Render Pro / addon blocks above the cart items list (subscription notes,
              * bundle suggestions, etc.).
-             *
-             * @param array<string, mixed> $cart Cart view model.
              */
             do_action('sikshya_cart_before_lines', $cart);
             ?>
-            <?php if (!empty($cart['bundle_id']) && !empty($cart['bundle_title'])) : ?>
+            <?php if ($page->getBundleId() > 0 && $page->getBundleTitle() !== '') : ?>
                 <div class="sikshya-cart-page__bundle-notice" style="margin-bottom:1rem;padding:0.75rem 1rem;border-radius:8px;border:1px solid rgba(34,197,94,0.35);background:rgba(34,197,94,0.06);">
                     <strong><?php esc_html_e('Bundle', 'sikshya'); ?></strong>
-                    <?php echo esc_html((string) $cart['bundle_title']); ?>
+                    <?php echo esc_html($page->getBundleTitle()); ?>
                     <span style="opacity:.85;"> — <?php esc_html_e('Checkout uses the bundle price for the whole pack.', 'sikshya'); ?></span>
                 </div>
             <?php endif; ?>
             <div class="sikshya-cart-page__panel" role="region" aria-label="<?php esc_attr_e('Cart items', 'sikshya'); ?>">
                 <div class="sikshya-cart-page__panel-head"><?php esc_html_e('Courses in cart', 'sikshya'); ?></div>
                 <ul class="sikshya-cart-lines">
-                    <?php foreach ($cart['lines'] as $line) : ?>
+                    <?php foreach ($page->getLines() as $line) : ?>
                         <li class="sikshya-cart-line">
                             <a class="sikshya-cart-line__thumb" href="<?php echo esc_url($line['permalink']); ?>" aria-hidden="true" tabindex="-1">
                                 <?php if (!empty($line['thumbnail'])) : ?>
@@ -127,7 +128,7 @@ get_header();
                                 ?>
                             </span>
                             <div class="sikshya-cart-line__remove">
-                                <form method="post" action="<?php echo esc_url($u['cart']); ?>" class="sikshya-inline-form">
+                                <form method="post" action="<?php echo esc_url($u->getCartUrl()); ?>" class="sikshya-inline-form">
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="remove" />
                                     <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $line['course_id']); ?>" />
@@ -146,14 +147,12 @@ get_header();
                 /**
                  * Render Pro / addon blocks inside the cart summary, above the subtotal
                  * (advanced coupon notices, bundle savings, etc.).
-                 *
-                 * @param array<string, mixed> $cart Cart view model.
                  */
                 do_action('sikshya_cart_summary_before', $cart);
                 ?>
                 <p class="sikshya-cart-subtotal">
                     <strong><?php esc_html_e('Subtotal', 'sikshya'); ?></strong>
-                    <span><?php echo esc_html(number_format_i18n($cart['subtotal_hint'], 2) . ' ' . $cart['currency']); ?></span>
+                    <span><?php echo esc_html(number_format_i18n($page->getSubtotalHint(), 2) . ' ' . $page->getCurrency()); ?></span>
                 </p>
 
                 <p class="sikshya-cart-page__summary-note">
@@ -161,8 +160,8 @@ get_header();
                 </p>
 
                 <div class="sikshya-cart-actions">
-                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u['checkout']); ?>"><?php esc_html_e('Proceed to checkout', 'sikshya'); ?></a>
-                    <form method="post" action="<?php echo esc_url($u['cart']); ?>" class="sikshya-inline-form" onsubmit="return confirm('<?php echo esc_js(__('Clear the cart?', 'sikshya')); ?>');">
+                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getCheckoutUrl()); ?>"><?php esc_html_e('Proceed to checkout', 'sikshya'); ?></a>
+                    <form method="post" action="<?php echo esc_url($u->getCartUrl()); ?>" class="sikshya-inline-form" onsubmit="return confirm('<?php echo esc_js(__('Clear the cart?', 'sikshya')); ?>');">
                         <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                         <input type="hidden" name="sikshya_cart_action" value="clear" />
                         <button type="submit" class="sikshya-btn sikshya-btn--ghost"><?php esc_html_e('Clear cart', 'sikshya'); ?></button>

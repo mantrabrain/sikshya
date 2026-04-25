@@ -45,7 +45,9 @@
         "phpstan": "phpstan analyse",
         "phpcs": "phpcs --standard=PSR12 src/",
         "phpcbf": "phpcbf --standard=PSR12 src/",
-        "build": "composer install --no-dev --optimize-autoloader"
+        "build": "composer install --no-dev --optimize-autoloader",
+        "makepot": "bash scripts/makepot.sh",
+        "i18n": "composer run makepot"
     },
     "config": {
         "optimize-autoloader": true,

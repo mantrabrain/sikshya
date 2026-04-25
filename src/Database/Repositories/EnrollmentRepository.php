@@ -79,6 +79,9 @@ class EnrollmentRepository implements RepositoryInterface
             'transaction_id' => sanitize_text_field($data['transaction_id']),
             'progress' => floatval($data['progress']),
         ];
+        if (array_key_exists('completed_date', $data) && $data['completed_date'] !== null) {
+            $insert['completed_date'] = $data['completed_date'];
+        }
         if ($data['notes'] !== null && $data['notes'] !== '') {
             $insert['notes'] = sanitize_textarea_field((string) $data['notes']);
         }
@@ -349,5 +352,133 @@ class EnrollmentRepository implements RepositoryInterface
         );
 
         return (float) $wpdb->get_var($sql);
+    }
+
+    /**
+     * Filtered list (used by legacy {@see \Sikshya\Models\Enrollment} and admin tooling).
+     *
+     * @param array{user_id?: int, course_id?: int, status?: string, limit?: int, offset?: int, orderby?: string, order?: string} $args
+     * @return array<int, object>
+     */
+    public function searchWithFilters(array $args = []): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+
+        global $wpdb;
+
+        $defaults = [
+            'user_id' => 0,
+            'course_id' => 0,
+            'status' => '',
+            'limit' => -1,
+            'offset' => 0,
+            'orderby' => 'enrolled_date',
+            'order' => 'DESC',
+        ];
+        $args = wp_parse_args($args, $defaults);
+
+        $where_conditions = [];
+        $where_values = [];
+        if ((int) $args['user_id'] > 0) {
+            $where_conditions[] = 'user_id = %d';
+            $where_values[] = (int) $args['user_id'];
+        }
+        if ((int) $args['course_id'] > 0) {
+            $where_conditions[] = 'course_id = %d';
+            $where_values[] = (int) $args['course_id'];
+        }
+        if ((string) $args['status'] !== '') {
+            $where_conditions[] = 'status = %s';
+            $where_values[] = (string) $args['status'];
+        }
+
+        $where_clause = $where_conditions !== [] ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+        $order_clause = 'ORDER BY ' . esc_sql((string) $args['orderby']) . ' ' . esc_sql((string) $args['order']);
+        $query = "SELECT * FROM {$this->table_name} {$where_clause} {$order_clause}";
+
+        if ((int) $args['limit'] > 0) {
+            $query .= ' LIMIT ' . (int) $args['limit'];
+            if ((int) $args['offset'] > 0) {
+                $query .= ' OFFSET ' . (int) $args['offset'];
+            }
+        }
+
+        if ($where_values !== []) {
+            $query = $wpdb->prepare($query, $where_values);
+        }
+
+        $rows = $wpdb->get_results($query);
+
+        return is_array($rows) ? $rows : [];
+    }
+
+    /**
+     * @return array{total_enrollments: int, active_enrollments: int, completed_enrollments: int, average_progress: float}
+     */
+    public function getStatisticsForCourse(int $course_id): array
+    {
+        if (!$this->tableExists() || $course_id <= 0) {
+            return [
+                'total_enrollments' => 0,
+                'active_enrollments' => 0,
+                'completed_enrollments' => 0,
+                'average_progress' => 0.0,
+            ];
+        }
+        global $wpdb;
+        $query = $wpdb->prepare(
+            "SELECT
+                COUNT(*) as total_enrollments,
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_enrollments,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_enrollments,
+                AVG(progress) as average_progress
+            FROM {$this->table_name}
+            WHERE course_id = %d",
+            $course_id
+        );
+        $stats = $wpdb->get_row($query);
+
+        return [
+            'total_enrollments' => (int) ($stats->total_enrollments ?? 0),
+            'active_enrollments' => (int) ($stats->active_enrollments ?? 0),
+            'completed_enrollments' => (int) ($stats->completed_enrollments ?? 0),
+            'average_progress' => (float) ($stats->average_progress ?? 0),
+        ];
+    }
+
+    /**
+     * @return array{total_enrollments: int, active_enrollments: int, completed_enrollments: int, average_progress: float}
+     */
+    public function getStatisticsForUser(int $user_id): array
+    {
+        if (!$this->tableExists() || $user_id <= 0) {
+            return [
+                'total_enrollments' => 0,
+                'active_enrollments' => 0,
+                'completed_enrollments' => 0,
+                'average_progress' => 0.0,
+            ];
+        }
+        global $wpdb;
+        $query = $wpdb->prepare(
+            "SELECT
+                COUNT(*) as total_enrollments,
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_enrollments,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_enrollments,
+                AVG(progress) as average_progress
+            FROM {$this->table_name}
+            WHERE user_id = %d",
+            $user_id
+        );
+        $stats = $wpdb->get_row($query);
+
+        return [
+            'total_enrollments' => (int) ($stats->total_enrollments ?? 0),
+            'active_enrollments' => (int) ($stats->active_enrollments ?? 0),
+            'completed_enrollments' => (int) ($stats->completed_enrollments ?? 0),
+            'average_progress' => (float) ($stats->average_progress ?? 0),
+        ];
     }
 }
