@@ -53,7 +53,7 @@ final class AddonManager
     /**
      * Boot enabled addons only.
      *
-     * Disabled modules never call {@see AddonInterface::boot()}, so hooks, services, and REST
+     * Disabled add-ons never call {@see AddonInterface::boot()}, so hooks, services, and REST
      * registered from an addon class do not run. UI still lists routes with overlays from React.
      */
     public function bootEnabledAddons(Plugin $plugin): void

@@ -47,7 +47,8 @@
         "phpcbf": "phpcbf --standard=PSR12 src/",
         "build": "composer install --no-dev --optimize-autoloader",
         "makepot": "bash scripts/makepot.sh",
-        "i18n": "composer run makepot"
+        "i18n": "composer run makepot",
+        "makepot:full": "npm ci && bash scripts/makepot.sh"
     },
     "config": {
         "optimize-autoloader": true,

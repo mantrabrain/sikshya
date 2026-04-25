@@ -65,7 +65,6 @@ class CourseController
     {
         // Admin hooks
         add_action('admin_menu', [$this, 'addAdminMenu']);
-        add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
 
         if (LegacyAjax::hooksEnabled()) {
             add_action('wp_ajax_sikshya_create_course', [$this, 'handleCreateCourse']);
@@ -94,29 +93,6 @@ class CourseController
             'sikshya-courses',
             [$this, 'renderCoursesPage']
         );
-    }
-
-    /**
-     * Enqueue admin assets
-     */
-    public function enqueueAdminAssets(): void
-    {
-        $screen = get_current_screen();
-
-        if (strpos($screen->id, 'sikshya-courses') !== false) {
-            wp_enqueue_script(
-                'sikshya-courses-admin',
-                $this->plugin->getAssetUrl('js/courses-admin.js'),
-                ['jquery'],
-                SIKSHYA_VERSION,
-                true
-            );
-
-            wp_localize_script('sikshya-courses-admin', 'sikshya_courses', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('sikshya_courses_nonce'),
-            ]);
-        }
     }
 
     /**

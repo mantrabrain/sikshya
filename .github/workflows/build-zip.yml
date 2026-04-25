@@ -17,7 +17,7 @@ jobs:
           php-version: "8.1"
           coverage: none
 
-      - name: Setup Node (admin-ui build)
+      - name: Setup Node (Vite build at plugin root)
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -30,7 +30,7 @@ jobs:
           composer install --no-dev --optimize-autoloader --no-interaction
 
       - name: Build admin UI
-        run: (cd admin-ui && npm ci && npm run build)
+        run: npm ci && npm run build
 
       - name: Build zip
         run: |

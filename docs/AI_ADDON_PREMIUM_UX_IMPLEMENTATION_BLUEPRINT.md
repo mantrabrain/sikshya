@@ -266,9 +266,9 @@ Use this table in every PR that touches an addon:
 | Addon persistence | `src/Addons/Addons.php`, `AddonManager.php`, `FeatureAddon.php` |
 | REST addons | `src/Api/AdminAddonsRestRoutes.php` |
 | REST inventory + gating | `docs/SIKSHYA_REST_ROUTE_MAP.md` |
-| React licensing helpers | `admin-ui/src/lib/licensing.ts` |
-| Example gated page | `admin-ui/src/pages/ContentDripPage.tsx`, `GradebookPage.tsx` |
-| Gated admin shell | `admin-ui/src/components/GatedFeatureWorkspace.tsx`, `PlanUpgradeOverlay.tsx` |
+| React licensing helpers | `client/src/lib/licensing.ts` |
+| Example gated page | `client/src/pages/ContentDripPage.tsx`, `GradebookPage.tsx` |
+| Gated admin shell | `client/src/components/GatedFeatureWorkspace.tsx`, `PlanUpgradeOverlay.tsx` |
 | Pro bootstrap | `sikshya-pro/src/Bootstrap.php` |
 | Access enforcement | `sikshya-pro/src/Access/ProAccessHooks.php` |
 

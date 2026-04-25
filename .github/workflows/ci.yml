@@ -1,0 +1,57 @@
+# Yatra ships a main `ci.yml` (PHP + TS quality). Sikshya free uses a lighter gate here;
+# translations are enforced separately in `i18n.yml` (Yatra only documents `npm run makepot`).
+
+name: Sikshya CI
+
+on:
+  push:
+    branches: [ main, master, development, develop ]
+  pull_request:
+    branches: [ main, master, development, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sikshya-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-syntax:
+    name: PHP syntax (8.1)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-sikshya-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-sikshya-
+
+      - name: Validate Composer
+        run: composer validate --strict
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --optimize-autoloader
+
+      - name: PHP lint (syntax only)
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.php' \
+            ! -path './vendor/*' ! -path './node_modules/*' \
+            -print0 | xargs -0 -n1 php -l >/dev/null

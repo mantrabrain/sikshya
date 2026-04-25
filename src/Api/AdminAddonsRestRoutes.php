@@ -207,7 +207,7 @@ final class AdminAddonsRestRoutes
      * Paid add-on ids: most to least typical priority for site owners (mail & revenue → teaching → ops → platform).
      * Ids not listed (future extensions) sort after these, alphabetically by label.
      *
-     * Keep in sync with `ADDON_IMPORTANCE_ORDER` in `admin-ui/src/pages/AddonsPage.tsx`.
+     * Keep in sync with `ADDON_IMPORTANCE_ORDER` in `client/src/pages/AddonsPage.tsx`.
      *
      * @return list<string>
      */

@@ -1,10 +1,21 @@
 name: i18n (POT)
 
+# Yatra: POT is generated via `npm run makepot` only (no dedicated GH workflow). Sikshya runs
+# the same WP-CLI + Babel merge in CI so `languages/*.pot` cannot drift from source.
+
 on:
   push:
-    branches: [ main, master, development ]
+    branches: [ main, master, development, develop ]
   pull_request:
-    branches: [ main, master, development ]
+    branches: [ main, master, development, develop ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sikshya-i18n-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pot:
@@ -14,11 +25,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
           coverage: none
+
+      - name: Install root JS tooling (Babel + makepot plugin)
+        run: npm ci
 
       - name: Install WP-CLI
         run: |
@@ -27,12 +48,10 @@ jobs:
           sudo mv wp-cli.phar /usr/local/bin/wp
           sudo chmod +x /usr/local/bin/wp
 
-      - name: Generate sikshya.pot
-        run: |
-          bash scripts/makepot.sh
+      - name: Generate sikshya.pot (PHP + Babel on client/src)
+        run: bash scripts/makepot.sh
 
       - name: Ensure POT is up to date
         run: |
           git status --porcelain
           git diff --exit-code
-

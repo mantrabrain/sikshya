@@ -43,7 +43,7 @@ final class Addons
             }
         }
 
-        // Free-tier modules are always considered enabled (not toggleable in the Addons UI).
+        // Free-tier add-ons are always considered enabled (not toggleable in the Addons UI).
         $ids = array_values(array_unique(array_merge($ids, self::defaultEnabledIds())));
 
         return $ids;

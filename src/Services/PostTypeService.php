@@ -198,7 +198,7 @@ class PostTypeService
                 'default' => 'none',
                 'sanitize_callback' => static function ($meta_value) {
                     $s = sanitize_key((string) $meta_value);
-                    // Must match CERT_PAGE_PATTERN_ORDER in admin-ui certificateLayout.ts.
+                    // Must match CERT_PAGE_PATTERN_ORDER in client/src/pages/content-editors/certificateLayout.ts.
                     // Note: sanitize_key lowercases, so microDots/paperGrain arrive as microdots/papergrain.
                     $allowed = ['none', 'dots', 'lines', 'grid', 'diagonals', 'microdots', 'papergrain'];
 
@@ -217,7 +217,7 @@ class PostTypeService
                 'auth_callback' => $auth,
                 'default' => 'none',
                 'sanitize_callback' => static function ($meta_value) {
-                    // Must match CERT_PAGE_DECO_ORDER in admin-ui certificateLayout.ts (camelCase ids).
+                    // Must match CERT_PAGE_DECO_ORDER in client/src/pages/content-editors/certificateLayout.ts (camelCase ids).
                     // Do not use sanitize_key() here — it lowercases and breaks ids like paperFolio.
                     $raw = (string) $meta_value;
                     $s = preg_replace('/[^a-zA-Z0-9_-]/', '', $raw) ?? '';

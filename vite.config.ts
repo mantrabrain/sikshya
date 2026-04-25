@@ -1,26 +1,27 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  root: path.resolve(__dirname, 'client'),
   plugins: [react()],
   server: {
     fs: {
-      allow: [path.resolve(__dirname, '..')],
+      allow: [path.resolve(__dirname)],
     },
   },
   build: {
-    outDir: path.resolve(__dirname, '../assets/admin/react'),
+    outDir: path.resolve(__dirname, 'assets/admin/react'),
     emptyOutDir: true,
     /** One CSS file so PHP can enqueue `sikshya-admin.css` (matches `AdminAssetsService`). */
     cssCodeSplit: false,
     sourcemap: false,
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'),
+      input: path.resolve(__dirname, 'client/index.html'),
       output: {
-        // IIFE wraps the entire bundle in (function(){…})() so minified
-        // variable names never leak to window and clobber WordPress globals
-        // like window.wp (which broke wp.media).
         format: 'iife',
         entryFileNames: 'sikshya-admin.js',
         chunkFileNames: 'sikshya-admin-[name].js',

@@ -82,7 +82,7 @@ class AdminAssetsService
             true
         );
 
-        // Register modal early — list table / tools / categories depend on it.
+        // Modal for legacy PHP settings screen (see Admin.php).
         wp_register_style(
             'sikshya-modal',
             $this->plugin->getAssetUrl('admin/css/modal.css'),
@@ -95,95 +95,6 @@ class AdminAssetsService
             $this->plugin->getAssetUrl('admin/js/modal.js'),
             ['jquery', 'sikshya-admin'],
             SIKSHYA_VERSION,
-            true
-        );
-
-        // Register list table assets
-        wp_register_style(
-            'sikshya-admin-list-table',
-            $this->plugin->getAssetUrl('admin/css/list-table.css'),
-            ['sikshya-admin', 'sikshya-modal'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-admin-list-table',
-            $this->plugin->getAssetUrl('admin/js/list-table.js'),
-            ['jquery', 'sikshya-admin', 'sikshya-modal'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register reports assets
-        wp_register_style(
-            'sikshya-reports',
-            $this->plugin->getAssetUrl('admin/css/reports.css'),
-            ['sikshya-admin'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-reports',
-            $this->plugin->getAssetUrl('admin/js/reports.js'),
-            ['jquery', 'sikshya-admin'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register tools assets
-        wp_register_style(
-            'sikshya-tools',
-            $this->plugin->getAssetUrl('admin/css/tools.css'),
-            ['sikshya-admin', 'sikshya-modal'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-tools',
-            $this->plugin->getAssetUrl('admin/js/tools.js'),
-            ['jquery', 'sikshya-admin', 'sikshya-modal'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register help assets
-        wp_register_style(
-            'sikshya-help',
-            $this->plugin->getAssetUrl('admin/css/help.css'),
-            ['sikshya-admin'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-help',
-            $this->plugin->getAssetUrl('admin/js/help.js'),
-            ['jquery', 'sikshya-admin'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register categories assets
-        wp_register_style(
-            'sikshya-categories',
-            $this->plugin->getAssetUrl('admin/css/categories.css'),
-            ['sikshya-admin', 'sikshya-modal'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-categories',
-            $this->plugin->getAssetUrl('admin/js/categories.js'),
-            ['jquery', 'sikshya-modal'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Register Chart.js
-        wp_register_script(
-            'sikshya-charts',
-            'https://cdn.jsdelivr.net/npm/chart.js',
-            [],
-            '3.9.1',
             true
         );
 

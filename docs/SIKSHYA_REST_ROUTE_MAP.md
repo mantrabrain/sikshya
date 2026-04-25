@@ -15,7 +15,7 @@ Routes registered by **`sikshya-pro`** are **always present** when the Pro plugi
 | `sikshya_pro_required` | Plan does not include the catalog feature (`Pro::feature( $id )` is false). |
 | `sikshya_addon_disabled` | Plan includes the feature, but the module is **off** in **Addons** (`Addons::isEnabled( $id )` is false). |
 
-React admin paths are centralized in `admin-ui/src/api/endpoints.ts` (`SIKSHYA_ENDPOINTS`).
+React admin paths are centralized in `client/src/api/endpoints.ts` (`SIKSHYA_ENDPOINTS`).
 
 ---
 

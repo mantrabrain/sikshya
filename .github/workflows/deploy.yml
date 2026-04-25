@@ -36,7 +36,7 @@ jobs:
         run: composer install --no-dev --optimize-autoloader --no-interaction
 
       - name: Build admin UI
-        run: (cd admin-ui && npm ci && npm run build)
+        run: npm ci && npm run build
 
       - name: Create distributable zip (same as local ./build.sh)
         run: bash ./build.sh

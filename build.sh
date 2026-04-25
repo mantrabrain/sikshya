@@ -45,9 +45,9 @@ else
   echo "Warning: composer not found or no composer.json; using existing vendor/ if present." >&2
 fi
 
-if command -v npm >/dev/null 2>&1 && [[ -f "${PLUGIN_DIR}/admin-ui/package.json" ]]; then
-  echo "==> admin-ui: npm ci && npm run build"
-  (cd "${PLUGIN_DIR}/admin-ui" && npm ci && npm run build)
+if command -v npm >/dev/null 2>&1 && [[ -f "${PLUGIN_DIR}/package.json" ]]; then
+  echo "==> plugin root: npm ci && npm run build"
+  (cd "${PLUGIN_DIR}" && npm ci && npm run build)
 else
   echo "Warning: npm not found; zip will use existing built assets." >&2
 fi
@@ -64,10 +64,18 @@ build/
 .wordpress-org/
 .git/
 .github/
+docs/
 .gitignore
 .gitattributes
-admin-ui/node_modules/
 node_modules/
+client/
+package.json
+package-lock.json
+vite.config.ts
+tsconfig.json
+tailwind.config.js
+postcss.config.js
+babel.config.cjs
 tests/
 phpunit.xml
 phpunit.xml.dist

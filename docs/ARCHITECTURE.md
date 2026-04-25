@@ -7,7 +7,7 @@ This document is the **contract** for how new code should be added. A full migra
 - **Model-driven (service → page model → template):** Learn hub, single lesson, single course, single quiz, courses grid, cart, checkout, order, account shell (+ partials).
 - **Still on legacy `*TemplateData` / `$vm[...]` in places:** some shared partials (e.g. course card, single-course review blocks) and any screen not listed above. Refactor by introducing `*PageService` + `*PageModel`, then switch the template to getters; keep a `toLegacyViewArray()` (or the filtered array) for existing hooks.
 - **Database access:** New work keeps `$wpdb` in `Database\Repositories\` and schema helpers. **Known legacy:** some admin `ListTable` and `Admin\Controllers\DashboardController` may still use `$wpdb` or large queries; prefer moving that SQL into a repository in the same feature PR when touched.
-- **Sikshya Pro:** `src/Rest/ProModuleRoutes.php` and `ProExtendedFeatureRoutes.php` still contain **inline SQL**; the target state is thin routes that call **services** + **repositories** (same rule as free REST).
+- **Sikshya Pro:** `sikshya-pro/src/Rest/ProAddonRoutes.php` and `ProExtendedFeatureRoutes.php` may still contain **inline SQL** in some handlers; the target state is thin routes that call **services** + **repositories** (same rule as free REST).
 
 ## Layering (required)
 
@@ -41,10 +41,22 @@ Legacy code may still use `*TemplateData` arrays; new work should return **model
 2. `templates/learn.php` uses only `$page` (`LearnPageModel`) and value objects such as `LearnPageUrlsModel`, `HubCourseRowModel`, `RecommendedCourseModel`, `CourseModel`.
 3. Pro continues to filter `sikshya_learn_template_data` (array). Actions receive the **legacy array first**, then the `LearnPageModel` as the second argument for new integrations.
 
-## Pro & Addons
+## Pro & add-ons
 
 - **Pro** may register extra filters/actions; it should not fork core files. `sikshya-pro` mirrors the same ideas: services + repositories + frontend hooks.
-- **Addons** (Free or Pro) should live under `Addons/AddonName/` with the same subfolders when they own behavior: `Controllers/`, `Services/`, `Repositories/`, `Models/`, `Templates/`, `Api/`, and register via the addon manager.
+- **Add-ons** (Free or Pro) are defined in the free `FeatureRegistry`, may be extended via `sikshya_addons_registry` (Sikshya Pro merges more), and live under the free `Sikshya\Addons\` namespace for the catalog. Pro implementation code lives under `sikshya-pro/src/Addons/<StudlyCase>/` (PSR-4: matches `SikshyaPro\Addons\<StudlyCase>\...`; the catalog **id** stays `snake_case`, e.g. `content_drip` → folder `ContentDrip/`). Use the same subfolders for behavior: `Services/`, `Repositories/`, `Rest/`, etc. Only **enabled** add-ons are booted (`AddonInterface::boot()`).
+
+## Naming
+
+- Use **add-on** / **addon** in product code and docs for pluggable features. Reserve **module** for curriculum structure (course sections, etc.), not for the installable add-on list.
+
+## i18n (POT) — PHP + TypeScript admin UI
+
+- Same pattern as **Yatra**: **WP-CLI** `i18n make-pot` for PHP (`src`, `includes`, `templates`, `assets`, excluding the React sources in `client/` and the built bundle under `assets/admin/react/`). If a `languages/sikshya-js.pot` fragment exists, a second `make-pot … --merge=…` merges it in, then the fragment is removed.
+- **JS/TS strings:** `@wordpress/babel-plugin-makepot` runs over **`client/src`** (`.ts`/`.tsx`), not the Vite production bundle — minified bundles do not preserve extractable `__()` / `_n()` / `_x()` sites. Use `@wordpress/i18n` in admin code when you add translatable UI copy; until then Babel may produce no `-js.pot` file (merge is skipped; that is expected).
+- **One `package.json` at the plugin root** (`npm ci`, `npm run build`, `npm run dev`); Vite/Tailwind/PostCSS/TS config live next to it. App sources live in **`client/src/`**; output is `assets/admin/react/`.
+- Local: `npm ci` at the plugin root, then `composer run makepot:full` / `npm run makepot`. CI runs `.github/workflows/i18n.yml`.
+- Quick PHP-only (skip Vite build): `SKIP_SIKSHYA_ADMIN_BUILD=1 bash scripts/makepot.sh` (Babel on `client/src` still runs if `node_modules` is present).
 
 ## JSON / REST API
 
