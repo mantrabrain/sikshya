@@ -43,7 +43,7 @@ $search_on = \Sikshya\Services\CourseFrontendSettings::isCourseSearchEnabled();
             value="<?php echo esc_attr($f['s']); ?>"
             placeholder="<?php esc_attr_e('Search courses…', 'sikshya'); ?>"
         />
-        <button type="submit" class="sikshya-archive-toolbar__search-btn sikshya-button sikshya-button--primary sikshya-button--small"><?php esc_html_e('Search', 'sikshya'); ?></button>
+        <button type="submit" class="sikshya-archive-toolbar__search-btn sikshya-btn sikshya-btn--primary sikshya-btn--sm"><?php esc_html_e('Search', 'sikshya'); ?></button>
     </form>
     <?php endif; ?>
 

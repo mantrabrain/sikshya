@@ -82,10 +82,10 @@ get_header();
             do_action('sikshya_cart_before_lines', $cart);
             ?>
             <?php if ($page_model->getBundleId() > 0 && $page_model->getBundleTitle() !== '') : ?>
-                <div class="sikshya-cart-page__bundle-notice" style="margin-bottom:1rem;padding:0.75rem 1rem;border-radius:8px;border:1px solid rgba(34,197,94,0.35);background:rgba(34,197,94,0.06);">
+                <div class="sikshya-cart-page__bundle-notice">
                     <strong><?php esc_html_e('Bundle', 'sikshya'); ?></strong>
                     <?php echo esc_html($page_model->getBundleTitle()); ?>
-                    <span style="opacity:.85;"> — <?php esc_html_e('Checkout uses the bundle price for the whole pack.', 'sikshya'); ?></span>
+                    <span class="sikshya-cart-page__bundle-notice-subtle"> — <?php esc_html_e('Checkout uses the bundle price for the whole pack.', 'sikshya'); ?></span>
                 </div>
             <?php endif; ?>
             <div class="sikshya-cart-page__panel" role="region" aria-label="<?php esc_attr_e('Cart items', 'sikshya'); ?>">

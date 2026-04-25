@@ -634,6 +634,69 @@ body:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .si
   color: var(--sikshya-gray-900);
 }
 
+/* -------------------------------------------------------------------------
+   Compatibility: legacy `.sikshya-button` now matches `.sikshya-btn`
+   ------------------------------------------------------------------------- */
+
+.sikshya-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sikshya-spacing-2);
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border: 1px solid transparent;
+  border-radius: var(--sikshya-radius);
+  background: transparent;
+  color: var(--sikshya-gray-800);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--sikshya-transition);
+  white-space: nowrap;
+}
+
+.sikshya-button--small {
+  padding: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
+  border-radius: var(--sikshya-radius);
+  font-size: var(--sikshya-font-size-xs);
+}
+
+.sikshya-button--primary {
+  background: var(--sikshya-primary);
+  color: var(--sikshya-white);
+}
+
+.sikshya-button--primary:hover {
+  background: var(--sikshya-primary-dark);
+  color: var(--sikshya-white);
+}
+
+.sikshya-button--outline {
+  border-color: var(--sikshya-gray-300);
+  background: var(--sikshya-white);
+  color: var(--sikshya-gray-800);
+}
+
+.sikshya-button--outline:hover {
+  background: var(--sikshya-gray-50);
+  border-color: var(--sikshya-gray-400);
+  color: var(--sikshya-gray-900);
+}
+
+.sikshya-button--ghost {
+  border-color: var(--sikshya-gray-300);
+  background: transparent;
+  color: var(--sikshya-gray-800);
+}
+
+.sikshya-button--ghost:hover {
+  background: var(--sikshya-gray-50);
+  border-color: var(--sikshya-gray-400);
+  color: var(--sikshya-gray-900);
+}
+
 /* Single course page: tighter CTA sizing (avoid oversized buttons) */
 .sikshya-single-course .sikshya-course-lp__actions .sikshya-btn {
   height: 40px !important;

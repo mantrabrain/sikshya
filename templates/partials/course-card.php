@@ -172,7 +172,7 @@ $card_label = sprintf(
             <div class="sikshya-course-card-meta-actions<?php echo ($has_counts || $is_bundle) ? '' : ' sikshya-course-card-meta-actions--action-only'; ?>">
                 <div class="sikshya-course-card-actions">
                     <?php if ($is_user_enrolled) : ?>
-                        <a class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action" href="<?php echo esc_url($learn_entry_url); ?>">
+                        <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-course-card-action" href="<?php echo esc_url($learn_entry_url); ?>">
                             <span class="sikshya-button__icon" aria-hidden="true">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             </span>
@@ -184,7 +184,7 @@ $card_label = sprintf(
                             <input type="hidden" name="sikshya_cart_action" value="add" />
                             <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
                             <input type="hidden" name="sikshya_redirect_to_checkout" value="1" />
-                            <button type="submit" class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action">
+                            <button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-course-card-action">
                                 <span class="sikshya-button__icon" aria-hidden="true">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                                 </span>
@@ -196,7 +196,7 @@ $card_label = sprintf(
                                 <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                 <input type="hidden" name="sikshya_cart_action" value="admin_enroll_bypass" />
                                 <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
-                                <button type="submit" class="sikshya-button sikshya-button--ghost sikshya-button--small sikshya-course-card-action">
+                                <button type="submit" class="sikshya-btn sikshya-btn--ghost sikshya-btn--sm sikshya-course-card-action">
                                     <span class="sikshya-button__label"><?php esc_html_e('Enroll without purchase', 'sikshya'); ?></span>
                                 </button>
                             </form>
@@ -206,7 +206,7 @@ $card_label = sprintf(
                             <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                             <input type="hidden" name="sikshya_cart_action" value="enroll_free" />
                             <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $course_id); ?>" />
-                            <button type="submit" class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action">
+                            <button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-course-card-action">
                                 <span class="sikshya-button__icon" aria-hidden="true">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                                 </span>
@@ -214,7 +214,7 @@ $card_label = sprintf(
                             </button>
                         </form>
                     <?php else : ?>
-                        <a class="sikshya-button sikshya-button--primary sikshya-button--small sikshya-course-card-action" href="<?php echo esc_url(wp_login_url($course_permalink)); ?>">
+                        <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-course-card-action" href="<?php echo esc_url(wp_login_url($course_permalink)); ?>">
                             <span class="sikshya-button__icon" aria-hidden="true">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                             </span>

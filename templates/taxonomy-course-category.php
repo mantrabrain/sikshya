@@ -88,7 +88,7 @@ $paged = (int) $ctx['paged'];
                     );
                     ?>
                 </p>
-                <a class="sikshya-button sikshya-button--primary" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
+                <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
                     <?php esc_html_e('Browse all courses', 'sikshya'); ?>
                 </a>
             </div>
