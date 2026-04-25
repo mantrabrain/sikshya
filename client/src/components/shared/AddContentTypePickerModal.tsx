@@ -80,6 +80,8 @@ type Props = {
   error?: unknown;
   /** Submit button label; defaults to "Add content". */
   submitLabel?: string;
+  /** Optional: link to Addons page for locked tiles. */
+  addonsHref?: string;
 };
 
 /**
@@ -108,6 +110,7 @@ export function AddContentTypePickerModal(props: Props) {
     busy,
     error,
     submitLabel = 'Add content',
+    addonsHref,
   } = props;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -142,6 +145,24 @@ export function AddContentTypePickerModal(props: Props) {
     ? CONTENT_PICKER_TYPES.filter((opt) => allowedTypes.includes(opt.type))
     : CONTENT_PICKER_TYPES;
 
+  const lockedReason = (opt: PickerOpt): { locked: boolean; badge?: 'Pro' | 'Off' | 'Upgrade'; hint?: string } => {
+    if (!opt.addonId) return { locked: false };
+    const st = opt.addonId === 'live_classes' ? liveAddon : scormAddon;
+    const enabled = Boolean(st.enabled);
+    const licenseOk = Boolean(st.licenseOk);
+    const loading = Boolean(st.loading) && st.enabled === null;
+    if (loading) {
+      return { locked: true, badge: 'Pro', hint: 'Checking add-on status…' };
+    }
+    if (!licenseOk) {
+      return { locked: true, badge: 'Upgrade', hint: 'Upgrade your plan to unlock this.' };
+    }
+    if (!enabled) {
+      return { locked: true, badge: 'Off', hint: 'Turn this on in Addons to use it.' };
+    }
+    return { locked: false };
+  };
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-4 backdrop-blur-[2px] sm:items-center"
@@ -173,32 +194,35 @@ export function AddContentTypePickerModal(props: Props) {
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {tiles.map((opt) => {
             const active = contentType === opt.type;
-            const lockedByAddon =
-              (opt.addonId === 'live_classes' && !(liveAddon.enabled && liveAddon.licenseOk)) ||
-              (opt.addonId === 'scorm_h5p_pro' && !(scormAddon.enabled && scormAddon.licenseOk));
-            const showsProBadge = Boolean(opt.proLabel);
+            const gate = lockedReason(opt);
             return (
               <button
                 key={opt.type}
                 type="button"
                 onClick={() => {
-                  if (lockedByAddon) return;
+                  if (gate.locked) return;
                   onContentTypeChange(opt.type);
                 }}
-                disabled={lockedByAddon}
-                aria-disabled={lockedByAddon}
-                title={lockedByAddon ? 'Requires Sikshya Pro and the relevant addon to be enabled.' : opt.label}
+                disabled={gate.locked}
+                aria-disabled={gate.locked}
+                title={gate.locked ? gate.hint || 'This item is locked.' : opt.label}
                 className={`relative flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 sm:text-sm ${
-                  lockedByAddon
+                  gate.locked
                     ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-500'
                     : active
                       ? 'border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-400 dark:bg-brand-950/50 dark:text-brand-200'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200'
                 }`}
               >
-                {showsProBadge ? (
-                  <span className="absolute right-1.5 top-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
-                    {opt.proLabel}
+                {gate.badge ? (
+                  <span
+                    className={`absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+                      gate.badge === 'Off'
+                        ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                        : 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300'
+                    }`}
+                  >
+                    {gate.badge}
                   </span>
                 ) : null}
                 <NavIcon name={opt.icon} className="h-5 w-5" />
@@ -207,6 +231,18 @@ export function AddContentTypePickerModal(props: Props) {
             );
           })}
         </div>
+        {addonsHref ? (
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            Locked items can be enabled from{' '}
+            <a
+              href={addonsHref}
+              className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
+            >
+              Addons
+            </a>
+            .
+          </p>
+        ) : null}
 
         <label htmlFor="sikshya-add-content-title-input" className={`${FIELD_LABEL} mt-5`}>
           Name for this item

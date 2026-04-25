@@ -1822,6 +1822,7 @@ function CourseBuilderEditor({
       />
       <AddContentTypePickerModal
         open={addContentOpen}
+        addonsHref={appViewHref(config, 'addons')}
         contextLabel="Chapter"
         contextValue={curriculumTree.find((c) => c.id === addContentChapterId)?.title ?? ''}
         contentType={addContentType}

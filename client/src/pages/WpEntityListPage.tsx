@@ -58,6 +58,7 @@ export function WpEntityListPage(props: {
   const { navigateHref } = useAdminRouting();
 
   const newHref = appViewHref(config, 'edit-content', { post_type: restBase });
+  const addonsHref = appViewHref(config, 'addons');
   const isLessonList = restBase === 'sik_lesson';
   const isCertificateList = restBase === 'sikshya_certificate';
   const isQuizList = restBase === 'sik_quiz';
@@ -436,6 +437,7 @@ export function WpEntityListPage(props: {
           open={addLessonOpen}
           heading="Add a lesson, quiz, or assignment"
           description="Pick a type, give it a clear name, then open it to add the actual teaching material. Quiz questions are created inside the quiz editor after you add the quiz here."
+          addonsHref={addonsHref}
           contentType={addLessonType}
           onContentTypeChange={(t) => {
             setAddLessonType(t);
