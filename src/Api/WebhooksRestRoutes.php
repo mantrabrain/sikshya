@@ -3,6 +3,7 @@
 namespace Sikshya\Api;
 
 use Sikshya\Commerce\OrderFulfillmentService;
+use Sikshya\Commerce\CheckoutService;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
@@ -63,7 +64,15 @@ class WebhooksRestRoutes
         $payload = $request->get_body();
         $sig = isset($_SERVER['HTTP_STRIPE_SIGNATURE']) ? (string) $_SERVER['HTTP_STRIPE_SIGNATURE'] : '';
 
-        if ($secret !== '' && !$this->verifyStripeSignature($payload, $sig, $secret)) {
+        // Security: if the webhook endpoint is hit, a signing secret must be configured
+        // and the signature must verify. Otherwise this endpoint becomes spoofable.
+        if ($secret === '') {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => 'Stripe webhook secret is not configured.'],
+                400
+            );
+        }
+        if (!$this->verifyStripeSignature($payload, $sig, $secret)) {
             return new WP_REST_Response(['ok' => false, 'message' => 'Invalid signature'], 400);
         }
 
@@ -91,7 +100,23 @@ class WebhooksRestRoutes
         }
 
         if ($order_id > 0) {
-            $this->fulfillment()->fulfillPaidOrder($order_id);
+            $orders = new OrderRepository();
+            $row = $orders->findById($order_id);
+            if ($row) {
+                $pi_amount = is_array($pi) && isset($pi['amount_received']) ? (int) $pi['amount_received'] : 0;
+                if ($pi_amount <= 0 && is_array($pi) && isset($pi['amount'])) {
+                    $pi_amount = (int) $pi['amount'];
+                }
+                $pi_cur = is_array($pi) && isset($pi['currency']) ? strtoupper((string) $pi['currency']) : '';
+                $expected_minor = CheckoutService::toMinorUnits((float) $row->total, (string) $row->currency);
+                if ($pi_cur !== '' && $pi_cur !== strtoupper((string) $row->currency)) {
+                    return new WP_REST_Response(['ok' => false, 'message' => 'Currency mismatch'], 400);
+                }
+                if ($pi_amount > 0 && $expected_minor > 0 && $pi_amount !== $expected_minor) {
+                    return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
+                }
+                $this->fulfillment()->fulfillPaidOrder($order_id);
+            }
         }
 
         return new WP_REST_Response(['ok' => true], 200);
@@ -113,17 +138,26 @@ class WebhooksRestRoutes
         }
 
         $payload = $request->get_body();
-        if ($paypal_webhook_id !== '' && $paypal_client_id !== '' && $paypal_secret !== '' && $payload !== '') {
-            $ok = $this->verifyPayPalSignature(
-                $payload,
-                $paypal_client_id,
-                $paypal_secret,
-                $paypal_mode,
-                $paypal_webhook_id
+        // Security: require signature verification for PayPal webhooks.
+        // If site owner hasn't configured webhook id/credentials, reject to avoid spoofed fulfillment.
+        if ($payload === '') {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Empty payload'], 400);
+        }
+        if ($paypal_webhook_id === '' || $paypal_client_id === '' || $paypal_secret === '') {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => 'PayPal webhook is not configured.'],
+                400
             );
-            if (!$ok) {
-                return new WP_REST_Response(['ok' => false, 'message' => 'Invalid signature'], 400);
-            }
+        }
+        $ok = $this->verifyPayPalSignature(
+            $payload,
+            $paypal_client_id,
+            $paypal_secret,
+            $paypal_mode,
+            $paypal_webhook_id
+        );
+        if (!$ok) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Invalid signature'], 400);
         }
 
         $json = json_decode($payload, true);
@@ -153,6 +187,15 @@ class WebhooksRestRoutes
         $orders = new OrderRepository();
         $row = $orders->findByGatewayIntent('paypal', $paypal_order_id);
         if ($row) {
+            $pu0 = isset($resource['purchase_units'][0]) && is_array($resource['purchase_units'][0]) ? $resource['purchase_units'][0] : null;
+            $amt = is_array($pu0) && isset($pu0['amount']['value']) ? (float) $pu0['amount']['value'] : null;
+            $cur = is_array($pu0) && isset($pu0['amount']['currency_code']) ? (string) $pu0['amount']['currency_code'] : '';
+            if (is_string($cur) && $cur !== '' && strtoupper($cur) !== strtoupper((string) $row->currency)) {
+                return new WP_REST_Response(['ok' => false, 'message' => 'Currency mismatch'], 400);
+            }
+            if (is_float($amt) && $amt >= 0 && abs($amt - (float) $row->total) > 0.009) {
+                return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
+            }
             $this->fulfillment()->fulfillPaidOrder((int) $row->id);
         }
 

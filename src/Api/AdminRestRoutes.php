@@ -410,6 +410,26 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/admin/enrollments/manual', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'manualEnroll'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+                'args' => [
+                    'user_id' => [
+                        'type' => 'integer',
+                        'required' => true,
+                        'minimum' => 1,
+                    ],
+                    'course_id' => [
+                        'type' => 'integer',
+                        'required' => true,
+                        'minimum' => 1,
+                    ],
+                ],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/quiz-attempts', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -1835,6 +1855,77 @@ class AdminRestRoutes
                 'page' => (int) $r['page'],
                 'per_page' => (int) $r['per_page'],
                 'table_missing' => !empty($r['table_missing']),
+            ],
+            200
+        );
+    }
+
+    /**
+     * Manually enroll a learner into a course (admin action).
+     */
+    public function manualEnroll(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $user_id = isset($params['user_id']) ? (int) $params['user_id'] : 0;
+        $course_id = isset($params['course_id']) ? (int) $params['course_id'] : 0;
+
+        if ($user_id <= 0 || $course_id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Invalid user or course.', 'sikshya')],
+                400
+            );
+        }
+
+        $u = get_user_by('id', $user_id);
+        if (!$u) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('User not found.', 'sikshya')],
+                404
+            );
+        }
+
+        $course_post = get_post($course_id);
+        if (!$course_post || (string) $course_post->post_type !== PostTypes::COURSE) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Course not found.', 'sikshya')],
+                404
+            );
+        }
+
+        $course = $this->plugin->getService('course');
+        if (!$course instanceof CourseService) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Course service unavailable.', 'sikshya')],
+                500
+            );
+        }
+
+        try {
+            $enrollment_id = $course->enrollUser(
+                $user_id,
+                $course_id,
+                [
+                    'status' => 'enrolled',
+                    'payment_method' => 'manual',
+                    'amount' => 0.0,
+                ]
+            );
+        } catch (\Exception $e) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => $e->getMessage()],
+                400
+            );
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'message' => __('Learner enrolled.', 'sikshya'),
+                'enrollment_id' => (int) $enrollment_id,
             ],
             200
         );

@@ -17,49 +17,66 @@ final class CheckoutTemplateData
      */
     public static function gatewaysConfigured(): array
     {
+        $isWired = static function (string $id, bool $default): bool {
+            /**
+             * Allow Pro/addons to declare that a gateway's checkout + confirm flow is fully wired.
+             * Core wires Stripe/PayPal/Mollie/Paystack/Razorpay and manual flows; Square/Authorize.Net
+             * are settings-only until an extension implements their session+confirm handlers.
+             */
+            return (bool) apply_filters('sikshya_payment_gateway_wired', $default, $id);
+        };
+
         $enable_offline = Settings::get('enable_offline_payment', '1');
         $enable_paypal = Settings::get('enable_paypal_payment', '1');
         $enable_stripe = Settings::get('enable_stripe_payment', '0');
 
         $stripe = Pro::isActive()
+            && $isWired('stripe', true)
             && self::isTruthyGatewayOption($enable_stripe)
             && (string) Settings::get('stripe_secret_key', '') !== '';
 
-        $paypal = self::isTruthyGatewayOption($enable_paypal)
+        $paypal = $isWired('paypal', true)
+            && self::isTruthyGatewayOption($enable_paypal)
             && (string) Settings::get('paypal_client_id', '') !== ''
             && (string) Settings::get('paypal_secret', '') !== '';
 
         // Pro gateways (configured + enabled) — actual session handling lives in Pro.
         $razorpay = Pro::isActive()
+            && $isWired('razorpay', true)
             && self::isTruthyGatewayOption(Settings::get('enable_razorpay_payment', '0'))
             && (string) Settings::get('razorpay_key_id', '') !== ''
             && (string) Settings::get('razorpay_key_secret', '') !== '';
 
         $mollie = Pro::isActive()
+            && $isWired('mollie', true)
             && self::isTruthyGatewayOption(Settings::get('enable_mollie_payment', '0'))
             && (string) Settings::get('mollie_api_key', '') !== '';
 
         $paystack = Pro::isActive()
+            && $isWired('paystack', true)
             && self::isTruthyGatewayOption(Settings::get('enable_paystack_payment', '0'))
             && (string) Settings::get('paystack_public_key', '') !== ''
             && (string) Settings::get('paystack_secret_key', '') !== '';
 
         $square = Pro::isActive()
+            && $isWired('square', false)
             && self::isTruthyGatewayOption(Settings::get('enable_square_payment', '0'))
             && (string) Settings::get('square_access_token', '') !== ''
             && (string) Settings::get('square_location_id', '') !== '';
 
         $authorize_net = Pro::isActive()
+            && $isWired('authorize_net', false)
             && self::isTruthyGatewayOption(Settings::get('enable_authorize_net_payment', '0'))
             && (string) Settings::get('authorize_net_login_id', '') !== ''
             && (string) Settings::get('authorize_net_transaction_key', '') !== '';
 
         $bank_transfer = Pro::isActive()
+            && $isWired('bank_transfer', true)
             && self::isTruthyGatewayOption(Settings::get('enable_bank_transfer_payment', '0'))
             && (string) Settings::get('bank_transfer_instructions', '') !== '';
 
         return [
-            'offline' => self::isTruthyGatewayOption($enable_offline),
+            'offline' => $isWired('offline', true) && self::isTruthyGatewayOption($enable_offline),
             'stripe' => $stripe,
             'paypal' => $paypal,
             'razorpay' => $razorpay,

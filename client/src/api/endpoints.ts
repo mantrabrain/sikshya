@@ -31,6 +31,8 @@ export const SIKSHYA_ENDPOINTS = {
     quizAttempts: '/admin/quiz-attempts',
     /** Paginated enrollments with learner/course labels. Course-manager auth. */
     enrollments: '/admin/enrollments',
+    /** POST: manually enroll a learner into a course. */
+    enrollmentsManual: '/admin/enrollments/manual',
     /** Paginated payments. Course-manager auth (same as other admin routes). */
     payments: '/admin/payments',
     /** Checkout orders (normalized ledger). */

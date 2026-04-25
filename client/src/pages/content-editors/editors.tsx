@@ -181,11 +181,45 @@ type EditorShellProps = {
 };
 
 function EditorFormShell({ loading, saving, error, onRetry, saveMsg, children }: EditorShellProps) {
+  const [toast, setToast] = useState<{ open: boolean; kind: 'success'; title: string; message?: string } | null>(null);
+
+  useEffect(() => {
+    if (!saveMsg) return;
+    setToast({ open: true, kind: 'success', title: 'Saved', message: saveMsg });
+  }, [saveMsg]);
+
+  useEffect(() => {
+    if (!toast?.open) return;
+    const t = window.setTimeout(() => setToast(null), 3800);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
   return (
     <>
-      {saveMsg ? (
-        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-100">
-          {saveMsg}
+      {toast?.open ? (
+        <div className="pointer-events-none fixed right-6 top-6 z-[120] w-[min(26rem,calc(100vw-3rem))]">
+          <div className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur dark:border-emerald-900/40 dark:bg-slate-900/95">
+            <span
+              className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white"
+              aria-hidden
+            >
+              <NavIcon name="badge" className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">{toast.title}</div>
+              {toast.message ? (
+                <div className="mt-0.5 text-xs leading-snug text-slate-600 dark:text-slate-300">{toast.message}</div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              onClick={() => setToast(null)}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
         </div>
       ) : null}
       {error ? (
@@ -340,7 +374,18 @@ export function LessonEditor(props: ContentEditorProps) {
       onRetry={() => void editor.load()}
       saveMsg={saveMsg}
     >
-      <section className={EDITOR_SURFACE} aria-label="Lesson editor">
+      <div className="space-y-3">
+        <HorizontalEditorTabs
+          ariaLabel="Lesson editor sections"
+          tabs={[
+            { id: 'content', label: 'Content', icon: 'plusDocument' },
+            { id: 'settings', label: 'Settings', icon: 'cog' },
+          ]}
+          value={editorTab}
+          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
+        />
+
+        <section className={EDITOR_SURFACE} aria-label="Lesson editor">
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -370,15 +415,6 @@ export function LessonEditor(props: ContentEditorProps) {
             </div>
           </div>
         </div>
-        <HorizontalEditorTabs
-          ariaLabel="Lesson editor sections"
-          tabs={[
-            { id: 'content', label: 'Content', icon: 'plusDocument' },
-            { id: 'settings', label: 'Settings', icon: 'cog' },
-          ]}
-          value={editorTab}
-          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
-        />
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
@@ -540,7 +576,8 @@ export function LessonEditor(props: ContentEditorProps) {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
       {embedded ? (
         <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
@@ -789,7 +826,19 @@ export function QuizEditor(props: ContentEditorProps) {
       onRetry={() => void editor.load()}
       saveMsg={saveMsg}
     >
-      <section className={EDITOR_SURFACE} aria-label="Quiz editor">
+      <div className="space-y-3">
+        <HorizontalEditorTabs
+          ariaLabel="Quiz editor sections"
+          tabs={[
+            { id: 'content', label: 'Content', icon: 'plusDocument' },
+            { id: 'settings', label: 'Settings', icon: 'cog' },
+            { id: 'questions', label: 'Questions', icon: 'helpCircle' },
+          ]}
+          value={editorTab}
+          onChange={(id) => setEditorTab(id as 'content' | 'settings' | 'questions')}
+        />
+
+        <section className={EDITOR_SURFACE} aria-label="Quiz editor">
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -827,16 +876,6 @@ export function QuizEditor(props: ContentEditorProps) {
             </div>
           </div>
         </div>
-        <HorizontalEditorTabs
-          ariaLabel="Quiz editor sections"
-          tabs={[
-            { id: 'content', label: 'Content', icon: 'plusDocument' },
-            { id: 'settings', label: 'Settings', icon: 'cog' },
-            { id: 'questions', label: 'Questions', icon: 'helpCircle' },
-          ]}
-          value={editorTab}
-          onChange={(id) => setEditorTab(id as 'content' | 'settings' | 'questions')}
-        />
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
@@ -1093,7 +1132,8 @@ export function QuizEditor(props: ContentEditorProps) {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
       <AddQuestionAuthoringModal
         config={config}
         open={addQuestionOpen}
@@ -1128,7 +1168,7 @@ export function QuizEditor(props: ContentEditorProps) {
 }
 
 export function QuestionEditor(props: ContentEditorProps) {
-  const { postId, backHref, entityLabel, onSavedNewId, embedded } = props;
+  const { config, postId, backHref, entityLabel, onSavedNewId, embedded } = props;
   const editor = useWpContentPost('sik_question', postId);
   const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
   const [title, setTitle] = useState('');
@@ -1149,6 +1189,18 @@ export function QuestionEditor(props: ContentEditorProps) {
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
   const [proQuestionValues, setProQuestionValues] = useState<ProQuestionValues>(PRO_QUESTION_DEFAULTS);
   const [typeMenuPos, setTypeMenuPos] = useState<{ top: number; left: number } | null>(null);
+
+  const advQuiz = useAddonEnabled('quiz_advanced');
+  const advFeatureOk = isFeatureEnabled(config.licensing, 'quiz_advanced');
+  const canUseAdvancedTypes = Boolean(advFeatureOk && advQuiz.enabled && advQuiz.licenseOk);
+  const isLockedType = useCallback(
+    (t: string) => {
+      const key = String(t || '').trim();
+      const needs = QUESTION_PICKER_TYPES.find((x) => x.type === key)?.requiresAdvancedQuiz;
+      return Boolean(needs && !canUseAdvancedTypes);
+    },
+    [canUseAdvancedTypes]
+  );
 
   useEffect(() => {
     if (editor.isNew) {
@@ -1255,6 +1307,9 @@ export function QuestionEditor(props: ContentEditorProps) {
   }, [editor.post, editor.isNew]);
 
   const onTypeChange = (v: string) => {
+    if (isLockedType(v)) {
+      return;
+    }
     setQType(v);
     if (v === 'true_false') {
       setCorrectAnswer('true');
@@ -1395,7 +1450,18 @@ export function QuestionEditor(props: ContentEditorProps) {
       onRetry={() => void editor.load()}
       saveMsg={saveMsg}
     >
-      <section className={EDITOR_SURFACE} aria-label="Question editor">
+      <div className="space-y-3">
+        <HorizontalEditorTabs
+          ariaLabel="Question editor sections"
+          tabs={[
+            { id: 'content', label: 'Content', icon: 'plusDocument' },
+            { id: 'settings', label: 'Settings', icon: 'cog' },
+          ]}
+          value={editorTab}
+          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
+        />
+
+        <section className={EDITOR_SURFACE} aria-label="Question editor">
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -1423,15 +1489,6 @@ export function QuestionEditor(props: ContentEditorProps) {
             </div>
           </div>
         </div>
-        <HorizontalEditorTabs
-          ariaLabel="Question editor sections"
-          tabs={[
-            { id: 'content', label: 'Content', icon: 'plusDocument' },
-            { id: 'settings', label: 'Settings', icon: 'cog' },
-          ]}
-          value={editorTab}
-          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
-        />
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
@@ -1491,16 +1548,31 @@ export function QuestionEditor(props: ContentEditorProps) {
                         Once you pick a type, Sikshya will show the right answer fields (options, matching pairs, ordering, etc.).
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {QUESTION_PICKER_TYPES.slice(0, 6).map((t) => (
-                          <button
-                            key={t.type}
-                            type="button"
-                            className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                            onClick={() => onTypeChange(t.type)}
-                          >
-                            {t.label}
-                          </button>
-                        ))}
+                        {QUESTION_PICKER_TYPES.slice(0, 6).map((t) => {
+                          const locked = isLockedType(t.type);
+                          return (
+                            <button
+                              key={t.type}
+                              type="button"
+                              disabled={locked}
+                              aria-disabled={locked}
+                              title={locked ? 'Enable Advanced Quiz add-on to use this type.' : undefined}
+                              className={
+                                locked
+                                  ? 'cursor-not-allowed rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-400 opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500'
+                                  : 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                              }
+                              onClick={() => onTypeChange(t.type)}
+                            >
+                              {t.label}
+                              {locked ? (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                                  Pro
+                                </span>
+                              ) : null}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1889,7 +1961,8 @@ export function QuestionEditor(props: ContentEditorProps) {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
       {typeMenuPos ? (
         <div
           className="fixed inset-0 z-[90]"
@@ -1910,15 +1983,22 @@ export function QuestionEditor(props: ContentEditorProps) {
           <ul className="max-h-[min(60vh,22rem)] overflow-y-auto p-2">
             {QUESTION_PICKER_TYPES.map((t) => {
               const active = qType === t.type;
+              const locked = isLockedType(t.type);
+              const lockTitle = locked ? 'Enable Advanced Quiz add-on to use this type.' : undefined;
               return (
                 <li key={t.type}>
                   <button
                     type="button"
                     role="option"
                     aria-selected={active}
+                    aria-disabled={locked}
+                    disabled={locked}
+                    title={lockTitle}
                     className={`flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
                       active
                         ? 'bg-brand-50 text-brand-900 dark:bg-brand-950/40 dark:text-brand-100'
+                        : locked
+                        ? 'cursor-not-allowed text-slate-400 opacity-70 dark:text-slate-500'
                         : 'text-slate-800 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                     onClick={() => {
@@ -1935,7 +2015,14 @@ export function QuestionEditor(props: ContentEditorProps) {
                       <NavIcon name={t.icon} className="h-4 w-4" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold leading-snug">{t.label}</span>
+                      <span className="block text-sm font-semibold leading-snug">
+                        {t.label}
+                        {locked ? (
+                          <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                            Pro
+                          </span>
+                        ) : null}
+                      </span>
                       <span className="mt-0.5 block text-xs leading-snug text-slate-500 dark:text-slate-400">{t.hint}</span>
                     </span>
                   </button>
@@ -2048,7 +2135,18 @@ export function AssignmentEditor(props: ContentEditorProps) {
       onRetry={() => void editor.load()}
       saveMsg={saveMsg}
     >
-      <section className={EDITOR_SURFACE} aria-label="Assignment editor">
+      <div className="space-y-3">
+        <HorizontalEditorTabs
+          ariaLabel="Assignment editor sections"
+          tabs={[
+            { id: 'content', label: 'Content', icon: 'plusDocument' },
+            { id: 'settings', label: 'Settings', icon: 'cog' },
+          ]}
+          value={editorTab}
+          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
+        />
+
+        <section className={EDITOR_SURFACE} aria-label="Assignment editor">
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2079,15 +2177,6 @@ export function AssignmentEditor(props: ContentEditorProps) {
             </div>
           </div>
         </div>
-        <HorizontalEditorTabs
-          ariaLabel="Assignment editor sections"
-          tabs={[
-            { id: 'content', label: 'Content', icon: 'plusDocument' },
-            { id: 'settings', label: 'Settings', icon: 'cog' },
-          ]}
-          value={editorTab}
-          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
-        />
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
@@ -2181,7 +2270,8 @@ export function AssignmentEditor(props: ContentEditorProps) {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
       {embedded ? (
         <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
@@ -2308,7 +2398,18 @@ export function ChapterEditor(props: ContentEditorProps) {
       onRetry={() => void editor.load()}
       saveMsg={saveMsg}
     >
-      <section className={EDITOR_SURFACE} aria-label="Chapter editor">
+      <div className="space-y-3">
+        <HorizontalEditorTabs
+          ariaLabel="Chapter editor sections"
+          tabs={[
+            { id: 'content', label: 'Content', icon: 'plusDocument' },
+            { id: 'settings', label: 'Settings', icon: 'cog' },
+          ]}
+          value={editorTab}
+          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
+        />
+
+        <section className={EDITOR_SURFACE} aria-label="Chapter editor">
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2331,15 +2432,6 @@ export function ChapterEditor(props: ContentEditorProps) {
             </div>
           </div>
         </div>
-        <HorizontalEditorTabs
-          ariaLabel="Chapter editor sections"
-          tabs={[
-            { id: 'content', label: 'Content', icon: 'plusDocument' },
-            { id: 'settings', label: 'Settings', icon: 'cog' },
-          ]}
-          value={editorTab}
-          onChange={(id) => setEditorTab(id as 'content' | 'settings')}
-        />
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
@@ -2435,7 +2527,8 @@ export function ChapterEditor(props: ContentEditorProps) {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
       {embedded ? (
         <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (
@@ -3077,11 +3170,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
       onRetry={() => void editor.load()}
       saveMsg={saveMsg}
     >
-      <section className={EDITOR_SURFACE} aria-label={`${entityLabel} editor`}>
-        <div className="border-b border-slate-100 px-6 pb-0 pt-6 dark:border-slate-800">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{entityLabel}</h2>
-          <p className={HINT}>Content: title, body, and optional featured image. Settings: publish status.</p>
-        </div>
+      <div className="space-y-3">
         <HorizontalEditorTabs
           ariaLabel={`${entityLabel} editor sections`}
           tabs={[
@@ -3091,6 +3180,12 @@ export function DefaultContentEditor(props: ContentEditorProps) {
           value={editorTab}
           onChange={(id) => setEditorTab(id as 'content' | 'settings')}
         />
+
+        <section className={EDITOR_SURFACE} aria-label={`${entityLabel} editor`}>
+        <div className="border-b border-slate-100 px-6 pb-0 pt-6 dark:border-slate-800">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{entityLabel}</h2>
+          <p className={HINT}>Content: title, body, and optional featured image. Settings: publish status.</p>
+        </div>
         <div className="p-6">
           {editorTab === 'content' ? (
             <div className="space-y-6" role="tabpanel">
@@ -3141,7 +3236,8 @@ export function DefaultContentEditor(props: ContentEditorProps) {
             </div>
           )}
         </div>
-      </section>
+        </section>
+      </div>
       {embedded ? (
         <EmbeddedSaveBar saving={editor.saving} entityLabel={entityLabel} canSave={Boolean(title.trim())} onSave={() => void onSave()} />
       ) : (

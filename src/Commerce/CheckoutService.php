@@ -16,6 +16,62 @@ use Sikshya\Licensing\Pro;
  */
 final class CheckoutService
 {
+    /**
+     * Some currencies (JPY, KRW, VND, etc.) have no minor units.
+     * Gateways expecting integer "minor units" must NOT multiply by 100 for these.
+     *
+     * @see https://stripe.com/docs/currencies#zero-decimal
+     * @return array<string, true>
+     */
+    private static function zeroDecimalCurrencies(): array
+    {
+        return [
+            'BIF' => true,
+            'CLP' => true,
+            'DJF' => true,
+            'GNF' => true,
+            'JPY' => true,
+            'KMF' => true,
+            'KRW' => true,
+            'MGA' => true,
+            'PYG' => true,
+            'RWF' => true,
+            'UGX' => true,
+            'VND' => true,
+            'VUV' => true,
+            'XAF' => true,
+            'XOF' => true,
+            'XPF' => true,
+        ];
+    }
+
+    private static function currencyMinorUnitFactor(string $currency): int
+    {
+        $cur = strtoupper(trim($currency));
+        if ($cur === '' || strlen($cur) !== 3) {
+            return 100;
+        }
+        return isset(self::zeroDecimalCurrencies()[$cur]) ? 1 : 100;
+    }
+
+    /**
+     * Convert major-unit amount to gateway minor-units (integer), respecting zero-decimal currencies.
+     */
+    public static function toMinorUnits(float $amount, string $currency): int
+    {
+        $factor = self::currencyMinorUnitFactor($currency);
+        return (int) round(max(0.0, $amount) * $factor);
+    }
+
+    /**
+     * Convert gateway minor-units back to major units.
+     */
+    public static function fromMinorUnits(int $minor, string $currency): float
+    {
+        $factor = self::currencyMinorUnitFactor($currency);
+        return round(((float) $minor) / max(1, $factor), 2);
+    }
+
     public function __construct(
         private Plugin $plugin,
         private OrderRepository $orders,
@@ -60,17 +116,13 @@ final class CheckoutService
             $currency = 'USD';
         }
 
-        /**
+        /*
          * Subscription-only checkout mode (Pro add-on):
          * - the cart must contain only subscription courses
          * - all courses must require the same plan id
          * - pricing is derived from the plan, not per-course price
          *
          * This keeps core unaware of plans/subscriptions tables: the add-on supplies pricing via a filter.
-         *
-         * @param array|null $pricing Null or array{ line_amounts: array<int,float>, subtotal: float }.
-         * @param int[]      $course_ids
-         * @param string     $currency
          */
         $subPricing = apply_filters('sikshya_checkout_subscription_pricing', null, $course_ids, $currency);
         if (is_array($subPricing) && isset($subPricing['line_amounts'], $subPricing['subtotal']) && is_array($subPricing['line_amounts'])) {
@@ -89,13 +141,8 @@ final class CheckoutService
         }
 
         if ($bundle_id > 0) {
-            /**
+            /*
              * Replace per-course line amounts with bundle pricing (Pro). Return null to keep summed course prices.
-             *
-             * @param array|null $pricing     Null or array{ line_amounts: array<int,float>, subtotal: float }.
-             * @param int        $bundle_id   Bundle primary key.
-             * @param int[]      $course_ids  Cart course IDs.
-             * @param string     $currency    Store currency (ISO).
              */
             $adjusted = apply_filters('sikshya_bundle_pricing_for_cart', null, $bundle_id, $course_ids, $currency);
             if (is_array($adjusted) && isset($adjusted['line_amounts'], $adjusted['subtotal']) && is_array($adjusted['line_amounts'])) {
@@ -112,14 +159,9 @@ final class CheckoutService
         if ($coupon_code !== '') {
             $coupon = $this->coupons->findActiveByCode($coupon_code);
             if ($coupon) {
-                /**
+                /*
                  * Allow Pro / extensions to block a coupon for this cart (min spend, course scope, etc.).
                  * Return a non-empty string to block checkout with that message.
-                 *
-                 * @param string   $blocked     Empty to allow, or error message.
-                 * @param object   $coupon      Coupon row.
-                 * @param int[]    $course_ids  Course IDs in the cart.
-                 * @param float    $subtotal    Cart subtotal before discount.
                  */
                 $blocked = apply_filters('sikshya_coupon_blocked_message', '', $coupon, $course_ids, $subtotal);
                 if (is_string($blocked) && $blocked !== '') {
@@ -203,12 +245,8 @@ final class CheckoutService
         if ($bundle_id > 0) {
             $meta['bundle_id'] = $bundle_id;
         }
-        /**
+        /*
          * Allow add-ons to attach checkout-mode metadata (eg. subscription plan id).
-         *
-         * @param array<string, mixed> $meta
-         * @param int[]                $course_ids
-         * @param string               $currency
          */
         $meta = apply_filters('sikshya_checkout_order_meta', $meta, array_keys($line_amounts), $currency);
 
@@ -453,10 +491,10 @@ final class CheckoutService
 
         $amount = (float) $order->total;
         $currency = strtolower((string) $order->currency);
-        $cents = (int) round($amount * 100);
+        $minor = self::toMinorUnits($amount, $currency);
 
         $body = [
-            'amount' => (string) $cents,
+            'amount' => (string) $minor,
             'currency' => $currency,
             'metadata[order_id]' => (string) $order->id,
             'automatic_payment_methods[enabled]' => 'true',
@@ -567,6 +605,8 @@ final class CheckoutService
             'purchase_units' => [
                 [
                     'reference_id' => (string) $order->id,
+                    // Bind PayPal order to Sikshya order for later integrity checks (confirm + webhook).
+                    'custom_id' => (string) $order->id,
                     'amount' => [
                         'currency_code' => $currency,
                         'value' => $value,
@@ -789,7 +829,7 @@ final class CheckoutService
         }
 
         $reference = 'skord_' . (int) $order->id . '_' . strtolower(wp_generate_password(8, false, false));
-        $amountMinor = (int) round((float) $order->total * 100);
+        $amountMinor = self::toMinorUnits((float) $order->total, $currency);
         if ($amountMinor < 1) {
             throw new \RuntimeException(__('Order total is too small for Paystack.', 'sikshya'));
         }
@@ -856,7 +896,7 @@ final class CheckoutService
             $currency = 'INR';
         }
 
-        $amountMinor = (int) round((float) $order->total * 100);
+        $amountMinor = self::toMinorUnits((float) $order->total, $currency);
         if ($amountMinor < 1) {
             throw new \RuntimeException(__('Order total is too small for Razorpay.', 'sikshya'));
         }
@@ -877,6 +917,11 @@ final class CheckoutService
                 __('Sikshya order %d', 'sikshya'),
                 (int) $order->id
             ),
+            // Bind link to order: returned back in GET (and visible in dashboard).
+            'reference_id' => (string) $order->id,
+            'notes' => [
+                'order_id' => (string) $order->id,
+            ],
             'callback_url' => $callback,
             'callback_method' => 'get',
         ];
@@ -1018,12 +1063,8 @@ final class CheckoutService
             return;
         }
 
-        /**
+        /*
          * Allow add-ons to block checkout before an order row is created (e.g. prerequisites).
-         *
-         * @param null|\WP_Error $reject     Return WP_Error to block; message is shown in REST/UI.
-         * @param int            $user_id
-         * @param int[]          $course_ids Normalized positive course IDs.
          */
         $reject = apply_filters('sikshya_checkout_validate_order_eligibility', null, $user_id, $course_ids);
         if ($reject instanceof \WP_Error) {

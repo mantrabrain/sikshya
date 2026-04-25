@@ -29,6 +29,15 @@
   box-sizing: border-box;
 }
 
+/* Accessible focus ring (standalone shell, no theme styles) */
+:where(a, button, input, select, textarea, [tabindex]):focus {
+  outline: none;
+}
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
+}
+
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
@@ -88,6 +97,8 @@ body.sikshya-account-shell {
 .sik-acc-nav {
   padding: 0.75rem 0;
   flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .sik-acc-nav__label {
@@ -113,6 +124,11 @@ body.sikshya-account-shell {
 }
 
 .sik-acc-nav a:hover {
+  background: #f8fafc;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-nav a:focus-visible {
   background: #f8fafc;
   color: var(--sik-acc-text);
 }
@@ -245,6 +261,12 @@ body.sikshya-account-shell {
   text-decoration: none;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sik-acc-btn:disabled,
+.sik-acc-btn[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .sik-acc-btn:hover {
@@ -545,6 +567,7 @@ body.sikshya-account-shell {
     flex-wrap: wrap;
     gap: 0.25rem;
     padding: 0.5rem 0.75rem 0.75rem;
+    overflow: visible;
   }
 
   .sik-acc-nav__label {

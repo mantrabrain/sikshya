@@ -224,6 +224,8 @@ final class Plugin
         \Sikshya\Certificates\CertificatePublic::boot();
         // Protect the bundled default templates from deletion (Pro can opt-out per-template).
         \Sikshya\Certificates\TemplateGuard::register();
+        // Enforce server-side gating for advanced question types (REST + editor).
+        \Sikshya\Quiz\QuestionTypeGuard::register();
 
         $stored_ver = (string) Settings::getRaw('sikshya_plugin_version', '');
         if ($stored_ver !== $this->version) {

@@ -1,11 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
-import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
-import { ButtonPrimary } from '../components/shared/buttons';
+import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { Modal } from '../components/shared/Modal';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
@@ -33,6 +34,9 @@ type ListResponse = {
   table_missing?: boolean;
 };
 
+type UserOpt = { id: number; name: string; email?: string };
+type CourseOpt = { id: number; title: string };
+
 export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
@@ -40,6 +44,18 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
+
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualSaving, setManualSaving] = useState(false);
+  const [manualMsg, setManualMsg] = useState<string | null>(null);
+  const [pickedUserId, setPickedUserId] = useState<number | null>(null);
+  const [pickedCourseId, setPickedCourseId] = useState<number | null>(null);
+  const [userQuery, setUserQuery] = useState('');
+  const [courseQuery, setCourseQuery] = useState('');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [courseDropdownOpen, setCourseDropdownOpen] = useState(false);
+  const debouncedUserQuery = useDebouncedValue(userQuery, 240);
+  const debouncedCourseQuery = useDebouncedValue(courseQuery, 240);
 
   const queryKey = useMemo(() => `${page}|${status}|${debouncedSearch}`, [page, status, debouncedSearch]);
 
@@ -64,6 +80,116 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
   const pages = data?.pages ?? 0;
   const tableMissing = Boolean(data?.table_missing);
 
+  const userSearch = useAsyncData(
+    async () => {
+      if (!manualOpen) return { data: [] as UserOpt[] };
+      if (!userDropdownOpen) return { data: [] as UserOpt[] };
+
+      const params = new URLSearchParams({
+        per_page: '20',
+        page: '1',
+        context: 'edit',
+        orderby: 'name',
+        order: 'asc',
+      });
+      const q = debouncedUserQuery.trim();
+      if (q) params.set('search', q);
+
+      const r = await getWpApi().getWithTotal<Array<{ id: number; name: string; email?: string }>>(`/users?${params.toString()}`);
+      const out = Array.isArray(r.data) ? r.data : [];
+      return { data: out.map((u) => ({ id: u.id, name: u.name, email: u.email })) };
+    },
+    [manualOpen, userDropdownOpen, debouncedUserQuery]
+  );
+
+  const courseSearch = useAsyncData(
+    async () => {
+      if (!manualOpen) return { data: [] as CourseOpt[] };
+      if (!courseDropdownOpen) return { data: [] as CourseOpt[] };
+
+      const params = new URLSearchParams({
+        per_page: '20',
+        page: '1',
+        context: 'edit',
+        _fields: 'id,title',
+      });
+      const q = debouncedCourseQuery.trim();
+      if (q) params.set('search', q);
+
+      const r = await getWpApi().getWithTotal<Array<{ id: number; title?: { rendered?: string } }>>(`/sik_course?${params.toString()}`);
+      const out = Array.isArray(r.data) ? r.data : [];
+      return {
+        data: out.map((p) => ({
+          id: p.id,
+          title: p?.title?.rendered ? String(p.title.rendered).replace(/<[^>]*>/g, '').trim() : `Course #${p.id}`,
+        })),
+      };
+    },
+    [manualOpen, courseDropdownOpen, debouncedCourseQuery]
+  );
+
+  const pickedUserLabel = useMemo(() => {
+    if (!pickedUserId) return null;
+    const hit = (userSearch.data?.data || []).find((u) => u.id === pickedUserId);
+    return hit ? (hit.email ? `${hit.name} (${hit.email})` : hit.name) : `User #${pickedUserId}`;
+  }, [pickedUserId, userSearch.data?.data]);
+
+  const pickedCourseLabel = useMemo(() => {
+    if (!pickedCourseId) return null;
+    const hit = (courseSearch.data?.data || []).find((c) => c.id === pickedCourseId);
+    return hit ? hit.title : `Course #${pickedCourseId}`;
+  }, [pickedCourseId, courseSearch.data?.data]);
+
+  useEffect(() => {
+    if (!manualOpen) {
+      return;
+    }
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (!t.closest('[data-manual-enroll-user="1"]')) setUserDropdownOpen(false);
+      if (!t.closest('[data-manual-enroll-course="1"]')) setCourseDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [manualOpen]);
+
+  const resetManual = () => {
+    setManualMsg(null);
+    setManualSaving(false);
+    setPickedUserId(null);
+    setPickedCourseId(null);
+    setUserQuery('');
+    setCourseQuery('');
+    setUserDropdownOpen(false);
+    setCourseDropdownOpen(false);
+  };
+
+  const submitManualEnroll = async () => {
+    setManualMsg(null);
+    const uid = pickedUserId || 0;
+    const cid = pickedCourseId || 0;
+    if (uid <= 0 || cid <= 0) {
+      setManualMsg('Pick a learner and a course.');
+      return;
+    }
+    setManualSaving(true);
+    try {
+      const r = await getSikshyaApi().post<{ ok?: boolean; message?: string }>(SIKSHYA_ENDPOINTS.admin.enrollmentsManual, {
+        user_id: uid,
+        course_id: cid,
+      });
+      setManualMsg(r?.message || 'Learner enrolled.');
+      setManualOpen(false);
+      resetManual();
+      refetch();
+    } catch (err) {
+      setManualMsg(err instanceof Error ? err.message : 'Request failed');
+    } finally {
+      setManualSaving(false);
+    }
+  };
+
   return (
     <AppShell
       page={config.page}
@@ -75,11 +201,170 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
       title={title}
       subtitle="Who is enrolled in which courses, with status and dates"
       pageActions={
-        <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
-          Refresh
-        </ButtonPrimary>
+        <div className="flex flex-wrap items-center gap-2">
+          <ButtonSecondary
+            type="button"
+            disabled={loading || tableMissing}
+            onClick={() => {
+              setManualOpen(true);
+              setManualMsg(null);
+            }}
+          >
+            Manual enroll
+          </ButtonSecondary>
+          <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
+            Refresh
+          </ButtonPrimary>
+        </div>
       }
     >
+      <Modal
+        open={manualOpen}
+        title="Manual enroll"
+        description="Enroll a learner into a course right now. This creates an enrollment row and initializes progress."
+        onClose={() => {
+          setManualOpen(false);
+          resetManual();
+        }}
+        size="lg"
+        footer={
+          <div className="flex items-center justify-between gap-3">
+            <ButtonSecondary
+              type="button"
+              disabled={manualSaving}
+              onClick={() => {
+                setManualOpen(false);
+                resetManual();
+              }}
+            >
+              Cancel
+            </ButtonSecondary>
+            <div className="flex items-center gap-2">
+              <ButtonPrimary type="button" disabled={manualSaving} onClick={() => void submitManualEnroll()}>
+                {manualSaving ? 'Enrolling…' : 'Enroll learner'}
+              </ButtonPrimary>
+            </div>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {manualMsg ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-200">
+              {manualMsg}
+            </div>
+          ) : null}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div data-manual-enroll-user="1">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Learner
+              </label>
+              <input
+                type="text"
+                value={userQuery}
+                onChange={(e) => {
+                  setUserQuery(e.target.value);
+                  setPickedUserId(null);
+                }}
+                onFocus={() => setUserDropdownOpen(true)}
+                placeholder="Search by name or email…"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              />
+              {pickedUserLabel ? (
+                <div className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                  Selected: <span className="font-semibold text-slate-900 dark:text-white">{pickedUserLabel}</span>
+                </div>
+              ) : null}
+              {userDropdownOpen ? (
+                <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
+                  {userSearch.loading ? (
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
+                  ) : (userSearch.data?.data || []).length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No users found.</div>
+                  ) : (
+                    <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
+                      {(userSearch.data?.data || []).map((u) => (
+                        <li key={u.id}>
+                          <button
+                            type="button"
+                            className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-900"
+                            onClick={() => {
+                              setPickedUserId(u.id);
+                              setUserQuery(u.email ? `${u.name} (${u.email})` : u.name);
+                              setUserDropdownOpen(false);
+                            }}
+                          >
+                            <span className="min-w-0">
+                              <span className="block truncate font-medium text-slate-900 dark:text-white">{u.name}</span>
+                              <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
+                                {u.email || `User #${u.id}`}
+                              </span>
+                            </span>
+                            <span className="shrink-0 text-xs text-slate-400">#{u.id}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            <div data-manual-enroll-course="1">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Course
+              </label>
+              <input
+                type="text"
+                value={courseQuery}
+                onChange={(e) => {
+                  setCourseQuery(e.target.value);
+                  setPickedCourseId(null);
+                }}
+                onFocus={() => setCourseDropdownOpen(true)}
+                placeholder="Search by course title…"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              />
+              {pickedCourseLabel ? (
+                <div className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                  Selected: <span className="font-semibold text-slate-900 dark:text-white">{pickedCourseLabel}</span>
+                </div>
+              ) : null}
+              {courseDropdownOpen ? (
+                <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
+                  {courseSearch.loading ? (
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
+                  ) : (courseSearch.data?.data || []).length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No courses found.</div>
+                  ) : (
+                    <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
+                      {(courseSearch.data?.data || []).map((c) => (
+                        <li key={c.id}>
+                          <button
+                            type="button"
+                            className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-900"
+                            onClick={() => {
+                              setPickedCourseId(c.id);
+                              setCourseQuery(c.title);
+                              setCourseDropdownOpen(false);
+                            }}
+                          >
+                            <span className="min-w-0">
+                              <span className="block truncate font-medium text-slate-900 dark:text-white">{c.title}</span>
+                            </span>
+                            <span className="shrink-0 text-xs text-slate-400">#{c.id}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </Modal>
+
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="min-w-[12rem] flex-1">
           <label htmlFor="sik-enr-search" className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

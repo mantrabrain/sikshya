@@ -26,6 +26,13 @@ $partial_path = AccountPageService::resolvePartialPath($page_model);
     <meta name="robots" content="noindex, nofollow">
     <title><?php echo esc_html($page_model->getPageTitle()); ?></title>
     <link rel="stylesheet" href="<?php echo $sheet_href; ?>">
+    <?php
+    /*
+     * Minimal extension point for account-shell pages.
+     * Note: This is NOT wp_head() intentionally (keeps the shell clean).
+     */
+    do_action('sikshya_account_shell_head', $acc, $view, $page_model);
+    ?>
 </head>
 <body class="sikshya-account-shell" data-sikshya-account-view="<?php echo esc_attr($view); ?>">
 <div class="sik-acc-app">
@@ -71,11 +78,8 @@ $partial_path = AccountPageService::resolvePartialPath($page_model);
             </a>
         </nav>
         <?php
-        /**
+        /*
          * Extra sidebar links (Pro / addons). Echo anchor rows matching `.sik-acc-nav a`.
-         *
-         * @param array<string, mixed> $acc Account template data.
-         * @param string $view Current account view slug.
          */
         do_action('sikshya_account_sidebar_nav', $acc, $view);
         ?>
@@ -120,5 +124,12 @@ $partial_path = AccountPageService::resolvePartialPath($page_model);
         </main>
     </div>
 </div>
+<?php
+/*
+ * Minimal footer hook for account shell pages (for add-ons scripts).
+ * Note: This is NOT wp_footer() intentionally.
+ */
+do_action('sikshya_account_shell_footer', $acc, $view, $page_model);
+?>
 </body>
 </html>

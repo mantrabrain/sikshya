@@ -236,6 +236,15 @@ class CheckoutRestRoutes
             );
         }
 
+        // Integrity guard: only allow confirming orders still awaiting payment.
+        $status = isset($order->status) ? (string) $order->status : '';
+        if (!in_array($status, ['pending', 'on-hold'], true)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'order_not_confirmable', 'message' => __('Order is not awaiting payment.', 'sikshya')],
+                400
+            );
+        }
+
         if ($gateway === 'stripe') {
             if ($pi === '') {
                 return new WP_REST_Response(
@@ -244,10 +253,36 @@ class CheckoutRestRoutes
                 );
             }
             $json = $this->checkoutService()->retrieveStripePaymentIntent($pi);
-            $status = is_array($json) ? (string) ($json['status'] ?? '') : '';
-            if ($status !== 'succeeded') {
+            $pi_status = is_array($json) ? (string) ($json['status'] ?? '') : '';
+            if ($pi_status !== 'succeeded') {
                 return new WP_REST_Response(
                     ['ok' => false, 'code' => 'payment_pending', 'message' => __('Payment not completed.', 'sikshya')],
+                    400
+                );
+            }
+            // Bind intent → order: verify metadata and money.
+            $md_order = is_array($json) && isset($json['metadata']['order_id']) ? (int) $json['metadata']['order_id'] : 0;
+            if ($md_order > 0 && $md_order !== (int) $order->id) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'intent_mismatch', 'message' => __('Payment intent does not match this order.', 'sikshya')],
+                    400
+                );
+            }
+            $pi_amount = is_array($json) && isset($json['amount_received']) ? (int) $json['amount_received'] : 0;
+            if ($pi_amount <= 0 && is_array($json) && isset($json['amount'])) {
+                $pi_amount = (int) $json['amount'];
+            }
+            $pi_cur = is_array($json) && isset($json['currency']) ? strtoupper((string) $json['currency']) : '';
+            $expected_minor = \Sikshya\Commerce\CheckoutService::toMinorUnits((float) $order->total, (string) $order->currency);
+            if ($pi_cur !== '' && $pi_cur !== strtoupper((string) $order->currency)) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'currency_mismatch', 'message' => __('Currency mismatch for this order.', 'sikshya')],
+                    400
+                );
+            }
+            if ($pi_amount > 0 && $expected_minor > 0 && $pi_amount !== $expected_minor) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'amount_mismatch', 'message' => __('Payment amount does not match this order.', 'sikshya')],
                     400
                 );
             }
@@ -263,6 +298,29 @@ class CheckoutRestRoutes
             if ($cap_status !== 'COMPLETED') {
                 return new WP_REST_Response(
                     ['ok' => false, 'code' => 'payment_pending', 'message' => __('PayPal capture failed.', 'sikshya')],
+                    400
+                );
+            }
+            // Bind capture → order: check purchase_units money and optional custom_id.
+            $pu0 = is_array($cap) && isset($cap['purchase_units'][0]) && is_array($cap['purchase_units'][0]) ? $cap['purchase_units'][0] : null;
+            $custom_id = is_array($pu0) && isset($pu0['custom_id']) ? (string) $pu0['custom_id'] : '';
+            if ($custom_id !== '' && $custom_id !== (string) $order->id) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'paypal_order_mismatch', 'message' => __('PayPal order does not match this order.', 'sikshya')],
+                    400
+                );
+            }
+            $amt = is_array($pu0) && isset($pu0['amount']['value']) ? (float) $pu0['amount']['value'] : null;
+            $cur = is_array($pu0) && isset($pu0['amount']['currency_code']) ? (string) $pu0['amount']['currency_code'] : '';
+            if (is_string($cur) && $cur !== '' && strtoupper($cur) !== strtoupper((string) $order->currency)) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'currency_mismatch', 'message' => __('Currency mismatch for this order.', 'sikshya')],
+                    400
+                );
+            }
+            if (is_float($amt) && $amt >= 0 && abs($amt - (float) $order->total) > 0.009) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'amount_mismatch', 'message' => __('Payment amount does not match this order.', 'sikshya')],
                     400
                 );
             }
@@ -282,6 +340,28 @@ class CheckoutRestRoutes
                     400
                 );
             }
+            // Bind Mollie payment → order by metadata + money.
+            $md_oid = is_array($m) && isset($m['metadata']['order_id']) ? (string) $m['metadata']['order_id'] : '';
+            if ($md_oid !== '' && $md_oid !== (string) $order->id) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'mollie_order_mismatch', 'message' => __('Mollie payment does not match this order.', 'sikshya')],
+                    400
+                );
+            }
+            $mcur = is_array($m) && isset($m['amount']['currency']) ? strtoupper((string) $m['amount']['currency']) : '';
+            $mval = is_array($m) && isset($m['amount']['value']) ? (float) $m['amount']['value'] : null;
+            if ($mcur !== '' && $mcur !== strtoupper((string) $order->currency)) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'currency_mismatch', 'message' => __('Currency mismatch for this order.', 'sikshya')],
+                    400
+                );
+            }
+            if (is_float($mval) && $mval >= 0 && abs($mval - (float) $order->total) > 0.009) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'amount_mismatch', 'message' => __('Payment amount does not match this order.', 'sikshya')],
+                    400
+                );
+            }
         } elseif ($gateway === 'paystack') {
             $ref = $paystack_reference !== '' ? $paystack_reference : (string) ($order->gateway_intent_id ?? '');
             if ($ref === '') {
@@ -294,6 +374,29 @@ class CheckoutRestRoutes
             if (!$data || (string) ($data['status'] ?? '') !== 'success') {
                 return new WP_REST_Response(
                     ['ok' => false, 'code' => 'payment_pending', 'message' => __('Paystack payment not verified.', 'sikshya')],
+                    400
+                );
+            }
+            // Bind Paystack tx → order by metadata + money.
+            $md_oid = is_array($data) && isset($data['metadata']['order_id']) ? (string) $data['metadata']['order_id'] : '';
+            if ($md_oid !== '' && $md_oid !== (string) $order->id) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'paystack_order_mismatch', 'message' => __('Paystack payment does not match this order.', 'sikshya')],
+                    400
+                );
+            }
+            $pcur = is_array($data) && isset($data['currency']) ? strtoupper((string) $data['currency']) : '';
+            $pamt = is_array($data) && isset($data['amount']) ? (int) $data['amount'] : 0; // minor units
+            $expected_minor = \Sikshya\Commerce\CheckoutService::toMinorUnits((float) $order->total, (string) $order->currency);
+            if ($pcur !== '' && $pcur !== strtoupper((string) $order->currency)) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'currency_mismatch', 'message' => __('Currency mismatch for this order.', 'sikshya')],
+                    400
+                );
+            }
+            if ($pamt > 0 && $expected_minor > 0 && $pamt !== $expected_minor) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'amount_mismatch', 'message' => __('Payment amount does not match this order.', 'sikshya')],
                     400
                 );
             }
@@ -310,6 +413,31 @@ class CheckoutRestRoutes
             if ($st !== 'paid') {
                 return new WP_REST_Response(
                     ['ok' => false, 'code' => 'payment_pending', 'message' => __('Razorpay payment link not paid yet.', 'sikshya')],
+                    400
+                );
+            }
+            // Bind Razorpay link → order by reference/notes + money.
+            $refId = is_array($link) && isset($link['reference_id']) ? (string) $link['reference_id'] : '';
+            $noteId = is_array($link) && isset($link['notes']['order_id']) ? (string) $link['notes']['order_id'] : '';
+            $bound = $refId !== '' ? $refId : $noteId;
+            if ($bound !== '' && $bound !== (string) $order->id) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'razorpay_order_mismatch', 'message' => __('Razorpay payment does not match this order.', 'sikshya')],
+                    400
+                );
+            }
+            $rcur = is_array($link) && isset($link['currency']) ? strtoupper((string) $link['currency']) : '';
+            $ramt = is_array($link) && isset($link['amount']) ? (int) $link['amount'] : 0; // minor units
+            $expected_minor = \Sikshya\Commerce\CheckoutService::toMinorUnits((float) $order->total, (string) $order->currency);
+            if ($rcur !== '' && $rcur !== strtoupper((string) $order->currency)) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'currency_mismatch', 'message' => __('Currency mismatch for this order.', 'sikshya')],
+                    400
+                );
+            }
+            if ($ramt > 0 && $expected_minor > 0 && $ramt !== $expected_minor) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'amount_mismatch', 'message' => __('Payment amount does not match this order.', 'sikshya')],
                     400
                 );
             }

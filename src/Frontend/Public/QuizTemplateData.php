@@ -170,10 +170,17 @@ final class QuizTemplateData
         $global_reviews = Settings::isTruthy(Settings::get('enable_reviews', true));
         $global_ratings = Settings::isTruthy(Settings::get('enable_ratings', true));
 
+        // Learn-page tabs should only show when the UI exists.
+        $reviews_available = (bool) apply_filters('sikshya_feature_reviews_available', false, $course_id, 'learn');
+        $discussions_available = (bool) apply_filters('sikshya_feature_discussions_available', false, $course_id, 'learn');
+
         return [
-            'reviews' => $global_reviews && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
+            'reviews' => $reviews_available
+                && $global_reviews
+                && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
             'ratings' => $global_ratings,
-            'discussions' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
+            'discussions' => $discussions_available
+                && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
             'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
             'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),
         ];

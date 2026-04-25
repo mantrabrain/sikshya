@@ -86,7 +86,7 @@ export function AppShell({
   const { shellAlerts, proPluginVersion, licensing } = useShellState();
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-50 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <Sidebar
         items={navigation}
         currentPage={sidebarActivePage ?? page}
