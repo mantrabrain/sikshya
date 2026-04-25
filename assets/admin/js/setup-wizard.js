@@ -82,9 +82,10 @@
       return { step: 4, learn_permalink_use_public_id: r ? r.value : '1' };
     }
     if (step === 5) {
-      const sample = form.querySelector('[name="import_sample_data"]');
-      const wantsSample = sample && 'checked' in sample ? !!sample.checked : false;
-      return { step: 5, import_sample_data: wantsSample ? '1' : '0' };
+      // Sample-course import is its own button on the Finish step (see
+      // sample-import handler below); the Finish click only marks the
+      // wizard complete.
+      return { step: 5 };
     }
     return { step };
   }
@@ -93,10 +94,7 @@
     return current >= 5 ? btnFinish : btnNext;
   }
 
-  function getBusyLabel(payload) {
-    if (current >= 5 && payload && payload.import_sample_data === '1') {
-      return (cfg.strings && cfg.strings.importing) || 'Importing sample data…';
-    }
+  function getBusyLabel() {
     return (cfg.strings && cfg.strings.saving) || 'Saving…';
   }
 
@@ -109,7 +107,7 @@
     const prevLabel = bus ? bus.textContent : '';
     if (bus) {
       bus.disabled = true;
-      bus.textContent = getBusyLabel(payload);
+      bus.textContent = getBusyLabel();
     }
     if (current < 5) btnFinish.disabled = true;
 
@@ -169,4 +167,120 @@
     e.preventDefault();
     saveAndGo();
   });
+
+  // ----- Add sample course (Finish step) ----------------------------------
+  // The button is independent of Finish setup: clicking it imports the
+  // bundled `default` sample pack via the dedicated REST endpoint and
+  // shows inline feedback. Finish setup itself just marks the wizard
+  // complete, so users can:
+  //   - skip the import entirely (just click Finish setup), OR
+  //   - click "Add sample course" first, watch it succeed, then Finish.
+  // The PHP endpoint also writes the result to a per-user transient, so
+  // the celebration screen can summarize what was created either way.
+  const sampleBtn = root.querySelector('[data-setup-sample-import]');
+  if (sampleBtn && cfg.sampleImportUrl) {
+    const labelEl = sampleBtn.querySelector('[data-setup-sample-label]');
+    const helperEl = root.querySelector('[data-setup-sample-helper]');
+    const statusEl = root.querySelector('[data-setup-sample-status]');
+    const COUNT_LABELS = {
+      courses: 'courses',
+      chapters: 'chapters',
+      lessons: 'lessons',
+      quizzes: 'quizzes',
+      questions: 'questions',
+      assignments: 'assignments',
+    };
+
+    function setSampleStatus(kind, html) {
+      if (!statusEl) return;
+      if (!kind) {
+        statusEl.removeAttribute('data-kind');
+        statusEl.innerHTML = '';
+        statusEl.setAttribute('hidden', '');
+        return;
+      }
+      statusEl.setAttribute('data-kind', kind);
+      statusEl.innerHTML = html;
+      statusEl.removeAttribute('hidden');
+    }
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function summarizeCounts(counts) {
+      if (!counts || typeof counts !== 'object') return '';
+      const bits = [];
+      Object.keys(COUNT_LABELS).forEach((k) => {
+        const n = parseInt(counts[k], 10) || 0;
+        if (n > 0) bits.push(`${n} ${COUNT_LABELS[k]}`);
+      });
+      return bits.join(', ');
+    }
+
+    sampleBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (sampleBtn.disabled) return;
+
+      const originalLabel = labelEl ? labelEl.textContent : '';
+      const busyText = (cfg.strings && cfg.strings.sampleAdding) || 'Adding sample course…';
+      sampleBtn.disabled = true;
+      sampleBtn.classList.add('is-busy');
+      if (labelEl) labelEl.textContent = busyText;
+      if (helperEl) helperEl.setAttribute('hidden', '');
+      setSampleStatus('busy', `<span class="sikshya-setup__sample-spinner" aria-hidden="true"></span>${escHtml(busyText)}`);
+
+      try {
+        const res = await fetch(cfg.sampleImportUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': cfg.nonce,
+          },
+          body: '{}',
+          credentials: 'same-origin',
+        });
+        const body = await res.json().catch(() => ({}));
+
+        if (res.ok && body && body.success) {
+          const counts = (body.data && body.data.counts) || {};
+          const okText = (cfg.strings && cfg.strings.sampleAdded) || 'Sample course added.';
+          const summary = summarizeCounts(counts);
+          const viewLabel = (cfg.strings && cfg.strings.sampleViewCourses) || 'View courses';
+          const link = cfg.coursesUrl
+            ? ` <a class="sikshya-setup__inline-link" href="${escHtml(cfg.coursesUrl)}">${escHtml(viewLabel)}</a>`
+            : '';
+          setSampleStatus(
+            'ok',
+            `<strong>${escHtml(okText)}</strong>${summary ? ` ${escHtml(`Created ${summary}.`)}` : ''}${link}`
+          );
+          if (labelEl) labelEl.textContent = okText;
+          sampleBtn.setAttribute('aria-disabled', 'true');
+          // Leave button disabled — the import is one-shot per wizard run.
+          return;
+        }
+
+        const failText = (cfg.strings && cfg.strings.sampleAddFailed) || 'Sample course could not be added.';
+        const reason = (body && body.message) ? String(body.message) : '';
+        setSampleStatus('error', `<strong>${escHtml(failText)}</strong>${reason ? ` ${escHtml(reason)}` : ''}`);
+        sampleBtn.disabled = false;
+        sampleBtn.classList.remove('is-busy');
+        if (labelEl) labelEl.textContent = originalLabel;
+        if (helperEl) helperEl.removeAttribute('hidden');
+      } catch (err) {
+        const failText = (cfg.strings && cfg.strings.sampleAddFailed) || 'Sample course could not be added.';
+        const reason = err && err.message ? String(err.message) : 'Network error';
+        setSampleStatus('error', `<strong>${escHtml(failText)}</strong> ${escHtml(reason)}`);
+        sampleBtn.disabled = false;
+        sampleBtn.classList.remove('is-busy');
+        if (labelEl) labelEl.textContent = originalLabel;
+        if (helperEl) helperEl.removeAttribute('hidden');
+      }
+    });
+  }
 })();

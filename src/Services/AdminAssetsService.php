@@ -168,13 +168,19 @@ class AdminAssetsService
                 'sikshyaSetupWizard',
                 [
                     'restUrl' => esc_url_raw(rest_url('sikshya/v1/admin/setup-wizard/step')),
+                    'sampleImportUrl' => esc_url_raw(rest_url('sikshya/v1/admin/setup-wizard/sample-import')),
+                    'coursesUrl' => esc_url_raw(admin_url('admin.php?page=sikshya&view=courses')),
                     'nonce' => wp_create_nonce('wp_rest'),
                     'dashboardUrl' => esc_url_raw(admin_url('admin.php?page=sikshya')),
                     'siteUrl' => esc_url_raw(home_url('/')),
                     'strings' => [
                         'saving' => __('Saving…', 'sikshya'),
-                        'importing' => __('Importing sample data…', 'sikshya'),
                         'confirmSkipAll' => __('Skip setup? You can re-run the wizard anytime from Sikshya → Tools.', 'sikshya'),
+                        'sampleAddLabel' => __('Add sample course', 'sikshya'),
+                        'sampleAdding' => __('Adding sample course…', 'sikshya'),
+                        'sampleAdded' => __('Sample course added.', 'sikshya'),
+                        'sampleAddFailed' => __('Sample course could not be added.', 'sikshya'),
+                        'sampleViewCourses' => __('View courses', 'sikshya'),
                     ],
                 ]
             );

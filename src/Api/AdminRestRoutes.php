@@ -314,6 +314,14 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/admin/setup-wizard/sample-import', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'importSetupWizardSample'],
+                'permission_callback' => [$this, 'permissionTools'],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/post-status-counts', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -1486,6 +1494,32 @@ class AdminRestRoutes
                 'next_url' => $next_url,
             ],
             200
+        );
+    }
+
+    /**
+     * Setup wizard "Add sample course" button.
+     *
+     * Triggers a one-shot import of the bundled `default` sample pack and
+     * stashes the result in a per-user transient so the celebration screen
+     * can summarize what was created. Returns a normalized payload to the JS
+     * caller so the inline UI can render success / failure immediately.
+     */
+    public function importSetupWizardSample(WP_REST_Request $request): WP_REST_Response
+    {
+        unset($request);
+
+        $payload = SetupWizardController::importBundledSampleCourse($this->plugin);
+
+        return new WP_REST_Response(
+            [
+                'success' => (bool) $payload['success'],
+                'message' => (string) $payload['message'],
+                'data' => [
+                    'counts' => isset($payload['counts']) && is_array($payload['counts']) ? $payload['counts'] : [],
+                ],
+            ],
+            $payload['success'] ? 200 : 400
         );
     }
 

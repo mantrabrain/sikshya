@@ -1032,43 +1032,39 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
   color: var(--muted);
 }
 
-/* ==== Sample data card (Finish step) ==== */
+/* ==== Sample data card (Finish step) ============================
+ * The card is no longer a clickable label; the import is driven by the
+ * dedicated "Add sample course" button so users can choose to import or
+ * just continue to Finish setup. The card frames the action visually
+ * (title + tag + helper text + button + inline status row).
+ */
 .sikshya-setup__sample {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   margin-top: 18px;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: 12px;
   border: 1px solid var(--border-soft);
   background: #f8fafc;
-  cursor: pointer;
-  transition: border-color 120ms ease, background 120ms ease;
+  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
-.sikshya-setup__sample:hover {
+.sikshya-setup__sample--action {
+  cursor: default;
+}
+
+.sikshya-setup__sample--action:hover {
   border-color: rgb(186 230 253);
   background: rgb(240 249 255);
-}
-
-.sikshya-setup__sample:has(input[type="checkbox"]:checked) {
-  border-color: var(--primary);
-  background: var(--primary-soft);
-}
-
-.sikshya-setup__sample input[type="checkbox"] {
-  margin-top: 3px;
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary);
-  flex-shrink: 0;
 }
 
 .sikshya-setup__sample-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
+  flex: 1;
 }
 
 .sikshya-setup__sample-head {
@@ -1098,9 +1094,124 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
 }
 
 .sikshya-setup__sample-text {
+  margin: 0;
   color: rgb(71 85 105);
   font-size: 12.5px;
   line-height: 1.5;
+}
+
+.sikshya-setup__sample-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.sikshya-setup__sample-helper {
+  color: rgb(100 116 139);
+  font-size: 12px;
+}
+
+/* Secondary button used by the “Add sample course” action.
+ * Slightly quieter than the primary blue so it never competes with
+ * “Finish setup”, but with enough visual weight to read as a CTA. */
+.sikshya-setup__btn--secondary {
+  background: #ffffff;
+  color: var(--primary-strong, rgb(29 78 216));
+  border: 1px solid rgb(186 230 253);
+  box-shadow: 0 1px 0 rgb(15 23 42 / 4%);
+}
+
+.sikshya-setup__btn--secondary:hover {
+  background: rgb(239 246 255);
+  border-color: var(--primary);
+  color: var(--primary-strong, rgb(29 78 216));
+}
+
+.sikshya-setup__btn--secondary:focus,
+.sikshya-setup__btn--secondary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sikshya-setup__sample-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sikshya-setup__sample-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.sikshya-setup__sample-btn.is-busy .sikshya-setup__sample-btn-icon {
+  animation: sikshya-setup-bounce 1s ease-in-out infinite;
+}
+
+@keyframes sikshya-setup-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+/* Inline status row directly below the button (busy / ok / error).
+ * Kept inside the card so success or failure stays anchored to the action
+ * that produced it. */
+.sikshya-setup__sample-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.sikshya-setup__sample-status[data-kind="busy"] {
+  background: rgb(241 245 249);
+  border-color: rgb(226 232 240);
+  color: rgb(51 65 85);
+}
+
+.sikshya-setup__sample-status[data-kind="ok"] {
+  background: rgb(220 252 231);
+  border-color: rgb(187 247 208);
+  color: rgb(22 101 52);
+}
+
+.sikshya-setup__sample-status[data-kind="error"] {
+  background: rgb(254 226 226);
+  border-color: rgb(252 165 165);
+  color: rgb(153 27 27);
+}
+
+.sikshya-setup__sample-status strong {
+  font-weight: 700;
+}
+
+.sikshya-setup__sample-status .sikshya-setup__inline-link {
+  margin-left: 6px;
+  font-weight: 600;
+}
+
+.sikshya-setup__sample-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid rgb(148 163 184);
+  border-top-color: transparent;
+  display: inline-block;
+  animation: sikshya-setup-spin 800ms linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sikshya-setup-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ==== Sample import result (celebration screen) ==== */

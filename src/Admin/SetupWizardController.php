@@ -118,12 +118,11 @@ final class SetupWizardController
             Settings::set('setup_completed', '1');
             flush_rewrite_rules(false);
             do_action('sikshya_usage_setup_wizard_completed');
-            // Optional sample-data import is non-blocking: a failure does not
-            // prevent the wizard from completing — the result is surfaced on
-            // the celebration screen instead.
-            if ($plugin !== null) {
-                self::maybeImportSampleData($data, $plugin);
-            }
+            // Sample-course import is now a separate, on-demand action driven
+            // by the “Add sample course” button on the Finish step (see the
+            // dedicated REST endpoint), so Finish setup stays a single-purpose
+            // “mark wizard complete” call.
+            unset($plugin);
 
             return ['success' => true, 'errors' => []];
         }
@@ -249,28 +248,20 @@ final class SetupWizardController
     }
 
     /**
-     * Optional “Add sample course” checkbox on the Finish step.
+     * Run the bundled sample-course import once, on demand.
      *
-     * Imports the bundled `sample-data/sample-lms.json` pack via the existing
-     * Tools importer and stashes the result in a per-user transient so the
-     * celebration screen can show "Sample course added — created N lessons…".
+     * Imports `sample-data/sample-lms.json` (the `default` pack) via the
+     * existing Tools importer and stashes the result in a per-user transient
+     * so the celebration screen can show "Sample course added — created N
+     * lessons…" right after the user clicks Finish setup.
      *
-     * Failures are NEVER fatal: the wizard always completes, and any error
-     * message from the import service is surfaced as a quiet notice on the
-     * celebration screen.
+     * Always returns a normalized payload — never throws — so the wizard
+     * can keep moving even when the importer hits an edge case.
      *
-     * @param array<string, mixed> $data
+     * @return array{success: bool, message: string, counts: array<string,int>}
      */
-    private static function maybeImportSampleData(array $data, Plugin $plugin): void
+    public static function importBundledSampleCourse(Plugin $plugin): array
     {
-        $raw = isset($data['import_sample_data']) ? wp_unslash((string) $data['import_sample_data']) : '0';
-        $val = sanitize_key((string) $raw);
-        $wants = ($val === '1' || $val === 'yes' || $val === 'on' || $val === 'true');
-        if (!$wants) {
-            return;
-        }
-
-        // Pack key is fixed for the wizard: ships with `sample-data/sample-lms.json`.
         try {
             $result = (new SampleDataController($plugin))->importByPackKey('default');
         } catch (\Throwable $e) {
@@ -286,9 +277,16 @@ final class SetupWizardController
             'counts' => isset($result['counts']) && is_array($result['counts']) ? $result['counts'] : [],
         ];
 
-        // 5 minutes is plenty for the redirect-to-celebration round-trip; we also
-        // delete it explicitly after rendering so it never lingers across logins.
-        set_transient(self::SAMPLE_RESULT_TRANSIENT_PREFIX . get_current_user_id(), $payload, 5 * MINUTE_IN_SECONDS);
+        // 5 minutes is plenty for the click → Finish setup → celebration
+        // round-trip; the celebration renderer also deletes the transient
+        // explicitly so it never lingers across logins.
+        set_transient(
+            self::SAMPLE_RESULT_TRANSIENT_PREFIX . get_current_user_id(),
+            $payload,
+            5 * MINUTE_IN_SECONDS
+        );
+
+        return $payload;
     }
 
     /**
@@ -512,8 +510,10 @@ final class SetupWizardController
         Settings::set('setup_completed', '1');
         flush_rewrite_rules(false);
         do_action('sikshya_usage_setup_wizard_completed');
-        // Optional: import the bundled sample course on Finish (noscript path).
-        self::maybeImportSampleData($_POST, $this->plugin);
+        // Sample-course import is now an explicit, button-driven action on
+        // the Finish step — see self::importBundledSampleCourse() and the
+        // dedicated REST endpoint. Finish setup itself just marks the wizard
+        // complete.
     }
 }
 

@@ -508,22 +508,39 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
                     </div>
                 </div>
 
-                <label class="sikshya-setup__sample">
-                    <input type="checkbox" name="import_sample_data" value="1" />
-                    <span class="sikshya-setup__sample-body">
-                        <span class="sikshya-setup__sample-head">
+                <div class="sikshya-setup__sample sikshya-setup__sample--action" data-setup-sample>
+                    <div class="sikshya-setup__sample-body">
+                        <div class="sikshya-setup__sample-head">
                             <span class="sikshya-setup__sample-title">
                                 <?php esc_html_e('Add a sample course (optional)', 'sikshya'); ?>
                             </span>
                             <span class="sikshya-setup__sample-tag">
                                 <?php esc_html_e('Great for first-time setup', 'sikshya'); ?>
                             </span>
-                        </span>
-                        <span class="sikshya-setup__sample-text">
+                        </div>
+                        <p class="sikshya-setup__sample-text">
                             <?php esc_html_e('Creates one demo course with chapters, lessons, a quiz, and an assignment so you can click around immediately. You can delete it anytime from Courses.', 'sikshya'); ?>
-                        </span>
-                    </span>
-                </label>
+                        </p>
+                        <div class="sikshya-setup__sample-row">
+                            <button
+                                type="button"
+                                class="sikshya-setup__btn sikshya-setup__btn--secondary sikshya-setup__sample-btn"
+                                data-setup-sample-import
+                            >
+                                <span class="sikshya-setup__sample-btn-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 16 16" width="14" height="14">
+                                        <path d="M8 3v8m0 0 3-3m-3 3-3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span data-setup-sample-label><?php esc_html_e('Add sample course', 'sikshya'); ?></span>
+                            </button>
+                            <span class="sikshya-setup__sample-helper" data-setup-sample-helper>
+                                <?php esc_html_e('Takes a few seconds. You can keep clicking Finish setup either way.', 'sikshya'); ?>
+                            </span>
+                        </div>
+                        <div class="sikshya-setup__sample-status" data-setup-sample-status hidden role="status" aria-live="polite"></div>
+                    </div>
+                </div>
 
                 <p class="sikshya-setup__tip">
                     <?php esc_html_e('Tip: enable Offline payment first to test checkout without API keys.', 'sikshya'); ?>
