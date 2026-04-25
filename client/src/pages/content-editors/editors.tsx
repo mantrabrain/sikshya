@@ -1095,6 +1095,7 @@ export function QuizEditor(props: ContentEditorProps) {
         </div>
       </section>
       <AddQuestionAuthoringModal
+        config={config}
         open={addQuestionOpen}
         onClose={() => setAddQuestionOpen(false)}
         onCreated={(id) => {

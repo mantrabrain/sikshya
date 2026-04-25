@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getWpApi } from '../../api';
 import { NavIcon } from '../NavIcon';
 import { ApiErrorPanel } from './ApiErrorPanel';
@@ -6,6 +6,10 @@ import { ButtonPrimary } from './buttons';
 import { HorizontalEditorTabs } from './HorizontalEditorTabs';
 import { Modal } from './Modal';
 import { WPMediaPickerField } from './WPMediaPickerField';
+import type { SikshyaReactConfig } from '../../types';
+import { appViewHref } from '../../lib/appUrl';
+import { isFeatureEnabled } from '../../lib/licensing';
+import { useAddonEnabled } from '../../hooks/useAddons';
 import {
   PRO_QUESTION_DEFAULTS,
   ProQuestionFields,
@@ -28,6 +32,8 @@ type PickerOpt = {
   label: string;
   hint: string;
   icon: 'helpCircle' | 'puzzle' | 'layers' | 'plusDocument';
+  /** When true, this question type requires the Advanced Quiz addon (Pro). */
+  requiresAdvancedQuiz?: boolean;
 };
 
 export const QUESTION_PICKER_TYPES: PickerOpt[] = [
@@ -43,6 +49,7 @@ export const QUESTION_PICKER_TYPES: PickerOpt[] = [
     label: 'Multiple response',
     hint: 'Learner can select more than one correct option.',
     icon: 'layers',
+    requiresAdvancedQuiz: true,
   },
   {
     type: 'short_answer',
@@ -55,24 +62,28 @@ export const QUESTION_PICKER_TYPES: PickerOpt[] = [
     label: 'Fill in the blank',
     hint: 'A short prompt with a missing word or phrase.',
     icon: 'puzzle',
+    requiresAdvancedQuiz: true,
   },
   {
     type: 'matching',
     label: 'Matching',
     hint: 'Pair items from two columns.',
     icon: 'layers',
+    requiresAdvancedQuiz: true,
   },
   {
     type: 'ordering',
     label: 'Ordering',
     hint: 'Reorder items into the correct sequence.',
     icon: 'layers',
+    requiresAdvancedQuiz: true,
   },
   {
     type: 'essay',
     label: 'Essay',
     hint: 'Long-form response, typically manually graded.',
     icon: 'helpCircle',
+    requiresAdvancedQuiz: true,
   },
 ];
 
@@ -225,6 +236,7 @@ function buildCreateBody(params: {
 }
 
 type Props = {
+  config: SikshyaReactConfig;
   open: boolean;
   onClose: () => void;
   onCreated: (questionId: number) => void;
@@ -236,7 +248,22 @@ type Props = {
  * Full “Content library → New question” authoring experience inside a modal (same fields as QuestionEditor).
  */
 export function AddQuestionAuthoringModal(props: Props) {
-  const { open, onClose, onCreated, onPickExisting, pickExistingLabel = 'Add to quiz' } = props;
+  const { config, open, onClose, onCreated, onPickExisting, pickExistingLabel = 'Add to quiz' } = props;
+
+  const advFeatureOk = isFeatureEnabled(config, 'quiz_advanced');
+  const advAddon = useAddonEnabled('quiz_advanced');
+  const canUseAdvancedTypes = useMemo(() => {
+    if (!advFeatureOk) return false;
+    if (advAddon.loading) return false;
+    return Boolean(advAddon.enabled);
+  }, [advAddon.enabled, advAddon.loading, advFeatureOk]);
+  const addonsHref = useMemo(() => appViewHref(config, 'addons'), [config]);
+
+  const isLockedType = useMemo(() => {
+    const locked = new Map<QuestionType, boolean>();
+    QUESTION_PICKER_TYPES.forEach((t) => locked.set(t.type, Boolean(t.requiresAdvancedQuiz) && !canUseAdvancedTypes));
+    return (t: QuestionType) => Boolean(locked.get(t));
+  }, [canUseAdvancedTypes]);
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -329,6 +356,11 @@ export function AddQuestionAuthoringModal(props: Props) {
   }, [librarySearch, open]);
 
   const onTypeChange = (v: string) => {
+    setError(null);
+    if (isLockedType(v as QuestionType)) {
+      setError(new Error('This question type requires the Advanced Quiz add-on.'));
+      return;
+    }
     setQType(v);
     if (v === 'true_false') {
       setCorrectAnswer('true');
@@ -396,6 +428,10 @@ export function AddQuestionAuthoringModal(props: Props) {
   const submitCreate = () => {
     const stem = title.trim();
     if (!stem || !qType) {
+      return;
+    }
+    if (isLockedType(qType as QuestionType)) {
+      setError(new Error('This question type requires the Advanced Quiz add-on.'));
       return;
     }
     setBusy(true);
@@ -562,13 +598,31 @@ export function AddQuestionAuthoringModal(props: Props) {
                               <button
                                 key={t.type}
                                 type="button"
-                                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                                disabled={isLockedType(t.type)}
+                                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                                  isLockedType(t.type)
+                                    ? 'cursor-not-allowed border-amber-200 bg-amber-50 text-amber-900 opacity-80 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200'
+                                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                                }`}
                                 onClick={() => onTypeChange(t.type)}
                               >
                                 {t.label}
+                                {t.requiresAdvancedQuiz ? <span className="ml-1">• Pro</span> : null}
                               </button>
                             ))}
                           </div>
+                          {!canUseAdvancedTypes ? (
+                            <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                              Advanced question types are available in{' '}
+                              <a
+                                href={addonsHref}
+                                className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
+                              >
+                                Advanced Quiz
+                              </a>
+                              .
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -1073,16 +1127,20 @@ export function AddQuestionAuthoringModal(props: Props) {
           <ul className="max-h-[min(60vh,22rem)] overflow-y-auto p-2">
             {QUESTION_PICKER_TYPES.map((t) => {
               const active = qType === t.type;
+              const locked = isLockedType(t.type);
               return (
                 <li key={t.type}>
                   <button
                     type="button"
                     role="option"
                     aria-selected={active}
+                    disabled={locked}
                     className={`flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
                       active
                         ? 'bg-brand-50 text-brand-900 dark:bg-brand-950/40 dark:text-brand-100'
-                        : 'text-slate-800 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                        : locked
+                          ? 'cursor-not-allowed text-slate-500 opacity-75 dark:text-slate-400'
+                          : 'text-slate-800 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                     onClick={() => {
                       onTypeChange(t.type);
@@ -1098,8 +1156,20 @@ export function AddQuestionAuthoringModal(props: Props) {
                       <NavIcon name={t.icon} className="h-4 w-4" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold leading-snug">{t.label}</span>
+                      <span className="flex flex-wrap items-center gap-2 text-sm font-semibold leading-snug">
+                        <span>{t.label}</span>
+                        {t.requiresAdvancedQuiz ? (
+                          <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
+                            Pro
+                          </span>
+                        ) : null}
+                      </span>
                       <span className="mt-0.5 block text-xs leading-snug text-slate-500 dark:text-slate-400">{t.hint}</span>
+                      {locked ? (
+                        <span className="mt-1 block text-[11px] font-medium text-amber-800 dark:text-amber-200">
+                          Enable Advanced Quiz add-on to use this type.
+                        </span>
+                      ) : null}
                     </span>
                   </button>
                 </li>
