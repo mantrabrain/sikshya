@@ -80,7 +80,7 @@ final class CertificateRenderer
     {
         $src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' . rawurlencode($target_url);
         return '<img class="sikshya-cert-qr" src="' . esc_url($src)
-            . '" width="140" height="140" alt="" loading="lazy" style="width:100%;height:100%;max-width:140px;max-height:140px;object-fit:contain;" />';
+            . '" width="140" height="140" alt="" loading="lazy" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;max-width:140px;max-height:140px;object-fit:contain;" />';
     }
 
     public static function wrap(string $inner, string $title, int $template_id = 0, string $share_url = '', string $hash = '', bool $show_controls = true, string $meta_line = ''): string
@@ -167,9 +167,17 @@ final class CertificateRenderer
             . 'async function rasterToJpegDataUrl(pngDataUrl,q){var img=await new Promise(function(resolve,reject){var i=new Image();i.onload=function(){resolve(i);};i.onerror=function(){reject(new Error("image load failed"));};i.src=pngDataUrl;});'
             . 'var c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;var ctx=c.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0);return c.toDataURL("image/jpeg",q);}'
             . 'async function captureRasterPngDataUrl(){var el=document.getElementById("sikshya-cert-sheet");if(!el){throw new Error("missing sheet");}var m=capturePixelRatio(el);'
+            . 'function shouldKeepNode(node){try{if(!node||node.nodeType!==1){return true;}'
+            . 'if(node.classList&&node.classList.contains("toolbar")){return false;}'
+            . 'if(node.classList&&node.classList.contains("sikshya-cert-qr")){return false;}'
+            . 'if(node.tagName==="IMG"){var src=(node.getAttribute("src")||"").trim();'
+            . 'if(src&&src.indexOf("data:")!==0){'
+            . 'try{var u=new URL(src,window.location.href);if(u.origin!==window.location.origin){return false;}}catch(e){return false;}}}'
+            . '}catch(e){}return true;}'
             . 'try{var hti=await ensureHtmlToImage();return await hti.toPng(el,{pixelRatio:m.pr,cacheBust:true,backgroundColor:"#ffffff",width:m.tw,height:m.th,style:{transform:"none"},'
-            . 'filter:function(node){try{if(!node||node.nodeType!==1){return true;}if(node.classList&&node.classList.contains("toolbar")){return false;}}catch(e){}return true;}});}catch(e){}'
-            . 'var h2c=await ensureHtml2Canvas();var canvas=await h2c(el,{backgroundColor:"#ffffff",scale:m.pr,useCORS:true,allowTaint:false,foreignObjectRendering:true,logging:false,width:m.tw,height:m.th});'
+            . 'filter:function(node){return shouldKeepNode(node);}});}catch(e){}'
+            . 'var h2c=await ensureHtml2Canvas();var canvas=await h2c(el,{backgroundColor:"#ffffff",scale:m.pr,useCORS:true,allowTaint:false,foreignObjectRendering:true,logging:false,width:m.tw,height:m.th,'
+            . 'ignoreElements:function(node){return !shouldKeepNode(node);}});'
             . 'return canvas.toDataURL("image/png");}'
             . 'async function downloadPng(){try{toast("Preparing PNG…");var dataUrl=await captureRasterPngDataUrl();'
             . 'var a=document.createElement("a");a.download=("certificate"+(hash?("-"+hash.slice(0,10)):"")+".png");a.href=dataUrl;'
