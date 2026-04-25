@@ -222,6 +222,8 @@ final class Plugin
         PermalinkService::boot();
         // Public hash-based certificate preview/document page (works in free; Pro can override).
         \Sikshya\Certificates\CertificatePublic::boot();
+        // Protect the bundled default templates from deletion (Pro can opt-out per-template).
+        \Sikshya\Certificates\TemplateGuard::register();
 
         $stored_ver = (string) Settings::getRaw('sikshya_plugin_version', '');
         if ($stored_ver !== $this->version) {

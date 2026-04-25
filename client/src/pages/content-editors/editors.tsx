@@ -2523,6 +2523,21 @@ export function CertificateEditor(props: ContentEditorProps) {
     return String((editor.post as any)?.sikshya_certificate_preview_url || '').trim();
   }, [editor.post]);
 
+  // The Free build seeds two ready-to-use templates and locks them against
+  // deletion via TemplateGuard. Mirror that lock in the UI so the affordance
+  // is hidden — the Pro filter is the single source of truth at the boundary.
+  const isProtectedTemplate = useMemo(() => {
+    const m = editor.post?.meta as Record<string, unknown> | undefined;
+    if (!m) {
+      return false;
+    }
+    const locked = readMeta(m, '_sikshya_certificate_default_locked');
+    if (locked === true || locked === '1' || locked === 1) {
+      return true;
+    }
+    return readMeta(m, '_sikshya_certificate_default') === '1';
+  }, [editor.post]);
+
   useEffect(() => {
     if (editor.isNew || featuredId <= 0) {
       if (!editor.isNew && featuredId <= 0) {
@@ -2879,6 +2894,24 @@ export function CertificateEditor(props: ContentEditorProps) {
                 <span className="bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                   {status === 'publish' ? 'Published' : 'Draft'}
                 </span>
+                {isProtectedTemplate ? (
+                  <span
+                    className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+                    title="This is a default template included with Sikshya. It cannot be deleted, but you can duplicate or edit it."
+                  >
+                    <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
+                      <path
+                        d="M5 7V5a3 3 0 0 1 6 0v2m-7 0h8v6H4V7Z"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Default template
+                  </span>
+                ) : null}
               </div>
             </div>
             <div className="min-w-0 text-left xl:text-center">
@@ -2886,7 +2919,9 @@ export function CertificateEditor(props: ContentEditorProps) {
                 {title.trim() || 'Untitled certificate'}
               </h1>
               <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                Full-page certificate builder workspace.
+                {isProtectedTemplate
+                  ? 'Built-in template — edit freely, deletion is protected.'
+                  : 'Full-page certificate builder workspace.'}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 xl:justify-end">
@@ -2926,7 +2961,7 @@ export function CertificateEditor(props: ContentEditorProps) {
               <ButtonPrimary type="button" disabled={editor.saving} onClick={() => void onSave()} className="px-4 py-1.5">
                 {editor.saving ? 'Saving…' : 'Save'}
               </ButtonPrimary>
-              {!editor.isNew ? (
+              {!editor.isNew && !isProtectedTemplate ? (
                 <button
                   type="button"
                   disabled={editor.saving}
