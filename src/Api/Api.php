@@ -70,6 +70,54 @@ class Api
             ]
         );
 
+        // Course category featured image fields for React admin lists/forms.
+        // Stored as term meta `category_image` (attachment ID) by CategoryService.
+        register_rest_field(
+            \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+            'sikshya_category_image_id',
+            [
+                'get_callback' => static function (array $term): int {
+                    $id = isset($term['id']) ? (int) $term['id'] : 0;
+                    if ($id <= 0) {
+                        return 0;
+                    }
+                    $raw = get_term_meta($id, 'category_image', true);
+                    $img = (int) $raw;
+                    return $img > 0 ? $img : 0;
+                },
+                'schema' => [
+                    'description' => 'Course category featured image attachment ID (term meta: category_image).',
+                    'type' => 'integer',
+                    'context' => ['view', 'edit'],
+                ],
+            ]
+        );
+        register_rest_field(
+            \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+            'sikshya_category_image_url',
+            [
+                'get_callback' => static function (array $term): string {
+                    $id = isset($term['id']) ? (int) $term['id'] : 0;
+                    if ($id <= 0) {
+                        return '';
+                    }
+                    $raw = get_term_meta($id, 'category_image', true);
+                    $img = (int) $raw;
+                    if ($img <= 0) {
+                        return '';
+                    }
+                    $url = wp_get_attachment_image_url($img, 'thumbnail');
+                    return is_string($url) ? $url : '';
+                },
+                'schema' => [
+                    'description' => 'Course category featured image URL (thumbnail).',
+                    'type' => 'string',
+                    'format' => 'uri',
+                    'context' => ['view', 'edit'],
+                ],
+            ]
+        );
+
         // Preview URL for unpublished course/lesson/quiz/assignment posts.
         // WP Core's REST exposes `link` (the public permalink) but never a
         // preview-mode URL, so the admin React row actions can't render a

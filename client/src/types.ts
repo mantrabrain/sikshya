@@ -182,5 +182,9 @@ export type WpTerm = {
   taxonomy?: string;
   count?: number;
   description?: string;
+  /** Sikshya REST field: course category featured image attachment ID. */
+  sikshya_category_image_id?: number;
+  /** Sikshya REST field: course category featured image URL (thumbnail). */
+  sikshya_category_image_url?: string;
 };
 

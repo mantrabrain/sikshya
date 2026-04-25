@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getErrorSummary } from '../../api/errors';
 import { appViewHref } from '../../lib/appUrl';
 import { useAdminRouting } from '../../lib/adminRouting';
 import { createDraftCourse } from '../../lib/createCourse';
 import { slugFromTitle } from '../../lib/slugFromTitle';
 import type { SikshyaReactConfig } from '../../types';
+import { isFeatureEnabled } from '../../lib/licensing';
+import { useAddonEnabled } from '../../hooks/useAddons';
 import { ButtonPrimary } from './buttons';
 import { Modal } from './Modal';
 
@@ -27,6 +29,14 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
   const [slugManual, setSlugManual] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const bundlesFeatureOk = isFeatureEnabled(config, 'course_bundles');
+  const bundlesAddon = useAddonEnabled('course_bundles');
+
+  const canUseBundles = useMemo(() => {
+    if (!bundlesFeatureOk) return false;
+    if (bundlesAddon.loading) return false;
+    return Boolean(bundlesAddon.enabled);
+  }, [bundlesAddon.enabled, bundlesAddon.loading, bundlesFeatureOk]);
 
   const siteRoot = config.siteUrl.replace(/\/$/, '');
   const courseBase = (config.permalinks && config.permalinks.rewrite_base_course) || 'courses';
@@ -50,6 +60,13 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     }
   }, [open]);
 
+  // If bundle selection becomes unavailable (addon disabled), fall back safely.
+  useEffect(() => {
+    if (kind === 'bundle' && !canUseBundles) {
+      setKind('regular');
+    }
+  }, [canUseBundles, kind]);
+
   const reset = () => {
     setKind('regular');
     setTitle('');
@@ -71,9 +88,10 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     setError(null);
     setSubmitting(true);
     try {
-      const id = await createDraftCourse(title, { slug: slug.trim() || undefined, kind });
+      const safeKind: CourseKind = kind === 'bundle' && !canUseBundles ? 'regular' : kind;
+      const id = await createDraftCourse(title, { slug: slug.trim() || undefined, kind: safeKind });
       const extra: Record<string, string> = { course_id: String(id) };
-      if (kind === 'bundle') {
+      if (safeKind === 'bundle') {
         // Show bundle UI immediately even if meta propagation is delayed.
         extra.force_bundle_ui = '1';
       }
@@ -135,19 +153,56 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
               </span>
             </label>
             <label
-              className={`flex cursor-pointer flex-col rounded-xl border p-3 text-left transition ${
+              className={`flex flex-col rounded-xl border p-3 text-left transition ${
                 kind === 'bundle'
                   ? 'border-brand-500 bg-brand-50/80 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/30'
-                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
-              }`}
+                  : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
+              } ${canUseBundles && !submitting ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-600' : 'cursor-not-allowed opacity-75'}`}
+              title={
+                canUseBundles
+                  ? undefined
+                  : bundlesAddon.loading
+                    ? 'Checking add-on status…'
+                    : 'Enable the Course Bundles add-on to create bundles.'
+              }
             >
               <span className="flex items-center gap-2">
-                <input type="radio" name="sik-course-kind" checked={kind === 'bundle'} onChange={() => setKind('bundle')} disabled={submitting} className="h-4 w-4" />
+                <input
+                  type="radio"
+                  name="sik-course-kind"
+                  checked={kind === 'bundle'}
+                  onChange={() => setKind('bundle')}
+                  disabled={submitting || !canUseBundles}
+                  className="h-4 w-4"
+                />
                 <span className="text-sm font-semibold text-slate-900 dark:text-white">Course bundle</span>
+                {!canUseBundles ? (
+                  <span className="ml-1 inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
+                    Pro
+                  </span>
+                ) : null}
               </span>
               <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
                 Package existing courses. Builder shows only bundle page + pricing (no curriculum tab).
               </span>
+              {!canUseBundles ? (
+                <span className="mt-2 pl-6 text-xs text-slate-500 dark:text-slate-400">
+                  {bundlesAddon.loading
+                    ? 'Checking add-on status…'
+                    : (
+                        <>
+                          Enable it in{' '}
+                          <a
+                            href={appViewHref(config, 'addons')}
+                            className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
+                          >
+                            Addons
+                          </a>
+                          .
+                        </>
+                      )}
+                </span>
+              ) : null}
             </label>
           </div>
         </fieldset>

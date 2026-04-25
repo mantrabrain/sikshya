@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { getErrorSummary } from '../api/errors';
@@ -32,6 +32,12 @@ type CategoryPayload = {
   image_id: number;
 };
 
+type WpMediaFrame = {
+  open: () => void;
+  on: (event: 'select', cb: () => void) => void;
+  state: () => { get: (k: 'selection') => { first: () => { toJSON: () => { id?: number; url?: string } } } };
+};
+
 export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title: string; subtitle: string }) {
   const { config, title, subtitle } = props;
   const { confirm, alert: alertDialog } = useSikshyaDialog();
@@ -43,6 +49,7 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
   const [parent, setParent] = useState(0);
   const [imageId, setImageId] = useState(0);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const mediaFrameRef = useRef<WpMediaFrame | null>(null);
   const [loadingCategory, setLoadingCategory] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -200,6 +207,26 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
         alwaysVisible: true,
         cellClassName: 'whitespace-nowrap tabular-nums text-slate-600 dark:text-slate-400',
         render: (t) => t.id,
+      },
+      {
+        id: 'image',
+        header: '',
+        columnPickerLabel: 'Image',
+        alwaysVisible: true,
+        headerClassName: 'w-16',
+        cellClassName: 'w-16',
+        render: (t) => {
+          const src = typeof t.sikshya_category_image_url === 'string' ? t.sikshya_category_image_url : '';
+          return (
+            <div className="flex h-10 w-12 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+              {src ? (
+                <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">—</span>
+              )}
+            </div>
+          );
+        },
       },
       {
         id: 'name',
@@ -391,17 +418,65 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="cc-image" className={LABEL}>
-                    Featured image (attachment ID)
-                  </label>
-                  <input
-                    id="cc-image"
-                    type="number"
-                    min={0}
-                    value={imageId || ''}
-                    onChange={(e) => setImageId(e.target.value === '' ? 0 : Number(e.target.value))}
-                    className={FIELD}
-                  />
+                  <label className={LABEL}>Featured image</label>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const wpAny = window as unknown as {
+                          wp?: {
+                            media?: (opts: { title?: string; button?: { text?: string }; multiple?: boolean; library?: { type?: string } }) => WpMediaFrame;
+                          };
+                        };
+                        const mediaFactory = wpAny.wp?.media;
+                        if (!mediaFactory) {
+                          void alertDialog({
+                            title: 'Media picker unavailable',
+                            message:
+                              'WordPress media picker was not found. Please ensure media scripts are available in the admin page.',
+                          });
+                          return;
+                        }
+                        if (!mediaFrameRef.current) {
+                          mediaFrameRef.current = mediaFactory({
+                            title: 'Select category image',
+                            button: { text: 'Use this image' },
+                            multiple: false,
+                            library: { type: 'image' },
+                          });
+                          mediaFrameRef.current.on('select', () => {
+                            const sel = mediaFrameRef.current?.state().get('selection').first().toJSON();
+                            const id = sel?.id ? Number(sel.id) : 0;
+                            setImageId(id > 0 ? id : 0);
+                            if (sel?.url) {
+                              setImagePreview(String(sel.url));
+                            }
+                          });
+                        }
+                        mediaFrameRef.current.open();
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      {imageId > 0 ? 'Change image' : 'Select image'}
+                    </button>
+                    {imageId > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageId(0);
+                          setImagePreview(null);
+                        }}
+                        className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      >
+                        Remove
+                      </button>
+                    ) : null}
+                    {imageId > 0 ? (
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Attachment ID: {imageId}</span>
+                    ) : (
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Optional</span>
+                    )}
+                  </div>
                   {imagePreview ? (
                     <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
                       <img src={imagePreview} alt="" className="max-h-36 w-full object-cover" />
