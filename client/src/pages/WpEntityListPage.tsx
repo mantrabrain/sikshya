@@ -390,12 +390,9 @@ export function WpEntityListPage(props: {
           },
         ];
 
-        if (isCertificateList) {
-          const href = String(r.sikshya_certificate_preview_url || '').trim();
-          if (href) {
-            items.push({ key: 'preview', label: 'Preview', href, external: true as const });
-          }
-        }
+        // Certificate templates already expose a public preview URL via `buildViewHref`,
+        // which renders as the standard "View" row action. Avoid adding a redundant
+        // second button ("Preview") to keep the row actions clean.
 
         return items;
       },
