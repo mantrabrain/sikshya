@@ -15,9 +15,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$page = CoursesGridPageService::forBrowseGrid();
-$courses_query = $page->getCoursesQuery();
-$filter_categories = $page->getFilterCategories();
+$page_model = CoursesGridPageService::forBrowseGrid();
+$courses_query = $page_model->getCoursesQuery();
+$filter_categories = $page_model->getFilterCategories();
 ?>
 
 <div class="sikshya-container">

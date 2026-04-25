@@ -145,6 +145,12 @@ export type WpPost = {
   meta?: Record<string, unknown>;
   /** Computed by Sikshya REST: template permalink + ?hash=... (HMAC), for public preview. */
   sikshya_certificate_preview_url?: string;
+  /**
+   * Computed by Sikshya REST for unpublished course/lesson/quiz/assignment posts only:
+   * preview URL signed with the capability-aware preview nonce. Empty / undefined for
+   * published posts (use `link` instead) and for users without edit-post capability.
+   */
+  sikshya_preview_link?: string;
   /** Sikshya REST field for course lists (bundle vs regular). */
   sikshya_course_type?: string;
   /** Term IDs on the post (edit context). */

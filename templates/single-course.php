@@ -12,24 +12,27 @@ get_header();
 
 while (have_posts()) :
     the_post();
-    /** @var SingleCoursePageModel $page */
-    $page = SingleCourseTemplateData::forPost(get_post());
-    $legacy_vm = $page->toLegacyViewArray();
-    $pricing = $page->getPricing();
-    $course_id = $page->getCourseId();
-    $urls = $page->getUrls();
-    $curriculum = $page->getCurriculum();
-    $cart_flash = $page->getCartFlash();
+    // NOTE: do NOT name this $page — that variable is reserved by WordPress
+    // (see global $page in setup_postdata/get_the_content) and shadowing it
+    // breaks the_content() with a TypeError on multipage posts.
+    /** @var SingleCoursePageModel $page_model */
+    $page_model = SingleCourseTemplateData::forPost(get_post());
+    $legacy_vm = $page_model->toLegacyViewArray();
+    $pricing = $page_model->getPricing();
+    $course_id = $page_model->getCourseId();
+    $urls = $page_model->getUrls();
+    $curriculum = $page_model->getCurriculum();
+    $cart_flash = $page_model->getCartFlash();
     $permalink = get_permalink($course_id);
-    $category_trail = $page->getCategoryTrail();
-    $tag_pills = $page->getTagPills();
-    $learning_outcomes = $page->getLearningOutcomes();
-    $includes_lines    = $page->getIncludesLines();
-    $curriculum_stats  = $page->getCurriculumStats();
-    $is_bundle         = $page->isBundle();
-    $bundle_courses    = $page->getBundleCourses();
-    $video_preview = $page->getVideoPreview();
-    $subtitle = $page->getSubtitle();
+    $category_trail = $page_model->getCategoryTrail();
+    $tag_pills = $page_model->getTagPills();
+    $learning_outcomes = $page_model->getLearningOutcomes();
+    $includes_lines    = $page_model->getIncludesLines();
+    $curriculum_stats  = $page_model->getCurriculumStats();
+    $is_bundle         = $page_model->isBundle();
+    $bundle_courses    = $page_model->getBundleCourses();
+    $video_preview = $page_model->getVideoPreview();
+    $subtitle = $page_model->getSubtitle();
     ?>
 
 <div class="sikshya-public sikshya-single-course sikshya-course-lp sik-f-scope">
@@ -69,7 +72,7 @@ while (have_posts()) :
                 </div>
             <?php endif; ?>
 
-            <?php do_action('sikshya_single_course_before_hero', $legacy_vm, $page); ?>
+            <?php do_action('sikshya_single_course_before_hero', $legacy_vm, $page_model); ?>
 
             <h1 class="sikshya-course-lp__title"><?php the_title(); ?></h1>
             <?php if ($subtitle !== '') : ?>
@@ -77,7 +80,7 @@ while (have_posts()) :
             <?php endif; ?>
 
             <?php
-            $reviews_vm = $page->getReviewsVm();
+            $reviews_vm = $page_model->getReviewsVm();
             $rev_aggregate = $reviews_vm['enabled'] ? ($reviews_vm['aggregate'] ?? null) : null;
             if (is_array($rev_aggregate) && (int) ($rev_aggregate['count'] ?? 0) > 0) :
                 $avg = (float) $rev_aggregate['average'];
@@ -107,29 +110,29 @@ while (have_posts()) :
             <?php endif; ?>
 
             <div class="sikshya-course-lp__stats">
-                <?php if ($page->getInstructorUser() instanceof WP_User) : ?>
+                <?php if ($page_model->getInstructorUser() instanceof WP_User) : ?>
                     <span class="sikshya-course-lp__stat">
                         <?php esc_html_e('Created by', 'sikshya'); ?>
-                        <strong><?php echo esc_html($page->getInstructorUser()->display_name); ?></strong>
+                        <strong><?php echo esc_html($page_model->getInstructorUser()->display_name); ?></strong>
                     </span>
                 <?php endif; ?>
-                <?php if ($page->getLastUpdatedLabel() !== '') : ?>
+                <?php if ($page_model->getLastUpdatedLabel() !== '') : ?>
                     <span class="sikshya-course-lp__stat">
                         <?php esc_html_e('Last updated', 'sikshya'); ?>
-                        <strong><?php echo esc_html($page->getLastUpdatedLabel()); ?></strong>
+                        <strong><?php echo esc_html($page_model->getLastUpdatedLabel()); ?></strong>
                     </span>
                 <?php endif; ?>
-                <?php if ($page->getLanguageLabel() !== '') : ?>
+                <?php if ($page_model->getLanguageLabel() !== '') : ?>
                     <span class="sikshya-course-lp__stat">
                         <?php esc_html_e('Language', 'sikshya'); ?>
-                        <strong><?php echo esc_html($page->getLanguageLabel()); ?></strong>
+                        <strong><?php echo esc_html($page_model->getLanguageLabel()); ?></strong>
                     </span>
                 <?php endif; ?>
-                <?php if ($page->getDifficultyKey() !== '') : ?>
+                <?php if ($page_model->getDifficultyKey() !== '') : ?>
                     <span class="sikshya-course-lp__stat">
                         <?php esc_html_e('Level', 'sikshya'); ?>
-                        <strong class="sikshya-difficulty-badge sikshya-difficulty-badge--<?php echo esc_attr(sanitize_html_class($page->getDifficultyKey())); ?>">
-                            <?php echo esc_html(ucfirst($page->getDifficultyKey())); ?>
+                        <strong class="sikshya-difficulty-badge sikshya-difficulty-badge--<?php echo esc_attr(sanitize_html_class($page_model->getDifficultyKey())); ?>">
+                            <?php echo esc_html(ucfirst($page_model->getDifficultyKey())); ?>
                         </strong>
                     </span>
                 <?php endif; ?>
@@ -241,9 +244,9 @@ while (have_posts()) :
                                     )
                                 );
                                 ?>
-                                <?php if ($page->getDurationLabel() !== '') : ?>
+                                <?php if ($page_model->getDurationLabel() !== '') : ?>
                                     <span class="sikshya-course-lp__curriculum-meta-sep">·</span>
-                                    <span><?php echo esc_html(sprintf(__('Est. %s hours total', 'sikshya'), $page->getDurationLabel())); ?></span>
+                                    <span><?php echo esc_html(sprintf(__('Est. %s hours total', 'sikshya'), $page_model->getDurationLabel())); ?></span>
                                 <?php endif; ?>
                             </p>
                         </div>
@@ -289,7 +292,7 @@ while (have_posts()) :
                                                 $type = get_post_type($item);
                                                 $label = function_exists('sikshya_public_content_type_label') ? sikshya_public_content_type_label($type) : '';
                                                 $icon_html = function_exists('sikshya_public_content_type_icon_html') ? sikshya_public_content_type_icon_html($type) : '';
-                                                $can_open = $page->isEnrolled();
+                                                $can_open = $page_model->isEnrolled();
                                                 $item_url = get_permalink($item);
                                                 ?>
                                                 <li class="sikshya-course-lp__outline-item">
@@ -324,11 +327,11 @@ while (have_posts()) :
                     </section>
                 <?php endif; ?>
 
-                <?php if ($page->getTargetAudienceHtml() !== '') : ?>
+                <?php if ($page_model->getTargetAudienceHtml() !== '') : ?>
                     <section class="sikshya-course-lp__panel" aria-labelledby="sikshya-audience-heading">
                         <h2 id="sikshya-audience-heading" class="sikshya-course-lp__heading"><?php esc_html_e('Who this course is for', 'sikshya'); ?></h2>
                         <div class="sikshya-course-lp__audience sikshya-prose">
-                            <?php echo $page->getTargetAudienceHtml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- shaped via wp_kses_post in service ?>
+                            <?php echo $page_model->getTargetAudienceHtml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- shaped via wp_kses_post in service ?>
                         </div>
                     </section>
                 <?php endif; ?>
@@ -410,7 +413,7 @@ while (have_posts()) :
                     </section>
                 <?php endif; ?>
 
-                <?php do_action('sikshya_single_course_after_main', $legacy_vm, $page); ?>
+                <?php do_action('sikshya_single_course_after_main', $legacy_vm, $page_model); ?>
             </main>
 
             <aside class="sikshya-course-lp__sidebar" aria-label="<?php esc_attr_e('Purchase options', 'sikshya'); ?>">
@@ -423,8 +426,8 @@ while (have_posts()) :
                             $thumb = isset($video_preview['thumb_url']) ? (string) $video_preview['thumb_url'] : '';
                             $watch = isset($video_preview['watch_url']) ? (string) $video_preview['watch_url'] : '';
                         }
-                        if ($thumb === '' && $page->getFeaturedImageUrl() !== '') {
-                            $thumb = $page->getFeaturedImageUrl();
+                        if ($thumb === '' && $page_model->getFeaturedImageUrl() !== '') {
+                            $thumb = $page_model->getFeaturedImageUrl();
                         }
                         ?>
                         <?php if ($thumb !== '' && $watch !== '') : ?>
@@ -453,25 +456,25 @@ while (have_posts()) :
                                 if (!empty($pricing['on_sale']) && null !== ($pricing['price'] ?? null) && null !== ($pricing['sale_price'] ?? null)) {
                                     echo '<span class="sikshya-price-current">' . wp_kses_post(sikshya_format_price((float) $pricing['sale_price'], $pricing['currency'], $course_id)) . '</span> ';
                                     echo '<span class="sikshya-price-original">' . wp_kses_post(sikshya_format_price((float) $pricing['price'], $pricing['currency'], $course_id)) . '</span>';
-                                } elseif ($page->isPaid()) {
+                                } elseif ($page_model->isPaid()) {
                                     echo '<span class="sikshya-price-current">' . wp_kses_post(sikshya_format_price((float) $pricing['effective'], $pricing['currency'], $course_id)) . '</span>';
                                 } else {
                                     echo '<span class="sikshya-price-free">' . esc_html__('Free', 'sikshya') . '</span>';
                                 }
                                 ?>
                             </div>
-                            <?php if ($page->getDiscountPercent() > 0) : ?>
-                                <span class="sikshya-course-lp__badge-off"><?php echo esc_html(sprintf(__('%d%% off', 'sikshya'), $page->getDiscountPercent())); ?></span>
+                            <?php if ($page_model->getDiscountPercent() > 0) : ?>
+                                <span class="sikshya-course-lp__badge-off"><?php echo esc_html(sprintf(__('%d%% off', 'sikshya'), $page_model->getDiscountPercent())); ?></span>
                             <?php endif; ?>
                         </div>
 
-                        <?php do_action('sikshya_single_course_after_price', $legacy_vm, $page); ?>
+                        <?php do_action('sikshya_single_course_after_price', $legacy_vm, $page_model); ?>
 
                         <div class="sikshya-course-lp__actions">
-                            <?php if ($page->isEnrolled()) : ?>
+                            <?php if ($page_model->isEnrolled()) : ?>
                                 <a class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls->getLearnFirstUrl() !== '' ? $urls->getLearnFirstUrl() : $urls->getLearnUrl()); ?>"><?php esc_html_e('Continue learning', 'sikshya'); ?></a>
                                 <a class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full" href="<?php echo esc_url($urls->getAccountUrl()); ?>"><?php esc_html_e('My learning', 'sikshya'); ?></a>
-                            <?php elseif ($page->isPaid()) : ?>
+                            <?php elseif ($page_model->isPaid()) : ?>
                                 <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form">
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="add" />
@@ -486,7 +489,7 @@ while (have_posts()) :
                                     <button type="submit" class="sikshya-btn sikshya-btn--sm sikshya-btn--ghost sikshya-course-lp__btn-full"><?php esc_html_e('Add to cart', 'sikshya'); ?></button>
                                 </form>
                                 <a class="sikshya-course-lp__sub-link" href="<?php echo esc_url($urls->getCartUrl()); ?>"><?php esc_html_e('View cart', 'sikshya'); ?></a>
-                                <?php if ($page->canAdminEnrollWithoutPurchase()) : ?>
+                                <?php if ($page_model->canAdminEnrollWithoutPurchase()) : ?>
                                     <form method="post" action="<?php echo esc_url($permalink); ?>" class="sikshya-course-lp__form sikshya-course-lp__form--admin-enroll">
                                         <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                         <input type="hidden" name="sikshya_cart_action" value="admin_enroll_bypass" />
@@ -507,8 +510,8 @@ while (have_posts()) :
                             <?php endif; ?>
                         </div>
 
-                        <?php if ($page->getMoneyBackText() !== '' && $page->isPaid() && !$page->isEnrolled()) : ?>
-                            <p class="sikshya-course-lp__guarantee"><?php echo esc_html($page->getMoneyBackText()); ?></p>
+                        <?php if ($page_model->getMoneyBackText() !== '' && $page_model->isPaid() && !$page_model->isEnrolled()) : ?>
+                            <p class="sikshya-course-lp__guarantee"><?php echo esc_html($page_model->getMoneyBackText()); ?></p>
                         <?php endif; ?>
 
                         <?php if (is_array($includes_lines) && $includes_lines !== []) : ?>
@@ -522,7 +525,7 @@ while (have_posts()) :
                             </div>
                         <?php endif; ?>
 
-                        <?php do_action('sikshya_single_course_after_actions', $legacy_vm, $page); ?>
+                        <?php do_action('sikshya_single_course_after_actions', $legacy_vm, $page_model); ?>
                     </div>
                 </div>
             </aside>

@@ -7,12 +7,12 @@
  * @package Sikshya
  *
  * @var array<string, mixed>                         $acc Back-compat view array for hooks.
- * @var \Sikshya\Presentation\Models\AccountPageModel $page
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
 use Sikshya\Frontend\Public\PublicPageUrls;
 
-$inst = $page->getInstructorVm();
+$inst = $page_model->getInstructorVm();
 $published = (int) ($inst['published_courses'] ?? 0);
 $enrolls = (int) ($inst['enrollments_total'] ?? 0);
 $completed = (int) ($inst['enrollments_completed'] ?? 0);
@@ -20,13 +20,13 @@ $recent = is_array($inst['recent_courses'] ?? null) ? $inst['recent_courses'] : 
 $pro_blocks = is_array($inst['pro_blocks'] ?? null) ? $inst['pro_blocks'] : [];
 $completion_rate = $enrolls > 0 ? round(100 * ($completed / $enrolls), 1) : 0.0;
 
-$add_url = $page->getUrls()->getAddNewCourseUrl();
-$manage_url = $page->getUrls()->getEditCoursesUrl();
-$learn_url = $page->getUrls()->getLearningUrl();
-$dash_url = $page->getUrls()->getDashboardUrl();
-$learner_n = $page->getEnrollmentCount();
-$ongoing_n = $page->getOngoingCount();
-$done_n = $page->getCompletedCount();
+$add_url = $page_model->getUrls()->getAddNewCourseUrl();
+$manage_url = $page_model->getUrls()->getEditCoursesUrl();
+$learn_url = $page_model->getUrls()->getLearningUrl();
+$dash_url = $page_model->getUrls()->getDashboardUrl();
+$learner_n = $page_model->getEnrollmentCount();
+$ongoing_n = $page_model->getOngoingCount();
+$done_n = $page_model->getCompletedCount();
 ?>
             <section class="sik-acc-hero" aria-label="<?php esc_attr_e('Teaching', 'sikshya'); ?>">
                 <p class="sik-acc-hero__date"><?php esc_html_e('Instructor view', 'sikshya'); ?></p>

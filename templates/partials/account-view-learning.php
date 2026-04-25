@@ -5,7 +5,7 @@
  * @package Sikshya
  *
  * @var array<string, mixed>                         $acc Back-compat view array for hooks.
- * @var \Sikshya\Presentation\Models\AccountPageModel $page
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
 use Sikshya\Frontend\Public\PublicPageUrls;
@@ -41,9 +41,9 @@ $render_enrollment_row = static function ($row): void {
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Ongoing courses', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Ongoing', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page->getUrls()->getCoursesUrl()); ?>"><?php esc_html_e('Browse all courses', 'sikshya'); ?></a>
+                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>"><?php esc_html_e('Browse all courses', 'sikshya'); ?></a>
                 </div>
-                <?php if ($page->getEnrollmentsOngoing() === []) : ?>
+                <?php if ($page_model->getEnrollmentsOngoing() === []) : ?>
                     <div class="sik-acc-empty">
                         <?php esc_html_e('You have no courses in progress.', 'sikshya'); ?>
                     </div>
@@ -59,7 +59,7 @@ $render_enrollment_row = static function ($row): void {
                             </thead>
                             <tbody>
                             <?php
-                            foreach ($page->getEnrollmentsOngoing() as $row) {
+                            foreach ($page_model->getEnrollmentsOngoing() as $row) {
                                 $render_enrollment_row($row);
                             }
                             ?>
@@ -73,7 +73,7 @@ $render_enrollment_row = static function ($row): void {
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Completed', 'sikshya'); ?></h2>
                 </div>
-                <?php if ($page->getEnrollmentsCompleted() === []) : ?>
+                <?php if ($page_model->getEnrollmentsCompleted() === []) : ?>
                     <div class="sik-acc-empty">
                         <?php esc_html_e('No completed courses yet.', 'sikshya'); ?>
                     </div>
@@ -89,7 +89,7 @@ $render_enrollment_row = static function ($row): void {
                             </thead>
                             <tbody>
                             <?php
-                            foreach ($page->getEnrollmentsCompleted() as $row) {
+                            foreach ($page_model->getEnrollmentsCompleted() as $row) {
                                 $render_enrollment_row($row);
                             }
                             ?>

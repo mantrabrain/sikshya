@@ -16,13 +16,13 @@ $learn_href = esc_url($plugin->getAssetUrl('css/learn.css')) . '?ver=' . $sheet_
 
 while (have_posts()) :
     the_post();
-    /** @var SingleLessonPageModel $page */
-    $page = LessonTemplateData::forPost(get_post());
-    $urls = $page->getUrls();
+    /** @var SingleLessonPageModel $page_model */
+    $page_model = LessonTemplateData::forPost(get_post());
+    $urls = $page_model->getUrls();
     $page_title = sprintf(
         /* translators: 1: lesson title, 2: site name */
         '%1$s — %2$s',
-        $page->getLessonH1Title(),
+        $page_model->getLessonH1Title(),
         get_bloginfo('name')
     );
     ?>
@@ -92,15 +92,15 @@ while (have_posts()) :
                     <?php echo esc_html(get_bloginfo('name')); ?>
                 </a>
                 <?php
-                $course_title = $page->getCourseTitleForTopbar();
+                $course_title = $page_model->getCourseTitleForTopbar();
                 ?>
                 <span class="sikshya-learnTopbar__title" title="<?php echo esc_attr($course_title); ?>"><?php echo esc_html($course_title); ?></span>
             </div>
-            <?php if ($page->isShowProgress()) : ?>
+            <?php if ($page_model->isShowProgress()) : ?>
                 <?php
-                $pct = $page->getProgressPercent();
-                $done = $page->getProgressCompleted();
-                $total = $page->getProgressTotal();
+                $pct = $page_model->getProgressPercent();
+                $done = $page_model->getProgressCompleted();
+                $total = $page_model->getProgressTotal();
                 ?>
                 <div class="sikshya-learnTopbar__middle">
                     <div class="sikshya-learnHeader__progressWrap">
@@ -172,8 +172,8 @@ while (have_posts()) :
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
-                        $outline_blocks = $page->getCurriculumBlocks();
-                        $outline_show_progress = $page->isShowProgress();
+                        $outline_blocks = $page_model->getCurriculumBlocks();
+                        $outline_show_progress = $page_model->isShowProgress();
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
@@ -182,7 +182,7 @@ while (have_posts()) :
 
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
 
-                <?php if ($page->hasError()) : ?>
+                <?php if ($page_model->hasError()) : ?>
                     <div class="sikshya-contentSection sikshya-contentSection--centered">
                         <div class="sikshya-contentPanel sikshya-contentPanel--emptyState" role="alert" aria-live="polite">
                             <div class="sikshya-learnEmptyState">
@@ -191,10 +191,10 @@ while (have_posts()) :
                                 </div>
                                 <div class="sikshya-learnEmptyState__body">
                                     <h2 class="sikshya-learnEmptyState__title"><?php esc_html_e('Access required', 'sikshya'); ?></h2>
-                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($page->getErrorMessage()); ?></p>
+                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($page_model->getErrorMessage()); ?></p>
                                     <div class="sikshya-learnEmptyState__actions">
                                         <?php
-                                        $errCourse = $page->getCoursePost();
+                                        $errCourse = $page_model->getCoursePost();
                                         if ($errCourse instanceof WP_Post) : ?>
                                             <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_permalink($errCourse)); ?>">
                                                 <?php esc_html_e('View course', 'sikshya'); ?>
@@ -212,21 +212,21 @@ while (have_posts()) :
                     </div>
                 <?php else : ?>
                     <?php
-                    $legacy_vm = $page->toLegacyViewArray();
+                    $legacy_vm = $page_model->toLegacyViewArray();
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
                             <div class="sikshya-learnHeader">
                                 <div class="sikshya-learnHeader__top">
                                     <div class="sikshya-learnHeader__titles">
-                                        <?php $lesson_icon = $page->getLessonIconForHeader(); ?>
+                                        <?php $lesson_icon = $page_model->getLessonIconForHeader(); ?>
                                         <div class="sikshya-learnHeader__titleRow">
                                             <span class="sikshya-learnHeader__typeIcon" aria-hidden="true">
                                                 <?php echo sikshya_learn_icon($lesson_icon); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                                             </span>
-                                            <h1 class="sikshya-learnHeader__title sikshya-zeroMargin"><?php echo esc_html($page->getLessonH1Title()); ?></h1>
+                                            <h1 class="sikshya-learnHeader__title sikshya-zeroMargin"><?php echo esc_html($page_model->getLessonH1Title()); ?></h1>
                                             <?php
-                                            $ch = $page->getCurrentChapter();
+                                            $ch = $page_model->getCurrentChapter();
                                             if ($ch instanceof WP_Post) : ?>
                                                 <span class="sikshya-learnHeader__chapterInline" title="<?php echo esc_attr(get_the_title($ch)); ?>">
                                                     <span class="sikshya-learnHeader__chapterIcon" aria-hidden="true">
@@ -238,9 +238,9 @@ while (have_posts()) :
                                         </div>
                                     </div>
                                     <div class="sikshya-learnHeader__actions">
-                                        <?php if ($page->isEnrolled() && !$page->isPreview()) : ?>
+                                        <?php if ($page_model->isEnrolled() && !$page_model->isPreview()) : ?>
                                             <?php
-                                            $is_done = $page->isCurrentCompleted();
+                                            $is_done = $page_model->isCurrentCompleted();
                                             $done_tip = __('Completed — this lesson is already marked complete in your progress.', 'sikshya');
                                             ?>
                                             <?php if ($is_done) : ?>
@@ -250,8 +250,8 @@ while (have_posts()) :
                                                 type="button"
                                                 class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
                                                 data-sikshya-mark-complete
-                                                data-course-id="<?php echo esc_attr((string) $page->getCourseId()); ?>"
-                                                data-lesson-id="<?php echo esc_attr((string) $page->getLessonId()); ?>"
+                                                data-course-id="<?php echo esc_attr((string) $page_model->getCourseId()); ?>"
+                                                data-lesson-id="<?php echo esc_attr((string) $page_model->getLessonId()); ?>"
                                                 <?php echo $is_done ? 'disabled aria-disabled="true"' : ''; ?>
                                             >
                                                 <?php if ($is_done) : ?>
@@ -281,10 +281,10 @@ while (have_posts()) :
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="resources"><?php esc_html_e('Resources', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="notes"><?php esc_html_e('Notes', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
-                            <?php if ($page->hasDiscussionsTab()) : ?>
+                            <?php if ($page_model->hasDiscussionsTab()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="discussions"><?php esc_html_e('Discussions', 'sikshya'); ?></button>
                             <?php endif; ?>
-                            <?php if ($page->hasReviewsTab()) : ?>
+                            <?php if ($page_model->hasReviewsTab()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
                             <?php endif; ?>
                         </div>
@@ -294,15 +294,15 @@ while (have_posts()) :
                                 /**
                                  * 1) Legacy lesson view array. 2) {@see SingleLessonPageModel}.
                                  */
-                                do_action('sikshya_lesson_before_content', $legacy_vm, $page);
+                                do_action('sikshya_lesson_before_content', $legacy_vm, $page_model);
                                 ?>
-                                <?php if ($page->hasRenderableLessonBody()) : ?>
-                                    <?php echo wp_kses_post($page->getLessonContentHtml()); ?>
+                                <?php if ($page_model->hasRenderableLessonBody()) : ?>
+                                    <?php echo wp_kses_post($page_model->getLessonContentHtml()); ?>
                                 <?php else : ?>
                                     <p class="sikshya-zeroMargin"><?php esc_html_e('This lesson does not have content yet.', 'sikshya'); ?></p>
                                 <?php endif; ?>
                                 <?php
-                                do_action('sikshya_lesson_after_content', $legacy_vm, $page);
+                                do_action('sikshya_lesson_after_content', $legacy_vm, $page_model);
                                 ?>
                             </div>
                         </div>
@@ -315,7 +315,7 @@ while (have_posts()) :
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
                                     <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this lesson yet.', 'sikshya'); ?></p>
                                 <?php endif; ?>
-                                <?php do_action('sikshya_lesson_resources_after', $legacy_vm, $page); ?>
+                                <?php do_action('sikshya_lesson_resources_after', $legacy_vm, $page_model); ?>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="notes">
@@ -330,7 +330,7 @@ while (have_posts()) :
                                 <p class="sikshya-zeroMargin"><?php esc_html_e('No announcements available.', 'sikshya'); ?></p>
                             </div>
                         </div>
-                        <?php if ($page->hasDiscussionsTab()) : ?>
+                        <?php if ($page_model->hasDiscussionsTab()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="discussions">
                                 <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Discussions', 'sikshya'); ?></h3>
@@ -338,7 +338,7 @@ while (have_posts()) :
                                 </div>
                             </div>
                         <?php endif; ?>
-                        <?php if ($page->hasReviewsTab()) : ?>
+                        <?php if ($page_model->hasReviewsTab()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
                                 <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Reviews', 'sikshya'); ?></h3>
@@ -349,8 +349,8 @@ while (have_posts()) :
         </div>
 
                     <?php
-                    $dock_prev = $page->getDockPrevious();
-                    $dock_next = $page->getDockNext();
+                    $dock_prev = $page_model->getDockPrevious();
+                    $dock_next = $page_model->getDockNext();
                     $prev_url = $dock_prev ? $dock_prev->getUrl() : '';
                     $next_url = $dock_next ? $dock_next->getUrl() : '';
                     $prev_title = $dock_prev ? $dock_prev->getTitle() : '';
@@ -495,7 +495,7 @@ while (have_posts()) :
   const completeBtn = document.querySelector('[data-sikshya-mark-complete]');
   if (completeBtn) {
     const restBase = <?php
-    $__lesson_rest = $page->getRest();
+    $__lesson_rest = $page_model->getRest();
     echo wp_json_encode((string) $__lesson_rest->getUrl(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     ?>;
     const restNonce = <?php echo wp_json_encode((string) $__lesson_rest->getNonce(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;

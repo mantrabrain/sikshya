@@ -8,10 +8,10 @@
 use Sikshya\Services\Frontend\CartPageService;
 use Sikshya\Presentation\Models\CartPageModel;
 
-/** @var CartPageModel $page */
-$page = CartPageService::build();
-$cart = $page->toLegacyViewArray();
-$u = $page->getUrls();
+/** @var CartPageModel $page_model */
+$page_model = CartPageService::build();
+$cart = $page_model->toLegacyViewArray();
+$u = $page_model->getUrls();
 
 get_header();
 ?>
@@ -31,7 +31,7 @@ get_header();
 
     <div class="sikshya-cart-page__body">
         <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <?php if ($page->isEmpty()) : ?>
+        <?php if ($page_model->isEmpty()) : ?>
             <div class="sikshya-cart-page__empty">
                 <div class="sikshya-cart-page__empty-copy">
                     <h2 class="sikshya-cart-page__empty-title"><?php esc_html_e('Your cart is empty', 'sikshya'); ?></h2>
@@ -81,17 +81,17 @@ get_header();
              */
             do_action('sikshya_cart_before_lines', $cart);
             ?>
-            <?php if ($page->getBundleId() > 0 && $page->getBundleTitle() !== '') : ?>
+            <?php if ($page_model->getBundleId() > 0 && $page_model->getBundleTitle() !== '') : ?>
                 <div class="sikshya-cart-page__bundle-notice" style="margin-bottom:1rem;padding:0.75rem 1rem;border-radius:8px;border:1px solid rgba(34,197,94,0.35);background:rgba(34,197,94,0.06);">
                     <strong><?php esc_html_e('Bundle', 'sikshya'); ?></strong>
-                    <?php echo esc_html($page->getBundleTitle()); ?>
+                    <?php echo esc_html($page_model->getBundleTitle()); ?>
                     <span style="opacity:.85;"> — <?php esc_html_e('Checkout uses the bundle price for the whole pack.', 'sikshya'); ?></span>
                 </div>
             <?php endif; ?>
             <div class="sikshya-cart-page__panel" role="region" aria-label="<?php esc_attr_e('Cart items', 'sikshya'); ?>">
                 <div class="sikshya-cart-page__panel-head"><?php esc_html_e('Courses in cart', 'sikshya'); ?></div>
                 <ul class="sikshya-cart-lines">
-                    <?php foreach ($page->getLines() as $line) : ?>
+                    <?php foreach ($page_model->getLines() as $line) : ?>
                         <li class="sikshya-cart-line">
                             <a class="sikshya-cart-line__thumb" href="<?php echo esc_url($line['permalink']); ?>" aria-hidden="true" tabindex="-1">
                                 <?php if (!empty($line['thumbnail'])) : ?>
@@ -152,7 +152,7 @@ get_header();
                 ?>
                 <p class="sikshya-cart-subtotal">
                     <strong><?php esc_html_e('Subtotal', 'sikshya'); ?></strong>
-                    <span><?php echo esc_html(number_format_i18n($page->getSubtotalHint(), 2) . ' ' . $page->getCurrency()); ?></span>
+                    <span><?php echo esc_html(number_format_i18n($page_model->getSubtotalHint(), 2) . ' ' . $page_model->getCurrency()); ?></span>
                 </p>
 
                 <p class="sikshya-cart-page__summary-note">

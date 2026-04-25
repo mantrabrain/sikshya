@@ -8,8 +8,8 @@
 use Sikshya\Frontend\Public\LearnTemplateData;
 use Sikshya\Core\Plugin;
 
-$page = LearnTemplateData::fromRequest();
-$urls = $page->getUrls();
+$page_model = LearnTemplateData::fromRequest();
+$urls = $page_model->getUrls();
 
 $plugin = Plugin::getInstance();
 $sheet_ver = rawurlencode((string) $plugin->version);
@@ -34,10 +34,10 @@ $page_title = sprintf(
     <link rel="stylesheet" href="<?php echo $learn_href; ?>">
 </head>
 <?php
-$learn_mode = $page->getMode();
+$learn_mode = $page_model->getMode();
 $is_hub = $learn_mode === 'hub';
 $is_bundle = $learn_mode === 'bundle';
-$has_course = $page->getCourseId() > 0;
+$has_course = $page_model->getCourseId() > 0;
 $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
 ?>
 <body class="sikshya-learning-shell sikshya-learning-shell--learn<?php echo $is_shell_without_course ? ' sikshya-learning-shell--hub' : ''; ?>">
@@ -94,7 +94,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                     <?php echo esc_html(get_bloginfo('name')); ?>
                 </a>
                 <?php
-                $top_label = $page->getLearnTopbarLabel();
+                $top_label = $page_model->getLearnTopbarLabel();
                 $learn_topbar_label = $top_label !== '' ? $top_label : __('Learn', 'sikshya');
                 ?>
                 <span class="sikshya-learnTopbar__title" title="<?php echo esc_attr($learn_topbar_label); ?>">
@@ -119,9 +119,9 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
              * 2) {@see \Sikshya\Presentation\Models\LearnPageModel} (optional; use in new add-ons).
              *
              * @param array<string, mixed> $legacy
-             * @param \Sikshya\Presentation\Models\LearnPageModel $page
+             * @param \Sikshya\Presentation\Models\LearnPageModel $page_model
              */
-            do_action('sikshya_learn_after_hero', $page->toLegacyViewArray(), $page);
+            do_action('sikshya_learn_after_hero', $page_model->toLegacyViewArray(), $page_model);
             ?>
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
             <aside class="sikshya-learnSidebar" aria-label="<?php esc_attr_e('Course content', 'sikshya'); ?>" data-sikshya-outline>
@@ -131,8 +131,8 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
-                        $outline_blocks = $page->getCurriculumBlocks();
-                        $outline_show_progress = $page->isShowProgress();
+                        $outline_blocks = $page_model->getCurriculumBlocks();
+                        $outline_show_progress = $page_model->isShowProgress();
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
@@ -140,15 +140,15 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
             </aside>
 
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
-                <?php if ($is_bundle && !$page->hasError()) : ?>
+                <?php if ($is_bundle && !$page_model->hasError()) : ?>
                     <?php
-                    $bpc = $page->getBundleProgressCounts() ?? ['total' => 0, 'done' => 0, 'average' => 0];
+                    $bpc = $page_model->getBundleProgressCounts() ?? ['total' => 0, 'done' => 0, 'average' => 0];
                     $total_c = (int) $bpc['total'];
                     $done_c  = (int) $bpc['done'];
                     $avg_pct = (int) $bpc['average'];
-                    $bundle_courses = $page->getHubOrBundleRows();
-                    $bundle_url     = $page->getBundlePermalinkForActions();
-                    $bundle_title   = $page->getBundleHeadlineTitle();
+                    $bundle_courses = $page_model->getHubOrBundleRows();
+                    $bundle_url     = $page_model->getBundlePermalinkForActions();
+                    $bundle_title   = $page_model->getBundleHeadlineTitle();
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
@@ -257,7 +257,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         </div>
                     <?php endif; ?>
 
-                <?php elseif ($page->getMode() === 'hub' && !$page->hasError()) : ?>
+                <?php elseif ($page_model->getMode() === 'hub' && !$page_model->hasError()) : ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">
                             <div class="sikshya-learnHeader">
@@ -278,7 +278,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         </div>
 
                         <?php
-                        $hub_courses = $page->getHubOrBundleRows();
+                        $hub_courses = $page_model->getHubOrBundleRows();
                         if ($hub_courses !== []) : ?>
                             <div class="sikshya-learnHubGrid" role="list">
                                 <?php foreach ($hub_courses as $brow) : ?>
@@ -341,7 +341,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                             </div>
 
                             <?php
-                            $recs = $page->getRecommendedCourses();
+                            $recs = $page_model->getRecommendedCourses();
                             if ($recs !== []) : ?>
                                 <div class="sikshya-learnHubSection" aria-label="<?php echo esc_attr__('Recommended courses', 'sikshya'); ?>">
                                     <div class="sikshya-learnHubSection__head">
@@ -378,7 +378,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
-                <?php elseif ($page->hasError()) : ?>
+                <?php elseif ($page_model->hasError()) : ?>
                     <div class="sikshya-contentSection sikshya-contentSection--centered">
                         <div class="sikshya-contentPanel sikshya-contentPanel--emptyState" role="alert" aria-live="polite">
                             <div class="sikshya-learnEmptyState">
@@ -387,10 +387,10 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                 </div>
                                 <div class="sikshya-learnEmptyState__body">
                                     <h2 class="sikshya-learnEmptyState__title"><?php esc_html_e('Access required', 'sikshya'); ?></h2>
-                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($page->getErrorMessage()); ?></p>
+                                    <p class="sikshya-learnEmptyState__message"><?php echo esc_html($page_model->getErrorMessage()); ?></p>
                                     <div class="sikshya-learnEmptyState__actions">
                                         <?php
-                                        $em = $page->getCourseModel();
+                                        $em = $page_model->getCourseModel();
                                         if ($em !== null) : ?>
                                             <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($em->getPermalink()); ?>">
                                                 <?php esc_html_e('View course', 'sikshya'); ?>
@@ -418,9 +418,9 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                     </div>
                 <?php else : ?>
                     <?php
-                    $cm = $page->getCourseModel();
+                    $cm = $page_model->getCourseModel();
                     $course_title = $cm ? $cm->getTitle() : __('Course', 'sikshya');
-                    $continue_url = $page->getContinueLearnUrlForHero();
+                    $continue_url = $page_model->getContinueLearnUrlForHero();
                     ?>
                     <div class="sikshya-contentSection">
                         <div class="sikshya-contentPanel sikshya-contentPanel--header">

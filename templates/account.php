@@ -9,14 +9,14 @@ use Sikshya\Core\Plugin;
 use Sikshya\Services\Frontend\AccountPageService;
 
 $plugin = Plugin::getInstance();
-$page = AccountPageService::fromRequest();
-$acc = $page->toLegacyViewArray(); // Back-compat for hooks/filters.
+$page_model = AccountPageService::fromRequest();
+$acc = $page_model->toLegacyViewArray(); // Back-compat for hooks/filters.
 
 $sheet_ver = rawurlencode((string) $plugin->version);
 $sheet_href = esc_url($plugin->getAssetUrl('css/account-shell.css')) . '?ver=' . $sheet_ver;
 
-$view = $page->getView();
-$partial_path = AccountPageService::resolvePartialPath($page);
+$view = $page_model->getView();
+$partial_path = AccountPageService::resolvePartialPath($page_model);
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -24,7 +24,7 @@ $partial_path = AccountPageService::resolvePartialPath($page);
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
-    <title><?php echo esc_html($page->getPageTitle()); ?></title>
+    <title><?php echo esc_html($page_model->getPageTitle()); ?></title>
     <link rel="stylesheet" href="<?php echo $sheet_href; ?>">
 </head>
 <body class="sikshya-account-shell" data-sikshya-account-view="<?php echo esc_attr($view); ?>">
@@ -36,36 +36,36 @@ $partial_path = AccountPageService::resolvePartialPath($page);
         </div>
         <nav class="sik-acc-nav" aria-label="<?php esc_attr_e('Primary', 'sikshya'); ?>">
             <p class="sik-acc-nav__label"><?php esc_html_e('Learn', 'sikshya'); ?></p>
-            <a class="<?php echo $view === 'dashboard' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page->getUrls()->getDashboardUrl()); ?>">
+            <a class="<?php echo $view === 'dashboard' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getDashboardUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◉</span>
                 <?php esc_html_e('Overview', 'sikshya'); ?>
             </a>
-            <a class="<?php echo $view === 'learning' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page->getUrls()->getLearningUrl()); ?>">
+            <a class="<?php echo $view === 'learning' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getLearningUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">▣</span>
                 <?php esc_html_e('My learning', 'sikshya'); ?>
             </a>
-            <a class="<?php echo $view === 'quiz-attempts' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page->getUrls()->getQuizAttemptsUrl()); ?>">
+            <a class="<?php echo $view === 'quiz-attempts' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getQuizAttemptsUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◎</span>
                 <?php esc_html_e('Quiz attempts', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url($page->getUrls()->getCoursesUrl()); ?>">
+            <a href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">▤</span>
                 <?php esc_html_e('Courses', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url($page->getUrls()->getLearnHubUrl()); ?>">
+            <a href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
                 <?php esc_html_e('Learning hub', 'sikshya'); ?>
             </a>
             <p class="sik-acc-nav__label"><?php esc_html_e('Commerce', 'sikshya'); ?></p>
-            <a class="<?php echo $view === 'payments' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page->getUrls()->getPaymentsUrl()); ?>">
+            <a class="<?php echo $view === 'payments' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getPaymentsUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">≡</span>
                 <?php esc_html_e('Payments', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url($page->getUrls()->getCartUrl()); ?>">
+            <a href="<?php echo esc_url($page_model->getUrls()->getCartUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◇</span>
                 <?php esc_html_e('Cart', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url($page->getUrls()->getCheckoutUrl()); ?>">
+            <a href="<?php echo esc_url($page_model->getUrls()->getCheckoutUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">✓</span>
                 <?php esc_html_e('Checkout', 'sikshya'); ?>
             </a>
@@ -80,7 +80,7 @@ $partial_path = AccountPageService::resolvePartialPath($page);
         do_action('sikshya_account_sidebar_nav', $acc, $view);
         ?>
         <div class="sik-acc-sidebar__footer">
-            <a href="<?php echo esc_url($page->getUrls()->getHomeUrl()); ?>">
+            <a href="<?php echo esc_url($page_model->getUrls()->getHomeUrl()); ?>">
                 <span aria-hidden="true">←</span>
                 <?php esc_html_e('Back to site', 'sikshya'); ?>
             </a>
@@ -90,25 +90,25 @@ $partial_path = AccountPageService::resolvePartialPath($page);
     <div class="sik-acc-main">
         <header class="sik-acc-topbar">
             <div class="sik-acc-topbar__titles">
-                <h1><?php echo esc_html($page->getHeadlineTitle()); ?></h1>
-                <p><?php echo esc_html($page->getHeadlineSubtitle()); ?></p>
+                <h1><?php echo esc_html($page_model->getHeadlineTitle()); ?></h1>
+                <p><?php echo esc_html($page_model->getHeadlineSubtitle()); ?></p>
             </div>
             <div class="sik-acc-topbar__actions">
-                <a class="sik-acc-btn" href="<?php echo esc_url($page->getUrls()->getHomeUrl()); ?>"><?php esc_html_e('Back to site', 'sikshya'); ?></a>
+                <a class="sik-acc-btn" href="<?php echo esc_url($page_model->getUrls()->getHomeUrl()); ?>"><?php esc_html_e('Back to site', 'sikshya'); ?></a>
                 <div class="sik-acc-user">
-                    <?php if ($page->getAvatarUrl() !== '') : ?>
-                        <img src="<?php echo esc_url($page->getAvatarUrl()); ?>" width="36" height="36" alt="" loading="lazy" decoding="async">
+                    <?php if ($page_model->getAvatarUrl() !== '') : ?>
+                        <img src="<?php echo esc_url($page_model->getAvatarUrl()); ?>" width="36" height="36" alt="" loading="lazy" decoding="async">
                     <?php else : ?>
-                        <span class="sik-acc-user__fallback" aria-hidden="true"><?php echo esc_html($page->getInitial()); ?></span>
+                        <span class="sik-acc-user__fallback" aria-hidden="true"><?php echo esc_html($page_model->getInitial()); ?></span>
                     <?php endif; ?>
                     <div class="sik-acc-user__meta">
-                        <div class="sik-acc-user__name"><?php echo esc_html($page->getDisplayName()); ?></div>
-                        <?php if ($page->getEmail() !== '') : ?>
-                            <div class="sik-acc-user__email"><?php echo esc_html($page->getEmail()); ?></div>
+                        <div class="sik-acc-user__name"><?php echo esc_html($page_model->getDisplayName()); ?></div>
+                        <?php if ($page_model->getEmail() !== '') : ?>
+                            <div class="sik-acc-user__email"><?php echo esc_html($page_model->getEmail()); ?></div>
                         <?php endif; ?>
                     </div>
                 </div>
-                <a class="sik-acc-btn sik-acc-btn--primary" href="<?php echo esc_url(wp_logout_url($page->getUrls()->getHomeUrl())); ?>"><?php esc_html_e('Log out', 'sikshya'); ?></a>
+                <a class="sik-acc-btn sik-acc-btn--primary" href="<?php echo esc_url(wp_logout_url($page_model->getUrls()->getHomeUrl())); ?>"><?php esc_html_e('Log out', 'sikshya'); ?></a>
             </div>
         </header>
 

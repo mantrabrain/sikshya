@@ -8,10 +8,10 @@
 use Sikshya\Services\Frontend\OrderPageService;
 use Sikshya\Presentation\Models\OrderPageModel;
 
-/** @var OrderPageModel $page */
-$page = OrderPageService::fromRequest();
-$od = $page->toLegacyViewArray();
-$u = $page->getUrls();
+/** @var OrderPageModel $page_model */
+$page_model = OrderPageService::fromRequest();
+$od = $page_model->toLegacyViewArray();
+$u = $page_model->getUrls();
 
 get_header();
 ?>
@@ -28,11 +28,11 @@ get_header();
             </nav>
             <h1 class="sikshya-order-page__title"><?php esc_html_e('Order details', 'sikshya'); ?></h1>
             <p class="sikshya-order-page__lead">
-                <?php if ($page->hasError()) : ?>
+                <?php if ($page_model->hasError()) : ?>
                     <?php esc_html_e('We could not load this order.', 'sikshya'); ?>
-                <?php elseif ($page->getOrder()) : ?>
+                <?php elseif ($page_model->getOrder()) : ?>
                     <?php
-                    $lead_status = (string) $page->getOrder()->status;
+                    $lead_status = (string) $page_model->getOrder()->status;
                     if ($lead_status === 'paid') {
                         esc_html_e('Thank you. Your purchase is complete and course access is available from your account.', 'sikshya');
                     } elseif ($lead_status === 'on-hold' || $lead_status === 'pending') {
@@ -49,14 +49,14 @@ get_header();
     </header>
 
     <div class="sikshya-order-page__body">
-        <?php if ($page->hasError()) : ?>
+        <?php if ($page_model->hasError()) : ?>
             <div class="sikshya-order-page__error" role="alert">
-                <p class="sikshya-order-page__error-text"><?php echo esc_html($page->getError()); ?></p>
+                <p class="sikshya-order-page__error-text"><?php echo esc_html($page_model->getError()); ?></p>
                 <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('Back to account', 'sikshya'); ?></a>
             </div>
         <?php else : ?>
             <?php
-            $o = $page->getOrder();
+            $o = $page_model->getOrder();
             if (!$o) {
                 ?>
                 <div class="sikshya-order-page__error" role="alert">
@@ -72,11 +72,11 @@ get_header();
                 ?>
             <div class="sikshya-order-page__layout">
                 <div class="sikshya-order-page__main">
-                    <?php if ($page->getOfflineInstructionsHtml() !== '') : ?>
+                    <?php if ($page_model->getOfflineInstructionsHtml() !== '') : ?>
                         <section class="sikshya-order-page__offline" aria-labelledby="sikshya-order-offline-heading">
                             <h2 id="sikshya-order-offline-heading" class="sikshya-order-page__offline-title"><?php esc_html_e('How to pay', 'sikshya'); ?></h2>
                             <div class="sikshya-order-page__offline-body">
-                                <?php echo wp_kses_post($page->getOfflineInstructionsHtml()); ?>
+                                <?php echo wp_kses_post($page_model->getOfflineInstructionsHtml()); ?>
                             </div>
                         </section>
                     <?php endif; ?>
@@ -84,7 +84,7 @@ get_header();
                     <section class="sikshya-order-page__panel" aria-labelledby="sikshya-order-items-heading">
                         <h2 id="sikshya-order-items-heading" class="sikshya-order-page__panel-title"><?php esc_html_e('Courses', 'sikshya'); ?></h2>
                         <ul class="sikshya-order-page__lines">
-                            <?php foreach ($page->getItems() as $it) : ?>
+                            <?php foreach ($page_model->getItems() as $it) : ?>
                                 <?php
                                 $cid = (int) $it->course_id;
                                 $title = get_the_title($cid) ?: '#' . $cid;
@@ -137,13 +137,13 @@ get_header();
                                     }
                                     ?>
                                     <span class="<?php echo esc_attr($badge_cls); ?>">
-                                        <?php echo esc_html($page->getStatusLabel()); ?>
+                                        <?php echo esc_html($page_model->getStatusLabel()); ?>
                                     </span>
                                 </span>
                             </div>
                             <div class="sikshya-order-page__summary-row">
                                 <span class="sikshya-order-page__summary-label"><?php esc_html_e('Payment method', 'sikshya'); ?></span>
-                                <span class="sikshya-order-page__summary-value"><?php echo esc_html($page->getGatewayLabel()); ?></span>
+                                <span class="sikshya-order-page__summary-value"><?php echo esc_html($page_model->getGatewayLabel()); ?></span>
                             </div>
                         </div>
                         <?php if ($discount > 0.00001) : ?>

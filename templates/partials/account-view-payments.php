@@ -5,7 +5,7 @@
  * @package Sikshya
  *
  * @var array<string, mixed>                         $acc Back-compat view array for hooks.
- * @var \Sikshya\Presentation\Models\AccountPageModel $page
+ * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
 use Sikshya\Frontend\Public\PublicPageUrls;
@@ -14,9 +14,9 @@ use Sikshya\Frontend\Public\PublicPageUrls;
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Orders', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Orders', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page->getUrls()->getCheckoutUrl()); ?>"><?php esc_html_e('Checkout', 'sikshya'); ?></a>
+                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page_model->getUrls()->getCheckoutUrl()); ?>"><?php esc_html_e('Checkout', 'sikshya'); ?></a>
                 </div>
-                <?php if ($page->getOrders() === []) : ?>
+                <?php if ($page_model->getOrders() === []) : ?>
                     <div class="sik-acc-empty"><?php esc_html_e('No orders yet.', 'sikshya'); ?></div>
                 <?php else : ?>
                     <div class="sik-acc-table-wrap">
@@ -31,7 +31,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                             </tr>
                             </thead>
                             <tbody>
-                            <?php foreach ($page->getOrders() as $ord) : ?>
+                            <?php foreach ($page_model->getOrders() as $ord) : ?>
                                 <?php
                                 $otok = isset($ord->public_token) ? \Sikshya\Database\Repositories\OrderRepository::sanitizePublicToken((string) $ord->public_token) : '';
                                 $order_href = $otok !== '' ? PublicPageUrls::orderView($otok) : PublicPageUrls::url('order');
@@ -67,7 +67,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                 <?php endif; ?>
             </section>
 
-            <?php if ($page->getLegacyPayments() !== []) : ?>
+            <?php if ($page_model->getLegacyPayments() !== []) : ?>
             <section class="sik-acc-panel" style="margin-top:1.25rem;" aria-label="<?php esc_attr_e('Payment records', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Payment records', 'sikshya'); ?></h2>
@@ -85,7 +85,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($page->getLegacyPayments() as $lp) : ?>
+                        <?php foreach ($page_model->getLegacyPayments() as $lp) : ?>
                             <?php
                             if (!is_array($lp)) {
                                 continue;

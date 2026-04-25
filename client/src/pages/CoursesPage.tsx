@@ -224,7 +224,8 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         collectionQueryExtras={{
           embed: '1',
           // Ensure bundle type meta is present in the collection response so the badge renders reliably.
-          fields: 'id,title,slug,status,meta,sikshya_course_type,_embedded,date,modified,excerpt,author',
+          fields:
+            'id,title,slug,status,link,meta,sikshya_course_type,sikshya_preview_link,_embedded,date,modified,excerpt,author',
           ...(typeFilter !== 'any' ? { sikshya_course_type: typeFilter } : null),
         }}
         toolbarTrailing={

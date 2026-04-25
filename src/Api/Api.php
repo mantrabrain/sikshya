@@ -70,6 +70,60 @@ class Api
             ]
         );
 
+        // Preview URL for unpublished course/lesson/quiz/assignment posts.
+        // WP Core's REST exposes `link` (the public permalink) but never a
+        // preview-mode URL, so the admin React row actions can't render a
+        // "Preview" link for drafts/pending/private/auto-draft. We compute
+        // it via get_preview_post_link(), which signs the URL with the
+        // capability-aware preview nonce, and only emit it when the current
+        // user can actually edit the post — so unauthorized REST consumers
+        // get an empty string.
+        $preview_link_callback = static function (array $obj): string {
+            $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+            if ($id <= 0) {
+                return '';
+            }
+            $post = get_post($id);
+            if (!$post instanceof \WP_Post) {
+                return '';
+            }
+            // For published/scheduled posts, `link` already points to the
+            // canonical permalink; the preview link is the same. We only
+            // expose this field for editable, not-yet-public posts to keep
+            // the React UI logic simple (Preview = drafts; View = published).
+            $editable_statuses = ['draft', 'pending', 'private', 'future', 'auto-draft'];
+            if (!in_array($post->post_status, $editable_statuses, true)) {
+                return '';
+            }
+            if (!current_user_can('edit_post', $id)) {
+                return '';
+            }
+            $url = get_preview_post_link($post);
+            return is_string($url) ? esc_url_raw($url) : '';
+        };
+        $preview_link_schema = [
+            'description' => 'Preview URL (with preview nonce) for unpublished posts; empty for published or unauthorized.',
+            'type' => 'string',
+            'format' => 'uri',
+            'context' => ['view', 'edit'],
+            'readonly' => true,
+        ];
+        foreach ([
+            \Sikshya\Constants\PostTypes::COURSE,
+            \Sikshya\Constants\PostTypes::LESSON,
+            \Sikshya\Constants\PostTypes::QUIZ,
+            \Sikshya\Constants\PostTypes::ASSIGNMENT,
+        ] as $sik_post_type) {
+            register_rest_field(
+                $sik_post_type,
+                'sikshya_preview_link',
+                [
+                    'get_callback' => $preview_link_callback,
+                    'schema' => $preview_link_schema,
+                ]
+            );
+        }
+
         // Certificate template public preview URL (base + hash).
         // Hash is auto-generated server-side and stored in meta (so we can resolve preview by hash
         // without scanning templates). Admin UI should never need a manual "save once".
