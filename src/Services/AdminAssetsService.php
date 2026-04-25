@@ -2,6 +2,7 @@
 
 namespace Sikshya\Services;
 
+use Sikshya\Admin\SetupWizardController;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
 
@@ -146,7 +147,39 @@ class AdminAssetsService
      */
     public function enqueueAdminAssets(): void
     {
+        $page_query = isset($_GET['page']) ? sanitize_key(wp_unslash((string) $_GET['page'])) : '';
+        $is_setup_wizard = $page_query === SetupWizardController::MENU_SLUG;
+
         $screen = get_current_screen();
+
+        if ($is_setup_wizard) {
+            if (wp_style_is('sikshya-react-shell', 'registered')) {
+                wp_enqueue_style('sikshya-react-shell');
+            }
+            if (wp_style_is('sikshya-setup-wizard', 'registered')) {
+                wp_enqueue_style('sikshya-setup-wizard');
+            }
+            if (wp_script_is('sikshya-setup-wizard', 'registered')) {
+                wp_enqueue_script('sikshya-setup-wizard');
+            }
+
+            wp_localize_script(
+                'sikshya-setup-wizard',
+                'sikshyaSetupWizard',
+                [
+                    'restUrl' => esc_url_raw(rest_url('sikshya/v1/admin/setup-wizard/step')),
+                    'nonce' => wp_create_nonce('wp_rest'),
+                    'dashboardUrl' => esc_url_raw(admin_url('admin.php?page=sikshya')),
+                    'siteUrl' => esc_url_raw(home_url('/')),
+                    'strings' => [
+                        'saving' => __('Saving…', 'sikshya'),
+                        'confirmSkipAll' => __('Skip setup? You can re-run the wizard anytime from Sikshya → Tools.', 'sikshya'),
+                    ],
+                ]
+            );
+
+            return;
+        }
 
         // Check if we're on a Sikshya admin page
         if (!$screen) {
@@ -167,16 +200,6 @@ class AdminAssetsService
 
         $screen_id = (string) ($screen->id ?? '');
         $screen_base = (string) ($screen->base ?? '');
-
-        if ($screen_id === 'admin_page_sikshya-setup') {
-            if (wp_style_is('sikshya-setup-wizard', 'registered')) {
-                wp_enqueue_style('sikshya-setup-wizard');
-            }
-            if (wp_script_is('sikshya-setup-wizard', 'registered')) {
-                wp_enqueue_script('sikshya-setup-wizard');
-            }
-            return;
-        }
 
         // React shell bundle: only the unified Sikshya app screen (subpages use `view=`).
         if ($screen_id === 'toplevel_page_sikshya') {

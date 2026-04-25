@@ -134,6 +134,9 @@ final class Plugin
             $this->services['achievement'] = new \Sikshya\Services\LearnerAchievementStub();
             $this->services['quiz'] = new \Sikshya\Services\QuizService();
 
+            // Opt-in usage telemetry (privacy-safe).
+            $this->services['usage'] = \Sikshya\Services\StatsUsage::instance();
+
             // Course builder orchestration (admin UI + REST)
             $this->services['courseBuilder'] = new \Sikshya\Services\CourseBuilderService(
                 $this,
@@ -237,6 +240,9 @@ final class Plugin
         // Initialize assets
         $this->services['frontendAssets']->init();
         $this->services['adminAssets']->init();
+        if (isset($this->services['usage']) && $this->services['usage'] instanceof \Sikshya\Services\StatsUsage) {
+            $this->services['usage']->init();
+        }
         if (isset($this->services['restCollectionQuery']) && $this->services['restCollectionQuery'] instanceof RestCollectionQueryService) {
             $this->services['restCollectionQuery']->init();
         }

@@ -8,6 +8,7 @@
 
 namespace Sikshya\Api;
 
+use Sikshya\Admin\SetupWizardController;
 use Sikshya\Admin\CourseBuilder\BundleBuilderFieldFilter;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
@@ -301,6 +302,14 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'toolsAction'],
+                'permission_callback' => [$this, 'permissionTools'],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/setup-wizard/step', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'saveSetupWizardStep'],
                 'permission_callback' => [$this, 'permissionTools'],
             ],
         ]);
@@ -1427,6 +1436,54 @@ class AdminRestRoutes
                     __('Test email sent to %s.', 'sikshya'),
                     $to
                 ),
+            ],
+            200
+        );
+    }
+
+    /**
+     * Auto-save a single setup wizard step (drives “Next” + shareable ?step= URLs).
+     */
+    public function saveSetupWizardStep(WP_REST_Request $request)
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = [];
+        }
+        $step = isset($params['step']) ? absint($params['step']) : 0;
+        if ($step < 1 || $step > 5) {
+            return new WP_Error(
+                'invalid_step',
+                __('Choose a valid step (1–5).', 'sikshya'),
+                ['status' => 400]
+            );
+        }
+        $r = SetupWizardController::processStep($step, $params);
+        if (!$r['success']) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'errors' => $r['errors'],
+                ],
+                400
+            );
+        }
+        $next_url = $step < 5
+            ? SetupWizardController::adminUrl($step + 1)
+            : SetupWizardController::doneUrl();
+        $messages = [
+            1 => __('You can continue to the next page.', 'sikshya'),
+            2 => __('Your public page words are saved.', 'sikshya'),
+            3 => __('Your currency settings are saved.', 'sikshya'),
+            4 => __('Your lesson link style is saved.', 'sikshya'),
+            5 => __('Sikshya is ready to use.', 'sikshya'),
+        ];
+
+        return new WP_REST_Response(
+            [
+                'success' => true,
+                'message' => $messages[ $step ] ?? '',
+                'next_url' => $next_url,
             ],
             200
         );

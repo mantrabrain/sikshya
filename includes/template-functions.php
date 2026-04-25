@@ -46,29 +46,413 @@ function sikshya_normalize_currency_code(string $code): string
 }
 
 /**
+ * Full ISO 4217 currency map shared across Sikshya (settings + setup wizard).
+ *
+ * Returns ISO code => human-readable name. Filterable for add-ons to extend.
+ *
+ * @return array<string, string>
+ */
+function sikshya_get_currencies(): array
+{
+    static $currencies = null;
+    if ($currencies !== null) {
+        return $currencies;
+    }
+
+    $currencies = [
+        'AED' => __('United Arab Emirates dirham', 'sikshya'),
+        'AFN' => __('Afghan afghani', 'sikshya'),
+        'ALL' => __('Albanian lek', 'sikshya'),
+        'AMD' => __('Armenian dram', 'sikshya'),
+        'ANG' => __('Netherlands Antillean guilder', 'sikshya'),
+        'AOA' => __('Angolan kwanza', 'sikshya'),
+        'ARS' => __('Argentine peso', 'sikshya'),
+        'AUD' => __('Australian dollar', 'sikshya'),
+        'AWG' => __('Aruban florin', 'sikshya'),
+        'AZN' => __('Azerbaijani manat', 'sikshya'),
+        'BAM' => __('Bosnia and Herzegovina convertible mark', 'sikshya'),
+        'BBD' => __('Barbadian dollar', 'sikshya'),
+        'BDT' => __('Bangladeshi taka', 'sikshya'),
+        'BGN' => __('Bulgarian lev', 'sikshya'),
+        'BHD' => __('Bahraini dinar', 'sikshya'),
+        'BIF' => __('Burundian franc', 'sikshya'),
+        'BMD' => __('Bermudian dollar', 'sikshya'),
+        'BND' => __('Brunei dollar', 'sikshya'),
+        'BOB' => __('Bolivian boliviano', 'sikshya'),
+        'BRL' => __('Brazilian real', 'sikshya'),
+        'BSD' => __('Bahamian dollar', 'sikshya'),
+        'BTC' => __('Bitcoin', 'sikshya'),
+        'BTN' => __('Bhutanese ngultrum', 'sikshya'),
+        'BWP' => __('Botswana pula', 'sikshya'),
+        'BYN' => __('Belarusian ruble', 'sikshya'),
+        'BZD' => __('Belize dollar', 'sikshya'),
+        'CAD' => __('Canadian dollar', 'sikshya'),
+        'CDF' => __('Congolese franc', 'sikshya'),
+        'CHF' => __('Swiss franc', 'sikshya'),
+        'CLP' => __('Chilean peso', 'sikshya'),
+        'CNY' => __('Chinese yuan', 'sikshya'),
+        'COP' => __('Colombian peso', 'sikshya'),
+        'CRC' => __('Costa Rican colón', 'sikshya'),
+        'CUC' => __('Cuban convertible peso', 'sikshya'),
+        'CUP' => __('Cuban peso', 'sikshya'),
+        'CVE' => __('Cape Verdean escudo', 'sikshya'),
+        'CZK' => __('Czech koruna', 'sikshya'),
+        'DJF' => __('Djiboutian franc', 'sikshya'),
+        'DKK' => __('Danish krone', 'sikshya'),
+        'DOP' => __('Dominican peso', 'sikshya'),
+        'DZD' => __('Algerian dinar', 'sikshya'),
+        'EGP' => __('Egyptian pound', 'sikshya'),
+        'ERN' => __('Eritrean nakfa', 'sikshya'),
+        'ETB' => __('Ethiopian birr', 'sikshya'),
+        'EUR' => __('Euro', 'sikshya'),
+        'FJD' => __('Fijian dollar', 'sikshya'),
+        'FKP' => __('Falkland Islands pound', 'sikshya'),
+        'GBP' => __('Pound sterling', 'sikshya'),
+        'GEL' => __('Georgian lari', 'sikshya'),
+        'GGP' => __('Guernsey pound', 'sikshya'),
+        'GHS' => __('Ghana cedi', 'sikshya'),
+        'GIP' => __('Gibraltar pound', 'sikshya'),
+        'GMD' => __('Gambian dalasi', 'sikshya'),
+        'GNF' => __('Guinean franc', 'sikshya'),
+        'GTQ' => __('Guatemalan quetzal', 'sikshya'),
+        'GYD' => __('Guyanese dollar', 'sikshya'),
+        'HKD' => __('Hong Kong dollar', 'sikshya'),
+        'HNL' => __('Honduran lempira', 'sikshya'),
+        'HRK' => __('Croatian kuna', 'sikshya'),
+        'HTG' => __('Haitian gourde', 'sikshya'),
+        'HUF' => __('Hungarian forint', 'sikshya'),
+        'IDR' => __('Indonesian rupiah', 'sikshya'),
+        'ILS' => __('Israeli new shekel', 'sikshya'),
+        'IMP' => __('Manx pound', 'sikshya'),
+        'INR' => __('Indian rupee', 'sikshya'),
+        'IQD' => __('Iraqi dinar', 'sikshya'),
+        'IRR' => __('Iranian rial', 'sikshya'),
+        'IRT' => __('Iranian toman', 'sikshya'),
+        'ISK' => __('Icelandic króna', 'sikshya'),
+        'JEP' => __('Jersey pound', 'sikshya'),
+        'JMD' => __('Jamaican dollar', 'sikshya'),
+        'JOD' => __('Jordanian dinar', 'sikshya'),
+        'JPY' => __('Japanese yen', 'sikshya'),
+        'KES' => __('Kenyan shilling', 'sikshya'),
+        'KGS' => __('Kyrgyzstani som', 'sikshya'),
+        'KHR' => __('Cambodian riel', 'sikshya'),
+        'KMF' => __('Comorian franc', 'sikshya'),
+        'KPW' => __('North Korean won', 'sikshya'),
+        'KRW' => __('South Korean won', 'sikshya'),
+        'KWD' => __('Kuwaiti dinar', 'sikshya'),
+        'KYD' => __('Cayman Islands dollar', 'sikshya'),
+        'KZT' => __('Kazakhstani tenge', 'sikshya'),
+        'LAK' => __('Lao kip', 'sikshya'),
+        'LBP' => __('Lebanese pound', 'sikshya'),
+        'LKR' => __('Sri Lankan rupee', 'sikshya'),
+        'LRD' => __('Liberian dollar', 'sikshya'),
+        'LSL' => __('Lesotho loti', 'sikshya'),
+        'LYD' => __('Libyan dinar', 'sikshya'),
+        'MAD' => __('Moroccan dirham', 'sikshya'),
+        'MDL' => __('Moldovan leu', 'sikshya'),
+        'MGA' => __('Malagasy ariary', 'sikshya'),
+        'MKD' => __('Macedonian denar', 'sikshya'),
+        'MMK' => __('Burmese kyat', 'sikshya'),
+        'MNT' => __('Mongolian tögrög', 'sikshya'),
+        'MOP' => __('Macanese pataca', 'sikshya'),
+        'MRU' => __('Mauritanian ouguiya', 'sikshya'),
+        'MUR' => __('Mauritian rupee', 'sikshya'),
+        'MVR' => __('Maldivian rufiyaa', 'sikshya'),
+        'MWK' => __('Malawian kwacha', 'sikshya'),
+        'MXN' => __('Mexican peso', 'sikshya'),
+        'MYR' => __('Malaysian ringgit', 'sikshya'),
+        'MZN' => __('Mozambican metical', 'sikshya'),
+        'NAD' => __('Namibian dollar', 'sikshya'),
+        'NGN' => __('Nigerian naira', 'sikshya'),
+        'NIO' => __('Nicaraguan córdoba', 'sikshya'),
+        'NOK' => __('Norwegian krone', 'sikshya'),
+        'NPR' => __('Nepalese rupee', 'sikshya'),
+        'NZD' => __('New Zealand dollar', 'sikshya'),
+        'OMR' => __('Omani rial', 'sikshya'),
+        'PAB' => __('Panamanian balboa', 'sikshya'),
+        'PEN' => __('Sol', 'sikshya'),
+        'PGK' => __('Papua New Guinean kina', 'sikshya'),
+        'PHP' => __('Philippine peso', 'sikshya'),
+        'PKR' => __('Pakistani rupee', 'sikshya'),
+        'PLN' => __('Polish złoty', 'sikshya'),
+        'PRB' => __('Transnistrian ruble', 'sikshya'),
+        'PYG' => __('Paraguayan guaraní', 'sikshya'),
+        'QAR' => __('Qatari riyal', 'sikshya'),
+        'RON' => __('Romanian leu', 'sikshya'),
+        'RSD' => __('Serbian dinar', 'sikshya'),
+        'RUB' => __('Russian ruble', 'sikshya'),
+        'RWF' => __('Rwandan franc', 'sikshya'),
+        'SAR' => __('Saudi riyal', 'sikshya'),
+        'SBD' => __('Solomon Islands dollar', 'sikshya'),
+        'SCR' => __('Seychellois rupee', 'sikshya'),
+        'SDG' => __('Sudanese pound', 'sikshya'),
+        'SEK' => __('Swedish krona', 'sikshya'),
+        'SGD' => __('Singapore dollar', 'sikshya'),
+        'SHP' => __('Saint Helena pound', 'sikshya'),
+        'SLL' => __('Sierra Leonean leone', 'sikshya'),
+        'SOS' => __('Somali shilling', 'sikshya'),
+        'SRD' => __('Surinamese dollar', 'sikshya'),
+        'SSP' => __('South Sudanese pound', 'sikshya'),
+        'STN' => __('São Tomé and Príncipe dobra', 'sikshya'),
+        'SYP' => __('Syrian pound', 'sikshya'),
+        'SZL' => __('Swazi lilangeni', 'sikshya'),
+        'THB' => __('Thai baht', 'sikshya'),
+        'TJS' => __('Tajikistani somoni', 'sikshya'),
+        'TMT' => __('Turkmenistan manat', 'sikshya'),
+        'TND' => __('Tunisian dinar', 'sikshya'),
+        'TOP' => __('Tongan paʻanga', 'sikshya'),
+        'TRY' => __('Turkish lira', 'sikshya'),
+        'TTD' => __('Trinidad and Tobago dollar', 'sikshya'),
+        'TWD' => __('New Taiwan dollar', 'sikshya'),
+        'TZS' => __('Tanzanian shilling', 'sikshya'),
+        'UAH' => __('Ukrainian hryvnia', 'sikshya'),
+        'UGX' => __('Ugandan shilling', 'sikshya'),
+        'USD' => __('United States dollar', 'sikshya'),
+        'UYU' => __('Uruguayan peso', 'sikshya'),
+        'UZS' => __('Uzbekistani som', 'sikshya'),
+        'VEF' => __('Venezuelan bolívar', 'sikshya'),
+        'VES' => __('Bolívar soberano', 'sikshya'),
+        'VND' => __('Vietnamese đồng', 'sikshya'),
+        'VUV' => __('Vanuatu vatu', 'sikshya'),
+        'WST' => __('Samoan tālā', 'sikshya'),
+        'XAF' => __('Central African CFA franc', 'sikshya'),
+        'XCD' => __('East Caribbean dollar', 'sikshya'),
+        'XOF' => __('West African CFA franc', 'sikshya'),
+        'XPF' => __('CFP franc', 'sikshya'),
+        'YER' => __('Yemeni rial', 'sikshya'),
+        'ZAR' => __('South African rand', 'sikshya'),
+        'ZMW' => __('Zambian kwacha', 'sikshya'),
+    ];
+
+    /**
+     * Filter the available Sikshya currencies (ISO code => display name).
+     *
+     * @param array<string,string> $currencies
+     */
+    return apply_filters('sikshya_currencies', $currencies);
+}
+
+/**
  * Symbol / prefix for common currencies.
+ *
+ * Falls back to `<CODE> ` (e.g. "AED 99.99") for currencies without a known glyph.
  *
  * @param string $code ISO 4217 code.
  * @return string
  */
 function sikshya_get_currency_symbol(string $code): string
 {
+    $code = strtoupper($code);
     $map = [
-        'USD' => '$',
-        'EUR' => '€',
-        'GBP' => '£',
-        'INR' => '₹',
+        'AED' => 'د.إ',
+        'AFN' => '؋',
+        'ALL' => 'L',
+        'AMD' => 'AMD',
+        'ANG' => 'ƒ',
+        'AOA' => 'Kz',
+        'ARS' => '$',
         'AUD' => 'A$',
-        'CAD' => 'C$',
-        'JPY' => '¥',
+        'AWG' => 'Afl.',
+        'AZN' => 'AZN',
+        'BAM' => 'KM',
+        'BBD' => '$',
+        'BDT' => '৳',
+        'BGN' => 'лв.',
+        'BHD' => '.د.ب',
+        'BIF' => 'Fr',
+        'BMD' => '$',
+        'BND' => '$',
+        'BOB' => 'Bs.',
         'BRL' => 'R$',
+        'BSD' => '$',
+        'BTC' => '฿',
+        'BTN' => 'Nu.',
+        'BWP' => 'P',
+        'BYN' => 'Br',
+        'BZD' => '$',
+        'CAD' => 'C$',
+        'CDF' => 'Fr',
+        'CHF' => 'CHF',
+        'CLP' => '$',
+        'CNY' => '¥',
+        'COP' => '$',
+        'CRC' => '₡',
+        'CUC' => '$',
+        'CUP' => '$',
+        'CVE' => '$',
+        'CZK' => 'Kč',
+        'DJF' => 'Fr',
+        'DKK' => 'kr.',
+        'DOP' => 'RD$',
+        'DZD' => 'د.ج',
+        'EGP' => 'EGP',
+        'ERN' => 'Nfk',
+        'ETB' => 'Br',
+        'EUR' => '€',
+        'FJD' => '$',
+        'FKP' => '£',
+        'GBP' => '£',
+        'GEL' => '₾',
+        'GGP' => '£',
+        'GHS' => '₵',
+        'GIP' => '£',
+        'GMD' => 'D',
+        'GNF' => 'Fr',
+        'GTQ' => 'Q',
+        'GYD' => '$',
+        'HKD' => 'HK$',
+        'HNL' => 'L',
+        'HRK' => 'kn',
+        'HTG' => 'G',
+        'HUF' => 'Ft',
+        'IDR' => 'Rp',
+        'ILS' => '₪',
+        'IMP' => '£',
+        'INR' => '₹',
+        'IQD' => 'ع.د',
+        'IRR' => '﷼',
+        'IRT' => 'تومان',
+        'ISK' => 'kr.',
+        'JEP' => '£',
+        'JMD' => '$',
+        'JOD' => 'د.أ',
+        'JPY' => '¥',
+        'KES' => 'KSh',
+        'KGS' => 'сом',
+        'KHR' => '៛',
+        'KMF' => 'Fr',
+        'KPW' => '₩',
+        'KRW' => '₩',
+        'KWD' => 'د.ك',
+        'KYD' => '$',
+        'KZT' => '₸',
+        'LAK' => '₭',
+        'LBP' => 'ل.ل',
+        'LKR' => 'රු',
+        'LRD' => '$',
+        'LSL' => 'L',
+        'LYD' => 'ل.د',
+        'MAD' => 'د.م.',
+        'MDL' => 'MDL',
+        'MGA' => 'Ar',
+        'MKD' => 'ден',
+        'MMK' => 'Ks',
+        'MNT' => '₮',
+        'MOP' => 'P',
+        'MRU' => 'UM',
+        'MUR' => '₨',
+        'MVR' => '.ރ',
+        'MWK' => 'MK',
         'MXN' => 'MX$',
-        'SGD' => 'S$',
+        'MYR' => 'RM',
+        'MZN' => 'MT',
+        'NAD' => 'N$',
+        'NGN' => '₦',
+        'NIO' => 'C$',
+        'NOK' => 'kr',
         'NPR' => 'रू',
+        'NZD' => 'NZ$',
+        'OMR' => 'ر.ع.',
+        'PAB' => 'B/.',
+        'PEN' => 'S/',
+        'PGK' => 'K',
+        'PHP' => '₱',
+        'PKR' => '₨',
+        'PLN' => 'zł',
+        'PRB' => 'р.',
+        'PYG' => '₲',
+        'QAR' => 'ر.ق',
+        'RON' => 'lei',
+        'RSD' => 'дин.',
+        'RUB' => '₽',
+        'RWF' => 'Fr',
+        'SAR' => 'ر.س',
+        'SBD' => '$',
+        'SCR' => '₨',
+        'SDG' => 'ج.س.',
+        'SEK' => 'kr',
+        'SGD' => 'S$',
+        'SHP' => '£',
+        'SLL' => 'Le',
+        'SOS' => 'Sh',
+        'SRD' => '$',
+        'SSP' => '£',
+        'STN' => 'Db',
+        'SYP' => 'ل.س',
+        'SZL' => 'L',
+        'THB' => '฿',
+        'TJS' => 'SM',
+        'TMT' => 'm',
+        'TND' => 'د.ت',
+        'TOP' => 'T$',
+        'TRY' => '₺',
+        'TTD' => '$',
+        'TWD' => 'NT$',
+        'TZS' => 'Sh',
+        'UAH' => '₴',
+        'UGX' => 'UGX',
+        'USD' => '$',
+        'UYU' => '$',
+        'UZS' => 'UZS',
+        'VEF' => 'Bs F',
+        'VES' => 'Bs.S',
+        'VND' => '₫',
+        'VUV' => 'Vt',
+        'WST' => 'T',
+        'XAF' => 'CFA',
+        'XCD' => '$',
+        'XOF' => 'CFA',
+        'XPF' => 'Fr',
+        'YER' => '﷼',
+        'ZAR' => 'R',
+        'ZMW' => 'ZK',
         'OTHER' => '',
     ];
 
-    return isset($map[$code]) ? $map[$code] : $code . ' ';
+    /**
+     * Filter the symbol/prefix for a currency.
+     *
+     * @param string $symbol The resolved symbol (or fallback "<code> ").
+     * @param string $code   ISO code (uppercased).
+     */
+    $symbol = isset($map[$code]) ? $map[$code] : $code . ' ';
+
+    return (string) apply_filters('sikshya_currency_symbol', $symbol, $code);
+}
+
+/**
+ * Display label for a currency suitable for select dropdowns ("Name (Symbol)").
+ *
+ * @param string $code ISO 4217 code.
+ * @return string
+ */
+function sikshya_get_currency_label(string $code): string
+{
+    $code = strtoupper($code);
+    $currencies = sikshya_get_currencies();
+    $name = isset($currencies[$code]) ? $currencies[$code] : $code;
+    $symbol = sikshya_get_currency_symbol($code);
+
+    if ($symbol === '' || trim($symbol) === $code) {
+        return sprintf('%s (%s)', $name, $code);
+    }
+
+    return sprintf('%s (%s)', $name, $symbol);
+}
+
+/**
+ * Map of code => "Name (Symbol)" for `<select>` dropdowns.
+ *
+ * @return array<string,string>
+ */
+function sikshya_get_currency_choices(): array
+{
+    $out = [];
+    foreach (sikshya_get_currencies() as $code => $_name) {
+        $out[$code] = sikshya_get_currency_label($code);
+    }
+
+    return $out;
 }
 
 /**

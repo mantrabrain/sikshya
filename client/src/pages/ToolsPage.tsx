@@ -173,6 +173,24 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       title={title}
       subtitle="Diagnostics, exports, and maintenance for administrators"
     >
+      {config.setupWizardUrl ? (
+        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Setup wizard</h2>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+            Configure storefront permalinks and learning URL style. You can return here anytime from
+            Tools.
+          </p>
+          <div className="mt-4">
+            <a
+              className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600"
+              href={config.setupWizardUrl}
+            >
+              Open setup wizard
+            </a>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4 dark:border-slate-800">
         {(
           [

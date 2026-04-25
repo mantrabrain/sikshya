@@ -79,7 +79,10 @@ class Admin
         add_action('admin_menu', [$this, 'addAdminMenus']);
         add_action('admin_init', [$this, 'initAdmin']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
-        add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectToWizard'], 0);
+        add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectLegacyWizardAdminUrl'], 0);
+        add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectToWizard'], 1);
+        // Process wizard form POSTs (save/skip) before any output, so redirects work cleanly.
+        add_action('admin_init', [$this->controllers['setup_wizard'], 'handleEarlyPost'], 2);
         if (LegacyAjax::hooksEnabled()) {
             add_action('wp_ajax_sikshya_admin_action', [$this, 'handleAjaxRequest']);
             add_action('wp_ajax_sikshya_categories_action', [$this, 'handleCategoriesAjaxRequest']);
@@ -124,11 +127,12 @@ class Admin
             5
         );
 
-        // Hidden one-time setup wizard (not shown in menu; redirects on first activation).
+        // Setup wizard: must stay in `$submenu` so WordPress can resolve `admin.php?page=sikshya-setup`
+        // (see `user_can_access_admin_page()` + `get_admin_page_parent()`). Entry point in React: Tools hub.
         add_submenu_page(
-            null,
-            __('Sikshya setup', 'sikshya'),
-            __('Setup', 'sikshya'),
+            AdminPages::DASHBOARD,
+            __('Sikshya Setup Wizard', 'sikshya'),
+            __('Sikshya Setup Wizard', 'sikshya'),
             'manage_options',
             SetupWizardController::MENU_SLUG,
             [$this->controllers['setup_wizard'], 'renderWizard']
@@ -188,11 +192,26 @@ class Admin
     }
 
     /**
+     * True when the request targets the PHP setup wizard (`admin.php?page=sikshya-setup`).
+     */
+    public static function isSikshyaSetupWizardRequest(): bool
+    {
+        if (!is_admin()) {
+            return false;
+        }
+        if (empty($_GET['page']) || !is_string($_GET['page'])) {
+            return false;
+        }
+
+        return sanitize_key(wp_unslash($_GET['page'])) === SetupWizardController::MENU_SLUG;
+    }
+
+    /**
      * Hide WP skip links and other chrome on the Sikshya full-screen shell.
      */
     public static function printSikshyaReactShellHead(): void
     {
-        if (!self::isSikshyaReactAppRequest()) {
+        if (!self::isSikshyaReactAppRequest() && !self::isSikshyaSetupWizardRequest()) {
             return;
         }
         echo '<style id="sikshya-react-wp-chrome-hide">
@@ -286,7 +305,7 @@ class Admin
      */
     public static function hideAdminBarOnSikshyaApp($show)
     {
-        return self::isSikshyaReactAppRequest() ? false : $show;
+        return (self::isSikshyaReactAppRequest() || self::isSikshyaSetupWizardRequest()) ? false : $show;
     }
 
     /**
@@ -295,9 +314,11 @@ class Admin
      */
     public static function dequeueWordPressUiOnSikshyaApp(): void
     {
-        $screen = get_current_screen();
-        if (!$screen || $screen->id !== 'toplevel_page_sikshya') {
-            return;
+        if (!self::isSikshyaSetupWizardRequest()) {
+            $screen = get_current_screen();
+            if (!$screen || $screen->id !== 'toplevel_page_sikshya') {
+                return;
+            }
         }
 
         $styles = [
@@ -475,6 +496,10 @@ class Admin
      */
     public function enqueueAdminAssets(): void
     {
+        if (self::isSikshyaSetupWizardRequest()) {
+            return;
+        }
+
         $screen = get_current_screen();
         if (!$screen) {
             return;
@@ -589,7 +614,7 @@ class Admin
         $screen = get_current_screen();
 
         $sid = $screen ? (string) ($screen->id ?? '') : '';
-        if ($screen && $sid === 'toplevel_page_sikshya') {
+        if (self::isSikshyaSetupWizardRequest() || ($screen && $sid === 'toplevel_page_sikshya')) {
             $styles = array_filter($styles, function ($style) {
                 return !in_array($style, ['forms', 'list-tables'], true);
             });
@@ -606,7 +631,7 @@ class Admin
     {
         $screen = get_current_screen();
 
-        if ($screen && $screen->id === 'toplevel_page_sikshya') {
+        if (self::isSikshyaSetupWizardRequest() || ($screen && $screen->id === 'toplevel_page_sikshya')) {
             wp_dequeue_style('list-tables');
             wp_dequeue_style('forms');
             wp_dequeue_style('wp-admin');
@@ -757,12 +782,13 @@ class Admin
     public function removeWordPressNoticesOnSikshyaPages(): void
     {
         $is_react_shell = self::isSikshyaReactAppRequest();
-        if (!$is_react_shell && !$this->isSikshyaAdminPage()) {
+        $is_setup_wizard = self::isSikshyaSetupWizardRequest();
+        if (!$is_react_shell && !$is_setup_wizard && !$this->isSikshyaAdminPage()) {
             return;
         }
 
-        // Unified React app: no WordPress admin notices (custom shell alerts only).
-        if ($is_react_shell) {
+        // Unified React app and setup wizard: no WordPress admin notices (custom shell alerts only).
+        if ($is_react_shell || $is_setup_wizard) {
             remove_all_actions('admin_notices');
             remove_all_actions('all_admin_notices');
             remove_all_actions('network_admin_notices');
@@ -804,7 +830,7 @@ class Admin
             return;
         }
 
-        if ($screen->id !== 'toplevel_page_sikshya') {
+        if ($screen->id !== 'toplevel_page_sikshya' && !self::isSikshyaSetupWizardRequest()) {
             return;
         }
 
@@ -942,6 +968,10 @@ class Admin
             return;
         }
 
+        if (self::isSikshyaSetupWizardRequest()) {
+            return;
+        }
+
         echo '<div class="sikshya-admin-footer">';
         echo '<p>' . sprintf(
             __('Sikshya LMS v%s | <a href="%s" target="_blank">Documentation</a> | <a href="%s" target="_blank">Support</a>', 'sikshya'),
@@ -961,6 +991,10 @@ class Admin
     public function filterAdminBodyClass($classes): string
     {
         $classes = is_string($classes) ? $classes : '';
+
+        if (self::isSikshyaSetupWizardRequest()) {
+            return trim($classes . ' sikshya-lms-admin sikshya-react-shell sikshya-setup-wizard-body');
+        }
 
         $screen = get_current_screen();
         if (!$screen) {

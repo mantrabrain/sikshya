@@ -14,6 +14,7 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
     restNonce: '',
     adminUrl: '/wp-admin/',
     appAdminBase: 'http://localhost/wp-admin/admin.php?page=sikshya',
+    setupWizardUrl: '/wp-admin/admin.php?page=sikshya-setup&step=1',
     siteUrl: '/',
     pluginUrl: '',
     user: { name: 'Developer', avatarUrl: '' },

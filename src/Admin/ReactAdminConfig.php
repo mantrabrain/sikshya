@@ -97,6 +97,18 @@ final class ReactAdminConfig
             'shellAlerts' => $shell['shellAlerts'],
         ];
 
+        if (current_user_can('manage_options')) {
+            $config['setupWizardUrl'] = esc_url_raw(
+                add_query_arg(
+                    [
+                        'page' => SetupWizardController::MENU_SLUG,
+                        SetupWizardController::STEP_QUERY => '1',
+                    ],
+                    admin_url('admin.php')
+                )
+            );
+        }
+
         /**
          * Allow Pro add-ons and custom code to inject extra config keys.
          *

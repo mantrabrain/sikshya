@@ -59,6 +59,8 @@ export type SikshyaReactConfig = {
   adminUrl: string;
   /** Full URL to `admin.php?page=sikshya` (use {@link appViewHref} for subpages). */
   appAdminBase: string;
+  /** PHP onboarding wizard (`admin.php?page=sikshya-setup`); set for administrators only. */
+  setupWizardUrl?: string;
   siteUrl: string;
   pluginUrl: string;
   /** Global frontend permalink bases (from PHP `PermalinkService::get()`). */

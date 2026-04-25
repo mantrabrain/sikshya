@@ -179,6 +179,17 @@ class SettingsManager
     {
         Settings::set($key, $value);
 
+        // Side-effect: keep usage tracking scheduler in sync with the consent toggle.
+        if ($key === 'allow_usage_tracking' && class_exists('\\Sikshya\\Services\\StatsUsage')) {
+            $truthy = Settings::isTruthy($value);
+            $u = \Sikshya\Services\StatsUsage::instance();
+            if ($truthy) {
+                $u->enable(true);
+            } else {
+                $u->disable();
+            }
+        }
+
         $saved_value = Settings::get($key, null);
 
         $value_normalized = $this->normalizeValue($value);
@@ -918,22 +929,17 @@ class SettingsManager
                         'description' => __('Which money unit prices use everywhere: course prices, cart, checkout, and receipts.', 'sikshya'),
                         'select_placeholder' => __('Choose one…', 'sikshya'),
                         'default' => 'USD',
-                        'options' => [
-                            'USD' => __('United States (US) dollar ($)', 'sikshya'),
-                            'EUR' => __('Euro (€)', 'sikshya'),
-                            'GBP' => __('British pound (£)', 'sikshya'),
-                            'CAD' => __('Canadian dollar (C$)', 'sikshya'),
-                            'AUD' => __('Australian dollar (A$)', 'sikshya'),
-                            'JPY' => __('Japanese yen (¥)', 'sikshya'),
-                            'INR' => __('Indian rupee (₹)', 'sikshya'),
-                            'BRL' => __('Brazilian real (R$)', 'sikshya'),
-                            'MXN' => __('Mexican peso ($)', 'sikshya'),
-                            'SGD' => __('Singapore dollar (S$)', 'sikshya')
-                        ],
+                        'options' => function_exists('sikshya_get_currency_choices')
+                            ? sikshya_get_currency_choices()
+                            : ['USD' => 'United States dollar ($)'],
                         'sanitize_callback' => 'sanitize_text_field',
                         'validate_callback' => function ($value) {
-                            $valid_currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR', 'BRL', 'MXN', 'SGD'];
-                            return in_array($value, $valid_currencies) ? true : __('Invalid currency selected.', 'sikshya');
+                            $valid = function_exists('sikshya_get_currencies')
+                                ? array_keys(sikshya_get_currencies())
+                                : ['USD'];
+                            return in_array(strtoupper((string) $value), $valid, true)
+                                ? true
+                                : __('Invalid currency selected.', 'sikshya');
                         }
                     ],
                     [
@@ -2723,7 +2729,27 @@ class SettingsManager
                         'max' => 168
                     ]
                 ]
-            ]
+            ],
+            [
+                'title' => __('Privacy & Usage', 'sikshya'),
+                'icon' => 'fas fa-user-shield',
+                'description' => __(
+                    'Control whether Sikshya can send anonymous usage data to help improve the product. We never send learner/customer PII.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'allow_usage_tracking',
+                        'type' => 'checkbox',
+                        'label' => __('Share anonymous usage data', 'sikshya'),
+                        'description' => __(
+                            'Helps us prioritize features and fix bugs faster. Sends only high-level environment and usage counts (no emails, no student names, no orders).',
+                            'sikshya'
+                        ),
+                        'default' => '0'
+                    ],
+                ],
+            ],
         ];
     }
 
