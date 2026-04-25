@@ -1043,20 +1043,45 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
   align-items: flex-start;
   gap: 12px;
   margin-top: 18px;
-  padding: 16px 18px;
-  border-radius: 12px;
-  border: 1px solid var(--border-soft);
-  background: #f8fafc;
-  transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  padding: 18px 18px;
+  border-radius: 14px;
+  border: 1px solid rgb(186 230 253); /* sky-200 */
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(240, 249, 255, 0.75));
+  box-shadow: 0 10px 24px -18px rgba(37, 99, 235, 0.35);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 120ms ease;
 }
 
 .sikshya-setup__sample--action {
   cursor: default;
 }
 
+.sikshya-setup__sample--action::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  opacity: 0.9;
+}
+
+.sikshya-setup__sample--action::after {
+  content: "";
+  position: absolute;
+  inset: -40% -20% auto -20%;
+  height: 140px;
+  background: radial-gradient(circle at 30% 40%, rgba(37, 99, 235, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
 .sikshya-setup__sample--action:hover {
-  border-color: rgb(186 230 253);
-  background: rgb(240 249 255);
+  border-color: rgb(125 211 252); /* sky-300 */
+  background: linear-gradient(135deg, rgba(239, 246, 255, 1), rgba(224, 242, 254, 0.95));
+  box-shadow: 0 18px 40px -26px rgba(37, 99, 235, 0.5);
+  transform: translateY(-1px);
 }
 
 .sikshya-setup__sample-body {
@@ -1065,6 +1090,8 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
   gap: 6px;
   min-width: 0;
   flex: 1;
+  position: relative;
+  padding-left: 6px; /* offset for left accent bar */
 }
 
 .sikshya-setup__sample-head {
@@ -1075,9 +1102,9 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
 }
 
 .sikshya-setup__sample-title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-2);
-  font-size: 13.5px;
+  font-size: 14px;
 }
 
 .sikshya-setup__sample-tag {
@@ -1119,8 +1146,8 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
 .sikshya-setup__btn--secondary {
   background: #ffffff;
   color: var(--primary-strong, rgb(29 78 216));
-  border: 1px solid rgb(186 230 253);
-  box-shadow: 0 1px 0 rgb(15 23 42 / 4%);
+  border: 1px solid rgb(147 197 253); /* blue-300 */
+  box-shadow: 0 10px 20px -18px rgba(37, 99, 235, 0.35), 0 1px 0 rgb(15 23 42 / 4%);
 }
 
 .sikshya-setup__btn--secondary:hover {
