@@ -208,7 +208,7 @@ Minimum checklist:
 | Bundles | `course_bundles` | **Missing vertical** — implement or remove from doc |
 | Advanced coupons / upsells | `coupons_advanced` | **Missing vertical** — implement or remove from doc |
 | Multi-instructor + revenue | `multi_instructor` | Course staff UI + split service |
-| Activity log | `activity_log` | **Missing vertical** — implement or remove from doc |
+| Activity log | `activity_log` | Admin timeline + REST filters + scoped access, per-course opt-out, retention, My account strip (`ActivityLog` add-on) |
 | Live classes + calendar | `live_classes`, `calendar` | **Missing vertical** — implement or remove from doc |
 | Social login | `social_login` | **Missing vertical** — implement or remove from doc |
 | SCORM / H5P | `scorm_h5p_pro` | Doc says Elite in `sikshya-elite.md` but registry tier is `pro` — **align tier + docs** |

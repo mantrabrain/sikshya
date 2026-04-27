@@ -7,7 +7,14 @@
 
 use Sikshya\Constants\PostTypes;
 
-get_header(); ?>
+sikshya_get_header(); ?>
+
+<?php
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+$label_instructors = function_exists('sikshya_label_plural') ? sikshya_label_plural('instructor', 'instructors', __('Instructors', 'sikshya'), 'frontend') : __('Instructors', 'sikshya');
+$label_students = function_exists('sikshya_label_plural') ? sikshya_label_plural('student', 'students', __('Students', 'sikshya'), 'frontend') : __('Students', 'sikshya');
+?>
 
 <div class="sikshya-course-catalog">
     <!-- Hero Section -->
@@ -15,13 +22,21 @@ get_header(); ?>
         <div class="sikshya-container">
             <div class="sikshya-hero-content">
                 <h1 class="sikshya-hero-title"><?php _e('Discover Amazing Courses', 'sikshya'); ?></h1>
-                <p class="sikshya-hero-subtitle"><?php _e('Learn from the best instructors and advance your skills', 'sikshya'); ?></p>
+                <p class="sikshya-hero-subtitle">
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: %s: plural label (e.g. instructors) */
+                        __('Learn from the best %s and advance your skills', 'sikshya'),
+                        strtolower($label_instructors)
+                    ));
+                    ?>
+                </p>
                 
                 <!-- Search Form -->
                 <form class="sikshya-search-form" method="get" action="<?php echo esc_url(home_url('/')); ?>">
                     <input type="hidden" name="post_type" value="<?php echo esc_attr(PostTypes::COURSE); ?>">
                     <div class="sikshya-search-input-group">
-                        <input type="text" name="s" placeholder="<?php _e('Search courses...', 'sikshya'); ?>" value="<?php echo esc_attr(get_search_query()); ?>" class="sikshya-search-input">
+                        <input type="text" name="s" placeholder="<?php echo esc_attr(sprintf(__('Search %s…', 'sikshya'), strtolower($label_courses))); ?>" value="<?php echo esc_attr(get_search_query()); ?>" class="sikshya-search-input">
                         <button type="submit" class="sikshya-search-button">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -39,8 +54,17 @@ get_header(); ?>
     <section class="sikshya-featured-courses">
         <div class="sikshya-container">
             <div class="sikshya-section-header">
-                <h2 class="sikshya-section-title"><?php _e('Featured Courses', 'sikshya'); ?></h2>
-                <p class="sikshya-section-subtitle"><?php _e('Handpicked courses from our top instructors', 'sikshya'); ?></p>
+                <h2 class="sikshya-section-title"><?php echo esc_html(sprintf(__('Featured %s', 'sikshya'), $label_courses)); ?></h2>
+                <p class="sikshya-section-subtitle">
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: 1: plural label (e.g. courses), 2: plural label (e.g. instructors) */
+                        __('Handpicked %1$s from our top %2$s', 'sikshya'),
+                        strtolower($label_courses),
+                        strtolower($label_instructors)
+                    ));
+                    ?>
+                </p>
             </div>
             
             <div class="sikshya-course-grid sikshya-course-grid--featured">
@@ -130,7 +154,15 @@ get_header(); ?>
                 <div class="sikshya-sort-bar">
                     <div class="sikshya-sort-left">
                         <span class="sikshya-results-count">
-                            <?php printf(_n('%s course found', '%s courses found', count($courses), 'sikshya'), number_format_i18n(count($courses))); ?>
+                            <?php
+                            $n = count($courses);
+                            echo esc_html(sprintf(
+                                _n('%1$s %2$s found', '%1$s %3$s found', $n, 'sikshya'),
+                                number_format_i18n($n),
+                                strtolower($label_course),
+                                strtolower($label_courses)
+                            ));
+                            ?>
                         </span>
                     </div>
                     
@@ -200,10 +232,10 @@ get_header(); ?>
                                 <polyline points="10,9 9,9 8,9"></polyline>
                             </svg>
                         </div>
-                        <h3 class="sikshya-no-courses-title"><?php _e('No courses found', 'sikshya'); ?></h3>
+                        <h3 class="sikshya-no-courses-title"><?php echo esc_html(sprintf(__('No %s found', 'sikshya'), strtolower($label_courses))); ?></h3>
                         <p class="sikshya-no-courses-text"><?php _e('Try adjusting your search criteria or browse our featured courses.', 'sikshya'); ?></p>
                         <a href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/')); ?>" class="sikshya-button sikshya-button--primary">
-                            <?php _e('Browse All Courses', 'sikshya'); ?>
+                            <?php echo esc_html(sprintf(__('Browse all %s', 'sikshya'), strtolower($label_courses))); ?>
                         </a>
                     </div>
                 <?php endif; ?>
@@ -216,8 +248,17 @@ get_header(); ?>
     <section class="sikshya-popular-courses">
         <div class="sikshya-container">
             <div class="sikshya-section-header">
-                <h2 class="sikshya-section-title"><?php _e('Popular Courses', 'sikshya'); ?></h2>
-                <p class="sikshya-section-subtitle"><?php _e('Most enrolled courses by our students', 'sikshya'); ?></p>
+                <h2 class="sikshya-section-title"><?php echo esc_html(sprintf(__('Popular %s', 'sikshya'), $label_courses)); ?></h2>
+                <p class="sikshya-section-subtitle">
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: 1: plural label (e.g. courses), 2: plural label (e.g. students) */
+                        __('Most enrolled %1$s by our %2$s', 'sikshya'),
+                        strtolower($label_courses),
+                        strtolower($label_students)
+                    ));
+                    ?>
+                </p>
             </div>
             
             <div class="sikshya-course-grid sikshya-course-grid--popular">
@@ -230,4 +271,4 @@ get_header(); ?>
     <?php endif; ?>
 </div>
 
-<?php get_footer(); ?> 
+<?php sikshya_get_footer(); ?>

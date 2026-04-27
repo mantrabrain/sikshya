@@ -56,7 +56,14 @@ type QuizAttemptsResponse = {
   table_missing?: boolean;
 };
 
-type AdvancedExportResp = { ok?: boolean; csv?: string; filename?: string };
+type ReportsAdvancedExportResp = {
+  ok?: boolean;
+  csv?: string;
+  filename?: string;
+  truncated?: boolean;
+  row_count?: number;
+  notice?: string;
+};
 
 type EnterpriseStatusResp = {
   ok?: boolean;
@@ -69,6 +76,40 @@ type EnterpriseStatusResp = {
   last_run_unix?: number;
   last_run_iso?: string;
   last_status?: string;
+};
+
+type EnterpriseScheduleRow = {
+  id: number;
+  status: 'active' | 'paused' | string;
+  label?: string;
+  report_type?: string;
+  frequency?: 'daily' | 'weekly' | 'monthly' | string;
+  day_of_week?: number;
+  day_of_month?: number;
+  hour?: number;
+  recipients?: string;
+  last_status?: string;
+  last_run_at?: string | null;
+};
+
+type EnterpriseRunRow = {
+  id: number;
+  schedule_id?: number | null;
+  trigger_source?: string;
+  status?: string;
+  report_type?: string;
+  row_count?: number;
+  truncated?: number;
+  error_message?: string | null;
+  created_at?: string;
+  started_at?: string | null;
+  finished_at?: string | null;
+};
+
+type EnterpriseDashboardV2Resp = {
+  ok?: boolean;
+  schedules?: EnterpriseScheduleRow[];
+  runs?: EnterpriseRunRow[];
 };
 
 function StatCard(props: { label: string; value: string; hint?: string }) {
@@ -100,6 +141,16 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
   );
   const reportsExportEnabled = reportsAdvMode === 'full';
   const [exportBusy, setExportBusy] = useState(false);
+  const [expType, setExpType] = useState<'summary' | 'enrollments' | 'quiz_attempts'>('summary');
+  const [expCourseId, setExpCourseId] = useState('');
+  const [expStatus, setExpStatus] = useState('');
+  const [expSearch, setExpSearch] = useState('');
+  const [expDateFrom, setExpDateFrom] = useState('');
+  const [expDateTo, setExpDateTo] = useState('');
+  const [expUserId, setExpUserId] = useState('');
+  const [expQuizId, setExpQuizId] = useState('');
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportHint, setExportHint] = useState<string | null>(null);
 
   const enterpriseFeature = isFeatureEnabled(config, 'enterprise_reports');
   const enterpriseAddon = useAddonEnabled('enterprise_reports');
@@ -110,6 +161,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
   );
   const enterpriseEnabled = enterpriseMode === 'full';
   const [enterpriseStatus, setEnterpriseStatus] = useState<EnterpriseStatusResp | null>(null);
+  const [enterpriseDash, setEnterpriseDash] = useState<EnterpriseDashboardV2Resp | null>(null);
   const [enterpriseBusy, setEnterpriseBusy] = useState(false);
   const [enterpriseSendBusy, setEnterpriseSendBusy] = useState(false);
   const [enterpriseMsg, setEnterpriseMsg] = useState<string | null>(null);
@@ -117,6 +169,10 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
   const [enterpriseDow, setEnterpriseDow] = useState(1);
   const [enterpriseHour, setEnterpriseHour] = useState(9);
   const [enterpriseSaveBusy, setEnterpriseSaveBusy] = useState(false);
+  const [scheduleCreateBusy, setScheduleCreateBusy] = useState(false);
+  const [scheduleLabel, setScheduleLabel] = useState('Weekly executive summary');
+  const [scheduleFrequency, setScheduleFrequency] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [scheduleReportType, setScheduleReportType] = useState<'executive_summary'>('executive_summary');
 
   const refreshEnterprise = useCallback(async () => {
     if (!enterpriseEnabled) return;
@@ -134,6 +190,16 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
     }
   }, [enterpriseEnabled]);
 
+  const refreshEnterpriseDashboard = useCallback(async () => {
+    if (!enterpriseEnabled) return;
+    try {
+      const r = await getSikshyaApi().get<EnterpriseDashboardV2Resp>(SIKSHYA_ENDPOINTS.pro.enterpriseReportsDashboardV2);
+      setEnterpriseDash(r);
+    } catch {
+      /* ignore; keep legacy status UI usable */
+    }
+  }, [enterpriseEnabled]);
+
   const sendEnterprise = async () => {
     if (!enterpriseEnabled) return;
     setEnterpriseMsg(null);
@@ -145,6 +211,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
       );
       setEnterpriseMsg(r.message || 'Sent.');
       void refreshEnterprise();
+      void refreshEnterpriseDashboard();
     } catch (e) {
       setEnterpriseMsg(e instanceof Error ? e.message : 'Failed to send');
     } finally {
@@ -157,6 +224,12 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
       void refreshEnterprise();
     }
   }, [enterpriseEnabled, enterpriseStatus, refreshEnterprise]);
+
+  useEffect(() => {
+    if (enterpriseEnabled && !enterpriseDash) {
+      void refreshEnterpriseDashboard();
+    }
+  }, [enterpriseEnabled, enterpriseDash, refreshEnterpriseDashboard]);
 
   const saveEnterpriseSettings = async () => {
     if (!enterpriseEnabled) return;
@@ -171,10 +244,50 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
       });
       setEnterpriseMsg('Saved scheduling settings.');
       void refreshEnterprise();
+      void refreshEnterpriseDashboard();
     } catch (e) {
       setEnterpriseMsg(e instanceof Error ? e.message : 'Failed to save settings');
     } finally {
       setEnterpriseSaveBusy(false);
+    }
+  };
+
+  const createEnterpriseSchedule = async () => {
+    if (!enterpriseEnabled) return;
+    setEnterpriseMsg(null);
+    setScheduleCreateBusy(true);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.enterpriseReportsSchedulesV2, {
+        label: scheduleLabel,
+        report_type: scheduleReportType,
+        frequency: scheduleFrequency,
+        day_of_week: enterpriseDow,
+        hour: enterpriseHour,
+        recipients: enterpriseRecipients,
+        delivery: { email_html: true, email_csv: true, webhook: true },
+        export: { format: 'csv' },
+      });
+      setEnterpriseMsg('Created schedule.');
+      void refreshEnterpriseDashboard();
+    } catch (e) {
+      setEnterpriseMsg(e instanceof Error ? e.message : 'Failed to create schedule');
+    } finally {
+      setScheduleCreateBusy(false);
+    }
+  };
+
+  const runScheduleNow = async (scheduleId: number) => {
+    if (!enterpriseEnabled) return;
+    setEnterpriseMsg(null);
+    setEnterpriseSendBusy(true);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.enterpriseReportsRunV2, { schedule_id: scheduleId });
+      setEnterpriseMsg('Run queued. It may take a moment to generate and email.');
+      void refreshEnterpriseDashboard();
+    } catch (e) {
+      setEnterpriseMsg(e instanceof Error ? e.message : 'Failed to queue run');
+    } finally {
+      setEnterpriseSendBusy(false);
     }
   };
 
@@ -247,19 +360,46 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
   const exportAdvancedCsv = async () => {
     if (!reportsExportEnabled) return;
     setExportBusy(true);
+    setExportError(null);
+    setExportHint(null);
     try {
-      const r = await getSikshyaApi().get<AdvancedExportResp>(SIKSHYA_ENDPOINTS.pro.reportsExport);
+      const courseId = parseInt(expCourseId.replace(/[^\d]/g, ''), 10) || 0;
+      const userId = parseInt(expUserId.replace(/[^\d]/g, ''), 10) || 0;
+      const quizId = parseInt(expQuizId.replace(/[^\d]/g, ''), 10) || 0;
+      const url = SIKSHYA_ENDPOINTS.pro.reportsAdvancedExport({
+        type: expType,
+        course_id: courseId > 0 ? courseId : undefined,
+        status: expStatus || undefined,
+        search: expSearch.trim() || undefined,
+        date_from: expDateFrom.trim() || undefined,
+        date_to: expDateTo.trim() || undefined,
+        user_id: userId > 0 ? userId : undefined,
+        quiz_id: quizId > 0 ? quizId : undefined,
+      });
+      const r = await getSikshyaApi().get<ReportsAdvancedExportResp>(url);
       const csv = r.csv || '';
-      const name = r.filename || 'sikshya-advanced-report.csv';
+      const name = r.filename || 'sikshya-export.csv';
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
+      const dl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = dl;
       a.download = name;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(dl);
+      const hints: string[] = [];
+      if (r.notice) hints.push(r.notice);
+      if (r.truncated) {
+        hints.push(
+          `Export stopped at the row cap (${typeof r.row_count === 'number' ? r.row_count : ''} rows). Narrow filters or raise the cap in Add-ons → Advanced analytics & exports → settings.`
+        );
+      } else if (typeof r.row_count === 'number' && expType !== 'summary') {
+        hints.push(`${r.row_count} row(s) exported.`);
+      }
+      setExportHint(hints.length ? hints.join(' ') : null);
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : 'Export failed');
     } finally {
       setExportBusy(false);
     }
@@ -500,29 +640,176 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
           mode={reportsAdvMode}
           featureId="reports_advanced"
           config={config}
-          featureTitle="Advanced analytics export"
-          featureDescription="Download a CSV snapshot of headline metrics (courses, enrollments, learners, revenue) for spreadsheets and offline planning."
+          featureTitle="Advanced analytics & exports"
+          featureDescription="Download CSVs for finance, accreditation, or instructor reviews: site summary, row-level enrollments, or quiz attempts. Instructors only see courses they teach."
           previewVariant="generic"
           addonEnableTitle="Advanced export is not enabled"
-          addonEnableDescription="Enable the Advanced analytics add-on to unlock the downloadable export alongside your on-screen charts."
+          addonEnableDescription="Enable the Advanced analytics add-on to unlock CSV exports alongside your on-screen charts."
           canEnable={Boolean(reportsAdvAddon.licenseOk)}
           enableBusy={reportsAdvAddon.loading}
           onEnable={() => void reportsAdvAddon.enable()}
           addonError={reportsAdvAddon.error}
         >
           <ListPanel>
-            <div className="flex flex-wrap items-start justify-between gap-3 p-6">
-              <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Spreadsheet export (Growth+)</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Download a CSV of key totals for Excel or Google Sheets. This does not replace the live charts above—it adds
-                  an offline-friendly summary.
-                </p>
+            <div className="space-y-5 p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Spreadsheet exports</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Pick a report type, optionally narrow by course or dates, then download. Privacy and row limits live under{' '}
+                    <span className="font-medium text-slate-700 dark:text-slate-200">Add-ons → Advanced analytics & exports</span> settings.
+                  </p>
+                </div>
+                {reportsExportEnabled ? (
+                  <ButtonPrimary type="button" disabled={exportBusy} onClick={() => void exportAdvancedCsv()}>
+                    {exportBusy ? 'Preparing…' : 'Download CSV'}
+                  </ButtonPrimary>
+                ) : null}
               </div>
+
               {reportsExportEnabled ? (
-                <ButtonPrimary type="button" disabled={exportBusy} onClick={() => void exportAdvancedCsv()}>
-                  {exportBusy ? 'Preparing…' : 'Download CSV'}
-                </ButtonPrimary>
+                <>
+                  <div className="grid gap-4 lg:grid-cols-12">
+                    <label className="block lg:col-span-4">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Report type
+                      </span>
+                      <select
+                        title="Summary is one row of headline metrics. Enrollments and quiz attempts export individual rows (subject to your row cap)."
+                        value={expType}
+                        onChange={(e) => setExpType(e.target.value as typeof expType)}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value="summary">Site summary (headline metrics)</option>
+                        <option value="enrollments">Enrollments (one row per seat)</option>
+                        <option value="quiz_attempts">Quiz attempts (one row per attempt)</option>
+                      </select>
+                    </label>
+                    <label className="block lg:col-span-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Course ID
+                      </span>
+                      <input
+                        title="Optional. Limits exports to a single course you can manage."
+                        value={expCourseId}
+                        onChange={(e) => setExpCourseId(e.target.value.replace(/[^\d]/g, ''))}
+                        placeholder="Any"
+                        inputMode="numeric"
+                        disabled={expType === 'summary'}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      />
+                    </label>
+                    <label className="block lg:col-span-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        From (date)
+                      </span>
+                      <input
+                        type="date"
+                        title="Filters by enrolled date for enrollments, or started date for quiz attempts (stored server time)."
+                        value={expDateFrom}
+                        onChange={(e) => setExpDateFrom(e.target.value)}
+                        disabled={expType === 'summary'}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      />
+                    </label>
+                    <label className="block lg:col-span-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        To (date)
+                      </span>
+                      <input
+                        type="date"
+                        title="Inclusive end of day for the stored datetime column (server time)."
+                        value={expDateTo}
+                        onChange={(e) => setExpDateTo(e.target.value)}
+                        disabled={expType === 'summary'}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      />
+                    </label>
+                    <label className="block lg:col-span-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Status
+                      </span>
+                      <select
+                        value={expStatus}
+                        onChange={(e) => setExpStatus(e.target.value)}
+                        disabled={expType === 'summary'}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value="">All</option>
+                        {expType === 'enrollments' ? (
+                          <>
+                            <option value="enrolled">Enrolled</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                          </>
+                        ) : null}
+                        {expType === 'quiz_attempts' ? (
+                          <>
+                            <option value="completed">Completed</option>
+                            <option value="in_progress">In progress</option>
+                            <option value="passed">Passed</option>
+                            <option value="failed">Failed</option>
+                          </>
+                        ) : null}
+                      </select>
+                    </label>
+                  </div>
+
+                  {expType !== 'summary' ? (
+                    <div className="grid gap-4 lg:grid-cols-12">
+                      <label className="block lg:col-span-6">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          Search
+                        </span>
+                        <input
+                          value={expSearch}
+                          onChange={(e) => setExpSearch(e.target.value)}
+                          placeholder={
+                            expType === 'enrollments'
+                              ? 'Learner name, email, login, or course title…'
+                              : 'Learner, quiz title, or course title…'
+                          }
+                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        />
+                      </label>
+                      {expType === 'quiz_attempts' ? (
+                        <>
+                          <label className="block lg:col-span-3">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              User ID
+                            </span>
+                            <input
+                              value={expUserId}
+                              onChange={(e) => setExpUserId(e.target.value.replace(/[^\d]/g, ''))}
+                              placeholder="Any"
+                              inputMode="numeric"
+                              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                            />
+                          </label>
+                          <label className="block lg:col-span-3">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                              Quiz ID
+                            </span>
+                            <input
+                              value={expQuizId}
+                              onChange={(e) => setExpQuizId(e.target.value.replace(/[^\d]/g, ''))}
+                              placeholder="Any"
+                              inputMode="numeric"
+                              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                            />
+                          </label>
+                        </>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {exportError ? (
+                    <p className="text-sm text-red-700 dark:text-red-300" role="alert">
+                      {exportError}
+                    </p>
+                  ) : null}
+                  {exportHint ? <p className="text-sm text-slate-600 dark:text-slate-300">{exportHint}</p> : null}
+                </>
               ) : null}
             </div>
           </ListPanel>
@@ -587,6 +874,14 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                   >
                     {enterpriseBusy ? 'Refreshing…' : 'Refresh status'}
                   </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                    onClick={() => void refreshEnterpriseDashboard()}
+                    disabled={enterpriseBusy}
+                  >
+                    Refresh schedules
+                  </button>
                   <ButtonPrimary type="button" disabled={enterpriseSendBusy} onClick={() => void sendEnterprise()}>
                     {enterpriseSendBusy ? 'Sending…' : 'Send a summary now'}
                   </ButtonPrimary>
@@ -650,6 +945,132 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       {enterpriseSaveBusy ? 'Saving…' : 'Save schedule'}
                     </ButtonPrimary>
                   </div>
+                </div>
+
+                <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Enterprise schedules (v2)</h3>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Create multiple schedules and queue runs without touching server cron settings. This is admin-only.
+                  </p>
+
+                  <div className="mt-4 grid gap-3 lg:grid-cols-12">
+                    <label className="block text-sm lg:col-span-5">
+                      <span className="font-medium text-slate-900 dark:text-white">Label</span>
+                      <input
+                        value={scheduleLabel}
+                        onChange={(e) => setScheduleLabel(e.target.value)}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                        placeholder="Weekly executive summary"
+                      />
+                    </label>
+                    <label className="block text-sm lg:col-span-3">
+                      <span className="font-medium text-slate-900 dark:text-white">Frequency</span>
+                      <select
+                        value={scheduleFrequency}
+                        onChange={(e) => setScheduleFrequency(e.target.value as typeof scheduleFrequency)}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                      >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </label>
+                    <label className="block text-sm lg:col-span-4">
+                      <span className="font-medium text-slate-900 dark:text-white">Report type</span>
+                      <select
+                        value={scheduleReportType}
+                        onChange={(e) => setScheduleReportType(e.target.value as typeof scheduleReportType)}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                      >
+                        <option value="executive_summary">Executive summary</option>
+                      </select>
+                    </label>
+                    <div className="flex items-end lg:col-span-12">
+                      <ButtonPrimary type="button" disabled={scheduleCreateBusy} onClick={() => void createEnterpriseSchedule()}>
+                        {scheduleCreateBusy ? 'Creating…' : 'Create schedule'}
+                      </ButtonPrimary>
+                    </div>
+                  </div>
+
+                  {enterpriseDash?.schedules?.length ? (
+                    <div className="mt-4 overflow-auto rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
+                      <table className="min-w-[980px] w-full border-collapse text-sm">
+                        <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                          <tr>
+                            <th className="px-4 py-3">ID</th>
+                            <th className="px-4 py-3">Label</th>
+                            <th className="px-4 py-3">Type</th>
+                            <th className="px-4 py-3">Cadence</th>
+                            <th className="px-4 py-3">Recipients</th>
+                            <th className="px-4 py-3">Last status</th>
+                            <th className="px-4 py-3">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {enterpriseDash.schedules.map((s) => (
+                            <tr key={s.id} className="text-slate-700 dark:text-slate-200">
+                              <td className="px-4 py-3 tabular-nums">{s.id}</td>
+                              <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{s.label || '—'}</td>
+                              <td className="px-4 py-3">{s.report_type || '—'}</td>
+                              <td className="px-4 py-3">
+                                {s.frequency || '—'} {typeof s.hour === 'number' ? `@ ${String(s.hour).padStart(2, '0')}:00` : ''}
+                              </td>
+                              <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+                                {s.recipients?.trim() ? s.recipients : 'Default admin email'}
+                              </td>
+                              <td className="px-4 py-3 text-xs">{s.last_status || '—'}</td>
+                              <td className="px-4 py-3">
+                                <button
+                                  type="button"
+                                  onClick={() => void runScheduleNow(s.id)}
+                                  className="rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                                  disabled={enterpriseSendBusy}
+                                >
+                                  Run now
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">No schedules yet. Create one above.</p>
+                  )}
+
+                  {enterpriseDash?.runs?.length ? (
+                    <div className="mt-4">
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Recent runs
+                      </h4>
+                      <div className="mt-2 overflow-auto rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
+                        <table className="min-w-[980px] w-full border-collapse text-sm">
+                          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                            <tr>
+                              <th className="px-4 py-3">Run</th>
+                              <th className="px-4 py-3">Schedule</th>
+                              <th className="px-4 py-3">Status</th>
+                              <th className="px-4 py-3">Type</th>
+                              <th className="px-4 py-3">Created</th>
+                              <th className="px-4 py-3">Error</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {enterpriseDash.runs.map((r) => (
+                              <tr key={r.id} className="text-slate-700 dark:text-slate-200">
+                                <td className="px-4 py-3 tabular-nums">{r.id}</td>
+                                <td className="px-4 py-3 tabular-nums">{r.schedule_id || '—'}</td>
+                                <td className="px-4 py-3">{r.status || '—'}</td>
+                                <td className="px-4 py-3">{r.report_type || '—'}</td>
+                                <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{r.created_at || '—'}</td>
+                                <td className="px-4 py-3 text-xs text-rose-700 dark:text-rose-300">{r.error_message || ''}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ) : null}

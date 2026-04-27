@@ -12,6 +12,8 @@ import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
 import type { SikshyaReactConfig } from '../types';
 
 type Options = {
+  brand_name?: string;
+  brand_short_name?: string;
   plugin_name?: string;
   logo_url?: string;
   admin_menu_icon_url?: string;
@@ -19,9 +21,39 @@ type Options = {
   topbar_text?: string;
   sidebar_bg?: string;
   sidebar_text?: string;
+  frontend_accent?: string;
   hide_sikshya_footer?: boolean;
   admin_footer_html?: string;
   login_accent_color?: string;
+  login_logo_url?: string;
+  admin_enabled?: boolean;
+  login_enabled?: boolean;
+  frontend_enabled?: boolean;
+  email_enabled?: boolean;
+  documentation_url?: string;
+  support_url?: string;
+  upgrade_url?: string;
+  terminology?: Partial<
+    Record<
+      | 'course'
+      | 'courses'
+      | 'lesson'
+      | 'lessons'
+      | 'quiz'
+      | 'quizzes'
+      | 'assignment'
+      | 'assignments'
+      | 'chapter'
+      | 'chapters'
+      | 'student'
+      | 'students'
+      | 'instructor'
+      | 'instructors'
+      | 'enrollment'
+      | 'enrollments',
+      string
+    >
+  >;
 };
 
 type Resp = { ok?: boolean; options?: Options };
@@ -32,8 +64,12 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
   const addon = useAddonEnabled('white_label');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
   const enabled = mode === 'full';
+  const platformName = config.branding?.pluginName?.trim() || 'Sikshya';
 
   const [opts, setOpts] = useState<Options>({});
+  const [courseId, setCourseId] = useState<number>(0);
+  const [courseOverrides, setCourseOverrides] = useState<Record<string, unknown>>({});
+  const [courseLoading, setCourseLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -67,19 +103,51 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
     }
   };
 
+  const loadCourseOverrides = useCallback(
+    async (id: number) => {
+      if (!enabled || !id) return;
+      setCourseLoading(true);
+      try {
+        const r = await getSikshyaApi().get<{ ok?: boolean; overrides?: Record<string, unknown> }>(
+          SIKSHYA_ENDPOINTS.pro.whiteLabelCourse(id),
+        );
+        setCourseOverrides(r.overrides || {});
+      } catch (err) {
+        setMsg(err instanceof Error ? err.message : 'Could not load course overrides');
+      } finally {
+        setCourseLoading(false);
+      }
+    },
+    [enabled],
+  );
+
+  const saveCourseOverrides = async () => {
+    if (!enabled || !courseId) return;
+    setSaving(true);
+    setMsg(null);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.whiteLabelCourse(courseId), courseOverrides);
+      setMsg('Course overrides saved.');
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : 'Course override save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <EmbeddableShell
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Match Sikshya to your school’s brand on login and admin screens."
+      subtitle={`Match ${platformName} to your school’s brand on login and admin screens.`}
     >
       <GatedFeatureWorkspace
         mode={mode}
         featureId="white_label"
         config={config}
         featureTitle="White label"
-        featureDescription="Hide the Sikshya footer credit, replace it with your own HTML, and tint the login form to match your brand."
+        featureDescription={`Hide the ${platformName} footer credit, replace it with your own HTML, and tint the login form to match your brand.`}
         previewVariant="form"
         addonEnableTitle="White label is not enabled"
         addonEnableDescription="Enable the White label add-on to apply branding overrides to admin and login screens."
@@ -95,6 +163,72 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
             <p className="text-sm text-slate-500">Loading…</p>
           ) : (
             <form onSubmit={onSave} className="space-y-5">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <label className="block text-sm">
+                  <span className="font-medium text-slate-900 dark:text-white">Brand name</span>
+                  <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                    Used across admin, frontend, and emails when Sikshya would normally show its product name.
+                  </span>
+                  <input
+                    type="text"
+                    value={opts.brand_name || ''}
+                    onChange={(e) => setOpts((p) => ({ ...p, brand_name: e.target.value }))}
+                    className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    placeholder="Acme Academy LMS"
+                  />
+                </label>
+
+                <label className="block text-sm">
+                  <span className="font-medium text-slate-900 dark:text-white">Short name</span>
+                  <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                    Optional shorter label for breadcrumbs and compact UI areas.
+                  </span>
+                  <input
+                    type="text"
+                    value={opts.brand_short_name || ''}
+                    onChange={(e) => setOpts((p) => ({ ...p, brand_short_name: e.target.value }))}
+                    className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    placeholder="Acme"
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-900/30">
+                <div className="font-semibold text-slate-900 dark:text-white">Where should branding apply?</div>
+                <label className="flex items-center justify-between gap-3">
+                  <span className="text-slate-700 dark:text-slate-200">Admin (wp-admin + React shell)</span>
+                  <input
+                    type="checkbox"
+                    checked={opts.admin_enabled ?? true}
+                    onChange={(e) => setOpts((p) => ({ ...p, admin_enabled: e.target.checked }))}
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span className="text-slate-700 dark:text-slate-200">Login screen</span>
+                  <input
+                    type="checkbox"
+                    checked={opts.login_enabled ?? true}
+                    onChange={(e) => setOpts((p) => ({ ...p, login_enabled: e.target.checked }))}
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span className="text-slate-700 dark:text-slate-200">Frontend pages</span>
+                  <input
+                    type="checkbox"
+                    checked={opts.frontend_enabled ?? true}
+                    onChange={(e) => setOpts((p) => ({ ...p, frontend_enabled: e.target.checked }))}
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span className="text-slate-700 dark:text-slate-200">Emails</span>
+                  <input
+                    type="checkbox"
+                    checked={opts.email_enabled ?? true}
+                    onChange={(e) => setOpts((p) => ({ ...p, email_enabled: e.target.checked }))}
+                  />
+                </label>
+              </div>
+
               <label className="flex items-start gap-3 text-sm">
                 <input
                   type="checkbox"
@@ -103,9 +237,9 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   className="mt-1"
                 />
                 <span>
-                  <span className="font-medium text-slate-900 dark:text-white">Hide Sikshya footer credit</span>
+                  <span className="font-medium text-slate-900 dark:text-white">Hide platform footer credit</span>
                   <span className="block text-xs text-slate-500 dark:text-slate-400">
-                    Removes the “Powered by Sikshya” line that normally appears at the bottom of admin pages.
+                    Removes the “Powered by …” line that normally appears at the bottom of admin pages.
                   </span>
                 </span>
               </label>
@@ -113,7 +247,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
               <label className="block text-sm">
                 <span className="font-medium text-slate-900 dark:text-white">Plugin name (wp-admin menu + sidebar)</span>
                 <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-                  Replaces “Sikshya LMS” with your own name in the WordPress admin menu and the Sikshya React sidebar.
+                  Replaces the default product name with your own name in the WordPress admin menu and the admin sidebar.
                 </span>
                 <input
                   type="text"
@@ -152,6 +286,44 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     onChange={(url) => setOpts((p) => ({ ...p, admin_menu_icon_url: url }))}
                   />
                 </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div>
+                  <div className="text-sm">
+                    <div className="font-medium text-slate-900 dark:text-white">Login logo (optional)</div>
+                    <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Replaces the WordPress login logo when login branding is enabled.
+                    </div>
+                  </div>
+                  <WPMediaPickerField
+                    id="sik-white-label-login-logo"
+                    value={opts.login_logo_url || ''}
+                    onChange={(url) => setOpts((p) => ({ ...p, login_logo_url: url }))}
+                  />
+                </div>
+
+                <label className="block text-sm">
+                  <span className="font-medium text-slate-900 dark:text-white">Frontend accent colour</span>
+                  <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                    Updates public Sikshya pages (course listing, course page, cart, checkout, learn, account).
+                  </span>
+                  <div className="mt-2 flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={opts.frontend_accent || '#6366f1'}
+                      onChange={(e) => setOpts((p) => ({ ...p, frontend_accent: e.target.value }))}
+                      className="h-10 w-16 cursor-pointer rounded border border-slate-200 dark:border-slate-700"
+                    />
+                    <input
+                      type="text"
+                      value={opts.frontend_accent || ''}
+                      onChange={(e) => setOpts((p) => ({ ...p, frontend_accent: e.target.value }))}
+                      className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      placeholder="#6366f1"
+                    />
+                  </div>
+                </label>
               </div>
 
               <label className="block text-sm">
@@ -193,9 +365,10 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Top header background</span>
+                  <span className="font-medium text-slate-900 dark:text-white">Admin accent colour</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-                    Applied to the Sikshya React top header.
+                    Drives link, primary button, and focus colours in the React admin (top bar stays default). Sidebar
+                    colour is used first when it is a strong tone; otherwise this value fills in.
                   </span>
                   <div className="mt-2 flex items-center gap-3">
                     <input
@@ -215,9 +388,9 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Top header text</span>
+                  <span className="font-medium text-slate-900 dark:text-white">Legacy accent text colour</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-                    Title/subtitle colour in the Sikshya React top header.
+                    Kept for saved profiles; not applied to the React top header (default title colours).
                   </span>
                   <div className="mt-2 flex items-center gap-3">
                     <input
@@ -279,6 +452,171 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     />
                   </div>
                 </label>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">Terminology</div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Rename common LMS nouns across Sikshya UI. Leave blank to keep defaults.
+                </div>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {(
+                    [
+                      'course',
+                      'courses',
+                      'lesson',
+                      'lessons',
+                      'quiz',
+                      'quizzes',
+                      'assignment',
+                      'assignments',
+                      'chapter',
+                      'chapters',
+                      'student',
+                      'students',
+                      'instructor',
+                      'instructors',
+                      'enrollment',
+                      'enrollments',
+                    ] as const
+                  ).map((k) => (
+                    <label key={k} className="block text-sm">
+                      <span className="font-medium capitalize text-slate-900 dark:text-white">{k}</span>
+                      <input
+                        type="text"
+                        value={opts.terminology?.[k] || ''}
+                        onChange={(e) =>
+                          setOpts((p) => ({
+                            ...p,
+                            terminology: { ...(p.terminology || {}), [k]: e.target.value },
+                          }))
+                        }
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        placeholder=""
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">Links</div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Used in admin footer, upsell prompts, and help surfaces.
+                </div>
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  <label className="block text-sm">
+                    <span className="font-medium text-slate-900 dark:text-white">Documentation URL</span>
+                    <input
+                      type="url"
+                      value={opts.documentation_url || ''}
+                      onChange={(e) => setOpts((p) => ({ ...p, documentation_url: e.target.value }))}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      placeholder="https://docs.yoursite.com"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    <span className="font-medium text-slate-900 dark:text-white">Support URL</span>
+                    <input
+                      type="url"
+                      value={opts.support_url || ''}
+                      onChange={(e) => setOpts((p) => ({ ...p, support_url: e.target.value }))}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      placeholder="https://support.yoursite.com"
+                    />
+                  </label>
+                  <label className="block text-sm lg:col-span-2">
+                    <span className="font-medium text-slate-900 dark:text-white">Upgrade / pricing URL</span>
+                    <input
+                      type="url"
+                      value={opts.upgrade_url || ''}
+                      onChange={(e) => setOpts((p) => ({ ...p, upgrade_url: e.target.value }))}
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      placeholder="https://yoursite.com/pricing"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">Per-course overrides (optional)</div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  Override brand name/logo/accent for a single course page and learn experience. Admins only.
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-end gap-3">
+                  <label className="block text-sm">
+                    <span className="font-medium text-slate-900 dark:text-white">Course ID</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={courseId ? String(courseId) : ''}
+                      onChange={(e) => setCourseId(Number(e.target.value || 0))}
+                      className="mt-2 w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      placeholder="123"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => void loadCourseOverrides(courseId)}
+                    disabled={!courseId || courseLoading}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                  >
+                    {courseLoading ? 'Loading…' : 'Load'}
+                  </button>
+                </div>
+
+                {courseId ? (
+                  <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <label className="block text-sm">
+                      <span className="font-medium text-slate-900 dark:text-white">Course brand name</span>
+                      <input
+                        type="text"
+                        value={(courseOverrides.brand_name as string) || ''}
+                        onChange={(e) => setCourseOverrides((p) => ({ ...p, brand_name: e.target.value }))}
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      />
+                    </label>
+                    <label className="block text-sm">
+                      <span className="font-medium text-slate-900 dark:text-white">Course accent</span>
+                      <div className="mt-2 flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={(courseOverrides.frontend_accent as string) || '#6366f1'}
+                          onChange={(e) => setCourseOverrides((p) => ({ ...p, frontend_accent: e.target.value }))}
+                          className="h-10 w-16 cursor-pointer rounded border border-slate-200 dark:border-slate-700"
+                        />
+                        <input
+                          type="text"
+                          value={(courseOverrides.frontend_accent as string) || ''}
+                          onChange={(e) => setCourseOverrides((p) => ({ ...p, frontend_accent: e.target.value }))}
+                          className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                        />
+                      </div>
+                    </label>
+                    <div className="lg:col-span-2">
+                      <div className="text-sm">
+                        <div className="font-medium text-slate-900 dark:text-white">Course logo (optional)</div>
+                        <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Overrides the admin/sidebar logo for this course context.</div>
+                      </div>
+                      <WPMediaPickerField
+                        id="sik-white-label-course-logo"
+                        value={(courseOverrides.logo_url as string) || ''}
+                        onChange={(url) => setCourseOverrides((p) => ({ ...p, logo_url: url }))}
+                      />
+                    </div>
+                    <div className="lg:col-span-2 flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => void saveCourseOverrides()}
+                        disabled={saving}
+                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-slate-900"
+                      >
+                        {saving ? 'Saving…' : 'Save course overrides'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               <div className="flex items-center gap-3">

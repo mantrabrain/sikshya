@@ -76,6 +76,7 @@ React admin paths are centralized in `client/src/api/endpoints.ts` (`SIKSHYA_END
 | `/me/lesson-complete` | — | `LearnerRestRoutes` | |
 | `/me/quiz-submit` | — | `LearnerRestRoutes` | |
 | `/me/unenroll` | — | `LearnerRestRoutes` | |
+| `/me/reports-advanced/export` | GET | `LearnerRestRoutes` action `sikshya_register_addon_learner_rest_routes` | **Pro** `reports_advanced` learner CSV (`type=my_enrollments\|my_quiz_attempts`); gated by add-on + plan + `allow_learner_self_export` |
 | `/me/assignments` | — | `LearnerRestRoutes` | If `assignments_basic` addon |
 | `/me/assignment-submit` | — | `LearnerRestRoutes` | |
 | `/me/assignment-feedback` | — | `LearnerRestRoutes` | |
@@ -96,14 +97,32 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | Route | Methods | `FeatureRegistry` id (primary) |
 |-------|---------|--------------------------------|
 | `/pro/drip-rules` | GET, POST | `content_drip` |
-| `/pro/subscriptions` | GET, POST | `subscriptions` |
-| `/pro/subscriptions/cancel` | POST | `subscriptions` |
-| `/pro/plans` | GET, POST | `subscriptions` |
-| `/pro/gradebook` | GET | `gradebook` |
+| `/pro/subscriptions` | GET, POST | `subscriptions` (`SikshyaPro\Addons\Subscriptions\Controllers\SubscriptionsRestController` on `rest_api_init` priority 10 when the add-on boots) |
+| `/pro/subscriptions/cancel` | POST | `subscriptions` (same) |
+| `/pro/plans` | GET, POST | `subscriptions` (same) |
+| `/pro/plans/(?P<id>\d+)` | PUT/PATCH, DELETE | `subscriptions` (same) |
+| `/pro/gradebook` | GET | `gradebook` (registered in Pro: `GradebookRestController`) |
 | `/pro/gradebook/export` | GET | `gradebook` |
-| `/pro/course-instructors` | GET, POST | `multi_instructor` |
-| `/pro/earnings` | GET | `multi_instructor` |
-| `/pro/certificates/advanced` | GET | `certificates_advanced` |
+| `/pro/gradebook/grid` | GET | `gradebook` |
+| `/pro/gradebook/drilldown` | GET | `gradebook` |
+| `/pro/gradebook/assignment-grade` | POST | `gradebook` |
+| `/pro/gradebook/learner` | GET | `gradebook` |
+| `/pro/gradebook/override` | POST | `gradebook` |
+| `/pro/grade-scales` | GET, POST | `gradebook` |
+| `/pro/grade-scales/(?P<id>\d+)` | GET, PUT/PATCH, DELETE | `gradebook` |
+| `/pro/multi-instructor/course-staff` | GET, POST, DELETE | `multi_instructor` |
+| `/pro/multi-instructor/earnings` | GET | `multi_instructor` |
+| `/pro/multi-instructor/earnings/set-status` | POST | `multi_instructor` + `manage_options` |
+| `/pro/extended/activity-log` | GET | `activity_log` (`SikshyaPro\Addons\ActivityLog\Controllers\ActivityLogRestController`; query `page`, `per_page`, `user_id`, `course_id`, `action`, `search`, `date_from`, `date_to`) |
+| `/pro/reports-advanced/export` | GET | `reports_advanced` (registered when add-on is enabled + licensed; query `type`, filters) |
+| `/pro/certificates/advanced` | GET | `certificates_advanced` (`SikshyaPro\Addons\CertificatesAdvanced\Controllers\CertificatesAdvancedRestController`; returns URL templates, merge fields, settings, hook names) |
+| `/pro/bundles` | GET, POST | `course_bundles` (`SikshyaPro\Addons\CourseBundles\Controllers\CourseBundlesRestController` on `rest_api_init` priority 10 when the add-on boots) |
+| `/pro/bundles/(?P<id>\d+)/courses` | GET, POST | `course_bundles` (same) |
+| `/pro/bundles/(?P<id>\d+)/courses/(?P<course_id>\d+)` | DELETE | `course_bundles` (same) |
+| `/pro/bundles/(?P<id>\d+)` | DELETE | `course_bundles` (same) |
+| `/pro/bundles/(?P<id>\d+)/purchase-link` | GET | `course_bundles` (same) |
+| `/pro/coupons/(?P<id>\d+)/advanced` | GET, POST | `coupons_advanced` (`SikshyaPro\Addons\CouponsAdvanced\Controllers\CouponsAdvancedRestController` on `rest_api_init` priority 10; body `rules` object for POST) |
+| `/admin/coupons/(?P<id>\d+)` | PATCH | Core admin (`AdminRestRoutes::patchAdminCoupon`) — coupon basics; requires Sikshya admin app permission |
 | `/scale/vendors` | GET, POST | `marketplace_multivendor` |
 | `/scale/withdrawals` | POST | `marketplace_multivendor` |
 | `/scale/reports/commissions` | GET | `marketplace_multivendor` |
@@ -113,6 +132,12 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | `/scale/public-api/keys/(?P<id>\d+)` | DELETE | `public_api_keys` |
 | `/scale/public-api/ping` | GET | `public_api_keys` (validated inside callback; unauthenticated ping with Bearer key) |
 
+**Course bundles extension (Pro):** My Account strip on `sikshya_account_dashboard_after` (`CourseBundlesAccountPanel` when **Show bundle packs on My Account** is on); filter `sikshya_course_bundles_account_panel_bundles`. Hooks include `sikshya_bundle_pricing_resolved`, `sikshya_course_bundles_after_create`, `sikshya_course_bundles_allow_trash`.
+
+**Advanced coupons extension (Pro):** Global settings via `/pro/addons/coupons_advanced/settings`; storefront hooks on cart, checkout, single course (`sikshya_pro_single_course_price_after`), learn sidebar, account payments. Checkout filters `sikshya_coupon_blocked_message` (5 args), `sikshya_coupon_discount_amount`, `sikshya_coupons_advanced_blocked_message`, `sikshya_coupons_advanced_normalize_save_meta`.
+
+**Activity log extension (Pro):** filters `sikshya_activity_log_action_label`, `sikshya_activity_log_allow_insert`, `sikshya_activity_log_scope_course_ids`, `sikshya_activity_log_show_learn_sidebar`; hook `sikshya_activity_log_recorded` after a row is stored. Learn UI: `sikshya_learn_sidebar_footer` (see `ActivityLogLearnTouchpoints`).
+
 ---
 
 ## Cron (Pro)
@@ -120,6 +145,7 @@ Registered on `rest_api_init` (priority 20) when `Sikshya\Licensing\Pro` exists.
 | Hook | Purpose | When unscheduled / skipped |
 |------|---------|----------------------------|
 | `sikshya_pro_drip_cron` | Content drip unlock grants | `DripCron::maybeSchedule()` clears the schedule when `content_drip` is not licensed or addon is off. |
+| `sikshya_activity_log_retention_cron` | Purges old `sikshya_activity_log` rows when retention is enabled | Unscheduled when `activity_log` is off or `retention_days` is 0 (`ActivityLogRetentionService`). |
 
 ---
 

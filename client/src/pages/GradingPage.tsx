@@ -185,10 +185,10 @@ export function GradingPage(props: { config: SikshyaReactConfig; title: string }
         featureId="gradebook"
         config={config}
         featureTitle="Grading"
-        featureDescription="Define grade scales and reuse them across courses."
+        featureDescription="Define grade scales and reuse them across courses. Use Reports → Gradebook for exports, grids, and final-grade overrides."
         previewVariant="table"
         addonEnableTitle="Gradebook is not enabled"
-        addonEnableDescription="Enable the Gradebook addon to unlock grading tools."
+        addonEnableDescription="Enable the Gradebook add-on for scales, course weights in the builder, and the full admin gradebook."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => void addon.enable()}

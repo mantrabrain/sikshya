@@ -80,10 +80,26 @@ export type SikshyaReactConfig = {
   branding?: {
     pluginName?: string;
     logoUrl?: string;
+    /** Feeds admin accent tokens with sidebar; does not paint the React top bar. */
     topbarBg?: string;
+    /** Legacy field; top bar uses default title colours. */
     topbarText?: string;
     sidebarBg?: string;
     sidebarText?: string;
+  };
+  /** Optional brand link overrides (docs/support/upgrade) from white-label. */
+  brandLinks?: {
+    documentationUrl?: string;
+    supportUrl?: string;
+    upgradeUrl?: string;
+  };
+  /** Optional terminology relabeling map (course/lesson/quiz/etc). */
+  terminology?: Record<string, string>;
+  /** Storefront offline / manual payment gateway (Settings → Payment). */
+  offlineCheckoutEnabled?: boolean;
+  /** Injected by Sikshya Pro Multi-instructor add-on (when loaded). */
+  multiInstructor?: {
+    canManageLedger: boolean;
   };
 };
 

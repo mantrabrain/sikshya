@@ -3,6 +3,8 @@ import { NavIcon } from '../NavIcon';
 import { ButtonPrimary } from './buttons';
 import { ApiErrorPanel } from './ApiErrorPanel';
 import { useAddonEnabled } from '../../hooks/useAddons';
+import type { SikshyaReactConfig } from '../../types';
+import { term } from '../../lib/terminology';
 
 /**
  * Identifies one of the seven kinds of teaching content the user can add.
@@ -45,8 +47,20 @@ export const CONTENT_PICKER_TYPES: PickerOpt[] = [
   { type: 'assignment', label: 'Assignment', icon: 'clipboard' },
 ];
 
-export function defaultTitleFor(type: ContentPickerType): string {
-  const lab = CONTENT_PICKER_TYPES.find((x) => x.type === type)?.label || 'Content';
+export function defaultTitleFor(type: ContentPickerType, config?: SikshyaReactConfig): string {
+  const quiz = config ? term(config, 'quiz') : 'Quiz';
+  const assignment = config ? term(config, 'assignment') : 'Assignment';
+  const lesson = config ? term(config, 'lesson') : 'Lesson';
+  const labels: Record<ContentPickerType, string> = {
+    lesson_text: `Text ${lesson.toLowerCase()}`,
+    lesson_video: `Video ${lesson.toLowerCase()}`,
+    lesson_live: 'Live class',
+    lesson_scorm: 'SCORM package',
+    lesson_h5p: 'H5P interactive',
+    quiz,
+    assignment,
+  };
+  const lab = labels[type] || 'Content';
   return `New ${lab.toLowerCase()}`;
 }
 
@@ -57,6 +71,8 @@ const FIELD_HINT = 'mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slat
 
 type Props = {
   open: boolean;
+  /** Needed for terminology relabeling. */
+  config?: SikshyaReactConfig;
   /** Modal heading. Defaults to the in-builder phrasing. */
   heading?: string;
   /** Subheading directly under the heading. */
@@ -96,6 +112,7 @@ type Props = {
 export function AddContentTypePickerModal(props: Props) {
   const {
     open,
+    config,
     heading = 'Add a lesson, quiz, or assignment',
     description = 'Pick a type, give it a clear name, then open it from the list to add the actual teaching material. Quiz questions are created inside the quiz editor after you add the quiz here.',
     contextLabel,
@@ -144,6 +161,10 @@ export function AddContentTypePickerModal(props: Props) {
   const tiles = allowedTypes
     ? CONTENT_PICKER_TYPES.filter((opt) => allowedTypes.includes(opt.type))
     : CONTENT_PICKER_TYPES;
+
+  const lesson = config ? term(config, 'lesson') : 'Lesson';
+  const quiz = config ? term(config, 'quiz') : 'Quiz';
+  const assignment = config ? term(config, 'assignment') : 'Assignment';
 
   const lockedReason = (opt: PickerOpt): { locked: boolean; badge?: 'Pro' | 'Off' | 'Upgrade'; hint?: string } => {
     if (!opt.addonId) return { locked: false };
@@ -253,7 +274,7 @@ export function AddContentTypePickerModal(props: Props) {
           id="sikshya-add-content-title-input"
           type="text"
           className={FIELD_INPUT}
-          placeholder={defaultTitleFor(contentType)}
+          placeholder={defaultTitleFor(contentType, config)}
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           onKeyDown={(e) => {

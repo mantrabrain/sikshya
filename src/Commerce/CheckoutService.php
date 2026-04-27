@@ -102,9 +102,10 @@ final class CheckoutService
      *
      * @param array<int, int> $course_ids
      * @param int               $bundle_id Optional Pro bundle: pricing may be replaced via {@see 'sikshya_bundle_pricing_for_cart'}.
+     * @param int               $user_id   Logged-in learner (0 if unknown). Passed to {@see 'sikshya_coupon_blocked_message'} and discount filters.
      * @return array{line_amounts: array<int, float>, subtotal: float, discount: float, total: float, currency: string, coupon_id: int|null}
      */
-    public function computePricingForCourses(array $course_ids, string $coupon_code = '', int $bundle_id = 0): array
+    public function computePricingForCourses(array $course_ids, string $coupon_code = '', int $bundle_id = 0, int $user_id = 0): array
     {
         $course_ids = array_values(array_unique(array_filter(array_map('intval', $course_ids))));
         if ($course_ids === []) {
@@ -162,13 +163,18 @@ final class CheckoutService
                 /*
                  * Allow Pro / extensions to block a coupon for this cart (min spend, course scope, etc.).
                  * Return a non-empty string to block checkout with that message.
+                 *
+                 * Fifth argument: logged-in buyer id when known (checkout); `0` when unavailable.
                  */
-                $blocked = apply_filters('sikshya_coupon_blocked_message', '', $coupon, $course_ids, $subtotal);
+                $blocked = apply_filters('sikshya_coupon_blocked_message', '', $coupon, $course_ids, $subtotal, $user_id);
                 if (is_string($blocked) && $blocked !== '') {
                     throw new \InvalidArgumentException($blocked);
                 }
 
                 [$discount, $total] = $this->coupons->applyToAmount($coupon, $subtotal);
+                $discount = (float) apply_filters('sikshya_coupon_discount_amount', $discount, $coupon, $course_ids, $subtotal, $user_id);
+                $discount = round(max(0.0, min($subtotal, $discount)), 2);
+                $total = max(0.0, round($subtotal - $discount, 2));
                 $coupon_id = (int) $coupon->id;
             } else {
                 throw new \InvalidArgumentException(__('Invalid or expired coupon.', 'sikshya'));
@@ -200,7 +206,7 @@ final class CheckoutService
 
         $this->assertCheckoutOrderEligibility($user_id, $course_ids);
 
-        $p = $this->computePricingForCourses($course_ids, $coupon_code, $bundle_id);
+        $p = $this->computePricingForCourses($course_ids, $coupon_code, $bundle_id, $user_id);
         $cur = $p['currency'];
 
         return [
@@ -233,7 +239,7 @@ final class CheckoutService
 
         $this->assertCheckoutOrderEligibility($user_id, $course_ids);
 
-        $p = $this->computePricingForCourses($course_ids, $coupon_code, $bundle_id);
+        $p = $this->computePricingForCourses($course_ids, $coupon_code, $bundle_id, $user_id);
         $line_amounts = $p['line_amounts'];
         $subtotal = $p['subtotal'];
         $discount = $p['discount'];

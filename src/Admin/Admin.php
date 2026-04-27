@@ -114,7 +114,7 @@ class Admin
     public function addAdminMenus(): void
     {
         // Single top-level entry: all React areas are sub-routes (`view=`). Legacy `page=sikshya-*` URLs redirect in admin_init.
-        $menu_label = (string) apply_filters('sikshya_admin_menu_label', __('Sikshya LMS', 'sikshya'));
+        $menu_label = (string) apply_filters('sikshya_admin_menu_label', sikshya_brand_name('admin'));
         $menu_icon = (string) apply_filters('sikshya_admin_menu_icon', 'dashicons-welcome-learn-more');
 
         add_menu_page(
@@ -360,6 +360,12 @@ class Admin
 
         $view = isset($_GET['view']) ? sanitize_key(wp_unslash((string) $_GET['view'])) : 'dashboard';
 
+        // Centralize transactional templates under Email → Templates (hub tab).
+        if ($view === 'email-templates') {
+            wp_safe_redirect(admin_url('admin.php?page=sikshya&view=email-hub&tab=templates'));
+            exit;
+        }
+
         $allowed = [
             'dashboard',
             'courses',
@@ -411,7 +417,6 @@ class Admin
             'integrations',
             'license',
             'email',
-            'email-templates',
             'email-template-edit',
         ];
 
@@ -423,7 +428,7 @@ class Admin
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
-        if (in_array($view, ['settings', 'email', 'email-templates', 'email-template-edit'], true) && !current_user_can('manage_options')) {
+        if (in_array($view, ['settings', 'email', 'email-template-edit'], true) && !current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -973,11 +978,18 @@ class Admin
         }
 
         echo '<div class="sikshya-admin-footer">';
+        $links = function_exists('sikshya_brand_links') ? sikshya_brand_links() : [];
+        $docs = isset($links['documentationUrl']) ? esc_url((string) $links['documentationUrl']) : 'https://docs.sikshya.com';
+        $support = isset($links['supportUrl']) ? esc_url((string) $links['supportUrl']) : 'https://support.sikshya.com';
+        $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya LMS', 'sikshya');
+
         echo '<p>' . sprintf(
-            __('Sikshya LMS v%s | <a href="%s" target="_blank">Documentation</a> | <a href="%s" target="_blank">Support</a>', 'sikshya'),
-            $this->plugin->version,
-            'https://docs.sikshya.com',
-            'https://support.sikshya.com'
+            /* translators: 1: brand name, 2: version, 3: docs url, 4: support url */
+            __('%1$s v%2$s | <a href="%3$s" target="_blank" rel="noopener">Documentation</a> | <a href="%4$s" target="_blank" rel="noopener">Support</a>', 'sikshya'),
+            esc_html($brand),
+            esc_html($this->plugin->version),
+            $docs,
+            $support
         ) . '</p>';
         echo '</div>';
     }

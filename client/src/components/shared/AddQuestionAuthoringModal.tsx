@@ -255,8 +255,10 @@ export function AddQuestionAuthoringModal(props: Props) {
   const canUseAdvancedTypes = useMemo(() => {
     if (!advFeatureOk) return false;
     if (advAddon.loading) return false;
-    return Boolean(advAddon.enabled);
-  }, [advAddon.enabled, advAddon.loading, advFeatureOk]);
+    if (!advAddon.enabled) return false;
+    if (advAddon.licenseOk === false) return false;
+    return true;
+  }, [advAddon.enabled, advAddon.loading, advAddon.licenseOk, advFeatureOk]);
   const addonsHref = useMemo(() => appViewHref(config, 'addons'), [config]);
 
   const isLockedType = useMemo(() => {
@@ -607,7 +609,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                 onClick={() => onTypeChange(t.type)}
                               >
                                 {t.label}
-                                {t.requiresAdvancedQuiz ? <span className="ml-1">• Pro</span> : null}
+                                {isLockedType(t.type) ? <span className="ml-1">• Pro</span> : null}
                               </button>
                             ))}
                           </div>
@@ -1158,7 +1160,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                     <span className="min-w-0">
                       <span className="flex flex-wrap items-center gap-2 text-sm font-semibold leading-snug">
                         <span>{t.label}</span>
-                        {t.requiresAdvancedQuiz ? (
+                        {locked ? (
                           <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
                             Pro
                           </span>

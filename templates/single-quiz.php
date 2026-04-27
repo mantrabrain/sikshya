@@ -28,6 +28,8 @@ while (have_posts()) {
         get_the_title(),
         get_bloginfo('name')
     );
+
+    $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
     ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -115,7 +117,7 @@ while (have_posts()) {
                             data-sikshya-progress-btn
                             aria-haspopup="dialog"
                             aria-expanded="false"
-                            aria-label="<?php echo esc_attr__('Course progress', 'sikshya'); ?>"
+                            aria-label="<?php echo esc_attr(sprintf(__('%s progress', 'sikshya'), $label_course)); ?>"
                         >
                             <span class="sikshya-learnHeader__progressBar" aria-hidden="true">
                                 <span class="sikshya-learnHeader__progressFill" style="<?php echo esc_attr('width:' . max(0, min(100, $pct)) . '%'); ?>"></span>
@@ -193,10 +195,18 @@ while (have_posts()) {
 
         <main class="sikshya-learnMain">
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
-            <aside class="sikshya-learnSidebar" aria-label="<?php esc_attr_e('Course content', 'sikshya'); ?>" data-sikshya-outline>
+            <aside class="sikshya-learnSidebar" aria-label="<?php echo esc_attr(sprintf(__('%s content', 'sikshya'), $label_course)); ?>" data-sikshya-outline>
                 <div class="sikshya-learnSidebar__inner">
                     <div class="sikshya-learnSidebar__head">
-                        <h2 class="sikshya-learnSidebar__heading"><?php esc_html_e('Course content', 'sikshya'); ?></h2>
+                        <h2 class="sikshya-learnSidebar__heading">
+                            <?php
+                            echo esc_html(sprintf(
+                                /* translators: %s: singular label (e.g. Course) */
+                                __('%s content', 'sikshya'),
+                                $label_course
+                            ));
+                            ?>
+                        </h2>
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
@@ -222,7 +232,7 @@ while (have_posts()) {
                                     <div class="sikshya-learnEmptyState__actions">
                                         <?php if ($page_model->getCourse() instanceof WP_Post) : ?>
                                             <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_permalink($page_model->getCourse())); ?>">
-                                                <?php esc_html_e('View course', 'sikshya'); ?>
+                                                <?php echo esc_html(sprintf(__('View %s', 'sikshya'), strtolower($label_course))); ?>
                                             </a>
                                         <?php endif; ?>
                                         <?php if ($page_model->getUrlAccount() !== '') : ?>
@@ -340,6 +350,12 @@ while (have_posts()) {
                         <?php if ($show_quiz_intro) : ?>
                             <div class="sikshya-contentPanel sikshya-contentPanel--quizIntro" data-sikshya-quiz-intro>
                                 <div class="sikshya-quizIntro">
+                                    <?php
+                                    $adv_notice = $page_model->getAdvanced();
+                                    if (is_array($adv_notice) && !empty($adv_notice['learner_notice'])) :
+                                        ?>
+                                        <p class="sikshya-quizIntro__notice" role="status"><?php echo esc_html((string) $adv_notice['learner_notice']); ?></p>
+                                    <?php endif; ?>
                                     <p class="sikshya-quizIntro__eyebrow"><?php esc_html_e('Your next step', 'sikshya'); ?></p>
                                     <h2 class="sikshya-quizIntro__title"><?php esc_html_e('Ready when you are', 'sikshya'); ?></h2>
                                     <p class="sikshya-quizIntro__lead"><?php echo esc_html($intro_lead); ?></p>

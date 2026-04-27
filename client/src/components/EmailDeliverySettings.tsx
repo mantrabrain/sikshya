@@ -118,7 +118,7 @@ export function EmailDeliverySettings(props: Props) {
     setTestFeedback(null);
     try {
       const res = await getSikshyaApi().post<{ success?: boolean; message?: string }>(
-        SIKSHYA_ENDPOINTS.settings.emailTestDelivery,
+        SIKSHYA_ENDPOINTS.pro.emailAdvancedTestDelivery,
         { to: testTo.trim() ? testTo.trim() : undefined }
       );
       if (res.success) {

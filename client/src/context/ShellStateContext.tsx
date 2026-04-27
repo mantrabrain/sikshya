@@ -46,7 +46,8 @@ export function ShellStateProvider({ children }: { children: ReactNode }) {
   const [proPluginVersion, setProPluginVersion] = useState(initial.proPluginVersion);
 
   const refreshShell = useCallback(async () => {
-    const view = route.page || 'dashboard';
+    const view =
+      typeof route.page === 'string' && route.page.trim() !== '' ? route.page.trim() : 'dashboard';
     try {
       const res = await getSikshyaApi().get<ShellMetaResponse>(SIKSHYA_ENDPOINTS.admin.shellMeta(view));
       const nextAlerts = normalizeShellAlerts(res.shellAlerts);

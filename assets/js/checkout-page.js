@@ -179,6 +179,8 @@
       return;
     }
     setStatus(t('startingCheckout', 'Starting checkout…'));
+    var marketingOptInEl = document.getElementById('sikshya-checkout-marketing-opt-in');
+    var marketingOptIn = marketingOptInEl ? Boolean(marketingOptInEl.checked) : null;
     fetch(restUrl + 'checkout/session', {
       method: 'POST',
       credentials: 'same-origin',
@@ -190,6 +192,7 @@
         course_ids: courseIds,
         gateway: gateway,
         coupon_code: getCouponCode(),
+        marketing_opt_in: marketingOptIn,
       }),
     })
       .then(function (r) {

@@ -27,9 +27,14 @@ $dash_url = $page_model->getUrls()->getDashboardUrl();
 $learner_n = $page_model->getEnrollmentCount();
 $ongoing_n = $page_model->getOngoingCount();
 $done_n = $page_model->getCompletedCount();
+
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+$label_instructor = function_exists('sikshya_label') ? sikshya_label('instructor', __('Instructor', 'sikshya'), 'frontend') : __('Instructor', 'sikshya');
+$label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plural('enrollment', 'enrollments', __('Enrollments', 'sikshya'), 'frontend') : __('Enrollments', 'sikshya');
 ?>
             <section class="sik-acc-hero" aria-label="<?php esc_attr_e('Teaching', 'sikshya'); ?>">
-                <p class="sik-acc-hero__date"><?php esc_html_e('Instructor view', 'sikshya'); ?></p>
+                <p class="sik-acc-hero__date"><?php echo esc_html(sprintf(__('%s view', 'sikshya'), $label_instructor)); ?></p>
                 <h2 class="sik-acc-hero__greet"><?php esc_html_e('Your teaching at a glance', 'sikshya'); ?></h2>
                 <p class="sik-acc-hero__lead">
                     <?php
@@ -54,7 +59,7 @@ $done_n = $page_model->getCompletedCount();
                 <div class="sik-acc-metrics" style="margin-top:0.75rem;">
                     <div class="sik-acc-metric">
                         <div class="sik-acc-metric__value"><?php echo esc_html((string) $learner_n); ?></div>
-                        <div class="sik-acc-metric__label"><?php esc_html_e('Enrollments', 'sikshya'); ?></div>
+                        <div class="sik-acc-metric__label"><?php echo esc_html($label_enrollments); ?></div>
                     </div>
                     <div class="sik-acc-metric">
                         <div class="sik-acc-metric__value"><?php echo esc_html((string) $ongoing_n); ?></div>
@@ -78,13 +83,13 @@ $done_n = $page_model->getCompletedCount();
             <section class="sik-acc-metrics" aria-label="<?php esc_attr_e('Teaching metrics', 'sikshya'); ?>">
                 <div class="sik-acc-metric">
                     <div class="sik-acc-metric__value"><?php echo esc_html((string) $published); ?></div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Published courses', 'sikshya'); ?></div>
+                    <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Published %s', 'sikshya'), strtolower($label_courses))); ?></div>
                     <div class="sik-acc-metric__hint"><?php esc_html_e('Live for learners', 'sikshya'); ?></div>
                 </div>
                 <div class="sik-acc-metric">
                     <div class="sik-acc-metric__value"><?php echo esc_html((string) $enrolls); ?></div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Total enrollments', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Across all your courses', 'sikshya'); ?></div>
+                    <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Total %s', 'sikshya'), strtolower($label_enrollments))); ?></div>
+                    <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf(__('Across all your %s', 'sikshya'), strtolower($label_courses))); ?></div>
                 </div>
                 <div class="sik-acc-metric">
                     <div class="sik-acc-metric__value"><?php echo esc_html((string) $completed); ?></div>
@@ -94,8 +99,8 @@ $done_n = $page_model->getCompletedCount();
                 <?php if ($add_url !== '') : ?>
                 <a class="sik-acc-metric sik-acc-metric--link" href="<?php echo esc_url($add_url); ?>">
                     <div class="sik-acc-metric__value">+ <?php esc_html_e('New', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Create a course', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Open the course editor', 'sikshya'); ?></div>
+                    <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Create a %s', 'sikshya'), strtolower($label_course))); ?></div>
+                    <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf(__('Open the %s editor', 'sikshya'), strtolower($label_course))); ?></div>
                 </a>
                 <?php endif; ?>
             </section>
@@ -127,13 +132,22 @@ $done_n = $page_model->getCompletedCount();
 
             <div class="sik-acc-panel" style="margin-top:0.5rem;">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('My courses', 'sikshya'); ?></h2>
+                    <h2 class="sik-acc-panel__title"><?php echo esc_html(sprintf(__('My %s', 'sikshya'), strtolower($label_courses))); ?></h2>
                     <?php if ($manage_url !== '') : ?>
                         <a class="sik-acc-btn" href="<?php echo esc_url($manage_url); ?>"><?php esc_html_e('Manage all', 'sikshya'); ?> →</a>
                     <?php endif; ?>
                 </div>
                 <?php if ($recent === []) : ?>
-                    <p class="sik-acc-cal__empty"><?php esc_html_e('You have not published any courses yet. Create your first course to start enrolling learners.', 'sikshya'); ?></p>
+                    <p class="sik-acc-cal__empty">
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: 1: plural label, 2: singular label */
+                            __('You have not published any %1$s yet. Create your first %2$s to start enrolling learners.', 'sikshya'),
+                            strtolower($label_courses),
+                            strtolower($label_course)
+                        ));
+                        ?>
+                    </p>
                 <?php else : ?>
                     <ul class="sik-acc-cal__list">
                         <?php foreach ($recent as $row) :

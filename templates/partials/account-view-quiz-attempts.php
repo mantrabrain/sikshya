@@ -9,19 +9,34 @@
  */
 
 ?>
-            <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Quiz attempts', 'sikshya'); ?>">
+            <?php
+            $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz', 'sikshya'), 'frontend') : __('Quiz', 'sikshya');
+            $label_quizzes = function_exists('sikshya_label_plural') ? sikshya_label_plural('quiz', 'quizzes', __('Quizzes', 'sikshya'), 'frontend') : __('Quizzes', 'sikshya');
+            $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+            $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+            ?>
+            <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('%s attempts', 'sikshya'), $label_quiz)); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Quiz attempts', 'sikshya'); ?></h2>
+                    <h2 class="sik-acc-panel__title"><?php echo esc_html(sprintf(__('%s attempts', 'sikshya'), $label_quiz)); ?></h2>
                 </div>
                 <?php if ($page_model->getQuizAttempts() === []) : ?>
-                    <div class="sik-acc-empty"><?php esc_html_e('No quizzes found in your enrolled courses yet.', 'sikshya'); ?></div>
+                    <div class="sik-acc-empty">
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: 1: plural label (e.g. quizzes), 2: plural label (e.g. courses) */
+                            __('No %1$s found in your enrolled %2$s yet.', 'sikshya'),
+                            strtolower($label_quizzes),
+                            strtolower($label_courses)
+                        ));
+                        ?>
+                    </div>
                 <?php else : ?>
                     <div class="sik-acc-table-wrap">
                         <table class="sik-acc-table">
                             <thead>
                             <tr>
-                                <th scope="col"><?php esc_html_e('Quiz', 'sikshya'); ?></th>
-                                <th scope="col"><?php esc_html_e('Course', 'sikshya'); ?></th>
+                                <th scope="col"><?php echo esc_html($label_quiz); ?></th>
+                                <th scope="col"><?php echo esc_html($label_course); ?></th>
                                 <th scope="col"><?php esc_html_e('Attempts', 'sikshya'); ?></th>
                                 <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
                             </tr>
@@ -43,9 +58,9 @@
                                 <tr>
                                     <td>
                                         <?php if ($url !== '') : ?>
-                                            <a href="<?php echo esc_url($url); ?>"><?php echo esc_html($quiz_title !== '' ? $quiz_title : __('Quiz', 'sikshya')); ?></a>
+                                            <a href="<?php echo esc_url($url); ?>"><?php echo esc_html($quiz_title !== '' ? $quiz_title : $label_quiz); ?></a>
                                         <?php else : ?>
-                                            <?php echo esc_html($quiz_title !== '' ? $quiz_title : __('Quiz', 'sikshya')); ?>
+                                            <?php echo esc_html($quiz_title !== '' ? $quiz_title : $label_quiz); ?>
                                         <?php endif; ?>
                                     </td>
                                     <td><?php echo esc_html($course_title); ?></td>

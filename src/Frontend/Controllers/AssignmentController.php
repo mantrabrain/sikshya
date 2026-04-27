@@ -57,7 +57,12 @@ class AssignmentController
         $assignment_id = intval($_POST['assignment_id'] ?? 0);
         $content = sanitize_textarea_field($_POST['content'] ?? '');
         $attachments = $_FILES['attachments'] ?? [];
-        if (!$user_id || !$assignment_id || empty($content)) {
+        $hasFiles = is_array($attachments) && isset($attachments['name'])
+            && (
+                (is_string($attachments['name']) && $attachments['name'] !== '')
+                || (is_array($attachments['name']) && !empty(array_filter(array_map('strval', $attachments['name']))))
+            );
+        if (!$user_id || !$assignment_id || ($content === '' && !$hasFiles)) {
             wp_send_json_error(__('Invalid request.', 'sikshya'));
         }
         $result = $this->plugin->getService('assignment')->submitAssignment($assignment_id, $user_id, $content, $attachments);

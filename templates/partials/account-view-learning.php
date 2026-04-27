@@ -10,6 +10,9 @@
 
 use Sikshya\Frontend\Public\PublicPageUrls;
 
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+
 $render_enrollment_row = static function ($row): void {
     $cid = is_object($row) ? (int) ($row->course_id ?? 0) : (int) ($row['course_id'] ?? 0);
     if ($cid <= 0) {
@@ -38,21 +41,29 @@ $render_enrollment_row = static function ($row): void {
     <?php
 };
 ?>
-            <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Ongoing courses', 'sikshya'); ?>">
+            <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('Ongoing %s', 'sikshya'), strtolower($label_courses))); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Ongoing', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>"><?php esc_html_e('Browse all courses', 'sikshya'); ?></a>
+                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
+                        <?php echo esc_html(sprintf(__('Browse all %s', 'sikshya'), strtolower($label_courses))); ?>
+                    </a>
                 </div>
                 <?php if ($page_model->getEnrollmentsOngoing() === []) : ?>
                     <div class="sik-acc-empty">
-                        <?php esc_html_e('You have no courses in progress.', 'sikshya'); ?>
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: %s: plural label (e.g. courses) */
+                            __('You have no %s in progress.', 'sikshya'),
+                            strtolower($label_courses)
+                        ));
+                        ?>
                     </div>
                 <?php else : ?>
                     <div class="sik-acc-table-wrap">
                         <table class="sik-acc-table">
                             <thead>
                             <tr>
-                                <th scope="col"><?php esc_html_e('Course', 'sikshya'); ?></th>
+                                <th scope="col"><?php echo esc_html($label_course); ?></th>
                                 <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
                                 <th scope="col"><?php esc_html_e('Enrolled', 'sikshya'); ?></th>
                             </tr>
@@ -69,20 +80,26 @@ $render_enrollment_row = static function ($row): void {
                 <?php endif; ?>
             </section>
 
-            <section class="sik-acc-panel" style="margin-top:1.25rem;" aria-label="<?php esc_attr_e('Completed courses', 'sikshya'); ?>">
+            <section class="sik-acc-panel" style="margin-top:1.25rem;" aria-label="<?php echo esc_attr(sprintf(__('Completed %s', 'sikshya'), strtolower($label_courses))); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Completed', 'sikshya'); ?></h2>
                 </div>
                 <?php if ($page_model->getEnrollmentsCompleted() === []) : ?>
                     <div class="sik-acc-empty">
-                        <?php esc_html_e('No completed courses yet.', 'sikshya'); ?>
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: %s: plural label (e.g. courses) */
+                            __('No completed %s yet.', 'sikshya'),
+                            strtolower($label_courses)
+                        ));
+                        ?>
                     </div>
                 <?php else : ?>
                     <div class="sik-acc-table-wrap">
                         <table class="sik-acc-table">
                             <thead>
                             <tr>
-                                <th scope="col"><?php esc_html_e('Course', 'sikshya'); ?></th>
+                                <th scope="col"><?php echo esc_html($label_course); ?></th>
                                 <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
                                 <th scope="col"><?php esc_html_e('Enrolled', 'sikshya'); ?></th>
                             </tr>
@@ -99,4 +116,10 @@ $render_enrollment_row = static function ($row): void {
                 <?php endif; ?>
             </section>
 
-            <?php do_action('sikshya_account_learning_after', $acc); ?>
+            <?php
+            /**
+             * @param array<string, mixed>                         $acc
+             * @param \Sikshya\Presentation\Models\AccountPageModel $page_model
+             */
+            do_action('sikshya_account_learning_after', $acc, $page_model);
+            ?>

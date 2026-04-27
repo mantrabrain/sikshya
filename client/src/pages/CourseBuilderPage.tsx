@@ -21,6 +21,7 @@ import { useAdminRouting } from '../lib/adminRouting';
 import type { FieldConfig, NavItem, SikshyaReactConfig, TabFieldsMap } from '../types';
 import { DateTimePickerField } from '../components/shared/DateTimePickerField';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
+import { term, termLower } from '../lib/terminology';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
 const FIELD_INPUT =
@@ -385,12 +386,13 @@ function FieldInput(props: {
   value: unknown;
   onChange: (v: unknown) => void;
   users: UserOpt[];
+  config?: SikshyaReactConfig;
   /** Site root URL for permalink preview */
   siteUrl?: string;
   /** Update another builder field (e.g. attachment ID when picking featured image). */
   onSiblingFieldChange?: (key: string, v: unknown) => void;
 }) {
-  const { id, fieldKey, cfg, value, onChange, users, siteUrl, onSiblingFieldChange } = props;
+  const { id, fieldKey, cfg, value, onChange, users, config, siteUrl, onSiblingFieldChange } = props;
   const t = cfg.type || 'text';
   const base = (siteUrl || '').replace(/\/?$/, '/');
   const scalePickerEnabled = cfg.widget === 'grade_scale_picker';
@@ -576,13 +578,17 @@ function FieldInput(props: {
         <MultiCoursePicker
           value={currentIds}
           onChange={(ids) => onChange(ids)}
-          title="Select courses for this bundle"
-          placeholder="Click to add courses to this bundle…"
-          hint={currentIds.length === 0 ? 'No courses selected yet.' : `${currentIds.length} course${currentIds.length === 1 ? '' : 's'} selected.`}
+          title={`Select ${config ? termLower(config, 'courses') : 'courses'} for this bundle`}
+          placeholder={`Click to add ${config ? termLower(config, 'courses') : 'courses'} to this bundle…`}
+          hint={
+            currentIds.length === 0
+              ? `No ${config ? termLower(config, 'courses') : 'courses'} selected yet.`
+              : `${currentIds.length} ${config ? termLower(config, 'course') : 'course'}${currentIds.length === 1 ? '' : 's'} selected.`
+          }
         />
         {currentIds.length > 0 ? (
           <p className={FIELD_HINT}>
-            {`${currentIds.length} course${currentIds.length === 1 ? '' : 's'} included. Buyers get access to all of them with one purchase.`}
+            {`${currentIds.length} ${config ? termLower(config, 'course') : 'course'}${currentIds.length === 1 ? '' : 's'} included. Buyers get access to all of them with one purchase.`}
           </p>
         ) : null}
       </div>
@@ -862,6 +868,7 @@ function FieldInput(props: {
 }
 
 function BuilderFieldBlock(props: {
+  config: SikshyaReactConfig;
   fid: string;
   fcfg: FieldConfig;
   values: Record<string, unknown>;
@@ -869,7 +876,7 @@ function BuilderFieldBlock(props: {
   siteUrl: string;
   onFieldChange: (fid: string, v: unknown) => void;
 }) {
-  const { fid, fcfg, values, users, siteUrl, onFieldChange } = props;
+  const { config, fid, fcfg, values, users, siteUrl, onFieldChange } = props;
   const isCheckbox = (fcfg.type || 'text') === 'checkbox';
 
   if (isCheckbox) {
@@ -881,6 +888,7 @@ function BuilderFieldBlock(props: {
           cfg={fcfg}
           value={values[fid]}
           users={users}
+          config={config}
           siteUrl={siteUrl}
           onSiblingFieldChange={onFieldChange}
           onChange={(v) => onFieldChange(fid, v)}
@@ -910,6 +918,7 @@ function BuilderFieldBlock(props: {
         cfg={fcfg}
         value={values[fid]}
         users={users}
+        config={config}
         siteUrl={siteUrl}
         onSiblingFieldChange={onFieldChange}
         onChange={(v) => onFieldChange(fid, v)}
@@ -1229,6 +1238,8 @@ export function CourseBuilderPage(props: { config: SikshyaReactConfig; title: st
 
 function CourseBuilderMissingSelection({ config, title }: { config: SikshyaReactConfig; title: string }) {
   const [createOpen, setCreateOpen] = useState(false);
+  const courseLower = termLower(config, 'course');
+  const coursesLower = termLower(config, 'courses');
   return (
     <AppShell
       page={config.page}
@@ -1238,7 +1249,7 @@ function CourseBuilderMissingSelection({ config, title }: { config: SikshyaReact
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
       title={title}
-      subtitle="Select or create a course to edit"
+      subtitle={`Select or create a ${courseLower} to edit`}
       pageActions={null}
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
@@ -1246,17 +1257,17 @@ function CourseBuilderMissingSelection({ config, title }: { config: SikshyaReact
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100 dark:bg-brand-950/50">
           <NavIcon name="course" className="h-8 w-8 text-brand-600 dark:text-brand-400" />
         </div>
-        <h2 className="mt-6 text-xl font-semibold text-slate-900 dark:text-white">Open a course in the builder</h2>
+        <h2 className="mt-6 text-xl font-semibold text-slate-900 dark:text-white">Open a {courseLower} in the builder</h2>
         <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-          Start by naming a new draft—we save it and bring you here—or pick a course from the catalog.
+          Start by naming a new draft—we save it and bring you here—or pick a {courseLower} from the catalog.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Create course</ButtonPrimary>
+          <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Create {courseLower}</ButtonPrimary>
           <a
             href={appViewHref(config, 'courses')}
             className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            Browse courses
+            Browse {coursesLower}
           </a>
         </div>
       </div>
@@ -1800,10 +1811,12 @@ function CourseBuilderEditor({
             href={appViewHref(config, 'courses')}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            <span aria-hidden>←</span> All courses
+            <span aria-hidden>←</span> All {termLower(config, 'courses')}
           </a>
           {courseId ? (
-            <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">Course ID {courseId}</span>
+            <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+              {term(config, 'course')} ID {courseId}
+            </span>
           ) : null}
         </div>
       }
@@ -1863,7 +1876,7 @@ function CourseBuilderEditor({
         <div className="mb-4">
           <ApiErrorPanel
             error={saveError}
-            title="Could not save this course"
+            title={`Could not save this ${termLower(config, 'course')}`}
             onRetry={() => {
               setSaveError(null);
             }}
@@ -1953,10 +1966,11 @@ function CourseBuilderEditor({
                   <div className="border-b border-slate-200/70 px-4 pb-3 pt-4 dark:border-slate-800">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                        Course outline
+                        {term(config, 'course')} outline
                       </div>
                       <div className="shrink-0 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                        {curriculumStats.publishedLessons}/{curriculumStats.totalLessons} lessons published
+                        {curriculumStats.publishedLessons}/{curriculumStats.totalLessons} {termLower(config, 'lessons')}{' '}
+                        published
                       </div>
                     </div>
                   </div>
@@ -2516,6 +2530,7 @@ function CourseBuilderEditor({
                           return row.fields.map(([fid, fcfg]) => (
                             <BuilderFieldBlock
                               key={`${rowIdx}-${fid}`}
+                              config={config}
                               fid={fid}
                               fcfg={fcfg}
                               values={values}
@@ -2531,6 +2546,7 @@ function CourseBuilderEditor({
                             {row.fields.map(([fid, fcfg]) => (
                               <BuilderFieldBlock
                                 key={fid}
+                                config={config}
                                 fid={fid}
                                 fcfg={fcfg}
                                 values={values}

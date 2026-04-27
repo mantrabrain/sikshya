@@ -9,6 +9,7 @@ import { getWpApi } from '../api';
 import type { Column } from '../components/shared/DataTable';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig, WpRestUser } from '../types';
+import { term, termLower } from '../lib/terminology';
 
 type Variant = 'students' | 'instructors';
 
@@ -23,6 +24,10 @@ export function WpUserListPage(props: {
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
 
   const roleSlug = variant === 'students' ? 'sikshya_student' : 'sikshya_instructor';
+  const termStudent = termLower(config, 'student');
+  const termInstructor = termLower(config, 'instructor');
+  const termStudents = term(config, 'students');
+  const termInstructors = term(config, 'instructors');
   const newUrl = `${adminBase}user-new.php`;
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -129,7 +134,7 @@ export function WpUserListPage(props: {
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
-            + Add {variant === 'students' ? 'student' : 'instructor'}
+            + Add {variant === 'students' ? termStudent : termInstructor}
           </ButtonPrimary>
           <LinkButtonPrimary href={newUrl} title="WordPress user creation screen">
             Add in WordPress
@@ -139,7 +144,7 @@ export function WpUserListPage(props: {
     >
       <Modal
         open={createOpen}
-        title={`Add ${variant === 'students' ? 'student' : 'instructor'}`}
+        title={`Add ${variant === 'students' ? termStudent : termInstructor}`}
         description="Creates a WordPress user and assigns the appropriate Sikshya role."
         onClose={() => (creating ? null : setCreateOpen(false))}
         size="md"
@@ -221,10 +226,10 @@ export function WpUserListPage(props: {
         refreshToken={refreshSeq}
         contextHint={
           variant === 'students'
-            ? 'Users with the Sikshya student role.'
-            : 'Users with the Sikshya instructor role.'
+            ? `Users with the ${termStudents} role.`
+            : `Users with the ${termInstructors} role. Review pending sign-ups under People → Applications.`
         }
-        searchPlaceholder={`Search ${variant === 'students' ? 'students' : 'instructors'}…`}
+        searchPlaceholder={`Search ${variant === 'students' ? termStudents.toLowerCase() : termInstructors.toLowerCase()}…`}
         sortFieldOptions={[
           { value: 'name', label: 'Name' },
           { value: 'registered_date', label: 'Registered' },
@@ -239,7 +244,7 @@ export function WpUserListPage(props: {
         emptyStateDescription="Try another search or create one here."
         emptyStateAction={
           <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
-            + Add {variant === 'students' ? 'student' : 'instructor'}
+            + Add {variant === 'students' ? termStudent : termInstructor}
           </ButtonPrimary>
         }
         skeletonHeaders={['ID', 'Name', 'Email', 'Registered']}

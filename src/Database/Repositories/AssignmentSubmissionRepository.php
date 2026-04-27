@@ -38,6 +38,22 @@ final class AssignmentSubmissionRepository
         return $row ?: null;
     }
 
+    public function findById(int $submission_id): ?object
+    {
+        if ($submission_id <= 0) {
+            return null;
+        }
+        global $wpdb;
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE id = %d LIMIT 1",
+                $submission_id
+            )
+        );
+
+        return $row ?: null;
+    }
+
     /**
      * @return array<int, object>
      */
@@ -121,19 +137,34 @@ final class AssignmentSubmissionRepository
         return (int) $wpdb->insert_id;
     }
 
-    public function gradeSubmission(int $submission_id, ?float $grade, string $feedback, string $status = 'graded'): bool
-    {
+    /**
+     * @param string|null $rubric_scores_json JSON payload or null to leave the column unchanged
+     */
+    public function gradeSubmission(
+        int $submission_id,
+        ?float $grade,
+        string $feedback,
+        string $status = 'graded',
+        ?string $rubric_scores_json = null
+    ): bool {
         global $wpdb;
+        $data = [
+            'grade' => $grade,
+            'feedback' => $feedback,
+            'status' => sanitize_text_field($status),
+            'graded_at' => current_time('mysql'),
+        ];
+        $formats = ['%f', '%s', '%s', '%s'];
+        if ($rubric_scores_json !== null) {
+            $data['rubric_scores_json'] = $rubric_scores_json;
+            $formats[] = '%s';
+        }
+
         return false !== $wpdb->update(
             $this->table_name,
-            [
-                'grade' => $grade,
-                'feedback' => $feedback,
-                'status' => sanitize_text_field($status),
-                'graded_at' => current_time('mysql'),
-            ],
+            $data,
             ['id' => $submission_id],
-            ['%f', '%s', '%s', '%s'],
+            $formats,
             ['%d']
         );
     }

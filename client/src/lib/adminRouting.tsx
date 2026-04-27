@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { getConfig } from '../config/env';
 import type { SikshyaReactConfig } from '../types';
 import { appViewHref } from './appUrl';
 
@@ -31,14 +32,26 @@ function isSikshyaAdminUrl(url: URL): boolean {
   return url.searchParams.get('page') === 'sikshya';
 }
 
-export function parseAdminRoute(baseConfig: SikshyaReactConfig, href?: string): AdminRoute {
+function baseRouteFields(baseConfig: SikshyaReactConfig | null | undefined): { page: string; query: Record<string, string> } {
+  const rawPage = baseConfig?.page;
+  const page = typeof rawPage === 'string' && rawPage.trim() !== '' ? rawPage.trim() : 'dashboard';
+  const rawQuery = baseConfig?.query;
+  const query =
+    rawQuery && typeof rawQuery === 'object' && !Array.isArray(rawQuery)
+      ? (rawQuery as Record<string, string>)
+      : {};
+  return { page, query };
+}
+
+export function parseAdminRoute(baseConfig: SikshyaReactConfig | null | undefined, href?: string): AdminRoute {
+  const { page: basePage, query: baseQuery } = baseRouteFields(baseConfig);
   const url = new URL(href || window.location.href, window.location.href);
 
   if (!isSikshyaAdminUrl(url)) {
-    return { page: baseConfig.page || 'dashboard', query: baseConfig.query || {} };
+    return { page: basePage || 'dashboard', query: baseQuery };
   }
 
-  const page = (url.searchParams.get('view') || baseConfig.page || 'dashboard').trim() || 'dashboard';
+  const page = (url.searchParams.get('view') || basePage || 'dashboard').trim() || 'dashboard';
   const query: Record<string, string> = {};
   url.searchParams.forEach((v, k) => {
     if (k === 'page' || k === 'view') return;
@@ -68,14 +81,15 @@ export function AdminRoutingProvider({
   baseConfig,
   children,
 }: {
-  baseConfig: SikshyaReactConfig;
+  baseConfig: SikshyaReactConfig | null | undefined;
   children: React.ReactNode;
 }) {
-  const [route, setRoute] = useState<AdminRoute>(() => parseAdminRoute(baseConfig));
+  const safeBaseConfig = baseConfig ?? getConfig();
+  const [route, setRoute] = useState<AdminRoute>(() => parseAdminRoute(safeBaseConfig));
 
   const navigateHref = useCallback(
     (href: string, opts?: { replace?: boolean }) => {
-      const nextRoute = parseAdminRoute(baseConfig, href);
+      const nextRoute = parseAdminRoute(safeBaseConfig, href);
       const nextUrl = new URL(href, window.location.href);
 
       if (opts?.replace) {
@@ -85,22 +99,22 @@ export function AdminRoutingProvider({
       }
       setRoute(nextRoute);
     },
-    [baseConfig]
+    [safeBaseConfig]
   );
 
   const navigateView = useCallback(
     (view: string, extra?: Record<string, string>, opts?: { replace?: boolean }) => {
-      const href = appViewHref(baseConfig, view, extra || {});
+      const href = appViewHref(safeBaseConfig, view, extra || {});
       navigateHref(href, opts);
     },
-    [baseConfig, navigateHref]
+    [safeBaseConfig, navigateHref]
   );
 
   useEffect(() => {
-    const onPopState = () => setRoute(parseAdminRoute(baseConfig));
+    const onPopState = () => setRoute(parseAdminRoute(safeBaseConfig));
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [baseConfig]);
+  }, [safeBaseConfig]);
 
   useEffect(() => {
     // Intercept in-app clicks so navigation stays SPA, but only for Sikshya React routes.

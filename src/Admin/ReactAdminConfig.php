@@ -8,6 +8,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Addons\Addons;
 use Sikshya\Licensing\Pro;
 use Sikshya\Services\PermalinkService;
+use Sikshya\Services\Settings;
 
 /**
  * Bootstrap payload for the React admin shell (URL-based pages, full-width layout).
@@ -95,6 +96,11 @@ final class ReactAdminConfig
              * @var array<int, array<string, mixed>>
              */
             'shellAlerts' => $shell['shellAlerts'],
+            /**
+             * Storefront: offline / manual gateway enabled (see Settings → Payment).
+             * Used by Orders and hubs so help text does not imply it is still turned off.
+             */
+            'offlineCheckoutEnabled' => self::isOfflineCheckoutEnabled(),
         ];
 
         if (current_user_can('manage_options')) {
@@ -169,7 +175,7 @@ final class ReactAdminConfig
         $course_children = [
             [
                 'id' => 'courses',
-                'label' => __('Courses', 'sikshya'),
+                'label' => sikshya_label('courses', __('Courses', 'sikshya'), 'admin'),
                 'icon' => 'table',
                 'href' => self::reactAppUrl('courses'),
                 'cap' => 'edit_posts',
@@ -204,13 +210,20 @@ final class ReactAdminConfig
                 'href' => self::reactAppUrl('reviews'),
                 'cap' => 'edit_posts',
             ], 'course_reviews'),
+            self::withNavGate([
+                'id' => 'course-team',
+                'label' => __('Course staff', 'sikshya'),
+                'icon' => 'course',
+                'href' => self::reactAppUrl('course-team'),
+                'cap' => 'edit_posts',
+            ], 'multi_instructor'),
         ];
 
         $children = self::filterNavChildren($course_children);
         if ($children !== []) {
             $items[] = [
                 'id' => 'course',
-                'label' => __('Course', 'sikshya'),
+                'label' => sikshya_label('course', __('Course', 'sikshya'), 'admin'),
                 'icon' => 'course',
                 'children' => $children,
             ];
@@ -232,14 +245,19 @@ final class ReactAdminConfig
         $people_children = [
             [
                 'id' => 'people',
-                'label' => __('Students & instructors', 'sikshya'),
+                'label' => sprintf(
+                    /* translators: 1: students label, 2: instructors label */
+                    __('%1$s & %2$s', 'sikshya'),
+                    sikshya_label('students', __('Students', 'sikshya'), 'admin'),
+                    sikshya_label('instructors', __('Instructors', 'sikshya'), 'admin')
+                ),
                 'icon' => 'users',
                 'href' => self::reactAppUrl('people'),
                 'cap' => 'edit_posts',
             ],
             [
                 'id' => 'enrollments',
-                'label' => __('Enrollments', 'sikshya'),
+                'label' => sikshya_label('enrollments', __('Enrollments', 'sikshya'), 'admin'),
                 'icon' => 'clipboard',
                 'href' => self::reactAppUrl('enrollments'),
                 'cap' => 'sikshya_enrollments_nav',
@@ -715,6 +733,16 @@ final class ReactAdminConfig
         $counts = wp_count_posts($post_type);
 
         return isset($counts->publish) ? (int) $counts->publish : 0;
+    }
+
+    /**
+     * Mirrors {@see \Sikshya\Commerce\CheckoutService::isOfflinePaymentEnabled()} truthiness for the React shell.
+     */
+    private static function isOfflineCheckoutEnabled(): bool
+    {
+        $v = Settings::get('enable_offline_payment', '1');
+
+        return $v === true || $v === 1 || $v === '1' || $v === 'true' || $v === 'yes' || $v === 'on';
     }
 
     /**

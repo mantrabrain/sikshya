@@ -25,6 +25,7 @@ final class EmailTemplateGate
         $map = [
             'sikshya_drip_lesson_unlocked' => ['drip_notifications', 'drip_notifications'],
             'sikshya_drip_course_unlocked' => ['drip_notifications', 'drip_notifications'],
+            'sikshya_drip_lessons_unlocked' => ['drip_notifications', 'drip_notifications'],
         ];
 
         /**

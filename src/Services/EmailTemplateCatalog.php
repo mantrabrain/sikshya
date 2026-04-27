@@ -311,12 +311,45 @@ final class EmailTemplateCatalog
                 ),
                 'merge_tags' => $tags_common,
             ],
+            'drip_lessons_unlocked_digest' => [
+                'name' => __('Drip: lessons unlocked (digest)', 'sikshya'),
+                'description' => __(
+                    'Sent when multiple lessons unlock in one drip cron pass (digest mode). Useful for reducing email noise when several lessons unlock at once.',
+                    'sikshya'
+                ),
+                'required_addon' => 'drip_notifications',
+                'required_feature' => 'drip_notifications',
+                'event' => 'sikshya_drip_lessons_unlocked',
+                'category' => 'automation',
+                'recipient' => 'student',
+                'recipient_to' => '{{student_email}}',
+                'template_type' => 'system',
+                'default_subject' => __('🔓 [{{site_name}}] {{lessons_count}} new lessons unlocked in {{course_title}}', 'sikshya'),
+                'default_body_html' => self::layout(
+                    '🔓',
+                    esc_html__('Lessons unlocked', 'sikshya'),
+                    '<p style="margin:0 0 16px;">' . esc_html__('Hi {{student_name}},', 'sikshya') . '</p>'
+                    . '<p style="margin:0 0 16px;">' . esc_html__(
+                        'New lessons are now available in your course. Here’s what just opened:',
+                        'sikshya'
+                    ) . '</p>'
+                    . self::factTable([
+                        ['label' => esc_html__('Course', 'sikshya'), 'value' => '{{course_title}}'],
+                        ['label' => esc_html__('Unlocked', 'sikshya'), 'value' => '{{lessons_count}} ' . esc_html__('lessons', 'sikshya')],
+                    ])
+                    . '{{lessons_list_html}}'
+                    . '<p style="margin:24px 0 0;text-align:center;">'
+                    . '<a href="{{course_url}}" style="display:inline-block;padding:14px 28px;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;border-radius:10px;">'
+                    . esc_html__('Continue learning →', 'sikshya')
+                    . '</a></p>'
+                ),
+                'merge_tags' => array_merge($tags_common, ['{{lessons_count}}', '{{lessons_list_html}}', '{{first_lesson_url}}']),
+            ],
         ];
 
         /**
          * Catalog rows may include `required_addon` and `required_feature` for add-on gating in admin and REST.
          *
-         * @param array<string, array<string, mixed>> $defs
          */
         return apply_filters('sikshya_email_template_catalog_definitions', $defs);
     }

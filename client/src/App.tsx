@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { getConfig } from './config/env';
 import { SikshyaDialogProvider } from './components/shared/SikshyaDialogContext';
 import { ContentPostEditorPage } from './pages/ContentPostEditorPage';
@@ -28,16 +29,18 @@ import { OrdersPage } from './pages/OrdersPage';
 import { PaymentsPage } from './pages/PaymentsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { EmailPage } from './pages/EmailPage';
-import { EmailTemplatesListPage } from './pages/EmailTemplatesListPage';
 import { EmailTemplateEditPage } from './pages/EmailTemplateEditPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SubscriptionsProPage } from './pages/SubscriptionsProPage';
 import { ToolsPage } from './pages/ToolsPage';
 import { WpEntityListPage } from './pages/WpEntityListPage';
 import { WpUserListPage } from './pages/WpUserListPage';
+import { InstructorApplicationsPage } from './pages/InstructorApplicationsPage';
 import { ShellStateProvider } from './context/ShellStateContext';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
 import { AddonsPage } from './pages/AddonsPage';
+import { applyAdminBrandThemeToRoot, clearAdminBrandThemeFromRoot } from './lib/adminBrandTokens';
+import { term } from './lib/terminology';
 import {
   BrandingHubPage,
   CertificatesHubPage,
@@ -54,17 +57,54 @@ import {
 function RoutedApp() {
   const baseConfig = getConfig();
   const { route } = useAdminRouting();
-  const config = { ...baseConfig, page: route.page, query: route.query };
+  const pageKey =
+    typeof route.page === 'string' && route.page.trim() !== '' ? route.page.trim() : 'dashboard';
+  const config = { ...baseConfig, page: pageKey, query: route.query ?? {} };
   const page = config.page;
+  const platformName = config.branding?.pluginName?.trim() || 'Sikshya';
+
+  useEffect(() => {
+    const root = document.getElementById('sikshya-admin-root');
+    if (!root) {
+      return;
+    }
+    const b = config.branding;
+    if (!b?.topbarBg && !b?.sidebarBg) {
+      clearAdminBrandThemeFromRoot(root);
+      return;
+    }
+    applyAdminBrandThemeToRoot(root, b);
+    return () => {
+      clearAdminBrandThemeFromRoot(root);
+    };
+  }, [config.branding?.topbarBg, config.branding?.sidebarBg]);
+  const T = {
+    course: term(config, 'course'),
+    courses: term(config, 'courses'),
+    lesson: term(config, 'lesson'),
+    lessons: term(config, 'lessons'),
+    quiz: term(config, 'quiz'),
+    quizzes: term(config, 'quizzes'),
+    assignment: term(config, 'assignment'),
+    assignments: term(config, 'assignments'),
+    chapter: term(config, 'chapter'),
+    chapters: term(config, 'chapters'),
+    student: term(config, 'student'),
+    students: term(config, 'students'),
+    instructor: term(config, 'instructor'),
+    instructors: term(config, 'instructors'),
+    enrollment: term(config, 'enrollment'),
+    enrollments: term(config, 'enrollments'),
+  };
 
   const routes = (() => {
   switch (page) {
     case 'dashboard':
       return <DashboardPage config={config} title="Dashboard" />;
     case 'courses':
-      return <CoursesPage config={config} title="Courses" restBase="sik_course" />;
+      return <CoursesPage config={config} title={T.courses} restBase="sik_course" />;
     case 'add-course':
-      return <CourseBuilderPage config={config} title="Course builder" />;
+      return <CourseBuilderPage config={config} title={`${T.course} builder`} />;
     case 'bundle-builder':
       return <CourseBuilderPage config={config} title="Bundle builder" />;
     case 'edit-content':
@@ -74,7 +114,7 @@ function RoutedApp() {
       return (
         <WpEntityListPage
           config={config}
-          title="Lessons"
+          title={T.lessons}
           subtitle="All lessons"
           restBase="sik_lesson"
         />
@@ -83,7 +123,7 @@ function RoutedApp() {
       return (
         <WpEntityListPage
           config={config}
-          title="Quizzes"
+          title={T.quizzes}
           subtitle="All quizzes"
           restBase="sik_quiz"
         />
@@ -92,7 +132,7 @@ function RoutedApp() {
       return (
         <WpEntityListPage
           config={config}
-          title="Assignments"
+          title={T.assignments}
           subtitle="All assignments"
           restBase="sik_assignment"
         />
@@ -155,7 +195,13 @@ function RoutedApp() {
     case 'white-label':
       return <WhiteLabelPage config={config} title="White label" />;
     case 'crm-automation':
-      return <CrmAutomationPage config={config} title="CRM & email automation" />;
+      return (
+        <GenericPlaceholderPage
+          config={config}
+          title="CRM & email automation"
+          description="This screen is not wired in the React shell yet."
+        />
+      );
     case 'calendar':
       return <CalendarPage config={config} title="Calendar" />;
     /* ---- Tabbed hubs (new sidebar entries that fan out to existing pages). ---- */
@@ -168,6 +214,7 @@ function RoutedApp() {
     case 'sales':
       return <SalesHubPage config={config} title="Sales" />;
     case 'email-hub':
+    case 'email-templates':
       return <EmailHubPage config={config} title="Email" />;
     case 'branding':
       return <BrandingHubPage config={config} title="Branding" />;
@@ -187,8 +234,8 @@ function RoutedApp() {
       return (
         <WpUserListPage
           config={config}
-          title="Students"
-          subtitle="Users with the Sikshya student role."
+          title={T.students}
+          subtitle={`Users with the ${T.student} role.`}
           variant="students"
         />
       );
@@ -196,13 +243,21 @@ function RoutedApp() {
       return (
         <WpUserListPage
           config={config}
-          title="Instructors"
-          subtitle="Users with the Sikshya instructor role."
+          title={T.instructors}
+          subtitle={`Users with the ${T.instructor} role. Pending sign-ups are under People → Applications.`}
           variant="instructors"
         />
       );
+    case 'instructor-applications':
+      return (
+        <InstructorApplicationsPage
+          config={config}
+          title="Instructor applications"
+          subtitle="Approve or reject learners who applied to teach."
+        />
+      );
     case 'enrollments':
-      return <EnrollmentsPage config={config} title="Enrollments" />;
+      return <EnrollmentsPage config={config} title={T.enrollments} />;
     case 'reports':
       return <ReportsHubPage config={config} title="Reports" />;
     case 'payments':
@@ -211,8 +266,6 @@ function RoutedApp() {
       return <SettingsPage config={config} title="Settings" />;
     case 'email':
       return <EmailPage config={config} title="Email" />;
-    case 'email-templates':
-      return <EmailTemplatesListPage config={config} title="Email templates" />;
     case 'email-template-edit':
       return <EmailTemplateEditPage config={config} title="Email template" />;
     case 'tools':
@@ -229,7 +282,7 @@ function RoutedApp() {
       return (
         <GenericPlaceholderPage
           config={config}
-          title="Sikshya"
+          title={platformName}
           description="This admin screen is powered by the React shell."
         />
       );

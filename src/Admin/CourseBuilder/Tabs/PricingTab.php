@@ -75,7 +75,7 @@ class PricingTab extends AbstractTab
      */
     public function getFields(): array
     {
-        return [
+        $fields = [
             'pricing' => [
                 'section' => [
                     'title' => __('Price', 'sikshya'),
@@ -322,6 +322,15 @@ class PricingTab extends AbstractTab
                 ],
             ],
         ];
+
+        /**
+         * Adjust Pricing & access tab fields (e.g. Pro add-ons removing unavailable modes).
+         *
+         * @param array<string, mixed> $fields
+         * @param PricingTab $tab
+         * @return array<string, mixed>
+         */
+        return apply_filters('sikshya_course_builder_pricing_tab_fields', $fields, $this);
     }
 
     /**
@@ -372,7 +381,15 @@ class PricingTab extends AbstractTab
             $errors['enrollment_end_date'] = __('Enrollment close date must be on or after the open date.', 'sikshya');
         }
 
-        return $errors;
+        /**
+         * Allow extensions to add or adjust validation errors for this tab.
+         *
+         * @param array<string, string> $errors
+         * @param array<string, mixed> $data
+         * @param PricingTab $tab
+         * @return array<string, string>
+         */
+        return apply_filters('sikshya_course_builder_pricing_tab_validate_errors', $errors, $data, $this);
     }
 
     /**

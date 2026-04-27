@@ -2,9 +2,7 @@
 
 namespace Sikshya\Services;
 
-use Sikshya\Addons\Addons;
 use Sikshya\Database\Repositories\CertificateRepository;
-use Sikshya\Licensing\Pro;
 
 /**
  * Basic email notifications (wp_mail) with editable templates.
@@ -117,6 +115,28 @@ final class EmailNotificationService
     }
 
     /**
+     * Drip unlock digest email (multiple lessons in one cron pass).
+     *
+     * @param int[] $lesson_ids
+     */
+    public function sendDripLessonsUnlockedDigestEmail(int $user_id, int $course_id, array $lesson_ids): bool
+    {
+        $user = get_user_by('id', $user_id);
+        if (!$user || empty($user->user_email)) {
+            return false;
+        }
+
+        $lesson_ids = array_values(array_filter(array_map('intval', $lesson_ids), static fn($v) => $v > 0));
+        if ($lesson_ids === []) {
+            return false;
+        }
+
+        $ctx = $this->buildMergeContextForDripLessons($user_id, $course_id, $lesson_ids);
+
+        return $this->sendSystemTemplate('drip_lessons_unlocked_digest', $ctx);
+    }
+
+    /**
      * Drip unlock email (course-wide rule). Respects the “Drip: course schedule unlocked” template enabled state (Email templates).
      */
     public function sendDripCourseUnlockedEmail(int $user_id, int $course_id): bool
@@ -143,6 +163,51 @@ final class EmailNotificationService
         $lesson_url = get_permalink($lesson_id);
         $ctx['{{lesson_title}}'] = is_string($lesson_title) ? $lesson_title : '';
         $ctx['{{lesson_url}}'] = is_string($lesson_url) ? $lesson_url : '';
+
+        return $ctx;
+    }
+
+    /**
+     * Merge context for drip lesson digest (course + lesson list).
+     *
+     * @param int[] $lesson_ids
+     * @return array<string, string>
+     */
+    public function buildMergeContextForDripLessons(int $user_id, int $course_id, array $lesson_ids): array
+    {
+        $ctx = $this->buildMergeContextForCourse($user_id, $course_id);
+
+        $lesson_ids = array_values(array_filter(array_map('intval', $lesson_ids), static fn($v) => $v > 0));
+        $lesson_ids = array_slice(array_values(array_unique($lesson_ids)), 0, 25);
+
+        $items = [];
+        foreach ($lesson_ids as $lid) {
+            $title = get_the_title($lid);
+            $url = get_permalink($lid);
+            $t = is_string($title) ? $title : '';
+            $u = is_string($url) ? $url : '';
+            if ($t === '') {
+                continue;
+            }
+            $items[] = [
+                'title' => $t,
+                'url' => $u,
+            ];
+        }
+
+        $list = '<ul style="margin:16px 0 0;padding:0 0 0 18px;">';
+        foreach ($items as $it) {
+            $title = esc_html($it['title']);
+            $url = $it['url'] !== '' ? esc_url($it['url']) : '';
+            $list .= '<li style="margin:0 0 8px;">';
+            $list .= $url !== '' ? '<a href="' . $url . '" style="color:#0d9488;font-weight:600;text-decoration:none;">' . $title . '</a>' : $title;
+            $list .= '</li>';
+        }
+        $list .= '</ul>';
+
+        $ctx['{{lessons_count}}'] = (string) count($items);
+        $ctx['{{lessons_list_html}}'] = $list;
+        $ctx['{{first_lesson_url}}'] = isset($items[0]['url']) ? (string) $items[0]['url'] : '';
 
         return $ctx;
     }
@@ -408,7 +473,7 @@ final class EmailNotificationService
         }
 
         $inner = '<p style="margin:0 0 12px;">' . esc_html__(
-            'This is a test email from your Sikshya LMS. If you received it, your From address, optional SMTP transport, and branded header/footer (when the professional email add-on is enabled) are working.',
+            'This is a test email from your LMS. If you received it, your From address, optional SMTP transport, and branded header/footer (when the professional email add-on is enabled) are working.',
             'sikshya'
         ) . '</p>';
 
@@ -446,18 +511,16 @@ final class EmailNotificationService
 
     private function wrapHtml(string $inner): string
     {
-        if (Pro::feature('email_advanced_customization') && Addons::isEnabled('email_advanced_customization')) {
-            $header = (string) Settings::get('email_template_header', '');
-            $footer = (string) Settings::get('email_template_footer', '');
-            if ($header !== '') {
-                $inner = wp_kses_post($header) . $inner;
-            }
-            if ($footer !== '') {
-                $inner .= wp_kses_post($footer);
-            }
-        }
+        /**
+         * Allow Pro (and other extensions) to prepend/append HTML around the inner body
+         * before the Sikshya outer card wrapper is applied.
+         *
+         * @param string $inner Safe HTML fragment.
+         */
+        $inner = (string) apply_filters('sikshya_email_transactional_inner_html', $inner);
 
         $brand = esc_html(get_bloginfo('name'));
+        $platform = function_exists('sikshya_brand_name') ? esc_html(sikshya_brand_name('email')) : esc_html__('Sikshya LMS', 'sikshya');
         $outer = '<div style="background:#f8fafc;padding:24px 0;">
             <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">
               <div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;font-weight:700;">' . $brand . '</div>
@@ -465,7 +528,11 @@ final class EmailNotificationService
                 ' . $inner . '
               </div>
               <div style="padding:14px 20px;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;">
-                ' . esc_html__('Sent by Sikshya LMS', 'sikshya') . '
+                ' . sprintf(
+                    /* translators: %s: platform/brand name */
+                    esc_html__('Sent by %s', 'sikshya'),
+                    $platform
+                ) . '
               </div>
             </div>
           </div>';

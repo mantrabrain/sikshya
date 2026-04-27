@@ -78,6 +78,22 @@
   max-width: 40rem;
 }
 
+.sikshya-checkout-page__util-links {
+  margin: var(--sikshya-spacing-3) 0 0;
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-checkout-page__util-links a {
+  color: var(--sikshya-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sikshya-checkout-page__util-links a:hover,
+.sikshya-checkout-page__util-links a:focus-visible {
+  text-decoration: underline;
+}
+
 .sikshya-checkout-page__body {
   width: 100%;
   max-width: 70rem;

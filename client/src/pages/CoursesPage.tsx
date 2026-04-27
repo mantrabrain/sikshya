@@ -11,6 +11,7 @@ import { courseMetaString, coursePriceLabel, embeddedAuthorName } from '../lib/c
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { embeddedTermNames } from '../lib/wpPostTerms';
 import { formatPostDate } from '../lib/formatPostDate';
+import { term, termLower } from '../lib/terminology';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
 
 function isBundleRow(r: WpPost): boolean {
@@ -56,6 +57,10 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
   const [createOpen, setCreateOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<'any' | 'regular' | 'subscription' | 'bundle'>('any');
   const showCourseStaff = isFeatureEnabled(config, 'multi_instructor');
+  const course = term(config, 'course');
+  const courses = term(config, 'courses');
+  const courseLower = termLower(config, 'course');
+  const coursesLower = termLower(config, 'courses');
 
   const columns: Column<WpPost>[] = useMemo(
     () => [
@@ -89,7 +94,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
       },
       {
         id: 'title',
-        header: 'Course',
+        header: course,
         sortKey: 'title',
         render: (r) => (
           <div className="max-w-md">
@@ -190,7 +195,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         render: (r) => <StatusBadge status={r.status} />,
       },
     ],
-    [config]
+    [config, course]
   );
 
   return (
@@ -205,13 +210,13 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
       title={title}
       subtitle="Live data from your site. Create a draft, then finish details in the builder."
       pageActions={
-        <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new course</ButtonPrimary>
+        <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new {courseLower}</ButtonPrimary>
       }
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
       <EntityListView
         restBase={restBase}
-        searchPlaceholder="Search courses by title…"
+        searchPlaceholder={`Search ${coursesLower} by title…`}
         sortFieldOptions={[
           { value: 'title', label: 'Title' },
           { value: 'date', label: 'Published' },
@@ -231,7 +236,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         toolbarTrailing={
           <div className="flex flex-wrap items-center gap-2">
             <label className="sr-only" htmlFor="sikshya-course-type-filter">
-              Course type
+              {course} type
             </label>
             <select
               id="sikshya-course-type-filter"
@@ -240,12 +245,12 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
                 setTypeFilter(e.target.value as 'any' | 'regular' | 'subscription' | 'bundle')
               }
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-              title="Filter by course type"
+              title={`Filter by ${courseLower} type`}
             >
               <option value="any">All types</option>
-              <option value="regular">Regular courses</option>
-              <option value="subscription">Subscription courses</option>
-              <option value="bundle">Bundle courses</option>
+              <option value="regular">Regular {coursesLower}</option>
+              <option value="subscription">Subscription {coursesLower}</option>
+              <option value="bundle">Bundle {coursesLower}</option>
             </select>
           </div>
         }
@@ -254,7 +259,7 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
             const items = [
               {
                 key: 'builder',
-                label: isBundleRow(r) ? 'Edit bundle' : 'Edit in builder',
+                label: isBundleRow(r) ? 'Edit bundle' : `Edit ${courseLower} in builder`,
                 href: appViewHref(config, 'add-course', {
                   course_id: String(r.id),
                   ...(isBundleRow(r) ? { force_bundle_ui: '1' } : null),
@@ -272,16 +277,16 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
           },
         }}
         columns={columns}
-        emptyMessage="No courses match your filters. Try clearing search or choosing another status."
-        emptyStateTitle="No courses found"
-        emptyStateDescription="Create a draft course to see it listed here."
+        emptyMessage={`No ${coursesLower} match your filters. Try clearing search or choosing another status.`}
+        emptyStateTitle={`No ${coursesLower} found`}
+        emptyStateDescription={`Create a draft ${courseLower} to see it listed here.`}
         emptyStateAction={
-          <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new course</ButtonPrimary>
+          <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new {courseLower}</ButtonPrimary>
         }
         skeletonHeaders={[
           'ID',
           '',
-          'Course',
+          course,
           'Categories',
           'Price',
           'Level',

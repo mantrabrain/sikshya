@@ -74,6 +74,22 @@
   color: var(--sik-f-text-heading);
 }
 
+.sikshya-cart-page__util-links {
+  margin: var(--sikshya-spacing-3) 0 0;
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-cart-page__util-links a {
+  color: var(--sikshya-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sikshya-cart-page__util-links a:hover,
+.sikshya-cart-page__util-links a:focus-visible {
+  text-decoration: underline;
+}
+
 .sikshya-cart-page__lead {
   margin: var(--sikshya-spacing-2) 0 0;
   font-size: var(--sikshya-font-size-sm);

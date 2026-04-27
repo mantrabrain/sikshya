@@ -8,12 +8,19 @@ export function appViewHref(
   view: string,
   extra: Record<string, string> = {}
 ): string {
+  const adminBase =
+    typeof config.adminUrl === 'string' && config.adminUrl.trim() !== ''
+      ? config.adminUrl.trim()
+      : '/wp-admin/';
   const fallback =
     typeof window !== 'undefined'
-      ? `${window.location.origin}${config.adminUrl.replace(/\/?$/, '/')}admin.php?page=sikshya`
-      : `${config.adminUrl.replace(/\/?$/, '/')}admin.php?page=sikshya`;
+      ? `${window.location.origin}${adminBase.replace(/\/?$/, '/')}admin.php?page=sikshya`
+      : `${adminBase.replace(/\/?$/, '/')}admin.php?page=sikshya`;
 
-  const raw = config.appAdminBase || fallback;
+  const raw =
+    typeof config.appAdminBase === 'string' && config.appAdminBase.trim() !== ''
+      ? config.appAdminBase.trim()
+      : fallback;
   const u = new URL(raw);
   u.searchParams.set('page', 'sikshya');
   u.searchParams.set('view', view);

@@ -333,18 +333,29 @@ class PostTypeService
     {
         $rewrite = PermalinkService::get();
 
+        $course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'admin') : __('Course', 'sikshya');
+        $courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'admin') : __('Courses', 'sikshya');
+
         $labels = [
-            'name' => __('Courses', 'sikshya'),
-            'singular_name' => __('Course', 'sikshya'),
-            'menu_name' => __('Courses', 'sikshya'),
-            'add_new' => __('Add New Course', 'sikshya'),
-            'add_new_item' => __('Add New Course', 'sikshya'),
-            'edit_item' => __('Edit Course', 'sikshya'),
-            'new_item' => __('New Course', 'sikshya'),
-            'view_item' => __('View Course', 'sikshya'),
-            'search_items' => __('Search Courses', 'sikshya'),
-            'not_found' => __('No courses found', 'sikshya'),
-            'not_found_in_trash' => __('No courses found in trash', 'sikshya'),
+            'name' => $courses,
+            'singular_name' => $course,
+            'menu_name' => $courses,
+            /* translators: %s: singular label */
+            'add_new' => sprintf(__('Add New %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'add_new_item' => sprintf(__('Add New %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'edit_item' => sprintf(__('Edit %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'new_item' => sprintf(__('New %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'view_item' => sprintf(__('View %s', 'sikshya'), $course),
+            /* translators: %s: plural label */
+            'search_items' => sprintf(__('Search %s', 'sikshya'), $courses),
+            /* translators: %s: plural label */
+            'not_found' => sprintf(__('No %s found', 'sikshya'), strtolower($courses)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($courses)),
         ];
 
         $args = [
@@ -373,18 +384,29 @@ class PostTypeService
     {
         $rewrite = PermalinkService::get();
 
+        $lesson = function_exists('sikshya_label') ? sikshya_label('lesson', __('Lesson', 'sikshya'), 'admin') : __('Lesson', 'sikshya');
+        $lessons = function_exists('sikshya_label_plural') ? sikshya_label_plural('lesson', 'lessons', __('Lessons', 'sikshya'), 'admin') : __('Lessons', 'sikshya');
+
         $labels = [
-            'name' => __('Lessons', 'sikshya'),
-            'singular_name' => __('Lesson', 'sikshya'),
-            'menu_name' => __('Lessons', 'sikshya'),
-            'add_new' => __('Add New Lesson', 'sikshya'),
-            'add_new_item' => __('Add New Lesson', 'sikshya'),
-            'edit_item' => __('Edit Lesson', 'sikshya'),
-            'new_item' => __('New Lesson', 'sikshya'),
-            'view_item' => __('View Lesson', 'sikshya'),
-            'search_items' => __('Search Lessons', 'sikshya'),
-            'not_found' => __('No lessons found', 'sikshya'),
-            'not_found_in_trash' => __('No lessons found in trash', 'sikshya'),
+            'name' => $lessons,
+            'singular_name' => $lesson,
+            'menu_name' => $lessons,
+            /* translators: %s: singular label */
+            'add_new' => sprintf(__('Add New %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'add_new_item' => sprintf(__('Add New %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'edit_item' => sprintf(__('Edit %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'new_item' => sprintf(__('New %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'view_item' => sprintf(__('View %s', 'sikshya'), $lesson),
+            /* translators: %s: plural label */
+            'search_items' => sprintf(__('Search %s', 'sikshya'), $lessons),
+            /* translators: %s: plural label */
+            'not_found' => sprintf(__('No %s found', 'sikshya'), strtolower($lessons)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($lessons)),
         ];
 
         $args = [
@@ -413,18 +435,29 @@ class PostTypeService
     {
         $rewrite = PermalinkService::get();
 
+        $quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz', 'sikshya'), 'admin') : __('Quiz', 'sikshya');
+        $quizzes = function_exists('sikshya_label_plural') ? sikshya_label_plural('quiz', 'quizzes', __('Quizzes', 'sikshya'), 'admin') : __('Quizzes', 'sikshya');
+
         $labels = [
-            'name' => __('Quizzes', 'sikshya'),
-            'singular_name' => __('Quiz', 'sikshya'),
-            'menu_name' => __('Quizzes', 'sikshya'),
-            'add_new' => __('Add New Quiz', 'sikshya'),
-            'add_new_item' => __('Add New Quiz', 'sikshya'),
-            'edit_item' => __('Edit Quiz', 'sikshya'),
-            'new_item' => __('New Quiz', 'sikshya'),
-            'view_item' => __('View Quiz', 'sikshya'),
-            'search_items' => __('Search Quizzes', 'sikshya'),
-            'not_found' => __('No quizzes found', 'sikshya'),
-            'not_found_in_trash' => __('No quizzes found in trash', 'sikshya'),
+            'name' => $quizzes,
+            'singular_name' => $quiz,
+            'menu_name' => $quizzes,
+            /* translators: %s: singular label */
+            'add_new' => sprintf(__('Add New %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'add_new_item' => sprintf(__('Add New %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'edit_item' => sprintf(__('Edit %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'new_item' => sprintf(__('New %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'view_item' => sprintf(__('View %s', 'sikshya'), $quiz),
+            /* translators: %s: plural label */
+            'search_items' => sprintf(__('Search %s', 'sikshya'), $quizzes),
+            /* translators: %s: plural label */
+            'not_found' => sprintf(__('No %s found', 'sikshya'), strtolower($quizzes)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($quizzes)),
         ];
 
         $args = [
@@ -453,18 +486,29 @@ class PostTypeService
     {
         $rewrite = PermalinkService::get();
 
+        $assignment = function_exists('sikshya_label') ? sikshya_label('assignment', __('Assignment', 'sikshya'), 'admin') : __('Assignment', 'sikshya');
+        $assignments = function_exists('sikshya_label_plural') ? sikshya_label_plural('assignment', 'assignments', __('Assignments', 'sikshya'), 'admin') : __('Assignments', 'sikshya');
+
         $labels = [
-            'name' => __('Assignments', 'sikshya'),
-            'singular_name' => __('Assignment', 'sikshya'),
-            'menu_name' => __('Assignments', 'sikshya'),
-            'add_new' => __('Add New Assignment', 'sikshya'),
-            'add_new_item' => __('Add New Assignment', 'sikshya'),
-            'edit_item' => __('Edit Assignment', 'sikshya'),
-            'new_item' => __('New Assignment', 'sikshya'),
-            'view_item' => __('View Assignment', 'sikshya'),
-            'search_items' => __('Search Assignments', 'sikshya'),
-            'not_found' => __('No assignments found', 'sikshya'),
-            'not_found_in_trash' => __('No assignments found in trash', 'sikshya'),
+            'name' => $assignments,
+            'singular_name' => $assignment,
+            'menu_name' => $assignments,
+            /* translators: %s: singular label */
+            'add_new' => sprintf(__('Add New %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'add_new_item' => sprintf(__('Add New %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'edit_item' => sprintf(__('Edit %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'new_item' => sprintf(__('New %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'view_item' => sprintf(__('View %s', 'sikshya'), $assignment),
+            /* translators: %s: plural label */
+            'search_items' => sprintf(__('Search %s', 'sikshya'), $assignments),
+            /* translators: %s: plural label */
+            'not_found' => sprintf(__('No %s found', 'sikshya'), strtolower($assignments)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($assignments)),
         ];
 
         $args = [
@@ -568,18 +612,28 @@ class PostTypeService
      */
     public function registerChapterPostType(): void
     {
+        $chapter = function_exists('sikshya_label') ? sikshya_label('chapter', __('Chapter', 'sikshya'), 'admin') : __('Chapter', 'sikshya');
+        $chapters = function_exists('sikshya_label_plural') ? sikshya_label_plural('chapter', 'chapters', __('Chapters', 'sikshya'), 'admin') : __('Chapters', 'sikshya');
         $labels = [
-            'name' => __('Chapters', 'sikshya'),
-            'singular_name' => __('Chapter', 'sikshya'),
-            'menu_name' => __('Chapters', 'sikshya'),
-            'add_new' => __('Add New Chapter', 'sikshya'),
-            'add_new_item' => __('Add New Chapter', 'sikshya'),
-            'edit_item' => __('Edit Chapter', 'sikshya'),
-            'new_item' => __('New Chapter', 'sikshya'),
-            'view_item' => __('View Chapter', 'sikshya'),
-            'search_items' => __('Search Chapters', 'sikshya'),
-            'not_found' => __('No chapters found', 'sikshya'),
-            'not_found_in_trash' => __('No chapters found in trash', 'sikshya'),
+            'name' => $chapters,
+            'singular_name' => $chapter,
+            'menu_name' => $chapters,
+            /* translators: %s: singular label */
+            'add_new' => sprintf(__('Add New %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'add_new_item' => sprintf(__('Add New %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'edit_item' => sprintf(__('Edit %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'new_item' => sprintf(__('New %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'view_item' => sprintf(__('View %s', 'sikshya'), $chapter),
+            /* translators: %s: plural label */
+            'search_items' => sprintf(__('Search %s', 'sikshya'), $chapters),
+            /* translators: %s: plural label */
+            'not_found' => sprintf(__('No %s found', 'sikshya'), strtolower($chapters)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($chapters)),
         ];
 
         $args = [

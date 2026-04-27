@@ -47,7 +47,7 @@ final class CertificatePublic
     public static function templateRedirect(): void
     {
         // If Pro advanced certificates are active, let Pro handle public rendering.
-        if (defined('SIKSHYA_PRO_VERSION') && class_exists('\\SikshyaPro\\Certificates\\AdvancedCertificatePublic')) {
+        if (defined('SIKSHYA_PRO_VERSION') && class_exists('\\SikshyaPro\\Addons\\CertificatesAdvanced\\Services\\AdvancedCertificatePublic')) {
             return;
         }
 
@@ -86,6 +86,20 @@ final class CertificatePublic
         // 1) Issued certificate (per-user hash) — unique for each course completion.
         $repo = new CertificateRepository();
         $row = $repo->findByVerificationCode($clean);
+        if ($row && (string) $row->status !== 'active') {
+            status_header(410);
+            nocache_headers();
+            header('Content-Type: text/html; charset=UTF-8');
+            $status = sanitize_key((string) ($row->status ?? ''));
+            $msg = $status === 'revoked'
+                ? __('This certificate has been revoked and is no longer valid.', 'sikshya')
+                : __('This certificate is not active and cannot be displayed.', 'sikshya');
+            echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">';
+            echo '<title>' . esc_html__('Certificate unavailable', 'sikshya') . '</title></head><body style="font-family:system-ui;padding:2rem;max-width:40rem;">';
+            echo '<h1 style="margin-top:0;">' . esc_html__('Certificate unavailable', 'sikshya') . '</h1>';
+            echo '<p>' . esc_html($msg) . '</p></body></html>';
+            exit;
+        }
         if ($row && (string) $row->status === 'active') {
             $user = get_userdata((int) $row->user_id);
             $learner = $user ? $user->display_name : '';

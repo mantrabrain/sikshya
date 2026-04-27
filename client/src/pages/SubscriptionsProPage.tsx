@@ -14,8 +14,10 @@ import { DataTableSkeleton } from '../components/shared/Skeleton';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { useAdminRouting } from '../lib/adminRouting';
+import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig, WpRestUser } from '../types';
+import { AddonSettingsPage } from './AddonSettingsPage';
 
 type Plan = {
   id: number;
@@ -35,9 +37,9 @@ type SubRow = {
   current_period_end: string | null;
 };
 
-type TabId = 'plans' | 'list';
+type TabId = 'plans' | 'list' | 'settings';
 
-const TAB_IDS: TabId[] = ['plans', 'list'];
+const TAB_IDS: TabId[] = ['plans', 'list', 'settings'];
 
 type ToastState = { kind: 'success' | 'error'; text: string } | null;
 
@@ -67,16 +69,27 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
     return (TAB_IDS as string[]).includes(fromUrl) ? (fromUrl as TabId) : 'list';
   })();
   const setActiveTab = (id: string) => {
-    navigateView(route.page, { tab: id });
+    const view =
+      typeof route.page === 'string' && route.page.trim() !== '' ? route.page.trim() : 'subscriptions';
+    navigateView(view, { tab: id });
   };
 
   const loader = useCallback(async () => {
     if (!enabled) {
-      return { ok: true, subscriptions: [] as SubRow[], plans: [] as Plan[], users: [] as WpRestUser[] };
+      return {
+        ok: true,
+        subscriptions: [] as SubRow[],
+        plans: [] as Plan[],
+        users: [] as WpRestUser[],
+        manualGrantAllowed: true,
+      };
     }
-    const [subs, plans] = await Promise.all([
+    const [subs, plans, settingsResp] = await Promise.all([
       getSikshyaApi().get<{ ok?: boolean; subscriptions?: SubRow[] }>(SIKSHYA_ENDPOINTS.pro.subscriptions),
       getSikshyaApi().get<{ ok?: boolean; plans?: Plan[] }>(SIKSHYA_ENDPOINTS.pro.plans),
+      getSikshyaApi()
+        .get<{ ok?: boolean; options?: Record<string, unknown> }>('/pro/addons/subscriptions/settings')
+        .catch(() => ({ ok: true, options: {} as Record<string, unknown> })),
     ]);
     const rawSubs = Array.isArray(subs.subscriptions) ? subs.subscriptions : [];
     const rawPlans = Array.isArray(plans.plans) ? plans.plans : [];
@@ -115,7 +128,13 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
           )
         : ([] as WpRestUser[]);
 
-    return { ok: true, subscriptions: normSubs, plans: normPlans, users };
+    const opts = settingsResp && typeof settingsResp === 'object' && 'options' in settingsResp ? settingsResp.options : {};
+    const manualGrant =
+      opts && typeof opts === 'object' && 'allow_manual_subscription_grant' in opts
+        ? opts.allow_manual_subscription_grant !== false
+        : true;
+
+    return { ok: true, subscriptions: normSubs, plans: normPlans, users, manualGrantAllowed: manualGrant };
   }, [enabled]);
 
   const { loading, data, error, refetch } = useAsyncData(loader, [enabled]);
@@ -126,6 +145,8 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
     ? (data as unknown as { users: WpRestUser[] }).users
     : [];
   const userById = useMemo(() => new Map(users.map((u) => [u.id, u])), [users]);
+  const manualGrantAllowed =
+    (data as unknown as { manualGrantAllowed?: boolean } | undefined)?.manualGrantAllowed !== false;
 
   return (
     <AppShell
@@ -138,7 +159,7 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
       title={title}
       subtitle="Recurring billing and access periods synced from your payment provider."
       pageActions={
-        enabled ? (
+        enabled && activeTab !== 'settings' ? (
           <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
             Refresh
           </ButtonPrimary>
@@ -165,14 +186,44 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
             tabs={[
               { id: 'list', label: 'Subscriptions', icon: 'table' },
               { id: 'plans', label: 'Plans', icon: 'badge' },
+              { id: 'settings', label: 'Add-on defaults', icon: 'cog' },
             ]}
             value={activeTab}
             onChange={setActiveTab}
           />
         </div>
 
-        {error ? (
+        {error && activeTab !== 'settings' ? (
           <ApiErrorPanel error={error} title="Could not load subscriptions" onRetry={() => refetch()} />
+        ) : activeTab === 'settings' ? (
+          <AddonSettingsPage
+            embedded
+            config={config}
+            title="Subscription settings"
+            addonId="subscriptions"
+            subtitle="Site-wide rules for manual grants, learner account UI, and how billing periods affect access."
+            featureTitle="Subscription settings"
+            featureDescription="These options apply everywhere subscription gating runs. Plans and per-course required plan still live on the other tabs."
+            relatedCoreSettingsTab="payment"
+            relatedCoreSettingsLabel="Payment"
+            nextSteps={[
+              {
+                label: 'Manage plans',
+                description: 'Create billing intervals and prices learners subscribe to.',
+                href: appViewHref(config, 'subscriptions', { tab: 'plans' }),
+              },
+              {
+                label: 'Assign subscriptions',
+                description: 'Grant or review rows tied to learners (when manual grants are allowed).',
+                href: appViewHref(config, 'subscriptions', { tab: 'list' }),
+              },
+              {
+                label: 'Open courses',
+                description: 'Set course type to subscription and pick a required plan on each course.',
+                href: appViewHref(config, 'courses'),
+              },
+            ]}
+          />
         ) : activeTab === 'plans' ? (
           <PlansTab loading={loading} plans={plans} onRefetch={refetch} onToast={setToast} />
         ) : (
@@ -182,8 +233,10 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
             plans={plans}
             planById={planById}
             userById={userById}
+            manualGrantAllowed={manualGrantAllowed}
             onRefetch={refetch}
             onJumpToPlans={() => setActiveTab('plans')}
+            onJumpToSettings={() => setActiveTab('settings')}
             onToast={setToast}
           />
         )}
@@ -555,11 +608,14 @@ function SubscriptionsTab(props: {
   plans: Plan[];
   planById: Map<number, Plan>;
   userById: Map<number, WpRestUser>;
+  manualGrantAllowed: boolean;
   onRefetch: () => void;
   onJumpToPlans: () => void;
+  onJumpToSettings: () => void;
   onToast: (t: ToastState) => void;
 }) {
-  const { loading, rows, plans, planById, userById, onRefetch, onJumpToPlans, onToast } = props;
+  const { loading, rows, plans, planById, userById, manualGrantAllowed, onRefetch, onJumpToPlans, onJumpToSettings, onToast } =
+    props;
 
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -573,7 +629,7 @@ function SubscriptionsTab(props: {
   const [planQuery, setPlanQuery] = useState<string>('');
   const [planOpen, setPlanOpen] = useState(false);
 
-  const canAdd = plans.length > 0;
+  const canAdd = plans.length > 0 && manualGrantAllowed;
 
   const filteredPlans = useMemo(() => {
     const q = planQuery.trim().toLowerCase();
@@ -705,7 +761,7 @@ function SubscriptionsTab(props: {
         ),
       },
     ],
-    [onRefetch, planById, userById]
+    [manualGrantAllowed, onRefetch, planById, userById]
   );
 
   return (
@@ -735,7 +791,18 @@ function SubscriptionsTab(props: {
         </ButtonPrimary>
       </div>
 
-      {!canAdd && !loading ? (
+      {!manualGrantAllowed && !loading ? (
+        <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-200">
+          Manual grants and cancellations are turned off under the{' '}
+          <button type="button" className="font-semibold underline" onClick={onJumpToSettings}>
+            Add-on defaults
+          </button>
+          {' '}
+          tab. Checkout can still create subscriptions automatically.
+        </div>
+      ) : null}
+
+      {!canAdd && manualGrantAllowed && !loading ? (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
           You need at least one plan before you can create a subscription.{' '}
           <button type="button" className="font-semibold underline" onClick={onJumpToPlans}>

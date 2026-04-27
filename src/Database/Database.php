@@ -13,6 +13,7 @@ use Sikshya\Database\Tables\OrdersTable;
 use Sikshya\Database\Tables\OrderItemsTable;
 use Sikshya\Database\Tables\CouponsTable;
 use Sikshya\Database\Tables\CouponRedemptionsTable;
+use Sikshya\Database\Tables\ReviewsTable;
 
 /**
  * Database Management Class
@@ -24,7 +25,7 @@ class Database
     /**
      * Bump when schema or migrations change (incremental upgrades via maybeUpgrade).
      */
-    public const SCHEMA_VERSION = '1.5.0';
+    public const SCHEMA_VERSION = '1.8.0';
 
     /**
      * Plugin instance
@@ -96,6 +97,11 @@ class Database
             $this->migrateTo160();
             Settings::setRaw('sikshya_db_version', '1.6.0');
             $current = '1.6.0';
+        }
+        if (version_compare((string) $current, '1.7.0', '<')) {
+            $this->migrateTo170();
+            Settings::setRaw('sikshya_db_version', '1.7.0');
+            $current = '1.7.0';
         }
     }
 
@@ -217,6 +223,37 @@ class Database
 
             $wpdb->update($table, ['verification_code' => $new], ['id' => $id], ['%s'], ['%d']);
         }
+    }
+
+    /**
+     * Reviews: add instructor replies and report counters.
+     */
+    private function migrateTo170(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+        dbDelta(ReviewsTable::createSql($charset_collate));
+    }
+
+    /**
+     * Assignment submissions: optional per-criterion scores (gradebook / advanced rubrics).
+     */
+    private function migrateTo180(): void
+    {
+        global $wpdb;
+        $table = AssignmentSubmissionsTable::getTableName();
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            return;
+        }
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from schema helper
+        $cols = $wpdb->get_results("SHOW COLUMNS FROM `{$table}` LIKE 'rubric_scores_json'");
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        if (is_array($cols) && $cols !== []) {
+            return;
+        }
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN rubric_scores_json longtext NULL AFTER feedback");
     }
 
 

@@ -33,6 +33,7 @@ final class CustomEmailTemplateHookDispatcher
         'sikshya.scheduled_reminder' => 4,
         'sikshya_drip_lesson_unlocked' => 3,
         'sikshya_drip_course_unlocked' => 2,
+        'sikshya_drip_lessons_unlocked' => 3,
     ];
 
     public static function register(EmailNotificationService $mailer): void
@@ -201,6 +202,19 @@ final class CustomEmailTemplateHookDispatcher
                 $cid = isset($args[1]) ? absint($args[1]) : 0;
 
                 return ($uid > 0 && $cid > 0) ? $mailer->buildMergeContextForCourse($uid, $cid) : null;
+
+            case 'sikshya_drip_lessons_unlocked':
+                $uid = isset($args[0]) ? absint($args[0]) : 0;
+                $cid = isset($args[1]) ? absint($args[1]) : 0;
+                $lids = $args[2] ?? [];
+                $lids = is_array($lids) ? array_values(array_filter(array_map('absint', $lids))) : [];
+                if ($uid > 0 && $cid > 0 && $lids !== [] && method_exists($mailer, 'buildMergeContextForDripLessons')) {
+                    /** @var array<string,string> $ctx */
+                    $ctx = $mailer->buildMergeContextForDripLessons($uid, $cid, $lids);
+                    return $ctx;
+                }
+
+                return null;
 
             default:
                 return null;

@@ -143,6 +143,14 @@ class SettingsTab extends AbstractTab
                     'sanitization' => 'boolval',
                     'layout' => 'two_column',
                 ],
+                'email_marketing_disabled' => [
+                    'type' => 'checkbox',
+                    'label' => __('Disable email marketing sync for this course', 'sikshya'),
+                    'description' => __('When checked, email marketing automations (Mailchimp/MailerLite sync) will ignore enrollments and completions for this course.', 'sikshya'),
+                    'validation' => 'boolval',
+                    'sanitization' => 'boolval',
+                    'layout' => 'two_column',
+                ],
                 ],
             ],
             'completion_rules' => [
@@ -341,6 +349,15 @@ class SettingsTab extends AbstractTab
                 ],
             ],
         ];
+
+        /**
+         * Append or adjust fields on the Settings tab (React course builder).
+         *
+         * @param array<string, mixed> $fields Tab field tree from this tab.
+         * @param \Sikshya\Core\Plugin   $plugin Core plugin instance.
+         * @return array<string, mixed>
+         */
+        return apply_filters('sikshya_course_builder_settings_tab_fields', $fields, $this->plugin);
     }
 
     /**

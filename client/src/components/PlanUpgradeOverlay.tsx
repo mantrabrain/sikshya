@@ -24,11 +24,11 @@ function sellingBullets(fullDescription: string): [string, string] {
   if (sentences.length === 1) {
     return [
       sentences[0],
-      'Upgrade to Sikshya Pro on the right plan to turn this on for your site—no guesswork.',
+      'Upgrade to the right plan to turn this on for your site—no guesswork.',
     ];
   }
   return [
-    'This capability is part of Sikshya Pro—unlock it when your plan includes it.',
+    'This capability is part of the Pro add-on—unlock it when your plan includes it.',
     'Compare plans and upgrade in one click. You can also enable modules from Addons after upgrading.',
   ];
 }
@@ -40,11 +40,12 @@ function sellingBullets(fullDescription: string): [string, string] {
 export function PlanUpgradeOverlay(props: Props) {
   const { config, featureId, featureTitle, description } = props;
   const lic = getLicensing(config);
+  const brandName = config.branding?.pluginName?.trim() || 'Sikshya';
   const entry = getCatalogEntry(config, featureId);
   const title = entry?.label || featureTitle;
   const body = (entry?.description && entry.description.trim()) || description;
   const plan = requiredPlanLabelForFeature(config, featureId);
-  const upgradeHref = lic?.upgradeUrl || 'https://sikshya.com/pricing/';
+  const upgradeHref = config.brandLinks?.upgradeUrl || lic?.upgradeUrl || 'https://sikshya.com/pricing/';
   const titleId = useId();
   const descId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -81,7 +82,7 @@ export function PlanUpgradeOverlay(props: Props) {
                 className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.9)]"
                 aria-hidden
               />
-              Sikshya Pro
+              {brandName} Pro
             </span>
 
             <div className="mt-5 flex w-full flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">

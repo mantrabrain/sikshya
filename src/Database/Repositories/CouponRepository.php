@@ -76,6 +76,27 @@ class CouponRepository
         );
     }
 
+    public function countRedemptionsByUser(int $coupon_id, int $user_id): int
+    {
+        global $wpdb;
+
+        if ($coupon_id <= 0 || $user_id <= 0 || !$this->tableExists()) {
+            return 0;
+        }
+
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->redemptions)) !== $this->redemptions) {
+            return 0;
+        }
+
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->redemptions} WHERE coupon_id = %d AND user_id = %d",
+                $coupon_id,
+                $user_id
+            )
+        );
+    }
+
     /**
      * Apply discount to a subtotal. Returns [discount, total].
      *
@@ -155,5 +176,47 @@ class CouponRepository
         );
 
         return (int) $wpdb->insert_id;
+    }
+
+    /**
+     * Update an existing coupon row (admin UI).
+     *
+     * @param array<string, mixed> $data
+     */
+    public function updateAdminCoupon(int $id, array $data): bool
+    {
+        global $wpdb;
+
+        if ($id <= 0 || !$this->tableExists()) {
+            return false;
+        }
+
+        $patch = [];
+        if (array_key_exists('code', $data)) {
+            $patch['code'] = strtoupper(sanitize_text_field((string) $data['code']));
+        }
+        if (array_key_exists('discount_type', $data)) {
+            $t = sanitize_key((string) $data['discount_type']);
+            $patch['discount_type'] = in_array($t, ['percent', 'fixed'], true) ? $t : 'percent';
+        }
+        if (array_key_exists('discount_value', $data)) {
+            $patch['discount_value'] = (float) $data['discount_value'];
+        }
+        if (array_key_exists('max_uses', $data)) {
+            $patch['max_uses'] = (int) $data['max_uses'];
+        }
+        if (array_key_exists('expires_at', $data)) {
+            $exp = $data['expires_at'];
+            $patch['expires_at'] = ($exp === null || $exp === '') ? null : sanitize_text_field((string) $exp);
+        }
+        if (array_key_exists('status', $data)) {
+            $patch['status'] = sanitize_key((string) $data['status']);
+        }
+
+        if ($patch === []) {
+            return true;
+        }
+
+        return false !== $wpdb->update($this->coupons, $patch, ['id' => $id]);
     }
 }

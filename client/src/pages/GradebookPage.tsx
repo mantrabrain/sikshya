@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { AddonSettingsPage } from './AddonSettingsPage';
 import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -100,6 +101,7 @@ type DrillAssignment = {
   item_type: 'assignment';
   item_id: number;
   item_title?: string;
+  rubric_criteria?: Array<{ index: number; label: string; max_points: number }>;
   submission: null | {
     id: number;
     content: string | null;
@@ -107,10 +109,31 @@ type DrillAssignment = {
     status: string;
     grade: number | null;
     feedback: string | null;
+    rubric_scores_json?: string | null;
     submitted_at: string;
     graded_at: string | null;
   };
 };
+
+function parseStoredRubricScores(
+  raw: string | null | undefined,
+  criteria?: Array<{ index: number }>,
+): Record<number, string> {
+  const out: Record<number, string> = {};
+  if (!raw || !criteria?.length) return out;
+  try {
+    const v = JSON.parse(raw) as { scores?: Array<{ i?: number; e?: number }> };
+    const scores = Array.isArray(v.scores) ? v.scores : [];
+    for (const s of scores) {
+      if (typeof s.i === 'number' && s.e !== undefined && s.e !== null) {
+        out[s.i] = String(s.e);
+      }
+    }
+  } catch {
+    return out;
+  }
+  return out;
+}
 
 function formatPct(n: number | null | undefined): string {
   if (n === null || n === undefined || Number.isNaN(Number(n))) {
@@ -130,6 +153,7 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [view, setView] = useState<'summary' | 'grid'>('summary');
+  const [workspaceTab, setWorkspaceTab] = useState<'grades' | 'settings'>('grades');
 
   const loader = useCallback(async () => {
     if (!enabled) {
@@ -157,7 +181,7 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
     const q = new URLSearchParams();
     if (search.trim()) q.set('search', search.trim());
     q.set('page', String(page));
-    q.set('per_page', '30');
+    q.set('per_page', '50');
     const base = SIKSHYA_ENDPOINTS.pro.gradebookGrid(courseId);
     const s = q.toString();
     const path = s ? `${base}${base.includes('?') ? '&' : '?'}${s}` : base;
@@ -171,54 +195,108 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
   const [drillBusy, setDrillBusy] = useState(false);
   const [drillErr, setDrillErr] = useState<unknown>(null);
   const [drillData, setDrillData] = useState<DrillQuiz | DrillAssignment | null>(null);
+  const [drillCtx, setDrillCtx] = useState<{ user: GridRow['user']; item: GridItem } | null>(null);
   const [gradeInput, setGradeInput] = useState('');
   const [feedbackInput, setFeedbackInput] = useState('');
+  const [rubricScoreInputs, setRubricScoreInputs] = useState<Record<number, string>>({});
+  const [gradeInlineErr, setGradeInlineErr] = useState('');
   const [gradeSaving, setGradeSaving] = useState(false);
 
-  const openDrill = async (u: GridRow['user'], item: GridItem) => {
-    if (!enabled || courseId <= 0) return;
-    setDrillOpen(true);
-    setDrillBusy(true);
-    setDrillErr(null);
-    setDrillData(null);
-    setGradeInput('');
-    setFeedbackInput('');
-    try {
-      const d = await getSikshyaApi().get<DrillQuiz | DrillAssignment>(
-        SIKSHYA_ENDPOINTS.pro.gradebookDrilldown({
-          course_id: courseId,
-          user_id: u.id,
-          item_type: item.type,
-          item_id: item.id,
-        })
-      );
-      setDrillData(d);
-      if (d && typeof d === 'object' && 'item_type' in d && d.item_type === 'assignment' && d.submission) {
-        setGradeInput(d.submission.grade != null ? String(d.submission.grade) : '');
-        setFeedbackInput(typeof d.submission.feedback === 'string' ? d.submission.feedback : '');
+  const loadDrilldown = useCallback(
+    async (u: GridRow['user'], item: GridItem) => {
+      if (!enabled || courseId <= 0) {
+        return;
       }
-    } catch (e) {
-      setDrillErr(e);
-    } finally {
-      setDrillBusy(false);
+      setDrillBusy(true);
+      setDrillErr(null);
+      setDrillData(null);
+      setGradeInput('');
+      setFeedbackInput('');
+      setRubricScoreInputs({});
+      setGradeInlineErr('');
+      try {
+        const d = await getSikshyaApi().get<DrillQuiz | DrillAssignment>(
+          SIKSHYA_ENDPOINTS.pro.gradebookDrilldown({
+            course_id: courseId,
+            user_id: u.id,
+            item_type: item.type,
+            item_id: item.id,
+          })
+        );
+        setDrillData(d);
+        if (d && typeof d === 'object' && 'item_type' in d && d.item_type === 'assignment') {
+          const da = d as DrillAssignment;
+          if (da.submission) {
+            setGradeInput(da.submission.grade != null ? String(da.submission.grade) : '');
+            setFeedbackInput(typeof da.submission.feedback === 'string' ? da.submission.feedback : '');
+            const parsed = parseStoredRubricScores(da.submission.rubric_scores_json, da.rubric_criteria);
+            const next: Record<number, string> = { ...parsed };
+            (da.rubric_criteria || []).forEach((c) => {
+              if (next[c.index] === undefined) next[c.index] = '';
+            });
+            setRubricScoreInputs(next);
+          } else {
+            const next: Record<number, string> = {};
+            (da.rubric_criteria || []).forEach((c) => {
+              next[c.index] = '';
+            });
+            setRubricScoreInputs(next);
+          }
+        }
+      } catch (e) {
+        setDrillErr(e);
+      } finally {
+        setDrillBusy(false);
+      }
+    },
+    [courseId, enabled]
+  );
+
+  const openDrill = (u: GridRow['user'], item: GridItem) => {
+    if (!enabled || courseId <= 0) {
+      return;
     }
+    setDrillCtx({ user: u, item });
+    setDrillOpen(true);
+    void loadDrilldown(u, item);
   };
+
+  const closeDrill = useCallback(() => {
+    setDrillOpen(false);
+    setDrillCtx(null);
+  }, []);
 
   const saveAssignmentGrade = async () => {
     if (!enabled || !drillData || drillData.item_type !== 'assignment' || !drillData.submission) return;
-    const submissionId = drillData.submission.id;
+    const da = drillData as DrillAssignment;
+    const submissionId = da.submission.id;
     const trimmed = gradeInput.trim();
     if (trimmed !== '' && !Number.isFinite(Number(trimmed))) return;
+    const criteria = da.rubric_criteria ?? [];
+    const body: Record<string, unknown> = {
+      submission_id: submissionId,
+      course_id: courseId,
+      grade: trimmed === '' ? null : Number(trimmed),
+      feedback: feedbackInput.trim(),
+      status: 'graded',
+    };
+    if (criteria.length > 0) {
+      const parts = criteria.map((c) => {
+        const raw = (rubricScoreInputs[c.index] ?? '').trim();
+        return { index: c.index, earned: raw };
+      });
+      const allFilled = parts.every((p) => p.earned !== '' && Number.isFinite(Number(p.earned)));
+      const anyTouched = parts.some((p) => p.earned !== '');
+      if (allFilled) {
+        body.rubric_scores = parts.map((p) => ({ index: p.index, earned: Number(p.earned) }));
+      } else if (trimmed === '' && anyTouched) {
+        return;
+      }
+    }
     setGradeSaving(true);
     try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.gradebookAssignmentGrade, {
-        submission_id: submissionId,
-        course_id: courseId,
-        grade: trimmed === '' ? null : Number(trimmed),
-        feedback: feedbackInput.trim(),
-        status: 'graded',
-      });
-      setDrillOpen(false);
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.gradebookAssignmentGrade, body);
+      closeDrill();
       await refetch();
       gridState.refetch();
     } finally {
@@ -345,9 +423,10 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
       const q = new URLSearchParams();
       if (courseId > 0) q.set('course_id', String(courseId));
       if (search.trim()) q.set('search', search.trim());
-      q.set('page', '1');
-      q.set('per_page', '5000');
-      const path = `${SIKSHYA_ENDPOINTS.pro.gradebookExport()}?${q.toString()}`;
+      const path =
+        q.toString() !== ''
+          ? `${SIKSHYA_ENDPOINTS.pro.gradebookExport()}?${q.toString()}`
+          : SIKSHYA_ENDPOINTS.pro.gradebookExport();
       const r = await getSikshyaApi().get<ExportResp>(path);
       const csv = r.csv || '';
       const name = r.filename || 'sikshya-gradebook.csv';
@@ -385,12 +464,15 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
       userAvatarUrl={config.user.avatarUrl}
       branding={config.branding}
       title={title}
-      subtitle="Quiz scores and attempts for reporting and learner outcomes."
+      subtitle="Weighted quiz and assignment scores per learner and course—summary list, course grid, CSV export, and staff overrides."
       pageActions={
         enabled ? (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <ButtonSecondary type="button" onClick={() => setWorkspaceTab('settings')}>
+              Gradebook settings
+            </ButtonSecondary>
             <ButtonSecondary type="button" onClick={() => window.open(appViewHref(config, 'grading'), '_self')}>
-              Grading setup
+              Grading &amp; scales
             </ButtonSecondary>
             <ButtonPrimary type="button" disabled={loading || exporting} onClick={() => refetch()}>
               Refresh
@@ -407,16 +489,72 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
         featureId="gradebook"
         config={config}
         featureTitle="Gradebook"
-        featureDescription="View learner quiz outcomes across courses, filter by course, and use the data in your reports."
+        featureDescription="See each learner’s combined quiz and assignment performance, open a per-course grid to drill into items, export CSVs for records, and set final-grade overrides when needed."
         previewVariant="table"
         addonEnableTitle="Gradebook is not enabled"
-        addonEnableDescription="Enable the Gradebook addon to register reporting routes and unlock learner outcome tables."
+        addonEnableDescription="Enable the Gradebook add-on to load grade REST routes, the admin gradebook screen, and optional learner-facing grade snippets on My account."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => void addon.enable()}
         addonError={addon.error}
       >
-        {error ? (
+        {enabled ? (
+          <div className="mb-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3 dark:border-slate-700">
+            <button
+              type="button"
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                workspaceTab === 'grades'
+                  ? 'bg-brand-600 text-white'
+                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+              onClick={() => setWorkspaceTab('grades')}
+            >
+              Grades &amp; export
+            </button>
+            <button
+              type="button"
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                workspaceTab === 'settings'
+                  ? 'bg-brand-600 text-white'
+                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+              onClick={() => setWorkspaceTab('settings')}
+            >
+              Add-on defaults
+            </button>
+          </div>
+        ) : null}
+
+        {enabled && workspaceTab === 'settings' ? (
+          <AddonSettingsPage
+            embedded
+            config={config}
+            title="Gradebook settings"
+            addonId="gradebook"
+            subtitle="CSV export defaults and the default page size for the course grid."
+            featureTitle="Gradebook settings"
+            featureDescription="These options apply site-wide. Instructors still manage weights and scales from each course (Grading tab) and from Grading in the sidebar."
+            relatedCoreSettingsTab="progress"
+            relatedCoreSettingsLabel="Progress"
+            nextSteps={[
+              {
+                label: 'Open the gradebook',
+                description: 'Review summaries, switch to course grid, and export when you need a spreadsheet.',
+                href: appViewHref(config, 'gradebook'),
+              },
+              {
+                label: 'Configure letter scales',
+                description: 'Create or edit scales and map courses under Grading.',
+                href: appViewHref(config, 'grading'),
+              },
+              {
+                label: 'Hide a course from learners’ grade views',
+                description: 'In Course builder → Grading, use “Hide this course from the learner gradebook” for pilots or private cohorts.',
+                href: appViewHref(config, 'courses'),
+              },
+            ]}
+          />
+        ) : error ? (
           <ApiErrorPanel error={error} title="Could not load gradebook" onRetry={() => refetch()} />
         ) : (
           <>
@@ -433,7 +571,7 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                       }
                     }}
                     placeholder="All courses"
-                    hint="Optional. Pick one course to see learner outcomes only for that course."
+                    hint="Optional: filter the summary and CSV export. Choose a course to unlock the course grid (one column per quiz and assignment)."
                     className="w-full max-w-full"
                   />
                 </div>
@@ -492,7 +630,10 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                 {loading ? (
                   <div className="p-8 text-center text-sm text-slate-500">Loading…</div>
                 ) : rows.length === 0 ? (
-                  <ListEmptyState title="No gradebook rows yet" description="Once learners complete quizzes or assignments, they’ll appear here." />
+                  <ListEmptyState
+                    title="No gradebook rows yet"
+                    description="Rows appear after learners complete quizzes or receive assignment grades. Courses marked “hide from the learner gradebook” in Course builder → Grading are hidden from this list unless your role can bypass that setting."
+                  />
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
@@ -641,7 +782,7 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                                   <button
                                     type="button"
                                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800"
-                                    onClick={() => void openDrill(r.user, it)}
+                                    onClick={() => openDrill(r.user, it)}
                                   >
                                     <div>{shown}</div>
                                     {subtitle ? <div className="mt-0.5 text-xs font-medium text-slate-500">{subtitle}</div> : null}
@@ -843,12 +984,12 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
             <Modal
               open={drillOpen}
               title="Item detail"
-              onClose={() => setDrillOpen(false)}
+              onClose={closeDrill}
               size="lg"
               footer={
                 drillData && drillData.item_type === 'assignment' && drillData.submission ? (
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    <ButtonSecondary type="button" disabled={gradeSaving} onClick={() => setDrillOpen(false)}>
+                    <ButtonSecondary type="button" disabled={gradeSaving} onClick={closeDrill}>
                       Close
                     </ButtonSecondary>
                     <ButtonPrimary type="button" disabled={gradeSaving} onClick={() => void saveAssignmentGrade()}>
@@ -857,7 +998,7 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                   </div>
                 ) : (
                   <div className="flex justify-end">
-                    <ButtonSecondary type="button" onClick={() => setDrillOpen(false)}>
+                    <ButtonSecondary type="button" onClick={closeDrill}>
                       Close
                     </ButtonSecondary>
                   </div>
@@ -867,7 +1008,11 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
               {drillBusy ? (
                 <p className="text-sm text-slate-500">Loading…</p>
               ) : drillErr ? (
-                <ApiErrorPanel error={drillErr} title="Could not load details" onRetry={() => void 0} />
+                <ApiErrorPanel
+                  error={drillErr}
+                  title="Could not load details"
+                  onRetry={drillCtx ? () => void loadDrilldown(drillCtx.user, drillCtx.item) : undefined}
+                />
               ) : !drillData ? (
                 <p className="text-sm text-slate-500">No data.</p>
               ) : drillData.item_type === 'quiz' ? (
@@ -922,6 +1067,11 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                     </div>
                   ) : (
                     <div className="grid gap-4 sm:grid-cols-2">
+                      {gradeInlineErr ? (
+                        <div className="sm:col-span-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-100">
+                          {gradeInlineErr}
+                        </div>
+                      ) : null}
                       <div>
                         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Grade (%)</label>
                         <input
@@ -930,8 +1080,39 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
                           onChange={(e) => setGradeInput(e.target.value)}
                           placeholder="e.g. 92"
                         />
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Leave blank to clear the grade.</p>
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          Leave blank to derive from rubric scores when every criterion has a value; otherwise clears the
+                          grade.
+                        </p>
                       </div>
+                      {(drillData as DrillAssignment).rubric_criteria &&
+                      (drillData as DrillAssignment).rubric_criteria!.length > 0 ? (
+                        <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Rubric scores</p>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            Enter points per row (0–max). When all rows are filled and overall grade is empty, the total
+                            percent is calculated from weights.
+                          </p>
+                          <ul className="mt-3 space-y-2">
+                            {(drillData as DrillAssignment).rubric_criteria!.map((c) => (
+                              <li key={c.index} className="flex flex-wrap items-center gap-2 text-sm">
+                                <span className="min-w-0 flex-1 text-slate-800 dark:text-slate-100">{c.label}</span>
+                                <span className="text-xs text-slate-500">max {c.max_points}</span>
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
+                                  value={rubricScoreInputs[c.index] ?? ''}
+                                  onChange={(e) =>
+                                    setRubricScoreInputs((prev) => ({ ...prev, [c.index]: e.target.value }))
+                                  }
+                                  placeholder="0"
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                       <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Feedback</label>
                         <textarea

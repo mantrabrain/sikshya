@@ -34,6 +34,7 @@
     var deleteBtn = root.querySelector('[data-sikshya-review-delete]');
     var listEl = root.querySelector('[data-sikshya-review-list]');
     var loadMoreBtn = root.querySelector('[data-sikshya-review-load-more]');
+    var sortSelect = root.querySelector('[data-sikshya-review-sort]');
 
     var editingReviewId = 0;
 
@@ -120,6 +121,10 @@
                     return { ok: res.ok, status: res.status, body: body };
                 });
         });
+    }
+
+    function apiPost(path, body) {
+        return apiFetch(path, { method: 'POST', body: JSON.stringify(body || {}) });
     }
 
     /* ------------------------------------------------------------------
@@ -322,4 +327,41 @@
                 });
         });
     }
+
+    /* ------------------------------------------------------------------
+     * Sort (server-rendered; reload with query param)
+     * ------------------------------------------------------------------ */
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function () {
+            var v = sortSelect.value || 'newest';
+            var url = new URL(window.location.href);
+            url.searchParams.set('reviews_sort', v);
+            window.location.href = url.toString();
+        });
+    }
+
+    /* ------------------------------------------------------------------
+     * Report review
+     * ------------------------------------------------------------------ */
+    root.querySelectorAll('[data-sikshya-review-report]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var li = btn.closest('[data-review-id]');
+            var id = li ? parseInt(li.getAttribute('data-review-id'), 10) || 0 : 0;
+            if (!id || !courseId) return;
+            btn.disabled = true;
+            apiPost('courses/' + courseId + '/reviews/' + id + '/report', {})
+                .then(function (r) {
+                    btn.disabled = false;
+                    if (!r.ok || (r.body && r.body.success === false)) {
+                        showStatus((r.body && r.body.message) || L10N.genericError, 'error');
+                        return;
+                    }
+                    showStatus((r.body && r.body.message) || 'Reported.', 'success');
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                    showStatus(L10N.genericError || 'Error', 'error');
+                });
+        });
+    });
 })();

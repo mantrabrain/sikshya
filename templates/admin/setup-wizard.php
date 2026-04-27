@@ -58,7 +58,7 @@ if ($show_done) {
                 <div class="sikshya-setup__brand">
                     <div class="sikshya-setup__logo" aria-hidden="true">S</div>
                     <div>
-                        <div class="sikshya-setup__title"><?php esc_html_e('Sikshya', 'sikshya'); ?></div>
+                        <div class="sikshya-setup__title"><?php echo esc_html(function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya', 'sikshya')); ?></div>
                         <div class="sikshya-setup__subtitle"><?php esc_html_e('Setup complete', 'sikshya'); ?></div>
                     </div>
                 </div>
@@ -99,7 +99,16 @@ if ($show_done) {
 
                     <h1 class="sikshya-setup__celebrate-title"><?php esc_html_e("You're all set!", 'sikshya'); ?></h1>
                     <p class="sikshya-setup__celebrate-lead">
-                        <?php esc_html_e('Sikshya saved your choices. Next, create your first course and try a test purchase.', 'sikshya'); ?>
+                        <?php
+                        $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya', 'sikshya');
+                        echo esc_html(
+                            sprintf(
+                                /* translators: %s: brand name */
+                                __('%s saved your choices. Next, create your first course and try a test purchase.', 'sikshya'),
+                                $brand
+                            )
+                        );
+                        ?>
                     </p>
 
                     <?php
@@ -184,7 +193,19 @@ if ($show_done) {
                     <div class="sikshya-setup__card">
                         <h3><?php esc_html_e('Need to change anything?', 'sikshya'); ?></h3>
                         <p class="sikshya-setup__muted">
-                            <?php esc_html_e('Open Settings anytime — you can always come back here from Sikshya → Tools.', 'sikshya'); ?>
+                            <?php
+                            $short = function_exists('sikshya_brand_profile')
+                                ? (string) (sikshya_brand_profile('admin')['brandShortName'] ?? '')
+                                : '';
+                            $short = $short !== '' ? $short : __('Sikshya', 'sikshya');
+                            echo esc_html(
+                                sprintf(
+                                    /* translators: %s: brand short name */
+                                    __('Open Settings anytime — you can always come back here from %s → Tools.', 'sikshya'),
+                                    $short
+                                )
+                            );
+                            ?>
                         </p>
                         <p class="sikshya-setup__celebrate-links">
                             <a class="sikshya-setup__inline-link" href="<?php echo esc_url(admin_url('admin.php?page=sikshya&view=settings')); ?>"><?php esc_html_e('Open Settings', 'sikshya'); ?></a>
@@ -208,7 +229,12 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
             <div class="sikshya-setup__brand">
                 <div class="sikshya-setup__logo" aria-hidden="true">S</div>
                 <div>
-                    <div class="sikshya-setup__title"><?php esc_html_e('Sikshya setup', 'sikshya'); ?></div>
+                    <div class="sikshya-setup__title">
+                        <?php
+                        $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya', 'sikshya');
+                        echo esc_html(sprintf(__('%s setup', 'sikshya'), $brand));
+                        ?>
+                    </div>
                     <div class="sikshya-setup__subtitle">
                         <?php esc_html_e('We save as you go. Use Back any time.', 'sikshya'); ?>
                     </div>
@@ -287,7 +313,12 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
             <?php /* ----- Step 1: Welcome ----- */ ?>
             <section class="sikshya-setup__step" data-setup-step="1"<?php echo $initial_step === 1 ? '' : ' hidden'; ?>>
                 <div class="sikshya-setup__hero">
-                    <h2 class="sikshya-setup__h2"><?php esc_html_e('Welcome to Sikshya', 'sikshya'); ?></h2>
+                    <h2 class="sikshya-setup__h2">
+                        <?php
+                        $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya', 'sikshya');
+                        echo esc_html(sprintf(__('Welcome to %s', 'sikshya'), $brand));
+                        ?>
+                    </h2>
                     <p class="sikshya-setup__lead">
                         <?php esc_html_e('A quick guided setup to get your course site ready. It takes about a minute and you can change everything later.', 'sikshya'); ?>
                     </p>
@@ -336,7 +367,18 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
                         ?>
                     />
                     <span class="sikshya-setup__consent-body">
-                        <span class="sikshya-setup__consent-title"><?php esc_html_e('Help improve Sikshya by sharing anonymous usage data', 'sikshya'); ?></span>
+                        <span class="sikshya-setup__consent-title">
+                            <?php
+                            $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya', 'sikshya');
+                            echo esc_html(
+                                sprintf(
+                                    /* translators: %s: brand name */
+                                    __('Help improve %s by sharing anonymous usage data', 'sikshya'),
+                                    $brand
+                                )
+                            );
+                            ?>
+                        </span>
                         <span class="sikshya-setup__consent-text"><?php esc_html_e('Only environment and feature counts — never student names, emails, or order details. Change anytime in Settings.', 'sikshya'); ?></span>
                     </span>
                 </label>

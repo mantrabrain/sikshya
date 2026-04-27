@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { getSikshyaApi } from '../api';
+import { appViewHref } from '../lib/appUrl';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -50,14 +51,42 @@ export type AddonSettingsPageProps = {
   preformSection?: React.ReactNode;
   /** When true, omit the AppShell wrapper (the parent owns the shell). */
   embedded?: boolean;
+  /** When false, hides the “what you are editing” callout (parent already explained scope). */
+  showSettingsScopeCallout?: boolean;
+  /**
+   * If set, the callout links to Settings with this tab for overlapping core behaviour
+   * (e.g. `quizzes` when this add-on extends random pools).
+   */
+  relatedCoreSettingsTab?: string;
+  /** Label for the Settings deep link; defaults to a title-cased `relatedCoreSettingsTab`. */
+  relatedCoreSettingsLabel?: string;
 };
 
 /**
  * Generic schema-driven settings page for addons that previously had no React UI.
  * Backed by `/sikshya/v1/pro/addons/<id>/settings`.
  */
+function humanizeSettingsTab(tab: string): string {
+  const t = tab.replace(/_/g, ' ').trim();
+  if (!t) return 'Settings';
+  return t.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export function AddonSettingsPage(props: AddonSettingsPageProps) {
-  const { config, title, addonId, subtitle, featureTitle, featureDescription, nextSteps, preformSection, embedded } = props;
+  const {
+    config,
+    title,
+    addonId,
+    subtitle,
+    featureTitle,
+    featureDescription,
+    nextSteps,
+    preformSection,
+    embedded,
+    showSettingsScopeCallout = true,
+    relatedCoreSettingsTab,
+    relatedCoreSettingsLabel,
+  } = props;
   const featureOk = isFeatureEnabled(config, addonId);
   const addon = useAddonEnabled(addonId);
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
@@ -223,6 +252,36 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
       >
         <div className="space-y-6">
           {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
+
+          {showSettingsScopeCallout ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-xs leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
+              <p className="font-semibold text-slate-800 dark:text-slate-100">What you are editing</p>
+              <p className="mt-1">
+                This form saves{' '}
+                <span className="font-medium text-slate-900 dark:text-white">{featureTitle}</span> add-on options for
+                the whole site. Core LMS defaults (catalog, checkout, core quiz rules, email, security) stay under{' '}
+                <a
+                  href={appViewHref(config, 'settings')}
+                  className="font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                >
+                  Settings
+                </a>
+                .
+              </p>
+              {relatedCoreSettingsTab ? (
+                <p className="mt-2">
+                  Related overlap:{' '}
+                  <a
+                    href={appViewHref(config, 'settings', { tab: relatedCoreSettingsTab })}
+                    className="font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                  >
+                    Settings → {relatedCoreSettingsLabel || humanizeSettingsTab(relatedCoreSettingsTab)}
+                  </a>
+                  .
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           {preformSection ? (
             <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">

@@ -18,20 +18,40 @@ if (!defined('ABSPATH')) {
 $page_model = CoursesGridPageService::forBrowseGrid();
 $courses_query = $page_model->getCoursesQuery();
 $filter_categories = $page_model->getFilterCategories();
+
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
 <div class="sikshya-container">
     
     <!-- Header -->
     <div class="sikshya-courses-header">
-        <h1 class="sikshya-heading sikshya-heading--h1"><?php _e('Browse Courses', 'sikshya'); ?></h1>
-        <p class="sikshya-courses-subtitle"><?php _e('Discover amazing courses from expert instructors', 'sikshya'); ?></p>
+        <h1 class="sikshya-heading sikshya-heading--h1">
+            <?php
+            echo esc_html(sprintf(
+                /* translators: %s: plural label (e.g. Courses) */
+                __('Browse %s', 'sikshya'),
+                $label_courses
+            ));
+            ?>
+        </h1>
+        <p class="sikshya-courses-subtitle">
+            <?php
+            echo esc_html(sprintf(
+                /* translators: 1: plural label (e.g. courses), 2: plural label (e.g. instructors) */
+                __('Discover amazing %1$s from expert %2$s', 'sikshya'),
+                strtolower($label_courses),
+                strtolower(function_exists('sikshya_label_plural') ? sikshya_label_plural('instructor', 'instructors', __('Instructors', 'sikshya'), 'frontend') : __('Instructors', 'sikshya'))
+            ));
+            ?>
+        </p>
     </div>
 
     <!-- Filters and Search -->
     <div class="sikshya-courses-filters">
         <div class="sikshya-search-wrapper">
-            <input type="text" class="sikshya-form__input sikshya-search" placeholder="<?php _e('Search courses...', 'sikshya'); ?>">
+            <input type="text" class="sikshya-form__input sikshya-search" placeholder="<?php echo esc_attr(sprintf(__('Search %s…', 'sikshya'), strtolower($label_courses))); ?>">
         </div>
         
         <div class="sikshya-filter-wrapper">
@@ -85,11 +105,27 @@ $filter_categories = $page_model->getFilterCategories();
             <div class="sikshya-no-courses__icon">
                 <span class="dashicons dashicons-book"></span>
             </div>
-            <h3><?php _e('No Courses Found', 'sikshya'); ?></h3>
-            <p><?php _e('Sorry, no courses match your criteria. Please try adjusting your filters.', 'sikshya'); ?></p>
+            <h3>
+                <?php
+                echo esc_html(sprintf(
+                    /* translators: %s: plural label (e.g. Courses) */
+                    __('No %s found', 'sikshya'),
+                    $label_courses
+                ));
+                ?>
+            </h3>
+            <p>
+                <?php
+                echo esc_html(sprintf(
+                    /* translators: %s: plural label (e.g. courses) */
+                    __('Sorry, no %s match your criteria. Please try adjusting your filters.', 'sikshya'),
+                    strtolower($label_courses)
+                ));
+                ?>
+            </p>
             <a href="<?php echo esc_url(remove_query_arg(['category', 'difficulty', 'search'])); ?>" 
                class="sikshya-btn sikshya-btn--primary">
-                <?php _e('View All Courses', 'sikshya'); ?>
+                <?php echo esc_html(sprintf(__('View all %s', 'sikshya'), strtolower($label_courses))); ?>
             </a>
         </div>
     <?php endif; ?>

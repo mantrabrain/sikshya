@@ -75,7 +75,11 @@ class DashboardController
     {
         wp_add_dashboard_widget(
             'sikshya_overview',
-            __('Sikshya LMS Overview', 'sikshya'),
+            sprintf(
+                /* translators: %s: brand name */
+                __('%s Overview', 'sikshya'),
+                function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya LMS', 'sikshya')
+            ),
             [$this, 'renderOverviewWidget']
         );
 
@@ -227,14 +231,13 @@ class DashboardController
     private function getPendingApprovals(): int
     {
         return count(get_users([
-            'role' => 'sikshya_instructor',
             'meta_query' => [
                 [
-                    'key' => 'sikshya_instructor_approved',
-                    'value' => '0',
-                    'compare' => '='
-                ]
-            ]
+                    'key' => '_sikshya_instructor_status',
+                    'value' => 'pending',
+                    'compare' => '=',
+                ],
+            ],
         ]));
     }
 

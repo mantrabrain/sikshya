@@ -178,7 +178,38 @@ class OrderRepository
             return false;
         }
 
-        return false !== $wpdb->update($this->orders, $data, ['id' => $id]);
+        $previous = null;
+        if (array_key_exists('status', $data)) {
+            $previous = $this->findById($id);
+        }
+
+        $updated = false !== $wpdb->update($this->orders, $data, ['id' => $id]);
+
+        if ($updated && $previous !== null && array_key_exists('status', $data)) {
+            $previous_status = (string) ($previous->status ?? '');
+            $new_status = (string) $data['status'];
+            if ($previous_status !== $new_status) {
+                /**
+                 * Fires whenever an order's status transitions. Generic event
+                 * for any addon (commissions, notifications, audit) to react.
+                 *
+                 * @param int    $order_id
+                 * @param string $new_status
+                 * @param string $previous_status
+                 * @param object $order_row Latest order row snapshot (post-update).
+                 */
+                $current = $this->findById($id);
+                do_action(
+                    'sikshya_order_status_changed',
+                    $id,
+                    $new_status,
+                    $previous_status,
+                    $current ?? $previous
+                );
+            }
+        }
+
+        return $updated;
     }
 
     public function tableExists(): bool
@@ -186,6 +217,26 @@ class OrderRepository
         global $wpdb;
 
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->orders)) === $this->orders;
+    }
+
+    /**
+     * Paid orders for this user (status {@see OrderFulfillmentService} sets to `paid`).
+     */
+    public function countPaidOrdersForUser(int $user_id): int
+    {
+        if ($user_id <= 0 || !$this->tableExists()) {
+            return 0;
+        }
+
+        global $wpdb;
+
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->orders} WHERE user_id = %d AND status = %s",
+                $user_id,
+                'paid'
+            )
+        );
     }
 
     /**

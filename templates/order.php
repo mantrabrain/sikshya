@@ -13,7 +13,10 @@ $page_model = OrderPageService::fromRequest();
 $od = $page_model->toLegacyViewArray();
 $u = $page_model->getUrls();
 
-get_header();
+sikshya_get_header();
+
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
 <div class="sikshya-public sikshya-order sikshya-order-page sik-f-scope">
@@ -34,15 +37,29 @@ get_header();
                     <?php
                     $lead_status = (string) $page_model->getOrder()->status;
                     if ($lead_status === 'paid') {
-                        esc_html_e('Thank you. Your purchase is complete and course access is available from your account.', 'sikshya');
+                        echo esc_html(sprintf(
+                            /* translators: %s: singular label (e.g. course) */
+                            __('Thank you. Your purchase is complete and %s access is available from your account.', 'sikshya'),
+                            strtolower($label_course)
+                        ));
                     } elseif ($lead_status === 'on-hold' || $lead_status === 'pending') {
                         esc_html_e('This order is waiting for payment or confirmation. Follow any instructions below, then check back after your administrator marks the order paid.', 'sikshya');
                     } else {
-                        esc_html_e('Summary of your order and purchased courses.', 'sikshya');
+                        echo esc_html(sprintf(
+                            /* translators: %s: plural label (e.g. courses) */
+                            __('Summary of your order and purchased %s.', 'sikshya'),
+                            strtolower($label_courses)
+                        ));
                     }
                     ?>
                 <?php else : ?>
-                    <?php esc_html_e('Summary of your order and purchased courses.', 'sikshya'); ?>
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: %s: plural label (e.g. courses) */
+                        __('Summary of your order and purchased %s.', 'sikshya'),
+                        strtolower($label_courses)
+                    ));
+                    ?>
                 <?php endif; ?>
             </p>
         </div>
@@ -82,7 +99,7 @@ get_header();
                     <?php endif; ?>
 
                     <section class="sikshya-order-page__panel" aria-labelledby="sikshya-order-items-heading">
-                        <h2 id="sikshya-order-items-heading" class="sikshya-order-page__panel-title"><?php esc_html_e('Courses', 'sikshya'); ?></h2>
+                        <h2 id="sikshya-order-items-heading" class="sikshya-order-page__panel-title"><?php echo esc_html($label_courses); ?></h2>
                         <ul class="sikshya-order-page__lines">
                             <?php foreach ($page_model->getItems() as $it) : ?>
                                 <?php
@@ -167,7 +184,9 @@ get_header();
                         </div>
                         <div class="sikshya-order-page__actions">
                             <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('My account', 'sikshya'); ?></a>
-                            <a class="sikshya-btn sikshya-btn--ghost" href="<?php echo esc_url($u->getCoursesUrl()); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
+                        <a class="sikshya-btn sikshya-btn--ghost" href="<?php echo esc_url($u->getCoursesUrl()); ?>">
+                            <?php echo esc_html(sprintf(__('Browse %s', 'sikshya'), strtolower($label_courses))); ?>
+                        </a>
                         </div>
                     </div>
                 </aside>
@@ -180,4 +199,4 @@ get_header();
 </div>
 
 <?php
-get_footer();
+sikshya_get_footer();

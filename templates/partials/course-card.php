@@ -57,6 +57,14 @@ $learn_entry_url = function_exists('sikshya_course_learn_entry_url') ? sikshya_c
 
 $cta_labels = \Sikshya\Services\CourseFrontendSettings::enrollmentButtonLabels();
 
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_lesson = function_exists('sikshya_label') ? sikshya_label('lesson', __('Lesson', 'sikshya'), 'frontend') : __('Lesson', 'sikshya');
+$label_lessons = function_exists('sikshya_label_plural') ? sikshya_label_plural('lesson', 'lessons', __('Lessons', 'sikshya'), 'frontend') : __('Lessons', 'sikshya');
+$label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz', 'sikshya'), 'frontend') : __('Quiz', 'sikshya');
+$label_quizzes = function_exists('sikshya_label_plural') ? sikshya_label_plural('quiz', 'quizzes', __('Quizzes', 'sikshya'), 'frontend') : __('Quizzes', 'sikshya');
+$label_assignment = function_exists('sikshya_label') ? sikshya_label('assignment', __('Assignment', 'sikshya'), 'frontend') : __('Assignment', 'sikshya');
+$label_assignments = function_exists('sikshya_label_plural') ? sikshya_label_plural('assignment', 'assignments', __('Assignments', 'sikshya'), 'frontend') : __('Assignments', 'sikshya');
+
 $course_price_ui = 'free';
 if ($on_sale && null !== $price_num && null !== $sale_num) {
     $course_price_ui = 'sale';
@@ -66,7 +74,8 @@ if ($on_sale && null !== $price_num && null !== $sale_num) {
 
 $card_label = sprintf(
     /* translators: %s: course title */
-    __('Course: %s', 'sikshya'),
+    __('%1$s: %2$s', 'sikshya'),
+    $label_course,
     $course->post_title
 );
 ?>
@@ -224,11 +233,16 @@ $card_label = sprintf(
                 </div>
 
                 <?php if ($has_counts) : ?>
-                    <ul class="sikshya-course-curriculum-stats" aria-label="<?php echo esc_attr__('Course curriculum', 'sikshya'); ?>">
+                    <ul class="sikshya-course-curriculum-stats" aria-label="<?php echo esc_attr(sprintf(__('%s curriculum', 'sikshya'), $label_course)); ?>">
                         <?php if (!empty($curriculum_counts['lessons'])) : ?>
                             <?php
                             $n = (int) $curriculum_counts['lessons'];
-                            $lessons_tip = sprintf(_n('%d Lesson', '%d Lessons', $n, 'sikshya'), $n);
+                            $lessons_tip = sprintf(
+                                _n('%1$d %2$s', '%1$d %3$s', $n, 'sikshya'),
+                                $n,
+                                $label_lesson,
+                                $label_lessons
+                            );
                             ?>
                             <li class="sikshya-course-curriculum-stats__item">
                                 <span
@@ -247,7 +261,12 @@ $card_label = sprintf(
                         <?php if (!empty($curriculum_counts['quizzes'])) : ?>
                             <?php
                             $n = (int) $curriculum_counts['quizzes'];
-                            $quizzes_tip = sprintf(_n('%d Quiz', '%d Quizzes', $n, 'sikshya'), $n);
+                            $quizzes_tip = sprintf(
+                                _n('%1$d %2$s', '%1$d %3$s', $n, 'sikshya'),
+                                $n,
+                                $label_quiz,
+                                $label_quizzes
+                            );
                             ?>
                             <li class="sikshya-course-curriculum-stats__item">
                                 <span
@@ -266,7 +285,12 @@ $card_label = sprintf(
                         <?php if (!empty($curriculum_counts['assignments'])) : ?>
                             <?php
                             $n = (int) $curriculum_counts['assignments'];
-                            $assign_tip = sprintf(_n('%d Assignment', '%d Assignments', $n, 'sikshya'), $n);
+                            $assign_tip = sprintf(
+                                _n('%1$d %2$s', '%1$d %3$s', $n, 'sikshya'),
+                                $n,
+                                $label_assignment,
+                                $label_assignments
+                            );
                             ?>
                             <li class="sikshya-course-curriculum-stats__item">
                                 <span
@@ -287,7 +311,7 @@ $card_label = sprintf(
             </div>
         </div>
 
-        <aside class="sikshya-course-card-aside" aria-label="<?php esc_attr_e('Course details', 'sikshya'); ?>">
+        <aside class="sikshya-course-card-aside" aria-label="<?php echo esc_attr(sprintf(__('%s details', 'sikshya'), $label_course)); ?>">
             <ul class="sikshya-course-aside-list">
                 <?php if (!empty($course_instructor)) : ?>
                     <li class="sikshya-aside-item">
@@ -339,7 +363,7 @@ $card_label = sprintf(
                 <span class="sikshya-button__icon" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </span>
-                <span class="sikshya-button__label"><?php esc_html_e('View course', 'sikshya'); ?></span>
+                <span class="sikshya-button__label"><?php echo esc_html(sprintf(__('View %s', 'sikshya'), strtolower($label_course))); ?></span>
             </a>
         </aside>
 
@@ -359,7 +383,7 @@ $card_label = sprintf(
                 <span class="sikshya-button__icon" aria-hidden="true">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </span>
-                <span class="sikshya-button__label"><?php esc_html_e('View course', 'sikshya'); ?></span>
+                <span class="sikshya-button__label"><?php echo esc_html(sprintf(__('View %s', 'sikshya'), strtolower($label_course))); ?></span>
             </a>
         </div>
     </div>

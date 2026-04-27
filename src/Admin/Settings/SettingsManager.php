@@ -1381,7 +1381,7 @@ class SettingsManager
                 'title' => __('Who can enroll & access content', 'sikshya'),
                 'icon' => 'fas fa-user-plus',
                 'description' => __(
-                    'Control guest checkout, login requirements, and waitlists. Stricter settings reduce spam; looser settings reduce friction.',
+                    'Control guest checkout, login requirements, and waitlists. Stricter settings reduce spam; looser settings reduce friction. Note: “Allow guest enrollment” and “Require login for course access” both ON is usually contradictory — guests have no WordPress login to satisfy a hard login gate.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -1389,14 +1389,20 @@ class SettingsManager
                         'key' => 'allow_guest_enrollment',
                         'type' => 'checkbox',
                         'label' => __('Allow guest enrollment', 'sikshya'),
-                        'description' => __('Allow visitors to enroll without creating an account (if your theme supports it).', 'sikshya'),
+                        'description' => __(
+                            'Allow visitors to enroll without creating an account (if your theme supports it). If you also require a WordPress login to view lessons, guest learners may be blocked — turn off guest enrollment or relax the login requirement.',
+                            'sikshya'
+                        ),
                         'default' => false,
                     ],
                     [
                         'key' => 'require_login',
                         'type' => 'checkbox',
                         'label' => __('Require login for course access', 'sikshya'),
-                        'description' => __('Require users to be logged in to view course content after enrolling.', 'sikshya'),
+                        'description' => __(
+                            'When on, only logged-in users can open course/lesson content after they are enrolled. Turn off if you rely on guest checkout or email-only access flows.',
+                            'sikshya'
+                        ),
                         'default' => true,
                     ],
                     [
@@ -1530,6 +1536,7 @@ class SettingsManager
     {
         return [
             [
+                'section_key' => 'payment_gateways',
                 'title' => __('Payment Gateways', 'sikshya'),
                 'icon' => 'fas fa-credit-card',
                 'description' => __(
@@ -1998,7 +2005,7 @@ class SettingsManager
                 'title' => __('Certificate Settings', 'sikshya'),
                 'icon' => 'fas fa-certificate',
                 'description' => __(
-                    'Completion certificates prove that a learner finished a course. Pick a default look; individual courses may override later.',
+                    'Site-wide switches for issuing certificates. Visual layout, colors, and merge fields are edited per template in Sikshya → Certificates (template builder), not here.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -2009,91 +2016,6 @@ class SettingsManager
                         'description' => __('When off, Sikshya will not create or show certificates (only turn off if you truly do not need them).', 'sikshya'),
                         'default' => true
                     ],
-                    [
-                        'key' => 'certificate_template',
-                        'type' => 'select',
-                        'label' => __('Default certificate style', 'sikshya'),
-                        'description' => __('Layout and decoration of the PDF or image learners receive.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'default',
-                        'options' => [
-                            'default' => __('Default Template', 'sikshya'),
-                            'modern' => __('Modern Template', 'sikshya'),
-                            'classic' => __('Classic Template', 'sikshya'),
-                            'minimal' => __('Minimal Template', 'sikshya')
-                        ]
-                    ],
-                    [
-                        'key' => 'certificate_format',
-                        'type' => 'select',
-                        'label' => __('File type learners download', 'sikshya'),
-                        'description' => __('PDF is best for printing; PNG/JPG are easy to share online.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'pdf',
-                        'options' => [
-                            'pdf' => __('PDF', 'sikshya'),
-                            'png' => __('PNG Image', 'sikshya'),
-                            'jpg' => __('JPG Image', 'sikshya')
-                        ]
-                    ]
-                ]
-            ],
-            [
-                'title' => __('Certificate Design', 'sikshya'),
-                'icon' => 'fas fa-image',
-                'description' => __(
-                    'Optional branding: upload images to your Media Library, then paste their full links here.',
-                    'sikshya'
-                ),
-                'fields' => [
-                    [
-                        'key' => 'certificate_logo',
-                        'type' => 'url',
-                        'label' => __('Logo image URL', 'sikshya'),
-                        'description' => __('Direct link to your school logo (PNG or SVG with transparent background works well).', 'sikshya'),
-                        'placeholder' => 'https://yoursite.com/wp-content/uploads/logo.png',
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'certificate_signature',
-                        'type' => 'url',
-                        'label' => __('Signature image URL', 'sikshya'),
-                        'description' => __('Scanned signature or stamp image shown on the certificate.', 'sikshya'),
-                        'placeholder' => 'https://yoursite.com/wp-content/uploads/signature.png',
-                        'default' => ''
-                    ],
-                    [
-                        'key' => 'certificate_font',
-                        'type' => 'select',
-                        'label' => __('Font for names and text', 'sikshya'),
-                        'description' => __('Readable serif or sans-serif for the learner name and course title.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'Arial',
-                        'options' => [
-                            'Arial' => __('Arial', 'sikshya'),
-                            'Times New Roman' => __('Times New Roman', 'sikshya'),
-                            'Helvetica' => __('Helvetica', 'sikshya'),
-                            'Georgia' => __('Georgia', 'sikshya'),
-                            'Verdana' => __('Verdana', 'sikshya')
-                        ]
-                    ],
-                    [
-                        'key' => 'certificate_font_size',
-                        'type' => 'number',
-                        'label' => __('Base font size (points)', 'sikshya'),
-                        'description' => __('Larger numbers make text bigger on the PDF or image. Try 12–18 for body text.', 'sikshya'),
-                        'placeholder' => __('e.g. 12', 'sikshya'),
-                        'default' => 12,
-                        'min' => 8,
-                        'max' => 72
-                    ],
-                    [
-                        'key' => 'certificate_color',
-                        'type' => 'color',
-                        'label' => __('Main text color', 'sikshya'),
-                        'description' => __('Usually black or dark gray for printing on white paper.', 'sikshya'),
-                        'default' => '#000000'
-                    ]
                 ]
             ],
             [

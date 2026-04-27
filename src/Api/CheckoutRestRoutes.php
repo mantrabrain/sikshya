@@ -107,6 +107,19 @@ class CheckoutRestRoutes
         }
 
         $uid = get_current_user_id();
+        $marketingOptIn = null;
+        if (is_array($params) && array_key_exists('marketing_opt_in', $params)) {
+            $marketingOptIn = (bool) $params['marketing_opt_in'];
+        }
+        if ($marketingOptIn !== null) {
+            /**
+             * Capture the buyer's marketing opt-in preference at checkout start.
+             *
+             * Add-ons (Email marketing) may persist this on the user and use it to decide
+             * whether a contact should be synced into providers on enrollment/purchase events.
+             */
+            do_action('sikshya_checkout_marketing_opt_in', $uid, $marketingOptIn);
+        }
 
         try {
             $checkout = $this->checkoutService();

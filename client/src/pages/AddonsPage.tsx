@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { appViewHref } from '../lib/appUrl';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
 type AddonTier = 'free' | 'starter' | 'pro' | 'scale';
@@ -342,10 +343,38 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
       userAvatarUrl={config.user.avatarUrl}
       branding={config.branding}
       title={title}
-      subtitle="Free core features stay on. This page lists paid add-ons only — turn each one on to load its settings, screens, and site features."
+      subtitle="Sikshya Free always runs the core LMS. Optional add-ons extend it — turn each switch on only when you need that feature."
       pageActions={null}
     >
       {error ? <ApiErrorPanel error={error} title="Could not load addons" onRetry={() => void refetch()} /> : null}
+
+      <div className="mb-4 rounded-2xl border border-sky-200 bg-sky-50/90 p-4 text-sm text-sky-950 shadow-sm dark:border-sky-900/50 dark:bg-sky-950/35 dark:text-sky-50">
+        <p className="font-semibold text-sky-950 dark:text-sky-100">How Sikshya Free, Pro, and add-ons fit together</p>
+        <ul className="mt-2 list-disc space-y-1.5 pl-5 leading-relaxed text-sky-950/95 dark:text-sky-100/95">
+          <li>
+            <span className="font-medium">Sikshya (free)</span> — courses, lessons, quizzes, enrollments, and basic
+            checkout. Nothing on this page can “turn off” the core plugin.
+          </li>
+          <li>
+            <span className="font-medium">Sikshya Pro (paid license)</span> — unlocks commercial plans (Starter, Growth,
+            Scale). Install and activate the Pro plugin, then activate your license under{' '}
+            <a className="font-semibold text-brand-700 underline hover:text-brand-800 dark:text-brand-300" href={appViewHref(config, 'license')}>
+              License
+            </a>
+            .
+          </li>
+          <li>
+            <span className="font-medium">Add-ons (this page)</span> — optional modules (subscriptions, drip, gradebook,
+            …). Enable one, then open its menu in the sidebar to configure it. Site-wide defaults often live under{' '}
+            <span className="font-medium">Settings</span>; per-feature tabs may say <span className="font-medium">Add-on defaults</span>.
+          </li>
+        </ul>
+        <p className="mt-2 text-xs text-sky-900/85 dark:text-sky-200/85">
+          Tip: in filters and badges, <span className="font-semibold">Growth</span> is the catalog name for the mid-tier
+          Pro plan (technical tier <code className="rounded bg-white/60 px-1 py-0.5 text-[11px] dark:bg-slate-900/60">pro</code>
+          ). <span className="font-semibold">Scale</span> is the highest tier.
+        </p>
+      </div>
 
       {data && !isProActive ? (
         <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-slate-900">

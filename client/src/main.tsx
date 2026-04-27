@@ -62,6 +62,7 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
       ],
     },
     query: {},
+    offlineCheckoutEnabled: true,
     licensing: {
       isProActive: false,
       siteTier: 'free',

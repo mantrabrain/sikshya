@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
+import { AddonSettingsPage } from './AddonSettingsPage';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
@@ -27,6 +29,8 @@ type BundleRow = {
 
 type ListResp = { ok?: boolean; bundles?: BundleRow[] };
 
+type BundlesTabId = 'bundles' | 'settings';
+
 /** Open the course builder on the Pricing tab for a given course / bundle post. */
 function courseBuilderHref(config: SikshyaReactConfig, courseId: number): string {
   return appViewHref(config, 'add-course', { course_id: String(courseId), force_bundle_ui: '1' });
@@ -38,6 +42,14 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
   const addon = useAddonEnabled('course_bundles');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
   const enabled = mode === 'full';
+
+  const [workspaceTab, setWorkspaceTab] = useState<BundlesTabId>('bundles');
+
+  useEffect(() => {
+    if (!enabled) {
+      setWorkspaceTab('bundles');
+    }
+  }, [enabled]);
 
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -152,6 +164,48 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
         onEnable={() => void addon.enable()}
         addonError={addon.error}
       >
+        {enabled ? (
+          <div className="-mt-2 mb-5 flex flex-wrap items-center gap-2 overflow-x-auto">
+            <HorizontalEditorTabs
+              ariaLabel="Course bundles sections"
+              tabs={[
+                { id: 'bundles', label: 'Bundles', icon: 'table' },
+                { id: 'settings', label: 'Add-on defaults', icon: 'cog' },
+              ]}
+              value={workspaceTab}
+              onChange={(id) => setWorkspaceTab(id as BundlesTabId)}
+            />
+          </div>
+        ) : null}
+
+        {enabled && workspaceTab === 'settings' ? (
+          <AddonSettingsPage
+            embedded
+            config={config}
+            title="Course bundles settings"
+            addonId="course_bundles"
+            subtitle="Control storefront links, redirects, marketing badges, and optional default bundle matching."
+            featureTitle="Course bundles settings"
+            featureDescription="These options apply site-wide. Bundle contents and prices are still edited per bundle in the Course Builder."
+            relatedCoreSettingsTab="payment"
+            relatedCoreSettingsLabel="Payment"
+            nextSteps={[
+              {
+                label: 'Manage bundles',
+                description: 'Create packs and open each one in the Course Builder.',
+                href: appViewHref(config, 'bundles'),
+              },
+              {
+                label: 'Open courses',
+                description: 'Add regular courses, then attach them on the bundle’s Pricing tab.',
+                href: appViewHref(config, 'courses'),
+              },
+            ]}
+          />
+        ) : null}
+
+        {workspaceTab === 'settings' ? null : (
+          <>
         {/* ── How bundles work notice ── */}
         <div className="mb-6 rounded-2xl border border-brand-100 bg-brand-50/60 p-5 dark:border-brand-900/40 dark:bg-brand-950/20">
           <div className="flex items-start gap-3">
@@ -213,7 +267,7 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
         </div>
 
         {/* ── Bundle list ── */}
-        {list.error ? (
+        {list.error && workspaceTab === 'bundles' ? (
           <ApiErrorPanel error={list.error} title="Could not load bundles" onRetry={() => list.refetch()} />
         ) : null}
 
@@ -350,6 +404,8 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
             </ul>
           )}
         </ListPanel>
+          </>
+        )}
       </GatedFeatureWorkspace>
     </AppShell>
   );

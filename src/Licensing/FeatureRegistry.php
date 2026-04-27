@@ -136,7 +136,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Settings to connect Sikshya to your email provider (for example SendGrid, Mailgun, Amazon SES, or your host’s outgoing mail). You can also add a simple header and footer so every enrollment or completion message matches your brand.\n\nTurn it on when: Mail from your site often lands in junk folders, or you want parents, students, or buyers to see a professional message with your name and colors.\n\nTurn it off when: Another tool already sends every email for your site, or you have not set up an email provider yet and want to keep things simple until you do.\n\nPlan: Growth or higher with Sikshya Pro. After enabling, open Sikshya → Email (or Delivery) in your WordPress dashboard to finish setup.",
+                    "What you get: Settings to connect Sikshya to your email provider (for example SendGrid, Mailgun, Amazon SES, or your host’s outgoing mail). You can also add a simple header and footer so every enrollment or completion message matches your brand. Use Email → Delivery for setup and a test send; transactional wording lives under Email → Templates.\n\nTurn it on when: Mail from your site often lands in junk folders, or you want parents, students, or buyers to see a professional message with your name and colors.\n\nTurn it off when: Another tool already sends every email for your site, or you have not set up an email provider yet and want to keep things simple until you do.\n\nPlan: Growth or higher with Sikshya Pro. After enabling, open Sikshya → Email in your WordPress dashboard to finish setup.",
                     'sikshya'
                 ),
             ],
@@ -196,7 +196,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: You can list multiple instructors on a course and set how sales are shared between them. When someone pays, Sikshya records who should get which slice.\n\nTurn it on when: You run a training company, invite guest teachers, or sell with a partner who should be paid automatically.\n\nTurn it off when: Only one person ever owns and sells courses—extra setup is not worth it.\n\nPlan: Growth or higher with Sikshya Pro. Your checkout must be set up; this add-on adds the people-and-payback side of shared courses.",
+                    "What you get: Pick teachers in the course builder, tune optional revenue weights, and use Course staff in the dashboard for fine control. When orders complete, Sikshya writes ledger rows using normalized splits so totals never exceed the line item. Global switches control where the team appears (single course, cards, learn screen); each course can hide the public team or turn off revenue recording for that course.\n\nTurn it on when: You run a school with co-teachers, guest experts, or revenue partners.\n\nTurn it off when: You alone author and sell every course.\n\nPlan: Growth or higher with Sikshya Pro. Configure global behavior under Add-ons → Multi-instructor; staff and percentages under Course staff.",
                     'sikshya'
                 ),
             ],

@@ -34,9 +34,11 @@ if ($cats_on) {
         $categories = [];
     }
 }
+
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
-<aside class="sikshya-archive-filters" aria-label="<?php esc_attr_e('Filter courses', 'sikshya'); ?>">
+<aside class="sikshya-archive-filters" aria-label="<?php echo esc_attr(sprintf(__('Filter %s', 'sikshya'), strtolower($label_courses))); ?>">
     <form class="sikshya-archive-filters__form" method="get" action="<?php echo esc_url($archive_url); ?>">
         <input type="hidden" name="post_type" value="<?php echo esc_attr(PostTypes::COURSE); ?>" />
         <?php if ($f['s'] !== '') : ?>

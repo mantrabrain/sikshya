@@ -1784,6 +1784,20 @@
   margin: 0 auto;
 }
 
+.sikshya-quizIntro__notice {
+  order: -1;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  max-width: 100%;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--sikshya-learn-text);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: var(--sikshya-learn-radius-md, 10px);
+}
+
 .sikshya-quizIntro__eyebrow {
   margin: 0 0 8px;
   font-size: var(--sikshya-learn-fs-12);

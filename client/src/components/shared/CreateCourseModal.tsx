@@ -9,6 +9,7 @@ import { isFeatureEnabled } from '../../lib/licensing';
 import { useAddonEnabled } from '../../hooks/useAddons';
 import { ButtonPrimary } from './buttons';
 import { Modal } from './Modal';
+import { term, termLower } from '../../lib/terminology';
 
 type Props = {
   config: SikshyaReactConfig;
@@ -31,6 +32,10 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const bundlesFeatureOk = isFeatureEnabled(config, 'course_bundles');
   const bundlesAddon = useAddonEnabled('course_bundles');
+  const courseLower = termLower(config, 'course');
+  const coursesLower = termLower(config, 'courses');
+  const lessonsLower = termLower(config, 'lessons');
+  const quizzesLower = termLower(config, 'quizzes');
 
   const canUseBundles = useMemo(() => {
     if (!bundlesFeatureOk) return false;
@@ -107,11 +112,11 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     <Modal
       open={open}
       onClose={handleClose}
-      title="Create a new course"
+      title={`Create a new ${courseLower}`}
       description={
         kind === 'bundle'
-          ? 'Bundles sell several courses for one price. You will set price, included courses, and catalog visibility next.'
-          : 'Start with a name and web address. You will add lessons, price, and media in the course builder next.'
+          ? `Bundles sell several ${coursesLower} for one price. You will set price, included ${coursesLower}, and catalog visibility next.`
+          : `Start with a name and web address. You will add ${lessonsLower}, price, and media in the ${courseLower} builder next.`
       }
       size="md"
       footer={
@@ -134,7 +139,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">What are you creating?</legend>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Choose now — the builder opens with the right layout (full course vs streamlined bundle).
+            Choose now — the builder opens with the right layout (full {courseLower} vs streamlined bundle).
           </p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <label
@@ -146,10 +151,10 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
             >
               <span className="flex items-center gap-2">
                 <input type="radio" name="sik-course-kind" checked={kind === 'regular'} onChange={() => setKind('regular')} disabled={submitting} className="h-4 w-4" />
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">Regular course</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">Regular {courseLower}</span>
               </span>
               <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
-                Lessons, quizzes, curriculum, drip, and all course options.
+                {term(config, 'lessons')}, {quizzesLower}, curriculum, drip, and all {courseLower} options.
               </span>
             </label>
             <label
@@ -163,7 +168,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
                   ? undefined
                   : bundlesAddon.loading
                     ? 'Checking add-on status…'
-                    : 'Enable the Course Bundles add-on to create bundles.'
+                    : `Enable the Course Bundles add-on to create ${coursesLower} bundles.`
               }
             >
               <span className="flex items-center gap-2">
@@ -175,7 +180,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
                   disabled={submitting || !canUseBundles}
                   className="h-4 w-4"
                 />
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">Course bundle</span>
+                <span className="text-sm font-semibold text-slate-900 dark:text-white">{term(config, 'course')} bundle</span>
                 {!canUseBundles ? (
                   <span className="ml-1 inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
                     Pro
@@ -183,7 +188,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
                 ) : null}
               </span>
               <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
-                Package existing courses. Builder shows only bundle page + pricing (no curriculum tab).
+                Package existing {coursesLower}. Builder shows only bundle page + pricing (no curriculum tab).
               </span>
               {!canUseBundles ? (
                 <span className="mt-2 pl-6 text-xs text-slate-500 dark:text-slate-400">
@@ -271,7 +276,8 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
           </div>
         ) : null}
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Your {kind === 'bundle' ? 'bundle' : 'course'} is saved as a <strong className="font-medium text-slate-700 dark:text-slate-300">draft</strong> until you publish
+          Your {kind === 'bundle' ? 'bundle' : courseLower} is saved as a{' '}
+          <strong className="font-medium text-slate-700 dark:text-slate-300">draft</strong> until you publish
           from the builder.
         </p>
       </form>

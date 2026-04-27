@@ -19,6 +19,11 @@ final class ReviewsTable extends AbstractTable
             rating int(11) NOT NULL,
             review_text text NULL,
             is_approved tinyint(1) NOT NULL DEFAULT 0,
+            reply_text text NULL,
+            reply_user_id bigint(20) NULL,
+            reply_created_at datetime NULL,
+            reported_count int(11) NOT NULL DEFAULT 0,
+            last_reported_at datetime NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
@@ -26,6 +31,8 @@ final class ReviewsTable extends AbstractTable
             KEY course_id (course_id),
             KEY rating (rating),
             KEY is_approved (is_approved),
+            KEY course_status_created (course_id, is_approved, created_at),
+            KEY reported_count (reported_count),
             UNIQUE KEY unique_review (user_id, course_id)
         ) {$charset_collate};";
     }

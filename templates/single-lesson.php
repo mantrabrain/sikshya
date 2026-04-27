@@ -25,6 +25,8 @@ while (have_posts()) :
         $page_model->getLessonH1Title(),
         get_bloginfo('name')
     );
+
+    $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
     ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -35,6 +37,14 @@ while (have_posts()) :
     <title><?php echo esc_html($page_title); ?></title>
     <link rel="stylesheet" href="<?php echo $ds_href; ?>">
     <link rel="stylesheet" href="<?php echo $learn_href; ?>">
+    <?php
+    /**
+     * Extension point for lesson-shell <head> (no wp_head() — keeps the shell minimal).
+     *
+     * @param \Sikshya\Presentation\Models\SingleLessonPageModel $page_model
+     */
+    do_action('sikshya_lesson_shell_head', $page_model);
+    ?>
 </head>
 <body class="sikshya-learning-shell sikshya-learning-shell--lesson">
 <div class="sikshya-learning-app">
@@ -110,7 +120,7 @@ while (have_posts()) :
                             data-sikshya-progress-btn
                             aria-haspopup="dialog"
                             aria-expanded="false"
-                            aria-label="<?php echo esc_attr__('Course progress', 'sikshya'); ?>"
+                            aria-label="<?php echo esc_attr(sprintf(__('%s progress', 'sikshya'), $label_course)); ?>"
                         >
                             <span class="sikshya-learnHeader__progressBar" aria-hidden="true">
                                 <span class="sikshya-learnHeader__progressFill" style="<?php echo esc_attr('width:' . max(0, min(100, $pct)) . '%'); ?>"></span>
@@ -165,10 +175,18 @@ while (have_posts()) :
 
         <main class="sikshya-learnMain">
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
-            <aside class="sikshya-learnSidebar" aria-label="<?php esc_attr_e('Course content', 'sikshya'); ?>" data-sikshya-outline>
+            <aside class="sikshya-learnSidebar" aria-label="<?php echo esc_attr(sprintf(__('%s content', 'sikshya'), $label_course)); ?>" data-sikshya-outline>
                 <div class="sikshya-learnSidebar__inner">
                     <div class="sikshya-learnSidebar__head">
-                        <h2 class="sikshya-learnSidebar__heading"><?php esc_html_e('Course content', 'sikshya'); ?></h2>
+                        <h2 class="sikshya-learnSidebar__heading">
+                            <?php
+                            echo esc_html(sprintf(
+                                /* translators: %s: singular label (e.g. Course) */
+                                __('%s content', 'sikshya'),
+                                $label_course
+                            ));
+                            ?>
+                        </h2>
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
@@ -197,7 +215,7 @@ while (have_posts()) :
                                         $errCourse = $page_model->getCoursePost();
                                         if ($errCourse instanceof WP_Post) : ?>
                                             <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_permalink($errCourse)); ?>">
-                                                <?php esc_html_e('View course', 'sikshya'); ?>
+                                                <?php echo esc_html(sprintf(__('View %s', 'sikshya'), strtolower($label_course))); ?>
                                             </a>
                                         <?php endif; ?>
                                         <?php if ($urls->getAccountUrl() !== '') : ?>

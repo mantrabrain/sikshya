@@ -28,8 +28,8 @@ function effectiveNavPage(currentPage: string): string {
   if (currentPage === 'add-lesson') {
     return 'lessons';
   }
-  if (currentPage === 'email-template-edit') {
-    return 'email-templates';
+  if (currentPage === 'email-template-edit' || currentPage === 'email-templates') {
+    return 'email-hub';
   }
   return currentPage;
 }
@@ -52,7 +52,15 @@ function IconSlot({ children, size = 'md' }: { children: ReactNode; size?: 'md' 
   );
 }
 
-function ChildLink({ item, currentPage }: { item: NavItem; currentPage: string }) {
+function ChildLink({
+  item,
+  currentPage,
+  brandedChrome,
+}: {
+  item: NavItem;
+  currentPage: string;
+  brandedChrome: boolean;
+}) {
   if (!item.href) {
     return null;
   }
@@ -63,11 +71,22 @@ function ChildLink({ item, currentPage }: { item: NavItem; currentPage: string }
       className={`flex w-full items-center gap-3 rounded-lg py-2 pl-3 pr-2 text-[13px] font-medium transition-colors ${
         active
           ? 'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100/80 dark:bg-brand-950/40 dark:text-brand-300 dark:ring-brand-900/50'
-          : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/70'
+          : brandedChrome
+            ? 'text-inherit/75 hover:bg-current/8'
+            : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/70'
       }`}
     >
       <IconSlot size="sm">
-        <NavIcon name={item.icon} className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+        <NavIcon
+          name={item.icon}
+          className={`h-4 w-4 ${
+            active
+              ? 'text-brand-600 dark:text-brand-400'
+              : brandedChrome
+                ? 'text-inherit/60'
+                : 'text-slate-400 dark:text-slate-500'
+          }`}
+        />
       </IconSlot>
       <span className="min-w-0 flex-1 truncate">{item.label}</span>
       {item.badge ? <NavBadge badge={item.badge} /> : null}
@@ -80,11 +99,13 @@ function NavBlock({
   currentPage,
   open,
   setOpen,
+  brandedChrome,
 }: {
   item: NavItem;
   currentPage: string;
   open: Record<string, boolean>;
   setOpen: Dispatch<SetStateAction<Record<string, boolean>>>;
+  brandedChrome: boolean;
 }) {
   const children = item.children;
   if (children?.length) {
@@ -98,22 +119,36 @@ function NavBlock({
           onClick={() => setOpen((o) => ({ ...o, [item.id]: !expanded }))}
           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${
             childBranch
-              ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white'
-              : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/60'
+              ? brandedChrome
+                ? 'bg-current/8 text-inherit'
+                : 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white'
+              : brandedChrome
+                ? 'text-inherit/80 hover:bg-current/8'
+                : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/60'
           }`}
         >
           <IconSlot>
-            <NavIcon name={item.icon} className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+            <NavIcon
+              name={item.icon}
+              className={`h-5 w-5 ${brandedChrome ? 'text-inherit/65' : 'text-slate-500 dark:text-slate-400'}`}
+            />
           </IconSlot>
           <span className="min-w-0 flex-1 truncate">{item.label}</span>
           <IconSlot size="sm">
-            <NavIcon name={expanded ? 'chevronDown' : 'chevronRight'} className="h-4 w-4 text-slate-400" />
+            <NavIcon
+              name={expanded ? 'chevronDown' : 'chevronRight'}
+              className={`h-4 w-4 ${brandedChrome ? 'text-inherit/45' : 'text-slate-400'}`}
+            />
           </IconSlot>
         </button>
         {expanded ? (
-          <div className="ml-2.5 space-y-0.5 border-l border-slate-200 py-0.5 pl-2.5 dark:border-slate-700">
+          <div
+            className={`ml-2.5 space-y-0.5 border-l py-0.5 pl-2.5 ${
+              brandedChrome ? 'border-current/15' : 'border-slate-200 dark:border-slate-700'
+            }`}
+          >
             {children.map((c) => (
-              <ChildLink key={c.id} item={c} currentPage={currentPage} />
+              <ChildLink key={c.id} item={c} currentPage={currentPage} brandedChrome={brandedChrome} />
             ))}
           </div>
         ) : null}
@@ -132,13 +167,17 @@ function NavBlock({
       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
         active
           ? 'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:ring-brand-900/40'
-          : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/60'
+          : brandedChrome
+            ? 'text-inherit/80 hover:bg-current/8'
+            : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/60'
       }`}
     >
       <IconSlot>
         <NavIcon
           name={item.icon}
-          className={`h-5 w-5 ${active ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-400'}`}
+          className={`h-5 w-5 ${
+            active ? 'text-brand-600 dark:text-brand-400' : brandedChrome ? 'text-inherit/65' : 'text-slate-500 dark:text-slate-400'
+          }`}
         />
       </IconSlot>
       <span className="min-w-0 flex-1 truncate">{item.label}</span>
@@ -182,6 +221,7 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
 
   const wpHome = `${adminUrl.replace(/\/?$/, '/')}index.php`;
   const title = branding?.pluginName?.trim() ? branding.pluginName.trim() : 'Sikshya';
+  const brandedChrome = Boolean(branding?.sidebarBg || branding?.sidebarText);
   const sidebarStyle = useMemo<React.CSSProperties | undefined>(() => {
     if (!branding?.sidebarBg && !branding?.sidebarText) return undefined;
     return {
@@ -193,10 +233,14 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
   return (
     <aside
       style={sidebarStyle}
-      className="flex h-screen w-[260px] shrink-0 flex-col border-r border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900"
+      className={`flex h-screen w-[260px] shrink-0 flex-col border-r border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900 ${
+        brandedChrome ? 'border-inherit' : ''
+      }`}
     >
       <div
-        className={`flex shrink-0 flex-col justify-center border-b border-slate-100 px-5 dark:border-slate-800 ${SHELL_HEADER_MIN_CLASS}`}
+        className={`flex shrink-0 flex-col justify-center border-b px-5 ${
+          brandedChrome ? 'border-current/10' : 'border-slate-100 dark:border-slate-800'
+        } ${SHELL_HEADER_MIN_CLASS}`}
       >
         <div className="flex items-center gap-3">
           {branding?.logoUrl ? (
@@ -207,17 +251,25 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
               referrerPolicy="no-referrer"
             />
           ) : null}
-          <div className="min-w-0 text-lg font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">
+          <div
+            className={`min-w-0 text-lg font-semibold leading-tight tracking-tight ${
+              brandedChrome ? 'text-inherit' : 'text-slate-900 dark:text-white'
+            }`}
+          >
             {title}
           </div>
         </div>
         <div className="mt-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <span
-            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-slate-200/90 bg-slate-100/90 px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight text-slate-700 ring-1 ring-inset ring-slate-200/60 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700/80"
-            title={`Sikshya (free) ${version}`}
+            className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight ring-1 ring-inset ${
+              brandedChrome
+                ? 'border-current/15 bg-current/5 text-inherit ring-current/10'
+                : 'border-slate-200/90 bg-slate-100/90 text-slate-700 ring-slate-200/60 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700/80'
+            }`}
+            title={`${title} ${version}`}
           >
-            <span className="text-slate-500 dark:text-slate-400">Free</span>
-            <span className="mx-0.5 text-slate-300 dark:text-slate-600" aria-hidden>
+            <span className={brandedChrome ? 'text-inherit/70' : 'text-slate-500 dark:text-slate-400'}>Free</span>
+            <span className={`mx-0.5 ${brandedChrome ? 'text-inherit/35' : 'text-slate-300 dark:text-slate-600'}`} aria-hidden>
               ·
             </span>
             <span className="tabular-nums">v{version}</span>
@@ -231,8 +283,8 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
               }`}
               title={
                 proLicensed
-                  ? `Sikshya Pro ${proPluginVersion} (licensed)`
-                  : `Sikshya Pro ${proPluginVersion} — activate your license for updates and paid modules`
+                  ? `${title} Pro ${proPluginVersion} (licensed)`
+                  : `${title} Pro ${proPluginVersion} — activate your license for updates and paid modules`
               }
             >
               <span className={proLicensed ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-200'}>
@@ -263,16 +315,31 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
       </div>
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2.5 py-4">
         {items.map((item) => (
-          <NavBlock key={item.id} item={item} currentPage={currentPage} open={open} setOpen={setOpen} />
+          <NavBlock
+            key={item.id}
+            item={item}
+            currentPage={currentPage}
+            open={open}
+            setOpen={setOpen}
+            brandedChrome={brandedChrome}
+          />
         ))}
       </nav>
-      <div className="sticky bottom-0 border-t border-slate-100 bg-white/95 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+      <div
+        className={`sticky bottom-0 border-t p-3 backdrop-blur ${
+          brandedChrome ? 'border-current/10' : 'border-slate-100 bg-white/95 dark:border-slate-800 dark:bg-slate-900/95'
+        }`}
+      >
         <a
           href={wpHome}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+            brandedChrome
+              ? 'text-inherit/75 hover:bg-current/8 hover:text-inherit'
+              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+          }`}
         >
           <IconSlot size="sm">
-            <NavIcon name="arrowLeft" className="h-4 w-4" />
+            <NavIcon name="arrowLeft" className={`h-4 w-4 ${brandedChrome ? 'text-inherit/70' : ''}`} />
           </IconSlot>
           <span className="min-w-0 flex-1 truncate">Back to WordPress</span>
         </a>

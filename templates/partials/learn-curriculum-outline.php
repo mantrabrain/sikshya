@@ -13,9 +13,20 @@ if (!isset($outline_blocks) || !is_array($outline_blocks)) {
 
 $outline_show_progress = isset($outline_show_progress) ? (bool) $outline_show_progress : true;
 
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_chapter = function_exists('sikshya_label') ? sikshya_label('chapter', __('Chapter', 'sikshya'), 'frontend') : __('Chapter', 'sikshya');
+
 if ($outline_blocks === []) {
     ?>
-    <p class="sikshya-curriculumOutline__empty sikshya-muted"><?php esc_html_e('No curriculum items are published for this course yet.', 'sikshya'); ?></p>
+    <p class="sikshya-curriculumOutline__empty sikshya-muted">
+        <?php
+        echo esc_html(sprintf(
+            /* translators: %s: singular label (e.g. course) */
+            __('No curriculum items are published for this %s yet.', 'sikshya'),
+            strtolower($label_course)
+        ));
+        ?>
+    </p>
     <?php
     return;
 }
@@ -50,7 +61,8 @@ if ($outline_blocks === []) {
                             echo esc_html(
                                 sprintf(
                                     /* translators: %d: chapter sequence number (1-based) */
-                                    __('Chapter %d', 'sikshya'),
+                                    __('%1$s %2$d', 'sikshya'),
+                                    $label_chapter,
                                     $chapter_num
                                 )
                             );
@@ -113,7 +125,12 @@ if ($outline_blocks === []) {
                                 class="sikshya-curriculumOutline__link<?php echo $locked ? ' is-locked' : ''; ?>"
                                 href="<?php echo esc_url((string) ($item['permalink'] ?? '')); ?>"
                                 <?php echo $current ? 'aria-current="page"' : ''; ?>
-                                <?php echo $locked && $lock_reason !== '' ? 'aria-label="' . esc_attr($item_title . ' — ' . $lock_reason) . '"' : ''; ?>
+                                <?php
+                                if ($locked) {
+                                    $aria_reason = $lock_reason !== '' ? $lock_reason : __('Locked', 'sikshya');
+                                    echo 'aria-label="' . esc_attr($item_title . ' — ' . $aria_reason) . '"';
+                                }
+                                ?>
                             >
                                 <span class="sikshya-curriculumOutline__check<?php echo $completed ? ' is-done' : ''; ?>" aria-hidden="true">
                                     <?php if ($completed) : ?>

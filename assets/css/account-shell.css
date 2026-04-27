@@ -110,6 +110,14 @@ body.sikshya-account-shell {
   color: var(--sik-acc-muted);
 }
 
+.sik-acc-nav__hint {
+  margin: -0.25rem 0 0.35rem;
+  padding: 0 1.25rem 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--sik-acc-muted);
+}
+
 .sik-acc-nav a {
   display: flex;
   align-items: center;
@@ -780,6 +788,15 @@ body.sikshya-account-shell {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--sik-acc-text);
+}
+
+a.sik-acc-cal__title {
+  text-decoration: none;
+  color: var(--sik-acc-brand);
+}
+
+a.sik-acc-cal__title:hover {
+  text-decoration: underline;
 }
 
 .sik-acc-cal__sub {

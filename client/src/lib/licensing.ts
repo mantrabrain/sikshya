@@ -13,6 +13,7 @@ export function getLicensing(config: SikshyaReactConfig): SikshyaLicensing | nul
  * - Uses `featureStates[featureId]` when the server sent that key.
  * - Otherwise: **free** tier defaults to on; paid tiers default to off until `featureStates` arrives.
  * - Unknown feature ids (no catalog row) default to off.
+ * @param config Full boot config (`SikshyaReactConfig`). Do not pass `config.licensing` alone — `getLicensing` would read the wrong shape.
  */
 export function isFeatureEnabled(config: SikshyaReactConfig, featureId: string): boolean {
   const lic = getLicensing(config);

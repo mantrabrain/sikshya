@@ -55,7 +55,9 @@ export function TabbedHubPage(props: Props) {
   })();
 
   const onTabChange = (id: string) => {
-    navigateView(route.page, { tab: id });
+    const view =
+      typeof route.page === 'string' && route.page.trim() !== '' ? route.page.trim() : 'dashboard';
+    navigateView(view, { tab: id });
   };
 
   const activeTab = visibleTabs.find((t) => t.id === activeId);

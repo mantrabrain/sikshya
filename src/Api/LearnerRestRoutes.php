@@ -89,6 +89,44 @@ class LearnerRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/me/assignments', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getMyAssignments'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+                'args' => [
+                    'course_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/me/assignment-submit', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'submitAssignment'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/me/assignment-feedback', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getMyAssignmentFeedback'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+                'args' => [
+                    'assignment_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
         /**
          * Allow enabled add-ons to register learner REST routes.
          *
@@ -366,8 +404,17 @@ class LearnerRestRoutes
             $params = $request->get_body_params();
         }
 
-        $assignment_id = isset($params['assignment_id']) ? (int) $params['assignment_id'] : 0;
-        $content = isset($params['content']) ? (string) $params['content'] : '';
+        $assignment_id = (int) $request->get_param('assignment_id');
+        if ($assignment_id <= 0 && is_array($params)) {
+            $assignment_id = (int) ($params['assignment_id'] ?? 0);
+        }
+
+        $contentRaw = $request->get_param('content');
+        if ($contentRaw === null && is_array($params)) {
+            $content = (string) ($params['content'] ?? '');
+        } else {
+            $content = is_string($contentRaw) ? $contentRaw : (string) $contentRaw;
+        }
 
         // File uploads for REST can come in $_FILES; keep parity with legacy controller.
         $files = $_FILES['attachments'] ?? [];

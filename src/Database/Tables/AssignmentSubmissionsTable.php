@@ -22,6 +22,7 @@ final class AssignmentSubmissionsTable extends AbstractTable
             status varchar(50) NOT NULL DEFAULT 'submitted',
             grade decimal(8,2) NULL,
             feedback longtext NULL,
+            rubric_scores_json longtext NULL,
             submitted_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             graded_at datetime NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

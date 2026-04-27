@@ -155,7 +155,13 @@ class CourseInfoTab extends AbstractTab
                 'type' => 'select',
                 'label' => __('Primary category', 'sikshya'),
                 'options' => $category_options,
-                'description' => __('Groups your course in the catalog. Create categories under Sikshya LMS → Categories if needed.', 'sikshya'),
+                'description' => sprintf(
+                    /* translators: %s: brand short name */
+                    __('Groups your course in the catalog. Create categories under %s → Categories if needed.', 'sikshya'),
+                    function_exists('sikshya_brand_profile')
+                        ? (string) (sikshya_brand_profile('admin')['brandShortName'] ?? __('Sikshya', 'sikshya'))
+                        : __('Sikshya', 'sikshya')
+                ),
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
                 ],

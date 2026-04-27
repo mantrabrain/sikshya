@@ -21,6 +21,8 @@ use Sikshya\Services\Settings;
 use Sikshya\Services\WpMailSmtpBridge;
 use Sikshya\Addons\AddonManager;
 use Sikshya\Frontend\Public\InstructorAccountView;
+use Sikshya\Frontend\Public\InstructorApplicationView;
+use Sikshya\Shortcodes\InstructorRegistrationShortcode;
 
 /**
  * Main Plugin Class
@@ -259,6 +261,8 @@ final class Plugin
         WpMailSmtpBridge::register();
 
         InstructorAccountView::init();
+        InstructorApplicationView::init();
+        InstructorRegistrationShortcode::init();
 
         // Hook into WordPress
         do_action('sikshya_init', $this);
@@ -434,15 +438,26 @@ final class Plugin
      */
     public function getPluginInfo(): array
     {
-        return [
-            'name' => 'Sikshya LMS',
+        $links = function_exists('sikshya_brand_links') ? sikshya_brand_links() : [];
+        $docs = isset($links['documentationUrl']) ? (string) $links['documentationUrl'] : 'https://docs.sikshya.com';
+        $support = isset($links['supportUrl']) ? (string) $links['supportUrl'] : 'https://support.sikshya.com';
+
+        $info = [
+            'name' => function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : 'Sikshya LMS',
             'version' => $this->version,
             'description' => 'A comprehensive WordPress Learning Management System plugin',
             'author' => 'Sikshya Team',
             'author_url' => 'https://sikshya.com',
             'plugin_url' => 'https://sikshya.com',
-            'support_url' => 'https://support.sikshya.com',
-            'documentation_url' => 'https://docs.sikshya.com',
+            'support_url' => $support,
+            'documentation_url' => $docs,
         ];
+
+        /**
+         * Filter plugin info presented in admin/diagnostics.
+         *
+         * @param array<string,string> $info
+         */
+        return (array) apply_filters('sikshya_plugin_info', $info);
     }
 }

@@ -13,7 +13,10 @@ $page_model = CartPageService::build();
 $cart = $page_model->toLegacyViewArray();
 $u = $page_model->getUrls();
 
-get_header();
+sikshya_get_header();
+
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
 <div class="sikshya-public sikshya-cart sikshya-cart-page sik-f-scope">
@@ -25,7 +28,20 @@ get_header();
                 <span class="sikshya-cart-page__breadcrumb-current"><?php esc_html_e('Cart', 'sikshya'); ?></span>
             </nav>
             <h1 class="sikshya-cart-page__title"><?php esc_html_e('Your cart', 'sikshya'); ?></h1>
-            <p class="sikshya-cart-page__lead"><?php esc_html_e('Review your courses before checkout.', 'sikshya'); ?></p>
+            <p class="sikshya-cart-page__lead">
+                <?php
+                echo esc_html(sprintf(
+                    /* translators: %s: plural label (e.g. courses) */
+                    __('Review your %s before checkout.', 'sikshya'),
+                    strtolower($label_courses)
+                ));
+                ?>
+            </p>
+            <?php if (is_user_logged_in() && $u->getAccountUrl() !== '') : ?>
+                <p class="sikshya-cart-page__util-links">
+                    <a href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('My account — orders & receipts', 'sikshya'); ?></a>
+                </p>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -35,8 +51,18 @@ get_header();
             <div class="sikshya-cart-page__empty">
                 <div class="sikshya-cart-page__empty-copy">
                     <h2 class="sikshya-cart-page__empty-title"><?php esc_html_e('Your cart is empty', 'sikshya'); ?></h2>
-                    <p class="sikshya-cart-page__empty-text"><?php esc_html_e('Browse courses and add the ones you want to learn next.', 'sikshya'); ?></p>
-                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getCoursesUrl()); ?>"><?php esc_html_e('Browse courses', 'sikshya'); ?></a>
+                    <p class="sikshya-cart-page__empty-text">
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: %s: plural label (e.g. courses) */
+                            __('Browse %s and add the ones you want to learn next.', 'sikshya'),
+                            strtolower($label_courses)
+                        ));
+                        ?>
+                    </p>
+                    <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getCoursesUrl()); ?>">
+                        <?php echo esc_html(sprintf(__('Browse %s', 'sikshya'), strtolower($label_courses))); ?>
+                    </a>
                 </div>
 
                 <div class="sikshya-cart-page__empty-illus" aria-hidden="true">
@@ -89,7 +115,15 @@ get_header();
                 </div>
             <?php endif; ?>
             <div class="sikshya-cart-page__panel" role="region" aria-label="<?php esc_attr_e('Cart items', 'sikshya'); ?>">
-                <div class="sikshya-cart-page__panel-head"><?php esc_html_e('Courses in cart', 'sikshya'); ?></div>
+                <div class="sikshya-cart-page__panel-head">
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: %s: plural label (e.g. Courses) */
+                        __('%s in cart', 'sikshya'),
+                        $label_courses
+                    ));
+                    ?>
+                </div>
                 <ul class="sikshya-cart-lines">
                     <?php foreach ($page_model->getLines() as $line) : ?>
                         <li class="sikshya-cart-line">
@@ -132,7 +166,7 @@ get_header();
                                     <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
                                     <input type="hidden" name="sikshya_cart_action" value="remove" />
                                     <input type="hidden" name="course_id" value="<?php echo esc_attr((string) $line['course_id']); ?>" />
-                                    <button type="submit" class="sikshya-btn-link sikshya-btn-link--danger" aria-label="<?php esc_attr_e('Remove course from cart', 'sikshya'); ?>">
+                                    <button type="submit" class="sikshya-btn-link sikshya-btn-link--danger" aria-label="<?php echo esc_attr(sprintf(__('Remove %s from cart', 'sikshya'), strtolower($label_course))); ?>">
                                         <?php esc_html_e('Remove', 'sikshya'); ?>
                                     </button>
                                 </form>
@@ -156,7 +190,13 @@ get_header();
                 </p>
 
                 <p class="sikshya-cart-page__summary-note">
-                    <?php esc_html_e('You’ll get instant access after successful payment. Free courses enroll immediately.', 'sikshya'); ?>
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: %s: plural label (e.g. courses) */
+                        __('You’ll get instant access after successful payment. Free %s enroll immediately.', 'sikshya'),
+                        strtolower($label_courses)
+                    ));
+                    ?>
                 </p>
 
                 <div class="sikshya-cart-actions">
@@ -173,4 +213,4 @@ get_header();
 </div>
 
 <?php
-get_footer();
+sikshya_get_footer();

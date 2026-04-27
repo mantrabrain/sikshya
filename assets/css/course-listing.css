@@ -30,6 +30,18 @@
   color: var(--sikshya-gray-600);
 }
 
+.sikshya-archive-courses__tip {
+  margin: var(--sikshya-spacing-2) 0 0;
+  max-width: 70ch;
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.55;
+  color: var(--sikshya-gray-700);
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-lg, 0.75rem);
+  border: 1px solid var(--sikshya-gray-200);
+  background: var(--sikshya-white);
+}
+
 /* Archive: sidebar + main */
 .sikshya-archive-courses__layout {
   display: grid;

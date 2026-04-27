@@ -6,7 +6,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { BulkActionsBar } from '../components/shared/list/BulkActionsBar';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListSearchToolbar } from '../components/shared/list/ListSearchToolbar';
-import { ButtonPrimary } from '../components/shared/buttons';
+import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { CourseFilterSelect } from '../components/shared/CourseFilterSelect';
 import { FieldHint } from '../components/shared/FieldHint';
 import { DataTable, type Column } from '../components/shared/DataTable';
@@ -47,13 +47,16 @@ type DripNotifStatus = {
   ok?: boolean;
   drip_addon_enabled?: boolean;
   drip_notifications_addon_enabled?: boolean;
+  drip_notification_mode?: 'per_lesson' | 'digest' | string;
   next_drip_run_unix?: number;
   next_drip_run_iso?: string;
   note?: string;
   template_lesson_unlock_enabled?: boolean;
   template_course_unlock_enabled?: boolean;
+  template_lesson_digest_enabled?: boolean;
   lesson_unlock_email_active?: boolean;
   course_unlock_email_active?: boolean;
+  lesson_digest_email_active?: boolean;
 };
 
 /**
@@ -211,6 +214,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
   const [editorDelayDays, setEditorDelayDays] = useState<string>('7');
   const [editorUnlockDate, setEditorUnlockDate] = useState<string>('');
   const [editorSaving, setEditorSaving] = useState(false);
+  const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     if (!editorOpen) {
@@ -226,6 +230,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
     setEditorRuleType(rt);
     setEditorDelayDays(rt === 'delay_days' ? String(editing?.rule_value ?? '7') : '7');
     setEditorUnlockDate(rt === 'date' ? String(editing?.rule_value ?? '') : '');
+    setEditorStep(cid > 0 ? 2 : 1);
   }, [editorOpen, editing, courseId]);
 
   const editorLessonsLoader = useCallback(async () => {
@@ -242,6 +247,30 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
     return getSikshyaApi().get<DripNotifStatus>(SIKSHYA_ENDPOINTS.pro.dripNotificationsStatus);
   }, [notifyEnabled]);
   const notifyQ = useAsyncData(notifyLoader, [notifyEnabled]);
+
+  const [dripEmailMode, setDripEmailMode] = useState<'per_lesson' | 'digest'>('per_lesson');
+  const [modeSaving, setModeSaving] = useState(false);
+
+  useEffect(() => {
+    const m = notifyQ.data?.drip_notification_mode;
+    if (m === 'digest' || m === 'per_lesson') {
+      setDripEmailMode(m);
+    }
+  }, [notifyQ.data?.drip_notification_mode]);
+
+  const saveDripEmailMode = async () => {
+    setModeSaving(true);
+    setToast(null);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.dripNotificationsSettings, { mode: dripEmailMode });
+      setToast({ kind: 'success', text: 'Lesson notification mode saved.' });
+      void notifyQ.refetch();
+    } catch (err) {
+      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Could not save settings' });
+    } finally {
+      setModeSaving(false);
+    }
+  };
 
   const saveRuleFromModal = async () => {
     const cid = editorCourseId;
@@ -517,8 +546,8 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
         <div className="space-y-6">
           <Modal
             open={editorOpen}
-            title={editing ? 'Edit schedule rule' : 'Add schedule rule'}
-            description="Choose a course, optionally a lesson, then set when it unlocks."
+            title={editing ? 'Edit drip schedule' : 'Create drip schedule'}
+            description="Step 1: course • Step 2: scope • Step 3: unlock rule"
             onClose={() => (editorSaving ? null : (setEditorOpen(false), setEditing(null)))}
             size="lg"
             footer={
@@ -527,122 +556,180 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                   type="button"
                   className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
                   onClick={() => {
-                    setEditorOpen(false);
-                    setEditing(null);
+                    if (editorSaving) return;
+                    if (editorStep === 1) {
+                      setEditorOpen(false);
+                      setEditing(null);
+                      return;
+                    }
+                    setEditorStep((s) => (s === 3 ? 2 : 1));
                   }}
                   disabled={editorSaving}
                 >
-                  Cancel
+                  {editorStep === 1 ? 'Cancel' : 'Back'}
                 </button>
-                <ButtonPrimary type="button" onClick={() => void saveRuleFromModal()} disabled={editorSaving}>
-                  {editorSaving ? 'Saving…' : 'Save rule'}
-                </ButtonPrimary>
+                {editorStep < 3 ? (
+                  <ButtonPrimary
+                    type="button"
+                    onClick={() => {
+                      if (editorSaving) return;
+                      if (editorStep === 1) {
+                        if (editorCourseId <= 0) {
+                          setToast({ kind: 'error', text: 'Pick the course first.' });
+                          return;
+                        }
+                        setEditorStep(2);
+                        return;
+                      }
+                      if (editorScope === 'lesson' && editorLessonId <= 0) {
+                        setToast({ kind: 'error', text: 'Pick the lesson this schedule applies to.' });
+                        return;
+                      }
+                      setEditorStep(3);
+                    }}
+                    disabled={editorSaving}
+                  >
+                    Next
+                  </ButtonPrimary>
+                ) : (
+                  <ButtonPrimary type="button" onClick={() => void saveRuleFromModal()} disabled={editorSaving}>
+                    {editorSaving ? 'Saving…' : editing ? 'Save changes' : 'Create schedule'}
+                  </ButtonPrimary>
+                )}
               </div>
             }
           >
-            <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
-              <div className="flex min-h-0 flex-col sm:col-span-2">
-                <CourseFilterSelect
-                  enabled={enabled}
-                  value={editorCourseId}
-                  onChange={(id) => {
-                    setEditorCourseId(id);
-                    setEditorLessonId(0);
-                  }}
-                  allowClear={false}
-                  fieldLayout="compact"
-                  dropdownZIndex={11050}
-                  allLabel="Search and select a course…"
-                  label="Course"
-                  hint="Use the search field in the dropdown to find a course (same as the list filter)."
-                />
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {(['Course', 'Scope', 'Unlock rule'] as const).map((label, idx) => {
+                  const step = (idx + 1) as 1 | 2 | 3;
+                  const active = step === editorStep;
+                  return (
+                    <span
+                      key={label}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        active
+                          ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-200'
+                          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                      }`}
+                    >
+                      {step}. {label}
+                    </span>
+                  );
+                })}
               </div>
 
-              <div className="flex min-h-0 flex-col">
-                <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
-                  Scope
-                  <select
-                    value={editorScope}
-                    onChange={(e) => {
-                      const next = e.target.value as 'course' | 'lesson';
-                      setEditorScope(next);
-                      if (next === 'course') setEditorLessonId(0);
+              {editorStep === 1 ? (
+                <div className="space-y-3">
+                  <CourseFilterSelect
+                    enabled={enabled}
+                    value={editorCourseId}
+                    onChange={(id) => {
+                      setEditorCourseId(id);
+                      setEditorLessonId(0);
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                  >
-                    <option value="course">Whole course</option>
-                    <option value="lesson">Specific lesson</option>
-                  </select>
-                </label>
-                <div className="min-h-0 flex-1" aria-hidden />
-                <FieldHint />
-              </div>
-
-              <div className="flex min-h-0 flex-col">
-                <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
-                  Lesson
-                  <select
-                    value={editorLessonId}
-                    onChange={(e) => setEditorLessonId(Number(e.target.value))}
-                    disabled={editorScope !== 'lesson' || editorCourseId <= 0}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                  >
-                    <option value={0}>
-                      {editorCourseId <= 0 ? 'Pick a course first' : editorLessonsQ.loading ? 'Loading lessons…' : '— Select lesson —'}
-                    </option>
-                    {editorLessons.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className="min-h-0 flex-1" aria-hidden />
-                <FieldHint />
-              </div>
-
-              <div className="flex min-h-0 flex-col">
-                <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
-                  Unlock rule
-                  <select
-                    value={editorRuleType}
-                    onChange={(e) => setEditorRuleType(e.target.value as DripRuleType)}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                  >
-                    <option value="delay_days">After enrollment (days)</option>
-                    <option value="date">On a fixed date</option>
-                  </select>
-                </label>
-                <div className="min-h-0 flex-1" aria-hidden />
-                <FieldHint />
-              </div>
-
-              {editorRuleType === 'delay_days' ? (
-                <div className="flex min-h-0 flex-col">
-                  <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
-                    Days after enrollment
-                    <input
-                      type="number"
-                      min={0}
-                      step={1}
-                      value={editorDelayDays}
-                      onChange={(e) => setEditorDelayDays(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-                    />
-                  </label>
-                  <div className="min-h-0 flex-1" aria-hidden />
-                  <FieldHint />
+                    allowClear={false}
+                    fieldLayout="compact"
+                    dropdownZIndex={11050}
+                    allLabel="Search and select a course…"
+                    label="Course"
+                    hint="Pick the course you want to schedule. You can add multiple schedules per course."
+                  />
                 </div>
-              ) : (
-                <div className="flex min-h-0 flex-col sm:col-span-2">
-                  <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">Unlock date</label>
-                  <div className="mt-1 shrink-0">
-                    <DateTimePickerField value={editorUnlockDate} onChange={setEditorUnlockDate} />
+              ) : null}
+
+              {editorStep === 2 ? (
+                <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
+                  <div className="flex min-h-0 flex-col">
+                    <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
+                      Scope
+                      <select
+                        value={editorScope}
+                        onChange={(e) => {
+                          const next = e.target.value as 'course' | 'lesson';
+                          setEditorScope(next);
+                          if (next === 'course') setEditorLessonId(0);
+                        }}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value="course">Whole course</option>
+                        <option value="lesson">Specific lesson</option>
+                      </select>
+                    </label>
+                    <FieldHint />
                   </div>
-                  <div className="min-h-0 flex-1" aria-hidden />
-                  <FieldHint />
+
+                  <div className="flex min-h-0 flex-col">
+                    <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
+                      Lesson
+                      <select
+                        value={editorLessonId}
+                        onChange={(e) => setEditorLessonId(Number(e.target.value))}
+                        disabled={editorScope !== 'lesson' || editorCourseId <= 0}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value={0}>
+                          {editorCourseId <= 0
+                            ? 'Pick a course first'
+                            : editorLessonsQ.loading
+                              ? 'Loading lessons…'
+                              : '— Select lesson —'}
+                        </option>
+                        {editorLessons.map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <FieldHint />
+                  </div>
                 </div>
-              )}
+              ) : null}
+
+              {editorStep === 3 ? (
+                <div className="grid gap-4 sm:grid-cols-2 sm:items-stretch">
+                  <div className="flex min-h-0 flex-col">
+                    <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
+                      Unlock rule
+                      <select
+                        value={editorRuleType}
+                        onChange={(e) => setEditorRuleType(e.target.value as DripRuleType)}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value="delay_days">After enrollment (days)</option>
+                        <option value="date">On a fixed date</option>
+                      </select>
+                    </label>
+                    <FieldHint />
+                  </div>
+
+                  {editorRuleType === 'delay_days' ? (
+                    <div className="flex min-h-0 flex-col">
+                      <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">
+                        Days after enrollment
+                        <input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={editorDelayDays}
+                          onChange={(e) => setEditorDelayDays(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        />
+                      </label>
+                      <FieldHint />
+                    </div>
+                  ) : (
+                    <div className="flex min-h-0 flex-col sm:col-span-2">
+                      <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">Unlock date</label>
+                      <div className="mt-1 shrink-0">
+                        <DateTimePickerField value={editorUnlockDate} onChange={setEditorUnlockDate} />
+                      </div>
+                      <FieldHint />
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           </Modal>
 
@@ -913,6 +1000,48 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                               ? 'Off (template disabled)'
                               : 'Off (plan)'}
                       </dd>
+                    </div>
+                    <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
+                      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Digest email (multi-lesson unlock)
+                      </dt>
+                      <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
+                        {notifyQ.data?.lesson_digest_email_active
+                          ? 'On'
+                          : notifyQ.data?.drip_notifications_addon_enabled === false
+                            ? 'Off (Drip notifications add-on)'
+                            : notifyQ.data?.template_lesson_digest_enabled === false
+                              ? 'Off (template disabled)'
+                              : 'Off (plan)'}
+                      </dd>
+                    </div>
+                    <div className="sm:col-span-2 rounded-lg border border-slate-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <label className="block text-sm text-slate-800 dark:text-slate-100">
+                          Lesson unlock emails
+                          <select
+                            className="mt-1.5 block w-full max-w-md rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                            value={dripEmailMode}
+                            onChange={(e) => setDripEmailMode(e.target.value === 'digest' ? 'digest' : 'per_lesson')}
+                            disabled={modeSaving}
+                          >
+                            <option value="per_lesson">One email per unlocked lesson (classic)</option>
+                            <option value="digest">Digest: one email per cron pass (recommended)</option>
+                          </select>
+                          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            Digest uses the <strong className="font-medium">Drip: lessons unlocked (digest)</strong> template.
+                            Per-lesson uses <strong className="font-medium">Drip: lesson unlocked</strong>.
+                          </p>
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <ButtonSecondary type="button" disabled={modeSaving} onClick={() => void notifyQ.refetch()}>
+                            Refresh status
+                          </ButtonSecondary>
+                          <ButtonPrimary type="button" disabled={modeSaving} onClick={() => void saveDripEmailMode()}>
+                            {modeSaving ? 'Saving…' : 'Save mode'}
+                          </ButtonPrimary>
+                        </div>
+                      </div>
                     </div>
                     {notifyQ.data?.note ? (
                       <p className="sm:col-span-2 text-xs text-slate-500 dark:text-slate-400">{notifyQ.data.note}</p>

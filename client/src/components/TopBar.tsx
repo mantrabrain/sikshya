@@ -1,9 +1,9 @@
 import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
-import type React from 'react';
 import { NavIcon } from './NavIcon';
 
 type Props = {
   title: string;
+  /** Accepted for API compatibility; not shown in the top chrome (page titles only). */
   subtitle?: string;
   badge?: string;
   userName: string;
@@ -12,15 +12,15 @@ type Props = {
   toolsHref?: string;
   isDark: boolean;
   onToggleDark: () => void;
-  branding?: {
-    topbarBg?: string;
-    topbarText?: string;
-  };
 };
 
+/**
+ * Top chrome always uses default light/dark shell styling. White-label colours apply to
+ * the sidebar and to the global `brand-*` accent (see {@link applyAdminBrandThemeToRoot}), not here.
+ */
 export function TopBar({
   title,
-  subtitle,
+  subtitle: _subtitle,
   badge,
   userName,
   userAvatarUrl,
@@ -28,20 +28,11 @@ export function TopBar({
   toolsHref,
   isDark,
   onToggleDark,
-  branding,
 }: Props) {
   const wpIndex = `${adminUrl.replace(/\/?$/, '/')}index.php`;
-  const topbarStyle: React.CSSProperties | undefined =
-    branding?.topbarBg || branding?.topbarText
-      ? {
-          backgroundColor: branding?.topbarBg || undefined,
-          color: branding?.topbarText || undefined,
-        }
-      : undefined;
 
   return (
     <header
-      style={topbarStyle}
       className={`sticky top-0 z-20 flex shrink-0 items-center border-b border-slate-200 bg-white px-6 dark:border-slate-800 dark:bg-slate-900 ${SHELL_HEADER_MIN_CLASS}`}
     >
       <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -49,16 +40,13 @@ export function TopBar({
           <h1 className="truncate text-xl font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">
             {title}
           </h1>
-          {(subtitle || badge) && (
+          {badge ? (
             <p className="mt-1 text-sm leading-snug text-slate-500 dark:text-slate-400">
-              {subtitle}
-              {badge ? (
-                <span className="ml-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
-                  {badge}
-                </span>
-              ) : null}
+              <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
+                {badge}
+              </span>
             </p>
-          )}
+          ) : null}
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">

@@ -17,6 +17,10 @@ $sheet_href = esc_url($plugin->getAssetUrl('css/account-shell.css')) . '?ver=' .
 
 $view = $page_model->getView();
 $partial_path = AccountPageService::resolvePartialPath($page_model);
+
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+$label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz', 'sikshya'), 'frontend') : __('Quiz', 'sikshya');
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -53,17 +57,26 @@ $partial_path = AccountPageService::resolvePartialPath($page_model);
             </a>
             <a class="<?php echo $view === 'quiz-attempts' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getQuizAttemptsUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◎</span>
-                <?php esc_html_e('Quiz attempts', 'sikshya'); ?>
+                <?php
+                echo esc_html(sprintf(
+                    /* translators: %s: singular label (e.g. Quiz) */
+                    __('%s attempts', 'sikshya'),
+                    $label_quiz
+                ));
+                ?>
             </a>
             <a href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">▤</span>
-                <?php esc_html_e('Courses', 'sikshya'); ?>
+                <?php echo esc_html($label_courses); ?>
             </a>
             <a href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
                 <?php esc_html_e('Learning hub', 'sikshya'); ?>
             </a>
             <p class="sik-acc-nav__label"><?php esc_html_e('Commerce', 'sikshya'); ?></p>
+            <p class="sik-acc-nav__hint">
+                <?php esc_html_e('Cart holds courses before you pay. Checkout is the secure payment step. Receipts live under Payments.', 'sikshya'); ?>
+            </p>
             <a class="<?php echo $view === 'payments' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getPaymentsUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">≡</span>
                 <?php esc_html_e('Payments', 'sikshya'); ?>

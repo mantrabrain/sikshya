@@ -827,7 +827,14 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   ) : (
                     <>
                       {modalLessons
-                        .filter((l) => l.id !== modalLessonId)
+                        .filter((l) => {
+                          if (l.id === modalLessonId) return false;
+                          const idx = modalLessons.findIndex((x) => x.id === l.id);
+                          const selfIdx = modalLessons.findIndex((x) => x.id === modalLessonId);
+                          // Backend rejects forward dependencies; keep UI aligned by showing only earlier lessons.
+                          if (idx >= 0 && selfIdx >= 0) return idx < selfIdx;
+                          return true;
+                        })
                         .map((l) => {
                           const checked = modalLessonPrereqs.includes(l.id);
                           return (
@@ -858,7 +865,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                     </>
                   )}
                 </div>
-                <FieldHint>Pick lessons below that learners must complete before the lesson above unlocks.</FieldHint>
+                <FieldHint>Only lessons earlier in the curriculum can be prerequisites.</FieldHint>
               </div>
             </div>
           </Modal>

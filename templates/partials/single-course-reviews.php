@@ -15,6 +15,7 @@ $ratings_enabled = !empty($reviews_vm['ratings_enabled']);
 $reviews_enabled = !empty($reviews_vm['reviews_enabled']);
 $aggregate = is_array($reviews_vm['aggregate'] ?? null) ? $reviews_vm['aggregate'] : ['count' => 0, 'average' => 0, 'breakdown' => []];
 $items = is_array($reviews_vm['items'] ?? null) ? $reviews_vm['items'] : [];
+$sort = sanitize_key((string) ($reviews_vm['sort'] ?? 'newest'));
 $user_review = is_array($reviews_vm['user_review'] ?? null) ? $reviews_vm['user_review'] : null;
 $can_review = !empty($reviews_vm['can_review']);
 $cannot_reason = (string) ($reviews_vm['cannot_review_reason'] ?? '');
@@ -24,6 +25,9 @@ $avg = (float) ($aggregate['average'] ?? 0);
 $count = (int) ($aggregate['count'] ?? 0);
 $breakdown = is_array($aggregate['breakdown'] ?? null) ? $aggregate['breakdown'] : [];
 $approval_mode = (string) ($reviews_vm['approval_mode'] ?? 'auto');
+
+$label_student = function_exists('sikshya_label') ? sikshya_label('student', __('Student', 'sikshya'), 'frontend') : __('Student', 'sikshya');
+$label_students = function_exists('sikshya_label_plural') ? sikshya_label_plural('student', 'students', __('Students', 'sikshya'), 'frontend') : __('Students', 'sikshya');
 
 $data_attrs = sprintf(
     'data-course-id="%d" data-rest-url="%s" data-nonce="%s" data-ratings-enabled="%s" data-reviews-enabled="%s" data-approval-mode="%s"',
@@ -43,7 +47,7 @@ $data_attrs = sprintf(
 >
     <div class="sikshya-course-lp__section-head">
         <h2 id="sikshya-reviews-heading" class="sikshya-course-lp__heading">
-            <?php esc_html_e('Student reviews', 'sikshya'); ?>
+            <?php echo esc_html(sprintf(__('%s reviews', 'sikshya'), $label_student)); ?>
         </h2>
     </div>
 
@@ -85,6 +89,19 @@ $data_attrs = sprintf(
                     </li>
                 <?php endfor; ?>
             </ul>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($count > 0) : ?>
+        <div class="sikshya-course-reviews__toolbar">
+            <label class="sikshya-course-reviews__sort">
+                <span class="sikshya-course-reviews__field-label"><?php esc_html_e('Sort by', 'sikshya'); ?></span>
+                <select class="sikshya-input" data-sikshya-review-sort>
+                    <option value="newest" <?php selected($sort, 'newest'); ?>><?php esc_html_e('Newest', 'sikshya'); ?></option>
+                    <option value="highest" <?php selected($sort, 'highest'); ?>><?php esc_html_e('Highest rating', 'sikshya'); ?></option>
+                    <option value="lowest" <?php selected($sort, 'lowest'); ?>><?php esc_html_e('Lowest rating', 'sikshya'); ?></option>
+                </select>
+            </label>
         </div>
     <?php endif; ?>
 
@@ -133,7 +150,13 @@ $data_attrs = sprintf(
             </div>
         <?php elseif (!$can_review) : ?>
             <div class="sikshya-course-reviews__notice sikshya-course-reviews__notice--muted">
-                <?php echo esc_html($cannot_reason !== '' ? $cannot_reason : __('Only enrolled students can leave a review.', 'sikshya')); ?>
+                <?php
+                echo esc_html($cannot_reason !== '' ? $cannot_reason : sprintf(
+                    /* translators: %s: plural label (e.g. students) */
+                    __('Only enrolled %s can leave a review.', 'sikshya'),
+                    strtolower($label_students)
+                ));
+                ?>
             </div>
         <?php endif; ?>
 
@@ -229,6 +252,23 @@ $data_attrs = sprintf(
                         <div class="sikshya-course-reviews__item-body sikshya-prose">
                             <?php echo wp_kses_post(wpautop((string) $item['review_text'])); ?>
                         </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($item['reply']) && is_array($item['reply']) && !empty($item['reply']['text'])) : ?>
+                        <div class="sikshya-course-reviews__reply">
+                            <div class="sikshya-course-reviews__reply-label">
+                                <?php esc_html_e('Official reply', 'sikshya'); ?>
+                            </div>
+                            <div class="sikshya-course-reviews__reply-body sikshya-prose">
+                                <?php echo wp_kses_post(wpautop((string) $item['reply']['text'])); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($is_logged_in) : ?>
+                        <button type="button" class="sikshya-btn sikshya-btn--ghost sikshya-course-reviews__report" data-sikshya-review-report>
+                            <?php esc_html_e('Report', 'sikshya'); ?>
+                        </button>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

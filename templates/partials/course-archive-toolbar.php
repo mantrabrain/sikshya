@@ -17,6 +17,8 @@ if (!$archive_url) {
     $archive_url = home_url('/');
 }
 $search_on = \Sikshya\Services\CourseFrontendSettings::isCourseSearchEnabled();
+
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
 <div class="sikshya-archive-toolbar">
@@ -34,14 +36,16 @@ $search_on = \Sikshya\Services\CourseFrontendSettings::isCourseSearchEnabled();
         <?php endif; ?>
         <input type="hidden" name="sikshya_sort" value="<?php echo esc_attr($f['sort']); ?>" />
         <input type="hidden" name="sikshya_per_page" value="<?php echo esc_attr((string) $f['per_page']); ?>" />
-        <label class="sikshya-sr-only" for="sikshya-archive-search"><?php esc_html_e('Search courses', 'sikshya'); ?></label>
+        <label class="sikshya-sr-only" for="sikshya-archive-search">
+            <?php echo esc_html(sprintf(__('Search %s', 'sikshya'), strtolower($label_courses))); ?>
+        </label>
         <input
             id="sikshya-archive-search"
             class="sikshya-archive-toolbar__search-input"
             type="search"
             name="s"
             value="<?php echo esc_attr($f['s']); ?>"
-            placeholder="<?php esc_attr_e('Search courses…', 'sikshya'); ?>"
+            placeholder="<?php echo esc_attr(sprintf(__('Search %s…', 'sikshya'), strtolower($label_courses))); ?>"
         />
         <button type="submit" class="sikshya-archive-toolbar__search-btn sikshya-btn sikshya-btn--primary sikshya-btn--sm"><?php esc_html_e('Search', 'sikshya'); ?></button>
     </form>

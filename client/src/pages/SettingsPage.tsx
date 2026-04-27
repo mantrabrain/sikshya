@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AppShell } from '../components/AppShell';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
@@ -15,6 +16,7 @@ import { CourseSettingsTab } from '../components/CourseSettingsTab';
 import { EnrollmentSettingsTab } from '../components/EnrollmentSettingsTab';
 import { isTruthyCheckboxValue, renderSettingsField } from './settingsRenderField';
 import { normalizeTabSections } from './settingsTabUtils';
+import { appViewHref } from '../lib/appUrl';
 
 type SettingsSchema = Record<string, SettingsSection[]>;
 
@@ -54,14 +56,20 @@ const TAB_META: SettingsTabMeta[] = [
   { id: 'quizzes', label: 'Quizzes', description: 'Scoring, timing, and quiz behavior.', icon: 'clipboard' },
   { id: 'assignments', label: 'Assignments', description: 'Submission and grading defaults.', icon: 'badge' },
   { id: 'progress', label: 'Progress', description: 'Quiz and assignment tracking.', icon: 'chart' },
-  { id: 'certificates', label: 'Certificates', description: 'Templates and issuance rules.', icon: 'badge' },
+  {
+    id: 'certificates',
+    label: 'Certificates',
+    description: 'Issuance and automation. Edit layouts in Certificates → Templates (builder).',
+    icon: 'badge',
+  },
   { id: 'students', label: 'Students', description: 'Learner experience and access.', icon: 'users' },
   { id: 'instructors', label: 'Instructors', description: 'Instructor permissions and workflow.', icon: 'users' },
   { id: 'notifications', label: 'Notifications', description: 'In-app and email notifications.', icon: 'helpCircle' },
   {
     id: 'integrations',
-    label: 'Connected services',
-    description: 'reCAPTCHA, analytics, and other third-party services bundled into Sikshya. (Outbound automation lives under Integrations in the sidebar.)',
+    label: 'Marketing tags',
+    description:
+      'Google Analytics and Meta Pixel IDs on learner-facing pages. Webhooks, API keys, and outbound automation are under Integrations in the sidebar — not here.',
     icon: 'puzzle',
   },
   { id: 'permalinks', label: 'Permalinks', description: 'Cart, checkout, account, and content URL bases.', icon: 'tag' },
@@ -252,7 +260,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null); // kept for inline header hint
   const [toast, setToast] = useState<ToastState | null>(null);
 
   const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
@@ -261,7 +268,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
     if (!values.data) return;
     setDraft(values.data);
     setInitialValues(values.data);
-    setSaveMsg(null);
     setSaveError(null);
     setToast(null);
   }, [values.data, tab]);
@@ -294,7 +300,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
   const onSave = async () => {
     setSaving(true);
     setSaveError(null);
-    setSaveMsg(null);
     setToast(null);
     try {
       const res = await getSikshyaApi().post<{ success: boolean; message?: string; data?: { values?: Record<string, unknown> } }>(
@@ -308,7 +313,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
       setDraft(next);
       setInitialValues(next);
       const msg = res.message || 'Settings saved.';
-      setSaveMsg(msg);
       setToast({ open: true, kind: 'success', title: 'Saved', message: msg });
     } catch (e) {
       setSaveError(e);
@@ -335,7 +339,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
     }
     setSaving(true);
     setSaveError(null);
-    setSaveMsg(null);
     setToast(null);
     try {
       const res = await getSikshyaApi().post<{ success: boolean; message?: string }>(SIKSHYA_ENDPOINTS.settings.reset, {
@@ -346,7 +349,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
       }
       await values.refetch();
       const msg = res.message || 'Settings reset.';
-      setSaveMsg(msg);
       setToast({ open: true, kind: 'success', title: 'Reset', message: msg });
     } catch (e) {
       setSaveError(e);
@@ -370,7 +372,9 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
     const [open, setOpen] = useState<string | null>(gateways[0]?.id || 'offline');
 
     const byTitle = (t: string) => tabSchema.find((s) => (s.title || '').toLowerCase().trim() === t.toLowerCase().trim());
-    const secGateways = byTitle('Payment Gateways');
+    /** Prefer stable `section_key` from PHP so translated titles do not break the gateway manager. */
+    const secGateways =
+      tabSchema.find((s) => (s.section_key || '') === 'payment_gateways') || byTitle('Payment Gateways');
 
     const gatewayFields = Array.isArray(secGateways?.fields) ? secGateways!.fields! : [];
 
@@ -644,49 +648,57 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
       userAvatarUrl={config.user.avatarUrl}
       branding={config.branding}
       title={title}
-      subtitle="Global settings"
+      subtitle="Site-wide defaults for every course"
     >
-      {toast?.open ? (
-        <div className="fixed right-6 top-6 z-[9999] w-[360px] max-w-[calc(100vw-48px)]">
-          <div
-            className={`rounded-2xl border px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${
-              toast.kind === 'success'
-                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-100'
-                : toast.kind === 'error'
-                  ? 'border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-100'
-                  : 'border-slate-200 bg-white/95 text-slate-900 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100'
-            }`}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl ${
-                  toast.kind === 'success'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
-                    : toast.kind === 'error'
-                      ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200'
-                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
-                }`}
-              >
-                <NavIcon name={toast.kind === 'success' ? 'badge' : toast.kind === 'error' ? 'helpCircle' : 'helpCircle'} className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">{toast.title}</div>
-                {toast.message ? <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div> : null}
+      {toast?.open && typeof document !== 'undefined'
+        ? createPortal(
+            <div className="pointer-events-none fixed inset-x-0 top-0 z-[100000] flex justify-end p-4 pt-14 sm:p-6 sm:pt-16">
+              <div className="pointer-events-auto w-full max-w-[min(360px,calc(100vw-2rem))]">
+                <div
+                  className={`rounded-2xl border px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${
+                    toast.kind === 'success'
+                      ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-100'
+                      : toast.kind === 'error'
+                        ? 'border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-100'
+                        : 'border-slate-200 bg-white/95 text-slate-900 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100'
+                  }`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                        toast.kind === 'success'
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+                          : toast.kind === 'error'
+                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200'
+                            : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                      }`}
+                    >
+                      <NavIcon
+                        name={toast.kind === 'success' ? 'badge' : toast.kind === 'error' ? 'helpCircle' : 'helpCircle'}
+                        className="h-5 w-5"
+                      />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold">{toast.title}</div>
+                      {toast.message ? <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div> : null}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setToast(null)}
+                      className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
+                      aria-label="Dismiss"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setToast(null)}
-                className="rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
-                aria-label="Dismiss"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+            </div>,
+            document.body
+          )
+        : null}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="min-w-0">
           <div className="overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
@@ -697,14 +709,36 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Settings
+                    Site-wide settings
                   </div>
-                  <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Sikshya configuration</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Core LMS defaults</p>
                   <p className="mt-1 text-xs leading-snug text-slate-500 dark:text-slate-400">
-                    Manage global defaults and behavior across the LMS.
+                    These tabs apply to your whole catalog. Add-on-only options live on each feature’s screen (often under
+                    “Add-on defaults”).
                   </p>
                 </div>
               </div>
+            </div>
+            <div className="border-b border-slate-200/60 px-4 py-3 dark:border-slate-800/70">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Where else to look
+              </p>
+              <ul className="mt-2 space-y-2 text-xs leading-snug text-slate-600 dark:text-slate-300">
+                <li>
+                  <span className="font-medium text-slate-800 dark:text-slate-100">Integrations hub</span> — webhooks, API
+                  keys, live classes workspace, SCORM, email marketing sync.{' '}
+                  <a
+                    href={appViewHref(config, 'integrations-hub')}
+                    className="font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                  >
+                    Open Integrations
+                  </a>
+                </li>
+                <li>
+                  <span className="font-medium text-slate-800 dark:text-slate-100">One course</span> — layout, pricing,
+                  instructors: Course builder for that course.
+                </li>
+              </ul>
             </div>
             {/* No inner scrollbar: let the page scroll naturally. */}
             <nav className="p-2" aria-label="Settings sections">
@@ -766,9 +800,6 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                     </div>
                     <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{tabMeta.label} settings</h2>
                     <p className="mt-1 text-sm text-slate-400/90 dark:text-slate-500/80">{tabMeta.description}</p>
-                    {saveMsg ? (
-                      <p className="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">{saveMsg}</p>
-                    ) : null}
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:min-w-[200px]">
                     <button
@@ -799,7 +830,7 @@ export function SettingsPage(props: { config: SikshyaReactConfig; title: string 
                   ) : tab === 'courses' ? (
                     <CourseSettingsTab tabSchema={tabSchema} renderField={renderField} />
                   ) : tab === 'enrollment' ? (
-                    <EnrollmentSettingsTab tabSchema={tabSchema} renderField={renderField} />
+                    <EnrollmentSettingsTab tabSchema={tabSchema} renderField={renderField} draft={draft} />
                   ) : (
                     <div className="space-y-8">
                       {tabSchema.map((sec, i) => {

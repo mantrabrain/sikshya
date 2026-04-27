@@ -13,6 +13,7 @@ use Sikshya\Admin\CourseBuilder\BundleBuilderFieldFilter;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\ReactAdminConfig;
+use Sikshya\Commerce\CheckoutService;
 use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Commerce\OrderFulfillmentService;
 use Sikshya\Core\Plugin;
@@ -20,6 +21,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Services\CategoryService;
 use Sikshya\Services\CourseBuilderService;
 use Sikshya\Services\CourseCurriculumActions;
+use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Database\Repositories\AdminTablesRepository;
 use Sikshya\Database\Repositories\PaymentRepository;
@@ -30,10 +32,10 @@ use Sikshya\Admin\Controllers\SampleDataController;
 use Sikshya\Addons\Addons;
 use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Licensing\Pro;
-use Sikshya\Services\EmailNotificationService;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\SystemInfoService;
+use Sikshya\Services\InstructorApplicationsService;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -290,14 +292,6 @@ class AdminRestRoutes
             ],
         ]);
 
-        register_rest_route($namespace, '/settings/email/test-delivery', [
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'postSettingsEmailTestDelivery'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-            ],
-        ]);
-
         register_rest_route($namespace, '/tools', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -430,6 +424,63 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/admin/instructor-applications', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'listInstructorApplications'],
+                'permission_callback' => [$this, 'permissionInstructorApplications'],
+                'args' => [
+                    'page' => [
+                        'type' => 'integer',
+                        'default' => 1,
+                        'minimum' => 1,
+                    ],
+                    'per_page' => [
+                        'type' => 'integer',
+                        'default' => 20,
+                        'minimum' => 1,
+                        'maximum' => 100,
+                    ],
+                    'status' => [
+                        'type' => 'string',
+                        'sanitize_callback' => 'sanitize_key',
+                    ],
+                    'search' => [
+                        'type' => 'string',
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/instructor-applications/(?P<id>\\d+)/approve', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'approveInstructorApplication'],
+                'permission_callback' => [$this, 'permissionInstructorApplications'],
+                'args' => [
+                    'id' => [
+                        'required' => true,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/instructor-applications/(?P<id>\\d+)/reject', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'rejectInstructorApplication'],
+                'permission_callback' => [$this, 'permissionInstructorApplications'],
+                'args' => [
+                    'id' => [
+                        'required' => true,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/quiz-attempts', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -540,6 +591,11 @@ class AdminRestRoutes
                     ],
                 ],
             ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'createAdminManualOrder'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
         ]);
 
         register_rest_route($namespace, '/admin/orders/(?P<id>\d+)/mark-paid', [
@@ -559,6 +615,14 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'createAdminCoupon'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/coupons/(?P<id>\\d+)', [
+            [
+                'methods' => WP_REST_Server::EDITABLE,
+                'callback' => [$this, 'patchAdminCoupon'],
                 'permission_callback' => [$this, 'permissionAdmin'],
             ],
         ]);
@@ -1410,66 +1474,6 @@ class AdminRestRoutes
     }
 
     /**
-     * Send a test HTML message through wp_mail (respects From/reply, optional SMTP, branded wrappers when licensed + add-on on).
-     */
-    public function postSettingsEmailTestDelivery(WP_REST_Request $request)
-    {
-        if (!Pro::feature('email_advanced_customization')) {
-            return Pro::restFeatureRequired('email_advanced_customization');
-        }
-        if (!Addons::isEnabled('email_advanced_customization')) {
-            return Pro::restAddonDisabled('email_advanced_customization');
-        }
-
-        $p = $this->jsonBody($request);
-        $raw = isset($p['to']) ? (string) $p['to'] : '';
-        $to = sanitize_email($raw);
-
-        if ($to === '') {
-            $user = wp_get_current_user();
-            $to = $user && !empty($user->user_email) ? (string) $user->user_email : '';
-        }
-
-        if ($to === '' || !is_email($to)) {
-            return new WP_REST_Response(
-                [
-                    'success' => false,
-                    'message' => __('Enter a valid recipient email address, or leave the field empty to use your account email.', 'sikshya'),
-                ],
-                400
-            );
-        }
-
-        $mailer = $this->plugin->getService('mailer');
-        if (!$mailer instanceof EmailNotificationService) {
-            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable.', 'sikshya')], 500);
-        }
-
-        $ok = $mailer->sendTestDeliveryEmail($to);
-        if (!$ok) {
-            return new WP_REST_Response(
-                [
-                    'success' => false,
-                    'message' => __('Could not send the test email. Check From / SMTP settings and your host mail logs.', 'sikshya'),
-                ],
-                500
-            );
-        }
-
-        return new WP_REST_Response(
-            [
-                'success' => true,
-                'message' => sprintf(
-                    /* translators: %s: recipient email address */
-                    __('Test email sent to %s.', 'sikshya'),
-                    $to
-                ),
-            ],
-            200
-        );
-    }
-
-    /**
      * Auto-save a single setup wizard step (drives “Next” + shareable ?step= URLs).
      */
     public function saveSetupWizardStep(WP_REST_Request $request)
@@ -1932,6 +1936,80 @@ class AdminRestRoutes
     }
 
     /**
+     * @return bool|WP_Error
+     */
+    public function permissionInstructorApplications(WP_REST_Request $request)
+    {
+        if (current_user_can('manage_sikshya') || current_user_can('manage_options')) {
+            return true;
+        }
+
+        $jwt = JwtAuthService::bearerFromRequest($request);
+        if ($jwt === '') {
+            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
+        }
+
+        $svc = $this->plugin->getService('jwtAuth');
+        if (!$svc instanceof JwtAuthService) {
+            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
+        }
+
+        $uid = $svc->validateToken($jwt);
+        if (is_wp_error($uid)) {
+            return $uid;
+        }
+
+        wp_set_current_user((int) $uid);
+
+        return current_user_can('manage_sikshya') || current_user_can('manage_options')
+            ? true
+            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
+    }
+
+    public function listInstructorApplications(WP_REST_Request $request): WP_REST_Response
+    {
+        $page = max(1, (int) $request->get_param('page'));
+        $per_page = max(1, min(100, (int) $request->get_param('per_page')));
+        $status = (string) $request->get_param('status');
+        $search = (string) $request->get_param('search');
+
+        $svc = new InstructorApplicationsService();
+        $out = $svc->listForRest($page, $per_page, $status, $search);
+
+        return new WP_REST_Response($out, 200);
+    }
+
+    public function approveInstructorApplication(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        $svc = new InstructorApplicationsService();
+        $res = $svc->approve($id);
+        if (is_wp_error($res)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => $res->get_error_message()],
+                (int) ($res->get_error_data()['status'] ?? 400)
+            );
+        }
+
+        return new WP_REST_Response(['ok' => true, 'message' => __('Instructor approved.', 'sikshya')], 200);
+    }
+
+    public function rejectInstructorApplication(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        $svc = new InstructorApplicationsService();
+        $res = $svc->reject($id);
+        if (is_wp_error($res)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => $res->get_error_message()],
+                (int) ($res->get_error_data()['status'] ?? 400)
+            );
+        }
+
+        return new WP_REST_Response(['ok' => true, 'message' => __('Application rejected.', 'sikshya')], 200);
+    }
+
+    /**
      * Paginated quiz attempts with learner + quiz/course labels for the React admin.
      */
     public function getAdminQuizAttempts(WP_REST_Request $request): WP_REST_Response
@@ -2146,6 +2224,112 @@ class AdminRestRoutes
     }
 
     /**
+     * Create a manual checkout order (offline gateway) for a learner — same pricing as storefront checkout.
+     * Optional {@see mark_paid} immediately fulfills enrollments (use when payment is already confirmed).
+     */
+    public function createAdminManualOrder(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $user_id = isset($params['user_id']) ? (int) $params['user_id'] : 0;
+        $course_ids_raw = $params['course_ids'] ?? [];
+        if (!is_array($course_ids_raw)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('course_ids must be an array of course post IDs.', 'sikshya')],
+                400
+            );
+        }
+
+        $course_ids = array_values(array_unique(array_filter(array_map('intval', $course_ids_raw))));
+        $coupon_code = isset($params['coupon_code']) ? sanitize_text_field((string) $params['coupon_code']) : '';
+        $bundle_id = isset($params['bundle_id']) ? (int) $params['bundle_id'] : 0;
+        $mark_paid = !empty($params['mark_paid']);
+
+        if ($user_id <= 0 || !get_user_by('id', $user_id)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Choose a valid WordPress user (the learner).', 'sikshya')],
+                400
+            );
+        }
+
+        if ($course_ids === []) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Select at least one course.', 'sikshya')],
+                400
+            );
+        }
+
+        $repo = new OrderRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Orders table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        try {
+            $checkout = new CheckoutService(
+                $this->plugin,
+                new OrderRepository(),
+                new CouponRepository()
+            );
+            $result = $checkout->createPendingOrderForCourses($user_id, $course_ids, $coupon_code, $bundle_id);
+        } catch (\InvalidArgumentException $e) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => $e->getMessage()],
+                400
+            );
+        } catch (\Throwable $e) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => $e->getMessage() ?: __('Could not create order.', 'sikshya')],
+                500
+            );
+        }
+
+        $order_id = (int) ($result['order_id'] ?? 0);
+        if ($order_id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Could not create order.', 'sikshya')],
+                500
+            );
+        }
+
+        $repo->updateOrder($order_id, ['gateway' => 'offline']);
+
+        if ($mark_paid) {
+            $course = $this->plugin->getService('course');
+            if (!$course instanceof CourseService) {
+                return new WP_REST_Response(
+                    [
+                        'ok' => false,
+                        'order_id' => $order_id,
+                        'message' => __('Order was created but could not be fulfilled: course service unavailable.', 'sikshya'),
+                    ],
+                    500
+                );
+            }
+
+            $fulfill = new OrderFulfillmentService($repo, new PaymentRepository(), $course);
+            $fulfill->fulfillPaidOrder($order_id);
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'order_id' => $order_id,
+                'mark_paid' => $mark_paid,
+                'message' => $mark_paid
+                    ? __('Order created, marked paid, and enrollments applied.', 'sikshya')
+                    : __('Manual order created as pending (offline). Use Mark paid after you confirm payment.', 'sikshya'),
+            ],
+            201
+        );
+    }
+
+    /**
      * Fulfill a pending / on-hold order (offline payments after manual verification).
      */
     public function markAdminOrderPaid(WP_REST_Request $request): WP_REST_Response
@@ -2273,5 +2457,63 @@ class AdminRestRoutes
         }
 
         return new WP_REST_Response(['ok' => true, 'id' => $id], 201);
+    }
+
+    /**
+     * Update coupon basics (code, discount, limits, status).
+     */
+    public function patchAdminCoupon(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(['ok' => false, 'message' => __('Invalid coupon id.', 'sikshya')], 400);
+        }
+
+        $repo = new \Sikshya\Database\Repositories\CouponRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'message' => __('Coupons table not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+        if (!is_array($params)) {
+            $params = [];
+        }
+
+        $data = [];
+        if (array_key_exists('code', $params)) {
+            $data['code'] = (string) $params['code'];
+        }
+        if (array_key_exists('discount_type', $params)) {
+            $data['discount_type'] = $params['discount_type'];
+        }
+        if (array_key_exists('discount_value', $params)) {
+            $data['discount_value'] = $params['discount_value'];
+        }
+        if (array_key_exists('max_uses', $params)) {
+            $data['max_uses'] = $params['max_uses'];
+        }
+        if (array_key_exists('expires_at', $params)) {
+            $data['expires_at'] = $params['expires_at'];
+        }
+        if (array_key_exists('status', $params)) {
+            $data['status'] = $params['status'];
+        }
+
+        if ($data === []) {
+            return new WP_REST_Response(['ok' => false, 'message' => __('Nothing to update.', 'sikshya')], 400);
+        }
+
+        $ok = $repo->updateAdminCoupon($id, $data);
+        if (!$ok) {
+            return new WP_REST_Response(['ok' => false, 'message' => __('Could not update coupon.', 'sikshya')], 500);
+        }
+
+        return new WP_REST_Response(['ok' => true, 'id' => $id], 200);
     }
 }

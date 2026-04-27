@@ -48,6 +48,7 @@ import {
   buildProAssignmentMeta,
   buildProLessonMetaForKind,
   buildProQuestionMeta,
+  QUIZ_ADVANCED_BANK_DRAW_HARD_MAX,
   buildProQuizMeta,
   readProAssignmentFromMeta,
   readProLessonFromMeta,
@@ -664,6 +665,7 @@ export function QuizEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded, config } = props;
   const editor = useWpContentPost('sik_quiz', postId);
   const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
+  const advQuiz = useAddonEnabled('quiz_advanced');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
@@ -681,6 +683,7 @@ export function QuizEditor(props: ContentEditorProps) {
   const [featured, setFeatured] = useState(0);
   const [editorTab, setEditorTab] = useState<'content' | 'settings' | 'questions'>('content');
   const [proQuizValues, setProQuizValues] = useState<ProQuizValues>(PRO_QUIZ_DEFAULTS);
+  const [quizAdvMaxDraw, setQuizAdvMaxDraw] = useState(QUIZ_ADVANCED_BANK_DRAW_HARD_MAX);
 
   const QUIZ_Q_DND_MIME = 'application/x-sikshya-quiz-questions-v1';
   const reorderIds = (ids: number[], fromId: number, beforeId: number | null) => {
@@ -799,7 +802,10 @@ export function QuizEditor(props: ContentEditorProps) {
         _sikshya_quiz_passing_score: Math.min(100, Math.max(0, passing)),
         _sikshya_quiz_attempts_allowed: Math.max(1, attempts),
         _sikshya_quiz_questions: quizQuestionIds,
-        ...buildProQuizMeta(proQuizValues),
+        ...buildProQuizMeta(
+          proQuizValues,
+          advQuiz.enabled && advQuiz.licenseOk ? quizAdvMaxDraw : QUIZ_ADVANCED_BANK_DRAW_HARD_MAX
+        ),
       },
     };
     try {
@@ -973,7 +979,11 @@ export function QuizEditor(props: ContentEditorProps) {
                   </select>
                 </div>
               </FormSection>
-              <ProQuizFields values={proQuizValues} onChange={setProQuizValues} />
+              <ProQuizFields
+                values={proQuizValues}
+                onChange={setProQuizValues}
+                maxRandomDrawPerQuiz={advQuiz.enabled && advQuiz.licenseOk ? quizAdvMaxDraw : QUIZ_ADVANCED_BANK_DRAW_HARD_MAX}
+              />
               <ProGradebookQuizWeightFields
                 gradeWeight={proQuizValues.gradeWeight}
                 onGradeWeightChange={(w) => setProQuizValues((v) => ({ ...v, gradeWeight: w }))}
@@ -1191,7 +1201,7 @@ export function QuestionEditor(props: ContentEditorProps) {
   const [typeMenuPos, setTypeMenuPos] = useState<{ top: number; left: number } | null>(null);
 
   const advQuiz = useAddonEnabled('quiz_advanced');
-  const advFeatureOk = isFeatureEnabled(config.licensing, 'quiz_advanced');
+  const advFeatureOk = isFeatureEnabled(config, 'quiz_advanced');
   const canUseAdvancedTypes = Boolean(advFeatureOk && advQuiz.enabled && advQuiz.licenseOk);
   const isLockedType = useCallback(
     (t: string) => {

@@ -10,6 +10,222 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Enqueue compiled block-support CSS when rendering Sikshya templates on block (FSE) themes.
+ * Mirrors Yatra's {@see yatra_block_support_styles()} so layout primitives stay styled.
+ */
+if (!function_exists('sikshya_block_support_styles')) {
+    function sikshya_block_support_styles(): void
+    {
+        if (!function_exists('wp_style_engine_get_stylesheet_from_context')) {
+            return;
+        }
+
+        $core_styles_keys = ['block-supports'];
+        $compiled = '';
+        foreach ($core_styles_keys as $style_key) {
+            $compiled .= wp_style_engine_get_stylesheet_from_context($style_key, []);
+        }
+        if ($compiled === '') {
+            return;
+        }
+
+        wp_register_style('sikshya-block-supports', false);
+        wp_enqueue_style('sikshya-block-supports');
+        wp_add_inline_style('sikshya-block-supports', $compiled);
+    }
+}
+
+/**
+ * Load the theme header for Sikshya frontend templates.
+ *
+ * On block (full-site editing) themes, {@see get_header()} often omits a usable document shell;
+ * this mirrors Yatra's {@see yatra_get_header()} by outputting a minimal HTML scaffold, title, and
+ * {@see block_header_area()}. On classic themes it delegates to {@see get_header()}.
+ *
+ * @param string|null $header_name Optional template name passed to {@see get_header()}.
+ */
+if (!function_exists('sikshya_get_header')) {
+    function sikshya_get_header(?string $header_name = null): void
+    {
+        global $wp_version;
+        if (
+            version_compare((string) $wp_version, '5.9', '>=')
+            && function_exists('wp_is_block_theme')
+            && wp_is_block_theme()
+        ) {
+            /*
+             * FSE themes may rely on the template canvas for title tags; ensure a <title> exists
+             * and avoid duplicate core title hooks (same rationale as Yatra).
+             */
+            remove_action('wp_head', '_wp_render_title_tag', 1);
+            remove_action('wp_head', '_block_template_render_title_tag', 1);
+            ?>
+<!doctype html>
+<html <?php language_attributes(); ?>>
+<head>
+    <meta charset="<?php bloginfo('charset'); ?>">
+    <title><?php echo esc_html(wp_get_document_title()); ?></title>
+    <?php wp_head(); ?>
+</head>
+
+<body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
+    <div class="wp-site-blocks">
+        <header class="wp-block-template-part site-header">
+            <?php
+            if (function_exists('block_header_area')) {
+                block_header_area();
+            }
+            ?>
+        </header>
+            <?php
+        } elseif ($header_name !== null && $header_name !== '') {
+            get_header($header_name);
+        } else {
+            get_header();
+        }
+    }
+}
+
+/**
+ * Load the theme footer for Sikshya frontend templates.
+ *
+ * Closes the FSE wrapper opened in {@see sikshya_get_header()} when applicable; otherwise {@see get_footer()}.
+ *
+ * @param string|null $footer_name Optional template name passed to {@see get_footer()}.
+ */
+if (!function_exists('sikshya_get_footer')) {
+    function sikshya_get_footer(?string $footer_name = null): void
+    {
+        global $wp_version;
+        if (
+            version_compare((string) $wp_version, '5.9', '>=')
+            && function_exists('wp_is_block_theme')
+            && wp_is_block_theme()
+        ) {
+            ?>
+        <footer class="wp-block-template-part site-footer">
+            <?php
+            if (function_exists('block_footer_area')) {
+                block_footer_area();
+            }
+            ?>
+        </footer>
+    </div>
+            <?php
+            sikshya_block_support_styles();
+            wp_footer();
+            ?>
+</body>
+</html>
+            <?php
+        } elseif ($footer_name !== null && $footer_name !== '') {
+            get_footer($footer_name);
+        } else {
+            get_footer();
+        }
+    }
+}
+
+/**
+ * Resolved brand profile for the current request context.
+ *
+ * This is intentionally an array (not a class) so the free plugin stays decoupled
+ * from Pro addon implementation details. Pro injects values via filters.
+ *
+ * @return array<string,mixed>
+ */
+function sikshya_brand_profile(string $context = 'frontend'): array
+{
+    $base = [
+        'brandName' => __('Sikshya LMS', 'sikshya'),
+        'brandShortName' => __('Sikshya', 'sikshya'),
+        'frontendAccent' => '',
+        'loginAccent' => '',
+        'loginLogoUrl' => '',
+        'hidePlatformFooter' => false,
+        'adminFooterHtml' => '',
+        'terminology' => [],
+        'links' => [
+            'documentationUrl' => 'https://docs.sikshya.com',
+            'supportUrl' => 'https://support.sikshya.com',
+            'upgradeUrl' => 'https://sikshya.com/pricing/',
+        ],
+        'surfaces' => [
+            'admin' => true,
+            'login' => true,
+            'frontend' => true,
+            'email' => true,
+        ],
+    ];
+
+    /**
+     * Filter the effective brand profile.
+     *
+     * @param array<string,mixed> $base
+     * @param string $context One of: admin, login, frontend, email.
+     */
+    $profile = (array) apply_filters('sikshya_brand_profile', $base, $context);
+
+    return array_merge($base, is_array($profile) ? $profile : []);
+}
+
+function sikshya_brand_name(string $context = 'frontend'): string
+{
+    $p = sikshya_brand_profile($context);
+    $name = isset($p['brandName']) ? sanitize_text_field((string) $p['brandName']) : '';
+    return $name !== '' ? $name : __('Sikshya LMS', 'sikshya');
+}
+
+/**
+ * @return array<string,string>
+ */
+function sikshya_brand_links(): array
+{
+    $base = [
+        'documentationUrl' => 'https://docs.sikshya.com',
+        'supportUrl' => 'https://support.sikshya.com',
+        'upgradeUrl' => 'https://sikshya.com/pricing/',
+    ];
+    $links = apply_filters('sikshya_brand_links', $base);
+    $links = is_array($links) ? $links : [];
+    return array_merge($base, array_map('strval', $links));
+}
+
+/**
+ * Terminology relabeling for common LMS nouns.
+ */
+function sikshya_label(string $key, string $default, string $context = 'frontend'): string
+{
+    $key = sanitize_key($key);
+    if ($key === '') {
+        return $default;
+    }
+
+    /**
+     * Filter a single label (terminology relabeling).
+     *
+     * @param string $defaultLabel
+     * @param string $key E.g. course, lesson, quiz, assignment, chapter, student, instructor, enrollment.
+     * @param string $context E.g. admin, frontend, email.
+     */
+    $filtered = apply_filters('sikshya_label', $default, $key, $context);
+    $out = is_string($filtered) ? sanitize_text_field($filtered) : $default;
+    return $out !== '' ? $out : $default;
+}
+
+function sikshya_label_plural(string $singularKey, string $pluralKey, string $defaultPlural, string $context = 'frontend'): string
+{
+    $plural = sikshya_label($pluralKey, '', $context);
+    if ($plural !== '') {
+        return $plural;
+    }
+    // Fallback: if singular was customized but plural wasn't, keep default plural (safer than naive "add s").
+    unset($singularKey);
+    return $defaultPlural;
+}
+
+/**
  * First non-empty post meta value from a list of keys (legacy + builder keys).
  *
  * @param int   $post_id Post ID.
@@ -778,11 +994,11 @@ function sikshya_public_content_type_label(string $post_type): string
 {
     switch ($post_type) {
         case 'sik_lesson':
-            return __('Lesson', 'sikshya');
+            return sikshya_label('lesson', __('Lesson', 'sikshya'), 'frontend');
         case 'sik_quiz':
-            return __('Quiz', 'sikshya');
+            return sikshya_label('quiz', __('Quiz', 'sikshya'), 'frontend');
         case 'sik_assignment':
-            return __('Assignment', 'sikshya');
+            return sikshya_label('assignment', __('Assignment', 'sikshya'), 'frontend');
         default:
             return __('Content', 'sikshya');
     }

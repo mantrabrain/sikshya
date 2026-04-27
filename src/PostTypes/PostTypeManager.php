@@ -33,8 +33,6 @@ class PostTypeManager
         add_action('init', [$this, 'registerPostTypes']);
         add_action('init', [$this, 'registerTaxonomies']);
         add_action('init', [$this, 'registerRestAccessiblePostMeta'], 20);
-        add_action('add_meta_boxes', [$this, 'addMetaBoxes']);
-        add_action('save_post', [$this, 'saveMetaData']);
     }
 
     /**
@@ -580,18 +578,28 @@ class PostTypeManager
      */
     private function registerCoursePostType()
     {
+        $course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'admin') : __('Course', 'sikshya');
+        $courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'admin') : __('Courses', 'sikshya');
         $labels = [
-            'name'               => __('Courses', 'sikshya'),
-            'singular_name'      => __('Course', 'sikshya'),
-            'menu_name'          => __('Courses', 'sikshya'),
-            'add_new'            => __('Add New Course', 'sikshya'),
-            'add_new_item'       => __('Add New Course', 'sikshya'),
-            'edit_item'          => __('Edit Course', 'sikshya'),
-            'new_item'           => __('New Course', 'sikshya'),
-            'view_item'          => __('View Course', 'sikshya'),
-            'search_items'       => __('Search Courses', 'sikshya'),
-            'not_found'          => __('No courses found', 'sikshya'),
-            'not_found_in_trash' => __('No courses found in trash', 'sikshya'),
+            'name'               => $courses,
+            'singular_name'      => $course,
+            'menu_name'          => $courses,
+            /* translators: %s: singular label */
+            'add_new'            => sprintf(__('Add New %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'add_new_item'       => sprintf(__('Add New %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'edit_item'          => sprintf(__('Edit %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'new_item'           => sprintf(__('New %s', 'sikshya'), $course),
+            /* translators: %s: singular label */
+            'view_item'          => sprintf(__('View %s', 'sikshya'), $course),
+            /* translators: %s: plural label */
+            'search_items'       => sprintf(__('Search %s', 'sikshya'), $courses),
+            /* translators: %s: plural label */
+            'not_found'          => sprintf(__('No %s found', 'sikshya'), strtolower($courses)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($courses)),
         ];
 
         $args = [
@@ -619,18 +627,28 @@ class PostTypeManager
      */
     private function registerLessonPostType()
     {
+        $lesson = function_exists('sikshya_label') ? sikshya_label('lesson', __('Lesson', 'sikshya'), 'admin') : __('Lesson', 'sikshya');
+        $lessons = function_exists('sikshya_label_plural') ? sikshya_label_plural('lesson', 'lessons', __('Lessons', 'sikshya'), 'admin') : __('Lessons', 'sikshya');
         $labels = [
-            'name'               => __('Lessons', 'sikshya'),
-            'singular_name'      => __('Lesson', 'sikshya'),
-            'menu_name'          => __('Lessons', 'sikshya'),
-            'add_new'            => __('Add New Lesson', 'sikshya'),
-            'add_new_item'       => __('Add New Lesson', 'sikshya'),
-            'edit_item'          => __('Edit Lesson', 'sikshya'),
-            'new_item'           => __('New Lesson', 'sikshya'),
-            'view_item'          => __('View Lesson', 'sikshya'),
-            'search_items'       => __('Search Lessons', 'sikshya'),
-            'not_found'          => __('No lessons found', 'sikshya'),
-            'not_found_in_trash' => __('No lessons found in trash', 'sikshya'),
+            'name'               => $lessons,
+            'singular_name'      => $lesson,
+            'menu_name'          => $lessons,
+            /* translators: %s: singular label */
+            'add_new'            => sprintf(__('Add New %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'add_new_item'       => sprintf(__('Add New %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'edit_item'          => sprintf(__('Edit %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'new_item'           => sprintf(__('New %s', 'sikshya'), $lesson),
+            /* translators: %s: singular label */
+            'view_item'          => sprintf(__('View %s', 'sikshya'), $lesson),
+            /* translators: %s: plural label */
+            'search_items'       => sprintf(__('Search %s', 'sikshya'), $lessons),
+            /* translators: %s: plural label */
+            'not_found'          => sprintf(__('No %s found', 'sikshya'), strtolower($lessons)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($lessons)),
         ];
 
         $args = [
@@ -658,18 +676,28 @@ class PostTypeManager
      */
     private function registerAssignmentPostType()
     {
+        $assignment = function_exists('sikshya_label') ? sikshya_label('assignment', __('Assignment', 'sikshya'), 'admin') : __('Assignment', 'sikshya');
+        $assignments = function_exists('sikshya_label_plural') ? sikshya_label_plural('assignment', 'assignments', __('Assignments', 'sikshya'), 'admin') : __('Assignments', 'sikshya');
         $labels = [
-            'name'               => __('Assignments', 'sikshya'),
-            'singular_name'      => __('Assignment', 'sikshya'),
-            'menu_name'          => __('Assignments', 'sikshya'),
-            'add_new'            => __('Add New Assignment', 'sikshya'),
-            'add_new_item'       => __('Add New Assignment', 'sikshya'),
-            'edit_item'          => __('Edit Assignment', 'sikshya'),
-            'new_item'           => __('New Assignment', 'sikshya'),
-            'view_item'          => __('View Assignment', 'sikshya'),
-            'search_items'       => __('Search Assignments', 'sikshya'),
-            'not_found'          => __('No assignments found', 'sikshya'),
-            'not_found_in_trash' => __('No assignments found in trash', 'sikshya'),
+            'name'               => $assignments,
+            'singular_name'      => $assignment,
+            'menu_name'          => $assignments,
+            /* translators: %s: singular label */
+            'add_new'            => sprintf(__('Add New %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'add_new_item'       => sprintf(__('Add New %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'edit_item'          => sprintf(__('Edit %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'new_item'           => sprintf(__('New %s', 'sikshya'), $assignment),
+            /* translators: %s: singular label */
+            'view_item'          => sprintf(__('View %s', 'sikshya'), $assignment),
+            /* translators: %s: plural label */
+            'search_items'       => sprintf(__('Search %s', 'sikshya'), $assignments),
+            /* translators: %s: plural label */
+            'not_found'          => sprintf(__('No %s found', 'sikshya'), strtolower($assignments)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($assignments)),
         ];
 
         $args = [
@@ -697,18 +725,28 @@ class PostTypeManager
      */
     private function registerQuizPostType()
     {
+        $quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz', 'sikshya'), 'admin') : __('Quiz', 'sikshya');
+        $quizzes = function_exists('sikshya_label_plural') ? sikshya_label_plural('quiz', 'quizzes', __('Quizzes', 'sikshya'), 'admin') : __('Quizzes', 'sikshya');
         $labels = [
-            'name'               => __('Quizzes', 'sikshya'),
-            'singular_name'      => __('Quiz', 'sikshya'),
-            'menu_name'          => __('Quizzes', 'sikshya'),
-            'add_new'            => __('Add New Quiz', 'sikshya'),
-            'add_new_item'       => __('Add New Quiz', 'sikshya'),
-            'edit_item'          => __('Edit Quiz', 'sikshya'),
-            'new_item'           => __('New Quiz', 'sikshya'),
-            'view_item'          => __('View Quiz', 'sikshya'),
-            'search_items'       => __('Search Quizzes', 'sikshya'),
-            'not_found'          => __('No quizzes found', 'sikshya'),
-            'not_found_in_trash' => __('No quizzes found in trash', 'sikshya'),
+            'name'               => $quizzes,
+            'singular_name'      => $quiz,
+            'menu_name'          => $quizzes,
+            /* translators: %s: singular label */
+            'add_new'            => sprintf(__('Add New %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'add_new_item'       => sprintf(__('Add New %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'edit_item'          => sprintf(__('Edit %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'new_item'           => sprintf(__('New %s', 'sikshya'), $quiz),
+            /* translators: %s: singular label */
+            'view_item'          => sprintf(__('View %s', 'sikshya'), $quiz),
+            /* translators: %s: plural label */
+            'search_items'       => sprintf(__('Search %s', 'sikshya'), $quizzes),
+            /* translators: %s: plural label */
+            'not_found'          => sprintf(__('No %s found', 'sikshya'), strtolower($quizzes)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($quizzes)),
         ];
 
         $args = [
@@ -775,18 +813,28 @@ class PostTypeManager
      */
     private function registerChapterPostType()
     {
+        $chapter = function_exists('sikshya_label') ? sikshya_label('chapter', __('Chapter', 'sikshya'), 'admin') : __('Chapter', 'sikshya');
+        $chapters = function_exists('sikshya_label_plural') ? sikshya_label_plural('chapter', 'chapters', __('Chapters', 'sikshya'), 'admin') : __('Chapters', 'sikshya');
         $labels = [
-            'name'               => __('Chapters', 'sikshya'),
-            'singular_name'      => __('Chapter', 'sikshya'),
-            'menu_name'          => __('Chapters', 'sikshya'),
-            'add_new'            => __('Add New Chapter', 'sikshya'),
-            'add_new_item'       => __('Add New Chapter', 'sikshya'),
-            'edit_item'          => __('Edit Chapter', 'sikshya'),
-            'new_item'           => __('New Chapter', 'sikshya'),
-            'view_item'          => __('View Chapter', 'sikshya'),
-            'search_items'       => __('Search Chapters', 'sikshya'),
-            'not_found'          => __('No chapters found', 'sikshya'),
-            'not_found_in_trash' => __('No chapters found in trash', 'sikshya'),
+            'name'               => $chapters,
+            'singular_name'      => $chapter,
+            'menu_name'          => $chapters,
+            /* translators: %s: singular label */
+            'add_new'            => sprintf(__('Add New %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'add_new_item'       => sprintf(__('Add New %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'edit_item'          => sprintf(__('Edit %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'new_item'           => sprintf(__('New %s', 'sikshya'), $chapter),
+            /* translators: %s: singular label */
+            'view_item'          => sprintf(__('View %s', 'sikshya'), $chapter),
+            /* translators: %s: plural label */
+            'search_items'       => sprintf(__('Search %s', 'sikshya'), $chapters),
+            /* translators: %s: plural label */
+            'not_found'          => sprintf(__('No %s found', 'sikshya'), strtolower($chapters)),
+            /* translators: %s: plural label */
+            'not_found_in_trash' => sprintf(__('No %s found in trash', 'sikshya'), strtolower($chapters)),
         ];
 
         $args = [
@@ -815,19 +863,39 @@ class PostTypeManager
     public function registerTaxonomies()
     {
         // Course Categories
+        $course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'admin') : __('Course', 'sikshya');
+        $courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'admin') : __('Courses', 'sikshya');
+        $course_categories = sprintf(
+            /* translators: %s: plural label (e.g. Courses) */
+            __('%s Categories', 'sikshya'),
+            $courses
+        );
+        $course_category = sprintf(
+            /* translators: %s: singular label (e.g. Course) */
+            __('%s Category', 'sikshya'),
+            $course
+        );
         register_taxonomy('sik_course_category', [PostTypes::COURSE], [
             'labels' => [
-                'name'              => __('Course Categories', 'sikshya'),
-                'singular_name'     => __('Course Category', 'sikshya'),
-                'search_items'      => __('Search Course Categories', 'sikshya'),
-                'all_items'         => __('All Course Categories', 'sikshya'),
-                'parent_item'       => __('Parent Course Category', 'sikshya'),
-                'parent_item_colon' => __('Parent Course Category:', 'sikshya'),
-                'edit_item'         => __('Edit Course Category', 'sikshya'),
-                'update_item'       => __('Update Course Category', 'sikshya'),
-                'add_new_item'      => __('Add New Course Category', 'sikshya'),
-                'new_item_name'     => __('New Course Category Name', 'sikshya'),
-                'menu_name'         => __('Course Categories', 'sikshya'),
+                'name'              => $course_categories,
+                'singular_name'     => $course_category,
+                /* translators: %s: plural label */
+                'search_items'      => sprintf(__('Search %s Categories', 'sikshya'), $courses),
+                /* translators: %s: plural label */
+                'all_items'         => sprintf(__('All %s Categories', 'sikshya'), $courses),
+                /* translators: %s: singular label */
+                'parent_item'       => sprintf(__('Parent %s Category', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'parent_item_colon' => sprintf(__('Parent %s Category:', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'edit_item'         => sprintf(__('Edit %s Category', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'update_item'       => sprintf(__('Update %s Category', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'add_new_item'      => sprintf(__('Add New %s Category', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'new_item_name'     => sprintf(__('New %s Category Name', 'sikshya'), $course),
+                'menu_name'         => $course_categories,
             ],
             'hierarchical'      => true,
             'show_ui'           => true,
@@ -840,22 +908,36 @@ class PostTypeManager
         // Course Tags
         register_taxonomy('sik_course_tag', [PostTypes::COURSE], [
             'labels' => [
-                'name'                       => __('Course Tags', 'sikshya'),
-                'singular_name'              => __('Course Tag', 'sikshya'),
-                'search_items'               => __('Search Course Tags', 'sikshya'),
-                'popular_items'              => __('Popular Course Tags', 'sikshya'),
-                'all_items'                  => __('All Course Tags', 'sikshya'),
+                /* translators: %s: plural label */
+                'name'                       => sprintf(__('%s Tags', 'sikshya'), $courses),
+                /* translators: %s: singular label */
+                'singular_name'              => sprintf(__('%s Tag', 'sikshya'), $course),
+                /* translators: %s: plural label */
+                'search_items'               => sprintf(__('Search %s Tags', 'sikshya'), $courses),
+                /* translators: %s: plural label */
+                'popular_items'              => sprintf(__('Popular %s Tags', 'sikshya'), $courses),
+                /* translators: %s: plural label */
+                'all_items'                  => sprintf(__('All %s Tags', 'sikshya'), $courses),
                 'parent_item'                => null,
                 'parent_item_colon'          => null,
-                'edit_item'                  => __('Edit Course Tag', 'sikshya'),
-                'update_item'                => __('Update Course Tag', 'sikshya'),
-                'add_new_item'               => __('Add New Course Tag', 'sikshya'),
-                'new_item_name'              => __('New Course Tag Name', 'sikshya'),
-                'separate_items_with_commas' => __('Separate course tags with commas', 'sikshya'),
-                'add_or_remove_items'        => __('Add or remove course tags', 'sikshya'),
-                'choose_from_most_used'      => __('Choose from the most used course tags', 'sikshya'),
-                'not_found'                  => __('No course tags found.', 'sikshya'),
-                'menu_name'                  => __('Course Tags', 'sikshya'),
+                /* translators: %s: singular label */
+                'edit_item'                  => sprintf(__('Edit %s Tag', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'update_item'                => sprintf(__('Update %s Tag', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'add_new_item'               => sprintf(__('Add New %s Tag', 'sikshya'), $course),
+                /* translators: %s: singular label */
+                'new_item_name'              => sprintf(__('New %s Tag Name', 'sikshya'), $course),
+                /* translators: %s: plural label */
+                'separate_items_with_commas' => sprintf(__('Separate %s tags with commas', 'sikshya'), strtolower($courses)),
+                /* translators: %s: plural label */
+                'add_or_remove_items'        => sprintf(__('Add or remove %s tags', 'sikshya'), strtolower($courses)),
+                /* translators: %s: plural label */
+                'choose_from_most_used'      => sprintf(__('Choose from the most used %s tags', 'sikshya'), strtolower($courses)),
+                /* translators: %s: plural label */
+                'not_found'                  => sprintf(__('No %s tags found.', 'sikshya'), strtolower($courses)),
+                /* translators: %s: plural label */
+                'menu_name'                  => sprintf(__('%s Tags', 'sikshya'), $courses),
             ],
             'hierarchical'          => false,
             'show_ui'               => true,
@@ -867,538 +949,4 @@ class PostTypeManager
         ]);
     }
 
-    /**
-     * Add meta boxes for post types
-     */
-    public function addMetaBoxes()
-    {
-        // Course meta boxes
-        add_meta_box(
-            'sikshya_course_settings',
-            __('Course Settings', 'sikshya'),
-            [$this, 'renderCourseMetaBox'],
-            PostTypes::COURSE,
-            'normal',
-            'high'
-        );
-
-        // Lesson meta boxes
-        add_meta_box(
-            'sikshya_lesson_settings',
-            __('Lesson Settings', 'sikshya'),
-            [$this, 'renderLessonMetaBox'],
-            PostTypes::LESSON,
-            'normal',
-            'high'
-        );
-
-        // Assignment meta boxes
-        add_meta_box(
-            'sikshya_assignment_settings',
-            __('Assignment Settings', 'sikshya'),
-            [$this, 'renderAssignmentMetaBox'],
-            PostTypes::ASSIGNMENT,
-            'normal',
-            'high'
-        );
-
-        // Quiz meta boxes
-        add_meta_box(
-            'sikshya_quiz_settings',
-            __('Quiz Settings', 'sikshya'),
-            [$this, 'renderQuizMetaBox'],
-            PostTypes::QUIZ,
-            'normal',
-            'high'
-        );
-
-        // Question meta boxes
-        add_meta_box(
-            'sikshya_question_settings',
-            __('Question Settings', 'sikshya'),
-            [$this, 'renderQuestionMetaBox'],
-            PostTypes::QUESTION,
-            'normal',
-            'high'
-        );
-
-        // Chapter meta boxes
-        add_meta_box(
-            'sikshya_chapter_settings',
-            __('Chapter Settings', 'sikshya'),
-            [$this, 'renderChapterMetaBox'],
-            PostTypes::CHAPTER,
-            'normal',
-            'high'
-        );
-    }
-
-    /**
-     * Render Course Meta Box
-     */
-    public function renderCourseMetaBox($post)
-    {
-        wp_nonce_field('sikshya_course_meta_box', 'sikshya_course_meta_box_nonce');
-
-        $course_price = get_post_meta($post->ID, '_sikshya_course_price', true);
-        $course_duration = get_post_meta($post->ID, '_sikshya_course_duration', true);
-        $course_level = get_post_meta($post->ID, '_sikshya_course_level', true);
-        $course_status = get_post_meta($post->ID, '_sikshya_course_status', true);
-
-        ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_course_price"><?php _e('Course Price', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_course_price" name="sikshya_course_price" 
-                           value="<?php echo esc_attr($course_price); ?>" step="0.01" min="0" />
-                    <p class="description"><?php _e('Set the course price (0 for free courses)', 'sikshya'); ?></p>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_course_duration"><?php _e('Course Duration', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="text" id="sikshya_course_duration" name="sikshya_course_duration" 
-                           value="<?php echo esc_attr($course_duration); ?>" />
-                    <p class="description"><?php _e('e.g., 10 hours, 2 weeks', 'sikshya'); ?></p>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_course_level"><?php _e('Course Level', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <select id="sikshya_course_level" name="sikshya_course_level">
-                        <option value=""><?php _e('Select Level', 'sikshya'); ?></option>
-                        <option value="beginner" <?php selected($course_level, 'beginner'); ?>><?php _e('Beginner', 'sikshya'); ?></option>
-                        <option value="intermediate" <?php selected($course_level, 'intermediate'); ?>><?php _e('Intermediate', 'sikshya'); ?></option>
-                        <option value="advanced" <?php selected($course_level, 'advanced'); ?>><?php _e('Advanced', 'sikshya'); ?></option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_course_status"><?php _e('Course Status', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <select id="sikshya_course_status" name="sikshya_course_status">
-                        <option value="draft" <?php selected($course_status, 'draft'); ?>><?php _e('Draft', 'sikshya'); ?></option>
-                        <option value="published" <?php selected($course_status, 'published'); ?>><?php _e('Published', 'sikshya'); ?></option>
-                        <option value="archived" <?php selected($course_status, 'archived'); ?>><?php _e('Archived', 'sikshya'); ?></option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <?php
-    }
-
-    /**
-     * Render Lesson Meta Box
-     */
-    public function renderLessonMetaBox($post)
-    {
-        wp_nonce_field('sikshya_lesson_meta_box', 'sikshya_lesson_meta_box_nonce');
-
-        $lesson_duration = get_post_meta($post->ID, '_sikshya_lesson_duration', true);
-        $lesson_type = get_post_meta($post->ID, '_sikshya_lesson_type', true);
-        $lesson_video_url = get_post_meta($post->ID, '_sikshya_lesson_video_url', true);
-
-        ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_lesson_duration"><?php _e('Lesson Duration', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="text" id="sikshya_lesson_duration" name="sikshya_lesson_duration" 
-                           value="<?php echo esc_attr($lesson_duration); ?>" />
-                    <p class="description"><?php _e('e.g., 15 minutes, 1 hour', 'sikshya'); ?></p>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_lesson_type"><?php _e('Lesson Type', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <select id="sikshya_lesson_type" name="sikshya_lesson_type">
-                        <option value=""><?php _e('Select Type', 'sikshya'); ?></option>
-                        <option value="video" <?php selected($lesson_type, 'video'); ?>><?php _e('Video', 'sikshya'); ?></option>
-                        <option value="text" <?php selected($lesson_type, 'text'); ?>><?php _e('Text', 'sikshya'); ?></option>
-                        <option value="audio" <?php selected($lesson_type, 'audio'); ?>><?php _e('Audio', 'sikshya'); ?></option>
-                        <option value="document" <?php selected($lesson_type, 'document'); ?>><?php _e('Document', 'sikshya'); ?></option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_lesson_video_url"><?php _e('Video URL', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="url" id="sikshya_lesson_video_url" name="sikshya_lesson_video_url" 
-                           value="<?php echo esc_attr($lesson_video_url); ?>" class="regular-text" />
-                    <p class="description"><?php _e('YouTube, Vimeo, or direct video URL', 'sikshya'); ?></p>
-                </td>
-            </tr>
-        </table>
-        <?php
-    }
-
-    /**
-     * Render Assignment Meta Box
-     */
-    public function renderAssignmentMetaBox($post)
-    {
-        wp_nonce_field('sikshya_assignment_meta_box', 'sikshya_assignment_meta_box_nonce');
-
-        $assignment_due_date = get_post_meta($post->ID, '_sikshya_assignment_due_date', true);
-        $assignment_points = get_post_meta($post->ID, '_sikshya_assignment_points', true);
-        $assignment_type = get_post_meta($post->ID, '_sikshya_assignment_type', true);
-
-        ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_assignment_due_date"><?php _e('Due Date', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="datetime-local" id="sikshya_assignment_due_date" name="sikshya_assignment_due_date" 
-                           value="<?php echo esc_attr($assignment_due_date); ?>" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_assignment_points"><?php _e('Points', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_assignment_points" name="sikshya_assignment_points" 
-                           value="<?php echo esc_attr($assignment_points); ?>" min="0" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_assignment_type"><?php _e('Assignment Type', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <select id="sikshya_assignment_type" name="sikshya_assignment_type">
-                        <option value=""><?php _e('Select Type', 'sikshya'); ?></option>
-                        <option value="essay" <?php selected($assignment_type, 'essay'); ?>><?php _e('Essay', 'sikshya'); ?></option>
-                        <option value="file_upload" <?php selected($assignment_type, 'file_upload'); ?>><?php _e('File Upload', 'sikshya'); ?></option>
-                        <option value="url_submission" <?php selected($assignment_type, 'url_submission'); ?>><?php _e('URL Submission', 'sikshya'); ?></option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <?php
-    }
-
-    /**
-     * Render Quiz Meta Box
-     */
-    public function renderQuizMetaBox($post)
-    {
-        wp_nonce_field('sikshya_quiz_meta_box', 'sikshya_quiz_meta_box_nonce');
-
-        $quiz_time_limit = get_post_meta($post->ID, '_sikshya_quiz_time_limit', true);
-        $quiz_passing_score = get_post_meta($post->ID, '_sikshya_quiz_passing_score', true);
-        $quiz_attempts_allowed = get_post_meta($post->ID, '_sikshya_quiz_attempts_allowed', true);
-
-        ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_quiz_time_limit"><?php _e('Time Limit (minutes)', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_quiz_time_limit" name="sikshya_quiz_time_limit" 
-                           value="<?php echo esc_attr($quiz_time_limit); ?>" min="0" />
-                    <p class="description"><?php _e('0 for no time limit', 'sikshya'); ?></p>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_quiz_passing_score"><?php _e('Passing Score (%)', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_quiz_passing_score" name="sikshya_quiz_passing_score" 
-                           value="<?php echo esc_attr($quiz_passing_score); ?>" min="0" max="100" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_quiz_attempts_allowed"><?php _e('Attempts Allowed', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_quiz_attempts_allowed" name="sikshya_quiz_attempts_allowed" 
-                           value="<?php echo esc_attr($quiz_attempts_allowed); ?>" min="1" />
-                </td>
-            </tr>
-        </table>
-        <?php
-    }
-
-    /**
-     * Render Question Meta Box
-     */
-    public function renderQuestionMetaBox($post)
-    {
-        wp_nonce_field('sikshya_question_meta_box', 'sikshya_question_meta_box_nonce');
-
-        $question_type = get_post_meta($post->ID, '_sikshya_question_type', true);
-        $question_points = get_post_meta($post->ID, '_sikshya_question_points', true);
-
-        ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_question_type"><?php _e('Question Type', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <select id="sikshya_question_type" name="sikshya_question_type">
-                        <option value=""><?php _e('Select Type', 'sikshya'); ?></option>
-                        <option value="multiple_choice" <?php selected($question_type, 'multiple_choice'); ?>><?php _e('Multiple Choice', 'sikshya'); ?></option>
-                        <option value="true_false" <?php selected($question_type, 'true_false'); ?>><?php _e('True/False', 'sikshya'); ?></option>
-                        <option value="short_answer" <?php selected($question_type, 'short_answer'); ?>><?php _e('Short Answer', 'sikshya'); ?></option>
-                        <option value="essay" <?php selected($question_type, 'essay'); ?>><?php _e('Essay', 'sikshya'); ?></option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_question_points"><?php _e('Points', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_question_points" name="sikshya_question_points" 
-                           value="<?php echo esc_attr($question_points); ?>" min="0" />
-                </td>
-            </tr>
-        </table>
-        <?php
-    }
-
-    /**
-     * Render Chapter Meta Box
-     */
-    public function renderChapterMetaBox($post)
-    {
-        wp_nonce_field('sikshya_chapter_meta_box', 'sikshya_chapter_meta_box_nonce');
-
-        $chapter_order = get_post_meta($post->ID, '_sikshya_chapter_order', true);
-        $chapter_course_id = get_post_meta($post->ID, '_sikshya_chapter_course_id', true);
-
-        ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_chapter_order"><?php _e('Chapter Order', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <input type="number" id="sikshya_chapter_order" name="sikshya_chapter_order" 
-                           value="<?php echo esc_attr($chapter_order); ?>" min="0" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">
-                    <label for="sikshya_chapter_course_id"><?php _e('Parent Course', 'sikshya'); ?></label>
-                </th>
-                <td>
-                    <?php
-                    $courses = get_posts([
-                        'post_type' => PostTypes::COURSE,
-                        'numberposts' => -1,
-                        'post_status' => 'publish'
-                    ]);
-                    ?>
-                    <select id="sikshya_chapter_course_id" name="sikshya_chapter_course_id">
-                        <option value=""><?php _e('Select Course', 'sikshya'); ?></option>
-                        <?php foreach ($courses as $course) : ?>
-                            <option value="<?php echo $course->ID; ?>" <?php selected($chapter_course_id, $course->ID); ?>>
-                                <?php echo esc_html($course->post_title); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <?php
-    }
-
-    /**
-     * Save meta data for all post types
-     */
-    public function saveMetaData($post_id)
-    {
-        // Check if this is an autosave
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            return;
-        }
-
-        // Check permissions
-        if (!current_user_can('edit_post', $post_id)) {
-            return;
-        }
-
-        $post_type = get_post_type($post_id);
-
-        switch ($post_type) {
-            case PostTypes::COURSE:
-                $this->saveCourseMetaData($post_id);
-                break;
-            case PostTypes::LESSON:
-                $this->saveLessonMetaData($post_id);
-                break;
-            case PostTypes::ASSIGNMENT:
-                $this->saveAssignmentMetaData($post_id);
-                break;
-            case PostTypes::QUIZ:
-                $this->saveQuizMetaData($post_id);
-                break;
-            case PostTypes::QUESTION:
-                $this->saveQuestionMetaData($post_id);
-                break;
-            case PostTypes::CHAPTER:
-                $this->saveChapterMetaData($post_id);
-                break;
-        }
-    }
-
-    /**
-     * Save Course Meta Data
-     */
-    private function saveCourseMetaData($post_id)
-    {
-        if (!wp_verify_nonce($_POST['sikshya_course_meta_box_nonce'] ?? '', 'sikshya_course_meta_box')) {
-            return;
-        }
-
-        $fields = [
-            'sikshya_course_price' => 'floatval',
-            'sikshya_course_duration' => 'sanitize_text_field',
-            'sikshya_course_level' => 'sanitize_text_field',
-            'sikshya_course_status' => 'sanitize_text_field',
-        ];
-
-        foreach ($fields as $field => $sanitize_callback) {
-            if (isset($_POST[$field])) {
-                $value = call_user_func($sanitize_callback, $_POST[$field]);
-                update_post_meta($post_id, '_' . $field, $value);
-            }
-        }
-    }
-
-    /**
-     * Save Lesson Meta Data
-     */
-    private function saveLessonMetaData($post_id)
-    {
-        if (!wp_verify_nonce($_POST['sikshya_lesson_meta_box_nonce'] ?? '', 'sikshya_lesson_meta_box')) {
-            return;
-        }
-
-        $fields = [
-            'sikshya_lesson_duration' => 'sanitize_text_field',
-            'sikshya_lesson_type' => 'sanitize_text_field',
-            'sikshya_lesson_video_url' => 'esc_url_raw',
-        ];
-
-        foreach ($fields as $field => $sanitize_callback) {
-            if (isset($_POST[$field])) {
-                $value = call_user_func($sanitize_callback, $_POST[$field]);
-                update_post_meta($post_id, '_' . $field, $value);
-            }
-        }
-    }
-
-    /**
-     * Save Assignment Meta Data
-     */
-    private function saveAssignmentMetaData($post_id)
-    {
-        if (!wp_verify_nonce($_POST['sikshya_assignment_meta_box_nonce'] ?? '', 'sikshya_assignment_meta_box')) {
-            return;
-        }
-
-        $fields = [
-            'sikshya_assignment_due_date' => 'sanitize_text_field',
-            'sikshya_assignment_points' => 'intval',
-            'sikshya_assignment_type' => 'sanitize_text_field',
-        ];
-
-        foreach ($fields as $field => $sanitize_callback) {
-            if (isset($_POST[$field])) {
-                $value = call_user_func($sanitize_callback, $_POST[$field]);
-                update_post_meta($post_id, '_' . $field, $value);
-            }
-        }
-    }
-
-    /**
-     * Save Quiz Meta Data
-     */
-    private function saveQuizMetaData($post_id)
-    {
-        if (!wp_verify_nonce($_POST['sikshya_quiz_meta_box_nonce'] ?? '', 'sikshya_quiz_meta_box')) {
-            return;
-        }
-
-        $fields = [
-            'sikshya_quiz_time_limit' => 'intval',
-            'sikshya_quiz_passing_score' => 'intval',
-            'sikshya_quiz_attempts_allowed' => 'intval',
-        ];
-
-        foreach ($fields as $field => $sanitize_callback) {
-            if (isset($_POST[$field])) {
-                $value = call_user_func($sanitize_callback, $_POST[$field]);
-                update_post_meta($post_id, '_' . $field, $value);
-            }
-        }
-    }
-
-    /**
-     * Save Question Meta Data
-     */
-    private function saveQuestionMetaData($post_id)
-    {
-        if (!wp_verify_nonce($_POST['sikshya_question_meta_box_nonce'] ?? '', 'sikshya_question_meta_box')) {
-            return;
-        }
-
-        $fields = [
-            'sikshya_question_type' => 'sanitize_text_field',
-            'sikshya_question_points' => 'intval',
-        ];
-
-        foreach ($fields as $field => $sanitize_callback) {
-            if (isset($_POST[$field])) {
-                $value = call_user_func($sanitize_callback, $_POST[$field]);
-                update_post_meta($post_id, '_' . $field, $value);
-            }
-        }
-    }
-
-    /**
-     * Save Chapter Meta Data
-     */
-    private function saveChapterMetaData($post_id)
-    {
-        if (!wp_verify_nonce($_POST['sikshya_chapter_meta_box_nonce'] ?? '', 'sikshya_chapter_meta_box')) {
-            return;
-        }
-
-        $fields = [
-            'sikshya_chapter_order' => 'intval',
-            'sikshya_chapter_course_id' => 'intval',
-        ];
-
-        foreach ($fields as $field => $sanitize_callback) {
-            if (isset($_POST[$field])) {
-                $value = call_user_func($sanitize_callback, $_POST[$field]);
-                update_post_meta($post_id, '_' . $field, $value);
-            }
-        }
-    }
 }

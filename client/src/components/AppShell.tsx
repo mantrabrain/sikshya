@@ -19,6 +19,7 @@ type Props = {
   title: string;
   subtitle?: string;
   badge?: string;
+  /** Sidebar + logos; top header always uses default chrome (see `TopBar`). */
   branding?: {
     pluginName?: string;
     logoUrl?: string;
@@ -96,7 +97,7 @@ export function AppShell({
         adminUrl={adminUrl}
         branding={branding}
       />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <TopBar
           title={title}
           subtitle={subtitle}
@@ -107,9 +108,12 @@ export function AppShell({
           toolsHref={toolsHref}
           isDark={isDark}
           onToggleDark={onToggleDark}
-          branding={branding}
         />
-        <main className={contentClassName ?? 'flex-1 overflow-auto bg-slate-50 p-6 dark:bg-slate-950'}>
+        <main
+          className={
+            contentClassName ?? 'min-h-0 flex-1 overflow-y-auto bg-slate-50 p-6 dark:bg-slate-950'
+          }
+        >
           <ShellAlertStrip alerts={shellAlerts} />
           {pageActions ? (
             <div className="mb-6 flex flex-wrap items-center justify-end gap-2">{pageActions}</div>

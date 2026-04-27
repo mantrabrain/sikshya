@@ -1,10 +1,13 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { NavIcon } from './NavIcon';
 import type { SettingsField, SettingsSection } from '../types/settingsSchema';
+import { isTruthyCheckboxValue } from '../pages/settingsRenderField';
 
 type Props = {
   tabSchema: SettingsSection[];
   renderField: (f: SettingsField) => React.ReactNode;
+  /** Current form values (for cross-field hints). */
+  draft?: Record<string, unknown>;
 };
 
 function sectionIconName(raw?: string): string {
@@ -106,8 +109,13 @@ const SUB_TABS: Array<{ id: 'purchase' | 'access' | 'rules'; label: string; icon
 ];
 
 export function EnrollmentSettingsTab(props: Props) {
-  const { tabSchema, renderField } = props;
+  const { tabSchema, renderField, draft } = props;
   const [sub, setSub] = useState<(typeof SUB_TABS)[number]['id']>('purchase');
+
+  const guestLoginConflict =
+    draft &&
+    isTruthyCheckboxValue(draft.allow_guest_enrollment) &&
+    isTruthyCheckboxValue(draft.require_login);
 
   const byKey = useMemo(() => {
     const map = new Map<string, SettingsSection>();
@@ -132,6 +140,21 @@ export function EnrollmentSettingsTab(props: Props) {
           Use <span className="font-semibold text-slate-600 dark:text-slate-300">Courses</span> for catalog layout, reviews, and
           search only.
         </p>
+
+        {guestLoginConflict ? (
+          <div
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100"
+            role="status"
+          >
+            <p className="font-semibold text-amber-950 dark:text-amber-50">These two options usually conflict</p>
+            <p className="mt-1 text-xs leading-relaxed text-amber-900/90 dark:text-amber-100/90">
+              Guest enrollment lets people join <strong>without</strong> a WordPress account. “Require login for course access”
+              expects a <strong>logged-in</strong> user to open lessons. Together, guests may enroll but then cannot open
+              content. Turn off guest enrollment if everyone must log in, or turn off the login requirement if you truly need
+              guest access (subject to how your theme handles identity).
+            </p>
+          </div>
+        ) : null}
 
         <div className="flex w-full flex-wrap gap-1 border-b border-slate-200/80 dark:border-slate-800">
           {SUB_TABS.map((t) => (

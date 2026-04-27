@@ -7,10 +7,12 @@ import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { Modal } from '../components/shared/Modal';
+import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { term, termLower } from '../lib/terminology';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
 type EnrollmentRow = {
@@ -35,11 +37,16 @@ type ListResponse = {
 };
 
 type UserOpt = { id: number; name: string; email?: string };
-type CourseOpt = { id: number; title: string };
-
 export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
+  const course = term(config, 'course');
+  const courseLower = termLower(config, 'course');
+  const coursesLower = termLower(config, 'courses');
+  const student = term(config, 'student');
+  const studentLower = termLower(config, 'student');
+  const enrollment = term(config, 'enrollment');
+  const enrollmentsLower = termLower(config, 'enrollments');
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
@@ -51,11 +58,8 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
   const [pickedUserId, setPickedUserId] = useState<number | null>(null);
   const [pickedCourseId, setPickedCourseId] = useState<number | null>(null);
   const [userQuery, setUserQuery] = useState('');
-  const [courseQuery, setCourseQuery] = useState('');
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [courseDropdownOpen, setCourseDropdownOpen] = useState(false);
   const debouncedUserQuery = useDebouncedValue(userQuery, 240);
-  const debouncedCourseQuery = useDebouncedValue(courseQuery, 240);
 
   const queryKey = useMemo(() => `${page}|${status}|${debouncedSearch}`, [page, status, debouncedSearch]);
 
@@ -102,43 +106,11 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
     [manualOpen, userDropdownOpen, debouncedUserQuery]
   );
 
-  const courseSearch = useAsyncData(
-    async () => {
-      if (!manualOpen) return { data: [] as CourseOpt[] };
-      if (!courseDropdownOpen) return { data: [] as CourseOpt[] };
-
-      const params = new URLSearchParams({
-        per_page: '20',
-        page: '1',
-        context: 'edit',
-        _fields: 'id,title',
-      });
-      const q = debouncedCourseQuery.trim();
-      if (q) params.set('search', q);
-
-      const r = await getWpApi().getWithTotal<Array<{ id: number; title?: { rendered?: string } }>>(`/sik_course?${params.toString()}`);
-      const out = Array.isArray(r.data) ? r.data : [];
-      return {
-        data: out.map((p) => ({
-          id: p.id,
-          title: p?.title?.rendered ? String(p.title.rendered).replace(/<[^>]*>/g, '').trim() : `Course #${p.id}`,
-        })),
-      };
-    },
-    [manualOpen, courseDropdownOpen, debouncedCourseQuery]
-  );
-
   const pickedUserLabel = useMemo(() => {
     if (!pickedUserId) return null;
     const hit = (userSearch.data?.data || []).find((u) => u.id === pickedUserId);
     return hit ? (hit.email ? `${hit.name} (${hit.email})` : hit.name) : `User #${pickedUserId}`;
   }, [pickedUserId, userSearch.data?.data]);
-
-  const pickedCourseLabel = useMemo(() => {
-    if (!pickedCourseId) return null;
-    const hit = (courseSearch.data?.data || []).find((c) => c.id === pickedCourseId);
-    return hit ? hit.title : `Course #${pickedCourseId}`;
-  }, [pickedCourseId, courseSearch.data?.data]);
 
   useEffect(() => {
     if (!manualOpen) {
@@ -148,7 +120,6 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
       const t = e.target as HTMLElement | null;
       if (!t) return;
       if (!t.closest('[data-manual-enroll-user="1"]')) setUserDropdownOpen(false);
-      if (!t.closest('[data-manual-enroll-course="1"]')) setCourseDropdownOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -160,9 +131,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
     setPickedUserId(null);
     setPickedCourseId(null);
     setUserQuery('');
-    setCourseQuery('');
     setUserDropdownOpen(false);
-    setCourseDropdownOpen(false);
   };
 
   const submitManualEnroll = async () => {
@@ -170,7 +139,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
     const uid = pickedUserId || 0;
     const cid = pickedCourseId || 0;
     if (uid <= 0 || cid <= 0) {
-      setManualMsg('Pick a learner and a course.');
+      setManualMsg(`Pick a ${studentLower} and a ${courseLower}.`);
       return;
     }
     setManualSaving(true);
@@ -179,7 +148,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
         user_id: uid,
         course_id: cid,
       });
-      setManualMsg(r?.message || 'Learner enrolled.');
+      setManualMsg(r?.message || `${student} enrolled.`);
       setManualOpen(false);
       resetManual();
       refetch();
@@ -199,7 +168,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
       userName={config.user.name}
       userAvatarUrl={config.user.avatarUrl}
       title={title}
-      subtitle="Who is enrolled in which courses, with status and dates"
+      subtitle={`Who is enrolled in which ${coursesLower}, with status and dates`}
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           <ButtonSecondary
@@ -220,8 +189,8 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
     >
       <Modal
         open={manualOpen}
-        title="Manual enroll"
-        description="Enroll a learner into a course right now. This creates an enrollment row and initializes progress."
+        title={`Manual ${enrollment}`}
+        description={`Enroll a ${studentLower} into a ${courseLower} right now. This creates an ${enrollmentsLower} row and initializes progress.`}
         onClose={() => {
           setManualOpen(false);
           resetManual();
@@ -241,7 +210,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
             </ButtonSecondary>
             <div className="flex items-center gap-2">
               <ButtonPrimary type="button" disabled={manualSaving} onClick={() => void submitManualEnroll()}>
-                {manualSaving ? 'Enrolling…' : 'Enroll learner'}
+                {manualSaving ? 'Enrolling…' : `Enroll ${studentLower}`}
               </ButtonPrimary>
             </div>
           </div>
@@ -257,7 +226,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
           <div className="grid gap-4 sm:grid-cols-2">
             <div data-manual-enroll-user="1">
               <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Learner
+                {student}
               </label>
               <input
                 type="text"
@@ -311,55 +280,13 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
             </div>
 
             <div data-manual-enroll-course="1">
-              <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Course
-              </label>
-              <input
-                type="text"
-                value={courseQuery}
-                onChange={(e) => {
-                  setCourseQuery(e.target.value);
-                  setPickedCourseId(null);
-                }}
-                onFocus={() => setCourseDropdownOpen(true)}
-                placeholder="Search by course title…"
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+              <SingleCoursePicker
+                label={course}
+                value={pickedCourseId ?? 0}
+                onChange={(id) => setPickedCourseId(id > 0 ? id : null)}
+                placeholder={`Click to choose a ${courseLower}…`}
+                hint={`Pick the ${courseLower} this ${studentLower} should be enrolled in.`}
               />
-              {pickedCourseLabel ? (
-                <div className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                  Selected: <span className="font-semibold text-slate-900 dark:text-white">{pickedCourseLabel}</span>
-                </div>
-              ) : null}
-              {courseDropdownOpen ? (
-                <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
-                  {courseSearch.loading ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
-                  ) : (courseSearch.data?.data || []).length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No courses found.</div>
-                  ) : (
-                    <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
-                      {(courseSearch.data?.data || []).map((c) => (
-                        <li key={c.id}>
-                          <button
-                            type="button"
-                            className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-900"
-                            onClick={() => {
-                              setPickedCourseId(c.id);
-                              setCourseQuery(c.title);
-                              setCourseDropdownOpen(false);
-                            }}
-                          >
-                            <span className="min-w-0">
-                              <span className="block truncate font-medium text-slate-900 dark:text-white">{c.title}</span>
-                            </span>
-                            <span className="shrink-0 text-xs text-slate-400">#{c.id}</span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
@@ -378,7 +305,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Learner name, email, or course title…"
+            placeholder={`${student} name, email, or ${courseLower} title…`}
             className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           />
         </div>
@@ -405,7 +332,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
 
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load enrollments" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={`Could not load ${enrollmentsLower}`} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -417,11 +344,13 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading enrollments…</div>
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+            Loading {enrollmentsLower}…
+          </div>
         ) : rows.length === 0 ? (
           <ListEmptyState
-            title="No enrollments"
-            description="When learners enroll in courses, each row will appear here with links to the user and course."
+            title={`No ${enrollmentsLower}`}
+            description={`When ${termLower(config, 'students')} enroll in ${coursesLower}, each row will appear here with links to the user and ${courseLower}.`}
           />
         ) : (
           <>
@@ -429,8 +358,8 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
               <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                   <tr>
-                    <th className="px-5 py-3.5">Learner</th>
-                    <th className="px-5 py-3.5">Course</th>
+                    <th className="px-5 py-3.5">{student}</th>
+                    <th className="px-5 py-3.5">{course}</th>
                     <th className="px-5 py-3.5">Status</th>
                     <th className="px-5 py-3.5">Enrolled</th>
                   </tr>
@@ -453,7 +382,7 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
                             href={appViewHref(config, 'add-course', { course_id: String(r.course_id) })}
                             className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
                           >
-                            {r.course_title || `Course #${r.course_id}`}
+                            {r.course_title || `${course} #${r.course_id}`}
                           </a>
                         ) : (
                           '—'

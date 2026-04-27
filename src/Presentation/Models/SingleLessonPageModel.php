@@ -176,6 +176,11 @@ final class SingleLessonPageModel
 
     public function getLessonIconForHeader(): string
     {
+        $post = $this->getLessonPost();
+        if ($post->post_type === \Sikshya\Constants\PostTypes::ASSIGNMENT) {
+            return 'assignment';
+        }
+
         $lesson_type = $this->getLessonTypeKey();
         switch ($lesson_type) {
             case 'video':

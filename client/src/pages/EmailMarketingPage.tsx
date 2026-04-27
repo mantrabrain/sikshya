@@ -13,6 +13,7 @@ import type { SikshyaReactConfig } from '../types';
 
 type ProviderId = 'mailchimp' | 'mailerlite' | 'brevo' | 'kit';
 type FieldType = 'string' | 'password' | 'textarea' | 'bool' | 'int' | 'select' | 'csv' | 'mapping';
+type TabId = 'setup' | 'rules' | 'logs' | 'tools';
 type MappingRow = {
   provider: ProviderId;
   remote_field: string;
@@ -34,6 +35,34 @@ type Resp = {
   addon?: string;
   options?: Record<string, unknown>;
   schema?: Schema;
+};
+
+type RuleRow = {
+  id: number;
+  name: string;
+  description: string;
+  is_active: number | boolean;
+  priority: number;
+  event_key: string;
+  filters_json?: string | null;
+  actions_json?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type LogRow = {
+  id: number;
+  job_id: number;
+  rule_id: number;
+  provider: string;
+  event_key: string;
+  user_id: number;
+  course_id: number;
+  status: string;
+  http_code: number;
+  error_code: string;
+  error_message?: string | null;
+  created_at?: string;
 };
 
 const BASE_FIELDS = ['api_key', 'audience_id'] as const;
@@ -172,10 +201,14 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
   const addon = useAddonEnabled(addonId);
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
   const enabled = mode === 'full';
+  const [tab, setTab] = useState<TabId>('setup');
   const [opts, setOpts] = useState<Record<string, unknown>>({});
   const [schema, setSchema] = useState<Schema>({});
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const [toolUserId, setToolUserId] = useState('');
+  const [toolCourseId, setToolCourseId] = useState('');
+  const [toolBusy, setToolBusy] = useState(false);
 
   const loader = useCallback(async () => {
     if (!enabled) return { ok: true, options: {}, schema: {} } as Resp;
@@ -187,6 +220,38 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
     if (data?.options) setOpts({ ...data.options });
     if (data?.schema) setSchema(data.schema);
   }, [data]);
+
+  const rulesLoader = useCallback(async () => {
+    if (!enabled) return { ok: true, rules: [] as RuleRow[] };
+    return getSikshyaApi().get<{ ok?: boolean; rules?: RuleRow[]; message?: string }>(`/pro/email-marketing/rules`);
+  }, [enabled]);
+  const logsLoader = useCallback(async () => {
+    if (!enabled) return { ok: true, logs: [] as LogRow[], total: 0, page: 1, per_page: 50, total_pages: 1 };
+    return getSikshyaApi().get<{
+      ok?: boolean;
+      logs?: LogRow[];
+      total?: number;
+      page?: number;
+      per_page?: number;
+      total_pages?: number;
+    }>(`/pro/email-marketing/logs?per_page=50&page=1`);
+  }, [enabled]);
+
+  const {
+    loading: rulesLoading,
+    data: rulesData,
+    error: rulesError,
+    refetch: refetchRules,
+  } = useAsyncData(rulesLoader, [enabled]);
+  const {
+    loading: logsLoading,
+    data: logsData,
+    error: logsError,
+    refetch: refetchLogs,
+  } = useAsyncData(logsLoader, [enabled]);
+
+  const rules = useMemo(() => (Array.isArray(rulesData?.rules) ? rulesData?.rules || [] : []), [rulesData]);
+  const logs = useMemo(() => (Array.isArray(logsData?.logs) ? logsData?.logs || [] : []), [logsData]);
 
   const provider = asProvider(opts.provider);
   const providerCopy = PROVIDER_COPY[provider];
@@ -289,6 +354,71 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
     );
   };
 
+  const createDefaultRule = async (event_key: string) => {
+    setMsg(null);
+    try {
+      const payload: Record<string, unknown> = {
+        name: event_key.replace(/_/g, ' '),
+        description: '',
+        is_active: true,
+        priority: 100,
+        event_key,
+        filters: { course: { mode: 'any', ids: [] as number[] } },
+        actions: { upsert: true, tags_add: [event_key] },
+      };
+      await getSikshyaApi().post(`/pro/email-marketing/rules`, payload);
+      setMsg({ kind: 'success', text: 'Rule created.' });
+      void refetchRules();
+      setTab('rules');
+    } catch (err) {
+      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Could not create rule' });
+    }
+  };
+
+  const runToolTest = async () => {
+    setMsg(null);
+    setToolBusy(true);
+    try {
+      const user_id = Number(toolUserId) || 0;
+      const course_id = Number(toolCourseId) || 0;
+      if (!user_id) {
+        throw new Error('User ID is required.');
+      }
+      await getSikshyaApi().post(`/pro/email-marketing/tools/test`, {
+        user_id,
+        course_id,
+        event_key: 'sikshya_user_enrolled',
+      });
+      setMsg({ kind: 'success', text: 'Test queued (if consent + rule match).' });
+      setTab('logs');
+      void refetchLogs();
+    } catch (err) {
+      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Tool failed' });
+    } finally {
+      setToolBusy(false);
+    }
+  };
+
+  const runToolBackfill = async () => {
+    setMsg(null);
+    setToolBusy(true);
+    try {
+      const course_id = Number(toolCourseId) || 0;
+      const res = await getSikshyaApi().post<{ ok?: boolean; queued?: number }>(`/pro/email-marketing/tools/backfill`, {
+        course_id,
+        max: 200,
+        days: 365,
+      });
+      setMsg({ kind: 'success', text: `Backfill queued ${res?.queued ?? 0} enrollments.` });
+      setTab('logs');
+      void refetchLogs();
+    } catch (err) {
+      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Backfill failed' });
+    } finally {
+      setToolBusy(false);
+    }
+  };
+
   return (
     <EmbeddableShell
       embedded={embedded}
@@ -311,63 +441,80 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         addonError={addon.error}
       >
         <div className="space-y-6">
-          {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
+          <div className="flex flex-wrap gap-2">
+            <ButtonSecondary type="button" className={tab === 'setup' ? 'ring-2 ring-brand-500/40' : ''} onClick={() => setTab('setup')}>
+              Setup
+            </ButtonSecondary>
+            <ButtonSecondary type="button" className={tab === 'rules' ? 'ring-2 ring-brand-500/40' : ''} onClick={() => setTab('rules')}>
+              Rules
+            </ButtonSecondary>
+            <ButtonSecondary type="button" className={tab === 'logs' ? 'ring-2 ring-brand-500/40' : ''} onClick={() => setTab('logs')}>
+              Logs
+            </ButtonSecondary>
+            <ButtonSecondary type="button" className={tab === 'tools' ? 'ring-2 ring-brand-500/40' : ''} onClick={() => setTab('tools')}>
+              Tools
+            </ButtonSecondary>
+          </div>
 
-          <ListPanel className="p-6">
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-              <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Beginner-friendly setup</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  Choose the provider your team already uses, paste the two values it asks for, enable sync, then add field mappings only if you need extra data.
-                </p>
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  {PROVIDER_ORDER.map((id) => {
-                    const info = PROVIDER_COPY[id];
-                    const active = provider === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setField('provider', id)}
-                        className={`rounded-2xl border p-4 text-left transition ${
-                          active
-                            ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-500/20 dark:bg-brand-950/30'
-                            : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-slate-900 dark:text-white">{info.name}</div>
-                            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{info.description}</div>
-                          </div>
-                          <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                            {info.badge}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
+          {tab === 'setup' ? (
+            <>
+              {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
+
+              <ListPanel className="p-6">
+                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+                  <div>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Beginner-friendly setup</h2>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      Choose the provider your team already uses, paste the two values it asks for, enable sync, then add field mappings only if you need extra data.
+                    </p>
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      {PROVIDER_ORDER.map((id) => {
+                        const info = PROVIDER_COPY[id];
+                        const active = provider === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setField('provider', id)}
+                            className={`rounded-2xl border p-4 text-left transition ${
+                              active
+                                ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-500/20 dark:bg-brand-950/30'
+                                : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-sm font-semibold text-slate-900 dark:text-white">{info.name}</div>
+                                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{info.description}</div>
+                              </div>
+                              <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                {info.badge}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 text-sm text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
+                    <div className="text-sm font-semibold">Recommended flow</div>
+                    <ol className="mt-3 space-y-2 text-xs leading-relaxed">
+                      <li>1. Pick one provider only.</li>
+                      <li>2. Paste the API key and destination ID.</li>
+                      <li>3. Turn on enrollment sync first.</li>
+                      <li>4. Save, test with one learner, then add mappings.</li>
+                    </ol>
+                    <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs dark:bg-slate-900/40">{providerCopy.beginnerTip}</p>
+                  </div>
                 </div>
-              </div>
+              </ListPanel>
 
-              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 text-sm text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
-                <div className="text-sm font-semibold">Recommended flow</div>
-                <ol className="mt-3 space-y-2 text-xs leading-relaxed">
-                  <li>1. Pick one provider only.</li>
-                  <li>2. Paste the API key and destination ID.</li>
-                  <li>3. Turn on enrollment sync first.</li>
-                  <li>4. Save, test with one learner, then add mappings.</li>
-                </ol>
-                <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs dark:bg-slate-900/40">{providerCopy.beginnerTip}</p>
-              </div>
-            </div>
-          </ListPanel>
-
-          <ListPanel className="p-6">
-            {loading ? (
-              <SkeletonCard rows={7} />
-            ) : (
-              <form onSubmit={onSave} className="space-y-6">
+              <ListPanel className="p-6">
+                {loading ? (
+                  <SkeletonCard rows={7} />
+                ) : (
+                  <form onSubmit={onSave} className="space-y-6">
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-950/40">
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -493,20 +640,266 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                     </span>
                   ) : null}
                 </div>
-              </form>
-            )}
-          </ListPanel>
+                  </form>
+                )}
+              </ListPanel>
 
-          <ListPanel className="p-6">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Next steps</h2>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li className="text-slate-700 dark:text-slate-200">Mailchimp: find your Audience ID in <span className="font-medium">Audience {'->'} Settings {'->'} Audience name and defaults</span>.</li>
-              <li className="text-slate-700 dark:text-slate-200">MailerLite: find your Group ID in <span className="font-medium">Subscribers {'->'} Groups</span>.</li>
-              <li className="text-slate-700 dark:text-slate-200">Brevo: use the numeric List ID and create any mapped contact attributes in Brevo first.</li>
-              <li className="text-slate-700 dark:text-slate-200">Kit: use a Form ID and remember Kit ignores custom fields that do not already exist.</li>
-              <li className="text-slate-700 dark:text-slate-200">After saving, enroll one test learner and confirm the record lands in the right destination before adding more mappings.</li>
-            </ul>
-          </ListPanel>
+              <ListPanel className="p-6">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Next steps</h2>
+                <ul className="mt-3 space-y-2 text-sm">
+                  <li className="text-slate-700 dark:text-slate-200">
+                    Mailchimp: find your Audience ID in <span className="font-medium">Audience {'->'} Settings {'->'} Audience name and defaults</span>.
+                  </li>
+                  <li className="text-slate-700 dark:text-slate-200">
+                    MailerLite: find your Group ID in <span className="font-medium">Subscribers {'->'} Groups</span>.
+                  </li>
+                  <li className="text-slate-700 dark:text-slate-200">Brevo: use the numeric List ID and create any mapped contact attributes in Brevo first.</li>
+                  <li className="text-slate-700 dark:text-slate-200">Kit: use a Form ID and remember Kit ignores custom fields that do not already exist.</li>
+                  <li className="text-slate-700 dark:text-slate-200">
+                    After saving, enroll one test learner and confirm the record lands in the right destination before adding more mappings.
+                  </li>
+                </ul>
+              </ListPanel>
+            </>
+          ) : null}
+
+          {tab === 'rules' ? (
+            <ListPanel className="p-6">
+              {rulesError ? <ApiErrorPanel error={rulesError} title="Could not load rules" onRetry={() => refetchRules()} /> : null}
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Rules</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Define what to do when events happen. Start with one enrollment rule, confirm it works, then add completion or order rules.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <ButtonSecondary type="button" onClick={() => void createDefaultRule('sikshya_user_enrolled')}>
+                    + Enrollment rule
+                  </ButtonSecondary>
+                  <ButtonSecondary type="button" onClick={() => void createDefaultRule('sikshya_course_completed')}>
+                    + Completion rule
+                  </ButtonSecondary>
+                  <ButtonSecondary type="button" onClick={() => void createDefaultRule('sikshya_order_fulfilled')}>
+                    + Order fulfilled rule
+                  </ButtonSecondary>
+                </div>
+              </div>
+
+              {rulesLoading ? (
+                <div className="mt-5">
+                  <SkeletonCard rows={6} />
+                </div>
+              ) : rules.length ? (
+                <ul className="mt-5 space-y-3">
+                  {rules.map((r) => {
+                    const on = Boolean(r.is_active);
+                    return (
+                      <li key={r.id} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-950/40">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-slate-900 dark:text-white">{r.name || r.event_key}</span>
+                              <span
+                                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                                  on
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200'
+                                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                                }`}
+                              >
+                                {on ? 'Active' : 'Off'}
+                              </span>
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                {r.event_key}
+                              </span>
+                            </div>
+                            {r.description ? <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{r.description}</p> : null}
+                            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                              Priority: <span className="font-medium text-slate-700 dark:text-slate-200">{r.priority}</span>
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 flex-wrap gap-2">
+                            <ButtonSecondary
+                              type="button"
+                              onClick={() => {
+                                const next = { ...r, is_active: !on };
+                                void (async () => {
+                                  try {
+                                    await getSikshyaApi().patch(`/pro/email-marketing/rules/${encodeURIComponent(String(r.id))}`, {
+                                      is_active: !on,
+                                      name: next.name,
+                                      description: next.description,
+                                      priority: next.priority,
+                                      event_key: next.event_key,
+                                      filters_json: next.filters_json ?? null,
+                                      actions_json: next.actions_json ?? null,
+                                    });
+                                    void refetchRules();
+                                  } catch (err) {
+                                    setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Update failed' });
+                                  }
+                                })();
+                              }}
+                            >
+                              {on ? 'Disable' : 'Enable'}
+                            </ButtonSecondary>
+                            <ButtonSecondary
+                              type="button"
+                              onClick={() => {
+                                if (!confirm('Delete this rule?')) return;
+                                void (async () => {
+                                  try {
+                                    await getSikshyaApi().delete(`/pro/email-marketing/rules/${encodeURIComponent(String(r.id))}`);
+                                    void refetchRules();
+                                  } catch (err) {
+                                    setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Delete failed' });
+                                  }
+                                })();
+                              }}
+                            >
+                              Delete
+                            </ButtonSecondary>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+                  No rules yet. Add an enrollment rule to get started.
+                </div>
+              )}
+            </ListPanel>
+          ) : null}
+
+          {tab === 'logs' ? (
+            <ListPanel className="p-6">
+              {logsError ? <ApiErrorPanel error={logsError} title="Could not load logs" onRetry={() => refetchLogs()} /> : null}
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Logs</h2>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    Delivery history for provider calls. This becomes more useful once the queue runner is enabled.
+                  </p>
+                </div>
+                <ButtonSecondary type="button" onClick={() => refetchLogs()}>
+                  Refresh
+                </ButtonSecondary>
+              </div>
+
+              {logsLoading ? (
+                <div className="mt-5">
+                  <SkeletonCard rows={6} />
+                </div>
+              ) : logs.length ? (
+                <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950/40">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
+                      <tr>
+                        <th className="px-4 py-3">When</th>
+                        <th className="px-4 py-3">Event</th>
+                        <th className="px-4 py-3">Provider</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3">HTTP</th>
+                        <th className="px-4 py-3">User</th>
+                        <th className="px-4 py-3">Course</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {logs.map((l) => (
+                        <tr key={l.id} className="text-slate-800 dark:text-slate-100">
+                          <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{l.created_at || ''}</td>
+                          <td className="px-4 py-3">
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                              {l.event_key}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">{l.provider}</td>
+                          <td className="px-4 py-3">
+                            <span className="font-medium">{l.status}</span>
+                            {l.error_message ? <div className="mt-1 text-xs text-rose-600 dark:text-rose-300">{l.error_message}</div> : null}
+                          </td>
+                          <td className="px-4 py-3">{l.http_code || ''}</td>
+                          <td className="px-4 py-3">{l.user_id}</td>
+                          <td className="px-4 py-3">{l.course_id}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+                  No logs yet.
+                </div>
+              )}
+            </ListPanel>
+          ) : null}
+
+          {tab === 'tools' ? (
+            <ListPanel className="p-6">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Tools</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Test sync and bulk operations. These respect consent and per-course overrides.
+              </p>
+              <div className="mt-5 grid gap-3 md:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm dark:border-slate-700 dark:bg-slate-950/40">
+                  <div className="font-semibold text-slate-900 dark:text-white">Test sync (safe)</div>
+                  <p className="mt-1 text-slate-600 dark:text-slate-300">
+                    Queues a test run for one user (and optional course). If there is no matching rule or the user is not opted-in, nothing is sent.
+                  </p>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label className="block text-sm">
+                      <span className="font-medium text-slate-900 dark:text-white">User ID</span>
+                      <input
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        value={toolUserId}
+                        onChange={(e) => setToolUserId(e.target.value)}
+                        placeholder="e.g. 123"
+                      />
+                    </label>
+                    <label className="block text-sm">
+                      <span className="font-medium text-slate-900 dark:text-white">Course ID (optional)</span>
+                      <input
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        value={toolCourseId}
+                        onChange={(e) => setToolCourseId(e.target.value)}
+                        placeholder="e.g. 456"
+                      />
+                    </label>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <ButtonPrimary type="button" disabled={toolBusy} onClick={() => void runToolTest()}>
+                      {toolBusy ? 'Working…' : 'Queue test'}
+                    </ButtonPrimary>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm dark:border-slate-700 dark:bg-slate-950/40">
+                  <div className="font-semibold text-slate-900 dark:text-white">Backfill enrollments</div>
+                  <p className="mt-1 text-slate-600 dark:text-slate-300">
+                    Queues sync jobs for recent enrollments. Use after you create your first enrollment rule.
+                  </p>
+                  <div className="mt-4">
+                    <label className="block text-sm">
+                      <span className="font-medium text-slate-900 dark:text-white">Course ID (optional)</span>
+                      <input
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        value={toolCourseId}
+                        onChange={(e) => setToolCourseId(e.target.value)}
+                        placeholder="Leave empty for recent site-wide enrollments"
+                      />
+                    </label>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <ButtonSecondary type="button" disabled={toolBusy} onClick={() => void runToolBackfill()}>
+                      {toolBusy ? 'Working…' : 'Queue backfill (last 365 days)'}
+                    </ButtonSecondary>
+                  </div>
+                </div>
+              </div>
+            </ListPanel>
+          ) : null}
         </div>
       </GatedFeatureWorkspace>
     </EmbeddableShell>

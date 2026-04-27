@@ -65,6 +65,20 @@ final class AssignmentService
             ];
         }
 
+        $existing = $this->submissions->findByAssignmentAndUser($assignment_id, $user_id);
+        if ($existing && (string) ($existing->status ?? '') === 'graded') {
+            $allow_resubmit = (string) get_post_meta($assignment_id, '_sikshya_assignment_allow_resubmit', true) === '1';
+            if (!$allow_resubmit) {
+                return [
+                    'success' => false,
+                    'message' => __(
+                        'This assignment is already graded. Resubmissions are not allowed unless your instructor enables them.',
+                        'sikshya'
+                    ),
+                ];
+            }
+        }
+
         $attachment_ids = $this->handleAttachments($user_id, $attachments);
         $sid = $this->submissions->upsertSubmission(
             [
@@ -226,15 +240,25 @@ final class AssignmentService
             }
         }
 
+        $rubric_scores = null;
+        if (isset($row->rubric_scores_json) && is_string($row->rubric_scores_json) && $row->rubric_scores_json !== '') {
+            $decoded = json_decode($row->rubric_scores_json, true);
+            $rubric_scores = is_array($decoded) ? $decoded : null;
+        }
+
+        $aid = (int) $row->assignment_id;
+
         return [
             'id' => (int) $row->id,
-            'assignment_id' => (int) $row->assignment_id,
+            'assignment_id' => $aid,
             'course_id' => (int) $row->course_id,
             'user_id' => (int) $row->user_id,
             'content' => (string) ($row->content ?? ''),
             'status' => (string) $row->status,
             'grade' => $row->grade !== null ? (float) $row->grade : null,
             'feedback' => (string) ($row->feedback ?? ''),
+            'rubric_scores' => $rubric_scores,
+            'allow_resubmit' => $aid > 0 && (string) get_post_meta($aid, '_sikshya_assignment_allow_resubmit', true) === '1',
             'attachments' => $attachments,
             'submitted_at' => (string) $row->submitted_at,
             'graded_at' => (string) ($row->graded_at ?? ''),

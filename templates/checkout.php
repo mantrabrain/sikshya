@@ -16,7 +16,7 @@ $vw = $page_model->getViewer();
 $fmt_subtotal = number_format_i18n($page_model->getSubtotalHint(), 2) . ' ' . $page_model->getCurrency();
 $fmt_total = $fmt_subtotal;
 
-get_header();
+sikshya_get_header();
 
 if (!is_user_logged_in()) {
     wp_safe_redirect(wp_login_url(get_permalink()));
@@ -48,6 +48,11 @@ if (!is_user_logged_in()) {
                     <?php esc_html_e('Complete your purchase securely.', 'sikshya'); ?>
                 <?php endif; ?>
             </p>
+            <?php if ($u->getAccountUrl() !== '') : ?>
+                <p class="sikshya-checkout-page__util-links">
+                    <a href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('My account — orders & receipts', 'sikshya'); ?></a>
+                </p>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -103,7 +108,16 @@ if (!is_user_logged_in()) {
                     <section class="sikshya-checkout-page__panel sikshya-checkout-page__panel--account" aria-labelledby="sikshya-checkout-account-heading">
                         <h2 id="sikshya-checkout-account-heading" class="sikshya-checkout-page__panel-title"><?php esc_html_e('Your account', 'sikshya'); ?></h2>
                         <p class="sikshya-checkout-page__panel-intro">
-                            <?php esc_html_e('You are buying digital course access. There is no appointment or date “booking” step in Sikshya—enrollment is tied to your WordPress account, and course access dates (if any) are set by each course.', 'sikshya'); ?>
+                            <?php
+                            $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('frontend') : __('Sikshya LMS', 'sikshya');
+                            echo esc_html(
+                                sprintf(
+                                    /* translators: %s: brand name */
+                                    __('You are buying digital course access. There is no appointment or date “booking” step in %s—enrollment is tied to your WordPress account, and course access dates (if any) are set by each course.', 'sikshya'),
+                                    $brand
+                                )
+                            );
+                            ?>
                         </p>
                         <dl class="sikshya-checkout-page__account-dl">
                             <div class="sikshya-checkout-page__account-row">
@@ -157,7 +171,19 @@ if (!is_user_logged_in()) {
                             <?php endforeach; ?>
                             <?php if (!$any_gw) : ?>
                                 <p class="sikshya-checkout-gateways__notice">
-                                    <?php esc_html_e('No payment method is available. Enable and configure gateways under Sikshya → Settings → Payment.', 'sikshya'); ?>
+                                    <?php
+                                    $short = function_exists('sikshya_brand_profile')
+                                        ? (string) (sikshya_brand_profile('frontend')['brandShortName'] ?? '')
+                                        : '';
+                                    $short = $short !== '' ? $short : __('Sikshya', 'sikshya');
+                                    echo esc_html(
+                                        sprintf(
+                                            /* translators: %s: brand short name */
+                                            __('No payment method is available. Enable and configure gateways under %s → Settings → Payment.', 'sikshya'),
+                                            $short
+                                        )
+                                    );
+                                    ?>
                                 </p>
                             <?php endif; ?>
                         </div>
@@ -226,4 +252,4 @@ if (!is_user_logged_in()) {
 </div>
 
 <?php
-get_footer();
+sikshya_get_footer();

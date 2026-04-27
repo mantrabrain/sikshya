@@ -7,12 +7,15 @@
 
 use Sikshya\Constants\PostTypes;
 
-get_header();
+sikshya_get_header();
 
 $ctx = \Sikshya\Frontend\Public\ArchiveContextTemplateData::fromWpQuery();
 $found = (int) $ctx['found'];
 $max_pages = (int) $ctx['max_pages'];
 $paged = (int) $ctx['paged'];
+
+$label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+$label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
 <div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--tag">
@@ -22,7 +25,15 @@ $paged = (int) $ctx['paged'];
             <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
                 <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
                 <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>"><?php esc_html_e('Course Tags', 'sikshya'); ?></a>
+                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: %s: plural label (e.g. Courses) */
+                        __('%s Tags', 'sikshya'),
+                        $label_courses
+                    ));
+                    ?>
+                </a>
                 <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
                 <span class="sikshya-taxonomy-courses__crumb sikshya-taxonomy-courses__crumb--current"><?php single_term_title(); ?></span>
             </nav>
@@ -37,11 +48,12 @@ $paged = (int) $ctx['paged'];
 
             <p class="sikshya-archive-courses__results" role="status">
                 <?php
-                printf(
-                    /* translators: %d: number of courses */
-                    esc_html(_n('%d course found', '%d courses found', $found, 'sikshya')),
-                    (int) $found
-                );
+                echo esc_html(sprintf(
+                    _n('%1$d %2$s found', '%1$d %3$s found', $found, 'sikshya'),
+                    (int) $found,
+                    strtolower($label_course),
+                    strtolower($label_courses)
+                ));
                 ?>
             </p>
         </header>
@@ -79,9 +91,17 @@ $paged = (int) $ctx['paged'];
             <?php endif; ?>
         <?php else : ?>
             <div class="sikshya-archive-courses__empty">
-                <p class="sikshya-archive-courses__empty-text"><?php esc_html_e('No courses use this tag yet.', 'sikshya'); ?></p>
+                <p class="sikshya-archive-courses__empty-text">
+                    <?php
+                    echo esc_html(sprintf(
+                        /* translators: %s: plural label (e.g. courses) */
+                        __('No %s use this tag yet.', 'sikshya'),
+                        strtolower($label_courses)
+                    ));
+                    ?>
+                </p>
                 <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
-                    <?php esc_html_e('Browse all courses', 'sikshya'); ?>
+                    <?php echo esc_html(sprintf(__('Browse all %s', 'sikshya'), strtolower($label_courses))); ?>
                 </a>
             </div>
         <?php endif; ?>
@@ -89,4 +109,4 @@ $paged = (int) $ctx['paged'];
 </div>
 
 <?php
-get_footer();
+sikshya_get_footer();

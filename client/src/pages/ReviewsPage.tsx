@@ -28,6 +28,11 @@ type ReviewRow = {
   created_at_label: string;
   edit_url: string;
   view_url: string;
+  reported_count?: number;
+  last_reported_at?: string;
+  reply_text?: string;
+  reply_user_id?: number;
+  reply_created_at?: string;
 };
 
 type ListResponse = {
@@ -76,6 +81,7 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [rowBusyId, setRowBusyId] = useState<number | null>(null);
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
 
   const loader = useCallback(async () => {
     if (!gateOpen) {
@@ -123,6 +129,35 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
     setRowBusyId(id);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewReject(id), {});
+      refetch();
+    } finally {
+      setRowBusyId(null);
+    }
+  };
+
+  const saveReply = async (id: number) => {
+    const text = (replyDrafts[id] ?? '').trim();
+    if (!text) return;
+    setRowBusyId(id);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewReply(id), { reply_text: text });
+      refetch();
+    } finally {
+      setRowBusyId(null);
+    }
+  };
+
+  const removeReply = async (id: number) => {
+    const ok = await confirm({
+      title: 'Remove reply?',
+      message: 'This removes the public instructor/admin reply from the course page.',
+      variant: 'danger',
+      confirmLabel: 'Remove',
+    });
+    if (!ok) return;
+    setRowBusyId(id);
+    try {
+      await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.reviewReply(id));
       refetch();
     } finally {
       setRowBusyId(null);
@@ -284,7 +319,7 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
                     <td className="whitespace-nowrap px-5 py-3.5">
                       {r.rating > 0 ? <StarDisplay value={r.rating} /> : <span className="text-slate-400">—</span>}
                     </td>
-                    <td className="max-w-[320px] px-5 py-3.5 text-slate-700 dark:text-slate-300">
+                    <td className="max-w-[420px] px-5 py-3.5 text-slate-700 dark:text-slate-300">
                       {r.review_text ? (
                         <p className="whitespace-pre-line text-sm leading-relaxed">
                           {r.review_text.length > 260 ? `${r.review_text.slice(0, 260)}…` : r.review_text}
@@ -292,6 +327,40 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
                       ) : (
                         <span className="text-xs italic text-slate-400">(rating only)</span>
                       )}
+                      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs font-semibold text-slate-600 dark:text-slate-300">Official reply</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            Reports: {Number(r.reported_count ?? 0).toLocaleString()}
+                          </div>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={replyDrafts[r.id] ?? r.reply_text ?? ''}
+                          onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                          placeholder="Write a short reply (shown publicly under the review)…"
+                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        />
+                        <div className="mt-2 flex items-center justify-end gap-2">
+                          {r.reply_text ? (
+                            <button
+                              type="button"
+                              className="text-xs font-semibold text-slate-600 hover:text-slate-800 disabled:opacity-50 dark:text-slate-300 dark:hover:text-white"
+                              disabled={rowBusyId === r.id}
+                              onClick={() => void removeReply(r.id)}
+                            >
+                              Remove reply
+                            </button>
+                          ) : null}
+                          <ButtonPrimary
+                            type="button"
+                            disabled={rowBusyId === r.id || ((replyDrafts[r.id] ?? r.reply_text ?? '').trim() === '')}
+                            onClick={() => void saveReply(r.id)}
+                          >
+                            Save reply
+                          </ButtonPrimary>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-3.5">
                       {r.is_approved ? (

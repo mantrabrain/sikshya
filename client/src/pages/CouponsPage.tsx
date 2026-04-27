@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AppShell } from '../components/AppShell';
+import { AddonSettingsPage } from './AddonSettingsPage';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
@@ -65,7 +66,14 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
   const advEnabled = advMode === 'full';
   const [advCouponId, setAdvCouponId] = useState<number | null>(null);
   const [advMin, setAdvMin] = useState<string>('');
+  const [advMaxSub, setAdvMaxSub] = useState<string>('');
   const [advCourseIds, setAdvCourseIds] = useState<number[]>([]);
+  const [advExcludedCourseIds, setAdvExcludedCourseIds] = useState<number[]>([]);
+  const [advMaxDiscount, setAdvMaxDiscount] = useState<string>('');
+  const [advPerUser, setAdvPerUser] = useState<string>('');
+  const [advFirstOrder, setAdvFirstOrder] = useState(false);
+  const [advValidFrom, setAdvValidFrom] = useState<string>('');
+  const [advValidUntil, setAdvValidUntil] = useState<string>('');
   const [advLoading, setAdvLoading] = useState(false);
   const [advSaving, setAdvSaving] = useState(false);
   const [advMsg, setAdvMsg] = useState<string | null>(null);
@@ -87,14 +95,20 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
         const r = await getSikshyaApi().get<AdvancedMetaResponse>(
           SIKSHYA_ENDPOINTS.pro.couponAdvanced(advCouponId)
         );
-        const meta = r.meta || {};
-        setAdvMin(meta.min_subtotal ? String(meta.min_subtotal) : '');
-        try {
-          const parsed = meta.allowed_course_ids ? (JSON.parse(meta.allowed_course_ids) as unknown) : [];
-          setAdvCourseIds(Array.isArray(parsed) ? parsed.map((n) => Number(n) || 0).filter((n) => n > 0) : []);
-        } catch {
-          setAdvCourseIds([]);
-        }
+        const rules = r.rules || {};
+        setAdvMin(rules.min_subtotal != null && rules.min_subtotal > 0 ? String(rules.min_subtotal) : '');
+        setAdvMaxSub(rules.max_subtotal != null && rules.max_subtotal > 0 ? String(rules.max_subtotal) : '');
+        setAdvCourseIds(Array.isArray(rules.allowed_course_ids) ? rules.allowed_course_ids.filter((n) => n > 0) : []);
+        setAdvExcludedCourseIds(
+          Array.isArray(rules.excluded_course_ids) ? rules.excluded_course_ids.filter((n) => n > 0) : []
+        );
+        setAdvMaxDiscount(
+          rules.max_discount_amount != null && rules.max_discount_amount > 0 ? String(rules.max_discount_amount) : ''
+        );
+        setAdvPerUser(rules.per_user_limit != null && rules.per_user_limit > 0 ? String(rules.per_user_limit) : '');
+        setAdvFirstOrder(Boolean(rules.first_order_only));
+        setAdvValidFrom(rules.valid_from ? String(rules.valid_from) : '');
+        setAdvValidUntil(rules.valid_until ? String(rules.valid_until) : '');
       } catch (err) {
         setAdvMsg(err instanceof Error ? err.message : 'Could not load advanced rules.');
       } finally {
@@ -103,14 +117,25 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
     })();
   }, [advCouponId, advEnabled]);
 
+  const buildAdvancedRulesPayload = (): AdvancedRules => ({
+    min_subtotal: clampNumberInput(advMin, 0),
+    max_subtotal: clampNumberInput(advMaxSub, 0),
+    allowed_course_ids: advCourseIds,
+    excluded_course_ids: advExcludedCourseIds,
+    max_discount_amount: clampNumberInput(advMaxDiscount, 0),
+    per_user_limit: Math.max(0, parseInt(advPerUser, 10) || 0),
+    first_order_only: advFirstOrder,
+    valid_from: advValidFrom.trim(),
+    valid_until: advValidUntil.trim(),
+  });
+
   const saveAdvanced = async () => {
     if (!advCouponId) return;
     setAdvSaving(true);
     setAdvMsg(null);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.couponAdvanced(advCouponId), {
-        min_subtotal: clampNumberInput(advMin, 0),
-        allowed_course_ids: advCourseIds,
+        rules: buildAdvancedRulesPayload(),
       });
       setAdvMsg('Advanced rules saved.');
     } catch (err) {
@@ -130,7 +155,14 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
 
     setAdvCouponId(null);
     setAdvMin('');
+    setAdvMaxSub('');
     setAdvCourseIds([]);
+    setAdvExcludedCourseIds([]);
+    setAdvMaxDiscount('');
+    setAdvPerUser('');
+    setAdvFirstOrder(false);
+    setAdvValidFrom('');
+    setAdvValidUntil('');
     setAdvMsg(null);
   };
 
@@ -155,15 +187,23 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
   };
 
   const editorMode: EditorMode = tab === 'manage' ? 'manage' : 'create';
-  const editorReadOnly = editorMode === 'manage';
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setSaveMsg(null);
     setSaving(true);
     try {
-      if (editorMode === 'manage') {
-        setSaveMsg('Editing coupon basics is not available yet. You can manage Advanced rules below.');
+      if (editorMode === 'manage' && selected) {
+        await getSikshyaApi().patch(SIKSHYA_ENDPOINTS.admin.coupon(selected.id), {
+          code: code.trim(),
+          discount_type: discountType,
+          discount_value: clampNumberInput(discountValue, 0),
+          max_uses: parseInt(maxUses, 10) || 0,
+          expires_at: expiresAt || null,
+          status: selected.status || 'active',
+        });
+        setSaveMsg('Coupon updated.');
+        await refetch();
         return;
       }
 
@@ -178,12 +218,19 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
 
       const createdId = Number(r?.id) || 0;
       if (createdId > 0 && advEnabled) {
-        const hasAdvanced = clampNumberInput(advMin, 0) > 0 || advCourseIds.length > 0;
+        const rules = buildAdvancedRulesPayload();
+        const hasAdvanced =
+          (rules.min_subtotal ?? 0) > 0 ||
+          (rules.max_subtotal ?? 0) > 0 ||
+          (rules.allowed_course_ids?.length ?? 0) > 0 ||
+          (rules.excluded_course_ids?.length ?? 0) > 0 ||
+          (rules.max_discount_amount ?? 0) > 0 ||
+          (rules.per_user_limit ?? 0) > 0 ||
+          rules.first_order_only ||
+          (rules.valid_from && String(rules.valid_from).trim() !== '') ||
+          (rules.valid_until && String(rules.valid_until).trim() !== '');
         if (hasAdvanced) {
-          await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.couponAdvanced(createdId), {
-            min_subtotal: clampNumberInput(advMin, 0),
-            allowed_course_ids: advCourseIds,
-          });
+          await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.couponAdvanced(createdId), { rules });
         }
       }
 
@@ -209,11 +256,14 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
       { id: 'list', label: 'Coupons' },
       { id: 'create', label: 'Create coupon' },
     ] as { id: PageTab; label: string }[];
+    if (advFeature) {
+      items.push({ id: 'settings', label: 'Add-on defaults' });
+    }
     if (tab === 'manage' && selected) {
       items.push({ id: 'manage', label: `Manage: ${selected.code}` });
     }
     return items;
-  }, [tab, selected]);
+  }, [tab, selected, advFeature]);
 
   return (
     <AppShell
@@ -258,6 +308,12 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
               beginCreate();
               return;
             }
+            if (next === 'settings') {
+              setSelected(null);
+              setTab('settings');
+              resetEditor();
+              return;
+            }
             if (next === 'manage' && selected) {
               beginManage(selected);
             }
@@ -266,7 +322,19 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
         />
       </div>
 
-      {tab === 'list' ? (
+      {tab === 'settings' ? (
+        <AddonSettingsPage
+          embedded
+          config={config}
+          title={title}
+          addonId="coupons_advanced"
+          subtitle="Storefront hints, cart promo, and checkout guidance."
+          featureTitle="Advanced coupons & upsells"
+          featureDescription="Tune where learners see coupon guidance and optional cart merchandising. Per-coupon rules stay on each coupon’s Manage screen."
+          relatedCoreSettingsTab="payment"
+          relatedCoreSettingsLabel="Payment"
+        />
+      ) : tab === 'list' ? (
         <ListPanel>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5 dark:border-slate-800">
             <div>
@@ -350,8 +418,8 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                 </h2>
                 <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                   {editorMode === 'create'
-                    ? 'Create a basic coupon, then optionally add Advanced rules (minimum subtotal, course restrictions).'
-                    : 'Basic coupon editing is coming soon. For now, use this screen to view and set Advanced rules.'}
+                    ? 'Create a basic coupon, then optionally add advanced rules (cart thresholds, course targeting, limits, schedule).'
+                    : 'Edit the code, discount, and limits above. Advanced targeting and caps are below.'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -376,7 +444,6 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                 <input
                   required
                   value={code}
-                  disabled={editorReadOnly}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950"
                   placeholder="SAVE10"
@@ -386,9 +453,8 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                 <span className="text-slate-600 dark:text-slate-400">Type</span>
                 <select
                   value={discountType}
-                  disabled={editorReadOnly}
                   onChange={(e) => setDiscountType(e.target.value as 'percent' | 'fixed')}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                 >
                   <option value="percent">Percent off</option>
                   <option value="fixed">Fixed amount</option>
@@ -401,9 +467,8 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                   step="0.01"
                   min="0"
                   value={discountValue}
-                  disabled={editorReadOnly}
                   onChange={(e) => setDiscountValue(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                 />
               </label>
               <label className="block text-sm">
@@ -412,16 +477,14 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                   type="number"
                   min="0"
                   value={maxUses}
-                  disabled={editorReadOnly}
                   onChange={(e) => setMaxUses(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                 />
               </label>
               <DateTimePickerField
                 kind="datetime"
                 value={expiresAt}
                 onChange={setExpiresAt}
-                disabled={editorReadOnly}
                 className="sm:col-span-2"
                 label="Expires (optional, local time)"
               />
@@ -435,40 +498,102 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                 featureId="coupons_advanced"
                 config={config}
                 featureTitle="Advanced coupon rules"
-                featureDescription="Restrict a coupon by minimum cart subtotal and/or course allow-list."
+                featureDescription="Target carts with min/max totals, allow or block specific courses, cap percent discounts, limit uses per learner, first-purchase-only windows, and optional schedule."
                 previewVariant="form"
                 addonEnableTitle="Advanced coupons is not enabled"
-                addonEnableDescription="Enable the Advanced coupons add-on to add minimum subtotal and course restrictions."
+                addonEnableDescription="Enable the Advanced coupons add-on for targeting, caps, and storefront hints."
                 canEnable={Boolean(advAddon.licenseOk)}
                 enableBusy={advAddon.loading}
                 onEnable={() => void advAddon.enable()}
                 addonError={advAddon.error}
               >
-                {editorMode === 'create' ? (
-                  <div className="space-y-5">
+                {editorMode === 'create' || (editorMode === 'manage' && selected) ? (
+                  <div className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Advanced rules (optional)</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                        {editorMode === 'create' ? 'Advanced rules (optional)' : `Advanced rules for ${selected?.code}`}
+                      </h3>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        Leave these empty to keep the coupon valid everywhere with no minimum.
+                        Leave fields empty or zero to disable that rule. Course exclude list blocks the code if any
+                        excluded course is in the cart.
                       </p>
+                      {editorMode === 'manage' && advLoading ? <p className="mt-2 text-sm text-slate-500">Loading…</p> : null}
                     </div>
-                    <label className="block text-sm">
-                      <span className="text-slate-600 dark:text-slate-400">Minimum cart subtotal</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        value={advMin}
-                        onChange={(e) => setAdvMin(e.target.value)}
-                        placeholder="0 = no minimum"
-                        className="mt-1 w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">Minimum cart subtotal</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={advMin}
+                          onChange={(e) => setAdvMin(e.target.value)}
+                          placeholder="0 = none"
+                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        />
+                      </label>
+                      <label className="block text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">Maximum cart subtotal</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={advMaxSub}
+                          onChange={(e) => setAdvMaxSub(e.target.value)}
+                          placeholder="0 = none"
+                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        />
+                      </label>
+                      <label className="block text-sm sm:col-span-2">
+                        <span className="text-slate-600 dark:text-slate-400">Max discount amount (caps % off)</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={advMaxDiscount}
+                          onChange={(e) => setAdvMaxDiscount(e.target.value)}
+                          placeholder="0 = no cap"
+                          className="mt-1 w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        />
+                      </label>
+                      <label className="block text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">Uses per learner (0 = unlimited)</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={advPerUser}
+                          onChange={(e) => setAdvPerUser(e.target.value)}
+                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        />
+                      </label>
+                      <label className="flex items-center gap-2 text-sm sm:col-span-2">
+                        <input
+                          type="checkbox"
+                          checked={advFirstOrder}
+                          onChange={(e) => setAdvFirstOrder(e.target.checked)}
+                          className="rounded border-slate-300"
+                        />
+                        <span className="text-slate-700 dark:text-slate-300">First paid order only (logged-in checkout)</span>
+                      </label>
+                      <DateTimePickerField
+                        kind="datetime"
+                        value={advValidFrom}
+                        onChange={setAdvValidFrom}
+                        className=""
+                        label="Valid from (optional)"
                       />
-                    </label>
+                      <DateTimePickerField
+                        kind="datetime"
+                        value={advValidUntil}
+                        onChange={setAdvValidUntil}
+                        className=""
+                        label="Valid until (optional, extra window)"
+                      />
+                    </div>
                     <div className="text-sm">
                       <span className="block text-slate-600 dark:text-slate-400">Allowed courses</span>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        Leave empty to allow the coupon on every course. Otherwise it is only valid when the cart
-                        contains at least one of these courses.
+                        If set, the cart must include at least one of these courses.
                       </p>
                       <div className="mt-3">
                         <MultiCoursePicker
@@ -479,57 +604,38 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                         />
                       </div>
                     </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      These rules will be saved automatically right after you create the coupon.
+                    <div className="text-sm">
+                      <span className="block text-slate-600 dark:text-slate-400">Excluded courses</span>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        If the cart contains any of these courses, the code is rejected.
+                      </p>
+                      <div className="mt-3">
+                        <MultiCoursePicker
+                          value={advExcludedCourseIds}
+                          onChange={setAdvExcludedCourseIds}
+                          title="Select excluded courses"
+                          placeholder="Click to select courses…"
+                        />
+                      </div>
                     </div>
+                    {editorMode === 'manage' && selected ? (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <ButtonPrimary type="button" onClick={() => void saveAdvanced()} disabled={advSaving || !advCouponId}>
+                          {advSaving ? 'Saving…' : 'Save advanced rules'}
+                        </ButtonPrimary>
+                        {advMsg ? <span className="text-xs text-slate-600 dark:text-slate-400">{advMsg}</span> : null}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Advanced rules save automatically when you create the coupon.
+                      </p>
+                    )}
                   </div>
-                ) : !selected ? (
+                ) : (
                   <ListEmptyState
                     title="Pick a coupon"
                     description="Open “Manage” from the Coupons list to load and edit advanced rules."
                   />
-                ) : (
-                  <div className="space-y-5">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Advanced rules for {selected.code}
-                      </h3>
-                      {advLoading ? <p className="mt-2 text-sm text-slate-500">Loading…</p> : null}
-                    </div>
-                    <label className="block text-sm">
-                      <span className="text-slate-600 dark:text-slate-400">Minimum cart subtotal</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        value={advMin}
-                        onChange={(e) => setAdvMin(e.target.value)}
-                        placeholder="0 = no minimum"
-                        className="mt-1 w-48 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                      />
-                    </label>
-                    <div className="text-sm">
-                      <span className="block text-slate-600 dark:text-slate-400">Allowed courses</span>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                        Leave empty to allow the coupon on every course. Otherwise it is only valid when the cart
-                        contains at least one of these courses.
-                      </p>
-                      <div className="mt-3">
-                        <MultiCoursePicker
-                          value={advCourseIds}
-                          onChange={setAdvCourseIds}
-                          title="Select allowed courses"
-                          placeholder="Click to select courses…"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <ButtonPrimary type="button" onClick={() => void saveAdvanced()} disabled={advSaving || !advCouponId}>
-                        {advSaving ? 'Saving…' : 'Save advanced rules'}
-                      </ButtonPrimary>
-                      {advMsg ? <span className="text-xs text-slate-600 dark:text-slate-400">{advMsg}</span> : null}
-                    </div>
-                  </div>
                 )}
               </GatedFeatureWorkspace>
             </div>
@@ -548,7 +654,7 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                 </ButtonSecondary>
               ) : null}
               <ButtonPrimary type="submit" form="sikshya-coupon-form" disabled={saving || tableMissing}>
-                {saving ? 'Saving…' : editorMode === 'create' ? 'Create coupon' : 'Save'}
+                {saving ? 'Saving…' : editorMode === 'create' ? 'Create coupon' : 'Save coupon'}
               </ButtonPrimary>
             </div>
           </ListPanel>

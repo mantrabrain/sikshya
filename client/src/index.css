@@ -9,10 +9,31 @@ body {
 
 #sikshya-admin-root {
   min-height: calc(100vh - 32px);
+  /**
+   * Default admin “brand” palette (matches the historical Sikshya blue ramp).
+   * White label can override these at runtime via inline styles (see `adminBrandTokens.ts`).
+   */
+  --sikshya-brand-50-rgb: 239 246 255;
+  --sikshya-brand-100-rgb: 219 234 254;
+  --sikshya-brand-200-rgb: 191 219 254;
+  --sikshya-brand-300-rgb: 147 197 253;
+  --sikshya-brand-400-rgb: 96 165 250;
+  --sikshya-brand-500-rgb: 59 130 246;
+  --sikshya-brand-600-rgb: 37 99 235;
+  --sikshya-brand-700-rgb: 29 78 216;
+  --sikshya-brand-800-rgb: 30 64 175;
+  --sikshya-brand-900-rgb: 30 58 138;
+  --sikshya-brand-950-rgb: 23 37 84;
 }
 
+/**
+ * Full-viewport shell: height (not min-height) avoids an extra document strip below
+ * short pages; overflow clips so only <main> scrolls inside AppShell.
+ */
 body.sikshya-react-shell #sikshya-admin-root {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* WordPress admin bar offset (not used on Sikshya React shell) */

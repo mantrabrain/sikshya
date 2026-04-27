@@ -16,6 +16,7 @@ import {
   defaultTitleFor,
 } from '../components/shared/AddContentTypePickerModal';
 import { CreateCertificateModal } from '../components/shared/CreateCertificateModal';
+import { term } from '../lib/terminology';
 
 function certificatePreviewSrc(r: WpPost): string | null {
   const url = r._embedded?.['wp:featuredmedia']?.[0]?.source_url;
@@ -65,6 +66,12 @@ export function WpEntityListPage(props: {
   const isQuestionList = restBase === 'sik_question';
   const isChapterList = restBase === 'sik_chapter';
   const isAssignmentList = restBase === 'sik_assignment';
+  const T = {
+    lesson: term(config, 'lesson'),
+    quiz: term(config, 'quiz'),
+    assignment: term(config, 'assignment'),
+    course: term(config, 'course'),
+  };
   const [addLessonOpen, setAddLessonOpen] = useState(false);
   const [addLessonBusy, setAddLessonBusy] = useState(false);
   const [addLessonError, setAddLessonError] = useState<unknown>(null);
@@ -75,7 +82,7 @@ export function WpEntityListPage(props: {
   const openAddLesson = () => {
     setAddLessonError(null);
     setAddLessonType('lesson_text');
-    setAddLessonTitle(defaultTitleFor('lesson_text'));
+    setAddLessonTitle(defaultTitleFor('lesson_text', config));
     setAddLessonOpen(true);
   };
 
@@ -213,7 +220,7 @@ export function WpEntityListPage(props: {
         detailCols.push(
           {
             id: 'course',
-            header: 'Course',
+            header: T.course,
             cellClassName: 'whitespace-nowrap',
             render: (r) => {
               const m = r.meta as Record<string, unknown> | undefined;
@@ -262,7 +269,7 @@ export function WpEntityListPage(props: {
         detailCols.push(
           {
             id: 'course',
-            header: 'Course',
+            header: T.course,
             cellClassName: 'whitespace-nowrap',
             render: (r) => {
               const m = r.meta as Record<string, unknown> | undefined;
@@ -311,7 +318,7 @@ export function WpEntityListPage(props: {
         detailCols.push(
           {
             id: 'course',
-            header: 'Course',
+            header: T.course,
             cellClassName: 'whitespace-nowrap',
             render: (r) => {
               const m = r.meta as Record<string, unknown> | undefined;
@@ -332,7 +339,7 @@ export function WpEntityListPage(props: {
         detailCols.push(
           {
             id: 'course',
-            header: 'Course',
+            header: T.course,
             cellClassName: 'whitespace-nowrap',
             render: (r) => {
               const m = r.meta as Record<string, unknown> | undefined;
@@ -421,7 +428,7 @@ export function WpEntityListPage(props: {
       subtitle={subtitle}
       pageActions={
         isLessonList ? (
-          <ButtonPrimary onClick={openAddLesson}>+ Add lesson</ButtonPrimary>
+          <ButtonPrimary onClick={openAddLesson}>+ Add {T.lesson.toLowerCase()}</ButtonPrimary>
         ) : isCertificateList ? (
           <ButtonPrimary onClick={openAddCertificate}>+ Add new certificate</ButtonPrimary>
         ) : (
@@ -435,16 +442,17 @@ export function WpEntityListPage(props: {
       {isLessonList ? (
         <AddContentTypePickerModal
           open={addLessonOpen}
-          heading="Add a lesson, quiz, or assignment"
-          description="Pick a type, give it a clear name, then open it to add the actual teaching material. Quiz questions are created inside the quiz editor after you add the quiz here."
+          heading={`Add a ${T.lesson.toLowerCase()}, ${T.quiz.toLowerCase()}, or ${T.assignment.toLowerCase()}`}
+          description={`Pick a type, give it a clear name, then open it to add the actual teaching material. ${T.quiz} questions are created inside the ${T.quiz.toLowerCase()} editor after you add the ${T.quiz.toLowerCase()} here.`}
           addonsHref={addonsHref}
           contentType={addLessonType}
           onContentTypeChange={(t) => {
             setAddLessonType(t);
-            setAddLessonTitle(defaultTitleFor(t));
+            setAddLessonTitle(defaultTitleFor(t, config));
           }}
           title={addLessonTitle}
           onTitleChange={setAddLessonTitle}
+          config={config}
           onClose={() => {
             if (!addLessonBusy) {
               setAddLessonOpen(false);
@@ -474,7 +482,7 @@ export function WpEntityListPage(props: {
         emptyStateDescription="Try another status or search term, or add a new item."
         emptyStateAction={
           isLessonList ? (
-            <ButtonPrimary onClick={openAddLesson}>+ Add lesson</ButtonPrimary>
+            <ButtonPrimary onClick={openAddLesson}>+ Add {T.lesson.toLowerCase()}</ButtonPrimary>
           ) : isCertificateList ? (
             <ButtonPrimary onClick={openAddCertificate}>+ Add new certificate</ButtonPrimary>
           ) : (

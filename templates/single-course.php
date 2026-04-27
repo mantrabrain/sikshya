@@ -8,7 +8,7 @@
 use Sikshya\Frontend\Public\SingleCourseTemplateData;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 
-get_header();
+sikshya_get_header();
 
 while (have_posts()) :
     the_post();
@@ -18,6 +18,9 @@ while (have_posts()) :
     /** @var SingleCoursePageModel $page_model */
     $page_model = SingleCourseTemplateData::forPost(get_post());
     $legacy_vm = $page_model->toLegacyViewArray();
+    $instructor_profiles = is_array($legacy_vm['instructor_profiles'] ?? null)
+        ? $legacy_vm['instructor_profiles']
+        : [];
     $pricing = $page_model->getPricing();
     $course_id = $page_model->getCourseId();
     $urls = $page_model->getUrls();
@@ -33,6 +36,10 @@ while (have_posts()) :
     $bundle_courses    = $page_model->getBundleCourses();
     $video_preview = $page_model->getVideoPreview();
     $subtitle = $page_model->getSubtitle();
+
+    $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
+    $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+    $label_instructor = function_exists('sikshya_label') ? sikshya_label('instructor', __('Instructor', 'sikshya'), 'frontend') : __('Instructor', 'sikshya');
     ?>
 
 <div class="sikshya-public sikshya-single-course sikshya-course-lp sik-f-scope">
@@ -42,7 +49,7 @@ while (have_posts()) :
                 <a href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
                 <span class="sikshya-course-lp__bc-sep" aria-hidden="true">›</span>
                 <?php if ($urls->getCoursesArchiveUrl() !== '') : ?>
-                    <a href="<?php echo esc_url($urls->getCoursesArchiveUrl()); ?>"><?php esc_html_e('Courses', 'sikshya'); ?></a>
+                    <a href="<?php echo esc_url($urls->getCoursesArchiveUrl()); ?>"><?php echo esc_html($label_courses); ?></a>
                     <span class="sikshya-course-lp__bc-sep" aria-hidden="true">›</span>
                 <?php endif; ?>
                 <?php
@@ -167,7 +174,15 @@ while (have_posts()) :
 
                 <?php if (is_array($includes_lines) && $includes_lines !== []) : ?>
                     <section class="sikshya-course-lp__panel sikshya-course-lp__includes-main" aria-labelledby="sikshya-includes-heading">
-                        <h2 id="sikshya-includes-heading" class="sikshya-course-lp__heading"><?php esc_html_e('This course includes', 'sikshya'); ?></h2>
+                        <h2 id="sikshya-includes-heading" class="sikshya-course-lp__heading">
+                            <?php
+                            echo esc_html(sprintf(
+                                /* translators: %s: singular label (e.g. course) */
+                                __('This %s includes', 'sikshya'),
+                                strtolower($label_course)
+                            ));
+                            ?>
+                        </h2>
                         <ul class="sikshya-course-lp__checklist">
                             <?php foreach ($includes_lines as $line) : ?>
                                 <li><?php echo esc_html((string) $line); ?></li>
@@ -181,10 +196,13 @@ while (have_posts()) :
                     <section class="sikshya-course-lp__panel sikshya-course-lp__bundle-courses" aria-labelledby="sikshya-bundle-courses-heading">
                         <h2 id="sikshya-bundle-courses-heading" class="sikshya-course-lp__heading">
                             <?php
+                            $bundle_count = count($bundle_courses);
+                            $bundle_label = $bundle_count === 1 ? strtolower($label_course) : strtolower($label_courses);
                             echo esc_html(sprintf(
-                                /* translators: %d: course count */
-                                _n('This bundle includes %d course', 'This bundle includes %d courses', count($bundle_courses), 'sikshya'),
-                                count($bundle_courses)
+                                /* translators: 1: item count, 2: pluralized item label */
+                                __('This bundle includes %1$d %2$s', 'sikshya'),
+                                $bundle_count,
+                                $bundle_label
                             ));
                             ?>
                         </h2>
@@ -214,7 +232,15 @@ while (have_posts()) :
 
                     <section class="sikshya-course-lp__panel sikshya-course-lp__curriculum<?php echo $is_bundle ? ' sikshya-course-lp__curriculum--hidden-for-bundle' : ''; ?>" aria-labelledby="sikshya-curriculum-heading"<?php echo $is_bundle ? ' hidden' : ''; ?>>
                         <div class="sikshya-course-lp__curriculum-head">
-                            <h2 id="sikshya-curriculum-heading" class="sikshya-course-lp__heading"><?php esc_html_e('Course content', 'sikshya'); ?></h2>
+                            <h2 id="sikshya-curriculum-heading" class="sikshya-course-lp__heading">
+                                <?php
+                                echo esc_html(sprintf(
+                                    /* translators: %s: singular label (e.g. Course) */
+                                    __('%s content', 'sikshya'),
+                                    $label_course
+                                ));
+                                ?>
+                            </h2>
                             <p class="sikshya-course-lp__curriculum-meta">
                                 <?php
                                 $chapters_n = (int) ($curriculum_stats['chapters'] ?? 0);
@@ -329,7 +355,15 @@ while (have_posts()) :
 
                 <?php if ($page_model->getTargetAudienceHtml() !== '') : ?>
                     <section class="sikshya-course-lp__panel" aria-labelledby="sikshya-audience-heading">
-                        <h2 id="sikshya-audience-heading" class="sikshya-course-lp__heading"><?php esc_html_e('Who this course is for', 'sikshya'); ?></h2>
+                        <h2 id="sikshya-audience-heading" class="sikshya-course-lp__heading">
+                            <?php
+                            echo esc_html(sprintf(
+                                /* translators: %s: singular label (e.g. course) */
+                                __('Who this %s is for', 'sikshya'),
+                                strtolower($label_course)
+                            ));
+                            ?>
+                        </h2>
                         <div class="sikshya-course-lp__audience sikshya-prose">
                             <?php echo $page_model->getTargetAudienceHtml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- shaped via wp_kses_post in service ?>
                         </div>
@@ -350,7 +384,7 @@ while (have_posts()) :
 
                 <?php if (is_array($instructor_profiles) && $instructor_profiles !== []) : ?>
                     <section class="sikshya-course-lp__panel sikshya-course-lp__instructors" aria-labelledby="sikshya-instructor-heading">
-                        <h2 id="sikshya-instructor-heading" class="sikshya-course-lp__heading"><?php esc_html_e('Instructor', 'sikshya'); ?></h2>
+                        <h2 id="sikshya-instructor-heading" class="sikshya-course-lp__heading"><?php echo esc_html($label_instructor); ?></h2>
                         <?php foreach ($instructor_profiles as $prof) : ?>
                             <?php
                             if (!is_array($prof)) {
@@ -536,4 +570,4 @@ while (have_posts()) :
     <?php
 endwhile;
 
-get_footer();
+sikshya_get_footer();

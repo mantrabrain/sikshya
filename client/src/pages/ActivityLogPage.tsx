@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { AddonSettingsPage } from './AddonSettingsPage';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { DataTable, type Column } from '../components/shared/DataTable';
@@ -8,7 +9,8 @@ import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPaginationBar, DEFAULT_LIST_PER_PAGE } from '../components/shared/list/ListPaginationBar';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
-import { ButtonPrimary } from '../components/shared/buttons';
+import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -18,8 +20,12 @@ import type { SikshyaReactConfig } from '../types';
 type LogRow = {
   id?: number;
   user_id?: number;
+  user_name?: string;
+  user_email?: string;
   course_id?: number;
+  course_title?: string;
   action?: string;
+  action_label?: string;
   object_type?: string;
   object_id?: number;
   meta?: string | null;
@@ -36,6 +42,18 @@ type Resp = {
   table_missing?: boolean;
 };
 
+const ACTION_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: 'All actions' },
+  { value: 'enrolled', label: 'Enrolled' },
+  { value: 'unenrolled', label: 'Unenrolled' },
+  { value: 'course_completed', label: 'Course completed' },
+  { value: 'lesson_completed', label: 'Lesson completed' },
+  { value: 'quiz_completed', label: 'Quiz completed' },
+  { value: 'assignment_submitted', label: 'Assignment submitted' },
+  { value: 'order_fulfilled', label: 'Order fulfilled' },
+  { value: 'certificate_issued', label: 'Certificate issued' },
+];
+
 export function ActivityLogPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
@@ -45,6 +63,14 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
   const enabled = mode === 'full';
   const [page, setPage] = useState(1);
   const perPage = DEFAULT_LIST_PER_PAGE;
+  const [workspaceTab, setWorkspaceTab] = useState<'timeline' | 'settings'>('timeline');
+
+  const [filterCourseId, setFilterCourseId] = useState(0);
+  const [filterUserId, setFilterUserId] = useState('');
+  const [filterAction, setFilterAction] = useState('');
+  const [filterSearch, setFilterSearch] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
 
   const loader = useCallback(async () => {
     if (!enabled) {
@@ -58,11 +84,41 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         table_missing: false,
       };
     }
-    const path = SIKSHYA_ENDPOINTS.pro.activityLog({ per_page: perPage, page });
+    const uid = parseInt(String(filterUserId).trim(), 10);
+    const path = SIKSHYA_ENDPOINTS.pro.activityLog({
+      per_page: perPage,
+      page,
+      course_id: filterCourseId > 0 ? filterCourseId : undefined,
+      user_id: Number.isFinite(uid) && uid > 0 ? uid : undefined,
+      action: filterAction || undefined,
+      search: filterSearch.trim() || undefined,
+      date_from: filterDateFrom.trim() || undefined,
+      date_to: filterDateTo.trim() || undefined,
+    });
     return getSikshyaApi().get<Resp>(path);
-  }, [enabled, page, perPage]);
+  }, [
+    enabled,
+    page,
+    perPage,
+    filterCourseId,
+    filterUserId,
+    filterAction,
+    filterSearch,
+    filterDateFrom,
+    filterDateTo,
+  ]);
 
-  const { loading, data, error, refetch } = useAsyncData(loader, [page, enabled, perPage]);
+  const { loading, data, error, refetch } = useAsyncData(loader, [
+    page,
+    enabled,
+    perPage,
+    filterCourseId,
+    filterUserId,
+    filterAction,
+    filterSearch,
+    filterDateFrom,
+    filterDateTo,
+  ]);
   const rows = data?.rows ?? [];
   const total = data?.total ?? null;
   const totalPages = data?.pages ?? null;
@@ -85,22 +141,28 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         render: (r) => {
           const uid = r.user_id ?? 0;
           if (uid <= 0) {
-            return '—';
+            return <span className="text-slate-500">—</span>;
           }
+          const label = (r.user_name || '').trim() || `User #${uid}`;
           return (
-            <a
-              href={`${adminBase}user-edit.php?user_id=${uid}`}
-              className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
-            >
-              User #{uid}
-            </a>
+            <div>
+              <a
+                href={`${adminBase}user-edit.php?user_id=${uid}`}
+                className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+              >
+                {label}
+              </a>
+              {r.user_email ? <div className="text-xs text-slate-500 dark:text-slate-400">{r.user_email}</div> : null}
+            </div>
           );
         },
       },
       {
         id: 'action',
         header: 'Action',
-        render: (r) => <span className="font-medium text-slate-900 dark:text-white">{r.action || '—'}</span>,
+        render: (r) => (
+          <span className="font-medium text-slate-900 dark:text-white">{r.action_label || r.action || '—'}</span>
+        ),
       },
       {
         id: 'course',
@@ -108,14 +170,15 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         render: (r) => {
           const cid = r.course_id ?? 0;
           if (cid <= 0) {
-            return <span className="text-slate-500">—</span>;
+            return <span className="text-slate-500">Site-wide</span>;
           }
+          const t = (r.course_title || '').trim() || `Course #${cid}`;
           return (
             <a
               href={appViewHref(config, 'add-course', { course_id: String(cid) })}
               className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
             >
-              Course #{cid}
+              {t}
             </a>
           );
         },
@@ -145,22 +208,37 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
 
   const emptyContent = (
     <ListEmptyState
-      title="No activity yet"
-      description="When learners enroll, complete lessons, or submit work, matching events appear here after the add-on is enabled and migrations have created the log table."
+      title="No activity matches"
+      description="Try widening the date range or clearing filters. New events appear as learners enroll, progress, and complete purchases."
     />
   );
+
+  const resetFilters = () => {
+    setFilterCourseId(0);
+    setFilterUserId('');
+    setFilterAction('');
+    setFilterSearch('');
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setPage(1);
+  };
 
   return (
     <EmbeddableShell
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Enrollment, completion, and commerce events recorded for support and audits."
+      subtitle="Filterable timeline of enrollments, progress, submissions, certificates, and fulfilled orders."
       pageActions={
         enabled ? (
-          <ButtonPrimary type="button" disabled={loading} onClick={() => void refetch()}>
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </ButtonPrimary>
+          <div className="flex flex-wrap gap-2">
+            <ButtonSecondary type="button" onClick={() => setWorkspaceTab('settings')}>
+              Activity log settings
+            </ButtonSecondary>
+            <ButtonPrimary type="button" disabled={loading} onClick={() => void refetch()}>
+              {loading ? 'Refreshing…' : 'Refresh'}
+            </ButtonPrimary>
+          </div>
         ) : null
       }
     >
@@ -169,27 +247,168 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         featureId="activity_log"
         config={config}
         featureTitle="Student activity log"
-        featureDescription="A dated timeline of enrollments, lesson progress, quiz results, and orders so you can answer what happened for a learner."
+        featureDescription="Answer “what happened?” for a learner or course: filter by user, course, action, or free-text search. Site managers see commerce-wide rows; instructors only see their own courses."
         previewVariant="table"
         addonEnableTitle="Activity log is not enabled"
-        addonEnableDescription="Enable the Student activity log add-on to record events and unlock this audit view."
+        addonEnableDescription="Enable the Student activity log add-on to record Sikshya events and unlock this audit view plus the My account strip."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => void addon.enable()}
         addonError={addon.error}
       >
-        {error ? (
+        {enabled ? (
+          <div className="mb-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3 dark:border-slate-700">
+            <button
+              type="button"
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                workspaceTab === 'timeline'
+                  ? 'bg-brand-600 text-white'
+                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+              onClick={() => setWorkspaceTab('timeline')}
+            >
+              Timeline
+            </button>
+            <button
+              type="button"
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                workspaceTab === 'settings'
+                  ? 'bg-brand-600 text-white'
+                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+              onClick={() => setWorkspaceTab('settings')}
+            >
+              Add-on defaults
+            </button>
+          </div>
+        ) : null}
+
+        {enabled && workspaceTab === 'settings' ? (
+          <AddonSettingsPage
+            embedded
+            config={config}
+            title="Activity log settings"
+            addonId="activity_log"
+            subtitle="Retention, learner dashboard strip size, and whether to honor per-course logging opt-out."
+            featureTitle="Activity log settings"
+            featureDescription="Every control here changes stored data or what learners and instructors see."
+            nextSteps={[
+              {
+                label: 'Open the timeline',
+                href: appViewHref(config, 'activity-log'),
+                description: 'Filter and review events across your catalog.',
+              },
+              {
+                label: 'Turn off logging for a pilot course',
+                href: appViewHref(config, 'courses'),
+                description: 'Course builder → Course info → Activity log → disable logging for that course.',
+              },
+            ]}
+          />
+        ) : null}
+
+        {enabled && workspaceTab === 'timeline' && error ? (
           <ApiErrorPanel error={error} title="Could not load activity log" onRetry={() => void refetch()} />
         ) : null}
 
-        {enabled && tableMissing ? (
+        {enabled && workspaceTab === 'timeline' && tableMissing ? (
           <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100">
             The activity log table is not installed yet. Activate Sikshya Pro or run database updates so Pro migrations can create it.
           </div>
         ) : null}
 
-        {enabled && !error && !tableMissing ? (
+        {enabled && workspaceTab === 'timeline' && !error && !tableMissing ? (
           <ListPanel>
+            <div className="space-y-4 border-b border-slate-100 p-4 dark:border-slate-800">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Filters apply immediately. Use learner WordPress ID for the user field. Instructors only see courses they author (plus co-instructor courses when Multi-instructor is on).
+              </p>
+              <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+                <SingleCoursePicker
+                  value={filterCourseId}
+                  onChange={(id) => {
+                    setFilterCourseId(id);
+                    setPage(1);
+                  }}
+                  placeholder="All courses"
+                  hint="Optional — limit events to one course."
+                  className="w-full max-w-full"
+                />
+                <label className="block text-sm text-slate-600 dark:text-slate-400">
+                  Learner user ID
+                  <input
+                    type="number"
+                    min={0}
+                    value={filterUserId}
+                    onChange={(e) => {
+                      setFilterUserId(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="e.g. 12"
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  />
+                </label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400">
+                  Action
+                  <select
+                    value={filterAction}
+                    onChange={(e) => {
+                      setFilterAction(e.target.value);
+                      setPage(1);
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  >
+                    {ACTION_OPTIONS.map((o) => (
+                      <option key={o.value || 'all'} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400 lg:col-span-2">
+                  Search (action, type, meta…)
+                  <input
+                    type="search"
+                    value={filterSearch}
+                    onChange={(e) => {
+                      setFilterSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    placeholder="Text contained in the event"
+                  />
+                </label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400">
+                  From date
+                  <input
+                    type="date"
+                    value={filterDateFrom}
+                    onChange={(e) => {
+                      setFilterDateFrom(e.target.value);
+                      setPage(1);
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  />
+                </label>
+                <label className="block text-sm text-slate-600 dark:text-slate-400">
+                  To date
+                  <input
+                    type="date"
+                    value={filterDateTo}
+                    onChange={(e) => {
+                      setFilterDateTo(e.target.value);
+                      setPage(1);
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  />
+                </label>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <ButtonSecondary type="button" onClick={() => resetFilters()}>
+                  Reset filters
+                </ButtonSecondary>
+              </div>
+            </div>
             {loading ? (
               <DataTableSkeleton headers={['Time', 'Learner', 'Action', 'Course', 'Object', 'Meta']} rows={8} />
             ) : (

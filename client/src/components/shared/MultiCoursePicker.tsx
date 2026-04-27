@@ -16,6 +16,8 @@ type Props = {
   placeholder?: string;
   /** Modal title; defaults to "Select courses". */
   title?: string;
+  /** Primary action label in the picker modal (default: "Select"). */
+  confirmLabel?: string;
   /** Helper line shown under the field. */
   hint?: string;
   /** Defaults to 20 results per search. */
@@ -43,6 +45,7 @@ export function MultiCoursePicker({
   excludeIds,
   placeholder = 'Click to select courses…',
   title = 'Select courses',
+  confirmLabel,
   hint,
   perPage = 20,
   readOnly = false,
@@ -108,23 +111,65 @@ export function MultiCoursePicker({
   const search = useCallback(
     async (term: string) => {
       const exclude = Array.from(new Set([...(excludeIds || [])])).filter((n) => n > 0);
+      const excludeSet = new Set(exclude);
       setBusy(true);
+      let usedSikshya = false;
       try {
         const r = await getSikshyaApi().get<{ ok?: boolean; courses?: MultiCourseOption[] }>(
           SIKSHYA_ENDPOINTS.pro.coursesSearch({ search: term.trim(), exclude, per_page: perPage })
         );
-        const rows = Array.isArray(r.courses) ? r.courses : [];
-        setResults(rows);
-        setLabelMap((prev) => {
-          const next = { ...prev };
-          for (const o of rows) next[o.id] = o.title;
-          return next;
-        });
+        if (Array.isArray(r?.courses)) {
+          const rows = r.courses.filter((c) => c?.id && !excludeSet.has(c.id));
+          setResults(rows);
+          setLabelMap((prev) => {
+            const next = { ...prev };
+            for (const o of rows) {
+              next[o.id] = o.title;
+            }
+            return next;
+          });
+          usedSikshya = true;
+        }
       } catch {
-        setResults([]);
-      } finally {
-        setBusy(false);
+        // Route may be absent (e.g. prerequisites add-on off) — fall back to WP REST.
       }
+      if (!usedSikshya) {
+        try {
+          const params = new URLSearchParams({
+            context: 'edit',
+            per_page: String(perPage),
+            page: '1',
+            _fields: 'id,title,status',
+          });
+          const q = term.trim();
+          if (q) {
+            params.set('search', q);
+          }
+          const raw = await getWpApi().get<
+            Array<{ id: number; title?: { rendered?: string }; status?: string }>
+          >(`/sik_course?${params.toString()}`);
+          const mapped = (Array.isArray(raw) ? raw : [])
+            .filter((p) => p?.id && !excludeSet.has(p.id))
+            .map((p) => ({
+              id: p.id,
+              title: p.title?.rendered
+                ? String(p.title.rendered).replace(/<[^>]*>/g, '').trim()
+                : `Course #${p.id}`,
+              status: typeof p.status === 'string' ? p.status : 'publish',
+            }));
+          setResults(mapped);
+          setLabelMap((prev) => {
+            const next = { ...prev };
+            for (const o of mapped) {
+              next[o.id] = o.title;
+            }
+            return next;
+          });
+        } catch {
+          setResults([]);
+        }
+      }
+      setBusy(false);
     },
     [excludeIds, perPage]
   );
@@ -164,6 +209,7 @@ export function MultiCoursePicker({
   })();
 
   const max = maxSelection !== undefined && maxSelection > 0 ? maxSelection : undefined;
+  const primaryLabel = confirmLabel ?? (max === 1 ? 'Select course' : 'Select courses');
 
   return (
     <div className={`space-y-2 ${className}`.trim()}>
@@ -208,11 +254,11 @@ export function MultiCoursePicker({
         size="lg"
         onClose={() => setOpen(false)}
         footer={
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <ButtonSecondary type="button" onClick={() => setOpen(false)}>
-              Cancel
+              Close
             </ButtonSecondary>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-end gap-3">
               <span className="text-xs text-slate-500 dark:text-slate-400">
                 {max === 1 ? (draft.length === 0 ? 'No course' : '1 course') : `${draft.length} selected`}
               </span>
@@ -226,7 +272,7 @@ export function MultiCoursePicker({
                   setOpen(false);
                 }}
               >
-                Done
+                {primaryLabel}
               </ButtonPrimary>
             </div>
           </div>

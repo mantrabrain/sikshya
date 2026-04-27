@@ -17,21 +17,54 @@ import { appViewHref } from '../lib/appUrl';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
 
-type WebhookRow = {
+type WebhookEndpointRowV2 = {
   id: number;
-  event_key: string;
+  label?: string;
+  event_key?: string;
   delivery_url: string;
-  is_active: number;
-  created_at: string;
+  is_active: boolean;
+  has_secret?: boolean;
+  failure_streak?: number;
+  last_status_code?: number | null;
+  last_error?: string | null;
+  last_success_at?: string | null;
+  last_failure_at?: string | null;
+  created_at?: string | null;
 };
 
 type ApiKeyRow = {
   id: number;
+  owner_user_id?: number;
   label: string;
   key_prefix: string;
+  scopes_json?: string | null;
+  expires_at?: string | null;
+  revoked: number;
+  last_used_at?: string | null;
+  created_at: string;
+};
+
+type OAuthAppRow = {
+  id: number;
+  owner_user_id: number;
+  name: string;
+  client_id: string;
+  redirect_uris_json?: string | null;
+  scopes_json?: string | null;
   revoked: number;
   created_at: string;
 };
+
+const API_SCOPES: Array<{ value: string; title: string; hint: string }> = [
+  { value: 'catalog:read', title: 'Catalog (read)', hint: 'Read courses and course pages.' },
+  { value: 'users:read', title: 'Users (read)', hint: 'Read learner profiles (PII). Use carefully.' },
+  { value: 'enrollments:read', title: 'Enrollments (read)', hint: 'Read enrollment and progress status.' },
+  { value: 'enrollments:write', title: 'Enrollments (write)', hint: 'Enroll/unenroll users. High impact.' },
+  { value: 'commerce:read', title: 'Commerce (read)', hint: 'Read order data.' },
+  { value: 'commerce:write', title: 'Commerce (write)', hint: 'Create/modify orders and payments. Highest risk.' },
+  { value: 'learning:read', title: 'Learning (read)', hint: 'Read learning progress.' },
+  { value: 'learning:write', title: 'Learning (write)', hint: 'Write progress/completions. High impact.' },
+];
 
 const WEBHOOK_EVENTS: Array<{ value: string; title: string; hint: string }> = [
   {
@@ -109,6 +142,11 @@ const WEBHOOK_EVENTS: Array<{ value: string; title: string; hint: string }> = [
     title: 'Everything (advanced)',
     hint: 'Sends all supported event types to the same URL. Only pick this if you understand how to separate events in Zapier/Make.',
   },
+  {
+    value: 'webhook.test',
+    title: 'Test event (manual)',
+    hint: 'A manual test payload you can send from Sikshya to validate your Zap or receiver URL.',
+  },
 ];
 
 async function copyText(label: string, text: string, onFail: (m: string) => void) {
@@ -152,6 +190,8 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const [whMsg, setWhMsg] = useState<string | null>(null);
 
   const [keyLabel, setKeyLabel] = useState('');
+  const [keyScopes, setKeyScopes] = useState<string[]>(['catalog:read']);
+  const [keyExpiryDays, setKeyExpiryDays] = useState(90);
   const [keyBusy, setKeyBusy] = useState(false);
   const [keyMsg, setKeyMsg] = useState<string | null>(null);
   const [freshKey, setFreshKey] = useState<string | null>(null);
@@ -159,11 +199,25 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const [pingBusy, setPingBusy] = useState(false);
   const [pingResult, setPingResult] = useState<string | null>(null);
 
+  const [appName, setAppName] = useState('');
+  const [appRedirect, setAppRedirect] = useState('');
+  const [appScopes, setAppScopes] = useState<string[]>(['catalog:read']);
+  const [appBusy, setAppBusy] = useState(false);
+  const [appMsg, setAppMsg] = useState<string | null>(null);
+  const [freshAppSecret, setFreshAppSecret] = useState<{ clientId: string; clientSecret: string } | null>(null);
+
   const whLoader = useCallback(async () => {
     if (!webhooksOn) {
-      return { ok: true, rows: [] as WebhookRow[] };
+      return { ok: true, items: [] as WebhookEndpointRowV2[] };
     }
-    return getSikshyaApi().get<{ ok?: boolean; rows?: WebhookRow[] }>(SIKSHYA_ENDPOINTS.scale.automationWebhooks);
+    return getSikshyaApi().get<{ ok?: boolean; items?: WebhookEndpointRowV2[] }>(SIKSHYA_ENDPOINTS.scale.webhooksV2Endpoints);
+  }, [webhooksOn]);
+
+  const deliveriesLoader = useCallback(async () => {
+    if (!webhooksOn) {
+      return { ok: true, items: [] as Array<Record<string, unknown>> };
+    }
+    return getSikshyaApi().get<{ ok?: boolean; items?: Array<Record<string, unknown>> }>(SIKSHYA_ENDPOINTS.scale.webhooksV2Deliveries);
   }, [webhooksOn]);
 
   const keysLoader = useCallback(async () => {
@@ -174,7 +228,17 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   }, [keysOn]);
 
   const wh = useAsyncData(whLoader, [webhooksOn]);
+  const deliveries = useAsyncData(deliveriesLoader, [webhooksOn]);
   const keys = useAsyncData(keysLoader, [keysOn]);
+
+  const appsLoader = useCallback(async () => {
+    if (!keysOn) {
+      return { ok: true, rows: [] as OAuthAppRow[] };
+    }
+    return getSikshyaApi().get<{ ok?: boolean; rows?: OAuthAppRow[] }>(SIKSHYA_ENDPOINTS.scale.publicApiApps);
+  }, [keysOn]);
+
+  const apps = useAsyncData(appsLoader, [keysOn]);
 
   const addonsHref = useMemo(() => appViewHref(config, 'addons'), [config]);
 
@@ -192,8 +256,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     }
     setWhBusy(true);
     try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.automationWebhooks, {
-        event_key: whEvent,
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.webhooksV2Endpoints, {
+        label: '',
+        events: [whEvent],
         delivery_url: whUrl.trim(),
         secret: whSecret.trim() || undefined,
       });
@@ -208,12 +273,12 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     }
   };
 
-  const removeWebhook = async (row: WebhookRow) => {
+  const removeWebhook = async (row: WebhookEndpointRowV2) => {
     const ok = await dialog.confirm({
       title: 'Remove this webhook?',
       message: (
         <p>
-          Stops sending <span className="font-mono text-xs">{row.event_key}</span> events to{' '}
+          Stops sending <span className="font-mono text-xs">{row.event_key || '*'}</span> events to{' '}
           <span className="break-all font-medium">{row.delivery_url}</span>. You can add it again later.
         </p>
       ),
@@ -224,10 +289,20 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       return;
     }
     try {
-      await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.scale.automationWebhook(row.id));
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.webhooksV2Endpoint(row.id), { is_active: false });
       wh.refetch();
     } catch {
       await dialog.alert({ title: 'Something went wrong', message: 'We could not remove that webhook. Try again.' });
+    }
+  };
+
+  const testWebhook = async (row: WebhookEndpointRowV2) => {
+    setWhMsg(null);
+    try {
+      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.webhooksV2EndpointTest(row.id), {});
+      setWhMsg('Queued a test delivery. Check your receiver and the delivery log.');
+    } catch (err) {
+      setWhMsg(err instanceof Error ? err.message : 'Could not queue test delivery.');
     }
   };
 
@@ -243,11 +318,13 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     try {
       const res = await getSikshyaApi().post<{ ok?: boolean; api_key?: string; message?: string }>(
         SIKSHYA_ENDPOINTS.scale.publicApiKeys,
-        { label: keyLabel.trim() }
+        { label: keyLabel.trim(), scopes: keyScopes, expires_at: new Date(Date.now() + keyExpiryDays * 86400000).toISOString() }
       );
       if (res.api_key) {
         setFreshKey(res.api_key);
         setKeyLabel('');
+        setKeyScopes(['catalog:read']);
+        setKeyExpiryDays(90);
         setKeyMsg(null);
         keys.refetch();
       } else {
@@ -312,6 +389,61 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     }
   };
 
+  const createApp = async (e: FormEvent) => {
+    e.preventDefault();
+    setAppMsg(null);
+    setFreshAppSecret(null);
+    if (!appName.trim()) {
+      setAppMsg('Give the app a name (for example “Mobile app”).');
+      return;
+    }
+    if (!appRedirect.trim()) {
+      setAppMsg('Add a redirect URL (must start with https://).');
+      return;
+    }
+    setAppBusy(true);
+    try {
+      const res = await getSikshyaApi().post<{ ok?: boolean; client_id?: string; client_secret?: string; message?: string }>(
+        SIKSHYA_ENDPOINTS.scale.publicApiApps,
+        { name: appName.trim(), redirect_uris: [appRedirect.trim()], scopes: appScopes }
+      );
+      if (res.client_id && res.client_secret) {
+        setFreshAppSecret({ clientId: res.client_id, clientSecret: res.client_secret });
+        setAppName('');
+        setAppRedirect('');
+        setAppScopes(['catalog:read']);
+        apps.refetch();
+      } else {
+        setAppMsg(res.message || 'Unexpected response from server.');
+      }
+    } catch (err) {
+      setAppMsg(err instanceof Error ? err.message : 'Could not create app.');
+    } finally {
+      setAppBusy(false);
+    }
+  };
+
+  const revokeApp = async (row: OAuthAppRow) => {
+    const ok = await dialog.confirm({
+      title: 'Revoke this OAuth app?',
+      message: (
+        <p>
+          Any tokens issued to <span className="font-mono text-xs">{row.client_id}</span> may stop working. You can create a
+          new app later.
+        </p>
+      ),
+      confirmLabel: 'Revoke app',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.scale.publicApiApp(row.id));
+      apps.refetch();
+    } catch {
+      await dialog.alert({ title: 'Something went wrong', message: 'We could not revoke that app. Try again.' });
+    }
+  };
+
   return (
     <EmbeddableShell
       embedded={embedded}
@@ -364,7 +496,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   description="Send JSON to Zapier, Make, or custom HTTPS endpoints when orders complete, courses finish, or certificates are issued."
                 />
               </div>
-            ) : !whAddon.enabled ? (
+            ) : !webhooksOn ? (
               <div className={`relative isolate mt-4 w-full ${PREMIUM_GATE_VIEWPORT_MIN_H}`}>
                 <div className={`pointer-events-none select-none opacity-[0.72] ${PREMIUM_GATE_VIEWPORT_MIN_H}`} aria-hidden>
                   <FeaturePreviewSkeleton variant="generic" />
@@ -374,11 +506,15 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     variant="premium"
                     title="Turn on webhooks"
                     description="Enable the Webhooks addon. Nothing is sent until you add a URL below."
-                    canEnable={Boolean(whAddon.licenseOk)}
-                    enableBusy={whAddon.loading}
-                    onEnable={() => void whAddon.enable()}
+                    canEnable={Boolean(whAddon.licenseOk) || Boolean(zapierAddon.licenseOk)}
+                    enableBusy={whAddon.loading || zapierAddon.loading}
+                    onEnable={() => {
+                      // Prefer enabling Webhooks (generic) but allow Zapier-only customers to proceed.
+                      if (whAddon.licenseOk) void whAddon.enable();
+                      else void zapierAddon.enable();
+                    }}
                     upgradeUrl={lic.upgradeUrl}
-                    error={whAddon.error}
+                    error={whAddon.error || zapierAddon.error}
                   />
                 </PremiumGatedSurface>
               </div>
@@ -451,33 +587,96 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     <ListPanel className="mt-3">
                       {wh.loading ? (
                         <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
-                      ) : (wh.data?.rows?.length ?? 0) === 0 ? (
+                      ) : (wh.data?.items?.length ?? 0) === 0 ? (
                         <ListEmptyState
                           title="No webhooks yet"
                           description="When you save your first URL it will appear here. You can add more than one — for example separate Zapier Zaps per event."
                         />
                       ) : (
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-                          {(wh.data?.rows ?? []).map((r) => (
+                          {(wh.data?.items ?? []).map((r) => (
                             <li key={r.id} className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                               <div className="min-w-0">
                                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                  {r.event_key}
+                                  {r.event_key || '*'}
                                 </div>
                                 <div className="mt-0.5 break-all font-mono text-xs text-slate-800 dark:text-slate-200">
                                   {r.delivery_url}
                                 </div>
+                                {r.last_error ? (
+                                  <div className="mt-1 text-xs text-red-700 dark:text-red-300">Last error: {r.last_error}</div>
+                                ) : null}
                               </div>
-                              <button
-                                type="button"
-                                className="shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
-                                onClick={() => void removeWebhook(r)}
-                              >
-                                Remove
-                              </button>
+                              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                                <button
+                                  type="button"
+                                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+                                  onClick={() => void testWebhook(r)}
+                                >
+                                  Test
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
+                                  onClick={() => void removeWebhook(r)}
+                                >
+                                  Disable
+                                </button>
+                              </div>
                             </li>
                           ))}
                         </ul>
+                      )}
+                    </ListPanel>
+                  )}
+                </div>
+
+                <div className="mt-8">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Recent deliveries</h3>
+                    <button
+                      type="button"
+                      onClick={() => deliveries.refetch()}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                  {deliveries.error ? (
+                    <div className="mt-2">
+                      <ApiErrorPanel error={deliveries.error} title="Deliveries" onRetry={() => deliveries.refetch()} />
+                    </div>
+                  ) : (
+                    <ListPanel className="mt-3">
+                      {deliveries.loading ? (
+                        <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
+                      ) : (deliveries.data?.items?.length ?? 0) === 0 ? (
+                        <ListEmptyState title="No deliveries yet" description="Once events trigger, deliveries will appear here." />
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full text-left text-xs">
+                            <thead className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                              <tr>
+                                <th className="px-4 py-3 font-semibold">Status</th>
+                                <th className="px-4 py-3 font-semibold">Event</th>
+                                <th className="px-4 py-3 font-semibold">Endpoint</th>
+                                <th className="px-4 py-3 font-semibold">Attempts</th>
+                                <th className="px-4 py-3 font-semibold">Created</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                              {(deliveries.data?.items ?? []).map((r: any) => (
+                                <tr key={String(r.id)}>
+                                  <td className="px-4 py-3 font-semibold">{String(r.status || '')}</td>
+                                  <td className="px-4 py-3 font-mono">{String(r.event_key || '')}</td>
+                                  <td className="px-4 py-3">{String(r.endpoint_id || '')}</td>
+                                  <td className="px-4 py-3">{String(r.attempt_count || 0) + '/' + String(r.max_attempts || 0)}</td>
+                                  <td className="px-4 py-3">{String(r.created_at || '')}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </ListPanel>
                   )}
@@ -569,6 +768,45 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Scopes</label>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      {API_SCOPES.map((s) => {
+                        const checked = keyScopes.includes(s.value);
+                        return (
+                          <label key={s.value} className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-950">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={(e) => {
+                                const on = e.target.checked;
+                                setKeyScopes((prev) => (on ? [...prev, s.value] : prev.filter((x) => x !== s.value)));
+                              }}
+                              className="mt-0.5"
+                            />
+                            <span className="min-w-0">
+                              <span className="block font-semibold text-slate-900 dark:text-white">{s.title}</span>
+                              <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">{s.hint}</span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                      Tip: start with read-only scopes. You can always revoke and create a stricter key later.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Expiry (days)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={3650}
+                      value={keyExpiryDays}
+                      onChange={(e) => setKeyExpiryDays(Math.max(1, Math.min(3650, Number(e.target.value) || 90)))}
+                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    />
+                  </div>
                   <ButtonPrimary type="submit" disabled={keyBusy}>
                     {keyBusy ? 'Creating…' : 'Create new key'}
                   </ButtonPrimary>
@@ -628,6 +866,138 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                                   type="button"
                                   className="shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
                                   onClick={() => void revokeKey(r)}
+                                >
+                                  Revoke
+                                </button>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </ListPanel>
+                  )}
+                </div>
+
+                <div className="mt-10">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">OAuth apps</h3>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                        Use OAuth when you need user consent and per-user access tokens (recommended for third-party apps).
+                      </p>
+                    </div>
+                  </div>
+
+                  {apps.error ? (
+                    <div className="mt-2">
+                      <ApiErrorPanel error={apps.error} title="OAuth apps" onRetry={() => apps.refetch()} />
+                    </div>
+                  ) : (
+                    <ListPanel className="mt-3">
+                      {freshAppSecret ? (
+                        <div className="m-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40">
+                          <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">Store these credentials now</p>
+                          <p className="mt-1 text-xs text-amber-900/90 dark:text-amber-200/90">
+                            We only show the client secret once.
+                          </p>
+                          <div className="mt-3 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Client ID</span>
+                              <code className="flex-1 overflow-x-auto rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+                                {freshAppSecret.clientId}
+                              </code>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Client secret</span>
+                              <code className="flex-1 overflow-x-auto rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+                                {freshAppSecret.clientSecret}
+                              </code>
+                            </div>
+                            <ButtonPrimary
+                              type="button"
+                              onClick={() =>
+                                void copyText('the client secret', freshAppSecret.clientSecret, async (m) => {
+                                  await dialog.alert({ title: 'Copy manually', message: m });
+                                })
+                              }
+                            >
+                              Copy client secret
+                            </ButtonPrimary>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <form onSubmit={createApp} className="p-4 space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">App name</label>
+                          <input
+                            value={appName}
+                            onChange={(e) => setAppName(e.target.value)}
+                            placeholder="e.g. Mobile app"
+                            className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Redirect URL</label>
+                          <input
+                            value={appRedirect}
+                            onChange={(e) => setAppRedirect(e.target.value)}
+                            placeholder="https://yourapp.com/oauth/callback"
+                            className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Scopes</label>
+                          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                            {API_SCOPES.map((s) => {
+                              const checked = appScopes.includes(s.value);
+                              return (
+                                <label key={s.value} className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-950">
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={(e) => {
+                                      const on = e.target.checked;
+                                      setAppScopes((prev) => (on ? [...prev, s.value] : prev.filter((x) => x !== s.value)));
+                                    }}
+                                    className="mt-0.5"
+                                  />
+                                  <span className="min-w-0">
+                                    <span className="block font-semibold text-slate-900 dark:text-white">{s.title}</span>
+                                    <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">{s.hint}</span>
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <ButtonPrimary type="submit" disabled={appBusy}>
+                          {appBusy ? 'Creating…' : 'Create OAuth app'}
+                        </ButtonPrimary>
+                        {appMsg ? <p className="text-sm text-amber-800 dark:text-amber-200">{appMsg}</p> : null}
+                      </form>
+
+                      {apps.loading ? (
+                        <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
+                      ) : (apps.data?.rows?.length ?? 0) === 0 ? (
+                        <ListEmptyState
+                          title="No OAuth apps yet"
+                          description="Create an OAuth app if you want external products to connect using user consent."
+                        />
+                      ) : (
+                        <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {(apps.data?.rows ?? []).map((r) => (
+                            <li key={r.id} className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium text-slate-900 dark:text-white">{r.name}</div>
+                                <div className="mt-1 font-mono text-xs text-slate-500">{r.client_id}</div>
+                                <div className="mt-1 text-xs text-slate-500">{r.revoked ? 'revoked' : 'active'}</div>
+                              </div>
+                              {!r.revoked ? (
+                                <button
+                                  type="button"
+                                  className="shrink-0 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
+                                  onClick={() => void revokeApp(r)}
                                 >
                                   Revoke
                                 </button>
