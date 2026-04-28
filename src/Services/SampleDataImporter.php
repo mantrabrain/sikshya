@@ -51,6 +51,6 @@ class SampleDataImporter
         $repo = new SampleDataPackRepository();
         $pack = $repo->findByAbsolutePath($absolutePath);
 
-        return $pack?->toServiceArray();
+        return $pack ? $pack->toServiceArray() : null;
     }
 }

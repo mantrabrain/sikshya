@@ -74,6 +74,58 @@ export function createHttpClient(
   resolveBaseUrl: () => string,
   resolveNonce: () => string
 ): HttpClient {
+  function tryExtractJsonFromRawBody(rawBody: string): unknown | null {
+    // Some endpoints may emit PHP warnings/notices before the JSON error payload.
+    // Try to recover the trailing JSON object so the UI can show a useful message.
+    const firstBrace = rawBody.indexOf('{');
+    const lastBrace = rawBody.lastIndexOf('}');
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+      return null;
+    }
+    const candidate = rawBody.slice(firstBrace, lastBrace + 1).trim();
+    try {
+      return JSON.parse(candidate) as unknown;
+    } catch {
+      // If there are multiple JSON-like chunks, try the last object.
+      const lastObjStart = rawBody.lastIndexOf('{');
+      if (lastObjStart !== -1 && lastObjStart < lastBrace) {
+        const candidate2 = rawBody.slice(lastObjStart, lastBrace + 1).trim();
+        try {
+          return JSON.parse(candidate2) as unknown;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
+  }
+
+  function resolveErrorMessage(data: unknown, fallback: string): string {
+    if (data && typeof data === 'object' && 'message' in data && typeof (data as { message: string }).message === 'string') {
+      return (data as { message: string }).message;
+    }
+
+    // If parsing failed earlier, we may have { rawBody: "<html warnings>...{json}"}.
+    if (
+      data &&
+      typeof data === 'object' &&
+      'rawBody' in data &&
+      typeof (data as { rawBody?: unknown }).rawBody === 'string'
+    ) {
+      const extracted = tryExtractJsonFromRawBody((data as { rawBody: string }).rawBody);
+      if (
+        extracted &&
+        typeof extracted === 'object' &&
+        'message' in extracted &&
+        typeof (extracted as { message: string }).message === 'string'
+      ) {
+        return (extracted as { message: string }).message;
+      }
+    }
+
+    return fallback;
+  }
+
   async function performFetch(
     path: string,
     init: RequestInit & { method?: HttpMethod } = {}
@@ -119,10 +171,7 @@ export function createHttpClient(
     const { res, data } = await performFetch(path, init);
 
     if (!res.ok) {
-      const msg =
-        (data && typeof data === 'object' && 'message' in data && typeof (data as { message: string }).message === 'string'
-          ? (data as { message: string }).message
-          : null) || res.statusText;
+      const msg = resolveErrorMessage(data, res.statusText || 'Request failed');
 
       throw new ApiError(msg || 'Request failed', {
         status: res.status,
@@ -144,10 +193,7 @@ export function createHttpClient(
     const { res, data } = await performFetch(path, { ...init, method });
 
     if (!res.ok) {
-      const msg =
-        (data && typeof data === 'object' && 'message' in data && typeof (data as { message: string }).message === 'string'
-          ? (data as { message: string }).message
-          : null) || res.statusText;
+      const msg = resolveErrorMessage(data, res.statusText || 'Request failed');
 
       throw new ApiError(msg || 'Request failed', {
         status: res.status,

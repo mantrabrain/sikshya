@@ -22,7 +22,10 @@ $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('C
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
-<div class="sikshya-public sikshya-archive-courses">
+<div
+    class="sikshya-public sikshya-archive-courses"
+    data-sikshya-archive-layout="<?php echo esc_attr($archive_layout); ?>"
+>
     <div class="sikshya-container">
         <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
         <header class="sikshya-archive-courses__header">

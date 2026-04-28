@@ -1,6 +1,8 @@
 import { ApiErrorPanel } from './shared/ApiErrorPanel';
 import { ButtonPrimary } from './shared/buttons';
 import { PREMIUM_LOCK_CARD_CLASS } from './PremiumGatedSurface';
+import { TopRightToast, useTopRightToast } from './shared/TopRightToast';
+import { getErrorSummary } from '../api';
 
 export function AddonEnablePanel(props: {
   title: string;
@@ -8,13 +10,25 @@ export function AddonEnablePanel(props: {
   canEnable: boolean;
   enableLabel?: string;
   enableBusy?: boolean;
-  onEnable: () => void;
+  onEnable: () => Promise<void>;
   upgradeUrl?: string;
   error?: unknown;
   /** Matches plan-gate premium card when shown inside `PremiumGatedSurface`. */
   variant?: 'default' | 'premium';
 }) {
   const { title, description, canEnable, enableLabel, enableBusy, onEnable, upgradeUrl, error, variant = 'default' } = props;
+  const toast = useTopRightToast(3200);
+
+  const onEnableClick = async () => {
+    toast.clear();
+    try {
+      await onEnable();
+      const base = title.replace(/\s+is\s+not\s+enabled\s*$/i, '').trim();
+      toast.success('Enabled', base ? `${base} enabled.` : 'Add-on enabled.');
+    } catch (e) {
+      toast.error('Enable failed', getErrorSummary(e));
+    }
+  };
 
   const isPremium = variant === 'premium';
 
@@ -26,6 +40,7 @@ export function AddonEnablePanel(props: {
           : 'w-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900'
       }
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {isPremium ? (
         <div
           className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600"
@@ -87,13 +102,13 @@ export function AddonEnablePanel(props: {
               <button
                 type="button"
                 disabled={enableBusy}
-                onClick={onEnable}
+                onClick={onEnableClick}
                 className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-amber-900/35 transition hover:from-amber-500 hover:via-yellow-400 hover:to-amber-500 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-stone-900 sm:flex-none"
               >
                 {enableBusy ? 'Enabling…' : enableLabel || 'Enable add-on'}
               </button>
             ) : (
-              <ButtonPrimary type="button" disabled={enableBusy} onClick={onEnable}>
+              <ButtonPrimary type="button" disabled={enableBusy} onClick={onEnableClick}>
                 {enableBusy ? 'Enabling…' : enableLabel || 'Enable addon'}
               </ButtonPrimary>
             )

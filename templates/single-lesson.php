@@ -329,9 +329,46 @@ while (have_posts()) :
                                 <?php
                                 $lesson_resources_rendered = apply_filters('sikshya_lesson_resources_rendered', false, $legacy_vm);
                                 if (!$lesson_resources_rendered) :
+                                    $course_id_for_resources = (int) $page_model->getCourseId();
+                                    $resources = get_post_meta($course_id_for_resources, '_sikshya_course_resources', true);
+                                    if (is_string($resources) && $resources !== '') {
+                                        $decoded = json_decode($resources, true);
+                                        if (is_array($decoded)) {
+                                            $resources = $decoded;
+                                        }
+                                    }
+                                    if (!is_array($resources)) {
+                                        $resources = [];
+                                    }
                                     ?>
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
-                                    <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this lesson yet.', 'sikshya'); ?></p>
+                                    <?php if ($resources === []) : ?>
+                                        <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this lesson yet.', 'sikshya'); ?></p>
+                                    <?php else : ?>
+                                        <ul class="sikshya-resList">
+                                            <?php foreach ($resources as $r) : ?>
+                                                <?php
+                                                if (!is_array($r)) {
+                                                    continue;
+                                                }
+                                                $rt = isset($r['title']) ? sanitize_text_field((string) $r['title']) : '';
+                                                $url = isset($r['url']) ? esc_url_raw((string) $r['url']) : '';
+                                                $aid = isset($r['attachment_id']) ? absint($r['attachment_id']) : 0;
+                                                if ($url === '' && $aid > 0) {
+                                                    $url = wp_get_attachment_url($aid) ?: '';
+                                                }
+                                                if ($url === '') {
+                                                    continue;
+                                                }
+                                                ?>
+                                                <li>
+                                                    <a class="sikshya-resLink" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer">
+                                                        <?php echo esc_html($rt !== '' ? $rt : wp_basename($url)); ?>
+                                                    </a>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                                 <?php do_action('sikshya_lesson_resources_after', $legacy_vm, $page_model); ?>
                             </div>
@@ -339,13 +376,58 @@ while (have_posts()) :
                         <div class="sikshya-tabPanel" data-sikshya-panel="notes">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('My notes', 'sikshya'); ?></h3>
-                                <p class="sikshya-zeroMargin"><?php esc_html_e('Notes are not available yet.', 'sikshya'); ?></p>
+                                <label class="sikshya-screen-reader-text" for="sikshya-learn-note"><?php esc_html_e('My notes', 'sikshya'); ?></label>
+                                <textarea
+                                    id="sikshya-learn-note"
+                                    class="sikshya-quizQ__textarea"
+                                    rows="6"
+                                    placeholder="<?php echo esc_attr__('Write a private note for this lesson…', 'sikshya'); ?>"
+                                    data-sikshya-note
+                                ></textarea>
+                                <div class="sikshya-quizActions" style="margin-top:10px;">
+                                    <button type="button" class="sikshya-btn sikshya-btn--outline" data-sikshya-note-save>
+                                        <?php esc_html_e('Save note', 'sikshya'); ?>
+                                    </button>
+                                    <span class="sikshya-muted" data-sikshya-note-status style="font-size:12px;"></span>
+                                </div>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="announcements">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Announcements', 'sikshya'); ?></h3>
-                                <p class="sikshya-zeroMargin"><?php esc_html_e('No announcements available.', 'sikshya'); ?></p>
+                                <?php
+                                $ann = get_post_meta((int) $page_model->getCourseId(), '_sikshya_course_announcements', true);
+                                if (is_string($ann) && $ann !== '') {
+                                    $decoded = json_decode($ann, true);
+                                    if (is_array($decoded)) {
+                                        $ann = $decoded;
+                                    }
+                                }
+                                if (!is_array($ann)) {
+                                    $ann = [];
+                                }
+                                ?>
+                                <?php if ($ann === []) : ?>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('No announcements available.', 'sikshya'); ?></p>
+                                <?php else : ?>
+                                    <?php foreach ($ann as $a) : ?>
+                                        <?php
+                                        if (!is_array($a)) {
+                                            continue;
+                                        }
+                                        $at = isset($a['title']) ? sanitize_text_field((string) $a['title']) : '';
+                                        $ad = isset($a['date']) ? sanitize_text_field((string) $a['date']) : '';
+                                        $am = isset($a['message']) ? (string) $a['message'] : '';
+                                        ?>
+                                        <div class="sikshya-announce" style="margin-top:12px;">
+                                            <div class="sikshya-announce__title"><?php echo esc_html($at !== '' ? $at : __('Announcement', 'sikshya')); ?></div>
+                                            <?php if ($ad !== '') : ?>
+                                                <div class="sikshya-announce__meta sikshya-muted"><?php echo esc_html($ad); ?></div>
+                                            <?php endif; ?>
+                                            <div class="sikshya-zeroMargin"><?php echo sikshya_render_rich_text($am); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <?php if ($page_model->hasDiscussionsTab()) : ?>
@@ -544,6 +626,66 @@ while (have_posts()) :
         completeBtn.removeAttribute('disabled');
         completeBtn.textContent = prevText;
         console.error(e);
+      }
+    });
+  }
+
+  // Notes (REST): private per-user note for this content.
+  const noteTa = document.querySelector('[data-sikshya-note]');
+  const noteSave = document.querySelector('[data-sikshya-note-save]');
+  const noteStatus = document.querySelector('[data-sikshya-note-status]');
+  if (noteTa && noteSave) {
+    const restBase = <?php echo wp_json_encode((string) $page_model->getRest()->getUrl(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+    const restNonce = <?php echo wp_json_encode((string) $page_model->getRest()->getNonce(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+    const courseId = <?php echo wp_json_encode((int) $page_model->getCourseId(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+    const contentId = <?php echo wp_json_encode((int) $page_model->getLessonId(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+    let loaded = false;
+    async function loadNote() {
+      if (loaded) return;
+      loaded = true;
+      try {
+        const url = new URL(restBase.replace(/\/?$/, '/') + 'me/content-note', window.location.href);
+        url.searchParams.set('course_id', String(courseId));
+        url.searchParams.set('content_id', String(contentId));
+        const res = await fetch(url.toString(), { method: 'GET', headers: { 'X-WP-Nonce': restNonce }, credentials: 'same-origin' });
+        const json = await res.json().catch(() => null);
+        if (res.ok && json && json.ok && json.data && typeof json.data.note === 'string') {
+          noteTa.value = json.data.note;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    // Load when user switches to Notes tab.
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (t.matches('[data-sikshya-tab="notes"]')) {
+        void loadNote();
+      }
+    });
+    noteSave.addEventListener('click', async () => {
+      if (!restBase || !restNonce) return;
+      noteSave.setAttribute('disabled', 'disabled');
+      if (noteStatus) noteStatus.textContent = 'Saving…';
+      try {
+        const res = await fetch(restBase.replace(/\/?$/, '/') + 'me/content-note', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': restNonce },
+          body: JSON.stringify({ course_id: Number(courseId), content_id: Number(contentId), note: String(noteTa.value || '') }),
+          credentials: 'same-origin',
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json || json.ok !== true) {
+          throw new Error((json && (json.message || json.data?.message)) || 'Failed');
+        }
+        if (noteStatus) noteStatus.textContent = 'Saved.';
+        window.setTimeout(() => { if (noteStatus) noteStatus.textContent = ''; }, 1600);
+      } catch (e) {
+        if (noteStatus) noteStatus.textContent = 'Could not save.';
+        console.error(e);
+      } finally {
+        noteSave.removeAttribute('disabled');
       }
     });
   }

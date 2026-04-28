@@ -28,11 +28,10 @@ final class OrderTemplateData
 
         if ($order_key === '') {
             $error = __('Missing order reference.', 'sikshya');
-        } elseif ($uid <= 0) {
-            $error = __('Please log in to view your order.', 'sikshya');
         } else {
             $repo = new OrderRepository();
-            $order = $repo->findByPublicTokenForUser($order_key, $uid);
+            // If logged in, enforce ownership. Otherwise, treat the public token as a bearer reference (guest receipt).
+            $order = $uid > 0 ? $repo->findByPublicTokenForUser($order_key, $uid) : $repo->findByPublicToken($order_key);
             if (!$order) {
                 $error = __('Order not found.', 'sikshya');
             } else {
@@ -41,8 +40,12 @@ final class OrderTemplateData
                 $gw = (string) $order->gateway;
                 $status_label = self::statusLabel($st);
                 $gateway_label = self::gatewayLabel($gw);
-                if ($gw === 'offline' && ($st === 'on-hold' || $st === 'pending')) {
+                // Show manual payment instructions on the receipt for offline/bank transfer orders.
+                // (Admins may mark orders paid later; keeping the instructions visible avoids confusion.)
+                if ($gw === 'offline') {
                     $offline_instructions_html = (string) Settings::get('offline_payment_instructions', '');
+                } elseif ($gw === 'bank_transfer') {
+                    $offline_instructions_html = (string) Settings::get('bank_transfer_instructions', '');
                 }
             }
         }
@@ -86,8 +89,12 @@ final class OrderTemplateData
 
         $map = [
             'offline' => __('Offline / manual', 'sikshya'),
+            'bank_transfer' => __('Bank transfer', 'sikshya'),
             'stripe' => __('Stripe', 'sikshya'),
             'paypal' => __('PayPal', 'sikshya'),
+            'mollie' => __('Mollie', 'sikshya'),
+            'paystack' => __('Paystack', 'sikshya'),
+            'razorpay' => __('Razorpay', 'sikshya'),
         ];
 
         return $map[$gateway] ?? $gateway;

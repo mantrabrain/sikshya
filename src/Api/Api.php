@@ -70,6 +70,54 @@ class Api
             ]
         );
 
+        /*
+         * List columns (React admin) need price / duration / level on collection responses.
+         * Core REST often omits underscore-prefixed `meta` entries in collections even with
+         * `show_in_rest` + `context=edit` (same class of issue as `sikshya_course_type` above).
+         */
+        $course_scalar_meta_field = static function (string $canonical_key, string $legacy_key): array {
+            return [
+                'get_callback' => static function (array $obj) use ($canonical_key, $legacy_key): string {
+                    $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+                    if ($id <= 0) {
+                        return '';
+                    }
+                    foreach ([$canonical_key, $legacy_key] as $k) {
+                        $raw = get_post_meta($id, $k, true);
+                        if ($raw === '' || $raw === null || $raw === false) {
+                            continue;
+                        }
+                        if (is_scalar($raw)) {
+                            return (string) $raw;
+                        }
+                    }
+
+                    return '';
+                },
+                'schema' => [
+                    'description' => 'Sikshya course meta mirrored for reliable REST collections.',
+                    'type' => 'string',
+                    'context' => ['view', 'edit'],
+                ],
+            ];
+        };
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::COURSE,
+            'sikshya_course_price',
+            $course_scalar_meta_field('_sikshya_price', '_sikshya_course_price')
+        );
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::COURSE,
+            'sikshya_course_duration',
+            // Prefer estimated length (hours) from Course details; `_sikshya_course_duration` is access window (days).
+            $course_scalar_meta_field('_sikshya_duration', '_sikshya_course_duration')
+        );
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::COURSE,
+            'sikshya_course_level',
+            $course_scalar_meta_field('_sikshya_difficulty', '_sikshya_course_level')
+        );
+
         // Course category featured image fields for React admin lists/forms.
         // Stored as term meta `category_image` (attachment ID) by CategoryService.
         register_rest_field(

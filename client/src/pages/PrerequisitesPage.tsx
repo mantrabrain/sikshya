@@ -24,6 +24,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type LessonRow = { id: number; title: string; status: string };
 
@@ -136,7 +137,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     showAllCourses,
   ]);
   const rows = listQ.data?.courses ?? [];
-  const [toast, setToast] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast(2600);
 
   const prereqBulkOptions = useMemo(
     () => [
@@ -213,13 +214,13 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       });
       if (!ok) return;
       setClearingAllLocksCourseId(r.course_id);
-      setToast(null);
+      toast.clear();
       try {
         await clearAllAccessLocksForCourseId(r.course_id);
-        setToast({ kind: 'success', text: 'All access locks removed for this course.' });
+        toast.success('Removed', 'All access locks removed for this course.');
         void listQ.refetch();
       } catch (e) {
-        setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Request failed' });
+        toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
       } finally {
         setClearingAllLocksCourseId(null);
       }
@@ -239,15 +240,15 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       });
       if (!ok) return;
       setClearingEnrollmentId(r.course_id);
-      setToast(null);
+      toast.clear();
       try {
         await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.coursePrerequisites(r.course_id), {
           prerequisite_course_ids: [],
         });
-        setToast({ kind: 'success', text: 'Enrollment lock cleared.' });
+        toast.success('Removed', 'Enrollment lock cleared.');
         void listQ.refetch();
       } catch (e) {
-        setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Request failed' });
+        toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
       } finally {
         setClearingEnrollmentId(null);
       }
@@ -267,7 +268,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       });
       if (!ok) return;
       setClearingLessonsCourseId(r.course_id);
-      setToast(null);
+      toast.clear();
       try {
         const data = await getSikshyaApi().get<{ locked_lessons?: { lesson_id: number }[] }>(
           SIKSHYA_ENDPOINTS.pro.courseLessonPrerequisiteSummary(r.course_id)
@@ -278,10 +279,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.lessonPrerequisites(lid), { prerequisite_lesson_ids: [] })
           )
         );
-        setToast({ kind: 'success', text: 'Lesson locks removed.' });
+        toast.success('Removed', 'Lesson locks removed.');
         void listQ.refetch();
       } catch (e) {
-        setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Request failed' });
+        toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
       } finally {
         setClearingLessonsCourseId(null);
       }
@@ -296,12 +297,12 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     const ids = [...selectedCourseIds];
     const n = ids.length;
     setBulkError(null);
-    setToast(null);
+    toast.clear();
 
     const run = async () => {
       if (bulkActionValue === 'clear_all') {
         await Promise.all(ids.map((courseId) => clearAllAccessLocksForCourseId(courseId)));
-        setToast({ kind: 'success', text: `Removed all access locks for ${n} course(s).` });
+        toast.success('Removed', `Removed all access locks for ${n} course(s).`);
         return;
       }
       if (bulkActionValue === 'clear_enrollment') {
@@ -312,7 +313,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             })
           )
         );
-        setToast({ kind: 'success', text: `Updated ${n} course(s).` });
+        toast.success('Updated', `Updated ${n} course(s).`);
         return;
       }
       if (bulkActionValue === 'clear_lesson_locks') {
@@ -327,7 +328,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             )
           );
         }
-        setToast({ kind: 'success', text: `Lesson locks cleared for ${n} course(s).` });
+        toast.success('Removed', `Lesson locks cleared for ${n} course(s).`);
       }
     };
 
@@ -562,17 +563,17 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     const cid = activeCourseRow?.course_id ?? 0;
     if (cid <= 0) return;
     setModalSavingEnrollment(true);
-    setToast(null);
+    toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.coursePrerequisites(cid), {
         prerequisite_course_ids: modalCoursePrereqs,
       });
-      setToast({ kind: 'success', text: 'Enrollment lock saved.' });
+      toast.success('Saved', 'Enrollment lock saved.');
       setEnrollmentModalOpen(false);
       setActiveCourseRow(null);
       void listQ.refetch();
     } catch (e) {
-      setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Save failed' });
+      toast.error('Save failed', e instanceof Error ? e.message : 'Save failed');
     } finally {
       setModalSavingEnrollment(false);
     }
@@ -580,22 +581,22 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
 
   const saveLessonModal = async () => {
     if (modalLessonId <= 0) {
-      setToast({ kind: 'error', text: 'Pick a lesson first.' });
+      toast.error('Missing lesson', 'Pick a lesson first.');
       return;
     }
     setModalSavingLesson(true);
-    setToast(null);
+    toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.lessonPrerequisites(modalLessonId), {
         prerequisite_lesson_ids: modalLessonPrereqs,
       });
-      setToast({ kind: 'success', text: 'Lesson lock saved.' });
+      toast.success('Saved', 'Lesson lock saved.');
       setLessonModalOpen(false);
       setActiveCourseRow(null);
       setModalLessonId(0);
       void listQ.refetch();
     } catch (e) {
-      setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Save failed' });
+      toast.error('Save failed', e instanceof Error ? e.message : 'Save failed');
     } finally {
       setModalSavingLesson(false);
     }
@@ -607,7 +608,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     }
 
     setAddStarting(true);
-    setToast(null);
+    toast.clear();
 
     try {
       let courseTitle = rows.find((row) => row.course_id === addCourseId)?.course_title || '';
@@ -634,18 +635,13 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
         setEnrollmentModalOpen(true);
       }
     } catch (e) {
-      setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Could not load the selected course.' });
+      toast.error('Could not load', e instanceof Error ? e.message : 'Could not load the selected course.');
     } finally {
       setAddStarting(false);
     }
   }, [addCourseId, addLockType, addStarting, rows]);
 
-  // Auto-dismiss success toasts so they don't sit forever after a save.
-  useEffect(() => {
-    if (!toast || toast.kind !== 'success') return;
-    const t = window.setTimeout(() => setToast(null), 2400);
-    return () => window.clearTimeout(t);
-  }, [toast]);
+  // Auto-dismiss handled by shared toast.
 
   return (
     <EmbeddableShell
@@ -665,7 +661,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
         addonEnableDescription="Turn on the Prerequisites add-on to enforce a learning order across courses and lessons."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <div className="space-y-6">
@@ -1011,29 +1007,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             </p>
           </div>
 
-          {/* Toast */}
-          {toast ? (
-            <div className="fixed right-4 top-4 z-[9999] w-[min(28rem,calc(100vw-2rem))]">
-              <div
-                role="status"
-                className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${
-                  toast.kind === 'success'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-200'
-                    : 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-200'
-                }`}
-              >
-                <span className="min-w-0 flex-1">{toast.text}</span>
-                <button
-                  type="button"
-                  onClick={() => setToast(null)}
-                  className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10"
-                  aria-label="Dismiss"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          ) : null}
+          <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
         </div>
       </GatedFeatureWorkspace>

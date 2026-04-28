@@ -253,7 +253,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         addonEnableDescription="Enable the Student activity log add-on to record Sikshya events and unlock this audit view plus the My account strip."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {enabled ? (

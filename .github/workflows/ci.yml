@@ -19,8 +19,12 @@ concurrency:
 
 jobs:
   php-syntax:
-    name: PHP syntax (8.1)
+    name: PHP syntax (${{ matrix.php }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["7.4", "8.2"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +32,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.1"
+          php-version: "${{ matrix.php }}"
           coverage: none
 
       - name: Get Composer cache directory

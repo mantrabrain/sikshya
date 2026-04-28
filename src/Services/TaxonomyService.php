@@ -82,7 +82,8 @@ class TaxonomyService
      */
     public function registerCourseTag(): void
     {
-        $rewrite = PermalinkService::get();
+        // Tag taxonomy is not exposed in settings; slug is fixed for stable URLs.
+        $tag_rewrite_slug = 'course-tag';
 
         $labels = [
             'name' => __('Course Tags', 'sikshya'),
@@ -103,7 +104,7 @@ class TaxonomyService
             'show_in_menu' => false,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => [ 'slug' => $rewrite['rewrite_tax_course_tag'], 'with_front' => false ],
+            'rewrite' => [ 'slug' => $tag_rewrite_slug, 'with_front' => false ],
             'show_in_rest' => true,
         ];
 

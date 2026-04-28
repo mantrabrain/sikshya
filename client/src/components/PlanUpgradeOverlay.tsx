@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useId } from 'react';
 import { appViewHref } from '../lib/appUrl';
 import { getCatalogEntry, getLicensing, requiredPlanLabelForFeature } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
@@ -45,26 +45,18 @@ export function PlanUpgradeOverlay(props: Props) {
   const title = entry?.label || featureTitle;
   const body = (entry?.description && entry.description.trim()) || description;
   const plan = requiredPlanLabelForFeature(config, featureId);
-  const upgradeHref = config.brandLinks?.upgradeUrl || lic?.upgradeUrl || 'https://sikshya.com/pricing/';
+  const upgradeHref =
+    config.brandLinks?.upgradeUrl || lic?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya/#pricing';
   const titleId = useId();
   const descId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
   const [bulletA, bulletB] = sellingBullets(body);
-
-  useEffect(() => {
-    const node = panelRef.current?.querySelector<HTMLElement>('a[data-sikshya-primary-upgrade]');
-    node?.focus();
-  }, []);
 
   return (
     <PremiumGatedSurface>
       <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
+        role="region"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        tabIndex={-1}
         className={PREMIUM_LOCK_CARD_CLASS}
       >
         <div
@@ -136,7 +128,6 @@ export function PlanUpgradeOverlay(props: Props) {
 
             <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
               <a
-                data-sikshya-primary-upgrade
                 href={upgradeHref}
                 target="_blank"
                 rel="noreferrer noopener"

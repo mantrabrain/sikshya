@@ -3,7 +3,9 @@
 namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Services\CourseFrontendSettings;
 use Sikshya\Services\CourseService;
+use WP_Query;
 
 class CourseController
 {
@@ -27,12 +29,16 @@ class CourseController
 
     public function index(): void
     {
-        $args = [
-            'posts_per_page' => get_query_var('posts_per_page', 12),
-            'paged' => get_query_var('paged', 1),
-        ];
+        $per_page = CourseFrontendSettings::coursesPerPageDefault();
+        $paged = max(1, (int) get_query_var('paged', 1));
+        $list_query = $this->courseService->queryCourses(
+            [
+                'posts_per_page' => $per_page,
+                'paged' => $paged,
+            ]
+        );
 
-        $courses = $this->courseService->getAllCourses($args);
+        $courses = $list_query->posts;
         $featured_courses = $this->courseService->getFeaturedCourses(6);
         $popular_courses = $this->courseService->getPopularCourses(6);
 
@@ -40,7 +46,7 @@ class CourseController
             'courses' => $courses,
             'featured_courses' => $featured_courses,
             'popular_courses' => $popular_courses,
-            'pagination' => $this->getPagination($args),
+            'pagination' => $this->getPaginationFromQuery($list_query, $per_page, $paged),
         ]);
     }
 
@@ -73,41 +79,61 @@ class CourseController
     public function category(): void
     {
         $category = get_queried_object();
-        $args = [
-            'posts_per_page' => get_query_var('posts_per_page', 12),
-            'paged' => get_query_var('paged', 1),
-            'tax_query' => [
-                [
-                    'taxonomy' => 'sikshya_course_category',
-                    'field' => 'term_id',
-                    'terms' => $category->term_id,
+        $per_page = CourseFrontendSettings::coursesPerPageDefault();
+        $paged = max(1, (int) get_query_var('paged', 1));
+        $list_query = $this->courseService->queryCourses(
+            [
+                'posts_per_page' => $per_page,
+                'paged' => $paged,
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'sikshya_course_category',
+                        'field' => 'term_id',
+                        'terms' => $category->term_id,
+                    ],
                 ],
-            ],
-        ];
+            ]
+        );
 
-        $courses = $this->courseService->getAllCourses($args);
+        $courses = $list_query->posts;
 
         $this->render('courses/category', [
             'category' => $category,
             'courses' => $courses,
-            'pagination' => $this->getPagination($args),
+            'pagination' => $this->getPaginationFromQuery($list_query, $per_page, $paged),
         ]);
     }
 
     public function search(): void
     {
         $search_term = sanitize_text_field($_GET['s'] ?? '');
-        $args = [
-            'posts_per_page' => get_query_var('posts_per_page', 12),
-            'paged' => get_query_var('paged', 1),
-        ];
+        $per_page = CourseFrontendSettings::coursesPerPageDefault();
+        $paged = max(1, (int) get_query_var('paged', 1));
 
-        $courses = $this->courseService->searchCourses($search_term, $args);
+        if ($search_term === '') {
+            $this->render('courses/search', [
+                'search_term' => '',
+                'courses' => [],
+                'pagination' => $this->paginationSnapshot(0, $per_page, $paged),
+            ]);
+
+            return;
+        }
+
+        $list_query = $this->courseService->querySearchCourses(
+            $search_term,
+            [
+                'posts_per_page' => $per_page,
+                'paged' => $paged,
+            ]
+        );
+
+        $courses = $list_query->posts;
 
         $this->render('courses/search', [
             'search_term' => $search_term,
             'courses' => $courses,
-            'pagination' => $this->getPagination($args),
+            'pagination' => $this->getPaginationFromQuery($list_query, $per_page, $paged),
         ]);
     }
 
@@ -183,7 +209,8 @@ class CourseController
     public function dashboard(): void
     {
         if (!is_user_logged_in()) {
-            wp_redirect(wp_login_url());
+            $req = (string) (is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : home_url('/'));
+            wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::login($req));
             exit;
         }
 
@@ -199,7 +226,8 @@ class CourseController
     public function myCourses(): void
     {
         if (!is_user_logged_in()) {
-            wp_redirect(wp_login_url());
+            $req = (string) (is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : home_url('/'));
+            wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::login($req));
             exit;
         }
 
@@ -236,14 +264,21 @@ class CourseController
         }
     }
 
-    private function getPagination(array $args): array
+    /**
+     * @return array<string, int|bool>
+     */
+    private function getPaginationFromQuery(WP_Query $query, int $posts_per_page, int $current_page): array
     {
-        global $wp_query;
+        return $this->paginationSnapshot((int) $query->found_posts, $posts_per_page, $current_page);
+    }
 
-        $total_posts = $wp_query->found_posts;
-        $posts_per_page = $args['posts_per_page'] ?? 12;
-        $current_page = $args['paged'] ?? 1;
-        $total_pages = ceil($total_posts / $posts_per_page);
+    /**
+     * @return array<string, int|bool>
+     */
+    private function paginationSnapshot(int $total_posts, int $posts_per_page, int $current_page): array
+    {
+        $posts_per_page = max(1, $posts_per_page);
+        $total_pages = $total_posts > 0 ? (int) ceil($total_posts / $posts_per_page) : 0;
 
         return [
             'total_posts' => $total_posts,
@@ -251,7 +286,7 @@ class CourseController
             'current_page' => $current_page,
             'total_pages' => $total_pages,
             'has_previous' => $current_page > 1,
-            'has_next' => $current_page < $total_pages,
+            'has_next' => $total_pages > 0 && $current_page < $total_pages,
             'previous_page' => $current_page - 1,
             'next_page' => $current_page + 1,
         ];

@@ -84,6 +84,22 @@ final class PublicPageUrls
         return PermalinkService::virtualPageUrl($key);
     }
 
+    /**
+     * Sikshya login page (virtual). Uses WordPress auth, but in Sikshya UI.
+     *
+     * @param string $redirect_to Absolute or relative URL to return to after login.
+     */
+    public static function login(string $redirect_to = ''): string
+    {
+        $base = self::url('login');
+        $redirect_to = trim((string) $redirect_to);
+        if ($redirect_to === '') {
+            return $base;
+        }
+
+        return add_query_arg('redirect_to', rawurlencode($redirect_to), $base);
+    }
+
     public static function learnForCourse(int $course_id): string
     {
         if ($course_id <= 0) {
@@ -168,6 +184,6 @@ final class PublicPageUrls
             return self::url('order');
         }
 
-        return add_query_arg('order_key', $t, self::url('order'));
+        return add_query_arg('order_key', 'SIK-ORD-' . $t, self::url('order'));
     }
 }

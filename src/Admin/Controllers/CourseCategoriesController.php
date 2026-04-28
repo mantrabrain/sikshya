@@ -6,6 +6,7 @@ use Sikshya\Admin\ReactAdminView;
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Utils\RichText;
 
 /**
  * Course Categories Controller
@@ -72,7 +73,7 @@ class CourseCategoriesController
     private function handleCreateCategory(): void
     {
         $name = sanitize_text_field($_POST['name'] ?? '');
-        $description = sanitize_textarea_field($_POST['description'] ?? '');
+        $description = RichText::sanitize(isset($_POST['description']) ? (string) wp_unslash($_POST['description']) : '');
         $slug = sanitize_title($_POST['slug'] ?? $name);
 
         if (empty($name)) {
@@ -101,7 +102,7 @@ class CourseCategoriesController
     {
         $term_id = intval($_POST['term_id'] ?? 0);
         $name = sanitize_text_field($_POST['name'] ?? '');
-        $description = sanitize_textarea_field($_POST['description'] ?? '');
+        $description = RichText::sanitize(isset($_POST['description']) ? (string) wp_unslash($_POST['description']) : '');
         $slug = sanitize_title($_POST['slug'] ?? $name);
 
         if (empty($term_id) || empty($name)) {

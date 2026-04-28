@@ -176,6 +176,8 @@ class PostTypeManager
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_duration');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_type');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_video_url');
+        // Lesson: free preview toggle.
+        $str_meta(PostTypes::LESSON, '_sikshya_is_free');
 
         // Question (sik_question).
         $str_meta(PostTypes::QUESTION, '_sikshya_question_type');

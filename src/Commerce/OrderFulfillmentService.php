@@ -38,6 +38,10 @@ final class OrderFulfillmentService
         $items = $this->orders->getItems($order_id);
         $user_id = (int) $order->user_id;
         if ($user_id <= 0) {
+            // Guest checkout: ensure an actual WP user exists before fulfilling.
+            $user_id = $this->ensureGuestStudentUser($order_id, $order);
+        }
+        if ($user_id <= 0) {
             return false;
         }
 
@@ -92,5 +96,76 @@ final class OrderFulfillmentService
         do_action('sikshya_order_fulfilled', $order_id, $order);
 
         return true;
+    }
+
+    /**
+     * Guest checkout creates an order first, then links a student account after payment succeeds.
+     *
+     * Webhook/IPN-driven gateways may fulfill without going through the browser confirm flow,
+     * so fulfillment must be able to provision the student account as well.
+     */
+    private function ensureGuestStudentUser(int $order_id, object $order): int
+    {
+        // Respect global guest checkout toggle.
+        if (!Settings::isTruthy(Settings::get('enable_guest_checkout', true))) {
+            return 0;
+        }
+
+        $meta = [];
+        if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+            $decoded = json_decode($order->meta, true);
+            if (is_array($decoded)) {
+                $meta = $decoded;
+            }
+        }
+
+        $guest = isset($meta['guest']) && is_array($meta['guest']) ? $meta['guest'] : [];
+        $email = isset($guest['email']) ? sanitize_email((string) $guest['email']) : '';
+        $name = isset($guest['name']) ? sanitize_text_field((string) $guest['name']) : '';
+        if ($email === '' || !is_email($email)) {
+            return 0;
+        }
+
+        // Never auto-link to an existing account — require sign-in for that email.
+        $existing = (int) email_exists($email);
+        if ($existing > 0) {
+            return 0;
+        }
+
+        $base = sanitize_user((string) preg_replace('/@.*/', '', $email), true);
+        if ($base === '') {
+            $base = 'student';
+        }
+        $username = $base;
+        $i = 1;
+        while (username_exists($username)) {
+            $i++;
+            $username = $base . $i;
+            if ($i > 50) {
+                $username = $base . wp_rand(1000, 999999);
+                break;
+            }
+        }
+
+        $password = wp_generate_password(20, true, true);
+        $new_id = wp_create_user($username, $password, $email);
+        if (is_wp_error($new_id) || (int) $new_id <= 0) {
+            return 0;
+        }
+        $uid = (int) $new_id;
+
+        $u = get_userdata($uid);
+        if ($u) {
+            $u->set_role('sikshya_student');
+        }
+        if ($name !== '') {
+            wp_update_user(['ID' => $uid, 'display_name' => $name]);
+        }
+        wp_new_user_notification($uid, null, 'user');
+
+        // Link order to the new student user so enrollments and receipts work.
+        $this->orders->updateOrder($order_id, ['user_id' => $uid]);
+
+        return $uid;
     }
 }

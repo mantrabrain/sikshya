@@ -36,6 +36,7 @@ use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\SystemInfoService;
 use Sikshya\Services\InstructorApplicationsService;
+use Sikshya\Services\StatsUsage;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -292,6 +293,16 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/admin/usage-tracking/send-now', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'sendUsageTrackingNow'],
+                'permission_callback' => static function () {
+                    return current_user_can('manage_options');
+                },
+            ],
+        ]);
+
         register_rest_route($namespace, '/tools', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -522,6 +533,20 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/admin/quiz-attempts/(?P<id>\\d+)/reset-timer', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'resetAdminQuizAttemptTimer'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+                'args' => [
+                    'id' => [
+                        'required' => true,
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/payments', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -540,6 +565,19 @@ class AdminRestRoutes
                         'maximum' => 100,
                     ],
                 ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/payments/(?P<id>\d+)', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getAdminPayment'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+            [
+                'methods' => WP_REST_Server::EDITABLE,
+                'callback' => [$this, 'patchAdminPayment'],
+                'permission_callback' => [$this, 'permissionAdmin'],
             ],
         ]);
 
@@ -594,6 +632,19 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'createAdminManualOrder'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/orders/(?P<id>\d+)', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getAdminOrder'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+            [
+                'methods' => WP_REST_Server::EDITABLE,
+                'callback' => [$this, 'patchAdminOrder'],
                 'permission_callback' => [$this, 'permissionAdmin'],
             ],
         ]);
@@ -1473,6 +1524,34 @@ class AdminRestRoutes
         );
     }
 
+    public function sendUsageTrackingNow(WP_REST_Request $request): WP_REST_Response
+    {
+        unset($request);
+
+        if (!class_exists(StatsUsage::class)) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Usage tracking is unavailable.', 'sikshya')], 400);
+        }
+
+        $u = StatsUsage::instance();
+        if (!$u->is_enabled()) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Usage tracking is disabled.', 'sikshya')], 400);
+        }
+
+        $ok = $u->sync();
+
+        return new WP_REST_Response(
+            [
+                'success' => (bool) $ok,
+                'message' => $ok ? __('Usage data sent.', 'sikshya') : __('Could not send usage data.', 'sikshya'),
+                'data' => [
+                    'last_sync' => (int) get_option(StatsUsage::OPT_LAST_SYNC, 0),
+                    'last_error' => $u->get_last_send_error(),
+                ],
+            ],
+            $ok ? 200 : 500
+        );
+    }
+
     /**
      * Auto-save a single setup wizard step (drives “Next” + shareable ?step= URLs).
      */
@@ -2039,6 +2118,68 @@ class AdminRestRoutes
         );
     }
 
+    public function resetAdminQuizAttemptTimer(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid attempt id.', 'sikshya')], 400);
+        }
+
+        $repo = new \Sikshya\Database\Repositories\QuizAttemptRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Quiz attempts table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        global $wpdb;
+        $table = \Sikshya\Database\Tables\QuizAttemptsTable::getTableName();
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d LIMIT 1", $id));
+        if (!$row) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'not_found', 'message' => __('Attempt not found.', 'sikshya')], 404);
+        }
+
+        $ok = false !== $wpdb->update(
+            $table,
+            [
+                'status' => 'in_progress',
+                'started_at' => current_time('mysql'),
+                'completed_at' => null,
+                'score' => 0.00,
+                'correct_answers' => 0,
+                'total_questions' => 0,
+                'time_taken' => 0,
+                'answers_data' => null,
+            ],
+            ['id' => $id],
+            ['%s', '%s', '%s', '%f', '%d', '%d', '%d', '%s'],
+            ['%d']
+        );
+
+        if (!$ok) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'update_failed', 'message' => __('Could not reset attempt timer.', 'sikshya')],
+                500
+            );
+        }
+
+        $updated = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d LIMIT 1", $id));
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'message' => __('Timer reset.', 'sikshya'),
+                'data' => [
+                    'attempt_id' => $id,
+                    'started_at' => $updated ? (string) $updated->started_at : current_time('mysql'),
+                    'status' => $updated ? (string) $updated->status : 'in_progress',
+                ],
+            ],
+            200
+        );
+    }
+
     /**
      * Paginated payments with payer and course labels for the React admin.
      */
@@ -2061,6 +2202,148 @@ class AdminRestRoutes
                 'table_missing' => !empty($r['table_missing']),
             ],
             200
+        );
+    }
+
+    /**
+     * Single payment row details (admin).
+     */
+    public function getAdminPayment(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid payment id.', 'sikshya')],
+                400
+            );
+        }
+
+        $repo = new \Sikshya\Database\Repositories\PaymentRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Payments table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        global $wpdb;
+        $table = \Sikshya\Database\Tables\PaymentsTable::getTableName();
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d LIMIT 1", $id));
+        if (!$row) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'not_found', 'message' => __('Payment not found.', 'sikshya')],
+                404
+            );
+        }
+
+        $user_id = isset($row->user_id) ? (int) $row->user_id : 0;
+        $course_id = isset($row->course_id) ? (int) $row->course_id : 0;
+        $user = $user_id > 0 ? get_user_by('id', $user_id) : false;
+        $payer_name = $user ? (string) ($user->display_name ?: $user->user_login) : '';
+        $payer_email = $user ? (string) $user->user_email : '';
+        $course_title = $course_id > 0 ? (string) (get_the_title($course_id) ?: '') : '';
+
+        $gateway_response = null;
+        if (isset($row->gateway_response) && is_string($row->gateway_response) && $row->gateway_response !== '') {
+            $decoded = json_decode($row->gateway_response, true);
+            if ($decoded !== null) {
+                $gateway_response = $decoded;
+            }
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'payment' => [
+                    'id' => (int) $row->id,
+                    'user_id' => $user_id,
+                    'course_id' => $course_id,
+                    'course_title' => $course_title,
+                    'amount' => isset($row->amount) ? (float) $row->amount : 0.0,
+                    'currency' => (string) ($row->currency ?? ''),
+                    'payment_method' => (string) ($row->payment_method ?? ''),
+                    'transaction_id' => (string) ($row->transaction_id ?? ''),
+                    'status' => (string) ($row->status ?? ''),
+                    'payment_date' => (string) ($row->payment_date ?? ''),
+                    'payer_name' => $payer_name,
+                    'payer_email' => $payer_email,
+                    'gateway_response' => $gateway_response,
+                ],
+            ],
+            200
+        );
+    }
+
+    /**
+     * Patch a payment row (admin).
+     *
+     * Allowed fields: status, payment_method, transaction_id, payment_date.
+     */
+    public function patchAdminPayment(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid payment id.', 'sikshya')],
+                400
+            );
+        }
+
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $repo = new \Sikshya\Database\Repositories\PaymentRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Payments table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        global $wpdb;
+        $table = \Sikshya\Database\Tables\PaymentsTable::getTableName();
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d LIMIT 1", $id));
+        if (!$row) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'not_found', 'message' => __('Payment not found.', 'sikshya')],
+                404
+            );
+        }
+
+        $patch = [];
+        if (array_key_exists('status', $params)) {
+            $st = sanitize_key((string) $params['status']);
+            if ($st !== '') {
+                $patch['status'] = $st;
+            }
+        }
+        if (array_key_exists('payment_method', $params)) {
+            $patch['payment_method'] = sanitize_text_field((string) $params['payment_method']);
+        }
+        if (array_key_exists('transaction_id', $params)) {
+            $patch['transaction_id'] = sanitize_text_field((string) $params['transaction_id']);
+        }
+        if (array_key_exists('payment_date', $params)) {
+            $dt = sanitize_text_field((string) $params['payment_date']);
+            if ($dt !== '') {
+                $patch['payment_date'] = $dt;
+            }
+        }
+
+        if ($patch === []) {
+            return new WP_REST_Response(['ok' => true, 'message' => __('No changes.', 'sikshya')], 200);
+        }
+
+        $updated = false !== $wpdb->update($table, $patch, ['id' => $id]);
+
+        return new WP_REST_Response(
+            [
+                'ok' => (bool) $updated,
+                'message' => $updated ? __('Payment updated.', 'sikshya') : __('Could not update payment.', 'sikshya'),
+            ],
+            $updated ? 200 : 500
         );
     }
 
@@ -2189,6 +2472,67 @@ class AdminRestRoutes
                 ];
             }
 
+            $meta = [];
+            if (isset($row->meta) && is_string($row->meta) && $row->meta !== '') {
+                $decoded = json_decode($row->meta, true);
+                if (is_array($decoded)) {
+                    $meta = $decoded;
+                }
+            }
+            $dynamic_fields = [];
+            if (isset($meta['dynamic_fields']) && is_array($meta['dynamic_fields'])) {
+                $df = $meta['dynamic_fields'];
+                if (isset($df['values']) && is_array($df['values'])) {
+                    $dynamic_fields = $df['values'];
+                }
+            }
+
+            // Attach human-readable labels for dynamic fields (schema-driven).
+            $dynamic_fields_display = [];
+            $schema_raw = \Sikshya\Services\Settings::get('checkout_dynamic_fields_schema', '');
+            $schema = [];
+            if (is_string($schema_raw) && $schema_raw !== '') {
+                $decoded = json_decode($schema_raw, true);
+                if (is_array($decoded)) {
+                    $schema = $decoded;
+                }
+            }
+            $schema_map = [];
+            foreach ($schema as $f) {
+                if (!is_array($f)) {
+                    continue;
+                }
+                $fid = isset($f['id']) ? sanitize_key((string) $f['id']) : '';
+                if ($fid === '') {
+                    continue;
+                }
+                $schema_map[$fid] = [
+                    'label' => isset($f['label']) ? (string) $f['label'] : $fid,
+                    'type' => isset($f['type']) ? sanitize_key((string) $f['type']) : '',
+                ];
+            }
+            $countries = function_exists('sikshya_get_country_choices') ? sikshya_get_country_choices() : [];
+            foreach ($dynamic_fields as $k => $v) {
+                $fid = sanitize_key((string) $k);
+                if ($fid === '') {
+                    continue;
+                }
+                $label = $schema_map[$fid]['label'] ?? $fid;
+                $type = $schema_map[$fid]['type'] ?? '';
+                $value = is_scalar($v) || $v === null ? (string) ($v ?? '') : wp_json_encode($v);
+                if ($type === 'country') {
+                    $code = strtoupper(preg_replace('/[^A-Z]/', '', $value));
+                    if ($code !== '' && is_array($countries) && isset($countries[$code])) {
+                        $value = (string) $countries[$code];
+                    }
+                }
+                $dynamic_fields_display[] = [
+                    'id' => $fid,
+                    'label' => $label,
+                    'value' => $value,
+                ];
+            }
+
             $items[] = [
                 'id' => (int) $row->id,
                 'user_id' => (int) $row->user_id,
@@ -2204,6 +2548,8 @@ class AdminRestRoutes
                 'payer_name' => (string) ($row->payer_name ?? ''),
                 'payer_email' => (string) ($row->payer_email ?? ''),
                 'lines' => $line_courses,
+                'dynamic_fields' => $dynamic_fields,
+                'dynamic_fields_display' => $dynamic_fields_display,
             ];
         }
 
@@ -2220,6 +2566,207 @@ class AdminRestRoutes
                 'per_page' => $per_page,
             ],
             200
+        );
+    }
+
+    /**
+     * Single order details (admin).
+     */
+    public function getAdminOrder(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid order id.', 'sikshya')],
+                400
+            );
+        }
+
+        $repo = new OrderRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Orders table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        $row = $repo->findById($id);
+        if (!$row) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'not_found', 'message' => __('Order not found.', 'sikshya')],
+                404
+            );
+        }
+
+        $meta = [];
+        if (isset($row->meta) && is_string($row->meta) && $row->meta !== '') {
+            $decoded = json_decode($row->meta, true);
+            if (is_array($decoded)) {
+                $meta = $decoded;
+            }
+        }
+        $dynamic_fields = [];
+        if (isset($meta['dynamic_fields']) && is_array($meta['dynamic_fields'])) {
+            $df = $meta['dynamic_fields'];
+            if (isset($df['values']) && is_array($df['values'])) {
+                $dynamic_fields = $df['values'];
+            }
+        }
+
+        $dynamic_fields_display = [];
+        $schema_raw = \Sikshya\Services\Settings::get('checkout_dynamic_fields_schema', '');
+        $schema = [];
+        if (is_string($schema_raw) && $schema_raw !== '') {
+            $decoded = json_decode($schema_raw, true);
+            if (is_array($decoded)) {
+                $schema = $decoded;
+            }
+        }
+        $schema_map = [];
+        foreach ($schema as $f) {
+            if (!is_array($f)) {
+                continue;
+            }
+            $fid = isset($f['id']) ? sanitize_key((string) $f['id']) : '';
+            if ($fid === '') {
+                continue;
+            }
+            $schema_map[$fid] = [
+                'label' => isset($f['label']) ? (string) $f['label'] : $fid,
+                'type' => isset($f['type']) ? sanitize_key((string) $f['type']) : '',
+            ];
+        }
+        $countries = function_exists('sikshya_get_country_choices') ? sikshya_get_country_choices() : [];
+        foreach ($dynamic_fields as $k => $v) {
+            $fid = sanitize_key((string) $k);
+            if ($fid === '') {
+                continue;
+            }
+            $label = $schema_map[$fid]['label'] ?? $fid;
+            $type = $schema_map[$fid]['type'] ?? '';
+            $value = is_scalar($v) || $v === null ? (string) ($v ?? '') : wp_json_encode($v);
+            if ($type === 'country') {
+                $code = strtoupper(preg_replace('/[^A-Z]/', '', $value));
+                if ($code !== '' && is_array($countries) && isset($countries[$code])) {
+                    $value = (string) $countries[$code];
+                }
+            }
+            $dynamic_fields_display[] = [
+                'id' => $fid,
+                'label' => $label,
+                'value' => $value,
+            ];
+        }
+
+        $user_id = (int) ($row->user_id ?? 0);
+        $user = $user_id > 0 ? get_user_by('id', $user_id) : false;
+        $payer_name = $user ? (string) ($user->display_name ?: $user->user_login) : '';
+        $payer_email = $user ? (string) $user->user_email : '';
+
+        $lines = [];
+        foreach ($repo->getItems((int) $row->id) as $it) {
+            $cid = (int) $it->course_id;
+            $title = $cid > 0 ? get_the_title($cid) : '';
+            $lines[] = [
+                'course_id' => $cid,
+                'course_title' => $title ?: '',
+                'quantity' => isset($it->quantity) ? (int) $it->quantity : 1,
+                'unit_price' => isset($it->unit_price) ? (float) $it->unit_price : 0.0,
+                'line_total' => isset($it->line_total) ? (float) $it->line_total : 0.0,
+            ];
+        }
+
+        $public_token = isset($row->public_token) && is_string($row->public_token) ? (string) $row->public_token : '';
+        $receipt_url = $public_token !== '' ? \Sikshya\Frontend\Public\PublicPageUrls::orderView($public_token) : '';
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'order' => [
+                    'id' => (int) $row->id,
+                    'user_id' => $user_id,
+                    'status' => (string) $row->status,
+                    'currency' => (string) $row->currency,
+                    'subtotal' => isset($row->subtotal) ? (float) $row->subtotal : 0.0,
+                    'discount_total' => isset($row->discount_total) ? (float) $row->discount_total : 0.0,
+                    'total' => isset($row->total) ? (float) $row->total : 0.0,
+                    'gateway' => (string) $row->gateway,
+                    'gateway_intent_id' => (string) ($row->gateway_intent_id ?? ''),
+                    'public_token' => $public_token,
+                    'created_at' => (string) ($row->created_at ?? ''),
+                    'payer_name' => $payer_name,
+                    'payer_email' => $payer_email,
+                    'meta' => $meta,
+                    'dynamic_fields' => $dynamic_fields,
+                    'dynamic_fields_display' => $dynamic_fields_display,
+                    'receipt_url' => $receipt_url,
+                    'lines' => $lines,
+                ],
+            ],
+            200
+        );
+    }
+
+    /**
+     * Patch an order row (admin).
+     *
+     * Allowed fields: status, gateway.
+     */
+    public function patchAdminOrder(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid order id.', 'sikshya')],
+                400
+            );
+        }
+
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $repo = new OrderRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Orders table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        $row = $repo->findById($id);
+        if (!$row) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'not_found', 'message' => __('Order not found.', 'sikshya')],
+                404
+            );
+        }
+
+        $patch = [];
+        if (array_key_exists('status', $params)) {
+            $st = sanitize_key((string) $params['status']);
+            if ($st !== '') {
+                $patch['status'] = $st;
+            }
+        }
+        if (array_key_exists('gateway', $params)) {
+            $gw = sanitize_key((string) $params['gateway']);
+            $patch['gateway'] = $gw;
+        }
+
+        if ($patch === []) {
+            return new WP_REST_Response(['ok' => true, 'message' => __('No changes.', 'sikshya')], 200);
+        }
+
+        $ok = $repo->updateOrder($id, $patch);
+
+        return new WP_REST_Response(
+            [
+                'ok' => (bool) $ok,
+                'message' => $ok ? __('Order updated.', 'sikshya') : __('Could not update order.', 'sikshya'),
+            ],
+            $ok ? 200 : 500
         );
     }
 

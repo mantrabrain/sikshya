@@ -51,6 +51,15 @@ class WebhooksRestRoutes
                 'permission_callback' => '__return_true',
             ],
         ]);
+
+        // PayPal Standard IPN (Simple mode: email-only).
+        register_rest_route($namespace, '/webhooks/paypal-ipn', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'paypalIpn'],
+                'permission_callback' => '__return_true',
+            ],
+        ]);
     }
 
     public function stripe(WP_REST_Request $request): WP_REST_Response
@@ -128,12 +137,10 @@ class WebhooksRestRoutes
         $settings = $this->plugin->getService('settings');
         $paypal_client_id = '';
         $paypal_secret = '';
-        $paypal_mode = '';
         $paypal_webhook_id = '';
         if (is_object($settings) && method_exists($settings, 'getSetting')) {
             $paypal_client_id = (string) $settings->getSetting('paypal_client_id', '');
             $paypal_secret = (string) $settings->getSetting('paypal_secret', '');
-            $paypal_mode = (string) $settings->getSetting('paypal_mode', '');
             $paypal_webhook_id = (string) $settings->getSetting('paypal_webhook_id', '');
         }
 
@@ -153,7 +160,7 @@ class WebhooksRestRoutes
             $payload,
             $paypal_client_id,
             $paypal_secret,
-            $paypal_mode,
+            '', // mode is derived from global enable_test_mode inside verifyPayPalSignature
             $paypal_webhook_id
         );
         if (!$ok) {
@@ -198,6 +205,80 @@ class WebhooksRestRoutes
             }
             $this->fulfillment()->fulfillPaidOrder((int) $row->id);
         }
+
+        return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    /**
+     * PayPal IPN handler for Simple (email) mode.
+     *
+     * @return WP_REST_Response
+     */
+    public function paypalIpn(WP_REST_Request $request): WP_REST_Response
+    {
+        $settings = $this->plugin->getService('settings');
+        $is_test = true;
+        if (is_object($settings) && method_exists($settings, 'getSetting')) {
+            $test = $settings->getSetting('enable_test_mode', true);
+            $is_test = $test === true || $test === 1 || $test === '1' || $test === 'true' || $test === 'yes' || $test === 'on';
+        }
+
+        $postData = $request->get_body_params();
+        if (!is_array($postData) || $postData === []) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Empty IPN payload'], 400);
+        }
+
+        // Verify with PayPal.
+        $verifyUrl = $is_test
+            ? 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr'
+            : 'https://ipnpb.paypal.com/cgi-bin/webscr';
+        $verifyData = array_merge(['cmd' => '_notify-validate'], $postData);
+
+        $resp = wp_remote_post($verifyUrl, [
+            'timeout' => 60,
+            'httpversion' => '1.1',
+            'body' => $verifyData,
+        ]);
+        if (is_wp_error($resp)) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'IPN verify error'], 400);
+        }
+        $body = (string) wp_remote_retrieve_body($resp);
+        if (trim($body) !== 'VERIFIED') {
+            return new WP_REST_Response(['ok' => false, 'message' => 'IPN not verified'], 400);
+        }
+
+        $paymentStatus = (string) ($postData['payment_status'] ?? '');
+        if ($paymentStatus !== 'Completed') {
+            return new WP_REST_Response(['ok' => true, 'ignored' => true], 200);
+        }
+
+        $customRaw = (string) ($postData['custom'] ?? '');
+        $custom = $customRaw !== '' ? json_decode($customRaw, true) : null;
+        $order_id = is_array($custom) && isset($custom['order_id']) ? (int) $custom['order_id'] : 0;
+        if ($order_id <= 0) {
+            // Fallback to item_number if used.
+            $order_id = isset($postData['item_number']) ? (int) $postData['item_number'] : 0;
+        }
+        if ($order_id <= 0) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $orders = new OrderRepository();
+        $row = $orders->findById($order_id);
+        if (!$row || (string) ($row->gateway ?? '') !== 'paypal') {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $cur = strtoupper((string) ($postData['mc_currency'] ?? ''));
+        $amt = isset($postData['mc_gross']) ? (float) $postData['mc_gross'] : null;
+        if ($cur !== '' && strtoupper((string) $row->currency) !== $cur) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Currency mismatch'], 400);
+        }
+        if (is_float($amt) && $amt >= 0 && abs($amt - (float) $row->total) > 0.009) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
+        }
+
+        $this->fulfillment()->fulfillPaidOrder((int) $row->id);
 
         return new WP_REST_Response(['ok' => true], 200);
     }
@@ -264,12 +345,16 @@ class WebhooksRestRoutes
         return false;
     }
 
-    private function paypalRestBase(string $mode): string
+    private function paypalRestBaseFromGlobalTestMode(): string
     {
-        $m = strtolower(trim($mode));
-        return in_array($m, ['live', 'production'], true)
-            ? 'https://api-m.paypal.com'
-            : 'https://api-m.sandbox.paypal.com';
+        $settings = $this->plugin->getService('settings');
+        $test = true;
+        if (is_object($settings) && method_exists($settings, 'getSetting')) {
+            $v = $settings->getSetting('enable_test_mode', true);
+            $test = $v === true || $v === 1 || $v === '1' || $v === 'true' || $v === 'yes' || $v === 'on';
+        }
+
+        return $test ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
     }
 
     private function verifyPayPalSignature(
@@ -289,7 +374,7 @@ class WebhooksRestRoutes
             return false;
         }
 
-        $base = $this->paypalRestBase($mode);
+        $base = $this->paypalRestBaseFromGlobalTestMode();
 
         // OAuth token.
         $token_res = wp_remote_post(

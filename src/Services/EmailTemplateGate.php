@@ -217,12 +217,20 @@ final class EmailTemplateGate
                     $addon_label = (string) $def['label'];
                 }
                 $tier = isset($def['tier']) ? (string) $def['tier'] : '';
-                $plan_label = match ($tier) {
-                    'starter' => __('Starter', 'sikshya'),
-                    'pro' => __('Growth', 'sikshya'),
-                    'scale' => __('Scale', 'sikshya'),
-                    default => '',
-                };
+                switch ($tier) {
+                    case 'starter':
+                        $plan_label = __('Starter', 'sikshya');
+                        break;
+                    case 'pro':
+                        $plan_label = __('Growth', 'sikshya');
+                        break;
+                    case 'scale':
+                        $plan_label = __('Scale', 'sikshya');
+                        break;
+                    default:
+                        $plan_label = '';
+                        break;
+                }
             }
         }
 

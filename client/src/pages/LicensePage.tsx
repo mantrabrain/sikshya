@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
-import { NavIcon } from '../components/NavIcon';
 import { ApiError, getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { NavIcon } from '../components/NavIcon';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useShellState } from '../context/ShellStateContext';
 import type { NavItem, SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type LicenseInfo = {
   key: string;
@@ -40,13 +41,6 @@ type DebugPayload = {
   at: string;
   response?: unknown;
   error?: unknown;
-};
-
-type LicenseToastState = {
-  open: boolean;
-  kind: 'success' | 'error';
-  title: string;
-  message: string;
 };
 
 function noticeFromBody(body: unknown): string | undefined {
@@ -100,55 +94,7 @@ function readNum(obj: Record<string, unknown>, key: string): number | undefined 
   return typeof v === 'number' && Number.isFinite(v) ? v : undefined;
 }
 
-function LicenseToast({
-  toast,
-  onDismiss,
-}: {
-  toast: LicenseToastState | null;
-  onDismiss: () => void;
-}) {
-  if (!toast?.open) return null;
-
-  return (
-    <div className="fixed right-6 top-6 z-[9999] w-[360px] max-w-[calc(100vw-48px)]">
-      <div
-        className={`rounded-2xl border px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${
-          toast.kind === 'success'
-            ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-100'
-            : 'border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-100'
-        }`}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="flex items-start gap-3">
-          <span
-            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-              toast.kind === 'success'
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
-                : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200'
-            }`}
-          >
-            <NavIcon name={toast.kind === 'success' ? 'badge' : 'helpCircle'} className="h-5 w-5" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold">{toast.title}</div>
-            <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div>
-          </div>
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
-            aria-label="Dismiss"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function LicensePage(props: { config: SikshyaReactConfig; title: string }) {
+export function LicensePage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const { confirm } = useSikshyaDialog();
   const { refreshShell } = useShellState();
@@ -158,10 +104,10 @@ export function LicensePage(props: { config: SikshyaReactConfig; title: string }
   const [licenseKey, setLicenseKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [busy, setBusy] = useState<'activate' | 'save' | 'check' | 'deactivate' | null>(null);
-  const [toast, setToast] = useState<LicenseToastState | null>(null);
+  const toast = useTopRightToast(4000);
   const [debugOpen, setDebugOpen] = useState(false);
   const [debugData, setDebugData] = useState<DebugPayload | null>(null);
-  const upgradeUrl = config.licensing?.upgradeUrl || 'https://store.mantrabrain.com/downloads/sikshya-pro/';
+  const upgradeUrl = config.licensing?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya/#pricing';
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -183,23 +129,16 @@ export function LicensePage(props: { config: SikshyaReactConfig; title: string }
     void load();
   }, [load]);
 
-  useEffect(() => {
-    if (!toast?.open) return;
-    const t = window.setTimeout(() => setToast(null), 4000);
-    return () => window.clearTimeout(t);
-  }, [toast]);
-
   const pushDebug = (type: string, response: unknown, error?: unknown) => {
     setDebugData({ type, at: new Date().toISOString(), response, error });
   };
 
   const showToast = (kind: 'success' | 'error', text: string) => {
-    setToast({
-      open: true,
-      kind,
-      title: kind === 'success' ? 'Success' : 'Error',
-      message: text,
-    });
+    if (kind === 'success') {
+      toast.success('Success', text);
+      return;
+    }
+    toast.error('Error', text);
   };
 
   const proInstalled = Boolean(data?.pro_plugin_active);
@@ -307,20 +246,15 @@ export function LicensePage(props: { config: SikshyaReactConfig; title: string }
   };
 
   const shell = (inner: React.ReactNode) => (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Sikshya Pro licensing and updates"
     >
-      <LicenseToast toast={toast} onDismiss={() => setToast(null)} />
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {inner}
-    </AppShell>
+    </EmbeddableShell>
   );
 
   if (loading && !data) {

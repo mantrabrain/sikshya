@@ -13,7 +13,8 @@ use Sikshya\Frontend\Public\PublicPageUrls;
 $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 
-$render_enrollment_row = static function ($row): void {
+$certs_by_course = is_array($acc['certificates_by_course'] ?? null) ? (array) $acc['certificates_by_course'] : [];
+$render_enrollment_row = static function ($row) use ($certs_by_course): void {
     $cid = is_object($row) ? (int) ($row->course_id ?? 0) : (int) ($row['course_id'] ?? 0);
     if ($cid <= 0) {
         return;
@@ -28,6 +29,14 @@ $render_enrollment_row = static function ($row): void {
             <a href="<?php echo esc_url(get_permalink($cid)); ?>"><?php echo esc_html(get_the_title($cid)); ?></a>
             <br>
             <a href="<?php echo esc_url(PublicPageUrls::learnForCourse($cid)); ?>"><?php esc_html_e('Open player', 'sikshya'); ?></a>
+            <?php
+            $cert = ($estatus === 'completed' && isset($certs_by_course[$cid]) && is_array($certs_by_course[$cid])) ? $certs_by_course[$cid] : null;
+            $cert_dl = is_array($cert) ? (string) ($cert['download_url'] ?? '') : '';
+            if ($cert_dl !== '') :
+                ?>
+                <br>
+                <a href="<?php echo esc_url($cert_dl); ?>" target="_blank" rel="noopener"><?php esc_html_e('Download certificate', 'sikshya'); ?></a>
+            <?php endif; ?>
         </td>
         <td>
             <?php if ($estatus === 'completed') : ?>
@@ -80,7 +89,7 @@ $render_enrollment_row = static function ($row): void {
                 <?php endif; ?>
             </section>
 
-            <section class="sik-acc-panel" style="margin-top:1.25rem;" aria-label="<?php echo esc_attr(sprintf(__('Completed %s', 'sikshya'), strtolower($label_courses))); ?>">
+            <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('Completed %s', 'sikshya'), strtolower($label_courses))); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Completed', 'sikshya'); ?></h2>
                 </div>

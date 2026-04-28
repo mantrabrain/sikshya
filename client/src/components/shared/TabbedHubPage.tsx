@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { AppShell } from '../AppShell';
 import { HorizontalEditorTabs } from './HorizontalEditorTabs';
 import { useAdminRouting } from '../../lib/adminRouting';
+import { EmbeddableShell } from './EmbeddableShell';
 import type { NavItem, SikshyaReactConfig } from '../../types';
 
 export type HubTab = {
@@ -20,6 +20,7 @@ export type HubTab = {
 };
 
 type Props = {
+  embedded?: boolean;
   config: SikshyaReactConfig;
   /** Hub title shown in the AppShell header. */
   title: string;
@@ -63,18 +64,13 @@ export function TabbedHubPage(props: Props) {
   const activeTab = visibleTabs.find((t) => t.id === activeId);
 
   return (
-    <AppShell
-      page={config.page}
-      sidebarActivePage={sidebarActivePage}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle={subtitle}
       badge={badge}
+      sidebarActivePage={sidebarActivePage}
     >
       {visibleTabs.length > 1 ? (
         <div className="-mt-2 mb-5 flex flex-wrap items-center gap-2 overflow-x-auto">
@@ -87,6 +83,6 @@ export function TabbedHubPage(props: Props) {
         </div>
       ) : null}
       {activeTab ? activeTab.render(config) : null}
-    </AppShell>
+    </EmbeddableShell>
   );
 }

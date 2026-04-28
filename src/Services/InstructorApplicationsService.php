@@ -12,9 +12,11 @@ use Sikshya\Frontend\Public\InstructorContext;
  */
 final class InstructorApplicationsService
 {
-    public function __construct(
-        private InstructorApplicationsRepository $repo = new InstructorApplicationsRepository()
-    ) {
+    private InstructorApplicationsRepository $repo;
+
+    public function __construct(?InstructorApplicationsRepository $repo = null)
+    {
+        $this->repo = $repo ?? new InstructorApplicationsRepository();
     }
 
     /**
@@ -62,7 +64,10 @@ final class InstructorApplicationsService
         ];
     }
 
-    public function approve(int $user_id): bool|\WP_Error
+    /**
+     * @return bool|\WP_Error
+     */
+    public function approve(int $user_id)
     {
         if ($user_id <= 0) {
             return new \WP_Error('invalid_user', __('Invalid user.', 'sikshya'), ['status' => 400]);
@@ -79,7 +84,10 @@ final class InstructorApplicationsService
         return true;
     }
 
-    public function reject(int $user_id): bool|\WP_Error
+    /**
+     * @return bool|\WP_Error
+     */
+    public function reject(int $user_id)
     {
         if ($user_id <= 0) {
             return new \WP_Error('invalid_user', __('Invalid user.', 'sikshya'), ['status' => 400]);

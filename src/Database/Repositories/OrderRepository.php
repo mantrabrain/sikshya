@@ -32,12 +32,33 @@ class OrderRepository
 
     /**
      * Normalize token from query string; returns empty if invalid.
+     *
+     * Accepts either raw 32-hex token or prefixed form: `SIK-ORD-<32hex>`.
      */
     public static function sanitizePublicToken(string $token): string
     {
-        $t = strtolower(preg_replace('/[^a-f0-9]/', '', $token));
+        $raw = trim((string) $token);
+        if ($raw === '') {
+            return '';
+        }
 
-        return strlen($t) === 32 ? $t : '';
+        // Allow prefix in any case.
+        $raw = preg_replace('/^\\s*sik\\-ord\\-\\s*/i', '', $raw);
+
+        // Be tolerant to copy/paste issues: extract the first 32-hex token in the string.
+        // (e.g. "SIK-ORD-<token>View Receipt", accidental query concatenations, etc.)
+        $candidate = strtolower((string) $raw);
+        if (preg_match('/([a-f0-9]{32})/i', $candidate, $m) && isset($m[1])) {
+            return strtolower((string) $m[1]);
+        }
+
+        // Fallback: strip non-hex and ensure exact length.
+        $t = strtolower((string) preg_replace('/[^a-f0-9]/', '', (string) $raw));
+        if (strlen($t) === 32) {
+            return $t;
+        }
+
+        return '';
     }
 
     /**
@@ -150,7 +171,7 @@ class OrderRepository
     {
         global $wpdb;
 
-        $allowed = ['status', 'gateway', 'gateway_intent_id', 'public_token', 'meta', 'total', 'discount_total', 'subtotal'];
+        $allowed = ['status', 'gateway', 'gateway_intent_id', 'public_token', 'meta', 'total', 'discount_total', 'subtotal', 'user_id'];
         $data = [];
         foreach ($allowed as $key) {
             if (!array_key_exists($key, $patch)) {
@@ -169,6 +190,8 @@ class OrderRepository
             } elseif ($key === 'public_token') {
                 $tok = self::sanitizePublicToken((string) $val);
                 $data['public_token'] = $tok !== '' ? $tok : null;
+            } elseif ($key === 'user_id') {
+                $data['user_id'] = (int) $val;
             } else {
                 $data[$key] = sanitize_text_field((string) $val);
             }
@@ -321,6 +344,30 @@ class OrderRepository
                 "SELECT * FROM {$this->orders} WHERE public_token = %s AND user_id = %d LIMIT 1",
                 $clean,
                 $user_id
+            )
+        );
+
+        return $row ?: null;
+    }
+
+    /**
+     * Resolve order for the receipt URL (public token acts as bearer reference).
+     *
+     * This is used for guest order receipts and post-payment redirects.
+     */
+    public function findByPublicToken(string $token): ?object
+    {
+        global $wpdb;
+
+        $clean = self::sanitizePublicToken($token);
+        if ($clean === '' || !$this->tableExists()) {
+            return null;
+        }
+
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->orders} WHERE public_token = %s LIMIT 1",
+                $clean
             )
         );
 

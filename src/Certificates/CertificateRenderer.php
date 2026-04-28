@@ -123,6 +123,16 @@ final class CertificateRenderer
                 . '<div class="small">' . esc_html__('Tip: PNG/PDF are generated in your browser.', 'sikshya') . '</div>'
                 . '</div>';
 
+            $html_to_image_src = defined('SIKSHYA_PLUGIN_URL')
+                ? rtrim((string) SIKSHYA_PLUGIN_URL, '/') . '/assets/public/vendor/html-to-image.min.js'
+                : '';
+            $html2canvas_src = defined('SIKSHYA_PLUGIN_URL')
+                ? rtrim((string) SIKSHYA_PLUGIN_URL, '/') . '/assets/public/vendor/html2canvas.min.js'
+                : '';
+            $jspdf_src = defined('SIKSHYA_PLUGIN_URL')
+                ? rtrim((string) SIKSHYA_PLUGIN_URL, '/') . '/assets/public/vendor/jspdf.umd.min.js'
+                : '';
+
             $controls_script = '<script>(function(){'
             . 'var stage=document.querySelector(".stage");if(!stage){return;}'
             . 'var shareUrl=stage.getAttribute("data-share-url")||window.location.href;'
@@ -151,15 +161,15 @@ final class CertificateRenderer
             . 'var w=window.open(target,"_blank","noopener,noreferrer");if(!w){window.location.href=target;}}'
             . 'async function ensureHtml2Canvas(){if(window.html2canvas){return window.html2canvas;}'
             . 'return await new Promise(function(resolve,reject){var s=document.createElement("script");'
-            . 's.src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";s.async=true;'
+            . 's.src="' . esc_js($html2canvas_src) . '";s.async=true;'
             . 's.onload=function(){resolve(window.html2canvas);};s.onerror=function(){reject(new Error("html2canvas failed to load"));};document.head.appendChild(s);});}'
             . 'async function ensureHtmlToImage(){if(window.htmlToImage&&window.htmlToImage.toPng){return window.htmlToImage;}'
             . 'return await new Promise(function(resolve,reject){var s=document.createElement("script");'
-            . 's.src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js";s.async=true;'
+            . 's.src="' . esc_js($html_to_image_src) . '";s.async=true;'
             . 's.onload=function(){resolve(window.htmlToImage);};s.onerror=function(){reject(new Error("html-to-image failed to load"));};document.head.appendChild(s);});}'
             . 'async function ensureJsPdf(){if(window.jspdf&&window.jspdf.jsPDF){return window.jspdf.jsPDF;}'
             . 'return await new Promise(function(resolve,reject){var s=document.createElement("script");'
-            . 's.src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";s.async=true;'
+            . 's.src="' . esc_js($jspdf_src) . '";s.async=true;'
             . 's.onload=function(){resolve(window.jspdf&&window.jspdf.jsPDF?window.jspdf.jsPDF:null);};s.onerror=function(){reject(new Error("jsPDF failed to load"));};document.head.appendChild(s);});}'
             . 'function capturePixelRatio(el){var rect=el.getBoundingClientRect();var tw=Math.max(1,Math.round(rect.width));var th=Math.max(1,Math.round(rect.height));var pr=2;'
             . 'if(exportW>0&&exportH>0&&tw>0&&th>0){var targetW=Math.round(exportW*96/72);var targetH=Math.round(exportH*96/72);pr=Math.max(2,Math.min(3,Math.min(targetW/tw,targetH/th)));}'
@@ -191,8 +201,10 @@ final class CertificateRenderer
             . 'var pdf=new J({orientation:orientation,unit:"pt",format:[w,h]});pdf.addImage(jpeg,"JPEG",0,0,w,h);'
             . 'pdf.save("certificate"+(hash?("-"+hash.slice(0,10)):"")+".pdf");toast("PDF downloaded.");'
             . '}catch(e){toast("Could not generate PDF. Use Print instead.");}}'
-            . 'document.addEventListener("click",function(ev){var t=ev.target;if(!(t&&t.getAttribute)){return;}'
-            . 'var a=t.getAttribute("data-action");if(!a){return;}ev.preventDefault();'
+            . 'document.addEventListener("click",function(ev){var t=ev.target;if(!t){return;}'
+            . 'var el=(t.closest&&typeof t.closest==="function")?t.closest("[data-action]"):t;'
+            . 'if(!(el&&el.getAttribute)){return;}'
+            . 'var a=el.getAttribute("data-action");if(!a){return;}ev.preventDefault();'
             . 'if(a==="print"){window.print();return;}'
             . 'if(a==="pdf"){downloadPdf();return;}'
             . 'if(a==="png"){downloadPng();return;}'

@@ -153,7 +153,8 @@ final class SingleCourseTemplateData
             }
         }
 
-        $last_updated = get_the_modified_date(Settings::getRaw('date_format'), $post);
+        $date_format = (string) Settings::get('date_format', get_option('date_format', 'F j, Y'));
+        $last_updated = get_the_modified_date($date_format, $post);
 
         $data = [
             'course_id' => $course_id,
@@ -199,7 +200,7 @@ final class SingleCourseTemplateData
                 'learn_first' => $first_content_url,
                 'account' => PublicPageUrls::url('account'),
                 'courses_archive' => get_post_type_archive_link(PostTypes::COURSE) ?: '',
-                'login' => wp_login_url(get_permalink($course_id)),
+                'login' => PublicPageUrls::login(get_permalink($course_id)),
             ],
         ];
 

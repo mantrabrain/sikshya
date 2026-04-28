@@ -81,6 +81,26 @@ class LearnerRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/me/quiz-attempt', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getMyQuizAttempt'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+                'args' => [
+                    'quiz_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'startMyQuizAttempt'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+            ],
+        ]);
+
         register_rest_route($namespace, '/me/unenroll', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -124,6 +144,31 @@ class LearnerRestRoutes
                         'sanitize_callback' => 'absint',
                     ],
                 ],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/me/content-note', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getMyContentNote'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+                'args' => [
+                    'course_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'sanitize_callback' => 'absint',
+                    ],
+                    'content_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'sanitize_callback' => 'absint',
+                    ],
+                ],
+            ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'saveMyContentNote'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
             ],
         ]);
 
@@ -249,9 +294,22 @@ class LearnerRestRoutes
             return $this->error('not_enrolled', __('You are not enrolled in this course.', 'sikshya'), 403);
         }
 
+        $provided_attempt_id = isset($params['attempt_id']) ? (int) $params['attempt_id'] : 0;
+        $attempt_row = null;
+        if ($provided_attempt_id > 0) {
+            $attempt_row = $this->quizAttempts->getAttemptForUser($provided_attempt_id, $uid);
+            // If the learner is finishing an already-started attempt, allow submission even when the max is reached.
+            if ($attempt_row && (int) $attempt_row->quiz_id !== $quiz_id) {
+                $attempt_row = null;
+            }
+            if ($attempt_row && (string) $attempt_row->status !== 'in_progress') {
+                $attempt_row = null;
+            }
+        }
+
         $max = $this->getMaxQuizAttempts($quiz_id);
         $attempted = $this->quizAttempts->countAttemptsForUserQuiz($uid, $quiz_id);
-        if ($max > 0 && $attempted >= $max) {
+        if (!$attempt_row && $max > 0 && $attempted >= $max) {
             return $this->error('attempts_exhausted', __('No quiz attempts remaining.', 'sikshya'), 400);
         }
 
@@ -312,21 +370,45 @@ class LearnerRestRoutes
 
         $passed = $score_percent >= $passing;
 
-        $attempt_no = $attempted + 1;
-        $attempt_id = $this->quizAttempts->createAttempt(
-            [
-                'user_id' => $uid,
-                'quiz_id' => $quiz_id,
-                'course_id' => $course_id,
-                'attempt_number' => $attempt_no,
-                'score' => $score_percent,
-                'total_questions' => count($question_ids),
-                'correct_answers' => $correct_count,
-                'time_taken' => isset($params['time_taken']) ? (int) $params['time_taken'] : 0,
-                'status' => 'completed',
-                'answers_data' => $stored_answers,
-            ]
-        );
+        $attempt_status = $passed ? 'passed' : 'completed';
+        $attempt_id = 0;
+        if ($provided_attempt_id > 0) {
+            if ($attempt_row && (int) $attempt_row->quiz_id === $quiz_id && (string) $attempt_row->status === 'in_progress') {
+                $attempt_id = (int) $attempt_row->id;
+                $this->quizAttempts->updateAttempt(
+                    $attempt_id,
+                    $uid,
+                    [
+                        'score' => $score_percent,
+                        'total_questions' => count($question_ids),
+                        'correct_answers' => $correct_count,
+                        'time_taken' => isset($params['time_taken']) ? (int) $params['time_taken'] : 0,
+                        'status' => $attempt_status,
+                        'completed_at' => current_time('mysql'),
+                        'answers_data' => wp_json_encode($stored_answers),
+                    ]
+                );
+            }
+        }
+        if ($attempt_id <= 0) {
+            $attempt_no = $attempted + 1;
+            $attempt_id = $this->quizAttempts->createAttempt(
+                [
+                    'user_id' => $uid,
+                    'quiz_id' => $quiz_id,
+                    'course_id' => $course_id,
+                    'attempt_number' => $attempt_no,
+                    'score' => $score_percent,
+                    'total_questions' => count($question_ids),
+                    'correct_answers' => $correct_count,
+                    'time_taken' => isset($params['time_taken']) ? (int) $params['time_taken'] : 0,
+                    'status' => $attempt_status,
+                    'started_at' => current_time('mysql'),
+                    'completed_at' => current_time('mysql'),
+                    'answers_data' => $stored_answers,
+                ]
+            );
+        }
 
         foreach ($question_ids as $qid) {
             if ($qid <= 0) {
@@ -342,10 +424,9 @@ class LearnerRestRoutes
             $this->quizAttempts->addItem($attempt_id, $qid, $ans_str, (bool) $eval['correct'], $earned);
         }
 
-        if ($passed) {
-            $this->progress->markQuizComplete($uid, $course_id, $quiz_id, $score_percent);
-            $this->syncEnrollmentProgress($uid, $course_id);
-        }
+        // A quiz is "completed" when it is submitted (pass/fail is separate).
+        $this->progress->markQuizComplete($uid, $course_id, $quiz_id, $score_percent);
+        $this->syncEnrollmentProgress($uid, $course_id);
 
         return new WP_REST_Response(
             [
@@ -355,6 +436,139 @@ class LearnerRestRoutes
                     'score_percent' => $score_percent,
                     'passing_score' => $passing,
                     'passed' => $passed,
+                    'status' => $attempt_status,
+                ],
+            ],
+            200
+        );
+    }
+
+    public function getMyQuizAttempt(WP_REST_Request $request): WP_REST_Response
+    {
+        $quiz_id = (int) $request->get_param('quiz_id');
+        if ($quiz_id <= 0 || get_post_type($quiz_id) !== PostTypes::QUIZ) {
+            return $this->error('invalid_quiz', __('Invalid quiz.', 'sikshya'), 400);
+        }
+
+        $uid = get_current_user_id();
+        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        if ($course_id <= 0) {
+            return $this->error('quiz_no_course', __('Quiz is not linked to a course.', 'sikshya'), 400);
+        }
+        $courseService = $this->getCourseService();
+        if (!$courseService->isUserEnrolled($uid, $course_id)) {
+            return $this->error('not_enrolled', __('You are not enrolled in this course.', 'sikshya'), 403);
+        }
+
+        $row = $this->quizAttempts->getLatestInProgressAttemptForUserQuiz($uid, $quiz_id);
+
+        $duration_mins = (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true);
+        $duration_seconds = $duration_mins > 0 ? $duration_mins * 60 : 0;
+        $started_at_ts = null;
+        if ($row && isset($row->started_at)) {
+            try {
+                $dt = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string) $row->started_at, wp_timezone());
+                if ($dt instanceof \DateTimeImmutable) {
+                    $started_at_ts = $dt->getTimestamp();
+                }
+            } catch (\Throwable $e) {
+                $started_at_ts = null;
+            }
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'data' => [
+                    'attempt' => $row
+                        ? [
+                            'id' => (int) $row->id,
+                            'started_at' => (string) $row->started_at,
+                            'started_at_ts' => $started_at_ts,
+                            'status' => (string) $row->status,
+                            'attempt_number' => (int) $row->attempt_number,
+                        ]
+                        : null,
+                    'durationSeconds' => $duration_seconds,
+                    'serverTime' => time(),
+                ],
+            ],
+            200
+        );
+    }
+
+    public function startMyQuizAttempt(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+        $quiz_id = isset($params['quiz_id']) ? (int) $params['quiz_id'] : 0;
+        if ($quiz_id <= 0 || get_post_type($quiz_id) !== PostTypes::QUIZ) {
+            return $this->error('invalid_quiz', __('Invalid quiz.', 'sikshya'), 400);
+        }
+
+        $uid = get_current_user_id();
+        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        if ($course_id <= 0) {
+            return $this->error('quiz_no_course', __('Quiz is not linked to a course.', 'sikshya'), 400);
+        }
+        $courseService = $this->getCourseService();
+        if (!$courseService->isUserEnrolled($uid, $course_id)) {
+            return $this->error('not_enrolled', __('You are not enrolled in this course.', 'sikshya'), 403);
+        }
+
+        // Reuse existing in-progress attempt if present.
+        $existing = $this->quizAttempts->getLatestInProgressAttemptForUserQuiz($uid, $quiz_id);
+        if ($existing) {
+            return new WP_REST_Response(
+                [
+                    'ok' => true,
+                    'data' => [
+                        'attempt_id' => (int) $existing->id,
+                        'started_at' => (string) $existing->started_at,
+                        'serverTime' => time(),
+                    ],
+                ],
+                200
+            );
+        }
+
+        $attempted = $this->quizAttempts->countAttemptsForUserQuiz($uid, $quiz_id);
+        $attempt_id = $this->quizAttempts->createAttempt(
+            [
+                'user_id' => $uid,
+                'quiz_id' => $quiz_id,
+                'course_id' => $course_id,
+                'attempt_number' => $attempted + 1,
+                'status' => 'in_progress',
+                'started_at' => current_time('mysql'),
+                'completed_at' => null,
+                'answers_data' => null,
+            ]
+        );
+
+        $row = $this->quizAttempts->getAttemptForUser($attempt_id, $uid);
+        $started_at_ts = null;
+        if ($row && isset($row->started_at)) {
+            try {
+                $dt = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string) $row->started_at, wp_timezone());
+                if ($dt instanceof \DateTimeImmutable) {
+                    $started_at_ts = $dt->getTimestamp();
+                }
+            } catch (\Throwable $e) {
+                $started_at_ts = null;
+            }
+        }
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'data' => [
+                    'attempt_id' => $attempt_id,
+                    'started_at' => $row ? (string) $row->started_at : current_time('mysql'),
+                    'started_at_ts' => $started_at_ts,
+                    'serverTime' => time(),
                 ],
             ],
             200
@@ -436,6 +650,76 @@ class LearnerRestRoutes
         $row = $svc->getAssignmentFeedback($assignment_id, $uid);
 
         return new WP_REST_Response(['ok' => true, 'data' => ['feedback' => $row]], 200);
+    }
+
+    public function getMyContentNote(WP_REST_Request $request): WP_REST_Response
+    {
+        $uid = get_current_user_id();
+        $course_id = (int) $request->get_param('course_id');
+        $content_id = (int) $request->get_param('content_id');
+        if ($uid <= 0 || $course_id <= 0 || $content_id <= 0) {
+            return $this->error('invalid_request', __('Invalid request.', 'sikshya'), 400);
+        }
+
+        $courseService = $this->getCourseService();
+        if (!$courseService->isUserEnrolled($uid, $course_id)) {
+            return $this->error('not_enrolled', __('You are not enrolled in this course.', 'sikshya'), 403);
+        }
+
+        $raw = get_user_meta($uid, '_sikshya_learn_notes', true);
+        $notes = is_array($raw) ? $raw : [];
+        $cKey = (string) absint($course_id);
+        $pKey = (string) absint($content_id);
+        $note = '';
+        if (isset($notes[$cKey]) && is_array($notes[$cKey]) && isset($notes[$cKey][$pKey]) && is_string($notes[$cKey][$pKey])) {
+            $note = (string) $notes[$cKey][$pKey];
+        }
+
+        return new WP_REST_Response(['ok' => true, 'data' => ['note' => $note]], 200);
+    }
+
+    public function saveMyContentNote(WP_REST_Request $request): WP_REST_Response
+    {
+        $uid = get_current_user_id();
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $course_id = isset($params['course_id']) ? (int) $params['course_id'] : 0;
+        $content_id = isset($params['content_id']) ? (int) $params['content_id'] : 0;
+        $note = isset($params['note']) ? (string) $params['note'] : '';
+        $note = sanitize_textarea_field($note);
+        if (strlen($note) > 10000) {
+            $note = substr($note, 0, 10000);
+        }
+
+        if ($uid <= 0 || $course_id <= 0 || $content_id <= 0) {
+            return $this->error('invalid_request', __('Invalid request.', 'sikshya'), 400);
+        }
+
+        $courseService = $this->getCourseService();
+        if (!$courseService->isUserEnrolled($uid, $course_id)) {
+            return $this->error('not_enrolled', __('You are not enrolled in this course.', 'sikshya'), 403);
+        }
+
+        $raw = get_user_meta($uid, '_sikshya_learn_notes', true);
+        $notes = is_array($raw) ? $raw : [];
+        $cKey = (string) absint($course_id);
+        $pKey = (string) absint($content_id);
+        if (!isset($notes[$cKey]) || !is_array($notes[$cKey])) {
+            $notes[$cKey] = [];
+        }
+
+        if ($note === '') {
+            unset($notes[$cKey][$pKey]);
+        } else {
+            $notes[$cKey][$pKey] = $note;
+        }
+
+        update_user_meta($uid, '_sikshya_learn_notes', $notes);
+
+        return new WP_REST_Response(['ok' => true, 'message' => __('Note saved.', 'sikshya')], 200);
     }
 
     private function getCourseService(): CourseService

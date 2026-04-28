@@ -132,7 +132,7 @@ final class FeatureRegistry
                 'tier' => 'pro',
                 'group' => 'communication',
                 'description' => __(
-                    "Sends Sikshya emails through a real email provider (the same kind of “send mail” setup businesses use) and lets you wrap messages in your logo and layout.\n\nTurn on when students miss your emails in spam, or you want notices to look like your school—not generic system mail.\n\nTurn off if you already send all site email through another plugin and do not want Sikshya to change delivery.",
+                    "Sends Sikshya emails through a real email provider (the same kind of “send mail” setup businesses use) and lets you wrap messages in your logo and layout.\n\nTurn on when students miss your emails in spam, or you want notices to look like your brand—not generic system mail.\n\nTurn off if you already send all site email through another plugin and do not want Sikshya to change delivery.",
                     'sikshya'
                 ),
                 'detail_description' => __(
@@ -152,7 +152,7 @@ final class FeatureRegistry
                 'tier' => 'starter',
                 'group' => 'course',
                 'description' => __(
-                    "Releases lessons a little at a time—such as “day 3 after signup” or “next Monday”—instead of showing the whole course on day one.\n\nTurn on for bootcamps, school terms, or any course where you do not want people skipping to the end.\n\nTurn off for fully self-paced courses where every lesson should open as soon as someone enrolls.",
+                    "Releases lessons a little at a time—such as “day 3 after signup” or “next Monday”—instead of showing the whole course on day one.\n\nTurn on for cohorts, term-based programs, or any course where you do not want people skipping to the end.\n\nTurn off for fully self-paced courses where every lesson should open as soon as someone enrolls.",
                     'sikshya'
                 ),
                 'detail_description' => __(
@@ -196,7 +196,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Pick teachers in the course builder, tune optional revenue weights, and use Course staff in the dashboard for fine control. When orders complete, Sikshya writes ledger rows using normalized splits so totals never exceed the line item. Global switches control where the team appears (single course, cards, learn screen); each course can hide the public team or turn off revenue recording for that course.\n\nTurn it on when: You run a school with co-teachers, guest experts, or revenue partners.\n\nTurn it off when: You alone author and sell every course.\n\nPlan: Growth or higher with Sikshya Pro. Configure global behavior under Add-ons → Multi-instructor; staff and percentages under Course staff.",
+                    "What you get: Pick teachers in the course builder, tune optional revenue weights, and use Course staff in the dashboard for fine control. When orders complete, Sikshya writes ledger rows using normalized splits so totals never exceed the line item. Global switches control where the team appears (single course, cards, learn screen); each course can hide the public team or turn off revenue recording for that course.\n\nTurn it on when: You run a training business with co-teachers, guest experts, or revenue partners.\n\nTurn it off when: You alone author and sell every course.\n\nPlan: Growth or higher with Sikshya Pro. Configure global behavior under Add-ons → Multi-instructor; staff and percentages under Course staff.",
                     'sikshya'
                 ),
             ],
@@ -304,6 +304,19 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'dynamic_checkout_fields' => [
+                'label' => __('Dynamic checkout fields', 'sikshya'),
+                'tier' => 'pro',
+                'group' => 'commerce',
+                'description' => __(
+                    "Add custom fields to checkout (text, select, checkbox, etc.) and show/hide them based on answers.\n\nTurn on when you need extra buyer info like company, VAT, referral source, or consent checkboxes.\n\nTurn off when the built-in checkout fields are enough.",
+                    'sikshya'
+                ),
+                'detail_description' => __(
+                    "What you get: A drag-and-drop style builder for extra checkout questions (text, dropdowns, checkboxes) with simple rules like “show this when Plan = Business”. Answers save to each order and can optionally be stored on the user for faster repeat checkout.\n\nTurn it on when: You sell to businesses, need compliance questions, or want structured lead info at purchase time.\n\nTurn it off when: You only need email + billing address.\n\nPlan: Growth or higher with Sikshya Pro.",
+                    'sikshya'
+                ),
+            ],
             'assignments_advanced' => [
                 'label' => __('Advanced assignments', 'sikshya'),
                 'tier' => 'pro',
@@ -401,7 +414,7 @@ final class FeatureRegistry
                 'tier' => 'scale',
                 'group' => 'commerce',
                 'description' => __(
-                    "Remembers which seller owns each course and how much the platform keeps when different teachers sell on the same site.\n\nTurn on for a true marketplace with many independent sellers.\n\nTurn off for a single school brand with one bank account.",
+                    "Remembers which seller owns each course and how much the platform keeps when different teachers sell on the same site.\n\nTurn on for a true marketplace with many independent sellers.\n\nTurn off for a single brand with one bank account.",
                     'sikshya'
                 ),
                 'detail_description' => __(
@@ -414,7 +427,7 @@ final class FeatureRegistry
                 'tier' => 'scale',
                 'group' => 'platform',
                 'description' => __(
-                    "Replaces Sikshya’s default names in the WordPress dashboard and can tune login colors so clients see your agency or school brand first.\n\nTurn on when you resell the LMS under your own name.\n\nTurn off to keep standard labels and the quickest setup.",
+                    "Replaces Sikshya’s default names in the WordPress dashboard and can tune login colors so clients see your agency or brand first.\n\nTurn on when you resell the LMS under your own name.\n\nTurn off to keep standard labels and the quickest setup.",
                     'sikshya'
                 ),
                 'detail_description' => __(
@@ -483,7 +496,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Super-admins see guidance for which plan covers which site in a multisite network.\n\nTurn it on when: IT runs many school sites from one WordPress dashboard.\n\nTurn it off when: You have a standard single website—there is no network menu to attach to.\n\nPlan: Scale with Sikshya Pro and a WordPress multisite installation.",
+                    "What you get: Super-admins see guidance for which plan covers which site in a multisite network.\n\nTurn it on when: IT runs many sites from one WordPress dashboard.\n\nTurn it off when: You have a standard single website—there is no network menu to attach to.\n\nPlan: Scale with Sikshya Pro and a WordPress multisite installation.",
                     'sikshya'
                 ),
             ],

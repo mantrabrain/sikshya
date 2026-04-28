@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
@@ -40,7 +40,7 @@ type CourseOpt = { id: number; title: string };
 /** Matches course builder instructor picker (WP roles that can be assigned as staff). */
 const STAFF_SEARCH_ROLES = ['administrator', 'editor', 'author', 'sikshya_instructor'] as const;
 
-export function CourseTeamPage(props: { config: SikshyaReactConfig; title: string }) {
+export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const featureOk = isFeatureEnabled(config, 'multi_instructor');
   const addon = useAddonEnabled('multi_instructor');
@@ -115,32 +115,22 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
         order: 'asc',
       });
       if (q) base.set('search', q);
-      const lists = await Promise.all(
-        STAFF_SEARCH_ROLES.map(async (role) => {
-          const p = new URLSearchParams(base);
-          p.set('role', role);
-          try {
-            return await getWpApi().get<Array<{ id: number; name: string; email?: string }>>(`/users?${p.toString()}`);
-          } catch {
-            return [];
-          }
-        })
-      );
-      const byId = new Map<number, UserOpt>();
-      for (const list of lists) {
+      base.set('roles', STAFF_SEARCH_ROLES.join(','));
+      try {
+        const list = await getWpApi().get<Array<{ id: number; name: string; email?: string }>>(`/users?${base.toString()}`);
         const arr = Array.isArray(list) ? list : [];
-        for (const u of arr) {
-          if (u && typeof u.id === 'number' && u.id > 0 && !byId.has(u.id)) {
-            byId.set(u.id, {
-              id: u.id,
-              name: u.name || `User #${u.id}`,
-              email: typeof u.email === 'string' && u.email ? u.email : undefined,
-            });
-          }
-        }
+        const merged: UserOpt[] = arr
+          .filter((u): u is { id: number; name: string; email?: string } => Boolean(u && typeof u.id === 'number' && u.id > 0))
+          .map((u) => ({
+            id: u.id,
+            name: u.name || `User #${u.id}`,
+            email: typeof u.email === 'string' && u.email ? u.email : undefined,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        return { data: merged.slice(0, 28) };
+      } catch {
+        return { data: [] as UserOpt[] };
       }
-      const merged = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-      return { data: merged.slice(0, 28) };
     },
     [enabled, debouncedUserQuery, userDropdownOpen]
   );
@@ -168,32 +158,22 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
         order: 'asc',
       });
       if (q) base.set('search', q);
-      const lists = await Promise.all(
-        STAFF_SEARCH_ROLES.map(async (role) => {
-          const p = new URLSearchParams(base);
-          p.set('role', role);
-          try {
-            return await getWpApi().get<Array<{ id: number; name: string; email?: string }>>(`/users?${p.toString()}`);
-          } catch {
-            return [];
-          }
-        })
-      );
-      const byId = new Map<number, UserOpt>();
-      for (const list of lists) {
+      base.set('roles', STAFF_SEARCH_ROLES.join(','));
+      try {
+        const list = await getWpApi().get<Array<{ id: number; name: string; email?: string }>>(`/users?${base.toString()}`);
         const arr = Array.isArray(list) ? list : [];
-        for (const u of arr) {
-          if (u && typeof u.id === 'number' && u.id > 0 && !byId.has(u.id)) {
-            byId.set(u.id, {
-              id: u.id,
-              name: u.name || `User #${u.id}`,
-              email: typeof u.email === 'string' && u.email ? u.email : undefined,
-            });
-          }
-        }
+        const merged: UserOpt[] = arr
+          .filter((u): u is { id: number; name: string; email?: string } => Boolean(u && typeof u.id === 'number' && u.id > 0))
+          .map((u) => ({
+            id: u.id,
+            name: u.name || `User #${u.id}`,
+            email: typeof u.email === 'string' && u.email ? u.email : undefined,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        return { data: merged.slice(0, 32) };
+      } catch {
+        return { data: [] as UserOpt[] };
       }
-      const merged = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-      return { data: merged.slice(0, 32) };
     },
     [enabled, debouncedLedgerQuery, ledgerDropdownOpen]
   );
@@ -443,13 +423,9 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
   }, [courseId, courseSearch.data?.data, courseQuery]);
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Assign co-instructors and revenue weights per course (Pro Multi-instructor). Open from Course → Course staff, or use Manage staff on any course row. Global visibility: Add-ons → Multi-instructor."
     >
@@ -989,6 +965,6 @@ export function CourseTeamPage(props: { config: SikshyaReactConfig; title: strin
           </div>
         </>
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

@@ -28,6 +28,26 @@ use Sikshya\Admin\SetupWizardController;
 class Admin
 {
     /**
+     * Size the Sikshya top-level WP admin menu icon.
+     *
+     * When `add_menu_page()` receives an image URL, WordPress renders an `<img>` inside the menu icon slot.
+     * Without a size override, custom logos can appear oversized/misaligned.
+     */
+    public static function printSikshyaAdminMenuIconCss(): void
+    {
+        echo '<style id="sikshya-admin-menu-icon">
+            #adminmenu #toplevel_page_sikshya .wp-menu-image img {
+                width: 20px;
+                height: 20px;
+                padding: 7px 0 0;
+                margin: 0 auto;
+                display: block;
+                box-sizing: content-box;
+            }
+        </style>';
+    }
+
+    /**
      * Plugin instance
      *
      * @var Plugin
@@ -94,6 +114,7 @@ class Admin
         add_filter('show_admin_bar', [self::class, 'hideAdminBarOnSikshyaApp']);
         add_action('admin_enqueue_scripts', [self::class, 'dequeueWordPressUiOnSikshyaApp'], 10000);
         add_action('admin_head', [self::class, 'printSikshyaReactShellHead'], 1);
+        add_action('admin_head', [self::class, 'printSikshyaAdminMenuIconCss'], 2);
 
         // Remove all other admin notices on Sikshya pages
         add_action('admin_head', [$this, 'removeOtherNoticesOnSikshyaPages']);
@@ -115,7 +136,11 @@ class Admin
     {
         // Single top-level entry: all React areas are sub-routes (`view=`). Legacy `page=sikshya-*` URLs redirect in admin_init.
         $menu_label = (string) apply_filters('sikshya_admin_menu_label', sikshya_brand_name('admin'));
-        $menu_icon = (string) apply_filters('sikshya_admin_menu_icon', 'dashicons-welcome-learn-more');
+        $logo_path = SIKSHYA_PLUGIN_DIR . 'assets/images/logo-white.png';
+        $default_icon = file_exists($logo_path)
+            ? (SIKSHYA_PLUGIN_URL . 'assets/images/logo-white.png')
+            : 'dashicons-welcome-learn-more';
+        $menu_icon = (string) apply_filters('sikshya_admin_menu_icon', $default_icon);
 
         add_menu_page(
             $menu_label,
@@ -127,53 +152,22 @@ class Admin
             5
         );
 
-        // Setup wizard: must stay in `$submenu` so WordPress can resolve `admin.php?page=sikshya-setup`
-        // (see `user_can_access_admin_page()` + `get_admin_page_parent()`). Entry point in React: Tools hub.
+        /*
+         * Setup wizard: keep it registered so WordPress can resolve the URL, but hide it
+         * from the left admin menu so “Sikshya LMS” has no visible submenu items.
+         *
+         * Do NOT pass `null` as parent slug — WP core calls `strpos()`/`str_replace()` on it,
+         * which triggers PHP 8.1+ deprecations. Register under Sikshya, then remove it.
+         */
         add_submenu_page(
             AdminPages::DASHBOARD,
             __('Sikshya Setup Wizard', 'sikshya'),
-            __('Sikshya Setup Wizard', 'sikshya'),
+            __('Setup Wizard', 'sikshya'),
             'manage_options',
             SetupWizardController::MENU_SLUG,
             [$this->controllers['setup_wizard'], 'renderWizard']
         );
-
-        // Core editor lists (no duplicate top-level CPT menus — all live under Sikshya LMS).
-        add_submenu_page(
-            'sikshya',
-            __('Assignments', 'sikshya'),
-            __('Assignments', 'sikshya'),
-            'edit_posts',
-            'edit.php?post_type=' . PostTypes::ASSIGNMENT,
-            ''
-        );
-
-        add_submenu_page(
-            'sikshya',
-            __('Questions', 'sikshya'),
-            __('Questions', 'sikshya'),
-            'edit_posts',
-            'edit.php?post_type=' . PostTypes::QUESTION,
-            ''
-        );
-
-        add_submenu_page(
-            'sikshya',
-            __('Chapters', 'sikshya'),
-            __('Chapters', 'sikshya'),
-            'edit_posts',
-            'edit.php?post_type=' . PostTypes::CHAPTER,
-            ''
-        );
-
-        add_submenu_page(
-            'sikshya',
-            __('Certificates', 'sikshya'),
-            __('Certificates', 'sikshya'),
-            'edit_posts',
-            'edit.php?post_type=' . PostTypes::CERTIFICATE,
-            ''
-        );
+        remove_submenu_page(AdminPages::DASHBOARD, SetupWizardController::MENU_SLUG);
     }
 
     /**
@@ -540,42 +534,8 @@ class Admin
             '6.0.0'
         );
 
-        // Enqueue settings assets only on React settings subpage
-        $is_react_settings = ($screen->id === 'toplevel_page_sikshya'
-            && isset($_GET['view'])
-            && sanitize_key(wp_unslash((string) $_GET['view'])) === 'settings');
-
-        if ($is_react_settings) {
-            wp_enqueue_style(
-                'sikshya-settings',
-                SIKSHYA_PLUGIN_URL . 'assets/admin/css/settings.css',
-                [],
-                SIKSHYA_VERSION
-            );
-            wp_enqueue_script(
-                'sikshya-settings',
-                SIKSHYA_PLUGIN_URL . 'assets/admin/js/settings.js',
-                ['jquery'],
-                SIKSHYA_VERSION,
-                true
-            );
-
-            // Enqueue modal system for settings page
-            wp_enqueue_style(
-                'sikshya-modal',
-                SIKSHYA_PLUGIN_URL . 'assets/admin/css/modal.css',
-                [],
-                SIKSHYA_VERSION
-            );
-            wp_enqueue_script(
-                'sikshya-modal',
-                SIKSHYA_PLUGIN_URL . 'assets/admin/js/modal.js',
-                ['jquery'],
-                SIKSHYA_VERSION,
-                true
-            );
-
-        }
+        // React admin shell owns the Settings UI. Do not enqueue legacy settings.css/settings.js
+        // on the React screen; it can cause visual conflicts and flicker on tab changes.
 
         // Toast (Sikshya admin only).
         wp_enqueue_style(

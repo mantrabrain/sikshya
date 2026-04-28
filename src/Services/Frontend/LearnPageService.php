@@ -6,6 +6,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\CourseRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
+use Sikshya\Services\CourseService;
 use Sikshya\Presentation\Models\LearnPageModel;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Services\Settings;
@@ -48,8 +49,8 @@ final class LearnPageService
                 $error = __('You have not purchased this bundle yet.', 'sikshya');
             }
         } else {
-            $repo = new EnrollmentRepository();
-            $enrolled = $repo->findByUserAndCourse($uid, $course_id) !== null;
+            $courses  = new CourseService();
+            $enrolled = $uid > 0 && $courses->isUserEnrolled($uid, $course_id);
             $raw = PublicCurriculumService::getCourseCurriculum($course_id);
 
             $track = Settings::isTruthy(Settings::get('track_lesson_progress', true));
@@ -90,7 +91,7 @@ final class LearnPageService
                 'course'  => $course_post ? (get_permalink($course_post) ?: '') : '',
                 'learn'   => PublicPageUrls::learnForCourse($course_id),
                 'courses_archive' => get_post_type_archive_link(PostTypes::COURSE) ?: '',
-                'login' => wp_login_url(PublicPageUrls::url('learn')),
+                'login' => PublicPageUrls::login(PublicPageUrls::url('learn')),
             ],
         ];
 
@@ -104,11 +105,20 @@ final class LearnPageService
         if ($course_id <= 0) {
             return false;
         }
-        if (!Settings::isTruthy(Settings::get('enable_course_preview', true))) {
-            return false;
+        // Preview is available when at least one curriculum item is explicitly marked free.
+        $raw = PublicCurriculumService::getCourseCurriculum($course_id);
+        foreach ($raw as $row) {
+            foreach ((array) ($row['contents'] ?? []) as $p) {
+                if (!$p instanceof \WP_Post) {
+                    continue;
+                }
+                if (Settings::isTruthy(get_post_meta((int) $p->ID, '_sikshya_is_free', true))) {
+                    return true;
+                }
+            }
         }
-        $course_preview = get_post_meta($course_id, '_sikshya_enable_course_preview', true);
-        return Settings::isTruthy($course_preview);
+
+        return false;
     }
 
     /**
@@ -120,12 +130,6 @@ final class LearnPageService
     private static function enrichBlocksPreview(array $raw, int $course_id): array
     {
         $out = [];
-
-        $preview_n = (int) Settings::get('preview_lessons_count', 0);
-        if ($preview_n < 0) {
-            $preview_n = 0;
-        }
-        $lesson_budget = $preview_n;
 
         $course_url = $course_id > 0 ? (get_permalink($course_id) ?: '') : '';
 
@@ -149,12 +153,7 @@ final class LearnPageService
                 $preview_allowed = false;
 
                 if ($type_key === 'lesson') {
-                    if ($is_free) {
-                        $preview_allowed = true;
-                    } elseif ($lesson_budget > 0) {
-                        $preview_allowed = true;
-                        --$lesson_budget;
-                    }
+                    $preview_allowed = $is_free;
                 } elseif ($type_key === 'quiz') {
                     // Quizzes are previewable only if explicitly free.
                     $preview_allowed = $is_free;
@@ -180,6 +179,8 @@ final class LearnPageService
                     'index_in_section' => $idx,
                     'completed' => false,
                     'preview_allowed' => $preview_allowed,
+                    'locked' => !$preview_allowed,
+                    'lock_reason' => !$preview_allowed ? __('Enroll to unlock this content.', 'sikshya') : '',
                 ];
             }
 
@@ -363,10 +364,14 @@ final class LearnPageService
             return [];
         }
 
-        $out = [];
+        $courses = new CourseService();
+        $out     = [];
         foreach ($rows as $row) {
             $cid = isset($row->course_id) ? (int) $row->course_id : 0;
             if ($cid <= 0) {
+                continue;
+            }
+            if (!$courses->isUserEnrolled($user_id, $cid)) {
                 continue;
             }
             $course = get_post($cid);
@@ -439,8 +444,9 @@ final class LearnPageService
             return [];
         }
 
-        $repo = new EnrollmentRepository();
-        $out  = [];
+        $repo    = new EnrollmentRepository();
+        $courses = new CourseService();
+        $out     = [];
 
         foreach ($raw as $cid) {
             $cid = (int) $cid;
@@ -458,8 +464,10 @@ final class LearnPageService
                 $progress = (int) max(0, min(100, round((float) $enrollment->progress)));
             }
 
+            $has_access = $courses->isUserEnrolled($user_id, $cid);
+
             // Allow admins / instructors to preview the bundle learn page even without enrollment.
-            if ($enrollment === null && !current_user_can('edit_posts')) {
+            if (!$has_access && !current_user_can('edit_posts')) {
                 continue;
             }
 
@@ -469,7 +477,7 @@ final class LearnPageService
                 'continue_url' => self::firstItemUrlForCourse($cid),
                 'course_url'   => get_permalink($cid) ?: '',
                 'thumb'        => get_the_post_thumbnail_url($cid, 'medium') ?: '',
-                'enrolled'     => $enrollment !== null,
+                'enrolled'     => $has_access,
             ];
         }
 

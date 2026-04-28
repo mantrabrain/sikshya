@@ -3,8 +3,8 @@
 namespace Sikshya\Services\Frontend;
 
 use Sikshya\Constants\PostTypes;
-use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
+use Sikshya\Services\CourseService;
 use Sikshya\Frontend\Public\CurriculumOutlineMeta;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Presentation\Models\SingleLessonPageModel;
@@ -35,8 +35,8 @@ final class LessonPageService
         if ($course_id <= 0) {
             $error = __('This lesson is not linked to a course.', 'sikshya');
         } else {
-            $repo = new EnrollmentRepository();
-            $enrolled = $uid > 0 && $repo->findByUserAndCourse($uid, $course_id) !== null;
+            $courses  = new CourseService();
+            $enrolled = $uid > 0 && $courses->isUserEnrolled($uid, $course_id);
 
             $raw = PublicCurriculumService::getCourseCurriculum($course_id);
 
@@ -108,7 +108,7 @@ final class LessonPageService
                 'lesson_type' => $lesson_type,
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
-                    'login' => wp_login_url(get_permalink($post) ?: ''),
+                    'login' => PublicPageUrls::login(get_permalink($post) ?: ''),
                     'course' => $course_post ? (get_permalink($course_post) ?: '') : '',
                     'learn' => PublicPageUrls::learnForCourse($course_id),
                     'account' => PublicPageUrls::url('account'),
@@ -143,56 +143,15 @@ final class LessonPageService
     /**
      * Whether the current content is preview-accessible (guest or non-enrolled).
      *
-     * Rules:
-     * - Global setting: enable_course_preview (default true)
-     * - Per-course meta: _sikshya_enable_course_preview (truthy)
-     * - If lesson meta _sikshya_is_free is truthy → allow
-     * - Else allow when within first N items (preview_lessons_count) in curriculum (lessons only)
+     * Rule:
+     * - If lesson meta `_sikshya_is_free` is truthy → allow preview
      *
      * @param array<int, array{chapter:\WP_Post, contents: array<int, \WP_Post>}> $raw_curriculum
      */
     private static function canPreviewContent(int $course_id, array $raw_curriculum, int $lesson_id): bool
     {
-        if (!Settings::isTruthy(Settings::get('enable_course_preview', true))) {
-            return false;
-        }
-
-        $course_preview = get_post_meta($course_id, '_sikshya_enable_course_preview', true);
-        if (!Settings::isTruthy($course_preview)) {
-            return false;
-        }
-
         $is_free = get_post_meta($lesson_id, '_sikshya_is_free', true);
-        if (Settings::isTruthy($is_free)) {
-            return true;
-        }
-
-        $cap = (int) Settings::get('preview_lessons_count', 3);
-        if ($cap <= 0) {
-            return false;
-        }
-
-        $seen = 0;
-        foreach ($raw_curriculum as $row) {
-            foreach ((array) ($row['contents'] ?? []) as $p) {
-                if (!$p instanceof \WP_Post) {
-                    continue;
-                }
-                if ($p->post_type !== PostTypes::LESSON) {
-                    continue;
-                }
-                ++$seen;
-                if ((int) $p->ID === $lesson_id) {
-                    return $seen <= $cap;
-                }
-                if ($seen >= $cap && $cap > 0) {
-                    // early exit if we've passed the preview window.
-                    continue;
-                }
-            }
-        }
-
-        return false;
+        return Settings::isTruthy($is_free);
     }
 
     /**

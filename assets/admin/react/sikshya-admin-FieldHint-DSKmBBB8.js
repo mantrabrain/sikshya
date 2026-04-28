@@ -1,0 +1,1 @@
+import{j as s}from"./sikshya-admin-sikshya-react-E_TY_un4.js";function a({children:e}){const t=e!=null&&e!=="";return s.jsx("div",{className:"min-h-[2.25rem] shrink-0 text-xs leading-snug text-slate-500 dark:text-slate-400",children:t?e:s.jsx("span",{className:"inline-block min-h-[1.125rem] select-none opacity-0","aria-hidden":!0,children:" "})})}export{a as F};

@@ -14,6 +14,24 @@ use Sikshya\Licensing\Pro;
 final class PaymentGatewayRegistry
 {
     /**
+     * @return array<string, string> Map gateway id => SVG icon filename (in Sikshya assets).
+     */
+    private static function iconMap(): array
+    {
+        return [
+            'offline' => 'pay-later.svg',
+            'paypal' => 'paypal.svg',
+            'stripe' => 'stripe.svg',
+            'razorpay' => 'razorpay.svg',
+            'mollie' => 'mollie.svg',
+            'paystack' => 'paystack.svg',
+            'square' => 'square.svg',
+            'authorize_net' => 'authorize-net.svg',
+            'bank_transfer' => 'bank_transfer.svg',
+        ];
+    }
+
+    /**
      * @return array<int, array{
      *   id: string,
      *   label: string,
@@ -44,6 +62,8 @@ final class PaymentGatewayRegistry
                 'tier' => 'free',
                 'enabled_setting_key' => 'enable_paypal_payment',
                 'setting_keys' => [
+                    'paypal_integration_mode',
+                    'paypal_email',
                     'paypal_client_id',
                     'paypal_secret',
                     'paypal_mode',
@@ -82,6 +102,7 @@ final class PaymentGatewayRegistry
                 'enabled_setting_key' => 'enable_mollie_payment',
                 'setting_keys' => [
                     'mollie_api_key',
+                    'mollie_payment_methods',
                     'mollie_webhook_secret',
                 ],
             ],
@@ -93,6 +114,7 @@ final class PaymentGatewayRegistry
                 'enabled_setting_key' => 'enable_paystack_payment',
                 'setting_keys' => [
                     'paystack_public_key',
+                    'paystack_payment_channels',
                     'paystack_secret_key',
                     'paystack_webhook_secret',
                 ],
@@ -104,6 +126,7 @@ final class PaymentGatewayRegistry
                 'tier' => 'pro',
                 'enabled_setting_key' => 'enable_square_payment',
                 'setting_keys' => [
+                    'square_application_id',
                     'square_access_token',
                     'square_location_id',
                     'square_webhook_signature_key',
@@ -117,6 +140,7 @@ final class PaymentGatewayRegistry
                 'enabled_setting_key' => 'enable_authorize_net_payment',
                 'setting_keys' => [
                     'authorize_net_login_id',
+                    'authorize_net_public_client_key',
                     'authorize_net_transaction_key',
                     'authorize_net_signature_key',
                 ],
@@ -128,6 +152,10 @@ final class PaymentGatewayRegistry
                 'tier' => 'pro',
                 'enabled_setting_key' => 'enable_bank_transfer_payment',
                 'setting_keys' => [
+                    'bank_transfer_bank_name',
+                    'bank_transfer_account_name',
+                    'bank_transfer_account_number',
+                    'bank_transfer_routing_code',
                     'bank_transfer_instructions',
                 ],
             ],
@@ -179,17 +207,26 @@ final class PaymentGatewayRegistry
     {
         $out = [];
         $proActive = Pro::isActive();
+        $icons = self::iconMap();
+        $base = defined('SIKSHYA_PLUGIN_URL') ? (string) constant('SIKSHYA_PLUGIN_URL') : '';
         foreach (self::all() as $g) {
             $tier = (string) ($g['tier'] ?? 'free');
             $locked = $tier === 'pro' && !$proActive;
+            $id = (string) $g['id'];
+            $icon_file = $icons[$id] ?? '';
+            $icon_url = '';
+            if ($base !== '' && $icon_file !== '') {
+                $icon_url = $base . 'assets/images/payment-gateways/' . $icon_file;
+            }
             $out[] = [
-                'id' => (string) $g['id'],
+                'id' => $id,
                 'label' => (string) $g['label'],
                 'description' => (string) ($g['description'] ?? ''),
                 'tier' => $tier,
                 'locked' => $locked,
                 'enabled_setting_key' => (string) ($g['enabled_setting_key'] ?? ''),
                 'setting_keys' => isset($g['setting_keys']) && is_array($g['setting_keys']) ? $g['setting_keys'] : [],
+                'icon_url' => $icon_url,
             ];
         }
         return $out;

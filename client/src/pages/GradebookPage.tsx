@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { AddonSettingsPage } from './AddonSettingsPage';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
 import { Modal } from '../components/shared/Modal';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -142,7 +142,7 @@ function formatPct(n: number | null | undefined): string {
   return Number(n).toFixed(2);
 }
 
-export function GradebookPage(props: { config: SikshyaReactConfig; title: string }) {
+export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const featureOk = isFeatureEnabled(config, 'gradebook');
   const addon = useAddonEnabled('gradebook');
@@ -455,14 +455,9 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
   }, [wq, wa]);
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Weighted quiz and assignment scores per learner and course—summary list, course grid, CSV export, and staff overrides."
       pageActions={
@@ -495,7 +490,7 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
         addonEnableDescription="Enable the Gradebook add-on to load grade REST routes, the admin gradebook screen, and optional learner-facing grade snippets on My account."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {enabled ? (
@@ -1136,6 +1131,6 @@ export function GradebookPage(props: { config: SikshyaReactConfig; title: string
           </>
         )}
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

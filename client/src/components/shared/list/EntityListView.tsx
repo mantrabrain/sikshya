@@ -114,7 +114,7 @@ export function EntityListView({
   const [status, setStatus] = useState<WpPostCollectionStatus>('any');
   const [page, setPage] = useState(1);
   const [orderby, setOrderby] = useState(defaultSortField);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [order, setOrder] = useState<'asc' | 'desc'>(defaultSortField === 'id' ? 'desc' : 'asc');
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
   const [bulkActionValue, setBulkActionValue] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);

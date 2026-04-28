@@ -28,7 +28,7 @@ export function LiveClassesWorkspacePage(props: {
       addonEnableDescription="Enable the add-on to tune join-link behaviour, session defaults, and where upcoming sessions appear across the storefront and learner experience."
       canEnable={Boolean(addon.licenseOk)}
       enableBusy={addon.loading}
-      onEnable={() => void addon.enable()}
+      onEnable={() => addon.enable()}
     >
       {mode === 'full' ? (
         <div className="space-y-8">

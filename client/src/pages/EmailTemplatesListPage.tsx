@@ -26,6 +26,9 @@ function categoryStyle(cat: string): string {
   if (c.includes('auto') || c.includes('account')) {
     return 'bg-amber-100 text-amber-950 dark:bg-amber-950/40 dark:text-amber-200';
   }
+  if (c.includes('commerce') || c.includes('payment') || c.includes('order')) {
+    return 'bg-teal-100 text-teal-900 dark:bg-teal-950/50 dark:text-teal-200';
+  }
   return 'bg-slate-200/90 text-slate-800 dark:bg-slate-800 dark:text-slate-200';
 }
 

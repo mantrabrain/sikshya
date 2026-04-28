@@ -14,6 +14,7 @@ import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import type { SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type ScormPackage = {
   id: number;
@@ -100,7 +101,7 @@ export function ScormH5pWorkspacePage(props: {
       addonEnableDescription="Enable the add-on to upload SCORM packages, run the runtime tracker, and unlock attempt reporting."
       canEnable={Boolean(addon.licenseOk)}
       enableBusy={addon.loading}
-      onEnable={() => void addon.enable()}
+      onEnable={() => addon.enable()}
       addonError={addon.error}
     >
       {enabled ? (
@@ -142,7 +143,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
   const [uploadWarnings, setUploadWarnings] = useState<string[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<ScormPackage | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [toast, setToast] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast(2600);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const loader = useCallback(async () => {
@@ -170,7 +171,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
         { method: 'POST', body: fd },
       );
       setUploadWarnings(resp.warnings ?? []);
-      setToast({ kind: 'success', text: 'Package uploaded.' });
+      toast.success('Uploaded', 'Package uploaded.');
       setReloadTick((n) => n + 1);
     } catch (err) {
       setUploadErr(err);
@@ -185,11 +186,11 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
       await getSikshyaApi().delete(
         `${SIKSHYA_ENDPOINTS.pro.scormPackage(pkg.id)}${force ? '?force=1' : ''}`,
       );
-      setToast({ kind: 'success', text: 'Package deleted.' });
+      toast.success('Deleted', 'Package deleted.');
       setConfirmDelete(null);
       setReloadTick((n) => n + 1);
     } catch (err) {
-      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Delete failed' });
+      toast.error('Delete failed', err instanceof Error ? err.message : 'Delete failed');
     } finally {
       setBusyId(null);
     }
@@ -324,17 +325,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
         </div>
       </section>
 
-      {toast ? (
-        <div
-          className={`rounded-lg border px-3 py-2 text-sm ${
-            toast.kind === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-              : 'border-rose-200 bg-rose-50 text-rose-900'
-          }`}
-        >
-          {toast.text}
-        </div>
-      ) : null}
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
       <ConfirmDialog
         open={Boolean(confirmDelete)}

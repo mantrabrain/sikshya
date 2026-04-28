@@ -11,9 +11,8 @@ final class CourseFrontendSettings
 {
     public static function coursesPerPageDefault(): int
     {
-        $n = (int) Settings::get('courses_per_page', 12);
-
-        return max(1, min(50, $n));
+        // Catalog display controls are no longer exposed in Global Settings; keep a stable default.
+        return 12;
     }
 
     public static function isCourseSearchEnabled(): bool
@@ -28,18 +27,14 @@ final class CourseFrontendSettings
 
     public static function archiveLayout(): string
     {
-        $layout = sanitize_key((string) Settings::get('course_archive_layout', 'grid'));
-        $allowed = ['grid', 'list', 'masonry'];
-
-        return in_array($layout, $allowed, true) ? $layout : 'grid';
+        // Layout controls are no longer exposed in Global Settings; keep a stable default.
+        return 'grid';
     }
 
     public static function singleLayout(): string
     {
-        $layout = sanitize_key((string) Settings::get('course_single_layout', 'default'));
-        $allowed = ['default', 'sidebar', 'fullwidth'];
-
-        return in_array($layout, $allowed, true) ? $layout : 'default';
+        // Layout controls are no longer exposed in Global Settings; keep a stable default.
+        return 'default';
     }
 
     /**
@@ -67,8 +62,16 @@ final class CourseFrontendSettings
         return Settings::isTruthy(Settings::get('enable_course_categories', true));
     }
 
-    public static function areTagsEnabled(): bool
+    /**
+     * How category links are rendered in the course archive filter sidebar.
+     *
+     * @return string list|grid|dropdown
+     */
+    public static function categoryDisplay(): string
     {
-        return Settings::isTruthy(Settings::get('enable_course_tags', true));
+        $v = sanitize_key((string) Settings::get('category_display', 'list'));
+        $allowed = ['list', 'grid', 'dropdown'];
+
+        return in_array($v, $allowed, true) ? $v : 'list';
     }
 }

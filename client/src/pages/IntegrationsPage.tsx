@@ -11,6 +11,7 @@ import { ButtonPrimary } from '../components/shared/buttons';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
@@ -187,13 +188,12 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const [whUrl, setWhUrl] = useState('');
   const [whSecret, setWhSecret] = useState('');
   const [whBusy, setWhBusy] = useState(false);
-  const [whMsg, setWhMsg] = useState<string | null>(null);
+  const toast = useTopRightToast();
 
   const [keyLabel, setKeyLabel] = useState('');
   const [keyScopes, setKeyScopes] = useState<string[]>(['catalog:read']);
   const [keyExpiryDays, setKeyExpiryDays] = useState(90);
   const [keyBusy, setKeyBusy] = useState(false);
-  const [keyMsg, setKeyMsg] = useState<string | null>(null);
   const [freshKey, setFreshKey] = useState<string | null>(null);
   const [pingToken, setPingToken] = useState('');
   const [pingBusy, setPingBusy] = useState(false);
@@ -203,7 +203,6 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   const [appRedirect, setAppRedirect] = useState('');
   const [appScopes, setAppScopes] = useState<string[]>(['catalog:read']);
   const [appBusy, setAppBusy] = useState(false);
-  const [appMsg, setAppMsg] = useState<string | null>(null);
   const [freshAppSecret, setFreshAppSecret] = useState<{ clientId: string; clientSecret: string } | null>(null);
 
   const whLoader = useCallback(async () => {
@@ -249,9 +248,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const addWebhook = async (e: FormEvent) => {
     e.preventDefault();
-    setWhMsg(null);
+    toast.clear();
     if (!whUrl.trim()) {
-      setWhMsg('Please paste the URL Zapier, Make, or your developer gave you.');
+      toast.error('Missing URL', 'Please paste the URL Zapier, Make, or your developer gave you.');
       return;
     }
     setWhBusy(true);
@@ -264,10 +263,10 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       });
       setWhUrl('');
       setWhSecret('');
-      setWhMsg('Saved. We will POST JSON to that address when the event happens.');
+      toast.success('Saved', 'Webhook saved. We will POST JSON to that address when the event happens.');
       wh.refetch();
     } catch (err) {
-      setWhMsg(err instanceof Error ? err.message : 'Could not save webhook.');
+      toast.error('Save failed', err instanceof Error ? err.message : 'Could not save webhook.');
     } finally {
       setWhBusy(false);
     }
@@ -297,21 +296,21 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
   };
 
   const testWebhook = async (row: WebhookEndpointRowV2) => {
-    setWhMsg(null);
+    toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.webhooksV2EndpointTest(row.id), {});
-      setWhMsg('Queued a test delivery. Check your receiver and the delivery log.');
+      toast.success('Queued', 'Queued a test delivery. Check your receiver and the delivery log.');
     } catch (err) {
-      setWhMsg(err instanceof Error ? err.message : 'Could not queue test delivery.');
+      toast.error('Queue failed', err instanceof Error ? err.message : 'Could not queue test delivery.');
     }
   };
 
   const createKey = async (e: FormEvent) => {
     e.preventDefault();
-    setKeyMsg(null);
+    toast.clear();
     setFreshKey(null);
     if (!keyLabel.trim()) {
-      setKeyMsg('Give this key a short name so you remember what uses it (for example “Mobile app”).');
+      toast.error('Missing label', 'Give this key a short name so you remember what uses it (for example “Mobile app”).');
       return;
     }
     setKeyBusy(true);
@@ -325,13 +324,13 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
         setKeyLabel('');
         setKeyScopes(['catalog:read']);
         setKeyExpiryDays(90);
-        setKeyMsg(null);
+        toast.success('Created', res.message || 'Key created.');
         keys.refetch();
       } else {
-        setKeyMsg('Unexpected response from server.');
+        toast.error('Create failed', res.message || 'Unexpected response from server.');
       }
     } catch (err) {
-      setKeyMsg(err instanceof Error ? err.message : 'Could not create key.');
+      toast.error('Create failed', err instanceof Error ? err.message : 'Could not create key.');
     } finally {
       setKeyBusy(false);
     }
@@ -391,14 +390,14 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const createApp = async (e: FormEvent) => {
     e.preventDefault();
-    setAppMsg(null);
+    toast.clear();
     setFreshAppSecret(null);
     if (!appName.trim()) {
-      setAppMsg('Give the app a name (for example “Mobile app”).');
+      toast.error('Missing name', 'Give the app a name (for example “Mobile app”).');
       return;
     }
     if (!appRedirect.trim()) {
-      setAppMsg('Add a redirect URL (must start with https://).');
+      toast.error('Missing redirect URL', 'Add a redirect URL (must start with https://).');
       return;
     }
     setAppBusy(true);
@@ -412,12 +411,13 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
         setAppName('');
         setAppRedirect('');
         setAppScopes(['catalog:read']);
+        toast.success('Created', res.message || 'App created.');
         apps.refetch();
       } else {
-        setAppMsg(res.message || 'Unexpected response from server.');
+        toast.error('Create failed', res.message || 'Unexpected response from server.');
       }
     } catch (err) {
-      setAppMsg(err instanceof Error ? err.message : 'Could not create app.');
+      toast.error('Create failed', err instanceof Error ? err.message : 'Could not create app.');
     } finally {
       setAppBusy(false);
     }
@@ -451,6 +451,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       title={title}
       subtitle="Connect Sikshya to Zapier, custom scripts, or mobile apps — without touching code unless you want to."
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <div className={`${SIKSHYA_ADMIN_PAGE_FULL_WIDTH} space-y-8`}>
         <section className="rounded-2xl border border-sky-200 bg-sky-50/90 p-5 text-sm leading-relaxed text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-100">
           <h2 className="text-base font-semibold text-sky-950 dark:text-sky-50">Start here</h2>
@@ -574,7 +575,6 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   <ButtonPrimary type="submit" disabled={whBusy}>
                     {whBusy ? 'Saving…' : 'Save webhook'}
                   </ButtonPrimary>
-                  {whMsg ? <p className="text-sm text-slate-600 dark:text-slate-300">{whMsg}</p> : null}
                 </form>
 
                 <div className="mt-8">
@@ -716,7 +716,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     description="Enable the “Public API & API keys” addon. You can create keys right after."
                     canEnable={Boolean(keyAddon.licenseOk)}
                     enableBusy={keyAddon.loading}
-                    onEnable={() => void keyAddon.enable()}
+                    onEnable={() => keyAddon.enable()}
                     upgradeUrl={lic.upgradeUrl}
                     error={keyAddon.error}
                   />
@@ -810,7 +810,6 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   <ButtonPrimary type="submit" disabled={keyBusy}>
                     {keyBusy ? 'Creating…' : 'Create new key'}
                   </ButtonPrimary>
-                  {keyMsg ? <p className="text-sm text-amber-800 dark:text-amber-200">{keyMsg}</p> : null}
                 </form>
 
                 <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/50">
@@ -974,7 +973,6 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                         <ButtonPrimary type="submit" disabled={appBusy}>
                           {appBusy ? 'Creating…' : 'Create OAuth app'}
                         </ButtonPrimary>
-                        {appMsg ? <p className="text-sm text-amber-800 dark:text-amber-200">{appMsg}</p> : null}
                       </form>
 
                       {apps.loading ? (

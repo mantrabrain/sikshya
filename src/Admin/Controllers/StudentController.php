@@ -12,8 +12,11 @@ use Sikshya\Core\Plugin;
  */
 class StudentController
 {
-    public function __construct(private Plugin $plugin)
+    private Plugin $plugin;
+
+    public function __construct(Plugin $plugin)
     {
+        $this->plugin = $plugin;
     }
 
     public function renderStudentsPage(): void

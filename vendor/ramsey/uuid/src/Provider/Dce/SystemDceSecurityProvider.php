@@ -21,6 +21,7 @@ use Ramsey\Uuid\Type\Integer as IntegerObject;
 use function escapeshellarg;
 use function preg_split;
 use function str_getcsv;
+use function strpos;
 use function strrpos;
 use function strtolower;
 use function strtoupper;
@@ -41,7 +42,6 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
      */
     public function getUid(): IntegerObject
     {
-        /** @var IntegerObject | int | float | string | null $uid */
         static $uid = null;
 
         if ($uid instanceof IntegerObject) {
@@ -54,8 +54,9 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
 
         if ($uid === '') {
             throw new DceSecurityException(
-                'Unable to get a user identifier using the system DCE Security provider; please provide a custom '
-                . 'identifier or use a different provider',
+                'Unable to get a user identifier using the system DCE '
+                . 'Security provider; please provide a custom identifier or '
+                . 'use a different provider'
             );
         }
 
@@ -71,7 +72,6 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
      */
     public function getGid(): IntegerObject
     {
-        /** @var IntegerObject | int | float | string | null $gid */
         static $gid = null;
 
         if ($gid instanceof IntegerObject) {
@@ -84,8 +84,9 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
 
         if ($gid === '') {
             throw new DceSecurityException(
-                'Unable to get a group identifier using the system DCE Security provider; please provide a custom '
-                . 'identifier or use a different provider',
+                'Unable to get a group identifier using the system DCE '
+                . 'Security provider; please provide a custom identifier or '
+                . 'use a different provider'
             );
         }
 
@@ -103,10 +104,15 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
             return '';
         }
 
-        return match ($this->getOs()) {
-            'WIN' => $this->getWindowsUid(),
-            default => trim((string) shell_exec('id -u')),
-        };
+        switch ($this->getOs()) {
+            case 'WIN':
+                return $this->getWindowsUid();
+            case 'DAR':
+            case 'FRE':
+            case 'LIN':
+            default:
+                return trim((string) shell_exec('id -u'));
+        }
     }
 
     /**
@@ -118,10 +124,15 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
             return '';
         }
 
-        return match ($this->getOs()) {
-            'WIN' => $this->getWindowsGid(),
-            default => trim((string) shell_exec('id -g')),
-        };
+        switch ($this->getOs()) {
+            case 'WIN':
+                return $this->getWindowsGid();
+            case 'DAR':
+            case 'FRE':
+            case 'LIN':
+            default:
+                return trim((string) shell_exec('id -g'));
+        }
     }
 
     /**
@@ -129,7 +140,9 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
      */
     private function hasShellExec(): bool
     {
-        return !str_contains(strtolower((string) ini_get('disable_functions')), 'shell_exec');
+        $disabledFunctions = strtolower((string) ini_get('disable_functions'));
+
+        return strpos($disabledFunctions, 'shell_exec') === false;
     }
 
     /**
@@ -137,23 +150,23 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
      */
     private function getOs(): string
     {
-        /** @var string $phpOs */
-        $phpOs = constant('PHP_OS');
-
-        return strtoupper(substr($phpOs, 0, 3));
+        return strtoupper(substr(constant('PHP_OS'), 0, 3));
     }
 
     /**
      * Returns the user identifier for a user on a Windows system
      *
-     * Windows does not have the same concept as an effective POSIX UID for the running script. Instead, each user is
-     * uniquely identified by an SID (security identifier). The SID includes three 32-bit unsigned integers that make up
-     * a unique domain identifier, followed by an RID (relative identifier) that we will use as the UID. The primary
-     * caveat is that this UID may not be unique to the system, since it is, instead, unique to the domain.
+     * Windows does not have the same concept as an effective POSIX UID for the
+     * running script. Instead, each user is uniquely identified by an SID
+     * (security identifier). The SID includes three 32-bit unsigned integers
+     * that make up a unique domain identifier, followed by an RID (relative
+     * identifier) that we will use as the UID. The primary caveat is that this
+     * UID may not be unique to the system, since it is, instead, unique to the
+     * domain.
      *
      * @link https://www.lifewire.com/what-is-an-sid-number-2626005 What Is an SID Number?
-     * @link https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/81d92bba-d22b-4a8c-908a-554ab29148ab Well-known SID Structures
-     * @link https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-identifiers#well-known-sids Well-known SIDs
+     * @link https://bit.ly/30vE7NM Well-known SID Structures
+     * @link https://bit.ly/2FWcYKJ Well-known security identifiers in Windows operating systems
      * @link https://www.windows-commandline.com/get-sid-of-user/ Get SID of user
      */
     private function getWindowsUid(): string
@@ -164,7 +177,7 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
             return '';
         }
 
-        $sid = str_getcsv(trim((string) $response), escape: '\\')[1] ?? '';
+        $sid = str_getcsv(trim((string) $response))[1] ?? '';
 
         if (($lastHyphen = strrpos($sid, '-')) === false) {
             return '';
@@ -176,10 +189,11 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
     /**
      * Returns a group identifier for a user on a Windows system
      *
-     * Since Windows does not have the same concept as an effective POSIX GID for the running script, we will get the
-     * local group memberships for the user running the script. Then, we will get the SID (security identifier) for the
-     * first group that appears in that list. Finally, we will return the RID (relative identifier) for the group and
-     * use that as the GID.
+     * Since Windows does not have the same concept as an effective POSIX GID
+     * for the running script, we will get the local group memberships for the
+     * user running the script. Then, we will get the SID (security identifier)
+     * for the first group that appears in that list. Finally, we will return
+     * the RID (relative identifier) for the group and use that as the GID.
      *
      * @link https://www.windows-commandline.com/list-of-user-groups-command-line/ List of user groups command line
      */
@@ -191,7 +205,9 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
             return '';
         }
 
+        /** @var string[] $userGroups */
         $userGroups = preg_split('/\s{2,}/', (string) $response, -1, PREG_SPLIT_NO_EMPTY);
+
         $firstGroup = trim($userGroups[1] ?? '', "* \t\n\r\0\x0B");
 
         if ($firstGroup === '') {
@@ -204,13 +220,15 @@ class SystemDceSecurityProvider implements DceSecurityProviderInterface
             return '';
         }
 
+        /** @var string[] $userGroup */
         $userGroup = preg_split('/\s{2,}/', (string) $response, -1, PREG_SPLIT_NO_EMPTY);
+
         $sid = $userGroup[1] ?? '';
 
         if (($lastHyphen = strrpos($sid, '-')) === false) {
             return '';
         }
 
-        return trim(substr($sid, $lastHyphen + 1));
+        return trim((string) substr($sid, $lastHyphen + 1));
     }
 }

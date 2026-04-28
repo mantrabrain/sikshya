@@ -23,26 +23,32 @@ use function uuid_generate_sha1;
 use function uuid_parse;
 
 /**
- * PeclUuidNameGenerator generates strings of binary data from a namespace and a name, using ext-uuid
+ * PeclUuidNameGenerator generates strings of binary data from a namespace and a
+ * name, using ext-uuid
  *
  * @link https://pecl.php.net/package/uuid ext-uuid
  */
 class PeclUuidNameGenerator implements NameGeneratorInterface
 {
-    /**
-     * @pure
-     */
+    /** @psalm-pure */
     public function generate(UuidInterface $ns, string $name, string $hashAlgorithm): string
     {
-        $uuid = match ($hashAlgorithm) {
-            'md5' => uuid_generate_md5($ns->toString(), $name), /** @phpstan-ignore possiblyImpure.functionCall */
-            'sha1' => uuid_generate_sha1($ns->toString(), $name), /** @phpstan-ignore possiblyImpure.functionCall */
-            default => throw new NameException(
-                sprintf('Unable to hash namespace and name with algorithm \'%s\'', $hashAlgorithm),
-            ),
-        };
+        switch ($hashAlgorithm) {
+            case 'md5':
+                $uuid = uuid_generate_md5($ns->toString(), $name);
 
-        /** @phpstan-ignore possiblyImpure.functionCall */
-        return (string) uuid_parse($uuid);
+                break;
+            case 'sha1':
+                $uuid = uuid_generate_sha1($ns->toString(), $name);
+
+                break;
+            default:
+                throw new NameException(sprintf(
+                    'Unable to hash namespace and name with algorithm \'%s\'',
+                    $hashAlgorithm
+                ));
+        }
+
+        return uuid_parse($uuid);
     }
 }

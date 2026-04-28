@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 import { DateTimePickerField } from '../components/shared/DateTimePickerField';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
@@ -45,7 +45,7 @@ function clampNumberInput(v: string, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-export function CouponsPage(props: { config: SikshyaReactConfig; title: string }) {
+export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
 
   const [tab, setTab] = useState<PageTab>('list');
@@ -266,13 +266,9 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
   }, [tab, selected, advFeature]);
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Discount codes applied at native checkout (Stripe / PayPal)."
       pageActions={
@@ -504,7 +500,7 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
                 addonEnableDescription="Enable the Advanced coupons add-on for targeting, caps, and storefront hints."
                 canEnable={Boolean(advAddon.licenseOk)}
                 enableBusy={advAddon.loading}
-                onEnable={() => void advAddon.enable()}
+                onEnable={() => advAddon.enable()}
                 addonError={advAddon.error}
               >
                 {editorMode === 'create' || (editorMode === 'manage' && selected) ? (
@@ -660,6 +656,6 @@ export function CouponsPage(props: { config: SikshyaReactConfig; title: string }
           </ListPanel>
         </div>
       )}
-    </AppShell>
+    </EmbeddableShell>
   );
 }

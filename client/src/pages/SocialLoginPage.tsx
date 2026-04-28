@@ -5,6 +5,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -40,7 +41,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
 
   const [opts, setOpts] = useState<Options>({});
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const toast = useTopRightToast();
 
   const loader = useCallback(async () => {
     if (!enabled) return { ok: true, options: {} as Options };
@@ -56,14 +57,13 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
 
   const onSave = async (e: FormEvent) => {
     e.preventDefault();
-    setMsg(null);
     setSaving(true);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.socialLogin, opts);
-      setMsg('Saved.');
+      toast.success('Saved', 'Social login settings saved.');
       refetch();
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : 'Save failed');
+      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -76,6 +76,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
       title={title}
       subtitle="Let learners sign up using Google or Facebook in addition to email."
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <GatedFeatureWorkspace
         mode={mode}
         featureId="social_login"
@@ -87,7 +88,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
         addonEnableDescription="Enable the Social login add-on to register login bridge endpoints and surface configuration."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {error ? <ApiErrorPanel error={error} title="Could not load social login config" onRetry={() => refetch()} /> : null}
@@ -307,7 +308,6 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                 <ButtonPrimary type="submit" disabled={saving}>
                   {saving ? 'Saving…' : 'Save settings'}
                 </ButtonPrimary>
-                {msg ? <span className="text-sm text-slate-600 dark:text-slate-400">{msg}</span> : null}
               </div>
             </form>
           )}

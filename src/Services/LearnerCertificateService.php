@@ -11,8 +11,11 @@ use Sikshya\Database\Repositories\CertificateRepository;
  */
 final class LearnerCertificateService
 {
-    public function __construct(private CertificateRepository $repo = new CertificateRepository())
+    private CertificateRepository $repo;
+
+    public function __construct(?CertificateRepository $repo = null)
     {
+        $this->repo = $repo ?? new CertificateRepository();
     }
 
     /**
@@ -22,6 +25,10 @@ final class LearnerCertificateService
     {
         $user_id = absint($user_id);
         if ($user_id <= 0) {
+            return [];
+        }
+
+        if (!Settings::isTruthy(Settings::get('students_can_download_certificates', '1'))) {
             return [];
         }
 
@@ -49,6 +56,10 @@ final class LearnerCertificateService
 
     public function getUserCertificatesCount(int $user_id): int
     {
+        if (!Settings::isTruthy(Settings::get('students_can_download_certificates', '1'))) {
+            return 0;
+        }
+
         return $this->repo->countByUser(absint($user_id));
     }
 
@@ -61,6 +72,10 @@ final class LearnerCertificateService
         $user_id = absint($user_id);
         if ($certificate_id <= 0 || $user_id <= 0) {
             return ['success' => false, 'message' => __('Invalid request.', 'sikshya')];
+        }
+
+        if (!Settings::isTruthy(Settings::get('students_can_download_certificates', '1'))) {
+            return ['success' => false, 'message' => __('Certificate downloads are disabled in LMS settings.', 'sikshya')];
         }
 
         $row = $this->repo->findByIdForUser($certificate_id, $user_id);

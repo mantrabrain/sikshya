@@ -1132,7 +1132,7 @@ abstract class AbstractListTable extends \WP_List_Table
      *
      * @return string|false
      */
-    public function current_action(): string|false
+    public function current_action()
     {
         if (isset($_REQUEST['action']) && -1 != $_REQUEST['action']) {
             return $_REQUEST['action'];

@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react';
-import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { Modal } from '../components/shared/Modal';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { useAdminRouting } from '../lib/adminRouting';
 import type { SikshyaReactConfig } from '../types';
 
 type PaymentRow = {
@@ -39,7 +42,12 @@ type ListResponse = {
 export function PaymentsPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
+  const { navigateView } = useAdminRouting();
   const [page, setPage] = useState(1);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editStatus, setEditStatus] = useState('pending');
+  const [saving, setSaving] = useState(false);
 
   const loader = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), per_page: '30' });
@@ -52,6 +60,12 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
   const total = data?.total ?? 0;
   const pages = data?.pages ?? 0;
   const tableMissing = Boolean(data?.table_missing);
+
+  const openEdit = (r: PaymentRow) => {
+    setEditId(r.id);
+    setEditStatus(r.status || 'pending');
+    setEditOpen(true);
+  };
 
   return (
     <EmbeddableShell
@@ -78,6 +92,65 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
         </div>
       ) : null}
 
+      <Modal
+        open={editOpen}
+        title={editId ? `Change payment status (#${editId})` : 'Change payment status'}
+        description="Update the payment record status."
+        size="lg"
+        onClose={() => {
+          if (!saving) setEditOpen(false);
+        }}
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              disabled={saving}
+              onClick={() => setEditOpen(false)}
+            >
+              Cancel
+            </button>
+            <ButtonPrimary
+              type="button"
+              disabled={saving || !editId}
+              onClick={async () => {
+                if (!editId) return;
+                setSaving(true);
+                try {
+                  await getSikshyaApi().patch<{ ok?: boolean; message?: string }>(
+                    SIKSHYA_ENDPOINTS.admin.paymentUpdate(editId),
+                    { status: editStatus }
+                  );
+                  setEditOpen(false);
+                  await refetch();
+                } catch (err) {
+                  window.alert(getErrorSummary(err));
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? 'Saving…' : 'Save'}
+            </ButtonPrimary>
+          </div>
+        }
+      >
+        <label className="block text-sm text-slate-700 dark:text-slate-200">
+          Status
+          <select
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+            value={editStatus}
+            onChange={(e) => setEditStatus(e.target.value)}
+            disabled={saving}
+          >
+            <option value="pending">pending</option>
+            <option value="completed">completed</option>
+            <option value="failed">failed</option>
+            <option value="refunded">refunded</option>
+          </select>
+        </label>
+      </Modal>
+
       <ListPanel>
         {loading ? (
           <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading payments…</div>
@@ -97,6 +170,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                     <th className="px-5 py-3.5">Course</th>
                     <th className="px-5 py-3.5">Amount</th>
                     <th className="px-5 py-3.5">Status</th>
+                    <th className="px-5 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -104,11 +178,15 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                     <tr key={r.id} className="bg-white dark:bg-slate-900">
                       <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-400">
                         {formatPostDate(r.payment_date)}
+                        <div className="mt-1 text-xs font-semibold text-brand-600 dark:text-brand-400">
+                          Payment #{r.id}
+                        </div>
                       </td>
                       <td className="px-5 py-3.5">
                         <a
                           href={`${adminBase}user-edit.php?user_id=${r.user_id}`}
                           className="font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {r.payer_name || `User #${r.user_id}`}
                         </a>
@@ -119,6 +197,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                           <a
                             href={appViewHref(config, 'add-course', { course_id: String(r.course_id) })}
                             className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             {r.course_title || `Course #${r.course_id}`}
                           </a>
@@ -131,6 +210,25 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={r.status} />
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        <div onClick={(e) => e.stopPropagation()} className="inline-flex">
+                          {(() => {
+                            const items: RowActionItem[] = [
+                              {
+                                key: 'view',
+                                label: 'View details',
+                                onClick: () => navigateView('payment', { id: String(r.id) }),
+                              },
+                              {
+                                key: 'status',
+                                label: 'Change status',
+                                onClick: () => openEdit(r),
+                              },
+                            ];
+                            return <RowActionsMenu items={items} ariaLabel={`Payment actions for #${r.id}`} />;
+                          })()}
+                        </div>
                       </td>
                     </tr>
                   ))}

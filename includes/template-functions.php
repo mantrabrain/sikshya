@@ -672,6 +672,297 @@ function sikshya_get_currency_choices(): array
 }
 
 /**
+ * Country choices for checkout/billing fields.
+ *
+ * Prefer WooCommerce's country list when available; otherwise fall back to a full
+ * ISO 3166-1 alpha-2 list. Add-ons/themes can override via filter.
+ *
+ * @return array<string, string> Map ISO code => Country name
+ */
+function sikshya_get_country_choices(): array
+{
+    $countries = [];
+
+    // Prefer WooCommerce if present.
+    if (class_exists('\WC_Countries')) {
+        try {
+            $wc = new \WC_Countries();
+            $countries = is_array($wc->get_countries()) ? $wc->get_countries() : [];
+        } catch (\Throwable $e) {
+            $countries = [];
+        }
+    }
+
+    if (empty($countries)) {
+        // Full fallback list (ISO 3166-1 alpha-2). Can be overridden by filter.
+        $countries = [
+            'AF' => 'Afghanistan',
+            'AX' => 'Åland Islands',
+            'AL' => 'Albania',
+            'DZ' => 'Algeria',
+            'AS' => 'American Samoa',
+            'AD' => 'Andorra',
+            'AO' => 'Angola',
+            'AI' => 'Anguilla',
+            'AQ' => 'Antarctica',
+            'AG' => 'Antigua and Barbuda',
+            'AR' => 'Argentina',
+            'AM' => 'Armenia',
+            'AW' => 'Aruba',
+            'AU' => 'Australia',
+            'AT' => 'Austria',
+            'AZ' => 'Azerbaijan',
+            'BS' => 'Bahamas',
+            'BH' => 'Bahrain',
+            'BD' => 'Bangladesh',
+            'BB' => 'Barbados',
+            'BY' => 'Belarus',
+            'BE' => 'Belgium',
+            'BZ' => 'Belize',
+            'BJ' => 'Benin',
+            'BM' => 'Bermuda',
+            'BT' => 'Bhutan',
+            'BO' => 'Bolivia',
+            'BQ' => 'Bonaire, Sint Eustatius and Saba',
+            'BA' => 'Bosnia and Herzegovina',
+            'BW' => 'Botswana',
+            'BV' => 'Bouvet Island',
+            'BR' => 'Brazil',
+            'IO' => 'British Indian Ocean Territory',
+            'BN' => 'Brunei Darussalam',
+            'BG' => 'Bulgaria',
+            'BF' => 'Burkina Faso',
+            'BI' => 'Burundi',
+            'KH' => 'Cambodia',
+            'CM' => 'Cameroon',
+            'CA' => 'Canada',
+            'CV' => 'Cape Verde',
+            'KY' => 'Cayman Islands',
+            'CF' => 'Central African Republic',
+            'TD' => 'Chad',
+            'CL' => 'Chile',
+            'CN' => 'China',
+            'CX' => 'Christmas Island',
+            'CC' => 'Cocos (Keeling) Islands',
+            'CO' => 'Colombia',
+            'KM' => 'Comoros',
+            'CG' => 'Congo',
+            'CD' => 'Congo (Democratic Republic of the)',
+            'CK' => 'Cook Islands',
+            'CR' => 'Costa Rica',
+            'CI' => "Côte d'Ivoire",
+            'HR' => 'Croatia',
+            'CU' => 'Cuba',
+            'CW' => 'Curaçao',
+            'CY' => 'Cyprus',
+            'CZ' => 'Czechia',
+            'DK' => 'Denmark',
+            'DJ' => 'Djibouti',
+            'DM' => 'Dominica',
+            'DO' => 'Dominican Republic',
+            'EC' => 'Ecuador',
+            'EG' => 'Egypt',
+            'SV' => 'El Salvador',
+            'GQ' => 'Equatorial Guinea',
+            'ER' => 'Eritrea',
+            'EE' => 'Estonia',
+            'SZ' => 'Eswatini',
+            'ET' => 'Ethiopia',
+            'FK' => 'Falkland Islands (Malvinas)',
+            'FO' => 'Faroe Islands',
+            'FJ' => 'Fiji',
+            'FI' => 'Finland',
+            'FR' => 'France',
+            'GF' => 'French Guiana',
+            'PF' => 'French Polynesia',
+            'TF' => 'French Southern Territories',
+            'GA' => 'Gabon',
+            'GM' => 'Gambia',
+            'GE' => 'Georgia',
+            'DE' => 'Germany',
+            'GH' => 'Ghana',
+            'GI' => 'Gibraltar',
+            'GR' => 'Greece',
+            'GL' => 'Greenland',
+            'GD' => 'Grenada',
+            'GP' => 'Guadeloupe',
+            'GU' => 'Guam',
+            'GT' => 'Guatemala',
+            'GG' => 'Guernsey',
+            'GN' => 'Guinea',
+            'GW' => 'Guinea-Bissau',
+            'GY' => 'Guyana',
+            'HT' => 'Haiti',
+            'HM' => 'Heard Island and McDonald Islands',
+            'VA' => 'Holy See',
+            'HN' => 'Honduras',
+            'HK' => 'Hong Kong',
+            'HU' => 'Hungary',
+            'IS' => 'Iceland',
+            'IN' => 'India',
+            'ID' => 'Indonesia',
+            'IR' => 'Iran',
+            'IQ' => 'Iraq',
+            'IE' => 'Ireland',
+            'IM' => 'Isle of Man',
+            'IL' => 'Israel',
+            'IT' => 'Italy',
+            'JM' => 'Jamaica',
+            'JP' => 'Japan',
+            'JE' => 'Jersey',
+            'JO' => 'Jordan',
+            'KZ' => 'Kazakhstan',
+            'KE' => 'Kenya',
+            'KI' => 'Kiribati',
+            'KP' => "Korea (Democratic People's Republic of)",
+            'KR' => 'Korea (Republic of)',
+            'KW' => 'Kuwait',
+            'KG' => 'Kyrgyzstan',
+            'LA' => "Lao People's Democratic Republic",
+            'LV' => 'Latvia',
+            'LB' => 'Lebanon',
+            'LS' => 'Lesotho',
+            'LR' => 'Liberia',
+            'LY' => 'Libya',
+            'LI' => 'Liechtenstein',
+            'LT' => 'Lithuania',
+            'LU' => 'Luxembourg',
+            'MO' => 'Macao',
+            'MG' => 'Madagascar',
+            'MW' => 'Malawi',
+            'MY' => 'Malaysia',
+            'MV' => 'Maldives',
+            'ML' => 'Mali',
+            'MT' => 'Malta',
+            'MH' => 'Marshall Islands',
+            'MQ' => 'Martinique',
+            'MR' => 'Mauritania',
+            'MU' => 'Mauritius',
+            'YT' => 'Mayotte',
+            'MX' => 'Mexico',
+            'FM' => 'Micronesia',
+            'MD' => 'Moldova',
+            'MC' => 'Monaco',
+            'MN' => 'Mongolia',
+            'ME' => 'Montenegro',
+            'MS' => 'Montserrat',
+            'MA' => 'Morocco',
+            'MZ' => 'Mozambique',
+            'MM' => 'Myanmar',
+            'NA' => 'Namibia',
+            'NR' => 'Nauru',
+            'NP' => 'Nepal',
+            'NL' => 'Netherlands',
+            'NC' => 'New Caledonia',
+            'NZ' => 'New Zealand',
+            'NI' => 'Nicaragua',
+            'NE' => 'Niger',
+            'NG' => 'Nigeria',
+            'NU' => 'Niue',
+            'NF' => 'Norfolk Island',
+            'MK' => 'North Macedonia',
+            'MP' => 'Northern Mariana Islands',
+            'NO' => 'Norway',
+            'OM' => 'Oman',
+            'PK' => 'Pakistan',
+            'PW' => 'Palau',
+            'PS' => 'Palestine, State of',
+            'PA' => 'Panama',
+            'PG' => 'Papua New Guinea',
+            'PY' => 'Paraguay',
+            'PE' => 'Peru',
+            'PH' => 'Philippines',
+            'PN' => 'Pitcairn',
+            'PL' => 'Poland',
+            'PT' => 'Portugal',
+            'PR' => 'Puerto Rico',
+            'QA' => 'Qatar',
+            'RE' => 'Réunion',
+            'RO' => 'Romania',
+            'RU' => 'Russian Federation',
+            'RW' => 'Rwanda',
+            'BL' => 'Saint Barthélemy',
+            'SH' => 'Saint Helena, Ascension and Tristan da Cunha',
+            'KN' => 'Saint Kitts and Nevis',
+            'LC' => 'Saint Lucia',
+            'MF' => 'Saint Martin (French part)',
+            'PM' => 'Saint Pierre and Miquelon',
+            'VC' => 'Saint Vincent and the Grenadines',
+            'WS' => 'Samoa',
+            'SM' => 'San Marino',
+            'ST' => 'Sao Tome and Principe',
+            'SA' => 'Saudi Arabia',
+            'SN' => 'Senegal',
+            'RS' => 'Serbia',
+            'SC' => 'Seychelles',
+            'SL' => 'Sierra Leone',
+            'SG' => 'Singapore',
+            'SX' => 'Sint Maarten (Dutch part)',
+            'SK' => 'Slovakia',
+            'SI' => 'Slovenia',
+            'SB' => 'Solomon Islands',
+            'SO' => 'Somalia',
+            'ZA' => 'South Africa',
+            'GS' => 'South Georgia and the South Sandwich Islands',
+            'SS' => 'South Sudan',
+            'ES' => 'Spain',
+            'LK' => 'Sri Lanka',
+            'SD' => 'Sudan',
+            'SR' => 'Suriname',
+            'SJ' => 'Svalbard and Jan Mayen',
+            'SE' => 'Sweden',
+            'CH' => 'Switzerland',
+            'SY' => 'Syrian Arab Republic',
+            'TW' => 'Taiwan',
+            'TJ' => 'Tajikistan',
+            'TZ' => 'Tanzania, United Republic of',
+            'TH' => 'Thailand',
+            'TL' => 'Timor-Leste',
+            'TG' => 'Togo',
+            'TK' => 'Tokelau',
+            'TO' => 'Tonga',
+            'TT' => 'Trinidad and Tobago',
+            'TN' => 'Tunisia',
+            'TR' => 'Turkey',
+            'TM' => 'Turkmenistan',
+            'TC' => 'Turks and Caicos Islands',
+            'TV' => 'Tuvalu',
+            'UG' => 'Uganda',
+            'UA' => 'Ukraine',
+            'AE' => 'United Arab Emirates',
+            'GB' => 'United Kingdom',
+            'US' => 'United States',
+            'UM' => 'United States Minor Outlying Islands',
+            'UY' => 'Uruguay',
+            'UZ' => 'Uzbekistan',
+            'VU' => 'Vanuatu',
+            'VE' => 'Venezuela',
+            'VN' => 'Viet Nam',
+            'VG' => 'Virgin Islands (British)',
+            'VI' => 'Virgin Islands (U.S.)',
+            'WF' => 'Wallis and Futuna',
+            'EH' => 'Western Sahara',
+            'YE' => 'Yemen',
+            'ZM' => 'Zambia',
+            'ZW' => 'Zimbabwe',
+        ];
+    }
+
+    /**
+     * Filter country choices used by Sikshya checkout field rendering.
+     *
+     * @param array<string, string> $countries
+     */
+    $countries = apply_filters('sikshya_country_choices', $countries);
+
+    // Normalize to strings + sort by name for UI.
+    $countries = array_map('strval', $countries);
+    asort($countries, SORT_NATURAL | SORT_FLAG_CASE);
+
+    return $countries;
+}
+
+/**
  * Store currency code from Sikshya settings (Payment tab — stored as `_sikshya_currency`).
  *
  * @return string ISO code.
@@ -742,6 +1033,50 @@ function sikshya_format_price($amount, ?string $currency_code = null, ?int $cour
 }
 
 /**
+ * Parse a float from course price meta values (legacy migrations may include symbols).
+ *
+ * @param mixed $raw Meta value.
+ * @return float|null Null when empty/unparseable.
+ */
+function sikshya_parse_price_meta($raw): ?float
+{
+    if ($raw === '' || $raw === null || $raw === false) {
+        return null;
+    }
+    if (is_int($raw) || is_float($raw) || (is_string($raw) && is_numeric($raw))) {
+        return (float) $raw;
+    }
+    if (!is_string($raw)) {
+        return null;
+    }
+
+    $s = trim($raw);
+    if ($s === '') {
+        return null;
+    }
+
+    // Keep digits and separators only; tolerate "USD 99.99", "₹1,200", etc.
+    $clean = preg_replace('/[^0-9,.\-]/', '', $s);
+    $clean = is_string($clean) ? trim($clean) : '';
+    if ($clean === '' || $clean === '-' || $clean === '.' || $clean === ',') {
+        return null;
+    }
+
+    // Remove thousand separators; keep last decimal separator when plausible.
+    if (str_contains($clean, ',') && str_contains($clean, '.')) {
+        $clean = str_replace(',', '', $clean);
+    } else {
+        if (substr_count($clean, ',') === 1 && preg_match('/,\d{1,2}$/', $clean)) {
+            $clean = str_replace(',', '.', $clean);
+        } else {
+            $clean = str_replace(',', '', $clean);
+        }
+    }
+
+    return is_numeric($clean) ? (float) $clean : null;
+}
+
+/**
  * Resolved course pricing from all known meta key variants (builder, legacy, CPT box).
  *
  * @param int $course_id Course post ID.
@@ -749,6 +1084,11 @@ function sikshya_format_price($amount, ?string $currency_code = null, ?int $cour
  */
 function sikshya_get_course_pricing(int $course_id): array
 {
+    $course_type_raw = function_exists('sikshya_first_nonempty_post_meta')
+        ? sikshya_first_nonempty_post_meta($course_id, ['_sikshya_course_type', 'course_type', 'sikshya_course_type'])
+        : get_post_meta($course_id, '_sikshya_course_type', true);
+    $course_type = sanitize_key((string) $course_type_raw);
+
     $price_raw = sikshya_first_nonempty_post_meta(
         $course_id,
         ['_sikshya_price', '_sikshya_course_price', 'sikshya_course_price']
@@ -760,8 +1100,14 @@ function sikshya_get_course_pricing(int $course_id): array
 
     $currency = sikshya_get_store_currency_code();
 
-    $price = is_numeric($price_raw) ? (float) $price_raw : null;
-    $sale = is_numeric($sale_raw) ? (float) $sale_raw : null;
+    $price = sikshya_parse_price_meta($price_raw);
+    $sale = sikshya_parse_price_meta($sale_raw);
+
+    // Course explicitly marked free should always render as free in listings.
+    if ($course_type === 'free') {
+        $price = null;
+        $sale = null;
+    }
 
     $on_sale = null !== $price && null !== $sale && $sale < $price && $sale >= 0;
     $effective = $on_sale ? $sale : $price;
@@ -773,6 +1119,73 @@ function sikshya_get_course_pricing(int $course_id): array
         'effective' => $effective,
         'on_sale' => $on_sale,
     ];
+}
+
+/**
+ * Course duration label for catalog cards (short, human friendly).
+ *
+ * Supports:
+ * - minutes as int/string: "90" => "1h 30m"
+ * - hh:mm: "1:30" => "1h 30m"
+ * - strings that already contain h/m/hour/min: kept (lightly normalized)
+ *
+ * @param mixed $raw
+ */
+function sikshya_format_course_duration_display($raw): string
+{
+    if ($raw === '' || $raw === null || $raw === false) {
+        return '';
+    }
+
+    if (is_int($raw) || is_float($raw) || (is_string($raw) && is_numeric(trim($raw)))) {
+        $mins = (int) round((float) $raw);
+        if ($mins <= 0) {
+            return '';
+        }
+        $h = intdiv($mins, 60);
+        $m = $mins % 60;
+        if ($h > 0 && $m > 0) {
+            return sprintf('%dh %dm', $h, $m);
+        }
+        if ($h > 0) {
+            return sprintf('%dh', $h);
+        }
+        return sprintf('%dm', $m);
+    }
+
+    if (!is_string($raw)) {
+        return '';
+    }
+
+    $s = trim(wp_strip_all_tags($raw));
+    if ($s === '') {
+        return '';
+    }
+
+    if (preg_match('/^(\d{1,3})\s*:\s*(\d{1,2})$/', $s, $m)) {
+        $h = (int) $m[1];
+        $mm = (int) $m[2];
+        if ($h <= 0 && $mm <= 0) {
+            return '';
+        }
+        if ($h > 0 && $mm > 0) {
+            return sprintf('%dh %dm', $h, $mm);
+        }
+        if ($h > 0) {
+            return sprintf('%dh', $h);
+        }
+        return sprintf('%dm', $mm);
+    }
+
+    $norm = strtolower($s);
+    $norm = preg_replace('/\bhours?\b|\bhrs?\b/', 'h', $norm);
+    $norm = preg_replace('/\bminutes?\b|\bmins?\b/', 'm', $norm);
+    $norm = preg_replace('/\s+/', ' ', (string) $norm);
+    $norm = trim((string) $norm);
+
+    $norm = preg_replace('/(\d)\s*h\s*(\d)/', '$1h $2', (string) $norm);
+
+    return $norm !== '' ? $norm : $s;
 }
 
 /**
@@ -805,7 +1218,11 @@ function sikshya_render_course_card(\WP_Post $course, string $type = 'default'):
     $course_id = (int) $course->ID;
     $p = sikshya_get_course_pricing($course_id);
 
-    $course_duration = sikshya_first_nonempty_post_meta($course_id, ['_sikshya_duration', '_sikshya_course_duration', 'sikshya_course_duration']);
+    $course_duration = function_exists('sikshya_get_course_catalog_duration_display')
+        ? sikshya_get_course_catalog_duration_display($course_id)
+        : sikshya_format_course_duration_display(
+            sikshya_first_nonempty_post_meta($course_id, ['_sikshya_duration', '_sikshya_course_duration', 'sikshya_course_duration'])
+        );
     $course_difficulty = sikshya_first_nonempty_post_meta($course_id, ['_sikshya_difficulty', '_sikshya_course_difficulty', 'sikshya_course_level']);
     $course_instructor = get_userdata((int) $course->post_author);
     $course_thumbnail = get_the_post_thumbnail_url($course_id, 'medium');
@@ -933,6 +1350,64 @@ function sikshya_is_user_enrolled_in_course(int $course_id, int $user_id = 0): b
     $repo = new \Sikshya\Database\Repositories\EnrollmentRepository();
 
     return $repo->findByUserAndCourse($user_id, $course_id) !== null;
+}
+
+/**
+ * Whether the user has completed the course (enrollment status).
+ *
+ * Cached per request to avoid repeated queries on course listings.
+ */
+function sikshya_is_user_completed_course(int $course_id, int $user_id = 0): bool
+{
+    $user_id = $user_id ?: get_current_user_id();
+    $course_id = (int) $course_id;
+    if ($user_id <= 0 || $course_id <= 0) {
+        return false;
+    }
+
+    static $cache = [];
+    $k = $user_id . ':' . $course_id;
+    if (array_key_exists($k, $cache)) {
+        return (bool) $cache[$k];
+    }
+
+    $repo = new \Sikshya\Database\Repositories\EnrollmentRepository();
+    $row = $repo->findByUserAndCourse($user_id, $course_id);
+    $cache[$k] = $row && isset($row->status) && (string) $row->status === 'completed';
+
+    return (bool) $cache[$k];
+}
+
+/**
+ * Certificate download URL for a user + course, if issued.
+ *
+ * Cached per request to keep course listings fast.
+ */
+function sikshya_get_user_course_certificate_download_url(int $course_id, int $user_id = 0): string
+{
+    $user_id = $user_id ?: get_current_user_id();
+    $course_id = (int) $course_id;
+    if ($user_id <= 0 || $course_id <= 0) {
+        return '';
+    }
+
+    static $cache = [];
+    $k = $user_id . ':' . $course_id;
+    if (array_key_exists($k, $cache)) {
+        return (string) $cache[$k];
+    }
+
+    // Respect global setting used by LearnerCertificateService.
+    if (class_exists(\Sikshya\Services\Settings::class) && !\Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('students_can_download_certificates', '1'))) {
+        $cache[$k] = '';
+        return '';
+    }
+
+    $repo = new \Sikshya\Database\Repositories\CertificateRepository();
+    $row = $repo->findByUserAndCourse($user_id, $course_id);
+    $cache[$k] = $row ? (string) ($row->download_url ?? '') : '';
+
+    return (string) $cache[$k];
 }
 
 /**

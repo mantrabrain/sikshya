@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import type React from 'react';
+import { getConfig } from '../config/env';
 import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
 import { NavIcon } from './NavIcon';
 import type { NavItem, NavItemBadge } from '../types';
@@ -196,6 +197,8 @@ type Props = {
   /** True when the Pro licence is active on this site. */
   proLicensed?: boolean;
   adminUrl: string;
+  /** Plugin root URL; used for the default mark when no white-label logo is set. */
+  pluginUrl?: string;
   branding?: {
     pluginName?: string;
     logoUrl?: string;
@@ -204,7 +207,16 @@ type Props = {
   };
 };
 
-export function Sidebar({ items, currentPage, version, proPluginVersion, proLicensed, adminUrl, branding }: Props) {
+export function Sidebar({
+  items,
+  currentPage,
+  version,
+  proPluginVersion,
+  proLicensed,
+  adminUrl,
+  pluginUrl,
+  branding,
+}: Props) {
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -221,6 +233,10 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
 
   const wpHome = `${adminUrl.replace(/\/?$/, '/')}index.php`;
   const title = branding?.pluginName?.trim() ? branding.pluginName.trim() : 'Sikshya';
+  const pluginBase = (pluginUrl?.trim() || getConfig().pluginUrl || '').replace(/\/+$/, '');
+  const whiteLabelLogo = branding?.logoUrl?.trim() || '';
+  const logoSrc =
+    whiteLabelLogo || (pluginBase ? `${pluginBase}/assets/images/logo-white.png` : '');
   const brandedChrome = Boolean(branding?.sidebarBg || branding?.sidebarText);
   const sidebarStyle = useMemo<React.CSSProperties | undefined>(() => {
     if (!branding?.sidebarBg && !branding?.sidebarText) return undefined;
@@ -243,13 +259,15 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
         } ${SHELL_HEADER_MIN_CLASS}`}
       >
         <div className="flex items-center gap-3">
-          {branding?.logoUrl ? (
-            <img
-              src={branding.logoUrl}
-              alt=""
-              className="h-8 w-8 shrink-0 rounded-md object-contain object-center"
-              referrerPolicy="no-referrer"
-            />
+          {logoSrc ? (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 shadow-sm ring-1 ring-inset ring-brand-500/35">
+              <img
+                src={logoSrc}
+                alt=""
+                className="h-6 w-6 object-contain object-center"
+                referrerPolicy="no-referrer"
+              />
+            </div>
           ) : null}
           <div
             className={`min-w-0 text-lg font-semibold leading-tight tracking-tight ${
@@ -259,27 +277,36 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
             {title}
           </div>
         </div>
-        <div className="mt-2 flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-2.5 flex min-w-0 flex-wrap items-center gap-1.5">
           <span
-            className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight ring-1 ring-inset ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium leading-none tracking-tight shadow-sm ${
               brandedChrome
-                ? 'border-current/15 bg-current/5 text-inherit ring-current/10'
-                : 'border-slate-200/90 bg-slate-100/90 text-slate-700 ring-slate-200/60 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700/80'
+                ? 'border-white/15 bg-black/[0.12] text-inherit shadow-black/10 dark:border-white/10 dark:bg-white/[0.08]'
+                : 'border-slate-200/90 bg-white text-slate-600 shadow-slate-900/[0.04] dark:border-slate-600/80 dark:bg-slate-800/90 dark:text-slate-300 dark:shadow-none'
             }`}
-            title={`${title} ${version}`}
+            title={`${title} (free) ${version}`}
           >
-            <span className={brandedChrome ? 'text-inherit/70' : 'text-slate-500 dark:text-slate-400'}>Free</span>
-            <span className={`mx-0.5 ${brandedChrome ? 'text-inherit/35' : 'text-slate-300 dark:text-slate-600'}`} aria-hidden>
-              ·
+            <span
+              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                brandedChrome ? 'bg-current opacity-50' : 'bg-slate-400 dark:bg-slate-500'
+              }`}
+              aria-hidden
+            />
+            <span className={brandedChrome ? 'text-inherit/90' : ''}>Free</span>
+            <span
+              className={`tabular-nums opacity-75 ${
+                brandedChrome ? 'text-inherit/80' : 'text-slate-500 dark:text-slate-400'
+              }`}
+            >
+              v{version}
             </span>
-            <span className="tabular-nums">v{version}</span>
           </span>
           {proPluginVersion ? (
             <span
-              className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-semibold leading-none tracking-tight ring-1 ring-inset ${
+              className={`inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium leading-none tracking-tight shadow-sm ${
                 proLicensed
-                  ? 'border-emerald-200/90 bg-emerald-50 text-emerald-950 ring-emerald-100/80 dark:border-emerald-800/80 dark:bg-emerald-950/50 dark:text-emerald-100 dark:ring-emerald-900/50'
-                  : 'border-amber-200/90 bg-amber-50 text-amber-950 ring-amber-100/80 dark:border-amber-800/80 dark:bg-amber-950/50 dark:text-amber-100 dark:ring-amber-900/50'
+                  ? 'border-emerald-200/80 bg-emerald-50 text-emerald-900 shadow-emerald-900/[0.04] dark:border-emerald-800/70 dark:bg-emerald-950/55 dark:text-emerald-100 dark:shadow-none'
+                  : 'border-amber-200/80 bg-amber-50 text-amber-950 shadow-amber-900/[0.04] dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-50 dark:shadow-none'
               }`}
               title={
                 proLicensed
@@ -287,27 +314,26 @@ export function Sidebar({ items, currentPage, version, proPluginVersion, proLice
                   : `${title} Pro ${proPluginVersion} — activate your license for updates and paid modules`
               }
             >
-              <span className={proLicensed ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-200'}>
+              <span
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                  proLicensed ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-amber-500 dark:bg-amber-400'
+                }`}
+                aria-hidden
+              />
+              <span className={proLicensed ? 'text-emerald-800 dark:text-emerald-100' : 'text-amber-900 dark:text-amber-100'}>
                 Pro
               </span>
               <span
-                className={
-                  proLicensed
-                    ? 'mx-0.5 text-emerald-300/90 dark:text-emerald-700/90'
-                    : 'mx-0.5 text-amber-300/90 dark:text-amber-800/90'
-                }
-                aria-hidden
+                className={`tabular-nums ${
+                  proLicensed ? 'text-emerald-700/85 dark:text-emerald-200/90' : 'text-amber-800/90 dark:text-amber-200/90'
+                }`}
               >
-                ·
+                v{proPluginVersion}
               </span>
-              <span className="tabular-nums">v{proPluginVersion}</span>
               {!proLicensed ? (
-                <>
-                  <span className="mx-0.5 text-amber-300/90 dark:text-amber-800/90" aria-hidden>
-                    ·
-                  </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide opacity-90">Unlicensed</span>
-                </>
+                <span className="max-w-[5.5rem] truncate text-[9px] font-normal normal-case tracking-normal text-amber-700/80 dark:text-amber-200/75">
+                  inactive
+                </span>
               ) : null}
             </span>
           ) : null}

@@ -37,6 +37,7 @@ class AdminAssetsService
     {
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('admin_init', [$this, 'registerAdminAssets']);
+        add_filter('script_loader_tag', [$this, 'filterReactAdminScriptLoaderTag'], 10, 3);
     }
 
     /**
@@ -59,15 +60,6 @@ class AdminAssetsService
             SIKSHYA_VERSION
         );
 
-        wp_register_script(
-            'sikshya-admin',
-            $this->plugin->getAssetUrl('admin/js/admin.js'),
-            ['jquery'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-
         wp_register_style(
             'sikshya-toast',
             $this->plugin->getAssetUrl('admin/css/toast.css'),
@@ -79,22 +71,6 @@ class AdminAssetsService
             'sikshya-toast',
             $this->plugin->getAssetUrl('admin/js/toast.js'),
             ['jquery'],
-            SIKSHYA_VERSION,
-            true
-        );
-
-        // Modal for legacy PHP settings screen (see Admin.php).
-        wp_register_style(
-            'sikshya-modal',
-            $this->plugin->getAssetUrl('admin/css/modal.css'),
-            ['sikshya-admin'],
-            SIKSHYA_VERSION
-        );
-
-        wp_register_script(
-            'sikshya-modal',
-            $this->plugin->getAssetUrl('admin/js/modal.js'),
-            ['jquery', 'sikshya-admin'],
             SIKSHYA_VERSION,
             true
         );
@@ -140,6 +116,26 @@ class AdminAssetsService
             SIKSHYA_VERSION
         );
 
+    }
+
+    /**
+     * Vite emits an ES-module graph (`import` + shared chunks). WordPress defaults to classic scripts.
+     *
+     * @param string $tag    Full HTML markup for the script element.
+     * @param string $handle Script handle.
+     * @param string $src    Script source URL (unused; kept for the filter signature).
+     * @return string
+     */
+    public function filterReactAdminScriptLoaderTag(string $tag, string $handle, string $src): string
+    {
+        unset($src);
+        if ($handle !== 'sikshya-react-admin') {
+            return $tag;
+        }
+        if (strpos($tag, 'type=') !== false) {
+            return $tag;
+        }
+        return str_replace('<script ', '<script type="module" ', $tag);
     }
 
     /**
@@ -216,6 +212,15 @@ class AdminAssetsService
             if (wp_style_is('sikshya-react-admin', 'registered')) {
                 wp_enqueue_style('sikshya-react-admin');
             }
+
+            // Defensive: some environments can load the React module without the expected
+            // bootstrap payload (caching/filters/partial output). Ensure the shell always
+            // has a minimal `user` object so it never hard-crashes on destructuring.
+            wp_add_inline_script(
+                'sikshya-react-admin',
+                'window.sikshyaReact=window.sikshyaReact||{};window.sikshyaReact.user=window.sikshyaReact.user||{name:"Admin",avatarUrl:""};',
+                'before'
+            );
             wp_enqueue_script('sikshya-react-admin');
 
             wp_enqueue_style('sikshya-toast');

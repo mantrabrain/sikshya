@@ -1,6 +1,10 @@
 /**
  * Full-width Sikshya React admin: hide default wp-admin chrome on our screens.
  */
+body.sikshya-react-shell {
+    overflow: hidden;
+}
+
 body.sikshya-react-shell .screen-reader-shortcut,
 body.sikshya-react-shell a[href="#wpbody-content"],
 body.sikshya-react-shell a[href="#wp-toolbar"] {

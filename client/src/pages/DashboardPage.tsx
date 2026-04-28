@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { MetricTile, QuickActionCard } from '../components/dashboard';
 import { NavIcon } from '../components/NavIcon';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
@@ -100,7 +100,7 @@ type OverviewPayload = {
   dashboardLinks?: { enrollments?: boolean; payments?: boolean };
 };
 
-export function DashboardPage(props: { config: SikshyaReactConfig; title: string }) {
+export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const [createOpen, setCreateOpen] = useState(false);
   const [refreshBusy, setRefreshBusy] = useState(false);
@@ -162,14 +162,9 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
   const licensing = getLicensing(config);
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Course health, learners, and shortcuts in one place"
       pageActions={
@@ -222,7 +217,7 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="min-w-0 leading-relaxed">
-                <span className="font-semibold">Scale your school</span>
+                <span className="font-semibold">Scale your course business</span>
                 {' — '}
                 Scheduled lesson access, subscriptions, gradebook, shared course staff, richer certificates, and more.
                 Your admin layout stays familiar; upgraded plans unlock the behaviour behind each screen.
@@ -347,7 +342,7 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
           </div>
         </section>
 
-        <div className="grid gap-6 xl:grid-cols-5">
+        <div className="grid items-start gap-6 xl:grid-cols-5">
           <section className="xl:col-span-3" aria-labelledby="dash-recent-courses">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 id="dash-recent-courses" className="text-base font-semibold text-slate-900 dark:text-white">
@@ -479,7 +474,7 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
             </div>
 
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-5 dark:border-slate-700 dark:bg-slate-900/40">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Grow your school</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Grow your course business</h3>
               <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden />
@@ -528,6 +523,6 @@ export function DashboardPage(props: { config: SikshyaReactConfig; title: string
           </section>
         </div>
       </div>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

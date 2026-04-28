@@ -21,6 +21,7 @@ if (!$archive_url) {
 }
 
 $cats_on = \Sikshya\Services\CourseFrontendSettings::areCategoriesEnabled();
+$cat_display = \Sikshya\Services\CourseFrontendSettings::categoryDisplay();
 
 $categories = [];
 if ($cats_on) {
@@ -54,16 +55,37 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
         </div>
 
         <?php if ($cats_on) : ?>
-        <div class="sikshya-archive-filters__group">
-            <label class="sikshya-archive-filters__label" for="sikshya-filter-cat"><?php esc_html_e('Category', 'sikshya'); ?></label>
-            <select class="sikshya-archive-filters__select" id="sikshya-filter-cat" name="sikshya_cat" onchange="this.form.submit()">
-                <option value=""><?php esc_html_e('All categories', 'sikshya'); ?></option>
-                <?php foreach ($categories as $term) : ?>
-                    <option value="<?php echo esc_attr($term->slug); ?>" <?php selected($f['category_slug'], $term->slug); ?>>
-                        <?php echo esc_html($term->name); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <div class="sikshya-archive-filters__group sikshya-archive-filters__group--categories sikshya-archive-filters__group--cat-display-<?php echo esc_attr($cat_display); ?>">
+            <span class="sikshya-archive-filters__label"><?php esc_html_e('Category', 'sikshya'); ?></span>
+            <?php if ($cat_display === 'dropdown') : ?>
+                <label class="screen-reader-text" for="sikshya-filter-cat"><?php esc_html_e('Category', 'sikshya'); ?></label>
+                <select class="sikshya-archive-filters__select" id="sikshya-filter-cat" name="sikshya_cat" onchange="this.form.submit()">
+                    <option value=""><?php esc_html_e('All categories', 'sikshya'); ?></option>
+                    <?php foreach ($categories as $term) : ?>
+                        <option value="<?php echo esc_attr($term->slug); ?>" <?php selected($f['category_slug'], $term->slug); ?>>
+                            <?php echo esc_html($term->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            <?php else : ?>
+                <?php
+                $all_cats_url = sikshya_course_archive_build_url(['category_slug' => '']);
+                ?>
+                <nav class="sikshya-archive-filters__cats sikshya-archive-filters__cats--<?php echo esc_attr($cat_display); ?>" aria-label="<?php echo esc_attr(__('Course categories', 'sikshya')); ?>">
+                    <a class="sikshya-archive-filters__cat-link<?php echo $f['category_slug'] === '' ? ' is-active' : ''; ?>" href="<?php echo esc_url($all_cats_url); ?>">
+                        <?php esc_html_e('All categories', 'sikshya'); ?>
+                    </a>
+                    <?php foreach ($categories as $term) : ?>
+                        <?php
+                        $term_url = sikshya_course_archive_build_url(['category_slug' => $term->slug]);
+                        $is_active = ($f['category_slug'] === $term->slug);
+                        ?>
+                        <a class="sikshya-archive-filters__cat-link<?php echo $is_active ? ' is-active' : ''; ?>" href="<?php echo esc_url($term_url); ?>">
+                            <?php echo esc_html($term->name); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </nav>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
 

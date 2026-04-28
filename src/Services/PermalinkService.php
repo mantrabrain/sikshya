@@ -31,6 +31,7 @@ final class PermalinkService
             'permalink_checkout' => 'checkout',
             'permalink_account' => 'account',
             'permalink_learn' => 'learn',
+            'permalink_login' => 'login',
             'permalink_order' => 'order',
             'rewrite_base_course' => 'courses',
             'rewrite_base_lesson' => 'lessons',
@@ -38,7 +39,6 @@ final class PermalinkService
             'rewrite_base_assignment' => 'assignments',
             'rewrite_base_certificate' => 'certificates',
             'rewrite_tax_course_category' => 'course-category',
-            'rewrite_tax_course_tag' => 'course-tag',
         ];
     }
 
@@ -79,7 +79,7 @@ final class PermalinkService
      */
     public static function virtualPageUrl(string $page): string
     {
-        $allowed = [ 'cart', 'checkout', 'account', 'learn', 'order' ];
+        $allowed = [ 'cart', 'checkout', 'account', 'learn', 'login', 'order' ];
         if (! in_array($page, $allowed, true)) {
             return home_url('/');
         }
@@ -207,7 +207,7 @@ final class PermalinkService
             'top'
         );
 
-        foreach (['cart', 'checkout', 'learn', 'order'] as $page) {
+        foreach (['cart', 'checkout', 'learn', 'login', 'order'] as $page) {
             $slug = $p['permalink_' . $page] ?? $page;
             $slug = self::sanitizeSlug($slug);
             $re   = preg_quote($slug, '/');

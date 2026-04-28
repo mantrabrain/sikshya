@@ -47,6 +47,11 @@ class CourseBuilderService
             $course_status = 'draft';
         }
 
+        // Keep the Settings tab ("course_status" select) consistent with the actual WP post_status.
+        // The React UI sends desired WP status as `course_status` param, but also includes tab field
+        // values; without syncing, the tab can keep showing "Draft" even after publishing.
+        $data['course_status'] = $course_status === 'publish' ? 'published' : $course_status;
+
         try {
             $manager = new CourseBuilderManager($this->plugin);
         } catch (\Exception $e) {

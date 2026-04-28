@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppShell } from '../components/AppShell';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { getErrorSummary } from '../api/errors';
 import { DataTable } from '../components/shared/DataTable';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from '../components/shared/list/ListSearchToolbar';
@@ -12,6 +12,7 @@ import { ButtonPrimary } from '../components/shared/buttons';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
+import { QuillField } from '../components/shared/QuillField';
 import type { Column } from '../components/shared/DataTable';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useWpTermCollection } from '../hooks/useWpTermCollection';
@@ -38,7 +39,7 @@ type WpMediaFrame = {
   state: () => { get: (k: 'selection') => { first: () => { toJSON: () => { id?: number; url?: string } } } };
 };
 
-export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title: string; subtitle: string }) {
+export function CourseCategoriesPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string; subtitle: string }) {
   const { config, title, subtitle } = props;
   const { confirm, alert: alertDialog } = useSikshyaDialog();
 
@@ -327,17 +328,7 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
   );
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      title={title}
-      subtitle={subtitle}
-      pageActions={null}
-    >
+    <EmbeddableShell embedded={props.embedded} config={config} title={title} subtitle={subtitle}>
       <div className="grid gap-6 lg:grid-cols-[minmax(300px,380px)_1fr] lg:items-start">
         <aside className="lg:sticky lg:top-6">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -376,15 +367,13 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
                   />
                 </div>
                 <div>
-                  <label htmlFor="cc-desc" className={LABEL}>
-                    Description
-                  </label>
-                  <textarea
-                    id="cc-desc"
-                    rows={3}
+                  <QuillField
+                    label="Description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className={`${FIELD} min-h-[72px] resize-y`}
+                    onChange={(html) => setDescription(html)}
+                    placeholder="Optional description shown on the category page"
+                    disabled={saving}
+                    minHeightPx={220}
                   />
                 </div>
                 <div>
@@ -564,6 +553,6 @@ export function CourseCategoriesPage(props: { config: SikshyaReactConfig; title:
           </ListPanel>
         </section>
       </div>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

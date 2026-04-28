@@ -174,7 +174,6 @@ final class Installer
         ]);
 
         Settings::setRaw('sikshya_course_settings', [
-            'courses_per_page' => 12,
             'featured_courses_count' => 6,
             'popular_courses_count' => 6,
             'enable_reviews' => true,

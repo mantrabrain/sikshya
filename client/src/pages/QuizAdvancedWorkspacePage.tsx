@@ -163,7 +163,7 @@ export function QuizAdvancedWorkspacePage(props: {
       addonEnableDescription="Enable the add-on to edit global settings, inspect taxonomy banks, and preview pool sizes before you wire quizzes."
       canEnable={Boolean(addon.licenseOk)}
       enableBusy={addon.loading}
-      onEnable={() => void addon.enable()}
+      onEnable={() => addon.enable()}
       addonError={addon.error}
     >
       {enabled ? (

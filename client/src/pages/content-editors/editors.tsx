@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getWpApi } from '../../api';
 import { NavIcon } from '../../components/NavIcon';
+import { TopRightToast, useTopRightToast } from '../../components/shared/TopRightToast';
 import { appViewHref } from '../../lib/appUrl';
 import { useAdminRouting } from '../../lib/adminRouting';
 import { ApiErrorPanel } from '../../components/shared/ApiErrorPanel';
@@ -10,6 +11,8 @@ import { getSikshyaApi } from '../../api';
 import { HorizontalEditorTabs } from '../../components/shared/HorizontalEditorTabs';
 import { WPMediaPickerField } from '../../components/shared/WPMediaPickerField';
 import { DateTimePickerField } from '../../components/shared/DateTimePickerField';
+import { QuillField } from '../../components/shared/QuillField';
+import { NumberWithUnitField } from '../../components/shared/NumberWithUnitField';
 import type { SikshyaReactConfig } from '../../types';
 import { GatedFeatureWorkspace } from '../../components/GatedFeatureWorkspace';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../../lib/licensing';
@@ -182,47 +185,16 @@ type EditorShellProps = {
 };
 
 function EditorFormShell({ loading, saving, error, onRetry, saveMsg, children }: EditorShellProps) {
-  const [toast, setToast] = useState<{ open: boolean; kind: 'success'; title: string; message?: string } | null>(null);
+  const toast = useTopRightToast(3800);
 
   useEffect(() => {
     if (!saveMsg) return;
-    setToast({ open: true, kind: 'success', title: 'Saved', message: saveMsg });
+    toast.success('Saved', saveMsg);
   }, [saveMsg]);
-
-  useEffect(() => {
-    if (!toast?.open) return;
-    const t = window.setTimeout(() => setToast(null), 3800);
-    return () => window.clearTimeout(t);
-  }, [toast]);
 
   return (
     <>
-      {toast?.open ? (
-        <div className="pointer-events-none fixed right-6 top-6 z-[120] w-[min(26rem,calc(100vw-3rem))]">
-          <div className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur dark:border-emerald-900/40 dark:bg-slate-900/95">
-            <span
-              className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white"
-              aria-hidden
-            >
-              <NavIcon name="badge" className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">{toast.title}</div>
-              {toast.message ? (
-                <div className="mt-0.5 text-xs leading-snug text-slate-600 dark:text-slate-300">{toast.message}</div>
-              ) : null}
-            </div>
-            <button
-              type="button"
-              className="rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-              onClick={() => setToast(null)}
-              aria-label="Dismiss"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {error ? (
         <div className="mb-4">
           <ApiErrorPanel error={error} title="Request failed" onRetry={onRetry} />
@@ -250,6 +222,11 @@ export type ContentEditorProps = {
   embedded?: boolean;
   /** When set, chapter editor locks parent course to this ID. */
   forcedCourseId?: number;
+  /**
+   * When embedded, allows the parent (Course Builder) to trigger a save
+   * before publishing the course.
+   */
+  exposeSave?: (saveFn: () => Promise<boolean>) => void;
 };
 
 function useMoveToTrash(
@@ -292,9 +269,11 @@ export function LessonEditor(props: ContentEditorProps) {
   const [content, setContent] = useState('');
   const [status, setStatus] = useState('draft');
   const [featured, setFeatured] = useState(0);
-  const [duration, setDuration] = useState('');
+  const [durationValue, setDurationValue] = useState<string>('');
+  const [durationUnit, setDurationUnit] = useState<'min' | 'hr'>('min');
   const [lessonType, setLessonType] = useState('text');
   const [videoUrl, setVideoUrl] = useState('');
+  const [isFreePreview, setIsFreePreview] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
   const [proValues, setProValues] = useState<ProLessonValues>(PRO_LESSON_DEFAULTS);
@@ -312,7 +291,8 @@ export function LessonEditor(props: ContentEditorProps) {
       setContent('');
       setStatus('draft');
       setFeatured(0);
-      setDuration('');
+      setDurationValue('');
+      setDurationUnit('min');
       setLessonType('text');
       setVideoUrl('');
       setProValues(PRO_LESSON_DEFAULTS);
@@ -328,16 +308,35 @@ export function LessonEditor(props: ContentEditorProps) {
     setStatus(p.status || 'draft');
     setFeatured(typeof p.featured_media === 'number' ? p.featured_media : 0);
     const m = p.meta as Record<string, unknown> | undefined;
-    setDuration(String(readMeta(m, '_sikshya_lesson_duration') ?? ''));
+    const rawDur = String(readMeta(m, '_sikshya_lesson_duration') ?? '').trim();
+    if (!rawDur) {
+      setDurationValue('');
+      setDurationUnit('min');
+    } else {
+      const lower = rawDur.toLowerCase();
+      const unit: 'min' | 'hr' = lower.includes('h') ? 'hr' : 'min';
+      const num = lower
+        .replace(/hours?|hrs?|hr|minutes?|mins?|min/g, '')
+        .replace(/[^\d.]/g, '')
+        .trim();
+      setDurationValue(num || rawDur);
+      setDurationUnit(unit);
+    }
     setLessonType(String(readMeta(m, '_sikshya_lesson_type') ?? 'text') || 'text');
     setVideoUrl(String(readMeta(m, '_sikshya_lesson_video_url') ?? ''));
+    setIsFreePreview(Boolean(readMeta(m, '_sikshya_is_free') === true || String(readMeta(m, '_sikshya_is_free') ?? '') === '1'));
     setProValues(readProLessonFromMeta(m));
   }, [editor.post, editor.isNew]);
 
-  const onSave = async () => {
+  const onSave = async (): Promise<boolean> => {
     setSaveMsg(null);
     editor.setError(null);
     const kind = (lessonType.trim() || 'text');
+    const durNum = parseFloat(durationValue);
+    const duration =
+      durationValue.trim() && Number.isFinite(durNum) && durNum > 0
+        ? `${durNum}${Number.isInteger(durNum) ? '' : ''} ${durationUnit === 'hr' ? 'hr' : 'min'}`
+        : '';
     const body: Record<string, unknown> = {
       title,
       content,
@@ -345,9 +344,10 @@ export function LessonEditor(props: ContentEditorProps) {
       excerpt,
       featured_media: featured > 0 ? featured : 0,
       meta: {
-        _sikshya_lesson_duration: duration.trim(),
+        _sikshya_lesson_duration: duration,
         _sikshya_lesson_type: kind,
         _sikshya_lesson_video_url: kind === 'video' ? videoUrl.trim() : '',
+        _sikshya_is_free: isFreePreview ? '1' : '0',
         ...buildProLessonMetaForKind(kind, proValues),
       },
     };
@@ -357,15 +357,22 @@ export function LessonEditor(props: ContentEditorProps) {
         const id = (res as { id: number }).id;
         if (typeof id === 'number' && id > 0) {
           onSavedNewId?.(id);
-          return;
+          return true;
         }
       }
       setSaveMsg('Lesson saved.');
       await editor.load();
+      return true;
     } catch {
       /* error in hook */
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!embedded || !props.exposeSave) return;
+    props.exposeSave(onSave);
+  }, [embedded, props, title, content, excerpt, status, featured, durationValue, durationUnit, lessonType, videoUrl, proValues]);
 
   return (
     <EditorFormShell
@@ -397,9 +404,9 @@ export function LessonEditor(props: ContentEditorProps) {
               <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>
                 {status || 'draft'}
               </span>
-              {duration?.trim() ? (
+              {durationValue?.trim() ? (
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
-                  {duration.trim()}
+                  {`${durationValue.trim()} ${durationUnit === 'hr' ? 'hr' : 'min'}`}
                 </span>
               ) : null}
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
@@ -436,13 +443,13 @@ export function LessonEditor(props: ContentEditorProps) {
                   Short summary
                 </label>
                 <p className={HINT}>A short blurb for lesson lists; optional but helps learners scan the outline.</p>
-                <textarea
-                  id="sik-lesson-excerpt"
-                  rows={3}
-                  className={`${FIELD} min-h-[72px] resize-y`}
+                <QuillField
+                  label="Short summary"
                   value={excerpt}
-                  onChange={(e) => setExcerpt(e.target.value)}
+                  onChange={(html) => setExcerpt(html)}
                   placeholder="One or two sentences about this lesson"
+                  disabled={editor.saving}
+                  minHeightPx={160}
                 />
               </div>
               <div>
@@ -526,13 +533,21 @@ export function LessonEditor(props: ContentEditorProps) {
                     ? 'Optional context shown below the embedded activity.'
                     : 'Main instructional content (HTML supported).'}
                 </p>
-                <textarea
-                  id="sik-lesson-body"
-                  rows={16}
-                  className={`${FIELD} min-h-[320px] w-full font-mono text-[13px] leading-relaxed`}
+                <QuillField
+                  label={
+                    lessonType === 'video'
+                      ? 'Transcript / notes'
+                      : lessonType === 'live'
+                        ? 'Briefing for the session'
+                        : lessonType === 'scorm' || lessonType === 'h5p'
+                          ? 'Notes shown alongside the activity'
+                          : 'Lesson content'
+                  }
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder={lessonType === 'video' ? '<p>Optional notes under the video…</p>' : '<p>Your teaching content (HTML allowed)…</p>'}
+                  onChange={(html) => setContent(html)}
+                  placeholder={lessonType === 'video' ? 'Optional notes under the video…' : 'Your lesson content…'}
+                  disabled={editor.saving}
+                  minHeightPx={360}
                 />
               </div>
             </div>
@@ -547,6 +562,10 @@ export function LessonEditor(props: ContentEditorProps) {
                     <label className={LABEL} htmlFor="sik-lesson-status">
                       Status
                     </label>
+                    {/* Keep row height aligned with Duration (which has a hint line). */}
+                    <p className={`${HINT} invisible`} aria-hidden>
+                      placeholder
+                    </p>
                     <select
                       id="sik-lesson-status"
                       className={FIELD}
@@ -560,19 +579,45 @@ export function LessonEditor(props: ContentEditorProps) {
                     </select>
                   </div>
                   <div>
-                    <label className={LABEL} htmlFor="sik-lesson-duration">
-                      Duration
-                    </label>
-                    <p className={HINT}>Shown next to the lesson in the outline (optional).</p>
-                    <input
+                    <NumberWithUnitField
                       id="sik-lesson-duration"
-                      className={FIELD}
-                      value={duration}
-                      onChange={(e) => setDuration(e.target.value)}
-                      placeholder="e.g. 12 min"
+                      label="Duration"
+                      hint="Shown next to the lesson in the outline (optional)."
+                      value={durationValue}
+                      onValueChange={setDurationValue}
+                      unit={durationUnit}
+                      onUnitChange={(u) => setDurationUnit(u === 'hr' ? 'hr' : 'min')}
+                      units={[
+                        { value: 'min', label: 'Minutes' },
+                        { value: 'hr', label: 'Hours' },
+                      ]}
+                      fieldClassName={FIELD}
+                      labelClassName={LABEL}
+                      hintClassName={HINT}
+                      placeholder={durationUnit === 'hr' ? 'e.g. 1.5' : 'e.g. 12'}
                     />
                   </div>
                 </div>
+              </FormSection>
+              <FormSection
+                title="Free preview"
+                description="When enabled, this lesson can be opened by visitors who are not enrolled (useful for demo lessons)."
+              >
+                <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={isFreePreview}
+                    onChange={(e) => setIsFreePreview(e.target.checked)}
+                    disabled={editor.saving}
+                  />
+                  <span className="min-w-0">
+                    <span className="block font-semibold text-slate-900 dark:text-white">Allow free preview</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                      Tip: mark one or two lessons as preview so learners understand the teaching style before purchasing.
+                    </span>
+                  </span>
+                </label>
               </FormSection>
             </div>
           )}
@@ -789,7 +834,7 @@ export function QuizEditor(props: ContentEditorProps) {
     setAddQuestionOpen(true);
   };
 
-  const onSave = async () => {
+  const onSave = async (): Promise<boolean> => {
     setSaveMsg(null);
     editor.setError(null);
     const body: Record<string, unknown> = {
@@ -814,15 +859,22 @@ export function QuizEditor(props: ContentEditorProps) {
         const id = (res as { id: number }).id;
         if (typeof id === 'number' && id > 0) {
           onSavedNewId?.(id);
-          return;
+          return true;
         }
       }
       setSaveMsg('Quiz saved.');
       await editor.load();
+      return true;
     } catch {
       /* hook sets error */
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!embedded || !props.exposeSave) return;
+    props.exposeSave(onSave);
+  }, [embedded, props, title, content, status, featured, timeLimit, passing, attempts, quizQuestionIds, proQuizValues, quizAdvMaxDraw]);
 
   return (
     <EditorFormShell
@@ -902,13 +954,13 @@ export function QuizEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-quiz-desc">
                   Instructions for students
                 </label>
-                <textarea
-                  id="sik-quiz-desc"
-                  rows={8}
-                  className={`${FIELD} min-h-[160px] w-full`}
+                <QuillField
+                  label="Instructions for students"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(html) => setContent(html)}
                   placeholder="What students see before starting the quiz…"
+                  disabled={editor.saving}
+                  minHeightPx={220}
                 />
               </div>
               <EditorFeaturedImageField
@@ -1361,7 +1413,7 @@ export function QuestionEditor(props: ContentEditorProps) {
     setMultiCorrect([]);
   };
 
-  const onSave = async () => {
+  const onSave = async (): Promise<boolean> => {
     setSaveMsg(null);
     editor.setError(null);
     const trimmedOptions = options.map((o) => o.trim()).filter(Boolean);
@@ -1419,15 +1471,22 @@ export function QuestionEditor(props: ContentEditorProps) {
         const id = (res as { id: number }).id;
         if (typeof id === 'number' && id > 0) {
           onSavedNewId?.(id);
-          return;
+          return true;
         }
       }
       setSaveMsg('Question saved.');
       await editor.load();
+      return true;
     } catch {
       /* hook */
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!embedded || !props.exposeSave) return;
+    props.exposeSave(onSave);
+  }, [embedded, props, title, content, status, featured, qType, points, options, correctAnswer, multiCorrect, matchLeft, matchRight, matchMap, orderItems, orderPerm]);
 
   const moveOrderSlot = (pos: number, dir: -1 | 1) => {
     setOrderPerm((prev) => {
@@ -1930,13 +1989,13 @@ export function QuestionEditor(props: ContentEditorProps) {
                   Explanation / feedback (optional)
                 </label>
                 <p className={HINT}>Shown after grading or kept for instructors. Stored as post content.</p>
-                <textarea
-                  id="sik-q-body"
-                  rows={8}
-                  className={`${FIELD} min-h-[160px] w-full`}
-                  placeholder="Optional explanation for learners or grading notes…"
+                <QuillField
+                  label="Explanation / feedback (optional)"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(html) => setContent(html)}
+                  placeholder="Optional explanation for learners or grading notes…"
+                  disabled={editor.saving}
+                  minHeightPx={220}
                 />
               </div>
             </div>
@@ -2106,7 +2165,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
     setProAsgValues(readProAssignmentFromMeta(m));
   }, [editor.post, editor.isNew]);
 
-  const onSave = async () => {
+  const onSave = async (): Promise<boolean> => {
     setSaveMsg(null);
     editor.setError(null);
     const body: Record<string, unknown> = {
@@ -2127,15 +2186,22 @@ export function AssignmentEditor(props: ContentEditorProps) {
         const id = (res as { id: number }).id;
         if (typeof id === 'number' && id > 0) {
           onSavedNewId?.(id);
-          return;
+          return true;
         }
       }
       setSaveMsg('Assignment saved.');
       await editor.load();
+      return true;
     } catch {
       /* hook */
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!embedded || !props.exposeSave) return;
+    props.exposeSave(onSave);
+  }, [embedded, props, title, content, status, featured, due, apoints, atype, proAsgValues]);
 
   return (
     <EditorFormShell
@@ -2207,13 +2273,13 @@ export function AssignmentEditor(props: ContentEditorProps) {
                   Instructions & rubric
                 </label>
                 <p className={HINT}>What to submit, file types, length, and how you will grade (optional but clearer for learners).</p>
-                <textarea
-                  id="sik-as-body"
-                  rows={12}
-                  className={`${FIELD} min-h-[240px] w-full`}
+                <QuillField
+                  label="Instructions & rubric"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(html) => setContent(html)}
                   placeholder="Task description, deliverables, and grading criteria…"
+                  disabled={editor.saving}
+                  minHeightPx={280}
                 />
               </div>
               <EditorFeaturedImageField
@@ -2370,7 +2436,7 @@ export function ChapterEditor(props: ContentEditorProps) {
     setCourseId(fromMeta > 0 ? fromMeta : forcedCourseId && forcedCourseId > 0 ? forcedCourseId : 0);
   }, [editor.post, editor.isNew, forcedCourseId]);
 
-  const onSave = async () => {
+  const onSave = async (): Promise<boolean> => {
     setSaveMsg(null);
     editor.setError(null);
     const effectiveCourse = forcedCourseId && forcedCourseId > 0 ? forcedCourseId : courseId;
@@ -2390,15 +2456,22 @@ export function ChapterEditor(props: ContentEditorProps) {
         const id = (res as { id: number }).id;
         if (typeof id === 'number' && id > 0) {
           onSavedNewId?.(id);
-          return;
+          return true;
         }
       }
       setSaveMsg('Chapter saved.');
       await editor.load();
+      return true;
     } catch {
       /* hook */
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!embedded || !props.exposeSave) return;
+    props.exposeSave(onSave);
+  }, [embedded, props, title, content, status, featured, order, courseId, forcedCourseId]);
 
   return (
     <EditorFormShell
@@ -2461,13 +2534,13 @@ export function ChapterEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-ch-body">
                   Description / intro
                 </label>
-                <textarea
-                  id="sik-ch-body"
-                  rows={8}
-                  className={`${FIELD} min-h-[140px] w-full`}
+                <QuillField
+                  label="Description / intro"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(html) => setContent(html)}
                   placeholder="Optional text shown above the lessons in this chapter…"
+                  disabled={editor.saving}
+                  minHeightPx={220}
                 />
               </div>
               <EditorFeaturedImageField
@@ -2561,6 +2634,7 @@ export function CertificateEditor(props: ContentEditorProps) {
   const { postId, backHref, entityLabel, onSavedNewId, embedded, config } = props;
   const editor = useWpContentPost('sikshya_certificate', postId);
   const moveToTrash = useMoveToTrash(editor, backHref, entityLabel);
+  const toast = useTopRightToast(2600);
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('draft');
   const [featuredId, setFeaturedId] = useState(0);
@@ -2568,12 +2642,6 @@ export function CertificateEditor(props: ContentEditorProps) {
   const [orientation, setOrientation] = useState<'landscape' | 'portrait'>('landscape');
   const [pageSize, setPageSize] = useState<'letter' | 'a4' | 'a5'>('a4');
   const [pageFinish, setPageFinish] = useState<CertificatePageFinish>(DEFAULT_CERTIFICATE_PAGE_FINISH);
-  const [toast, setToast] = useState<{
-    open: boolean;
-    kind: 'success' | 'error';
-    title: string;
-    message?: string;
-  } | null>(null);
   const [layout, setLayout] = useState<CertLayoutFile>(() => defaultCertificateLayout());
   const layoutRef = useRef<CertLayoutFile>(layout);
 
@@ -2667,17 +2735,10 @@ export function CertificateEditor(props: ContentEditorProps) {
     };
   }, [featuredId, editor.isNew]);
 
-  // Auto-dismiss success toasts so they don't pile up.
-  useEffect(() => {
-    if (!toast?.open || toast.kind !== 'success') {
-      return;
-    }
-    const timer = window.setTimeout(() => setToast(null), 2600);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+  // Auto-dismiss handled by shared toast.
 
   const onSave = async (nextStatus?: string) => {
-    setToast(null);
+    toast.clear();
     editor.setError(null);
     const targetStatus = nextStatus || status;
     const latestLayout = layoutRef.current;
@@ -2728,12 +2789,7 @@ export function CertificateEditor(props: ContentEditorProps) {
           (res && typeof res === 'object' && 'meta' in res
             ? (res as { meta?: Record<string, unknown> }).meta
             : undefined) ?? undefined;
-        setToast({
-          open: true,
-          kind: 'error',
-          title: 'Saved, but could not reload',
-          message: 'Refresh this page to see the latest version.',
-        });
+        toast.error('Saved, but could not reload', 'Refresh this page to see the latest version.');
         return;
       }
 
@@ -2769,18 +2825,12 @@ export function CertificateEditor(props: ContentEditorProps) {
       }
 
       if (mismatchedKeys.length) {
-        setToast({
-          open: true,
-          kind: 'error',
-          title: 'Some settings could not be saved',
-          message: mismatchedKeys.map((k) => k.replace(/^_sikshya_certificate_/, '')).join(', '),
-        });
+        toast.error(
+          'Some settings could not be saved',
+          mismatchedKeys.map((k) => k.replace(/^_sikshya_certificate_/, '')).join(', ')
+        );
       } else {
-        setToast({
-          open: true,
-          kind: 'success',
-          title: targetStatus === 'publish' ? 'Certificate published' : 'Saved',
-        });
+        toast.success(targetStatus === 'publish' ? 'Certificate published' : 'Saved');
       }
     } catch {
       return;
@@ -2948,43 +2998,7 @@ export function CertificateEditor(props: ContentEditorProps) {
         className="flex h-[100dvh] w-full flex-col overflow-hidden bg-slate-100 dark:bg-slate-950"
         aria-label="Certificate editor"
       >
-        {toast?.open ? (
-          <div className="fixed right-6 top-6 z-[9999] w-[420px] max-w-[calc(100vw-48px)]">
-            <div
-              className={`rounded-2xl border px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${
-                toast.kind === 'success'
-                  ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-100'
-                  : 'border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-100'
-              }`}
-              role="status"
-              aria-live="polite"
-            >
-              <div className="flex items-start gap-3">
-                <span
-                  className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl ${
-                    toast.kind === 'success'
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
-                      : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200'
-                  }`}
-                >
-                  <NavIcon name={toast.kind === 'success' ? 'badge' : 'helpCircle'} className="h-5 w-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold">{toast.title}</div>
-                  {toast.message ? <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div> : null}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setToast(null)}
-                  className="rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
-                  aria-label="Dismiss"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
+        <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
         <div className="shrink-0 border-b border-slate-200/80 bg-white/90 px-4 py-2.5 backdrop-blur dark:border-slate-800 dark:bg-slate-950/88 sm:px-6 xl:px-8">
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
             <div className="flex flex-wrap items-center gap-2 xl:justify-start">
@@ -3090,7 +3104,7 @@ export function CertificateEditor(props: ContentEditorProps) {
           addonEnableDescription="Turn on the Advanced certificates add-on to use the certificate builder."
           canEnable={Boolean(addon.licenseOk)}
           enableBusy={addon.loading}
-          onEnable={() => void addon.enable()}
+          onEnable={() => addon.enable()}
           addonError={addon.error}
         >
           <div className="flex min-h-0 flex-1 overflow-hidden px-0 py-0">

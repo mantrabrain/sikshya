@@ -51,12 +51,12 @@ $label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plu
             </section>
 
             <?php if ($learner_n > 0 && $learn_url !== '') : ?>
-            <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Your learning', 'sikshya'); ?>" style="margin-top:0;">
+            <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Your learning', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Your learning (as a student)', 'sikshya'); ?></h2>
                     <a class="sik-acc-btn" href="<?php echo esc_url($learn_url); ?>"><?php esc_html_e('Open My learning', 'sikshya'); ?> →</a>
                 </div>
-                <div class="sik-acc-metrics" style="margin-top:0.75rem;">
+                <div class="sik-acc-metrics sik-acc-metrics--panel">
                     <div class="sik-acc-metric">
                         <div class="sik-acc-metric__value"><?php echo esc_html((string) $learner_n); ?></div>
                         <div class="sik-acc-metric__label"><?php echo esc_html($label_enrollments); ?></div>
@@ -80,109 +80,149 @@ $label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plu
             </section>
             <?php endif; ?>
 
-            <section class="sik-acc-metrics" aria-label="<?php esc_attr_e('Teaching metrics', 'sikshya'); ?>">
-                <div class="sik-acc-metric">
-                    <div class="sik-acc-metric__value"><?php echo esc_html((string) $published); ?></div>
-                    <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Published %s', 'sikshya'), strtolower($label_courses))); ?></div>
-                    <div class="sik-acc-metric__hint"><?php esc_html_e('Live for learners', 'sikshya'); ?></div>
-                </div>
-                <div class="sik-acc-metric">
-                    <div class="sik-acc-metric__value"><?php echo esc_html((string) $enrolls); ?></div>
-                    <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Total %s', 'sikshya'), strtolower($label_enrollments))); ?></div>
-                    <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf(__('Across all your %s', 'sikshya'), strtolower($label_courses))); ?></div>
-                </div>
-                <div class="sik-acc-metric">
-                    <div class="sik-acc-metric__value"><?php echo esc_html((string) $completed); ?></div>
-                    <div class="sik-acc-metric__label"><?php esc_html_e('Completions', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf('%s%% completion rate', number_format_i18n($completion_rate, 1))); ?></div>
-                </div>
-                <?php if ($add_url !== '') : ?>
-                <a class="sik-acc-metric sik-acc-metric--link" href="<?php echo esc_url($add_url); ?>">
-                    <div class="sik-acc-metric__value">+ <?php esc_html_e('New', 'sikshya'); ?></div>
-                    <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Create a %s', 'sikshya'), strtolower($label_course))); ?></div>
-                    <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf(__('Open the %s editor', 'sikshya'), strtolower($label_course))); ?></div>
-                </a>
-                <?php endif; ?>
-            </section>
+            <div class="sik-acc-grid sik-acc-grid--split" aria-label="<?php esc_attr_e('Teaching overview', 'sikshya'); ?>">
+                <div class="sik-acc-grid__main">
+                    <section class="sik-acc-metrics" aria-label="<?php esc_attr_e('Teaching metrics', 'sikshya'); ?>">
+                        <div class="sik-acc-metric">
+                            <div class="sik-acc-metric__value"><?php echo esc_html((string) $published); ?></div>
+                            <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Published %s', 'sikshya'), strtolower($label_courses))); ?></div>
+                            <div class="sik-acc-metric__hint"><?php esc_html_e('Live for learners', 'sikshya'); ?></div>
+                        </div>
+                        <div class="sik-acc-metric">
+                            <div class="sik-acc-metric__value"><?php echo esc_html((string) $enrolls); ?></div>
+                            <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Total %s', 'sikshya'), strtolower($label_enrollments))); ?></div>
+                            <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf(__('Across all your %s', 'sikshya'), strtolower($label_courses))); ?></div>
+                        </div>
+                        <div class="sik-acc-metric">
+                            <div class="sik-acc-metric__value"><?php echo esc_html((string) $completed); ?></div>
+                            <div class="sik-acc-metric__label"><?php esc_html_e('Completions', 'sikshya'); ?></div>
+                            <div class="sik-acc-metric__hint"><?php echo esc_html(sprintf('%s%% completion rate', number_format_i18n($completion_rate, 1))); ?></div>
+                        </div>
+                        <a class="sik-acc-metric sik-acc-metric--link" href="<?php echo esc_url($manage_url !== '' ? $manage_url : $page_model->getUrls()->getCoursesUrl()); ?>">
+                            <div class="sik-acc-metric__value"><?php esc_html_e('Manage', 'sikshya'); ?> →</div>
+                            <div class="sik-acc-metric__label"><?php echo esc_html(sprintf(__('Your %s', 'sikshya'), strtolower($label_courses))); ?></div>
+                            <div class="sik-acc-metric__hint"><?php esc_html_e('Edit, publish, and update content', 'sikshya'); ?></div>
+                        </a>
+                    </section>
 
-            <?php if (!empty($pro_blocks)) : ?>
-                <section class="sik-acc-library" aria-label="<?php esc_attr_e('Pro insights', 'sikshya'); ?>">
-                    <?php foreach ($pro_blocks as $block) :
-                        if (!is_array($block)) {
-                            continue;
-                        }
-                        $value = (string) ($block['value'] ?? '');
-                        $label = (string) ($block['label'] ?? '');
-                        $hint = (string) ($block['hint'] ?? '');
-                        if ($value === '' && $label === '') {
-                            continue;
-                        }
-                        ?>
-                        <div class="sik-acc-lib-card">
-                            <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--blue" aria-hidden="true">★</div>
-                            <div class="sik-acc-lib-card__num"><?php echo esc_html($value); ?></div>
-                            <div class="sik-acc-lib-card__lbl"><?php echo esc_html($label); ?></div>
-                            <?php if ($hint !== '') : ?>
-                                <p class="sik-acc-shortcut__desc" style="margin:0.25rem 0 0;"><?php echo esc_html($hint); ?></p>
+                    <?php if (!empty($pro_blocks)) : ?>
+                        <section class="sik-acc-library" aria-label="<?php esc_attr_e('Pro insights', 'sikshya'); ?>">
+                            <?php foreach ($pro_blocks as $block) :
+                                if (!is_array($block)) {
+                                    continue;
+                                }
+                                $value = (string) ($block['value'] ?? '');
+                                $label = (string) ($block['label'] ?? '');
+                                $hint = (string) ($block['hint'] ?? '');
+                                if ($value === '' && $label === '') {
+                                    continue;
+                                }
+                                ?>
+                                <div class="sik-acc-lib-card sik-acc-lib-card--static">
+                                    <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--blue" aria-hidden="true">★</div>
+                                    <div class="sik-acc-lib-card__num"><?php echo esc_html($value); ?></div>
+                                    <div class="sik-acc-lib-card__lbl"><?php echo esc_html($label); ?></div>
+                                    <?php if ($hint !== '') : ?>
+                                        <p class="sik-acc-shortcut__desc sik-acc-shortcut__desc--in-card"><?php echo esc_html($hint); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </section>
+                    <?php endif; ?>
+
+                    <div class="sik-acc-panel">
+                        <div class="sik-acc-panel__head">
+                            <div class="sik-acc-panel__title-block">
+                                <h2 class="sik-acc-panel__title"><?php echo esc_html(sprintf(__('My %s', 'sikshya'), strtolower($label_courses))); ?></h2>
+                                <p class="sik-acc-panel__sub"><?php esc_html_e('Recent courses you published and quick actions.', 'sikshya'); ?></p>
+                            </div>
+                            <?php if ($manage_url !== '') : ?>
+                                <a class="sik-acc-btn" href="<?php echo esc_url($manage_url); ?>"><?php esc_html_e('Manage all', 'sikshya'); ?> →</a>
                             <?php endif; ?>
                         </div>
-                    <?php endforeach; ?>
-                </section>
-            <?php endif; ?>
+                        <?php if ($recent === []) : ?>
+                            <p class="sik-acc-cal__empty">
+                                <?php
+                                echo esc_html(sprintf(
+                                    /* translators: 1: plural label, 2: singular label */
+                                    __('You have not published any %1$s yet. Create your first %2$s to start enrolling learners.', 'sikshya'),
+                                    strtolower($label_courses),
+                                    strtolower($label_course)
+                                ));
+                                ?>
+                            </p>
+                        <?php else : ?>
+                            <ul class="sik-acc-cal__list">
+                                <?php foreach ($recent as $row) :
+                                    if (!is_array($row)) {
+                                        continue;
+                                    }
+                                    $title = (string) ($row['title'] ?? '');
+                                    $count = (int) ($row['enrollments'] ?? 0);
+                                    $edit = (string) ($row['edit_url'] ?? '');
+                                    $view_url = (string) ($row['view_url'] ?? '');
+                                    ?>
+                                    <li class="sik-acc-cal__item">
+                                        <span class="sik-acc-cal__date"><?php echo esc_html(sprintf(_n('%d enrollment', '%d enrollments', $count, 'sikshya'), $count)); ?></span>
+                                        <div class="sik-acc-cal__main">
+                                            <span class="sik-acc-cal__title"><?php echo esc_html($title); ?></span>
+                                            <span class="sik-acc-cal__sub">
+                                                <?php if ($view_url !== '') : ?>
+                                                    <a href="<?php echo esc_url($view_url); ?>"><?php esc_html_e('Public page', 'sikshya'); ?></a>
+                                                <?php endif; ?>
+                                                <?php if ($edit !== '') : ?>
+                                                    <?php if ($view_url !== '') : ?> · <?php endif; ?>
+                                                    <a href="<?php echo esc_url($edit); ?>"><?php esc_html_e('Edit', 'sikshya'); ?></a>
+                                                <?php endif; ?>
+                                            </span>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
 
-            <div class="sik-acc-panel" style="margin-top:0.5rem;">
-                <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php echo esc_html(sprintf(__('My %s', 'sikshya'), strtolower($label_courses))); ?></h2>
-                    <?php if ($manage_url !== '') : ?>
-                        <a class="sik-acc-btn" href="<?php echo esc_url($manage_url); ?>"><?php esc_html_e('Manage all', 'sikshya'); ?> →</a>
-                    <?php endif; ?>
+                    <?php
+                    /**
+                     * Slot for Pro / addon-rendered teaching widgets (gradebook health, revenue charts, etc.).
+                     *
+                     */
+                    do_action('sikshya_account_instructor_after', $acc);
+                    ?>
                 </div>
-                <?php if ($recent === []) : ?>
-                    <p class="sik-acc-cal__empty">
-                        <?php
-                        echo esc_html(sprintf(
-                            /* translators: 1: plural label, 2: singular label */
-                            __('You have not published any %1$s yet. Create your first %2$s to start enrolling learners.', 'sikshya'),
-                            strtolower($label_courses),
-                            strtolower($label_course)
-                        ));
-                        ?>
-                    </p>
-                <?php else : ?>
-                    <ul class="sik-acc-cal__list">
-                        <?php foreach ($recent as $row) :
-                            if (!is_array($row)) {
-                                continue;
-                            }
-                            $title = (string) ($row['title'] ?? '');
-                            $count = (int) ($row['enrollments'] ?? 0);
-                            $edit = (string) ($row['edit_url'] ?? '');
-                            $view_url = (string) ($row['view_url'] ?? '');
-                            ?>
-                            <li class="sik-acc-cal__item">
-                                <span class="sik-acc-cal__date"><?php echo esc_html(sprintf(_n('%d enrollment', '%d enrollments', $count, 'sikshya'), $count)); ?></span>
-                                <div class="sik-acc-cal__main">
-                                    <span class="sik-acc-cal__title"><?php echo esc_html($title); ?></span>
-                                    <span class="sik-acc-cal__sub">
-                                        <?php if ($view_url !== '') : ?>
-                                            <a href="<?php echo esc_url($view_url); ?>"><?php esc_html_e('Public page', 'sikshya'); ?></a>
-                                        <?php endif; ?>
-                                        <?php if ($edit !== '') : ?>
-                                            <?php if ($view_url !== '') : ?> · <?php endif; ?>
-                                            <a href="<?php echo esc_url($edit); ?>"><?php esc_html_e('Edit', 'sikshya'); ?></a>
-                                        <?php endif; ?>
-                                    </span>
+
+                <aside class="sik-acc-panel" aria-label="<?php esc_attr_e('Quick actions', 'sikshya'); ?>">
+                    <div class="sik-acc-panel__head">
+                        <h2 class="sik-acc-panel__title"><?php esc_html_e('Quick actions', 'sikshya'); ?></h2>
+                    </div>
+                    <div class="sik-acc-shortcuts">
+                        <?php if ($manage_url !== '') : ?>
+                            <a class="sik-acc-shortcut" href="<?php echo esc_url($manage_url); ?>">
+                                <span class="sik-acc-shortcut__icon" aria-hidden="true">▦</span>
+                                <div>
+                                    <p class="sik-acc-shortcut__title"><?php esc_html_e('Manage my courses', 'sikshya'); ?></p>
+                                    <p class="sik-acc-shortcut__desc"><?php esc_html_e('Edit lessons, pricing, curriculum, and publish updates.', 'sikshya'); ?></p>
                                 </div>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if ($add_url !== '') : ?>
+                            <a class="sik-acc-shortcut" href="<?php echo esc_url($add_url); ?>">
+                                <span class="sik-acc-shortcut__icon" aria-hidden="true">+</span>
+                                <div>
+                                    <p class="sik-acc-shortcut__title"><?php esc_html_e('Add new course', 'sikshya'); ?></p>
+                                    <p class="sik-acc-shortcut__desc"><?php esc_html_e('Start a new course draft and build content.', 'sikshya'); ?></p>
+                                </div>
+                            </a>
+                        <?php endif; ?>
+                        <a class="sik-acc-shortcut" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
+                            <span class="sik-acc-shortcut__icon" aria-hidden="true">▤</span>
+                            <div>
+                                <p class="sik-acc-shortcut__title"><?php esc_html_e('Browse courses', 'sikshya'); ?></p>
+                                <p class="sik-acc-shortcut__desc"><?php esc_html_e('See the public catalog as learners do.', 'sikshya'); ?></p>
+                            </div>
+                        </a>
+                    </div>
+                </aside>
             </div>
 
-            <?php
-            /**
-             * Slot for Pro / addon-rendered teaching widgets (gradebook health, revenue charts, etc.).
-             *
-             */
-            do_action('sikshya_account_instructor_after', $acc);
-            ?>
+            <?php // Grid end. ?>

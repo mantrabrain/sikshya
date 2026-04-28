@@ -264,6 +264,9 @@ export function MultiCoursePicker({
               </span>
               <ButtonPrimary
                 type="button"
+                // Defensive contrast: some installs don't ship the custom `brand-*` Tailwind palette,
+                // which can make the primary button render as white text on a light background.
+                className="bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
                 onClick={() => {
                   if (max !== undefined && draft.length > max) {
                     return;

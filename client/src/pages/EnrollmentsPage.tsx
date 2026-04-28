@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
 import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
 import { appViewHref } from '../lib/appUrl';
@@ -37,7 +37,7 @@ type ListResponse = {
 };
 
 type UserOpt = { id: number; name: string; email?: string };
-export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: string }) {
+export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const course = term(config, 'course');
@@ -160,13 +160,9 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle={`Who is enrolled in which ${coursesLower}, with status and dates`}
       pageActions={
@@ -427,6 +423,6 @@ export function EnrollmentsPage(props: { config: SikshyaReactConfig; title: stri
           </>
         )}
       </ListPanel>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

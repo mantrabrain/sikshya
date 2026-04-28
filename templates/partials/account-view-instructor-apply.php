@@ -33,11 +33,11 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
             </section>
 
             <?php if ($status !== '') : ?>
-                <section class="sik-acc-panel" style="margin-top:0;">
+                <section class="sik-acc-panel">
                     <div class="sik-acc-panel__head">
                         <h2 class="sik-acc-panel__title"><?php esc_html_e('Status', 'sikshya'); ?></h2>
                     </div>
-                    <p class="sik-acc-cal__empty" style="margin-top:0;">
+                    <p class="sik-acc-status-line">
                         <?php
                         if ($status === 'pending') {
                             esc_html_e('Pending review', 'sikshya');
@@ -50,7 +50,7 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                         }
                         ?>
                         <?php if ($submitted_at !== '') : ?>
-                            <span style="opacity:.75;">
+                            <span class="sik-acc-status-line__meta">
                                 <?php
                                 $ts = strtotime($submitted_at);
                                 $when = $ts ? wp_date(get_option('date_format'), $ts) : $submitted_at;
@@ -62,7 +62,7 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 </section>
             <?php endif; ?>
 
-            <section style="margin-top:0.75rem;">
+            <section class="sik-acc-panel sik-acc-apply-body">
                 <?php echo $shortcode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             </section>
 

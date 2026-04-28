@@ -1,5 +1,6 @@
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import type { SettingsField } from '../types/settingsSchema';
+import { DynamicFieldsBuilder } from '../components/settings/DynamicFieldsBuilder';
 
 export function fieldToStringValue(v: unknown): string {
   if (v === null || v === undefined) return '';
@@ -67,7 +68,23 @@ export function renderSettingsField(
 
   let body: ReactNode;
 
-  if (type === 'checkbox') {
+  if (type === 'dynamic_fields_builder') {
+    body = (
+      <div>
+        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
+          {label}
+        </label>
+        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        <div className="mt-2">
+          <DynamicFieldsBuilder
+            value={cur ?? f.default ?? '[]'}
+            readOnly={readOnly}
+            onChange={onChangeGuard<string>((v) => setDraft((p) => ({ ...p, [k]: v })))}
+          />
+        </div>
+      </div>
+    );
+  } else if (type === 'checkbox') {
     const checked = isTruthyCheckboxValue(cur);
     body = (
       <div>
@@ -116,6 +133,80 @@ export function renderSettingsField(
             </option>
           ))}
         </select>
+      </div>
+    );
+  } else if (type === 'multi_select') {
+    const opts = f.options || {};
+    const allowed = Object.keys(opts).map((x) => String(x));
+    const raw = fieldToStringValue(cur ?? f.default ?? '');
+    const selected = raw
+      .split(',')
+      .map((x) => String(x || '').trim())
+      .filter((x) => x !== '')
+      .filter((x, i, a) => a.indexOf(x) === i)
+      .filter((x) => allowed.includes(x));
+
+    const setSelected = (vals: string[]) => {
+      const normalized = vals
+        .map((x) => String(x || '').trim())
+        .filter((x) => x !== '' && allowed.includes(x))
+        .filter((x, i, a) => a.indexOf(x) === i);
+      setDraft((p) => ({ ...p, [k]: normalized.join(',') }));
+    };
+
+    body = (
+      <div>
+        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
+          {label}
+        </label>
+        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+
+        <select
+          id={k}
+          multiple
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          value={selected}
+          disabled={readOnly}
+          onChange={(e) =>
+            onChangeGuard<string[]>((v) => setSelected(v))(
+              Array.from(e.target.selectedOptions || []).map((o) => String(o.value))
+            )
+          }
+          size={Math.min(6, Math.max(3, allowed.length))}
+        >
+          {Object.entries(opts).map(([ov, ol]) => (
+            <option key={String(ov)} value={ov}>
+              {ol}
+            </option>
+          ))}
+        </select>
+
+        {selected.length ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {selected.map((v) => (
+              <span
+                key={v}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[12px] font-semibold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              >
+                {opts[v] || v}
+                {!readOnly ? (
+                  <button
+                    type="button"
+                    className="rounded-full px-1 text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200"
+                    onClick={() => setSelected(selected.filter((x) => x !== v))}
+                    aria-label={`Remove ${opts[v] || v}`}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 text-xs text-slate-400/90 dark:text-slate-500/80">
+            Select one or more methods. The value is stored as a comma-separated list.
+          </p>
+        )}
       </div>
     );
   } else if (type === 'color') {
@@ -199,7 +290,7 @@ export function renderSettingsField(
 
   // Checkbox and textarea span two columns; keep that behavior on the wrapper
   // so the lock-overlay doesn't break the grid layout.
-  const spanClass = type === 'checkbox' || type === 'textarea' ? 'lg:col-span-2' : '';
+  const spanClass = type === 'checkbox' || type === 'textarea' || type === 'dynamic_fields_builder' ? 'lg:col-span-2' : '';
 
   if (locked) {
     return (

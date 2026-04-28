@@ -115,7 +115,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                 </a>
             </section>
 
-            <div class="sik-acc-panel" style="margin-top:0.5rem;">
+            <div class="sik-acc-panel">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Quick links', 'sikshya'); ?></h2>
                 </div>

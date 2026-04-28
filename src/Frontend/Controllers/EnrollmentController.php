@@ -38,7 +38,8 @@ class EnrollmentController
         $user_id = get_current_user_id();
 
         if (!$user_id) {
-            wp_redirect(wp_login_url(add_query_arg('redirect_to', urlencode($_SERVER['REQUEST_URI']), '')));
+            $req = (string) (is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : home_url('/'));
+            wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::login($req));
             exit;
         }
 

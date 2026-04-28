@@ -14,15 +14,9 @@ import type { SikshyaReactConfig } from '../types';
 import type { SettingsField, SettingsSection } from '../types/settingsSchema';
 import { renderSettingsField } from './settingsRenderField';
 import { normalizeTabSections } from './settingsTabUtils';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type SettingsSchema = Record<string, SettingsSection[]>;
-
-type ToastState = {
-  open: boolean;
-  kind: 'success' | 'error' | 'info';
-  title: string;
-  message?: string;
-};
 
 function normalizeForDirtyCompare(v: unknown): string {
   if (v === null || v === undefined) return '';
@@ -72,7 +66,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
-  const [toast, setToast] = useState<ToastState | null>(null);
+  const toast = useTopRightToast(3800);
   const [initialValues, setInitialValues] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
@@ -81,7 +75,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
     setInitialValues(values.data);
     setSaveMsg(null);
     setSaveError(null);
-    setToast(null);
+    toast.clear();
   }, [values.data]);
 
   const tabSchema = normalizeTabSections((schema.data?.tabs || {})[tab]);
@@ -94,17 +88,11 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
     }
   }, [draft, initialValues]);
 
-  useEffect(() => {
-    if (!toast?.open) return;
-    const t = window.setTimeout(() => setToast(null), 3800);
-    return () => window.clearTimeout(t);
-  }, [toast]);
-
   const onSave = async () => {
     setSaving(true);
     setSaveError(null);
     setSaveMsg(null);
-    setToast(null);
+    toast.clear();
     try {
       const res = await getSikshyaApi().post<{ success: boolean; message?: string; data?: { values?: Record<string, unknown> } }>(
         SIKSHYA_ENDPOINTS.settings.save,
@@ -118,15 +106,10 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       setInitialValues(next);
       const msg = res.message || 'Settings saved.';
       setSaveMsg(msg);
-      setToast({ open: true, kind: 'success', title: 'Saved', message: msg });
+      toast.success('Saved', msg);
     } catch (e) {
       setSaveError(e);
-      setToast({
-        open: true,
-        kind: 'error',
-        title: 'Save failed',
-        message: e instanceof Error ? e.message : 'Could not save settings. Please try again.',
-      });
+      toast.error('Save failed', e instanceof Error ? e.message : 'Could not save settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -145,7 +128,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
     setSaving(true);
     setSaveError(null);
     setSaveMsg(null);
-    setToast(null);
+    toast.clear();
     try {
       const res = await getSikshyaApi().post<{ success: boolean; message?: string }>(SIKSHYA_ENDPOINTS.settings.reset, {
         tab,
@@ -156,15 +139,10 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       await values.refetch();
       const msg = res.message || 'Settings reset.';
       setSaveMsg(msg);
-      setToast({ open: true, kind: 'success', title: 'Reset', message: msg });
+      toast.success('Reset', msg);
     } catch (e) {
       setSaveError(e);
-      setToast({
-        open: true,
-        kind: 'error',
-        title: 'Reset failed',
-        message: e instanceof Error ? e.message : 'Could not reset settings. Please try again.',
-      });
+      toast.error('Reset failed', e instanceof Error ? e.message : 'Could not reset settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -179,47 +157,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       title={title}
       subtitle="Sender identity, SMTP, and global HTML wrappers — template copy lives under Email templates"
     >
-      {toast?.open ? (
-        <div className="fixed right-6 top-6 z-[9999] w-[360px] max-w-[calc(100vw-48px)]">
-          <div
-            className={`rounded-2xl border px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${
-              toast.kind === 'success'
-                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/60 dark:text-emerald-100'
-                : toast.kind === 'error'
-                  ? 'border-rose-200 bg-rose-50/95 text-rose-900 dark:border-rose-900/50 dark:bg-rose-950/60 dark:text-rose-100'
-                  : 'border-slate-200 bg-white/95 text-slate-900 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100'
-            }`}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl ${
-                  toast.kind === 'success'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
-                    : toast.kind === 'error'
-                      ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200'
-                      : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
-                }`}
-              >
-                <NavIcon name={toast.kind === 'success' ? 'badge' : 'helpCircle'} className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold">{toast.title}</div>
-                {toast.message ? <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div> : null}
-              </div>
-              <button
-                type="button"
-                onClick={() => setToast(null)}
-                className="rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
-                aria-label="Dismiss"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
       <div className={SIKSHYA_ADMIN_PAGE_FULL_WIDTH}>
         <AsyncBoundary

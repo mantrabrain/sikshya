@@ -26,10 +26,21 @@ function coerceUser(raw: unknown): SikshyaReactConfig['user'] {
   if (!raw || typeof raw !== 'object') {
     return { name: 'Admin', avatarUrl: '' };
   }
-  const u = raw as { name?: unknown; avatarUrl?: unknown };
+  const u = raw as {
+    name?: unknown;
+    avatarUrl?: unknown;
+    email?: unknown;
+    profileUrl?: unknown;
+    logoutUrl?: unknown;
+  };
   const name = typeof u.name === 'string' && u.name.trim() !== '' ? u.name.trim() : 'Admin';
   const avatarUrl = typeof u.avatarUrl === 'string' ? u.avatarUrl : '';
-  return { name, avatarUrl };
+  const email = typeof u.email === 'string' && u.email.trim() !== '' ? u.email.trim() : undefined;
+  const profileUrl =
+    typeof u.profileUrl === 'string' && u.profileUrl.trim() !== '' ? u.profileUrl.trim() : undefined;
+  const logoutUrl =
+    typeof u.logoutUrl === 'string' && u.logoutUrl.trim() !== '' ? u.logoutUrl.trim() : undefined;
+  return { name, avatarUrl, email, profileUrl, logoutUrl };
 }
 
 /**

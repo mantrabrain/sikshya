@@ -17,7 +17,13 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
     setupWizardUrl: '/wp-admin/admin.php?page=sikshya-setup&step=1',
     siteUrl: '/',
     pluginUrl: '',
-    user: { name: 'Developer', avatarUrl: '' },
+    user: {
+      name: 'Developer',
+      email: 'dev@example.com',
+      avatarUrl: 'https://www.gravatar.com/avatar/be9d18f611892a738e54f2a3a171e2f9?s=160&d=mp&r=g',
+      profileUrl: '/wp-admin/profile.php',
+      logoutUrl: '/wp-admin/',
+    },
     navigation: [
       {
         id: 'dashboard',
@@ -67,7 +73,7 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
       isProActive: false,
       siteTier: 'free',
       siteTierLabel: 'Free',
-      upgradeUrl: 'https://store.mantrabrain.com/downloads/sikshya-pro/',
+      upgradeUrl: 'https://mantrabrain.com/plugins/sikshya/#pricing',
       featureStates: {},
       /** Minimal rows so `isFeatureEnabled` + overlays behave like production in Vite dev */
       catalog: [
@@ -86,7 +92,10 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
 }
 
 const rootEl = document.getElementById('sikshya-admin-root');
-if (rootEl) {
+// Guard against double-loading the module in wp-admin (e.g. caching/CDN issues or duplicate enqueue).
+const w = window as unknown as { __sikshyaAdminMounted?: boolean };
+if (rootEl && !w.__sikshyaAdminMounted) {
+  w.__sikshyaAdminMounted = true;
   createRoot(rootEl).render(
     <StrictMode>
       <App />

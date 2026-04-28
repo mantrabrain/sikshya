@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 
+// Note: some builds/themes may not ship the custom `brand-*` Tailwind palette.
+// Provide an indigo fallback so primary CTAs never become white text on white background.
 const basePrimary =
-  'inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1';
+  'inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 bg-brand-600 hover:bg-brand-700 focus:ring-brand-500';
 const baseSecondary =
   'inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-1';
 

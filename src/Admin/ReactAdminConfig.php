@@ -50,9 +50,21 @@ final class ReactAdminConfig
             }
         }
 
-        $avatar = get_avatar_url($user->ID, ['size' => 64]);
+        $email_raw = (string) $user->user_email;
+        $gravatar_url = '';
+        if ($email_raw !== '' && is_email($email_raw)) {
+            $gravatar_url = sprintf(
+                'https://www.gravatar.com/avatar/%s?s=160&d=mp&r=g',
+                md5(strtolower(trim($email_raw)))
+            );
+        }
+        $avatar_fallback = get_avatar_url($user->ID, ['size' => 160]);
+        $avatar_url = $gravatar_url !== '' ? $gravatar_url : (string) $avatar_fallback;
 
         $shell = self::shellBootstrap($pageKey);
+
+        $logo_path = SIKSHYA_PLUGIN_DIR . 'assets/images/logo-white.png';
+        $logo_url  = file_exists($logo_path) ? (SIKSHYA_PLUGIN_URL . 'assets/images/logo-white.png') : '';
 
         $config = [
             'page' => $pageKey,
@@ -72,6 +84,10 @@ final class ReactAdminConfig
             'appAdminBase' => add_query_arg(['page' => AdminPages::DASHBOARD], admin_url('admin.php')),
             'siteUrl' => home_url('/'),
             'pluginUrl' => SIKSHYA_PLUGIN_URL,
+            'branding' => [
+                'pluginName' => function_exists('sikshya_brand_name') ? (string) sikshya_brand_name('admin') : __('Sikshya LMS', 'sikshya'),
+                'logoUrl' => esc_url_raw((string) $logo_url),
+            ],
             // Frontend permalink bases (must mirror global Sikshya permalink settings).
             'permalinks' => PermalinkService::get(),
             'plainPermalinks' => PermalinkService::isPlainPermalinks(),
@@ -83,7 +99,10 @@ final class ReactAdminConfig
             ],
             'user' => [
                 'name' => $user->display_name ?: $user->user_login,
-                'avatarUrl' => $avatar ? (string) $avatar : '',
+                'email' => $email_raw,
+                'avatarUrl' => esc_url_raw($avatar_url),
+                'profileUrl' => esc_url_raw(admin_url('profile.php')),
+                'logoutUrl' => esc_url_raw(wp_logout_url(admin_url())),
             ],
             'navigation' => self::navigationItems(),
             'initialData' => $initialData,
@@ -118,10 +137,33 @@ final class ReactAdminConfig
         /**
          * Allow Pro add-ons and custom code to inject extra config keys.
          *
+         * Important: The React shell expects a stable minimum payload. Some third-party code
+         * may filter config keys; keep required keys populated to avoid hard crashes.
+         *
          * @param array<string, mixed> $config
-         * @param string $pageKey
+         * @param string              $pageKey
          */
-        return (array) apply_filters('sikshya_react_admin_config', $config, $pageKey);
+        $filtered = (array) apply_filters('sikshya_react_admin_config', $config, $pageKey);
+
+        if (!isset($filtered['page']) || !is_string($filtered['page']) || $filtered['page'] === '') {
+            $filtered['page'] = $config['page'];
+        }
+
+        if (!isset($filtered['user']) || !is_array($filtered['user'])) {
+            $filtered['user'] = $config['user'];
+        }
+        if (!isset($filtered['user']['name']) || !is_string($filtered['user']['name']) || $filtered['user']['name'] === '') {
+            $filtered['user']['name'] = $config['user']['name'];
+        }
+        if (!isset($filtered['user']['avatarUrl']) || !is_string($filtered['user']['avatarUrl'])) {
+            $filtered['user']['avatarUrl'] = $config['user']['avatarUrl'];
+        }
+
+        if (!isset($filtered['navigation']) || !is_array($filtered['navigation'])) {
+            $filtered['navigation'] = $config['navigation'];
+        }
+
+        return $filtered;
     }
 
     /**
@@ -437,12 +479,7 @@ final class ReactAdminConfig
         }
 
         if (current_user_can('manage_options')) {
-            $items[] = [
-                'id' => 'tools',
-                'label' => __('Tools', 'sikshya'),
-                'icon' => 'wrench',
-                'href' => self::reactAppUrl('tools'),
-            ];
+            // Tools stays accessible from the top header. Remove from sidebar to reduce duplication.
         }
 
         return $items;

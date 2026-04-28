@@ -22,7 +22,7 @@ final class ReactAdminView
 
         wp_add_inline_script(
             'sikshya-react-admin',
-            'window.sikshyaReact = ' . wp_json_encode($config) . ';',
+            'window.sikshyaReact=window.sikshyaReact||{};window.sikshyaReact=Object.assign(window.sikshyaReact,' . wp_json_encode($config) . ');window.sikshyaReact.user=window.sikshyaReact.user||{name:"Admin",avatarUrl:""};window.sikshyaReact.user.name=window.sikshyaReact.user.name||"Admin";window.sikshyaReact.user.avatarUrl=window.sikshyaReact.user.avatarUrl||"";',
             'before'
         );
     }

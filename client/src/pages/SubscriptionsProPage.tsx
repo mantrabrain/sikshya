@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { getErrorSummary, getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
@@ -8,6 +7,7 @@ import { DataTable, type Column } from '../components/shared/DataTable';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
 import { RowActionsMenu } from '../components/shared/list/RowActionsMenu';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
@@ -18,6 +18,7 @@ import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig, WpRestUser } from '../types';
 import { AddonSettingsPage } from './AddonSettingsPage';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type Plan = {
   id: number;
@@ -49,19 +50,25 @@ type ToastState = { kind: 'success' | 'error'; text: string } | null;
  * matches the rest of our admin hubs (Sales, Certificates, People) and lets
  * each view own its own toolbar, empty state, and modal.
  */
-export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title: string }) {
+export function SubscriptionsProPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const featureOk = isFeatureEnabled(config, 'subscriptions');
   const addon = useAddonEnabled('subscriptions');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
   const enabled = mode === 'full';
 
-  const [toast, setToast] = useState<ToastState>(null);
-  useEffect(() => {
-    if (!toast || toast.kind !== 'success') return;
-    const t = window.setTimeout(() => setToast(null), 2600);
-    return () => window.clearTimeout(t);
-  }, [toast]);
+  const toast = useTopRightToast(2600);
+  const pushToast = (t: ToastState) => {
+    if (!t) {
+      toast.clear();
+      return;
+    }
+    if (t.kind === 'success') {
+      toast.success('Success', t.text);
+      return;
+    }
+    toast.error('Error', t.text);
+  };
 
   const { route, navigateView } = useAdminRouting();
   const activeTab: TabId = (() => {
@@ -149,13 +156,9 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
     (data as unknown as { manualGrantAllowed?: boolean } | undefined)?.manualGrantAllowed !== false;
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Recurring billing and access periods synced from your payment provider."
       pageActions={
@@ -177,7 +180,7 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
         addonEnableDescription="Enable the Subscriptions addon to register recurring billing routes and show subscription settings."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <div className="-mt-2 mb-5 flex flex-wrap items-center gap-2 overflow-x-auto">
@@ -225,7 +228,7 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
             ]}
           />
         ) : activeTab === 'plans' ? (
-          <PlansTab loading={loading} plans={plans} onRefetch={refetch} onToast={setToast} />
+          <PlansTab loading={loading} plans={plans} onRefetch={refetch} onToast={pushToast} />
         ) : (
           <SubscriptionsTab
             loading={loading}
@@ -237,34 +240,14 @@ export function SubscriptionsProPage(props: { config: SikshyaReactConfig; title:
             onRefetch={refetch}
             onJumpToPlans={() => setActiveTab('plans')}
             onJumpToSettings={() => setActiveTab('settings')}
-            onToast={setToast}
+            onToast={pushToast}
           />
         )}
 
         {/* Toast */}
-        {toast ? (
-          <div
-            role="status"
-            className={`fixed right-4 top-4 z-[9999] w-[min(28rem,calc(100vw-2rem))] rounded-xl border px-4 py-3 text-sm shadow-lg ${
-              toast.kind === 'success'
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-200'
-                : 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-200'
-            }`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">{toast.text}</div>
-              <button
-                type="button"
-                className="shrink-0 rounded-md px-2 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10"
-                onClick={() => setToast(null)}
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        ) : null}
+        <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }
 

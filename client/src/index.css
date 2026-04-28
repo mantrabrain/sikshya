@@ -30,6 +30,10 @@ body {
  * Full-viewport shell: height (not min-height) avoids an extra document strip below
  * short pages; overflow clips so only <main> scrolls inside AppShell.
  */
+body.sikshya-react-shell {
+  overflow: hidden;
+}
+
 body.sikshya-react-shell #sikshya-admin-root {
   height: 100vh;
   min-height: 0;

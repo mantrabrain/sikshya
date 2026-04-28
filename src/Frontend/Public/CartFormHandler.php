@@ -48,46 +48,80 @@ final class CartFormHandler
             if ($to_checkout) {
                 $checkout = PublicPageUrls::url('checkout');
                 if (is_string($checkout) && $checkout !== '') {
-                    wp_safe_redirect(add_query_arg('sikshya_cart', $flag, $checkout));
-                    exit;
+                    self::redirectWithTransientFlash(
+                        $checkout,
+                        $changed ? 'success' : 'info',
+                        $changed ? __('Course added to your cart.', 'sikshya') : __('This course is already in your cart.', 'sikshya')
+                    );
                 }
             }
-            wp_safe_redirect(add_query_arg('sikshya_cart', $flag, $redirect_base));
-            exit;
+            self::redirectWithTransientFlash(
+                $redirect_base,
+                $changed ? 'success' : 'info',
+                $changed ? __('Course added to your cart.', 'sikshya') : __('This course is already in your cart.', 'sikshya')
+            );
         }
 
         if ($action === 'remove' && $course_id > 0) {
             CartStorage::removeCourse($course_id);
-            wp_safe_redirect(add_query_arg('sikshya_cart', 'removed', $redirect_base));
-            exit;
+            self::redirectWithTransientFlash($redirect_base, 'success', __('Course removed from your cart.', 'sikshya'));
         }
 
         if ($action === 'clear') {
             CartStorage::clear();
-            wp_safe_redirect(add_query_arg('sikshya_cart', 'cleared', $redirect_base));
-            exit;
+            self::redirectWithTransientFlash($redirect_base, 'success', __('Your cart was cleared.', 'sikshya'));
         }
 
         if ($action === 'enroll_free' && $course_id > 0) {
             if (!is_user_logged_in()) {
-                wp_safe_redirect(add_query_arg('sikshya_cart', 'login_required', $redirect_base));
-                exit;
+                self::redirectWithTransientFlash($redirect_base, 'info', __('Log in to enroll in this course.', 'sikshya'));
             }
             $enrolled = self::enrollFreeIfZeroPrice($course_id);
-            $flag = $enrolled ? 'enrolled' : 'enroll_failed';
-            wp_safe_redirect(add_query_arg('sikshya_cart', $flag, $redirect_base));
-            exit;
+            if ($enrolled) {
+                $learn = function_exists('sikshya_course_learn_entry_url') ? sikshya_course_learn_entry_url($course_id) : '';
+                /**
+                 * Allow extensions to override where learners land after a successful free enrollment.
+                 *
+                 * @param string $url
+                 * @param int    $course_id
+                 */
+                $learn = (string) apply_filters('sikshya_enroll_free_redirect_url', $learn, $course_id);
+                if ($learn !== '') {
+                    wp_safe_redirect($learn);
+                    exit;
+                }
+            }
+            self::redirectWithTransientFlash(
+                $redirect_base,
+                $enrolled ? 'success' : 'error',
+                $enrolled ? __('You are now enrolled in this course.', 'sikshya') : __('Could not complete enrollment. Please try again.', 'sikshya')
+            );
         }
 
         if ($action === 'admin_enroll_bypass' && $course_id > 0) {
             if (!is_user_logged_in()) {
-                wp_safe_redirect(add_query_arg('sikshya_cart', 'login_required', $redirect_base));
-                exit;
+                self::redirectWithTransientFlash($redirect_base, 'info', __('Log in to enroll in this course.', 'sikshya'));
             }
             $enrolled = function_exists('sikshya_enroll_paid_course_as_admin') && sikshya_enroll_paid_course_as_admin($course_id) > 0;
-            $flag = $enrolled ? 'enrolled' : 'enroll_failed';
-            wp_safe_redirect(add_query_arg('sikshya_cart', $flag, $redirect_base));
-            exit;
+            if ($enrolled) {
+                $learn = function_exists('sikshya_course_learn_entry_url') ? sikshya_course_learn_entry_url($course_id) : '';
+                /**
+                 * Allow extensions to override where admins land after an admin bypass enrollment.
+                 *
+                 * @param string $url
+                 * @param int    $course_id
+                 */
+                $learn = (string) apply_filters('sikshya_admin_enroll_bypass_redirect_url', $learn, $course_id);
+                if ($learn !== '') {
+                    wp_safe_redirect($learn);
+                    exit;
+                }
+            }
+            self::redirectWithTransientFlash(
+                $redirect_base,
+                $enrolled ? 'success' : 'error',
+                $enrolled ? __('You are now enrolled in this course.', 'sikshya') : __('Could not complete enrollment. Please try again.', 'sikshya')
+            );
         }
 
         wp_safe_redirect($redirect_base);

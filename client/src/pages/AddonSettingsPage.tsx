@@ -7,6 +7,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { SkeletonCard } from '../components/shared/Skeleton';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -95,7 +96,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
   const [opts, setOpts] = useState<Record<string, unknown>>({});
   const [schema, setSchema] = useState<Schema>({});
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast();
 
   const loader = useCallback(async () => {
     if (!enabled) return { ok: true, options: {}, schema: {} } as Resp;
@@ -110,14 +111,13 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
 
   const onSave = async (e: FormEvent) => {
     e.preventDefault();
-    setMsg(null);
     setSaving(true);
     try {
       await getSikshyaApi().post(`/pro/addons/${encodeURIComponent(addonId)}/settings`, opts);
-      setMsg({ kind: 'success', text: 'Settings saved.' });
+      toast.success('Saved', 'Settings saved.');
       void refetch();
     } catch (err) {
-      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Save failed' });
+      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -225,7 +225,24 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
   };
 
   // Group bool fields together at the bottom for visual scan; keep schema order otherwise.
-  const fieldEntries = Object.entries(schema);
+  const fieldEntries = Object.entries(schema).filter(([name, def]) => {
+    // Hide removed / confusing settings.
+    // "Use legacy certificate links (no pretty URL)" conflicts with Sikshya permalink handling and should not be exposed.
+    if (addonId === 'certificates_advanced') {
+      const label = (def.label || '').toLowerCase();
+      const help = (def.help || '').toLowerCase();
+      if (
+        label.includes('legacy certificate') ||
+        label.includes('no pretty url') ||
+        help.includes('query-style') ||
+        help.includes('qr images are omitted') ||
+        name.toLowerCase().includes('legacy')
+      ) {
+        return false;
+      }
+    }
+    return true;
+  });
   const inputFields = fieldEntries.filter(([, d]) => d.type !== 'bool');
   const boolFields = fieldEntries.filter(([, d]) => d.type === 'bool');
 
@@ -236,6 +253,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
       title={title}
       subtitle={subtitle}
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <GatedFeatureWorkspace
         mode={mode}
         featureId={addonId}
@@ -247,7 +265,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
         addonEnableDescription={`Turn on the ${featureTitle} add-on to surface configuration and start using its features.`}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <div className="space-y-6">
@@ -306,17 +324,6 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
                   <ButtonPrimary type="submit" disabled={saving}>
                     {saving ? 'Saving…' : 'Save settings'}
                   </ButtonPrimary>
-                  {msg ? (
-                    <span
-                      className={
-                        msg.kind === 'success'
-                          ? 'text-sm text-emerald-700 dark:text-emerald-300'
-                          : 'text-sm text-rose-700 dark:text-rose-300'
-                      }
-                    >
-                      {msg.text}
-                    </span>
-                  ) : null}
                 </div>
               </form>
             )}

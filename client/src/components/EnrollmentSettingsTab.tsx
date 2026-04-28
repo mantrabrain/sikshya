@@ -92,7 +92,7 @@ const SUB_TABS: Array<{ id: 'purchase' | 'access' | 'rules'; label: string; icon
     id: 'purchase',
     label: 'Purchase & completion',
     icon: 'chart',
-    keys: ['enrollment_checkout', 'enrollment_completion'],
+    keys: ['enrollment_checkout', 'enrollment_dynamic_checkout_fields', 'enrollment_completion'],
   },
   {
     id: 'access',

@@ -16,6 +16,7 @@ function sikshya_course_archive_filters_bootstrap(): void
 {
     add_action('pre_get_posts', 'sikshya_course_archive_pre_get_posts', 10, 1);
     add_action('pre_get_posts', 'sikshya_course_taxonomy_archives_pre_get_posts', 10, 1);
+    add_filter('posts_search', 'sikshya_course_catalog_posts_search', 500, 2);
 }
 
 sikshya_course_archive_filters_bootstrap();
@@ -51,6 +52,11 @@ function sikshya_course_taxonomy_archives_pre_get_posts(\WP_Query $query): void
     }
 
     $query->set('posts_per_page', sikshya_course_archive_default_per_page());
+
+    $filters = sikshya_course_archive_get_filter_request();
+    if ($filters['s'] !== '') {
+        $query->set('s', $filters['s']);
+    }
 }
 
 /**
@@ -198,6 +204,98 @@ function sikshya_course_archive_pre_get_posts(\WP_Query $query): void
             $query->set('order', 'DESC');
             break;
     }
+}
+
+/**
+ * Restrict catalog keyword search to fields chosen under LMS → Global Settings → Courses.
+ *
+ * @param string    $search SQL fragment (usually starts with " AND ((").
+ * @param \WP_Query $query  Query.
+ * @return string
+ */
+function sikshya_course_catalog_posts_search(string $search, \WP_Query $query): string
+{
+    if (is_admin() || !$query->is_main_query()) {
+        return $search;
+    }
+
+    $keyword = trim((string) $query->get('s'));
+    if ($keyword === '') {
+        return $search;
+    }
+
+    $is_course_archive = $query->is_post_type_archive(\Sikshya\Constants\PostTypes::COURSE);
+    $is_course_tax = $query->is_tax(
+        [
+            \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+            \Sikshya\Constants\Taxonomies::COURSE_TAG,
+        ]
+    );
+    if (!$is_course_archive && !$is_course_tax) {
+        return $search;
+    }
+
+    if (!\Sikshya\Services\CourseFrontendSettings::isCourseSearchEnabled()) {
+        return $search;
+    }
+
+    $match_title = \Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('search_title', '1'));
+    $match_desc = \Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('search_description', '1'));
+    $match_inst = \Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('search_instructor', '1'));
+    $match_cat = \Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('search_categories', '1'));
+    if (!$match_title && !$match_desc && !$match_inst && !$match_cat) {
+        return $search;
+    }
+
+    global $wpdb;
+
+    $like = '%' . $wpdb->esc_like($keyword) . '%';
+    $or_parts = [];
+
+    if ($match_title) {
+        $or_parts[] = $wpdb->prepare("{$wpdb->posts}.post_title LIKE %s", $like);
+    }
+    if ($match_desc) {
+        $or_parts[] = $wpdb->prepare(
+            "({$wpdb->posts}.post_excerpt LIKE %s OR {$wpdb->posts}.post_content LIKE %s)",
+            $like,
+            $like
+        );
+    }
+    if ($match_inst) {
+        $author_ids = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->users} WHERE display_name LIKE %s OR user_login LIKE %s OR user_nicename LIKE %s",
+                $like,
+                $like,
+                $like
+            )
+        );
+        if (is_array($author_ids) && $author_ids !== []) {
+            $author_ids = array_map('intval', $author_ids);
+            $or_parts[] = "{$wpdb->posts}.post_author IN (" . implode(',', $author_ids) . ')';
+        }
+    }
+    if ($match_cat) {
+        $slug_like = '%' . $wpdb->esc_like(sanitize_title($keyword)) . '%';
+        $or_parts[] = $wpdb->prepare(
+            "EXISTS (SELECT 1 FROM {$wpdb->term_relationships} tr
+                INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
+                    AND tt.taxonomy IN (%s, %s)
+                INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+                WHERE tr.object_id = {$wpdb->posts}.ID AND (t.name LIKE %s OR t.slug LIKE %s))",
+            \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+            \Sikshya\Constants\Taxonomies::COURSE_TAG,
+            $like,
+            $slug_like
+        );
+    }
+
+    if ($or_parts === []) {
+        $or_parts[] = $wpdb->prepare("{$wpdb->posts}.post_title LIKE %s", $like);
+    }
+
+    return ' AND (' . implode(' OR ', $or_parts) . ')';
 }
 
 /**
@@ -370,6 +468,25 @@ function sikshya_course_settings_body_class(array $classes): array
     if (is_singular(\Sikshya\Constants\PostTypes::COURSE)) {
         $layout = \Sikshya\Services\CourseFrontendSettings::singleLayout();
         $classes[] = 'sikshya-course-layout--' . $layout;
+    }
+
+    /*
+     * Course discovery (archive, taxonomies, legacy catalog page): use the same
+     * `sikshya-course-layout--*` hook as singular courses so "Single course page layout"
+     * (Settings → Course Display) can drive theme/CSS consistently on /courses/, etc.
+     */
+    $course_listing_shell = is_post_type_archive(\Sikshya\Constants\PostTypes::COURSE)
+        || is_tax(
+            [
+                \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+                \Sikshya\Constants\Taxonomies::COURSE_TAG,
+            ]
+        )
+        || is_page('sikshya-courses');
+
+    if ($course_listing_shell && !is_singular(\Sikshya\Constants\PostTypes::COURSE)) {
+        $single_layout = \Sikshya\Services\CourseFrontendSettings::singleLayout();
+        $classes[]     = 'sikshya-course-layout--' . $single_layout;
     }
 
     if (is_post_type_archive(\Sikshya\Constants\PostTypes::COURSE)) {

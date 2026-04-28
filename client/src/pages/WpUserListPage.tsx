@@ -104,13 +104,18 @@ export function WpUserListPage(props: {
         throw new Error('Username, email, and password are required.');
       }
 
-      await getWpApi().post('/users', {
+      const created = await getWpApi().post<{ id: number }>('/users', {
         username: uname,
         email: em,
         password: pw,
         name: nm || undefined,
         roles: [roleSlug],
       });
+
+      // Some WP installs apply a default role on creation; enforce the exact intended role.
+      if (created && typeof created.id === 'number' && created.id > 0) {
+        await getWpApi().put(`/users/${created.id}`, { roles: [roleSlug] });
+      }
 
       setCreateOpen(false);
       setUsername('');

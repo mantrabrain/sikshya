@@ -23,23 +23,34 @@ use Ramsey\Uuid\Rfc4122\Fields as Rfc4122Fields;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @deprecated DegradedUuid instances are no longer necessary to support 32-bit systems. Please transition to {@see DefaultUuidBuilder}.
+ * @deprecated DegradedUuid instances are no longer necessary to support 32-bit
+ *     systems. Transition to {@see DefaultUuidBuilder}.
  *
- * @immutable
+ * @psalm-immutable
  */
 class DegradedUuidBuilder implements UuidBuilderInterface
 {
-    private TimeConverterInterface $timeConverter;
+    /**
+     * @var NumberConverterInterface
+     */
+    private $numberConverter;
 
     /**
-     * @param NumberConverterInterface $numberConverter The number converter to use when constructing the DegradedUuid
-     * @param TimeConverterInterface|null $timeConverter The time converter to use for converting timestamps extracted
-     *     from a UUID to Unix timestamps
+     * @var TimeConverterInterface
+     */
+    private $timeConverter;
+
+    /**
+     * @param NumberConverterInterface $numberConverter The number converter to
+     *     use when constructing the DegradedUuid
+     * @param TimeConverterInterface|null $timeConverter The time converter to use
+     *     for converting timestamps extracted from a UUID to Unix timestamps
      */
     public function __construct(
-        private NumberConverterInterface $numberConverter,
+        NumberConverterInterface $numberConverter,
         ?TimeConverterInterface $timeConverter = null
     ) {
+        $this->numberConverter = $numberConverter;
         $this->timeConverter = $timeConverter ?: new DegradedTimeConverter();
     }
 
@@ -51,10 +62,15 @@ class DegradedUuidBuilder implements UuidBuilderInterface
      *
      * @return DegradedUuid The DegradedUuidBuild returns an instance of Ramsey\Uuid\DegradedUuid
      *
-     * @phpstan-impure
+     * @psalm-pure
      */
     public function build(CodecInterface $codec, string $bytes): UuidInterface
     {
-        return new DegradedUuid(new Rfc4122Fields($bytes), $this->numberConverter, $codec, $this->timeConverter);
+        return new DegradedUuid(
+            new Rfc4122Fields($bytes),
+            $this->numberConverter,
+            $codec,
+            $this->timeConverter
+        );
     }
 }

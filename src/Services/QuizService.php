@@ -173,25 +173,24 @@ final class QuizService
 
         $score_percent = $total_points > 0 ? round($earned_points / $total_points * 100, 2) : 0.0;
 
-        $repo->updateAttempt((int) $row->id, $user_id, [
-            'score' => $score_percent,
-            'total_questions' => count($question_ids),
-            'correct_answers' => $correct_count,
-            'status' => 'completed',
-            'completed_at' => current_time('mysql'),
-            'answers_data' => wp_json_encode($answers),
-        ]);
-
-        // Mark quiz complete if passed.
         $passing = (float) get_post_meta($quiz_id, '_sikshya_quiz_passing_score', true);
         if ($passing <= 0) {
             $passing = 70.0;
         }
         $passed = $score_percent >= $passing;
-        if ($passed) {
-            $progress = new \Sikshya\Database\Repositories\ProgressRepository();
-            $progress->markQuizComplete($user_id, $course_id, $quiz_id, $score_percent);
-        }
+
+        $repo->updateAttempt((int) $row->id, $user_id, [
+            'score' => $score_percent,
+            'total_questions' => count($question_ids),
+            'correct_answers' => $correct_count,
+            'status' => $passed ? 'passed' : 'completed',
+            'completed_at' => current_time('mysql'),
+            'answers_data' => wp_json_encode($answers),
+        ]);
+
+        // A quiz is "completed" when it is submitted (pass/fail is separate).
+        $progress = new \Sikshya\Database\Repositories\ProgressRepository();
+        $progress->markQuizComplete($user_id, $course_id, $quiz_id, $score_percent);
 
         return [
             'success' => true,

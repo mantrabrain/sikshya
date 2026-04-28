@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
@@ -36,7 +36,7 @@ function courseBuilderHref(config: SikshyaReactConfig, courseId: number): string
   return appViewHref(config, 'add-course', { course_id: String(courseId), force_bundle_ui: '1' });
 }
 
-export function BundlesPage(props: { config: SikshyaReactConfig; title: string }) {
+export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const featureOk = isFeatureEnabled(config, 'course_bundles');
   const addon = useAddonEnabled('course_bundles');
@@ -132,14 +132,9 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Bundles are courses — create one here and configure it in the Course Builder."
       pageActions={
@@ -161,7 +156,7 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
         addonEnableDescription="Enable the Course bundles add-on to unlock bundle features."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {enabled ? (
@@ -407,6 +402,6 @@ export function BundlesPage(props: { config: SikshyaReactConfig; title: string }
           </>
         )}
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

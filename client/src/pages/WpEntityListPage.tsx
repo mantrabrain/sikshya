@@ -48,6 +48,14 @@ function lessonSubtypeForPickerType(t: ContentPickerType): '' | 'text' | 'video'
   }
 }
 
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export function WpEntityListPage(props: {
   config: SikshyaReactConfig;
   title: string;
@@ -91,6 +99,7 @@ export function WpEntityListPage(props: {
     if (!name) {
       return;
     }
+    const slug = slugify(name) || undefined;
     const targetPostType = postTypeForPickerType(addLessonType);
     const lessonKind = lessonSubtypeForPickerType(addLessonType);
     setAddLessonBusy(true);
@@ -98,6 +107,7 @@ export function WpEntityListPage(props: {
     void getWpApi()
       .post<{ id: number }>(`/${targetPostType}`, {
         title: name,
+        ...(slug ? { slug } : null),
         status: 'draft',
         ...(lessonKind ? { meta: { _sikshya_lesson_type: lessonKind } } : null),
       })
@@ -472,7 +482,7 @@ export function WpEntityListPage(props: {
           { value: 'modified', label: 'Modified' },
           { value: 'id', label: 'ID' },
         ]}
-        defaultSortField="title"
+        defaultSortField="id"
         columnPickerStorageKey={pickerKey}
         collectionQueryExtras={{ embed: '1' }}
         postRowActions={postRowActions}

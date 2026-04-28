@@ -48,6 +48,10 @@ $currency = (string) ($pricing['currency'] ?? 'USD');
 $effective_price = $pricing['effective'] ?? null;
 $is_paid_course = null !== $effective_price && (float) $effective_price > 0.00001;
 $is_user_enrolled = function_exists('sikshya_is_user_enrolled_in_course') && sikshya_is_user_enrolled_in_course($course_id);
+$is_user_completed = function_exists('sikshya_is_user_completed_course') && $is_user_enrolled && sikshya_is_user_completed_course($course_id);
+$cert_url = ($is_user_completed && function_exists('sikshya_get_user_course_certificate_download_url'))
+    ? (string) sikshya_get_user_course_certificate_download_url($course_id)
+    : '';
 $can_admin_enroll_without_purchase = $is_paid_course && !$is_user_enrolled && is_user_logged_in()
     && function_exists('sikshya_current_user_can_admin_enroll_without_purchase')
     && sikshya_current_user_can_admin_enroll_without_purchase();
@@ -65,10 +69,29 @@ $label_quizzes = function_exists('sikshya_label_plural') ? sikshya_label_plural(
 $label_assignment = function_exists('sikshya_label') ? sikshya_label('assignment', __('Assignment', 'sikshya'), 'frontend') : __('Assignment', 'sikshya');
 $label_assignments = function_exists('sikshya_label_plural') ? sikshya_label_plural('assignment', 'assignments', __('Assignments', 'sikshya'), 'frontend') : __('Assignments', 'sikshya');
 
+$duration_display = (string) $course_duration;
+if ($duration_display !== '') {
+    // Make very compact durations read nicer on cards (e.g. "3m" -> "3 min", "2h" -> "2 hr").
+    $d = trim($duration_display);
+    if (preg_match('/^(\d+)\s*m$/i', $d, $m)) {
+        $duration_display = sprintf(
+            /* translators: %s: number of minutes */
+            __('%s min', 'sikshya'),
+            $m[1]
+        );
+    } elseif (preg_match('/^(\d+)\s*h$/i', $d, $m)) {
+        $duration_display = sprintf(
+            /* translators: %s: number of hours */
+            __('%s hr', 'sikshya'),
+            $m[1]
+        );
+    }
+}
+
 $course_price_ui = 'free';
 if ($on_sale && null !== $price_num && null !== $sale_num) {
     $course_price_ui = 'sale';
-} elseif (null !== $price_num && (float) $price_num > 0) {
+} elseif ($is_paid_course) {
     $course_price_ui = 'paid';
 }
 
@@ -157,13 +180,86 @@ $card_label = sprintf(
             </p>
 
             <?php
+            ob_start();
             /**
-             * Extra meta inside the card body (multi-instructor count, prerequisites pill, etc.).
+             * Extra meta inside the card body (multi-instructor count, marketplace vendor, etc.).
              *
              * @param int $course_id
              */
             do_action('sikshya_course_card_meta', $course_id);
+            $extra_meta_html = trim((string) ob_get_clean());
             ?>
+
+            <?php if (!empty($course_instructor) || $extra_meta_html !== '') : ?>
+                <div class="sikshya-course-card-byline">
+                    <?php if (!empty($course_instructor)) : ?>
+                        <span class="sikshya-course-card__meta-item sikshya-course-card__meta-item--instructor">
+                            <span class="dashicons dashicons-admin-users" aria-hidden="true"></span>
+                            <span>
+                                <?php
+                                echo esc_html(sprintf(
+                                    /* translators: %s: instructor display name */
+                                    __('Instructor: %s', 'sikshya'),
+                                    $course_instructor->display_name
+                                ));
+                                ?>
+                            </span>
+                        </span>
+                    <?php endif; ?>
+                    <?php
+                    // Printed by addons; assumes they escape their own output.
+                    echo $extra_meta_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php
+            $rating_vm = apply_filters(
+                'sikshya_course_card_rating_vm',
+                [
+                    'average' => 0.0,
+                    'count' => 0,
+                ],
+                $course_id
+            );
+            $rating_avg = is_array($rating_vm) ? (float) ($rating_vm['average'] ?? 0) : 0.0;
+            $rating_count = is_array($rating_vm) ? (int) ($rating_vm['count'] ?? 0) : 0;
+            $rating_avg = max(0.0, min(5.0, $rating_avg));
+            $rating_count = max(0, $rating_count);
+            ?>
+            <div class="sikshya-course-card-submeta" aria-label="<?php esc_attr_e('Course meta', 'sikshya'); ?>">
+                <div class="sikshya-course-card-rating" role="img" aria-label="<?php echo esc_attr(sprintf(__('%s out of 5 stars', 'sikshya'), number_format_i18n($rating_avg, 1))); ?>">
+                    <span class="sikshya-rating-stars" aria-hidden="true">
+                        <?php
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($rating_avg >= $i) {
+                                echo '<span class="sikshya-rating-star sikshya-rating-star--full">★</span>';
+                            } elseif ($rating_avg >= ($i - 0.5)) {
+                                echo '<span class="sikshya-rating-star sikshya-rating-star--half">★</span>';
+                            } else {
+                                echo '<span class="sikshya-rating-star">☆</span>';
+                            }
+                        }
+                        ?>
+                    </span>
+                    <span class="sikshya-course-card-rating__count">
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: %s: rating count */
+                            _n('(%s rating)', '(%s ratings)', $rating_count, 'sikshya'),
+                            number_format_i18n($rating_count)
+                        ));
+                        ?>
+                    </span>
+                </div>
+                <?php if (!empty($course_difficulty)) : ?>
+                    <div class="sikshya-course-card-level">
+                        <span class="sikshya-meta-chip sikshya-meta-chip--muted">
+                            <?php echo esc_html(ucfirst((string) $course_difficulty)); ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
             <?php if ($is_bundle && count($bundle_ids) > 0) : ?>
                 <p class="sikshya-course-card-bundle-hint">
@@ -187,6 +283,24 @@ $card_label = sprintf(
                             </span>
                             <span class="sikshya-button__label"><?php esc_html_e('Continue learning', 'sikshya'); ?></span>
                         </a>
+                        <?php if ($cert_url !== '') : ?>
+                            <a
+                                class="sikshya-btn sikshya-btn--ghost sikshya-btn--sm sikshya-course-card-action sikshya-course-card-action--icon"
+                                href="<?php echo esc_url($cert_url); ?>"
+                                target="_blank"
+                                rel="noopener"
+                                aria-label="<?php echo esc_attr__('Download certificate', 'sikshya'); ?>"
+                            >
+                                <span class="sikshya-course-card-action__tooltip" aria-hidden="true"><?php esc_html_e('Download certificate', 'sikshya'); ?></span>
+                                <span class="sikshya-button__icon" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7 10 12 15 17 10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </span>
+                            </a>
+                        <?php endif; ?>
                     <?php elseif ($is_paid_course) : ?>
                         <form method="post" action="<?php echo esc_url($course_permalink); ?>" class="sikshya-course-card-action-form">
                             <?php wp_nonce_field('sikshya_cart', 'sikshya_cart_nonce'); ?>
@@ -223,7 +337,7 @@ $card_label = sprintf(
                             </button>
                         </form>
                     <?php else : ?>
-                        <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-course-card-action" href="<?php echo esc_url(wp_login_url($course_permalink)); ?>">
+                        <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-course-card-action" href="<?php echo esc_url(\Sikshya\Frontend\Public\PublicPageUrls::login($course_permalink)); ?>">
                             <span class="sikshya-button__icon" aria-hidden="true">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                             </span>
@@ -313,12 +427,44 @@ $card_label = sprintf(
 
         <aside class="sikshya-course-card-aside" aria-label="<?php echo esc_attr(sprintf(__('%s details', 'sikshya'), $label_course)); ?>">
             <ul class="sikshya-course-aside-list">
-                <?php if (!empty($course_instructor)) : ?>
-                    <li class="sikshya-aside-item">
-                        <span class="sikshya-aside-item__icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <li class="sikshya-aside-item sikshya-course-aside-rating" aria-label="<?php esc_attr_e('Rating', 'sikshya'); ?>">
+                    <span class="sikshya-aside-item__icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </span>
+                    <span class="sikshya-aside-item__text">
+                        <span class="sikshya-course-card-rating sikshya-course-card-rating--aside" role="img" aria-label="<?php echo esc_attr(sprintf(__('%s out of 5 stars', 'sikshya'), number_format_i18n($rating_avg, 1))); ?>">
+                            <span class="sikshya-rating-stars" aria-hidden="true">
+                                <?php
+                                for ($i = 1; $i <= 5; $i++) {
+                                    if ($rating_avg >= $i) {
+                                        echo '<span class="sikshya-rating-star sikshya-rating-star--full">★</span>';
+                                    } elseif ($rating_avg >= ($i - 0.5)) {
+                                        echo '<span class="sikshya-rating-star sikshya-rating-star--half">★</span>';
+                                    } else {
+                                        echo '<span class="sikshya-rating-star">☆</span>';
+                                    }
+                                }
+                                ?>
+                            </span>
+                            <span class="sikshya-course-card-rating__count">
+                                <?php
+                                echo esc_html(sprintf(
+                                    /* translators: %s: rating count */
+                                    _n('(%s rating)', '(%s ratings)', $rating_count, 'sikshya'),
+                                    number_format_i18n($rating_count)
+                                ));
+                                ?>
+                            </span>
                         </span>
-                        <span class="sikshya-aside-item__text"><?php echo esc_html($course_instructor->display_name); ?></span>
+                    </span>
+                </li>
+
+                <?php if (!empty($course_difficulty)) : ?>
+                    <li class="sikshya-aside-item sikshya-course-aside-level" aria-label="<?php esc_attr_e('Level', 'sikshya'); ?>">
+                        <span class="sikshya-aside-item__icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </span>
+                        <span class="sikshya-aside-item__text sikshya-meta-chip sikshya-meta-chip--muted"><?php echo esc_html(ucfirst((string) $course_difficulty)); ?></span>
                     </li>
                 <?php endif; ?>
 
@@ -327,7 +473,7 @@ $card_label = sprintf(
                         <span class="sikshya-aside-item__icon" aria-hidden="true">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         </span>
-                        <span class="sikshya-aside-item__text"><?php echo esc_html($course_duration); ?></span>
+                        <span class="sikshya-aside-item__text sikshya-meta-chip"><?php echo esc_html($duration_display); ?></span>
                     </li>
                 <?php endif; ?>
 
@@ -338,22 +484,14 @@ $card_label = sprintf(
                     <span class="sikshya-aside-item__text"><?php esc_html_e('Self-paced', 'sikshya'); ?></span>
                 </li>
 
-                <?php if (!empty($course_difficulty)) : ?>
-                    <li class="sikshya-aside-item">
-                        <span class="sikshya-aside-item__icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        </span>
-                        <span class="sikshya-aside-item__text sikshya-aside-item__text--cap"><?php echo esc_html(ucfirst((string) $course_difficulty)); ?></span>
-                    </li>
-                <?php endif; ?>
             </ul>
 
             <div class="sikshya-course-aside-price sikshya-course-price sikshya-course-price--<?php echo esc_attr($course_price_ui); ?>">
                 <?php if ($on_sale && null !== $price_num && null !== $sale_num) : ?>
                     <span class="sikshya-course-price-original" aria-hidden="true"><?php echo wp_kses_post(sikshya_format_price($price_num, $currency)); ?></span>
                     <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price($sale_num, $currency)); ?></span>
-                <?php elseif (null !== $price_num && (float) $price_num > 0) : ?>
-                    <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price((float) $price_num, $currency)); ?></span>
+                <?php elseif ($is_paid_course && null !== $effective_price) : ?>
+                    <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price((float) $effective_price, $currency)); ?></span>
                 <?php else : ?>
                     <span class="sikshya-course-price-free"><?php esc_html_e('Free', 'sikshya'); ?></span>
                 <?php endif; ?>
@@ -368,12 +506,12 @@ $card_label = sprintf(
         </aside>
 
         <div class="sikshya-course-card-footer">
-            <div class="sikshya-course-price sikshya-course-price--<?php echo esc_attr($course_price_ui); ?>">
+            <div class="sikshya-course-price  sikshya-course-price--<?php echo esc_attr($course_price_ui); ?>">
                 <?php if ($on_sale && null !== $price_num && null !== $sale_num) : ?>
                     <span class="sikshya-course-price-original" aria-hidden="true"><?php echo wp_kses_post(sikshya_format_price($price_num, $currency)); ?></span>
                     <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price($sale_num, $currency)); ?></span>
-                <?php elseif (null !== $price_num && (float) $price_num > 0) : ?>
-                    <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price((float) $price_num, $currency)); ?></span>
+                <?php elseif ($is_paid_course && null !== $effective_price) : ?>
+                    <span class="sikshya-course-price-current"><?php echo wp_kses_post(sikshya_format_price((float) $effective_price, $currency)); ?></span>
                 <?php else : ?>
                     <span class="sikshya-course-price-free"><?php esc_html_e('Free', 'sikshya'); ?></span>
                 <?php endif; ?>

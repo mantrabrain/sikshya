@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
@@ -341,6 +342,29 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
     }
   }, [attemptsCourseId, attemptsPerPage, attemptsQuizId, attemptsSearch, attemptsStatus, attemptsUserId]);
 
+  const resetAttemptTimer = useCallback(
+    async (attemptId: number) => {
+      if (!attemptId) return;
+      if (
+        !window.confirm(
+          'Reset this attempt timer? This will restart the countdown and clear any in-progress answers for this attempt.'
+        )
+      ) {
+        return;
+      }
+      setAttemptsBusy(true);
+      try {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.quizAttemptResetTimer(attemptId), {});
+        await refreshAttempts(attemptsPage);
+      } catch {
+        // keep current rows
+      } finally {
+        setAttemptsBusy(false);
+      }
+    },
+    [attemptsPage, refreshAttempts]
+  );
+
   useEffect(() => {
     setSnap(boot);
   }, [boot]);
@@ -596,6 +620,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                   <th className="px-4 py-3">Score</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Completed</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -625,6 +650,19 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{r.completed_at || '—'}</td>
+                    <td className="px-4 py-3 text-right">
+                      {(() => {
+                        const items: RowActionItem[] = [
+                          {
+                            key: 'reset-timer',
+                            label: 'Reset timer',
+                            onClick: () => void resetAttemptTimer(Number(r.id) || 0),
+                            disabled: attemptsBusy,
+                          },
+                        ];
+                        return <RowActionsMenu items={items} ariaLabel={`Quiz attempt actions for #${r.id}`} />;
+                      })()}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -647,7 +685,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
           addonEnableDescription="Enable the Advanced analytics add-on to unlock CSV exports alongside your on-screen charts."
           canEnable={Boolean(reportsAdvAddon.licenseOk)}
           enableBusy={reportsAdvAddon.loading}
-          onEnable={() => void reportsAdvAddon.enable()}
+          onEnable={() => reportsAdvAddon.enable()}
           addonError={reportsAdvAddon.error}
         >
           <ListPanel>
@@ -828,7 +866,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
           addonEnableDescription="Enable the Enterprise reports add-on to schedule the weekly summary email cron."
           canEnable={Boolean(enterpriseAddon.licenseOk)}
           enableBusy={enterpriseAddon.loading}
-          onEnable={() => void enterpriseAddon.enable()}
+          onEnable={() => enterpriseAddon.enable()}
           addonError={enterpriseAddon.error}
         >
           <ListPanel>
@@ -902,7 +940,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       value={enterpriseRecipients}
                       onChange={(e) => setEnterpriseRecipients(e.target.value)}
                       className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
-                      placeholder="ceo@school.edu, it@school.edu"
+                      placeholder="ceo@company.com, it@company.com"
                     />
                   </label>
 

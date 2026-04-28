@@ -160,9 +160,26 @@ final class AdminAddonsRestRoutes
         // Auto-enable dependencies.
         foreach ($addon->dependencies() as $dep) {
             $dep = sanitize_key((string) $dep);
-            if ($dep !== '') {
-                Addons::enable($dep);
+            if ($dep === '' || !isset($reg[$dep])) {
+                continue;
             }
+
+            $depAddon = $reg[$dep];
+            $depTier = $depAddon->tier();
+            if (($depTier === 'starter' || $depTier === 'pro' || $depTier === 'scale') && !Pro::feature($dep)) {
+                return new WP_REST_Response(
+                    [
+                        'success' => false,
+                        'message' => __('A required add-on needs an active license.', 'sikshya'),
+                        'code' => 'sikshya_pro_required',
+                        'feature' => $dep,
+                        'required_by' => $id,
+                    ],
+                    403
+                );
+            }
+
+            Addons::enable($dep);
         }
         Addons::enable($id);
 

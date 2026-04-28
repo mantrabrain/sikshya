@@ -77,11 +77,21 @@
                 });
             };
 
-            let boot = 'grid';
+            // Honor admin "Course catalog layout" when localStorage is unset; otherwise
+            // apply() defaults to grid and strips server-rendered list mode.
+            const serverLayout = String(root.getAttribute('data-sikshya-archive-layout') || 'grid')
+                .trim()
+                .toLowerCase();
+            const serverToggle = serverLayout === 'list' ? 'list' : 'grid';
+
+            let boot = serverToggle;
             try {
-                boot = window.localStorage.getItem(KEY) || 'grid';
+                const stored = window.localStorage.getItem(KEY);
+                if (stored === 'list' || stored === 'grid') {
+                    boot = stored;
+                }
             } catch (e) {
-                boot = 'grid';
+                boot = serverToggle;
             }
             apply(boot);
 

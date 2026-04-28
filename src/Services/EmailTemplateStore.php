@@ -2,6 +2,8 @@
 
 namespace Sikshya\Services;
 
+use Sikshya\Utils\RichText;
+
 /**
  * Per-site email template overrides and custom templates.
  *
@@ -286,7 +288,7 @@ final class EmailTemplateStore
             $cur['name'] = sanitize_text_field((string) $patch['name']);
         }
         if (isset($patch['description'])) {
-            $cur['description'] = sanitize_textarea_field((string) $patch['description']);
+            $cur['description'] = RichText::sanitize((string) $patch['description']);
         }
         if (isset($patch['recipient_to'])) {
             $cur['recipient_to'] = self::sanitizeRecipientTo((string) $patch['recipient_to']);
@@ -323,7 +325,7 @@ final class EmailTemplateStore
             'template_type' => 'custom',
             'enabled' => Settings::isTruthy($data['enabled'] ?? true),
             'name' => $name,
-            'description' => sanitize_textarea_field((string) ($data['description'] ?? '')),
+            'description' => RichText::sanitize((string) ($data['description'] ?? '')),
             'event' => $event_key,
             'category' => sanitize_key((string) ($data['category'] ?? 'custom')),
             'recipient_to' => $recipient_to,
@@ -371,7 +373,7 @@ final class EmailTemplateStore
             $cur['name'] = sanitize_text_field((string) $patch['name']);
         }
         if (isset($patch['description'])) {
-            $cur['description'] = sanitize_textarea_field((string) $patch['description']);
+            $cur['description'] = RichText::sanitize((string) $patch['description']);
         }
         if (isset($patch['event'])) {
             $cur['event'] = self::sanitizeEventKey((string) $patch['event']);

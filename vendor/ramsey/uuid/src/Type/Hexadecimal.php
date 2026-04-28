@@ -17,62 +17,63 @@ namespace Ramsey\Uuid\Type;
 use Ramsey\Uuid\Exception\InvalidArgumentException;
 use ValueError;
 
-use function preg_match;
+use function ctype_xdigit;
 use function sprintf;
+use function strpos;
+use function strtolower;
 use function substr;
 
 /**
  * A value object representing a hexadecimal number
  *
- * This class exists for type-safety purposes, to ensure that hexadecimal numbers returned from ramsey/uuid methods as
- * strings are truly hexadecimal and not some other kind of string.
+ * This class exists for type-safety purposes, to ensure that hexadecimal numbers
+ * returned from ramsey/uuid methods as strings are truly hexadecimal and not some
+ * other kind of string.
  *
- * @immutable
+ * @psalm-immutable
  */
 final class Hexadecimal implements TypeInterface
 {
     /**
-     * @var non-empty-string
+     * @var string
      */
-    private string $value;
+    private $value;
 
     /**
-     * @param self | string $value The hexadecimal value to store
+     * @param string $value The hexadecimal value to store
      */
-    public function __construct(self | string $value)
+    public function __construct(string $value)
     {
-        $this->value = $value instanceof self ? (string) $value : $this->prepareValue($value);
+        $value = strtolower($value);
+
+        if (strpos($value, '0x') === 0) {
+            $value = substr($value, 2);
+        }
+
+        if (!ctype_xdigit($value)) {
+            throw new InvalidArgumentException(
+                'Value must be a hexadecimal number'
+            );
+        }
+
+        $this->value = $value;
     }
 
-    /**
-     * @return non-empty-string
-     *
-     * @pure
-     */
     public function toString(): string
     {
         return $this->value;
     }
 
-    /**
-     * @return non-empty-string
-     */
     public function __toString(): string
     {
         return $this->toString();
     }
 
-    /**
-     * @return non-empty-string
-     */
     public function jsonSerialize(): string
     {
         return $this->toString();
     }
 
-    /**
-     * @return non-empty-string
-     */
     public function serialize(): string
     {
         return $this->toString();
@@ -89,15 +90,18 @@ final class Hexadecimal implements TypeInterface
     /**
      * Constructs the object from a serialized string representation
      *
-     * @param string $data The serialized string representation of the object
+     * @param string $serialized The serialized string representation of the object
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     * @psalm-suppress UnusedMethodCall
      */
-    public function unserialize(string $data): void
+    public function unserialize($serialized): void
     {
-        $this->__construct($data);
+        $this->__construct($serialized);
     }
 
     /**
-     * @param array{string?: string} $data
+     * @param array{string: string} $data
      */
     public function __unserialize(array $data): void
     {
@@ -108,24 +112,5 @@ final class Hexadecimal implements TypeInterface
         // @codeCoverageIgnoreEnd
 
         $this->unserialize($data['string']);
-    }
-
-    /**
-     * @return non-empty-string
-     */
-    private function prepareValue(string $value): string
-    {
-        $value = strtolower($value);
-
-        if (str_starts_with($value, '0x')) {
-            $value = substr($value, 2);
-        }
-
-        if (!preg_match('/^[A-Fa-f0-9]+$/', $value)) {
-            throw new InvalidArgumentException('Value must be a hexadecimal number');
-        }
-
-        /** @var non-empty-string */
-        return $value;
     }
 }

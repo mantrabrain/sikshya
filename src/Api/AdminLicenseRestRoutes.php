@@ -167,7 +167,7 @@ final class AdminLicenseRestRoutes
              * with the active plugin list on some hosts (symlinks, case paths) while Pro is running.
              */
             'pro_plugin_active' => self::is_pro_plugin_runtime_active(),
-            'upgrade_url' => (string) ($lic['upgradeUrl'] ?? 'https://sikshya.com/pricing/'),
+            'upgrade_url' => (string) ($lic['upgradeUrl'] ?? 'https://mantrabrain.com/plugins/sikshya/#pricing'),
             'site_tier' => (string) ($lic['siteTier'] ?? 'free'),
             'site_tier_label' => (string) ($lic['siteTierLabel'] ?? ''),
         ];

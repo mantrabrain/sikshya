@@ -44,6 +44,16 @@ export type SikshyaLicensing = {
   }>;
 };
 
+/** Current user for the React admin shell (TopBar menu, Gravatar, profile / logout links). */
+export type SikshyaShellUser = {
+  name: string;
+  /** Gravatar (or fallback) URL from PHP. */
+  avatarUrl: string;
+  email?: string;
+  profileUrl?: string;
+  logoutUrl?: string;
+};
+
 export type SikshyaReactConfig = {
   page: string;
   /** Sikshya (free) plugin version. */
@@ -69,7 +79,7 @@ export type SikshyaReactConfig = {
   plainPermalinks?: boolean;
   /** CPT keys needed for building example URLs. */
   postTypes?: { course?: string; lesson?: string; quiz?: string; assignment?: string };
-  user: { name: string; avatarUrl: string };
+  user: SikshyaShellUser;
   navigation: NavItem[];
   initialData: Record<string, unknown>;
   query: Record<string, string>;
@@ -80,9 +90,9 @@ export type SikshyaReactConfig = {
   branding?: {
     pluginName?: string;
     logoUrl?: string;
-    /** Feeds admin accent tokens with sidebar; does not paint the React top bar. */
+    /** Feeds admin accent tokens with sidebar; does not paint the React content header row. */
     topbarBg?: string;
-    /** Legacy field; top bar uses default title colours. */
+    /** Legacy field; React content header uses default title colours. */
     topbarText?: string;
     sidebarBg?: string;
     sidebarText?: string;
@@ -142,6 +152,8 @@ export type FieldConfig = {
   required_feature?: string;
   required_addon_label?: string;
   required_plan_label?: string;
+  /** When true (from PHP), course meta is not read/written for this field (UI-only widgets). */
+  skip_persistence?: boolean;
 };
 
 export type TabFieldsMap = Record<string, Record<string, { section?: { title?: string; description?: string }; fields?: Record<string, FieldConfig> }>>;
@@ -169,6 +181,10 @@ export type WpPost = {
   sikshya_preview_link?: string;
   /** Sikshya REST field for course lists (bundle vs regular). */
   sikshya_course_type?: string;
+  /** Sikshya REST fields: mirrored meta for collection responses (see `Api::registerRoutes`). */
+  sikshya_course_price?: string;
+  sikshya_course_duration?: string;
+  sikshya_course_level?: string;
   /** Term IDs on the post (edit context). */
   sikshya_course_category?: number[];
   _embedded?: {

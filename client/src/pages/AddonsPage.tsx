@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
-import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
+import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import type { NavItem, SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type AddonTier = 'free' | 'starter' | 'pro' | 'scale';
 
@@ -179,7 +180,7 @@ function AddonDescriptionWithHelp(props: { addonId: string; label: string; descr
   );
 }
 
-export function AddonsPage(props: { config: SikshyaReactConfig; title: string }) {
+export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const [data, setData] = useState<AddonsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -191,6 +192,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
   const [tierFilter, setTierFilter] = useState<'all' | AddonTier>('all');
   const [sort, setSort] = useState<'importance' | 'name_asc' | 'name_desc' | 'tier' | 'status'>('importance');
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const toast = useTopRightToast(3200);
 
   const refetch = async () => {
     setLoading(true);
@@ -264,7 +266,9 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
   }, [allRows, sort]);
 
   const upgradeUrl =
-    data?.licensing?.upgradeUrl || config.licensing?.upgradeUrl || 'https://store.mantrabrain.com/downloads/sikshya-pro/';
+    data?.licensing?.upgradeUrl ||
+    config.licensing?.upgradeUrl ||
+    'https://mantrabrain.com/plugins/sikshya/#pricing';
 
   const licensing = data?.licensing;
   const isProActive = licensing?.isProActive === true;
@@ -279,12 +283,19 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
   const toggle = async (addon: AddonRow) => {
     setBusyId(addon.id);
     setError(null);
+    toast.clear();
     try {
       const path = addon.enabled ? SIKSHYA_ENDPOINTS.admin.addonsDisable(addon.id) : SIKSHYA_ENDPOINTS.admin.addonsEnable(addon.id);
       const res = await getSikshyaApi().post<AddonsResponse>(path, {});
       setData(res);
+      if (addon.enabled) {
+        toast.success('Disabled', `${addon.label} disabled.`);
+      } else {
+        toast.success('Enabled', `${addon.label} enabled.`);
+      }
     } catch (e) {
       setError(e);
+      toast.error('Action failed', getErrorSummary(e));
     } finally {
       setBusyId(null);
     }
@@ -312,6 +323,8 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
     if (!ids.length) return;
     setBulkBusy(true);
     setError(null);
+    toast.clear();
+    let updated = 0;
     try {
       // Sequential to keep server load predictable and responses consistent.
       for (const id of ids) {
@@ -324,28 +337,30 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
         const path = mode === 'enable' ? SIKSHYA_ENDPOINTS.admin.addonsEnable(id) : SIKSHYA_ENDPOINTS.admin.addonsDisable(id);
         const res = await getSikshyaApi().post<AddonsResponse>(path, {});
         setData(res);
+        updated++;
       }
       setSelected({});
+      if (updated > 0) {
+        toast.success(mode === 'enable' ? 'Enabled' : 'Disabled', `${updated} add-on(s) updated.`);
+      } else {
+        toast.info('No changes', 'Nothing to update for the selected add-ons.');
+      }
     } catch (e) {
       setError(e);
+      toast.error('Bulk update failed', getErrorSummary(e));
     } finally {
       setBulkBusy(false);
     }
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Sikshya Free always runs the core LMS. Optional add-ons extend it — turn each switch on only when you need that feature."
-      pageActions={null}
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {error ? <ApiErrorPanel error={error} title="Could not load addons" onRetry={() => void refetch()} /> : null}
 
       <div className="mb-4 rounded-2xl border border-sky-200 bg-sky-50/90 p-4 text-sm text-sky-950 shadow-sm dark:border-sky-900/50 dark:bg-sky-950/35 dark:text-sky-50">
@@ -617,7 +632,7 @@ export function AddonsPage(props: { config: SikshyaReactConfig; title: string })
           })}
         </div>
       )}
-    </AppShell>
+    </EmbeddableShell>
   );
 }
 

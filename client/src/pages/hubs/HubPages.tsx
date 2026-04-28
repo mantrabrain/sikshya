@@ -28,7 +28,7 @@ import { isFeatureEnabled } from '../../lib/licensing';
 import { appViewHref } from '../../lib/appUrl';
 import { term } from '../../lib/terminology';
 
-type Props = { config: SikshyaReactConfig; title: string };
+type Props = { embedded?: boolean; config: SikshyaReactConfig; title: string };
 
 /**
  * Library hub: a single nav entry that fans out to the five "all rows of one
@@ -49,6 +49,7 @@ export function ContentLibraryHubPage({ config, title }: Props) {
   };
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
       subtitle={`Browse every ${T.lesson.toLowerCase()}, ${T.quiz.toLowerCase()}, ${T.assignment.toLowerCase()}, question, and ${T.chapter.toLowerCase()} on the site.`}
@@ -125,6 +126,7 @@ export function PeopleHubPage({ config, title }: Props) {
   const instructors = term(config, 'instructors');
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
       subtitle={`${students} and ${instructors.toLowerCase()} that have a role on this site.`}
@@ -179,6 +181,7 @@ export function PeopleHubPage({ config, title }: Props) {
 export function CertificatesHubPage({ config, title }: Props) {
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
       subtitle="Designs that get rendered, and a record of every certificate already awarded."
@@ -248,6 +251,7 @@ export function SalesHubPage({ config, title }: Props) {
 
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
       subtitle={salesSubtitle}
@@ -288,6 +292,7 @@ export function EmailHubPage({ config, title }: Props) {
 
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
       subtitle="Sender identity, SMTP, and the transactional email templates Sikshya uses."
@@ -316,9 +321,10 @@ export function BrandingHubPage({ config, title }: Props) {
   const hasSocial = isFeatureEnabled(config, 'social_login');
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
-      subtitle="How your school looks across login, account, and admin screens."
+      subtitle="How your brand looks across login, account, and admin screens."
       sidebarActivePage="branding"
       tabs={[
         {
@@ -342,6 +348,7 @@ export function BrandingHubPage({ config, title }: Props) {
 export function IntegrationsHubPage({ config, title }: Props) {
   return (
     <TabbedHubPage
+      embedded
       config={config}
       title={title}
       subtitle="Automation and external tools (webhooks, API keys, live classes, SCORM, email marketing). Site-wide LMS defaults stay under Settings — this hub is for connections and add-on workspaces."
@@ -410,9 +417,10 @@ export function IntegrationsHubPage({ config, title }: Props) {
   );
 }
 
-export function LearningRulesHubPage({ config, title }: Props) {
+export function LearningRulesHubPage({ embedded, config, title }: Props) {
   return (
     <TabbedHubPage
+      embedded={embedded}
       config={config}
       title={title}
       subtitle="Cross-course access logic — when does each lesson open, and what must be done first."
@@ -441,9 +449,10 @@ export function LearningRulesHubPage({ config, title }: Props) {
  * keeps its own sidebar entry because it is a true second job ("grade work")
  * rather than a different view of the same dataset.
  */
-export function ReportsHubPage({ config, title }: Props) {
+export function ReportsHubPage({ embedded, config, title }: Props) {
   return (
     <TabbedHubPage
+      embedded={embedded}
       config={config}
       title={title}
       subtitle="Enrollment, completion, and dated events."
@@ -471,9 +480,10 @@ export function ReportsHubPage({ config, title }: Props) {
  * audit trail used during support / compliance, not a metric. Putting it next
  * to system diagnostics is a better mental model.
  */
-export function ToolsHubPage({ config, title }: Props) {
+export function ToolsHubPage({ embedded, config, title }: Props) {
   return (
     <TabbedHubPage
+      embedded={embedded}
       config={config}
       title={title}
       subtitle="Diagnostics, exports, audit log, and maintenance."

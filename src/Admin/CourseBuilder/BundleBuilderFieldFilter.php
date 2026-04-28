@@ -70,7 +70,7 @@ final class BundleBuilderFieldFilter
     {
         $out = [];
         if (isset($course['basic_info'], $course['basic_info']['fields'], $course['basic_info']['section']) && is_array($course['basic_info']['fields'])) {
-            $keep = ['title', 'slug', 'short_description', 'description', 'category', 'course_tags'];
+            $keep = ['title', 'slug', 'short_description', 'description', 'category'];
             $fields = [];
             foreach ($keep as $k) {
                 if (isset($course['basic_info']['fields'][$k])) {

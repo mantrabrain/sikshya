@@ -10,6 +10,16 @@ class CourseRepository implements RepositoryInterface
 {
     public function findAll(array $args = []): array
     {
+        $query = $this->queryCourses($args);
+
+        return $query->posts;
+    }
+
+    /**
+     * Run a course listing query (caller may read {@see WP_Query::found_posts} for pagination).
+     */
+    public function queryCourses(array $args = []): WP_Query
+    {
         $defaults = [
             'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
@@ -19,9 +29,8 @@ class CourseRepository implements RepositoryInterface
         ];
 
         $query_args = wp_parse_args($args, $defaults);
-        $query = new WP_Query($query_args);
 
-        return $query->posts;
+        return new WP_Query($query_args);
     }
 
     public function findById(int $id): ?object
@@ -159,6 +168,16 @@ class CourseRepository implements RepositoryInterface
 
     public function search(string $search_term, array $args = []): array
     {
+        $query = $this->querySearch($search_term, $args);
+
+        return $query->posts;
+    }
+
+    /**
+     * Course search query (caller may read {@see WP_Query::found_posts} for pagination).
+     */
+    public function querySearch(string $search_term, array $args = []): WP_Query
+    {
         $defaults = [
             'post_type' => PostTypes::COURSE,
             'post_status' => 'publish',
@@ -168,9 +187,8 @@ class CourseRepository implements RepositoryInterface
         ];
 
         $query_args = wp_parse_args($args, $defaults);
-        $query = new WP_Query($query_args);
 
-        return $query->posts;
+        return new WP_Query($query_args);
     }
 
     public function getFeatured(array $args = []): array

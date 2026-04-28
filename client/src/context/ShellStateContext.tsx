@@ -24,7 +24,19 @@ const ShellStateContext = createContext<ShellStateValue | null>(null);
 export function useShellState(): ShellStateValue {
   const ctx = useContext(ShellStateContext);
   if (!ctx) {
-    throw new Error('useShellState must be used within ShellStateProvider');
+    // Defensive fallback: some WP admin pages can mount subsets of the React shell
+    // (or mount order can be disrupted by 3rd-party scripts). Returning a safe
+    // default prevents a full white-screen crash; callers still get a usable UI.
+    const c = getConfig();
+    return {
+      shellAlerts: normalizeShellAlerts(c.shellAlerts ?? []),
+      licensing: normalizeLicensing(c.licensing),
+      proPluginVersion:
+        typeof c.proPluginVersion === 'string' && c.proPluginVersion.trim() !== '' ? c.proPluginVersion.trim() : '',
+      refreshShell: async () => {
+        // no-op (provider not mounted)
+      },
+    };
   }
   return ctx;
 }

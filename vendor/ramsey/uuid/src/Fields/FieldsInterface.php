@@ -17,17 +17,16 @@ namespace Ramsey\Uuid\Fields;
 use Serializable;
 
 /**
- * UUIDs consist of unsigned integers, the bytes of which are separated into fields and arranged in a particular layout
- * defined by the specification for the variant
+ * UUIDs are comprised of unsigned integers, the bytes of which are separated
+ * into fields and arranged in a particular layout defined by the specification
+ * for the variant
  *
- * @immutable
+ * @psalm-immutable
  */
 interface FieldsInterface extends Serializable
 {
     /**
      * Returns the bytes that comprise the fields
-     *
-     * @pure
      */
     public function getBytes(): string;
 }

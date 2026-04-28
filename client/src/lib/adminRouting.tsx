@@ -72,7 +72,22 @@ const AdminRoutingContext = createContext<Ctx | null>(null);
 export function useAdminRouting(): Ctx {
   const ctx = useContext(AdminRoutingContext);
   if (!ctx) {
-    throw new Error('useAdminRouting must be used within AdminRoutingProvider');
+    // Defensive fallback: some admin UI pieces may be rendered outside the SPA provider
+    // (or in rare cases a stale module graph can cause context mismatch).
+    // In that scenario we still want basic navigation to work via full page loads.
+    const base = getConfig();
+    const route = parseAdminRoute(base);
+    const navigateHref: Ctx['navigateHref'] = (href, opts) => {
+      if (opts?.replace) {
+        window.location.replace(href);
+      } else {
+        window.location.href = href;
+      }
+    };
+    const navigateView: Ctx['navigateView'] = (view, extra, opts) => {
+      navigateHref(appViewHref(base, view, extra || {}), opts);
+    };
+    return { route, navigateHref, navigateView };
   }
   return ctx;
 }

@@ -1,5 +1,4 @@
-/* Design tokens + shared utilities (dashboard layout loads separately via sikshya-dashboard handle) */
-@import url('./design-system.css');
+/* React admin uses bundled styles; no shared token import needed here. */
 
 /* Sikshya LMS Admin Styles - Using Design System */
 

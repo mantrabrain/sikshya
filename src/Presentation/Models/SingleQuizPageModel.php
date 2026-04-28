@@ -16,10 +16,16 @@ if (!defined('ABSPATH')) {
 final class SingleQuizPageModel
 {
     /**
+     * @var array<string, mixed>
+     */
+    private array $data;
+
+    /**
      * @param array<string, mixed> $data
      */
-    private function __construct(private array $data)
+    private function __construct(array $data)
     {
+        $this->data = $data;
     }
 
     /**

@@ -54,19 +54,13 @@ function SectionShell(props: {
   );
 }
 
-const SUB_TABS: Array<{ id: 'catalog' | 'discovery'; label: string; icon: string; keys: string[] }> = [
-  { id: 'catalog', label: 'Catalog & layout', icon: 'course', keys: ['course_display'] },
-  {
-    id: 'discovery',
-    label: 'Discovery',
-    icon: 'tag',
-    keys: ['course_reviews', 'course_tax', 'course_search'],
-  },
+const SUB_TABS: Array<{ id: 'discovery'; label: string; icon: string; keys: string[] }> = [
+  { id: 'discovery', label: 'Discovery', icon: 'tag', keys: ['course_reviews', 'course_tax', 'course_search'] },
 ];
 
 export function CourseSettingsTab(props: Props) {
   const { tabSchema, renderField } = props;
-  const [sub, setSub] = useState<(typeof SUB_TABS)[number]['id']>('catalog');
+  const [sub, setSub] = useState<(typeof SUB_TABS)[number]['id']>('discovery');
 
   const byKey = useMemo(() => {
     const map = new Map<string, SettingsSection>();
@@ -92,26 +86,7 @@ export function CourseSettingsTab(props: Props) {
           sidebar.
         </p>
 
-        <div className="flex w-full flex-wrap gap-1 border-b border-slate-200/80 dark:border-slate-800">
-          {SUB_TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setSub(t.id)}
-              className={`relative flex flex-1 items-center justify-center gap-2 px-3 pb-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 sm:flex-none sm:justify-start sm:px-4 ${
-                sub === t.id
-                  ? 'text-brand-600 dark:text-brand-400'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              <NavIcon name={t.icon} className="h-4 w-4 shrink-0" />
-              {t.label}
-              {sub === t.id ? (
-                <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-brand-500 dark:bg-brand-400" />
-              ) : null}
-            </button>
-          ))}
-        </div>
+        {/* Only one Courses sub-tab is currently supported; keep the UI simple. */}
       </div>
 
       <div className="mt-6 w-full space-y-6 px-6">

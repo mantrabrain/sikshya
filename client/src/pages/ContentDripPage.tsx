@@ -23,6 +23,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { appViewHref } from '../lib/appUrl';
 import type { SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 /** Mirrors `DripService::unlockAtForLesson` — keep the union in sync with the PHP side. */
 type DripRuleType = 'delay_days' | 'date';
@@ -128,15 +129,10 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Rule | null>(null);
 
-  const [toast, setToast] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast(2400);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // Auto-dismiss success toasts so they don't pile up after several saves.
-  useEffect(() => {
-    if (!toast || toast.kind !== 'success') return;
-    const t = window.setTimeout(() => setToast(null), 2400);
-    return () => window.clearTimeout(t);
-  }, [toast]);
+  // Auto-dismiss handled by shared toast.
 
   useEffect(() => {
     setPage(1);
@@ -260,13 +256,13 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
 
   const saveDripEmailMode = async () => {
     setModeSaving(true);
-    setToast(null);
+    toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.dripNotificationsSettings, { mode: dripEmailMode });
-      setToast({ kind: 'success', text: 'Lesson notification mode saved.' });
+      toast.success('Saved', 'Lesson notification mode saved.');
       void notifyQ.refetch();
     } catch (err) {
-      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Could not save settings' });
+      toast.error('Save failed', err instanceof Error ? err.message : 'Could not save settings');
     } finally {
       setModeSaving(false);
     }
@@ -275,31 +271,31 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
   const saveRuleFromModal = async () => {
     const cid = editorCourseId;
     if (cid <= 0) {
-      setToast({ kind: 'error', text: 'Pick the course first.' });
+      toast.error('Missing course', 'Pick the course first.');
       return;
     }
     if (editorScope === 'lesson' && editorLessonId <= 0) {
-      setToast({ kind: 'error', text: 'Pick the lesson this rule applies to.' });
+      toast.error('Missing lesson', 'Pick the lesson this rule applies to.');
       return;
     }
     let value = '';
     if (editorRuleType === 'delay_days') {
       const days = parseInt(editorDelayDays, 10);
       if (!Number.isFinite(days) || days < 0) {
-        setToast({ kind: 'error', text: 'Enter how many days after enrollment the lesson should unlock.' });
+        toast.error('Missing value', 'Enter how many days after enrollment the lesson should unlock.');
         return;
       }
       value = String(days);
     } else {
       if (!editorUnlockDate) {
-        setToast({ kind: 'error', text: 'Pick the date when learners should get access.' });
+        toast.error('Missing date', 'Pick the date when learners should get access.');
         return;
       }
       value = editorUnlockDate;
     }
 
     setEditorSaving(true);
-    setToast(null);
+    toast.clear();
     const payload = {
       course_id: cid,
       lesson_id: editorScope === 'lesson' ? editorLessonId : 0,
@@ -314,7 +310,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       } else {
         await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.dripRules, payload);
       }
-      setToast({ kind: 'success', text: isEdit ? 'Schedule updated.' : 'Schedule created.' });
+      toast.success('Saved', isEdit ? 'Schedule updated.' : 'Schedule created.');
       setEditorOpen(false);
       setEditing(null);
       // List is filtered by toolbar course + rule type + search — align filters so the new row appears.
@@ -324,7 +320,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       setListRuleType('');
       void rulesQ.refetch();
     } catch (err) {
-      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Save failed' });
+      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
     } finally {
       setEditorSaving(false);
     }
@@ -354,13 +350,13 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       if (!ok) return;
 
       setDeletingId(rule.id);
-      setToast(null);
+      toast.clear();
       try {
         await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.dripRule(rule.id));
-        setToast({ kind: 'success', text: 'Schedule removed.' });
+        toast.success('Removed', 'Schedule removed.');
         void rulesQ.refetch();
       } catch (err) {
-        setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Could not delete the rule' });
+        toast.error('Remove failed', err instanceof Error ? err.message : 'Could not delete the rule');
       } finally {
         setDeletingId(null);
       }
@@ -385,10 +381,10 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
 
     setBulkBusy(true);
     setBulkError(null);
-    setToast(null);
+    toast.clear();
     try {
       await Promise.all(ids.map((id) => getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.dripRule(id))));
-      setToast({ kind: 'success', text: `Removed ${n} schedule(s).` });
+      toast.success('Removed', `Removed ${n} schedule(s).`);
       setSelectedRuleIds(new Set());
       setBulkActionValue('');
       void rulesQ.refetch();
@@ -540,7 +536,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
         addonEnableDescription="Enable the Content Drip addon to register its routes and start managing lesson unlock schedules."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <div className="space-y-6">
@@ -575,14 +571,14 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       if (editorSaving) return;
                       if (editorStep === 1) {
                         if (editorCourseId <= 0) {
-                          setToast({ kind: 'error', text: 'Pick the course first.' });
+                          toast.error('Missing course', 'Pick the course first.');
                           return;
                         }
                         setEditorStep(2);
                         return;
                       }
                       if (editorScope === 'lesson' && editorLessonId <= 0) {
-                        setToast({ kind: 'error', text: 'Pick the lesson this schedule applies to.' });
+                        toast.error('Missing lesson', 'Pick the lesson this schedule applies to.');
                         return;
                       }
                       setEditorStep(3);
@@ -723,7 +719,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                     <div className="flex min-h-0 flex-col sm:col-span-2">
                       <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">Unlock date</label>
                       <div className="mt-1 shrink-0">
-                        <DateTimePickerField value={editorUnlockDate} onChange={setEditorUnlockDate} />
+                        <DateTimePickerField kind="date" value={editorUnlockDate} onChange={setEditorUnlockDate} />
                       </div>
                       <FieldHint />
                     </div>
@@ -886,29 +882,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             </p>
           </div>
 
-          {/* Toast */}
-          {toast ? (
-            <div className="fixed right-4 top-4 z-[9999] w-[min(28rem,calc(100vw-2rem))]">
-              <div
-                role="status"
-                className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg ${
-                  toast.kind === 'success'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-200'
-                    : 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-200'
-                }`}
-              >
-                <span className="min-w-0 flex-1">{toast.text}</span>
-                <button
-                  type="button"
-                  onClick={() => setToast(null)}
-                  className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10"
-                  aria-label="Dismiss"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          ) : null}
+          <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
           {/* Drip notifications addon — sub-section, gated separately so admins
               can toggle the email-on-unlock behaviour without touching the
@@ -925,7 +899,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
               addonEnableDescription="Enable Drip notifications. When the drip cron unlocks content, learners receive your transactional templates (From/SMTP on the Email page)."
               canEnable={Boolean(notifyAddon.licenseOk)}
               enableBusy={notifyAddon.loading}
-              onEnable={() => void notifyAddon.enable()}
+              onEnable={() => notifyAddon.enable()}
               addonError={notifyAddon.error}
             >
               <ListPanel className="p-6">

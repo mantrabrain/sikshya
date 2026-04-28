@@ -191,7 +191,19 @@ final class SetupWizardController
     {
         $raw = isset($data['allow_usage_tracking']) ? wp_unslash((string) $data['allow_usage_tracking']) : '0';
         $val = sanitize_key((string) $raw);
-        Settings::set('allow_usage_tracking', ($val === '1' || $val === 'yes' || $val === 'on') ? '1' : '0');
+        $allow = ($val === '1' || $val === 'yes' || $val === 'on');
+        Settings::set('allow_usage_tracking', $allow ? '1' : '0');
+
+        // Keep the telemetry scheduler in sync with the wizard consent choice.
+        // This mirrors Yatra's welcome-step behavior (enable/disable triggers immediate send + schedules).
+        if (class_exists('\\Sikshya\\Services\\StatsUsage')) {
+            $u = \Sikshya\Services\StatsUsage::instance();
+            if ($allow) {
+                $u->enable(true);
+            } else {
+                $u->disable();
+            }
+        }
     }
 
     /**

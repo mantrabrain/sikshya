@@ -39,6 +39,8 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
     ?>
 </head>
 <body class="sikshya-account-shell" data-sikshya-account-view="<?php echo esc_attr($view); ?>">
+<a class="sik-acc-skip-link" href="#sik-acc-main"><?php esc_html_e('Skip to content', 'sikshya'); ?></a>
+<input type="checkbox" id="sik-acc-nav-open" class="sik-acc-nav-state" tabindex="-1" aria-hidden="true">
 <div class="sik-acc-app">
     <aside class="sik-acc-sidebar" aria-label="<?php esc_attr_e('Account navigation', 'sikshya'); ?>">
         <div class="sik-acc-sidebar__brand">
@@ -73,6 +75,16 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                 <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
                 <?php esc_html_e('Learning hub', 'sikshya'); ?>
             </a>
+            <?php
+            /**
+             * Extra "Learn" links placed right after Learning hub.
+             *
+             * @param array<string, mixed>                         $acc
+             * @param string                                      $view
+             * @param \Sikshya\Presentation\Models\AccountPageModel $page_model
+             */
+            do_action('sikshya_account_sidebar_nav_after_learning_hub', $acc, $view, $page_model);
+            ?>
             <p class="sik-acc-nav__label"><?php esc_html_e('Commerce', 'sikshya'); ?></p>
             <p class="sik-acc-nav__hint">
                 <?php esc_html_e('Cart holds courses before you pay. Checkout is the secure payment step. Receipts live under Payments.', 'sikshya'); ?>
@@ -89,13 +101,14 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                 <span class="sik-acc-nav__icon" aria-hidden="true">✓</span>
                 <?php esc_html_e('Checkout', 'sikshya'); ?>
             </a>
+            <?php
+            /*
+             * Extra sidebar links (Pro / addons). Must stay inside `<nav class="sik-acc-nav">`
+             * so anchors match `.sik-acc-nav a` (same padding, no underline, active state).
+             */
+            do_action('sikshya_account_sidebar_nav', $acc, $view);
+            ?>
         </nav>
-        <?php
-        /*
-         * Extra sidebar links (Pro / addons). Echo anchor rows matching `.sik-acc-nav a`.
-         */
-        do_action('sikshya_account_sidebar_nav', $acc, $view);
-        ?>
         <div class="sik-acc-sidebar__footer">
             <a href="<?php echo esc_url($page_model->getUrls()->getHomeUrl()); ?>">
                 <span aria-hidden="true">←</span>
@@ -104,8 +117,14 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
         </div>
     </aside>
 
-    <div class="sik-acc-main">
+    <label class="sik-acc-nav-scrim" for="sik-acc-nav-open"><span class="sik-acc-sr-only"><?php esc_html_e('Close menu', 'sikshya'); ?></span></label>
+
+    <div class="sik-acc-main" id="sik-acc-main">
         <header class="sik-acc-topbar">
+            <label class="sik-acc-nav-toggle" for="sik-acc-nav-open">
+                <span class="sik-acc-nav-toggle__bars" aria-hidden="true"></span>
+                <span class="sik-acc-nav-toggle__text"><?php esc_html_e('Menu', 'sikshya'); ?></span>
+            </label>
             <div class="sik-acc-topbar__titles">
                 <h1><?php echo esc_html($page_model->getHeadlineTitle()); ?></h1>
                 <p><?php echo esc_html($page_model->getHeadlineSubtitle()); ?></p>

@@ -10,6 +10,8 @@
 namespace Sikshya\Admin\CourseBuilder\Tabs;
 
 use Sikshya\Admin\CourseBuilder\Core\AbstractTab;
+use Sikshya\Constants\PostTypes;
+use Sikshya\Services\CertificateIssuanceService;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -75,6 +77,14 @@ class SettingsTab extends AbstractTab
      */
     public function getFields(): array
     {
+        $certificate_template_options = CertificateIssuanceService::getPublishedCertificateTemplateChoices();
+        if ($certificate_template_options === []) {
+            $certificate_template_options['0'] = __(
+                'No published certificate templates yet — create one under Certificates → Templates.',
+                'sikshya'
+            );
+        }
+
         return [
             'course_settings' => [
                 'section' => [
@@ -258,16 +268,13 @@ class SettingsTab extends AbstractTab
                     'certificate_template' => [
                         'type' => 'select',
                         'label' => __('Certificate template', 'sikshya'),
-                        'options' => [
-                            'default' => __('Default', 'sikshya'),
-                            'modern' => __('Modern', 'sikshya'),
-                            'classic' => __('Classic', 'sikshya'),
-                            'custom' => __('Custom', 'sikshya'),
-                        ],
-                        'default' => 'default',
-                        'description' => __('Visual style for the PDF or print view.', 'sikshya'),
+                        'select_placeholder' => __('Choose a template…', 'sikshya'),
+                        'options' => $certificate_template_options,
+                        'description' => __(
+                            'Uses the same certificate posts as Certificates → Templates. Pick the layout learners receive when a certificate is issued.',
+                            'sikshya'
+                        ),
                         'depends_on' => 'enable_certificate',
-                        'validation' => 'in:default,modern,classic,custom',
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
                     ],
@@ -358,6 +365,73 @@ class SettingsTab extends AbstractTab
          * @return array<string, mixed>
          */
         return apply_filters('sikshya_course_builder_settings_tab_fields', $fields, $this->plugin);
+    }
+
+    /**
+     * @param int $course_id
+     * @return array<string, mixed>
+     */
+    public function load(int $course_id): array
+    {
+        $data = parent::load($course_id);
+        if ($course_id > 0 && array_key_exists('certificate_template', $data)) {
+            $raw = $data['certificate_template'];
+            $data['certificate_template'] = CertificateIssuanceService::normalizeBuilderCertificateTemplateValue(
+                $course_id,
+                is_scalar($raw) ? (string) $raw : ''
+            );
+        }
+
+        return $data;
+    }
+
+    /**
+     * Keep `_sikshya_certificate` aligned with the selected template for integrations that read that meta.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function save(array $data, int $course_id): bool
+    {
+        $ok = parent::save($data, $course_id);
+        if (!$ok || $course_id <= 0) {
+            return $ok;
+        }
+
+        $enabled = !empty($data['enable_certificate']);
+        $tid = isset($data['certificate_template']) ? absint($data['certificate_template']) : 0;
+
+        if (!$enabled || $tid <= 0) {
+            delete_post_meta($course_id, '_sikshya_certificate');
+            return $ok;
+        }
+
+        if (get_post_type($tid) === PostTypes::CERTIFICATE && get_post_status($tid) === 'publish') {
+            update_post_meta($course_id, '_sikshya_certificate', $tid);
+        }
+
+        return $ok;
+    }
+
+    /**
+     * @param mixed $value
+     * @param array<string, mixed> $field_config
+     * @return mixed
+     */
+    protected function sanitizeField(string $field_id, $value, array $field_config)
+    {
+        if ($field_id === 'certificate_template') {
+            $id = absint($value);
+            if ($id <= 0) {
+                return '';
+            }
+            if (get_post_type($id) !== PostTypes::CERTIFICATE || get_post_status($id) !== 'publish') {
+                return '';
+            }
+
+            return (string) $id;
+        }
+
+        return parent::sanitizeField($field_id, $value, $field_config);
     }
 
     /**

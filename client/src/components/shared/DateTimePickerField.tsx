@@ -67,7 +67,7 @@ export function DateTimePickerField(props: Props) {
     <label className={`block text-sm ${className}`}>
       {label ? <span className="text-slate-600 dark:text-slate-400">{label}</span> : null}
       {description ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{description}</span> : null}
-      <div className="mt-1">
+      <div className="mt-1 w-full">
         <DatePicker
           selected={selected}
           onChange={onPick}
@@ -78,6 +78,7 @@ export function DateTimePickerField(props: Props) {
           timeIntervals={15}
           timeCaption="Time"
           customInput={<Input />}
+          wrapperClassName="w-full"
           popperPlacement="bottom-start"
         />
       </div>

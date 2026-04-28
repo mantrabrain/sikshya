@@ -128,7 +128,29 @@ export function SikshyaDialogProvider({ children }: { children: ReactNode }) {
 export function useSikshyaDialog(): Ctx {
   const ctx = useContext(SikshyaDialogContext);
   if (!ctx) {
-    throw new Error('useSikshyaDialog must be used within SikshyaDialogProvider');
+    // Defensive fallback: some wp-admin screens may mount a subset of the React bundle
+    // (or mount order can be disrupted by 3rd-party scripts). Avoid crashing.
+    return {
+      confirm: async ({ title, message, confirmLabel, cancelLabel }) => {
+        const text = `${title}\n\n${typeof message === 'string' ? message : ''}`;
+        // Prefer native confirm if possible; otherwise allow.
+        if (typeof window === 'undefined' || typeof window.confirm !== 'function') {
+          return true;
+        }
+        // Some browsers ignore button labels; keep them for signature compatibility.
+        void confirmLabel;
+        void cancelLabel;
+        return window.confirm(text);
+      },
+      alert: async ({ title, message, buttonLabel }) => {
+        const text = `${title}\n\n${typeof message === 'string' ? message : ''}`;
+        if (typeof window === 'undefined' || typeof window.alert !== 'function') {
+          return;
+        }
+        void buttonLabel;
+        window.alert(text);
+      },
+    };
   }
   return ctx;
 }

@@ -9,6 +9,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type Row = {
   user_id: number;
@@ -42,7 +43,7 @@ export function InstructorApplicationsPage(props: {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [toast, setToast] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast(2600);
 
   const queryKey = useMemo(() => `${page}|${status}|${debouncedSearch}`, [page, status, debouncedSearch]);
 
@@ -65,17 +66,17 @@ export function InstructorApplicationsPage(props: {
 
   const act = async (userId: number, action: 'approve' | 'reject') => {
     setBusyId(userId);
-    setToast(null);
+    toast.clear();
     try {
       const path =
         action === 'approve'
           ? SIKSHYA_ENDPOINTS.admin.instructorApplicationApprove(userId)
           : SIKSHYA_ENDPOINTS.admin.instructorApplicationReject(userId);
       await getSikshyaApi().post(path, {});
-      setToast({ kind: 'success', text: action === 'approve' ? 'Approved.' : 'Rejected.' });
+      toast.success('Saved', action === 'approve' ? 'Approved.' : 'Rejected.');
       void refetch();
     } catch (e) {
-      setToast({ kind: 'error', text: e instanceof Error ? e.message : 'Request failed' });
+      toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
     } finally {
       setBusyId(null);
     }
@@ -91,17 +92,7 @@ export function InstructorApplicationsPage(props: {
         'Review “Apply to become an instructor” submissions. Approving assigns the Sikshya instructor role.'
       }
     >
-      {toast ? (
-        <div
-          className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
-            toast.kind === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-100'
-              : 'border-red-200 bg-red-50 text-red-900 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-100'
-          }`}
-        >
-          {toast.text}
-        </div>
-      ) : null}
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
       <ListPanel className="p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">

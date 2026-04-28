@@ -23,39 +23,40 @@ use function substr;
 use function substr_replace;
 
 /**
- * TimestampFirstCombCodec encodes and decodes COMBs, with the timestamp as the first 48 bits
+ * TimestampFirstCombCodec encodes and decodes COMBs, with the timestamp as the
+ * first 48 bits
  *
- * In contrast with the TimestampLastCombCodec, the TimestampFirstCombCodec adds the timestamp to the first 48 bits of
- * the COMB. To generate a timestamp-first COMB, set the TimestampFirstCombCodec as the codec, along with the
- * CombGenerator as the random generator.
+ * In contrast with the TimestampLastCombCodec, the TimestampFirstCombCodec
+ * adds the timestamp to the first 48 bits of the COMB. To generate a
+ * timestamp-first COMB, set the TimestampFirstCombCodec as the codec, along
+ * with the CombGenerator as the random generator.
  *
- * ```
+ * ``` php
  * $factory = new UuidFactory();
  *
  * $factory->setCodec(new TimestampFirstCombCodec($factory->getUuidBuilder()));
  *
  * $factory->setRandomGenerator(new CombGenerator(
  *     $factory->getRandomGenerator(),
- *     $factory->getNumberConverter(),
+ *     $factory->getNumberConverter()
  * ));
  *
  * $timestampFirstComb = $factory->uuid4();
  * ```
  *
- * @deprecated Please migrate to {@link https://uuid.ramsey.dev/en/stable/rfc4122/version7.html Version 7, Unix Epoch Time UUIDs}.
+ * @link https://www.informit.com/articles/printerfriendly/25862 The Cost of GUIDs as Primary Keys
  *
- * @link https://web.archive.org/web/20240118030355/https://www.informit.com/articles/printerfriendly/25862 The Cost of GUIDs as Primary Keys
- *
- * @immutable
+ * @psalm-immutable
  */
 class TimestampFirstCombCodec extends StringCodec
 {
     /**
-     * @return non-empty-string
+     * @psalm-return non-empty-string
+     * @psalm-suppress MoreSpecificReturnType we know that the retrieved `string` is never empty
+     * @psalm-suppress LessSpecificReturnStatement we know that the retrieved `string` is never empty
      */
     public function encode(UuidInterface $uuid): string
     {
-        /** @phpstan-ignore possiblyImpure.methodCall */
         $bytes = $this->swapBytes($uuid->getFields()->getBytes());
 
         return sprintf(
@@ -69,7 +70,9 @@ class TimestampFirstCombCodec extends StringCodec
     }
 
     /**
-     * @return non-empty-string
+     * @psalm-return non-empty-string
+     * @psalm-suppress MoreSpecificReturnType we know that the retrieved `string` is never empty
+     * @psalm-suppress LessSpecificReturnStatement we know that the retrieved `string` is never empty
      */
     public function encodeBinary(UuidInterface $uuid): string
     {
@@ -84,29 +87,27 @@ class TimestampFirstCombCodec extends StringCodec
      */
     public function decode(string $encodedUuid): UuidInterface
     {
-        /** @phpstan-ignore possiblyImpure.methodCall */
         $bytes = $this->getBytes($encodedUuid);
 
-        /** @phpstan-ignore possiblyImpure.methodCall */
         return $this->getBuilder()->build($this, $this->swapBytes($bytes));
     }
 
     public function decodeBytes(string $bytes): UuidInterface
     {
-        /** @phpstan-ignore possiblyImpure.methodCall */
         return $this->getBuilder()->build($this, $this->swapBytes($bytes));
     }
 
     /**
      * Swaps bytes according to the timestamp-first COMB rules
-     *
-     * @pure
      */
     private function swapBytes(string $bytes): string
     {
         $first48Bits = substr($bytes, 0, 6);
         $last48Bits = substr($bytes, -6);
 
-        return substr_replace(substr_replace($bytes, $last48Bits, 0, 6), $first48Bits, -6);
+        $bytes = substr_replace($bytes, $last48Bits, 0, 6);
+        $bytes = substr_replace($bytes, $first48Bits, -6);
+
+        return $bytes;
     }
 }

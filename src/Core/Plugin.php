@@ -18,11 +18,16 @@ use Sikshya\Services\FrontendAssetsService;
 use Sikshya\Services\AdminAssetsService;
 use Sikshya\Services\RestCollectionQueryService;
 use Sikshya\Services\Settings;
+use Sikshya\Services\GlobalSettingsBootstrap;
 use Sikshya\Services\WpMailSmtpBridge;
+use Sikshya\Services\EmailNotificationService;
+use Sikshya\Services\CustomEmailTemplateHookDispatcher;
 use Sikshya\Addons\AddonManager;
 use Sikshya\Frontend\Public\InstructorAccountView;
 use Sikshya\Frontend\Public\InstructorApplicationView;
 use Sikshya\Shortcodes\InstructorRegistrationShortcode;
+use Sikshya\Shortcodes\CoursesShortcode;
+use Sikshya\Shortcodes\AuthShortcodes;
 
 /**
  * Main Plugin Class
@@ -228,6 +233,8 @@ final class Plugin
         \Sikshya\Certificates\TemplateGuard::register();
         // Enforce server-side gating for advanced question types (REST + editor).
         \Sikshya\Quiz\QuestionTypeGuard::register();
+        // Ensure Sikshya content always has a usable slug (prevents sporadic 404s).
+        \Sikshya\Utils\EnsurePostSlug::register();
 
         $stored_ver = (string) Settings::getRaw('sikshya_plugin_version', '');
         if ($stored_ver !== $this->version) {
@@ -260,9 +267,32 @@ final class Plugin
 
         WpMailSmtpBridge::register();
 
+        GlobalSettingsBootstrap::register();
+        add_filter('map_meta_cap', [\Sikshya\Services\InstructorPermissions::class, 'mapMetaCap'], 10, 4);
+
+        $mailer = $this->services['mailer'] ?? null;
+        if ($mailer instanceof EmailNotificationService) {
+            CustomEmailTemplateHookDispatcher::register($mailer);
+            add_action(
+                'sikshya_order_fulfilled',
+                static function ($order_id, $order) use ($mailer): void {
+                    $oid = (int) $order_id;
+                    if ($oid > 0) {
+                        $mailer->sendPaymentReceiptForOrder($oid, $order);
+                    }
+                },
+                12,
+                2
+            );
+        }
+
         InstructorAccountView::init();
         InstructorApplicationView::init();
+        \Sikshya\Frontend\Public\CertificatesAccountView::init();
+        \Sikshya\Frontend\Public\CourseRatingPrompt::init();
         InstructorRegistrationShortcode::init();
+        CoursesShortcode::init();
+        AuthShortcodes::init();
 
         // Hook into WordPress
         do_action('sikshya_init', $this);
@@ -447,8 +477,8 @@ final class Plugin
             'version' => $this->version,
             'description' => 'A comprehensive WordPress Learning Management System plugin',
             'author' => 'Sikshya Team',
-            'author_url' => 'https://sikshya.com',
-            'plugin_url' => 'https://sikshya.com',
+            'author_url' => 'https://mantrabrain.com',
+            'plugin_url' => 'https://mantrabrain.com/plugins/sikshya/',
             'support_url' => $support,
             'documentation_url' => $docs,
         ];

@@ -312,6 +312,26 @@ class EnrollmentRepository implements RepositoryInterface
         return (int) $wpdb->get_var($sql);
     }
 
+    /**
+     * Active seats for the per-student cap (excludes completed).
+     */
+    public function countActiveEnrollmentsForUser(int $user_id): int
+    {
+        if (!$this->tableExists() || $user_id <= 0) {
+            return 0;
+        }
+
+        global $wpdb;
+
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$this->table_name} WHERE user_id = %d AND status = %s",
+                $user_id,
+                'enrolled'
+            )
+        );
+    }
+
     public function countByCourse(int $course_id): int
     {
         global $wpdb;

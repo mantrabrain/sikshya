@@ -29,6 +29,7 @@ export const SIKSHYA_ENDPOINTS = {
     reportsSnapshot: '/admin/reports-snapshot',
     /** Paginated quiz attempts (per learner + quiz). Course-manager auth. */
     quizAttempts: '/admin/quiz-attempts',
+    quizAttemptResetTimer: (id: number) => `/admin/quiz-attempts/${encodeURIComponent(String(id))}/reset-timer`,
     /** Paginated enrollments with learner/course labels. Course-manager auth. */
     enrollments: '/admin/enrollments',
     /** POST: manually enroll a learner into a course. */
@@ -49,8 +50,12 @@ export const SIKSHYA_ENDPOINTS = {
       `/admin/instructor-applications/${encodeURIComponent(String(id))}/reject`,
     /** Paginated payments. Course-manager auth (same as other admin routes). */
     payments: '/admin/payments',
+    payment: (id: number) => `/admin/payments/${encodeURIComponent(String(id))}`,
+    paymentUpdate: (id: number) => `/admin/payments/${encodeURIComponent(String(id))}`,
     /** Checkout orders: GET list, POST create manual (admin). */
     orders: '/admin/orders',
+    order: (id: number) => `/admin/orders/${encodeURIComponent(String(id))}`,
+    orderUpdate: (id: number) => `/admin/orders/${encodeURIComponent(String(id))}`,
     ordersMarkPaid: (id: number) =>
       `/admin/orders/${encodeURIComponent(String(id))}/mark-paid`,
     /** Coupon codes — GET list, POST create. */
@@ -94,6 +99,8 @@ export const SIKSHYA_ENDPOINTS = {
     emailTemplatePreview: (id: string) => `/admin/email-templates/${encodeURIComponent(id)}/preview`,
     /** Bulk enable / disable / delete custom templates. */
     emailTemplateBulk: '/admin/email-template-bulk',
+    /** Manually trigger usage tracking send (admin test button). */
+    usageTrackingSendNow: '/admin/usage-tracking/send-now',
   },
   /** Registered by `sikshya-pro`; 403 when plan lacks feature (`sikshya_pro_required`) or addon off (`sikshya_addon_disabled`). */
   pro: {

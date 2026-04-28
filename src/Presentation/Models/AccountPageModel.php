@@ -56,6 +56,10 @@ final class AccountPageModel
                 'title' => __('Quiz attempts', 'sikshya'),
                 'subtitle' => __('Usage and limits for quizzes in your courses.', 'sikshya'),
             ],
+            'certificates' => [
+                'title' => __('My certificates', 'sikshya'),
+                'subtitle' => __('Download your completion certificates.', 'sikshya'),
+            ],
             'instructor' => [
                 'title' => __('Instructor overview', 'sikshya'),
                 'subtitle' => __('Your authored courses, enrollments, and teaching tools.', 'sikshya'),

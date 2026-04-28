@@ -1,6 +1,14 @@
 (function () {
 	'use strict';
 
+	// Shared attempt state (used by timer + submit).
+	var attemptId = 0;
+	var startedAt = 0;
+	var serverOffsetMs = 0;
+	var duration = 0;
+	var isSubmitting = false;
+	var autoSubmitted = false;
+
 	function getConfig() {
 		return window.sikshyaQuizTaker || {};
 	}
@@ -204,34 +212,126 @@
 			el.hidden = true;
 			return;
 		}
+		var cfg = getConfig();
 		var pct = typeof data.score_percent === 'number' ? data.score_percent : 0;
 		var passed = !!data.passed;
-		var msg = passed
-			? (window.sikshyaQuizTaker && window.sikshyaQuizTaker.i18n && window.sikshyaQuizTaker.i18n.passed) || 'Passed.'
-			: (window.sikshyaQuizTaker && window.sikshyaQuizTaker.i18n && window.sikshyaQuizTaker.i18n.notPassed) || 'Not passed.';
+		var passing = typeof data.passing_score === 'number' ? data.passing_score : null;
+		var i18n = (cfg && cfg.i18n) ? cfg.i18n : {};
+		var msg = passed ? (i18n.passed || 'You passed this quiz.') : (i18n.notPassed || 'You did not reach the passing score.');
 		el.innerHTML = '';
-		var p = document.createElement('p');
-		p.className = 'sikshya-quiz-result__score';
-		p.textContent = (window.sikshyaQuizTaker && window.sikshyaQuizTaker.i18n && window.sikshyaQuizTaker.i18n.score)
-			? window.sikshyaQuizTaker.i18n.score.replace('%s', String(pct))
-			: ('Score: ' + String(pct) + '%');
-		el.appendChild(p);
-		var p2 = document.createElement('p');
-		p2.className = passed ? 'sikshya-quiz-result__pass' : 'sikshya-quiz-result__fail';
-		p2.textContent = msg;
-		el.appendChild(p2);
+		el.classList.add('sikshya-quiz-result--panel');
+
+		var wrap = document.createElement('div');
+		wrap.className = 'sikshya-quizResults';
+
+		var title = document.createElement('h3');
+		title.className = 'sikshya-quizResults__title';
+		title.textContent = i18n.resultsTitle || 'Quiz results';
+		wrap.appendChild(title);
+
+		var score = document.createElement('p');
+		score.className = 'sikshya-quizResults__score';
+		score.textContent = i18n.score ? i18n.score.replace('%s', String(pct)) : ('Score: ' + String(pct) + '%');
+		wrap.appendChild(score);
+
+		if (passing !== null) {
+			var req = document.createElement('p');
+			req.className = 'sikshya-quizResults__req';
+			req.textContent = i18n.passingScore ? i18n.passingScore.replace('%s', String(passing)) : ('Passing score: ' + String(passing) + '%');
+			wrap.appendChild(req);
+		}
+
+		var status = document.createElement('p');
+		status.className = passed ? 'sikshya-quizResults__pass' : 'sikshya-quizResults__fail';
+		status.textContent = msg;
+		wrap.appendChild(status);
+
+		var actions = document.createElement('div');
+		actions.className = 'sikshya-quizResults__actions';
+
+		if (cfg && cfg.nextUrl) {
+			var cont = document.createElement('a');
+			cont.href = cfg.nextUrl;
+			cont.className = 'sikshya-btn sikshya-btn--primary';
+			cont.textContent = i18n.continue || 'Continue';
+			actions.appendChild(cont);
+		}
+
+		var toggle = document.createElement('button');
+		toggle.type = 'button';
+		toggle.className = 'sikshya-btn sikshya-btn--outline';
+		toggle.textContent = i18n.reviewAnswers || 'Review answers';
+		actions.appendChild(toggle);
+
+		var again = document.createElement('button');
+		again.type = 'button';
+		again.className = 'sikshya-btn sikshya-btn--ghost';
+		again.textContent = i18n.tryAgain || 'Try again';
+		actions.appendChild(again);
+
+		wrap.appendChild(actions);
+		el.appendChild(wrap);
 		el.hidden = false;
+
+		// Default behavior: show a dedicated results UI, not the next screen.
+		// Keep answers available via "Review answers".
+		var form = el.closest ? el.closest('form') : null;
+		if (form) {
+			var blocks = form.querySelectorAll('.sikshya-q');
+			Array.prototype.forEach.call(blocks, function (b) {
+				b.hidden = true;
+				var inputs = b.querySelectorAll('input, textarea, select, button');
+				Array.prototype.forEach.call(inputs, function (n) {
+					if (n && n.tagName !== 'BUTTON') {
+						n.disabled = true;
+					}
+				});
+			});
+			var pager = form.querySelector('[data-sikshya-quiz-pager]');
+			if (pager) {
+				pager.hidden = true;
+			}
+			var submit = form.querySelector('.sikshya-quiz-submit');
+			if (submit) {
+				submit.hidden = true;
+			}
+		}
+
+		var showing = false;
+		toggle.addEventListener('click', function () {
+			showing = !showing;
+			toggle.textContent = showing ? (i18n.hideAnswers || 'Hide answers') : (i18n.reviewAnswers || 'Review answers');
+			if (!form) {
+				return;
+			}
+			var blocks = form.querySelectorAll('.sikshya-q');
+			Array.prototype.forEach.call(blocks, function (b) {
+				b.hidden = !showing;
+			});
+		});
+
+		again.addEventListener('click', function () {
+			window.location.reload();
+		});
 	}
 
 	function onSubmit(e) {
 		e.preventDefault();
-		var cfg = getConfig();
-		if (!cfg.restUrl || !cfg.restNonce || !cfg.quizId) {
+		if (isSubmitting) {
 			return;
 		}
+		isSubmitting = true;
+		var cfg = getConfig();
 		var form = e.target;
 		var resultEl = form.querySelector('.sikshya-quiz-result');
 		var btn = form.querySelector('.sikshya-quiz-submit');
+		if (!cfg.restUrl || !cfg.restNonce || !cfg.quizId) {
+			if (resultEl) {
+				resultEl.hidden = false;
+				resultEl.textContent = (cfg && cfg.i18n && cfg.i18n.error) || 'Could not submit the quiz. Please reload the page and try again.';
+			}
+			return;
+		}
 		if (btn) {
 			btn.disabled = true;
 		}
@@ -240,7 +340,8 @@
 			quiz_id: parseInt(cfg.quizId, 10),
 			answers: collectAnswers(form),
 			question_ids: collectQuestionOrder(form),
-			time_taken: 0,
+			time_taken: window.__sikshyaQuizTimeTakenSeconds || 0,
+			attempt_id: attemptId || 0,
 		};
 
 		fetch(cfg.restUrl + 'me/quiz-submit', {
@@ -258,6 +359,11 @@
 				});
 			})
 			.then(function (res) {
+				try {
+					if (!res.ok) {
+						console.warn('[Sikshya quiz-submit]', res.status, res.json);
+					}
+				} catch (e) {}
 				if (res.ok && res.json && res.json.ok && res.json.data) {
 					renderResult(resultEl, res.json.data);
 				} else {
@@ -275,6 +381,7 @@
 				}
 			})
 			.finally(function () {
+				isSubmitting = false;
 				if (btn) {
 					btn.disabled = false;
 				}
@@ -282,6 +389,253 @@
 	}
 
 	function init() {
+		var cfg = getConfig();
+		var locked = !!(cfg && (cfg.locked || (cfg.attempt && cfg.attempt.status === 'locked')));
+		duration = parseInt(cfg.durationSeconds || (cfg.advanced && cfg.advanced.durationSeconds) || 0, 10) || 0;
+		var timerEl = document.querySelector('[data-sikshya-quiz-timer-value]');
+		var startBtns = document.querySelectorAll('[data-sikshya-quiz-start]');
+		var quizForm = document.querySelector('[data-sikshya-quiz-form]');
+		var quizIntro = document.querySelector('[data-sikshya-quiz-intro]');
+		var countdownTimer = null;
+
+		function ensureTimerEl() {
+			if (timerEl) return timerEl;
+			var host = document.querySelector('[data-sikshya-quiz-timer]');
+			if (!host) return null;
+			var el = host.querySelector('[data-sikshya-quiz-timer-value]');
+			if (!el) {
+				el = document.createElement('span');
+				el.className = 'sikshya-quizTimer__value';
+				el.setAttribute('data-sikshya-quiz-timer-value', '');
+				host.appendChild(el);
+			}
+			timerEl = el;
+			return timerEl;
+		}
+
+		function fmt(secs) {
+			secs = Math.max(0, parseInt(secs, 10) || 0);
+			var h = Math.floor(secs / 3600);
+			var m = Math.floor((secs % 3600) / 60);
+			var s = secs % 60;
+			var hh = h < 10 ? '0' + String(h) : String(h);
+			var mm = m < 10 ? '0' + String(m) : String(m);
+			var ss = s < 10 ? '0' + String(s) : String(s);
+			// Always show HH:MM:SS for clarity.
+			return hh + ':' + mm + ':' + ss;
+		}
+
+		function tick() {
+			if (locked) {
+				return;
+			}
+			if (!duration || !startedAt) {
+				return;
+			}
+			var now = Date.now() + serverOffsetMs;
+			var elapsed = Math.floor((now - startedAt) / 1000);
+			window.__sikshyaQuizTimeTakenSeconds = elapsed;
+			var left = duration - elapsed;
+			var te = ensureTimerEl();
+			if (te) {
+				te.textContent = fmt(left);
+			}
+			if (left <= 0) {
+				if (countdownTimer) {
+					clearInterval(countdownTimer);
+					countdownTimer = null;
+				}
+				if (autoSubmitted) {
+					return;
+				}
+				autoSubmitted = true;
+				// Auto-submit when time ends.
+				try {
+					if (quizForm) {
+						var submitBtn = quizForm.querySelector('.sikshya-quiz-submit');
+						if (submitBtn && !submitBtn.disabled) {
+							submitBtn.click();
+						} else {
+							quizForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+						}
+					}
+				} catch (e) {
+					/* ignore */
+				}
+			}
+		}
+
+		function startTimer() {
+			if (locked) return;
+			if (!duration) return;
+			if (countdownTimer) return;
+			if (!startedAt) {
+				// Fresh start: anchor on "now" (server-adjusted).
+				startedAt = Date.now() + serverOffsetMs;
+				window.__sikshyaQuizTimeTakenSeconds = 0;
+				// Show immediately at full duration (e.g. 10:00), then start ticking.
+				var te = ensureTimerEl();
+				if (te) {
+					te.textContent = fmt(duration);
+				}
+			}
+			tick();
+			countdownTimer = setInterval(tick, 1000);
+		}
+
+		function parseMysqlToMs(s) {
+			// "YYYY-MM-DD HH:MM:SS" (site timezone). We treat it as local time for countdown purposes.
+			if (!s || typeof s !== 'string') return 0;
+			var m = s.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+			if (!m) return 0;
+			var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6]));
+			return d.getTime();
+		}
+
+		function fetchActiveAttempt() {
+			// Prefer server-rendered attempt data (no page-load REST call).
+			if (cfg && cfg.attempt && cfg.serverTime) {
+				return Promise.resolve({ ok: true, json: { ok: true, data: { attempt: cfg.attempt, durationSeconds: cfg.durationSeconds || 0, serverTime: cfg.serverTime } } });
+			}
+			if (!cfg.restUrl || !cfg.restNonce || !cfg.quizId) return Promise.resolve(null);
+			var url = String(cfg.restUrl).replace(/\/?$/, '/') + 'me/quiz-attempt?quiz_id=' + encodeURIComponent(String(cfg.quizId));
+			return fetch(url, { method: 'GET', credentials: 'same-origin', headers: { 'X-WP-Nonce': cfg.restNonce } })
+				.then(function (r) {
+					return r.json().then(function (j) {
+						return { ok: r.ok, json: j };
+					});
+				})
+				.catch(function () { return null; });
+		}
+
+		function startAttemptOnServer() {
+			if (!cfg.restUrl || !cfg.restNonce || !cfg.quizId) return Promise.resolve(null);
+			return fetch(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/quiz-attempt', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.restNonce },
+				body: JSON.stringify({ quiz_id: parseInt(cfg.quizId, 10) || 0 }),
+			})
+				.then(function (r) {
+					return r.json().then(function (j) {
+						return { ok: r.ok, json: j };
+					});
+				})
+				.catch(function () { return null; });
+		}
+
+		function applyAttemptPayload(payload) {
+			if (!payload || !payload.ok || !payload.json || payload.json.ok !== true) return;
+			var d = payload.json.data || {};
+			if (typeof d.serverTime === 'number') {
+				serverOffsetMs = d.serverTime * 1000 - Date.now();
+			}
+			if (d.durationSeconds) {
+				duration = parseInt(d.durationSeconds, 10) || duration;
+			}
+			var a = d.attempt || null;
+			if (a && typeof a === 'object') {
+				attemptId = parseInt(a.id, 10) || attemptId;
+				var ts = parseInt(a.started_at_ts || 0, 10) || 0;
+				if (ts > 0) {
+					startedAt = ts * 1000;
+				} else {
+					var ms = parseMysqlToMs(String(a.started_at || ''));
+					if (ms) startedAt = ms;
+				}
+			} else if (d.attempt_id) {
+				attemptId = parseInt(d.attempt_id, 10) || attemptId;
+				var ts2 = parseInt(d.started_at_ts || 0, 10) || 0;
+				if (ts2 > 0) {
+					startedAt = ts2 * 1000;
+				} else {
+					var ms2 = parseMysqlToMs(String(d.started_at || ''));
+					if (ms2) startedAt = ms2;
+				}
+			}
+		}
+
+		function startQuizUi() {
+			if (!quizForm) {
+				return;
+			}
+			quizForm.hidden = false;
+			if (quizIntro) {
+				quizIntro.setAttribute('hidden', '');
+			}
+			if (startBtns && startBtns.length) {
+				Array.prototype.forEach.call(startBtns, function (b) {
+					b.setAttribute('hidden', '');
+					b.setAttribute('aria-expanded', 'true');
+				});
+			}
+			try {
+				var first = quizForm.querySelector('input, textarea, select, button');
+				if (first && first.focus) {
+					first.focus({ preventScroll: true });
+				}
+				if (quizForm.scrollIntoView) {
+					quizForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				}
+			} catch (e) {
+				/* ignore */
+			}
+		}
+
+		// Start on "Start quiz" click.
+		if (startBtns && startBtns.length) {
+			Array.prototype.forEach.call(startBtns, function (b) {
+				b.addEventListener('click', function () {
+					if (locked) {
+						return;
+					}
+					if (b.hasAttribute('disabled') || b.getAttribute('aria-disabled') === 'true') {
+						return;
+					}
+					startQuizUi();
+					// Ensure attempt exists server-side and timer resumes across browsers.
+					startAttemptOnServer().then(function (res) {
+						applyAttemptPayload(res);
+						if (duration) {
+							window.setTimeout(startTimer, 50);
+						}
+					});
+				});
+			});
+		}
+
+		// If form is already visible (resume), start immediately.
+		if (quizForm && quizForm.hidden === false) {
+			if (locked) {
+				return;
+			}
+			fetchActiveAttempt().then(function (res) {
+				applyAttemptPayload(res);
+				if (attemptId && startedAt) {
+					if (duration) startTimer();
+					return;
+				}
+				// Form is visible but no active attempt was found (or template didn't include it).
+				// Create/reuse an attempt so the timer is server-anchored, then start ticking.
+				startAttemptOnServer().then(function (res2) {
+					applyAttemptPayload(res2);
+					if (duration) startTimer();
+				});
+			});
+		} else if (quizForm) {
+			// If an in-progress attempt exists, auto-resume without requiring the user to click "Start quiz" again.
+			fetchActiveAttempt().then(function (res) {
+				applyAttemptPayload(res);
+				if (attemptId && startedAt) {
+					if (locked) {
+						return;
+					}
+					startQuizUi();
+					if (duration) startTimer();
+				}
+			});
+		}
+
 		var forms = document.querySelectorAll('form.sikshya-quiz-form[data-quiz-id]');
 		Array.prototype.forEach.call(forms, function (form) {
 			bindOrdering(form);

@@ -1,58 +1,147 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { getConfig } from './config/env';
+import { AppShell } from './components/AppShell';
 import { SikshyaDialogProvider } from './components/shared/SikshyaDialogContext';
-import { ContentPostEditorPage } from './pages/ContentPostEditorPage';
-import { ContentDripPage } from './pages/ContentDripPage';
-import { CourseCategoriesPage } from './pages/CourseCategoriesPage';
-import { CourseBuilderPage } from './pages/CourseBuilderPage';
-import { CourseTeamPage } from './pages/CourseTeamPage';
-import { CoursesPage } from './pages/CoursesPage';
-import { CouponsPage } from './pages/CouponsPage';
-import { ReviewsPage } from './pages/ReviewsPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { EnrollmentsPage } from './pages/EnrollmentsPage';
-import { GenericPlaceholderPage } from './pages/GenericPlaceholderPage';
-import { ActivityLogPage } from './pages/ActivityLogPage';
-import { BundlesPage } from './pages/BundlesPage';
-import { CalendarPage } from './pages/CalendarPage';
-import { GradebookPage } from './pages/GradebookPage';
-import { GradingPage } from './pages/GradingPage';
-import { IntegrationsPage } from './pages/IntegrationsPage';
-import { LicensePage } from './pages/LicensePage';
-import { IssuedCertificatesPage } from './pages/IssuedCertificatesPage';
-import { MarketplacePage } from './pages/MarketplacePage';
-import { PrerequisitesPage } from './pages/PrerequisitesPage';
-import { SocialLoginPage } from './pages/SocialLoginPage';
-import { WhiteLabelPage } from './pages/WhiteLabelPage';
-import { EmailMarketingPage } from './pages/EmailMarketingPage';
-import { OrdersPage } from './pages/OrdersPage';
-import { PaymentsPage } from './pages/PaymentsPage';
-import { ReportsPage } from './pages/ReportsPage';
-import { EmailPage } from './pages/EmailPage';
-import { EmailTemplateEditPage } from './pages/EmailTemplateEditPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { SubscriptionsProPage } from './pages/SubscriptionsProPage';
-import { ToolsPage } from './pages/ToolsPage';
-import { WpEntityListPage } from './pages/WpEntityListPage';
-import { WpUserListPage } from './pages/WpUserListPage';
-import { InstructorApplicationsPage } from './pages/InstructorApplicationsPage';
 import { ShellStateProvider } from './context/ShellStateContext';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
-import { AddonsPage } from './pages/AddonsPage';
 import { applyAdminBrandThemeToRoot, clearAdminBrandThemeFromRoot } from './lib/adminBrandTokens';
 import { term } from './lib/terminology';
-import {
-  BrandingHubPage,
-  CertificatesHubPage,
-  ContentLibraryHubPage,
-  EmailHubPage,
-  IntegrationsHubPage,
-  LearningRulesHubPage,
-  PeopleHubPage,
-  ReportsHubPage,
-  SalesHubPage,
-  ToolsHubPage,
-} from './pages/hubs/HubPages';
+import type { NavItem } from './types';
+
+const ActivityLogPage = lazy(() =>
+  import('./pages/ActivityLogPage').then((m) => ({ default: m.ActivityLogPage }))
+);
+const AddonsPage = lazy(() => import('./pages/AddonsPage').then((m) => ({ default: m.AddonsPage })));
+const BundlesPage = lazy(() => import('./pages/BundlesPage').then((m) => ({ default: m.BundlesPage })));
+const CalendarPage = lazy(() => import('./pages/CalendarPage').then((m) => ({ default: m.CalendarPage })));
+const ContentDripPage = lazy(() =>
+  import('./pages/ContentDripPage').then((m) => ({ default: m.ContentDripPage }))
+);
+const ContentPostEditorPage = lazy(() =>
+  import('./pages/ContentPostEditorPage').then((m) => ({ default: m.ContentPostEditorPage }))
+);
+const CouponsPage = lazy(() => import('./pages/CouponsPage').then((m) => ({ default: m.CouponsPage })));
+const CourseBuilderPage = lazy(() =>
+  import('./pages/CourseBuilderPage').then((m) => ({ default: m.CourseBuilderPage }))
+);
+const CourseCategoriesPage = lazy(() =>
+  import('./pages/CourseCategoriesPage').then((m) => ({ default: m.CourseCategoriesPage }))
+);
+const CourseTeamPage = lazy(() =>
+  import('./pages/CourseTeamPage').then((m) => ({ default: m.CourseTeamPage }))
+);
+const CoursesPage = lazy(() => import('./pages/CoursesPage').then((m) => ({ default: m.CoursesPage })));
+const DashboardPage = lazy(() =>
+  import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage }))
+);
+const EmailMarketingPage = lazy(() =>
+  import('./pages/EmailMarketingPage').then((m) => ({ default: m.EmailMarketingPage }))
+);
+const EmailPage = lazy(() => import('./pages/EmailPage').then((m) => ({ default: m.EmailPage })));
+const EmailTemplateEditPage = lazy(() =>
+  import('./pages/EmailTemplateEditPage').then((m) => ({ default: m.EmailTemplateEditPage }))
+);
+const EnrollmentsPage = lazy(() =>
+  import('./pages/EnrollmentsPage').then((m) => ({ default: m.EnrollmentsPage }))
+);
+const GenericPlaceholderPage = lazy(() =>
+  import('./pages/GenericPlaceholderPage').then((m) => ({ default: m.GenericPlaceholderPage }))
+);
+const GradebookPage = lazy(() =>
+  import('./pages/GradebookPage').then((m) => ({ default: m.GradebookPage }))
+);
+const GradingPage = lazy(() => import('./pages/GradingPage').then((m) => ({ default: m.GradingPage })));
+const InstructorApplicationsPage = lazy(() =>
+  import('./pages/InstructorApplicationsPage').then((m) => ({ default: m.InstructorApplicationsPage }))
+);
+const IntegrationsPage = lazy(() =>
+  import('./pages/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage }))
+);
+const IssuedCertificatesPage = lazy(() =>
+  import('./pages/IssuedCertificatesPage').then((m) => ({ default: m.IssuedCertificatesPage }))
+);
+const LicensePage = lazy(() => import('./pages/LicensePage').then((m) => ({ default: m.LicensePage })));
+const MarketplacePage = lazy(() =>
+  import('./pages/MarketplacePage').then((m) => ({ default: m.MarketplacePage }))
+);
+const OrdersPage = lazy(() => import('./pages/OrdersPage').then((m) => ({ default: m.OrdersPage })));
+const OrderDetailsPage = lazy(() =>
+  import('./pages/OrderDetailsPage').then((m) => ({ default: m.OrderDetailsPage }))
+);
+const PaymentsPage = lazy(() => import('./pages/PaymentsPage').then((m) => ({ default: m.PaymentsPage })));
+const PaymentDetailsPage = lazy(() =>
+  import('./pages/PaymentDetailsPage').then((m) => ({ default: m.PaymentDetailsPage }))
+);
+const PrerequisitesPage = lazy(() =>
+  import('./pages/PrerequisitesPage').then((m) => ({ default: m.PrerequisitesPage }))
+);
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage').then((m) => ({ default: m.ReviewsPage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const SocialLoginPage = lazy(() =>
+  import('./pages/SocialLoginPage').then((m) => ({ default: m.SocialLoginPage }))
+);
+const SubscriptionsProPage = lazy(() =>
+  import('./pages/SubscriptionsProPage').then((m) => ({ default: m.SubscriptionsProPage }))
+);
+const WhiteLabelPage = lazy(() =>
+  import('./pages/WhiteLabelPage').then((m) => ({ default: m.WhiteLabelPage }))
+);
+const WpEntityListPage = lazy(() =>
+  import('./pages/WpEntityListPage').then((m) => ({ default: m.WpEntityListPage }))
+);
+const WpUserListPage = lazy(() =>
+  import('./pages/WpUserListPage').then((m) => ({ default: m.WpUserListPage }))
+);
+
+const hubPages = () => import('./pages/hubs/HubPages');
+const BrandingHubPage = lazy(() => hubPages().then((m) => ({ default: m.BrandingHubPage })));
+const CertificatesHubPage = lazy(() => hubPages().then((m) => ({ default: m.CertificatesHubPage })));
+const ContentLibraryHubPage = lazy(() => hubPages().then((m) => ({ default: m.ContentLibraryHubPage })));
+const EmailHubPage = lazy(() => hubPages().then((m) => ({ default: m.EmailHubPage })));
+const IntegrationsHubPage = lazy(() => hubPages().then((m) => ({ default: m.IntegrationsHubPage })));
+const LearningRulesHubPage = lazy(() => hubPages().then((m) => ({ default: m.LearningRulesHubPage })));
+const PeopleHubPage = lazy(() => hubPages().then((m) => ({ default: m.PeopleHubPage })));
+const ReportsHubPage = lazy(() => hubPages().then((m) => ({ default: m.ReportsHubPage })));
+const SalesHubPage = lazy(() => hubPages().then((m) => ({ default: m.SalesHubPage })));
+const ToolsHubPage = lazy(() => hubPages().then((m) => ({ default: m.ToolsHubPage })));
+
+function AdminRouteFallback() {
+  return (
+    <div
+      className="flex min-h-[40vh] items-center justify-center p-8 text-sm text-slate-500 dark:text-slate-400"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      Loading…
+    </div>
+  );
+}
+
+function prefetchAdminChunks(): void {
+  // Reduce sidebar "flicker" by preloading common route chunks shortly after first paint.
+  // This avoids Suspense fallback flashes on each view change in slower environments.
+  const w = window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void };
+  const schedule = (cb: () => void) => {
+    if (typeof w.requestIdleCallback === 'function') {
+      w.requestIdleCallback(cb, { timeout: 1200 });
+    } else {
+      setTimeout(cb, 350);
+    }
+  };
+
+  schedule(() => {
+    void import('./pages/DashboardPage');
+    void import('./pages/CoursesPage');
+    void import('./pages/SettingsPage');
+    void import('./pages/OrdersPage');
+    void import('./pages/OrderDetailsPage');
+    void import('./pages/PaymentsPage');
+    void import('./pages/PaymentDetailsPage');
+    void import('./pages/EnrollmentsPage');
+    void import('./pages/AddonsPage');
+    void import('./pages/EmailPage');
+  });
+}
 
 function RoutedApp() {
   const baseConfig = getConfig();
@@ -97,18 +186,22 @@ function RoutedApp() {
     enrollments: term(config, 'enrollments'),
   };
 
+  useEffect(() => {
+    prefetchAdminChunks();
+  }, []);
+
   const routes = (() => {
   switch (page) {
     case 'dashboard':
-      return <DashboardPage config={config} title="Dashboard" />;
+      return <DashboardPage embedded config={config} title="Dashboard" />;
     case 'courses':
-      return <CoursesPage config={config} title={T.courses} restBase="sik_course" />;
+      return <CoursesPage embedded config={config} title={T.courses} restBase="sik_course" />;
     case 'add-course':
-      return <CourseBuilderPage config={config} title={`${T.course} builder`} />;
+      return <CourseBuilderPage embedded config={config} title={`${T.course} builder`} />;
     case 'bundle-builder':
-      return <CourseBuilderPage config={config} title="Bundle builder" />;
+      return <CourseBuilderPage embedded config={config} title="Bundle builder" />;
     case 'edit-content':
-      return <ContentPostEditorPage config={config} shellTitle="Edit content" />;
+      return <ContentPostEditorPage embedded config={config} shellTitle="Edit content" />;
     case 'lessons':
     case 'add-lesson':
       return (
@@ -165,35 +258,37 @@ function RoutedApp() {
         />
       );
     case 'issued-certificates':
-      return <IssuedCertificatesPage config={config} title="Issued certificates" />;
+      return <IssuedCertificatesPage embedded config={config} title="Issued certificates" />;
     case 'orders':
-      return <OrdersPage config={config} title="Orders" />;
+      return <OrdersPage embedded config={config} title="Orders" />;
+    case 'order':
+      return <OrderDetailsPage embedded config={config} title="Order" />;
     case 'coupons':
-      return <CouponsPage config={config} title="Coupons" />;
+      return <CouponsPage embedded config={config} title="Coupons" />;
     case 'reviews':
-      return <ReviewsPage config={config} title="Course reviews" />;
+      return <ReviewsPage embedded config={config} title="Course reviews" />;
     case 'gradebook':
-      return <GradebookPage config={config} title="Gradebook" />;
+      return <GradebookPage embedded config={config} title="Gradebook" />;
     case 'grading':
-      return <GradingPage config={config} title="Grading" />;
+      return <GradingPage embedded config={config} title="Grading" />;
     case 'activity-log':
-      return <ActivityLogPage config={config} title="Activity log" />;
+      return <ActivityLogPage embedded config={config} title="Activity log" />;
     case 'content-drip':
-      return <ContentDripPage config={config} title="Scheduled access" />;
+      return <ContentDripPage embedded config={config} title="Scheduled access" />;
     case 'subscriptions':
-      return <SubscriptionsProPage config={config} title="Subscriptions" />;
+      return <SubscriptionsProPage embedded config={config} title="Subscriptions" />;
     case 'course-team':
-      return <CourseTeamPage config={config} title="Course staff" />;
+      return <CourseTeamPage embedded config={config} title="Course staff" />;
     case 'marketplace':
-      return <MarketplacePage config={config} title="Marketplace" />;
+      return <MarketplacePage embedded config={config} title="Marketplace" />;
     case 'bundles':
-      return <BundlesPage config={config} title="Course bundles" />;
+      return <BundlesPage embedded config={config} title="Course bundles" />;
     case 'prerequisites':
-      return <PrerequisitesPage config={config} title="Prerequisites" />;
+      return <PrerequisitesPage embedded config={config} title="Prerequisites" />;
     case 'social-login':
-      return <SocialLoginPage config={config} title="Social login" />;
+      return <SocialLoginPage embedded config={config} title="Social login" />;
     case 'white-label':
-      return <WhiteLabelPage config={config} title="White label" />;
+      return <WhiteLabelPage embedded config={config} title="White label" />;
     case 'crm-automation':
       return (
         <GenericPlaceholderPage
@@ -203,28 +298,29 @@ function RoutedApp() {
         />
       );
     case 'calendar':
-      return <CalendarPage config={config} title="Calendar" />;
+      return <CalendarPage embedded config={config} title="Calendar" />;
     /* ---- Tabbed hubs (new sidebar entries that fan out to existing pages). ---- */
     case 'content-library':
-      return <ContentLibraryHubPage config={config} title="Content library" />;
+      return <ContentLibraryHubPage embedded config={config} title="Content library" />;
     case 'people':
-      return <PeopleHubPage config={config} title="People" />;
+      return <PeopleHubPage embedded config={config} title="People" />;
     case 'certificates-hub':
-      return <CertificatesHubPage config={config} title="Certificates" />;
+      return <CertificatesHubPage embedded config={config} title="Certificates" />;
     case 'sales':
-      return <SalesHubPage config={config} title="Sales" />;
+      return <SalesHubPage embedded config={config} title="Sales" />;
     case 'email-hub':
     case 'email-templates':
-      return <EmailHubPage config={config} title="Email" />;
+      return <EmailHubPage embedded config={config} title="Email" />;
     case 'branding':
-      return <BrandingHubPage config={config} title="Branding" />;
+      return <BrandingHubPage embedded config={config} title="Branding" />;
     case 'integrations-hub':
-      return <IntegrationsHubPage config={config} title="Integrations" />;
+      return <IntegrationsHubPage embedded config={config} title="Integrations" />;
     case 'learning-rules':
-      return <LearningRulesHubPage config={config} title="Learning rules" />;
+      return <LearningRulesHubPage embedded config={config} title="Learning rules" />;
     case 'course-categories':
       return (
         <CourseCategoriesPage
+          embedded
           config={config}
           title="Course categories"
           subtitle="Organize courses with hierarchical categories."
@@ -251,33 +347,36 @@ function RoutedApp() {
     case 'instructor-applications':
       return (
         <InstructorApplicationsPage
+          embedded
           config={config}
           title="Instructor applications"
           subtitle="Approve or reject learners who applied to teach."
         />
       );
     case 'enrollments':
-      return <EnrollmentsPage config={config} title={T.enrollments} />;
+      return <EnrollmentsPage embedded config={config} title={T.enrollments} />;
     case 'reports':
-      return <ReportsHubPage config={config} title="Reports" />;
+      return <ReportsHubPage embedded config={config} title="Reports" />;
     case 'payments':
-      return <PaymentsPage config={config} title="Payments" />;
+      return <PaymentsPage embedded config={config} title="Payments" />;
+    case 'payment':
+      return <PaymentDetailsPage embedded config={config} title="Payment" />;
     case 'settings':
-      return <SettingsPage config={config} title="Settings" />;
+      return <SettingsPage embedded config={config} title="Settings" />;
     case 'email':
-      return <EmailPage config={config} title="Email" />;
+      return <EmailPage embedded config={config} title="Email" />;
     case 'email-template-edit':
-      return <EmailTemplateEditPage config={config} title="Email template" />;
+      return <EmailTemplateEditPage embedded config={config} title="Email template" />;
     case 'tools':
-      return <ToolsHubPage config={config} title="Tools" />;
+      return <ToolsHubPage embedded config={config} title="Tools" />;
     case 'addons':
-      return <AddonsPage config={config} title="Addons" />;
+      return <AddonsPage embedded config={config} title="Addons" />;
     case 'integrations':
-      return <IntegrationsPage config={config} title="Integrations" />;
+      return <IntegrationsPage embedded config={config} title="Integrations" />;
     case 'email-marketing':
-      return <EmailMarketingPage config={config} title="Email marketing" />;
+      return <EmailMarketingPage embedded config={config} title="Email marketing" />;
     case 'license':
-      return <LicensePage config={config} title="License" />;
+      return <LicensePage embedded config={config} title="License" />;
     default:
       return (
         <GenericPlaceholderPage
@@ -289,7 +388,31 @@ function RoutedApp() {
   }
   })();
 
-  return <SikshyaDialogProvider>{routes}</SikshyaDialogProvider>;
+  return (
+    <SikshyaDialogProvider>
+      <AppShell
+        page={config.page}
+        version={config.version}
+        navigation={config.navigation as NavItem[]}
+        adminUrl={config.adminUrl}
+        pluginUrl={config.pluginUrl}
+        user={config.user}
+        branding={config.branding}
+        title={
+          page === 'settings'
+            ? 'Settings'
+            : page === 'dashboard'
+              ? 'Dashboard'
+              : page === 'courses'
+                ? T.courses
+                : platformName
+        }
+        subtitle={page === 'settings' ? 'Site-wide defaults for every course' : undefined}
+      >
+        <Suspense fallback={<AdminRouteFallback />}>{routes}</Suspense>
+      </AppShell>
+    </SikshyaDialogProvider>
+  );
 }
 
 export default function App() {

@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -67,7 +67,7 @@ function StarDisplay({ value }: { value: number }) {
   );
 }
 
-export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }) {
+export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const { confirm } = useSikshyaDialog();
 
@@ -188,13 +188,9 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Approve, unpublish, or delete learner reviews. Course averages update automatically."
       pageActions={
@@ -216,7 +212,7 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
         addonEnableDescription="Enable the Course reviews addon to register the public review form, the REST endpoints, and this moderation screen."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
       {error ? (
@@ -438,6 +434,6 @@ export function ReviewsPage(props: { config: SikshyaReactConfig; title: string }
         </div>
       ) : null}
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

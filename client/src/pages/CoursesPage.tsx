@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
-import { AppShell } from '../components/AppShell';
+import { useEffect, useMemo, useState } from 'react';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { EntityListView, StatusBadge } from '../components/shared/list';
 import { ButtonPrimary } from '../components/shared/buttons';
 import type { Column } from '../components/shared/DataTable';
 import { NavIcon } from '../components/NavIcon';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled } from '../lib/licensing';
 import { courseMetaString, coursePriceLabel, embeddedAuthorName } from '../lib/courseListMeta';
@@ -52,7 +52,7 @@ function excerptPlain(r: WpPost): string {
 
 const COURSE_CAT_TAX = 'sikshya_course_category';
 
-export function CoursesPage(props: { config: SikshyaReactConfig; title: string; restBase: string }) {
+export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string; restBase: string }) {
   const { config, title, restBase } = props;
   const [createOpen, setCreateOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<'any' | 'regular' | 'subscription' | 'bundle'>('any');
@@ -61,6 +61,17 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
   const courses = term(config, 'courses');
   const courseLower = termLower(config, 'course');
   const coursesLower = termLower(config, 'courses');
+
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get('create') === '1' || sp.get('create') === 'true') {
+        setCreateOpen(true);
+      }
+    } catch {
+      // no-op (SSR / malformed URL)
+    }
+  }, []);
 
   const columns: Column<WpPost>[] = useMemo(
     () => [
@@ -157,13 +168,13 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
         header: 'Duration',
         defaultHidden: true,
         cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
-        render: (r) => courseMetaString(r, '_sikshya_course_duration', '_sikshya_duration'),
+        render: (r) => courseMetaString(r, '_sikshya_course_duration', '_sikshya_duration', 'sikshya_course_duration'),
       },
       {
         id: 'level',
         header: 'Level',
         cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
-        render: (r) => courseMetaString(r, '_sikshya_course_level', '_sikshya_difficulty'),
+        render: (r) => courseMetaString(r, '_sikshya_course_level', '_sikshya_difficulty', 'sikshya_course_level'),
       },
       {
         id: 'excerpt',
@@ -199,14 +210,9 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
   );
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Live data from your site. Create a draft, then finish details in the builder."
       pageActions={
@@ -224,13 +230,13 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
           { value: 'id', label: 'ID' },
           { value: 'author', label: 'Author' },
         ]}
-        defaultSortField="title"
+        defaultSortField="id"
         columnPickerStorageKey="course"
         collectionQueryExtras={{
           embed: '1',
           // Ensure bundle type meta is present in the collection response so the badge renders reliably.
           fields:
-            'id,title,slug,status,link,meta,sikshya_course_type,sikshya_preview_link,_embedded,date,modified,excerpt,author',
+            'id,title,slug,status,link,meta,sikshya_course_type,sikshya_course_price,sikshya_course_duration,sikshya_course_level,sikshya_preview_link,_embedded,date,modified,excerpt,author',
           ...(typeFilter !== 'any' ? { sikshya_course_type: typeFilter } : null),
         }}
         toolbarTrailing={
@@ -295,6 +301,6 @@ export function CoursesPage(props: { config: SikshyaReactConfig; title: string; 
           'Status',
         ]}
       />
-    </AppShell>
+    </EmbeddableShell>
   );
 }

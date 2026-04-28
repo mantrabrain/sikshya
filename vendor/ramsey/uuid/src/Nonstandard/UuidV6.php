@@ -14,55 +14,85 @@ declare(strict_types=1);
 
 namespace Ramsey\Uuid\Nonstandard;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Ramsey\Uuid\Codec\CodecInterface;
 use Ramsey\Uuid\Converter\NumberConverterInterface;
 use Ramsey\Uuid\Converter\TimeConverterInterface;
+use Ramsey\Uuid\Exception\DateTimeException;
 use Ramsey\Uuid\Exception\InvalidArgumentException;
 use Ramsey\Uuid\Lazy\LazyUuidFromString;
 use Ramsey\Uuid\Rfc4122\FieldsInterface as Rfc4122FieldsInterface;
-use Ramsey\Uuid\Rfc4122\TimeTrait;
 use Ramsey\Uuid\Rfc4122\UuidInterface;
 use Ramsey\Uuid\Rfc4122\UuidV1;
-use Ramsey\Uuid\Uuid as BaseUuid;
+use Ramsey\Uuid\Uuid;
+use Throwable;
+
+use function hex2bin;
+use function str_pad;
+use function substr;
+
+use const STR_PAD_LEFT;
 
 /**
- * Reordered time, or version 6, UUIDs include timestamp, clock sequence, and node values that are combined into a
- * 128-bit unsigned integer
- *
- * @deprecated Use {@see \Ramsey\Uuid\Rfc4122\UuidV6} instead.
+ * Ordered-time, or version 6, UUIDs include timestamp, clock sequence, and node
+ * values that are combined into a 128-bit unsigned integer
  *
  * @link https://github.com/uuid6/uuid6-ietf-draft UUID version 6 IETF draft
  * @link http://gh.peabody.io/uuidv6/ "Version 6" UUIDs
- * @link https://www.rfc-editor.org/rfc/rfc9562#section-5.6 RFC 9562, 5.6. UUID Version 6
  *
- * @immutable
+ * @psalm-immutable
  */
-class UuidV6 extends BaseUuid implements UuidInterface
+final class UuidV6 extends Uuid implements UuidInterface
 {
-    use TimeTrait;
-
     /**
-     * Creates a version 6 (reordered Gregorian time) UUID
+     * Creates a version 6 (time-based) UUID
      *
      * @param Rfc4122FieldsInterface $fields The fields from which to construct a UUID
-     * @param NumberConverterInterface $numberConverter The number converter to use for converting hex values to/from integers
-     * @param CodecInterface $codec The codec to use when encoding or decoding UUID strings
-     * @param TimeConverterInterface $timeConverter The time converter to use for converting timestamps extracted from a
-     *     UUID to unix timestamps
+     * @param NumberConverterInterface $numberConverter The number converter to use
+     *     for converting hex values to/from integers
+     * @param CodecInterface $codec The codec to use when encoding or decoding
+     *     UUID strings
+     * @param TimeConverterInterface $timeConverter The time converter to use
+     *     for converting timestamps extracted from a UUID to unix timestamps
      */
     public function __construct(
         Rfc4122FieldsInterface $fields,
         NumberConverterInterface $numberConverter,
         CodecInterface $codec,
-        TimeConverterInterface $timeConverter,
+        TimeConverterInterface $timeConverter
     ) {
-        if ($fields->getVersion() !== BaseUuid::UUID_TYPE_REORDERED_TIME) {
+        if ($fields->getVersion() !== Uuid::UUID_TYPE_PEABODY) {
             throw new InvalidArgumentException(
-                'Fields used to create a UuidV6 must represent a version 6 (reordered time) UUID',
+                'Fields used to create a UuidV6 must represent a '
+                . 'version 6 (ordered-time) UUID'
             );
         }
 
         parent::__construct($fields, $numberConverter, $codec, $timeConverter);
+    }
+
+    /**
+     * Returns a DateTimeInterface object representing the timestamp associated
+     * with the UUID
+     *
+     * @return DateTimeImmutable A PHP DateTimeImmutable instance representing
+     *     the timestamp of a version 6 UUID
+     */
+    public function getDateTime(): DateTimeInterface
+    {
+        $time = $this->timeConverter->convertTime($this->fields->getTimestamp());
+
+        try {
+            return new DateTimeImmutable(
+                '@'
+                . $time->getSeconds()->toString()
+                . '.'
+                . str_pad($time->getMicroseconds()->toString(), 6, '0', STR_PAD_LEFT)
+            );
+        } catch (Throwable $e) {
+            throw new DateTimeException($e->getMessage(), (int) $e->getCode(), $e);
+        }
     }
 
     /**
@@ -78,7 +108,7 @@ class UuidV6 extends BaseUuid implements UuidInterface
             . substr($hex, 16);
 
         /** @var LazyUuidFromString $uuid */
-        $uuid = BaseUuid::fromBytes((string) hex2bin($hex));
+        $uuid = Uuid::fromBytes((string) hex2bin($hex));
 
         return $uuid->toUuidV1();
     }
@@ -86,7 +116,7 @@ class UuidV6 extends BaseUuid implements UuidInterface
     /**
      * Converts a version 1 UUID into an instance of a version 6 UUID
      */
-    public static function fromUuidV1(UuidV1 $uuidV1): \Ramsey\Uuid\Rfc4122\UuidV6
+    public static function fromUuidV1(UuidV1 $uuidV1): UuidV6
     {
         $hex = $uuidV1->getHex()->toString();
         $hex = substr($hex, 13, 3)
@@ -96,7 +126,7 @@ class UuidV6 extends BaseUuid implements UuidInterface
             . substr($hex, 16);
 
         /** @var LazyUuidFromString $uuid */
-        $uuid = BaseUuid::fromBytes((string) hex2bin($hex));
+        $uuid = Uuid::fromBytes((string) hex2bin($hex));
 
         return $uuid->toUuidV6();
     }

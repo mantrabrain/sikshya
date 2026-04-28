@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) {
 
 use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Core\Plugin;
+use Sikshya\Database\Repositories\QuizAttemptRepository;
 
 $plugin = Plugin::getInstance();
 $sheet_ver = rawurlencode((string) $plugin->version);
@@ -171,27 +172,89 @@ while (have_posts()) {
         </header>
 
             <?php if ($page_model->isLoggedIn() && $page_model->isEnrolled() && !$page_model->hasError()) : ?>
-        <script>
-            window.sikshyaQuizTaker = <?php
-            echo wp_json_encode(
-                [
-                    'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
-                    'restNonce' => wp_create_nonce('wp_rest'),
-                    'quizId' => (string) $quiz_id,
-                    'advanced' => $page_model->getAdvanced(),
-                    'i18n' => [
-                        'score' => __('Your score: %s%%', 'sikshya'),
-                        'passed' => __('You passed this quiz.', 'sikshya'),
-                        'notPassed' => __('You did not reach the passing score.', 'sikshya'),
-                        'error' => __('Could not submit the quiz. Please try again.', 'sikshya'),
-                    ],
-                ],
-                JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-            );
-            ?>;
-        </script>
-        <script src="<?php echo $quiz_js; ?>" defer></script>
-    <?php endif; ?>
+                <?php
+                $quiz_id = (int) $page_model->getPost()->ID;
+                // Time limit meta is the canonical source for learner timer UI.
+                $duration_mins = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_time_limit', true) : 0;
+                if ($duration_mins <= 0 && $quiz_id > 0) {
+                    $duration_mins = (int) get_post_meta($quiz_id, 'sikshya_quiz_time_limit', true);
+                }
+                // Back-compat: older installs may have stored duration under these keys.
+                if ($duration_mins <= 0 && $quiz_id > 0) {
+                    $duration_mins = (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true);
+                }
+                if ($duration_mins <= 0 && $quiz_id > 0) {
+                    $duration_mins = (int) get_post_meta($quiz_id, 'sikshya_quiz_duration', true);
+                }
+                $attempt = null;
+                try {
+                    $repo = new QuizAttemptRepository();
+                    $attempt = $repo->getLatestInProgressAttemptForUserQuiz(get_current_user_id(), $quiz_id);
+                } catch (\Throwable $e) {
+                    $attempt = null;
+                }
+                $attempt_started_ts = null;
+                if ($attempt && isset($attempt->started_at)) {
+                    try {
+                        $dt = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string) $attempt->started_at, wp_timezone());
+                        if ($dt instanceof \DateTimeImmutable) {
+                            $attempt_started_ts = $dt->getTimestamp();
+                        }
+                    } catch (\Throwable $e) {
+                        $attempt_started_ts = null;
+                    }
+                }
+                $legacy = $page_model->toLegacyViewArray();
+                $navNext = '';
+                if (is_array($legacy) && isset($legacy['nav']) && is_array($legacy['nav']) && isset($legacy['nav']['next'])) {
+                    $navNext = (string) $legacy['nav']['next'];
+                }
+                $navPrev = '';
+                if (is_array($legacy) && isset($legacy['nav']) && is_array($legacy['nav']) && isset($legacy['nav']['prev'])) {
+                    $navPrev = (string) $legacy['nav']['prev'];
+                }
+                ?>
+                <script>
+                  window.sikshyaQuizTaker = <?php
+                  echo wp_json_encode(
+                      [
+                          'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
+                          'restNonce' => wp_create_nonce('wp_rest'),
+                          'quizId' => (string) $quiz_id,
+                          'durationSeconds' => $duration_mins > 0 ? ((int) $duration_mins * 60) : 0,
+                          'serverTime' => time(),
+                          'locked' => (bool) $page_model->isAttemptsExhausted(),
+                          'attempt' => $attempt
+                              ? [
+                                  'id' => (int) $attempt->id,
+                                  'started_at' => (string) $attempt->started_at,
+                                  'started_at_ts' => $attempt_started_ts,
+                                  'status' => (string) $attempt->status,
+                                  'attempt_number' => (int) $attempt->attempt_number,
+                              ]
+                              : null,
+                          'nextUrl' => $navNext !== '' ? esc_url_raw($navNext) : null,
+                          'prevUrl' => $navPrev !== '' ? esc_url_raw($navPrev) : null,
+                          'advanced' => $page_model->getAdvanced(),
+                          'i18n' => [
+                              'score' => __('Your score: %s%%', 'sikshya'),
+                              'passingScore' => __('Passing score: %s%%', 'sikshya'),
+                              'passed' => __('You passed this quiz.', 'sikshya'),
+                              'notPassed' => __('You did not reach the passing score.', 'sikshya'),
+                              'error' => __('Could not submit the quiz. Please try again.', 'sikshya'),
+                              'resultsTitle' => __('Quiz results', 'sikshya'),
+                              'continue' => __('Continue', 'sikshya'),
+                              'reviewAnswers' => __('Review answers', 'sikshya'),
+                              'hideAnswers' => __('Hide answers', 'sikshya'),
+                              'tryAgain' => __('Try again', 'sikshya'),
+                          ],
+                      ],
+                      JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                  );
+                  ?>;
+                </script>
+                <script src="<?php echo $quiz_js; ?>" defer></script>
+            <?php endif; ?>
 
         <main class="sikshya-learnMain">
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
@@ -249,7 +312,18 @@ while (have_posts()) {
                     <?php
                     $quiz_id = (int) $page_model->getPost()->ID;
                     $question_count = count($page_model->getQuestions());
-                    $duration_mins = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true) : 0;
+                    // Time limit meta is the canonical source for learner timer UI.
+                    $duration_mins = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_time_limit', true) : 0;
+                    if ($duration_mins <= 0 && $quiz_id > 0) {
+                        $duration_mins = (int) get_post_meta($quiz_id, 'sikshya_quiz_time_limit', true);
+                    }
+                    // Back-compat: older installs may have stored duration under these keys.
+                    if ($duration_mins <= 0 && $quiz_id > 0) {
+                        $duration_mins = (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true);
+                    }
+                    if ($duration_mins <= 0 && $quiz_id > 0) {
+                        $duration_mins = (int) get_post_meta($quiz_id, 'sikshya_quiz_duration', true);
+                    }
                     $passing_score = $quiz_id > 0 ? (int) get_post_meta($quiz_id, '_sikshya_quiz_passing_score', true) : 0;
                     $passing_score = $passing_score > 0 ? $passing_score : 70;
                     $attempts_max = $page_model->getAttemptsMax();
@@ -290,7 +364,13 @@ while (have_posts()) {
                                         </div>
                                     </div>
                                     <div class="sikshya-learnHeader__actions">
-                                        <?php if (!$attempts_exhausted) : ?>
+                                        <?php if ($duration_mins > 0) : ?>
+                                            <div class="sikshya-quizTimer" data-sikshya-quiz-timer aria-live="polite">
+                                                <span class="sikshya-quizTimer__label"><?php esc_html_e('Time left', 'sikshya'); ?></span>
+                                                <span class="sikshya-quizTimer__value" data-sikshya-quiz-timer-value>00:00:00</span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!$attempts_exhausted && $question_count > 0) : ?>
                                             <button
                                                 type="button"
                                                 class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
@@ -298,6 +378,18 @@ while (have_posts()) {
                                                 aria-expanded="false"
                                                 aria-controls="sikshya-learn-quiz-form"
                                             ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                        <?php elseif (!$attempts_exhausted && $question_count <= 0) : ?>
+                                            <span class="sikshya-tooltipWrap" data-sikshya-tooltip-wrap>
+                                                <button
+                                                    type="button"
+                                                    class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
+                                                    disabled
+                                                    aria-disabled="true"
+                                                ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                                <span class="sikshya-tooltip" role="tooltip">
+                                                    <?php esc_html_e('This quiz does not have questions yet.', 'sikshya'); ?>
+                                                </span>
+                                            </span>
                                         <?php else : ?>
                                             <?php
                                             $lock_tip = $attempts_message !== ''
@@ -413,13 +505,15 @@ while (have_posts()) {
                                             </li>
                                         <?php endif; ?>
                                     </ul>
-                                    <button
-                                        type="button"
-                                        class="sikshya-btn sikshya-btn--primary sikshya-quizIntro__cta"
-                                        data-sikshya-quiz-start
-                                        aria-expanded="false"
-                                        aria-controls="sikshya-learn-quiz-form"
-                                    ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                    <?php if ($question_count > 0) : ?>
+                                        <button
+                                            type="button"
+                                            class="sikshya-btn sikshya-btn--primary sikshya-quizIntro__cta"
+                                            data-sikshya-quiz-start
+                                            aria-expanded="false"
+                                            aria-controls="sikshya-learn-quiz-form"
+                                        ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
+                                    <?php endif; ?>
                                     <p class="sikshya-quizIntro__hint">
                                         <?php esc_html_e('Questions will open in this area. Extra study tips live in the Overview tab below.', 'sikshya'); ?>
                                     </p>
@@ -454,7 +548,19 @@ while (have_posts()) {
                                     <?php endif; ?>
                                     <div class="sikshya-quiz-result" hidden aria-live="polite"></div>
                                     <div class="sikshya-quizActions">
-                                        <button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-quiz-submit" <?php echo $attempts_exhausted ? 'disabled aria-disabled="true"' : ''; ?>><?php esc_html_e('Submit quiz', 'sikshya'); ?></button>
+                                        <?php
+                                        $submit_label = $attempts_exhausted ? __('Quiz locked', 'sikshya') : __('Submit quiz', 'sikshya');
+                                        $submit_title = '';
+                                        if ($attempts_exhausted) {
+                                            $submit_title = $attempts_message !== '' ? $attempts_message : __('No quiz attempts remaining.', 'sikshya');
+                                        }
+                                        ?>
+                                        <button
+                                            type="submit"
+                                            class="sikshya-btn sikshya-btn--primary sikshya-quiz-submit"
+                                            <?php echo $attempts_exhausted ? 'disabled aria-disabled="true"' : ''; ?>
+                                            <?php echo $submit_title !== '' ? 'title="' . esc_attr($submit_title) . '"' : ''; ?>
+                                        ><?php echo esc_html($submit_label); ?></button>
                                 </div>
                                 </form>
                             <?php else : ?>
@@ -472,6 +578,7 @@ while (have_posts()) {
                             <button type="button" class="sikshya-tabBtn is-active" data-sikshya-tab="overview"><?php esc_html_e('Overview', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="resources"><?php esc_html_e('Resources', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
+                            <button type="button" class="sikshya-tabBtn" data-sikshya-tab="notes"><?php esc_html_e('Notes', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
                             <?php if ($page_model->isCourseFeatureDiscussions()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="discussions"><?php esc_html_e('Discussions', 'sikshya'); ?></button>
@@ -520,7 +627,46 @@ while (have_posts()) {
                         <div class="sikshya-tabPanel" data-sikshya-panel="resources">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
-                                <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this quiz yet.', 'sikshya'); ?></p>
+                                <?php
+                                $course_id_for_resources = (int) $page_model->getCourseId();
+                                $resources = get_post_meta($course_id_for_resources, '_sikshya_course_resources', true);
+                                if (is_string($resources) && $resources !== '') {
+                                    $decoded = json_decode($resources, true);
+                                    if (is_array($decoded)) {
+                                        $resources = $decoded;
+                                    }
+                                }
+                                if (!is_array($resources)) {
+                                    $resources = [];
+                                }
+                                ?>
+                                <?php if ($resources === []) : ?>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('No resources available for this quiz yet.', 'sikshya'); ?></p>
+                                <?php else : ?>
+                                    <ul class="sikshya-resList">
+                                        <?php foreach ($resources as $r) : ?>
+                                            <?php
+                                            if (!is_array($r)) {
+                                                continue;
+                                            }
+                                            $rt = isset($r['title']) ? sanitize_text_field((string) $r['title']) : '';
+                                            $url = isset($r['url']) ? esc_url_raw((string) $r['url']) : '';
+                                            $aid = isset($r['attachment_id']) ? absint($r['attachment_id']) : 0;
+                                            if ($url === '' && $aid > 0) {
+                                                $url = wp_get_attachment_url($aid) ?: '';
+                                            }
+                                            if ($url === '') {
+                                                continue;
+                                            }
+                                            ?>
+                                            <li>
+                                                <a class="sikshya-resLink" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer">
+                                                    <?php echo esc_html($rt !== '' ? $rt : wp_basename($url)); ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="instructions">
@@ -533,14 +679,61 @@ while (have_posts()) {
                                 </ul>
                             </div>
                         </div>
+                        <div class="sikshya-tabPanel" data-sikshya-panel="notes">
+                            <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                                <h3 class="sikshya-learnH3"><?php esc_html_e('My notes', 'sikshya'); ?></h3>
+                                <label class="sikshya-screen-reader-text" for="sikshya-learn-note"><?php esc_html_e('My notes', 'sikshya'); ?></label>
+                                <textarea
+                                    id="sikshya-learn-note"
+                                    class="sikshya-quizQ__textarea"
+                                    rows="6"
+                                    placeholder="<?php echo esc_attr__('Write a private note for this quiz…', 'sikshya'); ?>"
+                                    data-sikshya-note
+                                ></textarea>
+                                <div class="sikshya-quizActions" style="margin-top:10px;">
+                                    <button type="button" class="sikshya-btn sikshya-btn--outline" data-sikshya-note-save>
+                                        <?php esc_html_e('Save note', 'sikshya'); ?>
+                                    </button>
+                                    <span class="sikshya-muted" data-sikshya-note-status style="font-size:12px;"></span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="announcements">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Announcements', 'sikshya'); ?></h3>
-                                <div class="sikshya-announce">
-                                    <div class="sikshya-announce__title"><?php esc_html_e('Tip: review the lesson first', 'sikshya'); ?></div>
-                                    <div class="sikshya-announce__meta sikshya-muted"><?php esc_html_e('Posted 1 week ago', 'sikshya'); ?></div>
-                                    <p class="sikshya-zeroMargin"><?php esc_html_e('If you are stuck, revisit the previous lesson and try again. Practice improves score quickly.', 'sikshya'); ?></p>
-                                </div>
+                                <?php
+                                $ann = get_post_meta((int) $page_model->getCourseId(), '_sikshya_course_announcements', true);
+                                if (is_string($ann) && $ann !== '') {
+                                    $decoded = json_decode($ann, true);
+                                    if (is_array($decoded)) {
+                                        $ann = $decoded;
+                                    }
+                                }
+                                if (!is_array($ann)) {
+                                    $ann = [];
+                                }
+                                ?>
+                                <?php if ($ann === []) : ?>
+                                    <p class="sikshya-zeroMargin"><?php esc_html_e('No announcements available.', 'sikshya'); ?></p>
+                                <?php else : ?>
+                                    <?php foreach ($ann as $a) : ?>
+                                        <?php
+                                        if (!is_array($a)) {
+                                            continue;
+                                        }
+                                        $at = isset($a['title']) ? sanitize_text_field((string) $a['title']) : '';
+                                        $ad = isset($a['date']) ? sanitize_text_field((string) $a['date']) : '';
+                                        $am = isset($a['message']) ? (string) $a['message'] : '';
+                                        ?>
+                                        <div class="sikshya-announce" style="margin-top:12px;">
+                                            <div class="sikshya-announce__title"><?php echo esc_html($at !== '' ? $at : __('Announcement', 'sikshya')); ?></div>
+                                            <?php if ($ad !== '') : ?>
+                                                <div class="sikshya-announce__meta sikshya-muted"><?php echo esc_html($ad); ?></div>
+                                            <?php endif; ?>
+                                            <div class="sikshya-zeroMargin"><?php echo sikshya_render_rich_text($am); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <?php if ($page_model->isCourseFeatureDiscussions()) : ?>
@@ -560,6 +753,60 @@ while (have_posts()) {
                             </div>
             <?php endif; ?>
         </div>
+
+        <script>
+        (function(){
+          // Notes (REST): private per-user note for this content.
+          const cfg = window.sikshyaQuizTaker || {};
+          const noteTa = document.querySelector('[data-sikshya-note]');
+          const noteSave = document.querySelector('[data-sikshya-note-save]');
+          const noteStatus = document.querySelector('[data-sikshya-note-status]');
+          if (!noteTa || !noteSave || !cfg.restUrl || !cfg.restNonce || !cfg.quizId) return;
+          const courseId = <?php echo wp_json_encode((int) $page_model->getCourseId(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+          const contentId = parseInt(cfg.quizId, 10) || 0;
+          let loaded = false;
+          async function loadNote(){
+            if (loaded) return;
+            loaded = true;
+            try{
+              const url = new URL(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/content-note', window.location.href);
+              url.searchParams.set('course_id', String(courseId));
+              url.searchParams.set('content_id', String(contentId));
+              const res = await fetch(url.toString(), { method:'GET', headers:{ 'X-WP-Nonce': cfg.restNonce }, credentials:'same-origin' });
+              const json = await res.json().catch(() => null);
+              if (res.ok && json && json.ok && json.data && typeof json.data.note === 'string') {
+                noteTa.value = json.data.note;
+              }
+            }catch(e){ console.error(e); }
+          }
+          document.addEventListener('click', (e) => {
+            const t = e.target;
+            if (!(t instanceof Element)) return;
+            if (t.matches('[data-sikshya-tab="notes"]')) void loadNote();
+          });
+          noteSave.addEventListener('click', async () => {
+            noteSave.setAttribute('disabled','disabled');
+            if (noteStatus) noteStatus.textContent = 'Saving…';
+            try{
+              const res = await fetch(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/content-note', {
+                method:'POST',
+                credentials:'same-origin',
+                headers:{ 'Content-Type':'application/json', 'X-WP-Nonce': cfg.restNonce },
+                body: JSON.stringify({ course_id: Number(courseId), content_id: Number(contentId), note: String(noteTa.value || '') }),
+              });
+              const json = await res.json().catch(() => null);
+              if (!res.ok || !json || json.ok !== true) throw new Error((json && (json.message || json.data?.message)) || 'Failed');
+              if (noteStatus) noteStatus.textContent = 'Saved.';
+              window.setTimeout(() => { if (noteStatus) noteStatus.textContent = ''; }, 1600);
+            }catch(e){
+              if (noteStatus) noteStatus.textContent = 'Could not save.';
+              console.error(e);
+            }finally{
+              noteSave.removeAttribute('disabled');
+            }
+          });
+        })();
+        </script>
 
                     <?php
                     // Sticky Prev/Next: derive from curriculum blocks.

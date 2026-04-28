@@ -306,6 +306,8 @@ class PostTypeService
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_duration');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_type');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_video_url');
+        // Lesson: free preview toggle (used by frontend preview rules + lesson editor).
+        $str_meta(PostTypes::LESSON, '_sikshya_is_free');
 
         $str_meta(PostTypes::QUESTION, '_sikshya_question_type');
         $int_meta(PostTypes::QUESTION, '_sikshya_question_points');

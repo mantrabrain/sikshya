@@ -1,0 +1,1 @@
+import{j as d}from"./sikshya-admin-sikshya-react-E_TY_un4.js";function t({children:e,className:r="",overflow:o="hidden"}){const s=o==="visible"?"overflow-visible":"overflow-hidden";return d.jsx("div",{className:`${s} rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 ${r}`,children:e})}export{t as L};

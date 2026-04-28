@@ -1,15 +1,16 @@
 import { useCallback, useMemo, useState, type FormEvent } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type OverviewResp = {
   ok?: boolean;
@@ -162,14 +163,28 @@ function StatTile(props: { label: string; value: string; hint?: string }) {
   );
 }
 
-export function MarketplacePage(props: { config: SikshyaReactConfig; title: string }) {
+export function MarketplacePage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const featureOk = isFeatureEnabled(config, 'marketplace_multivendor');
   const addon = useAddonEnabled('marketplace_multivendor');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
   const enabled = mode === 'full';
   const [tab, setTab] = useState<TabId>('overview');
-  const [toast, setToast] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast(2600);
+  const pushToast = useCallback(
+    (t: { kind: 'success' | 'error'; text: string } | null) => {
+      if (!t) {
+        toast.clear();
+        return;
+      }
+      if (t.kind === 'success') {
+        toast.success('Success', t.text);
+      } else {
+        toast.error('Error', t.text);
+      }
+    },
+    [toast]
+  );
 
   const overviewLoader = useCallback(async () => {
     if (!enabled) {
@@ -182,13 +197,9 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
   const currency = overview.data?.currency ?? 'USD';
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Run a multi-vendor LMS marketplace: track per-line commissions, manage vendor storefronts, and process withdrawals from one workspace."
     >
@@ -203,21 +214,11 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
         addonEnableDescription="Enable the Marketplace addon to register vendor routes and unlock multi-vendor selling."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <>
-          {toast ? (
-            <div
-              className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
-                toast.kind === 'success'
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-100'
-                  : 'border-red-200 bg-red-50 text-red-900 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-100'
-              }`}
-            >
-              {toast.text}
-            </div>
-          ) : null}
+          <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
           <div className="mb-5 flex flex-wrap items-center gap-2">
             {TABS.map((t) => (
@@ -255,12 +256,12 @@ export function MarketplacePage(props: { config: SikshyaReactConfig; title: stri
               currency={currency}
             />
           ) : null}
-          {tab === 'vendors' ? <VendorsPanel enabled={enabled} setToast={setToast} /> : null}
+          {tab === 'vendors' ? <VendorsPanel enabled={enabled} setToast={pushToast} /> : null}
           {tab === 'commissions' ? <CommissionsPanel enabled={enabled} /> : null}
-          {tab === 'withdrawals' ? <WithdrawalsPanel enabled={enabled} setToast={setToast} /> : null}
+          {tab === 'withdrawals' ? <WithdrawalsPanel enabled={enabled} setToast={pushToast} /> : null}
         </>
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }
 
@@ -333,16 +334,16 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
 
   const setVendorStatus = async (vendor: Vendor, next: 'active' | 'pending' | 'suspended') => {
     setBusy(vendor.id);
-    setToast(null);
+    toast.clear();
     try {
       await getSikshyaApi().put<{ ok?: boolean }>(
         SIKSHYA_ENDPOINTS.marketplace.admin.vendor(vendor.id),
         { status: next }
       );
-      setToast({ kind: 'success', text: `Vendor ${vendor.display_name || vendor.user_display} marked ${next}.` });
+      toast.success('Updated', `Vendor ${vendor.display_name || vendor.user_display} marked ${next}.`);
       void v.refetch();
     } catch (err) {
-      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Failed to update vendor.' });
+      toast.error('Update failed', err instanceof Error ? err.message : 'Failed to update vendor.');
     } finally {
       setBusy(null);
     }
@@ -595,7 +596,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
 
   const act = async (id: number, action: 'approve' | 'reject' | 'mark-paid') => {
     setBusy(id);
-    setToast(null);
+    toast.clear();
     try {
       const path =
         action === 'approve'
@@ -604,10 +605,10 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
           ? SIKSHYA_ENDPOINTS.marketplace.admin.withdrawalReject(id)
           : SIKSHYA_ENDPOINTS.marketplace.admin.withdrawalMarkPaid(id);
       await getSikshyaApi().post(path, {});
-      setToast({ kind: 'success', text: `Withdrawal #${id} ${action.replace('-', ' ')}.` });
+      toast.success('Updated', `Withdrawal #${id} ${action.replace('-', ' ')}.`);
       void w.refetch();
     } catch (err) {
-      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Action failed.' });
+      toast.error('Action failed', err instanceof Error ? err.message : 'Action failed.');
     } finally {
       setBusy(null);
     }
@@ -616,18 +617,18 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
   const submitAdjustment = async (e: FormEvent) => {
     e.preventDefault();
     setAdjustBusy(true);
-    setToast(null);
+    toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.marketplace.admin.adjustments, {
         vendor_user_id: Number(adjustVendor) || 0,
         amount: parseFloat(adjustAmount) || 0,
         reason: adjustReason.trim(),
       });
-      setToast({ kind: 'success', text: 'Adjustment recorded.' });
+      toast.success('Saved', 'Adjustment recorded.');
       setAdjustAmount('');
       setAdjustReason('');
     } catch (err) {
-      setToast({ kind: 'error', text: err instanceof Error ? err.message : 'Could not record adjustment.' });
+      toast.error('Save failed', err instanceof Error ? err.message : 'Could not record adjustment.');
     } finally {
       setAdjustBusy(false);
     }

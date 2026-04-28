@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { AppShell } from '../components/AppShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
 import type { NavItem, SikshyaReactConfig } from '../types';
@@ -32,7 +32,7 @@ const TITLE_BY_POST_TYPE: Record<string, string> = {
   sikshya_certificate: 'Certificate',
 };
 
-export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shellTitle: string }) {
+export function ContentPostEditorPage(props: { embedded?: boolean; config: SikshyaReactConfig; shellTitle: string }) {
   const { config, shellTitle } = props;
   const { navigateHref } = useAdminRouting();
   const q = config.query || {};
@@ -64,23 +64,18 @@ export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shell
 
   if (!postType) {
     return (
-      <AppShell
-        page={config.page}
-        sidebarActivePage="dashboard"
-        version={config.version}
-        navigation={config.navigation as NavItem[]}
-        adminUrl={config.adminUrl}
-        userName={config.user.name}
-        userAvatarUrl={config.user.avatarUrl}
+      <EmbeddableShell
+        embedded={props.embedded}
+        config={config}
         title={shellTitle}
         subtitle="Missing content type"
-        pageActions={null}
+        sidebarActivePage="dashboard"
       >
         <ApiErrorPanel
           error={new Error('No post_type in the URL. Open this screen from a list link.')}
           title="Cannot load editor"
         />
-      </AppShell>
+      </EmbeddableShell>
     );
   }
 
@@ -100,17 +95,12 @@ export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shell
   }
 
   return (
-    <AppShell
-      page={config.page}
-      sidebarActivePage={listView}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={shellTitle}
       subtitle={subtitle}
-      pageActions={null}
+      sidebarActivePage={listView}
     >
       <div className="w-full min-w-0">
         {renderContentEditor(postType, {
@@ -122,6 +112,6 @@ export function ContentPostEditorPage(props: { config: SikshyaReactConfig; shell
           onSavedNewId,
         })}
       </div>
-    </AppShell>
+    </EmbeddableShell>
   );
 }

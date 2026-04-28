@@ -28,6 +28,12 @@ body:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .si
   max-width: 1200px;
 }
 
+/* Full-width preset (Settings → Single course page layout) on catalog + legacy catalog page. */
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .sikshya-container,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-course-catalog .sikshya-container {
+  max-width: none;
+}
+
 /* Hero Section */
 .sikshya-hero {
   background: linear-gradient(135deg, var(--sikshya-primary) 0%, var(--sikshya-primary-dark) 100%);

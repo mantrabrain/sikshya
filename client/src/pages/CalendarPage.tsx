@@ -178,7 +178,7 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
         addonEnableDescription="Enable the Calendar add-on to expose staff and learner schedule endpoints and dashboard blocks."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {enabled ? (

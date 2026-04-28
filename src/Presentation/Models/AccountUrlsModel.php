@@ -14,10 +14,16 @@ if (!defined('ABSPATH')) {
 final class AccountUrlsModel
 {
     /**
+     * @var array<string, string>
+     */
+    private array $row;
+
+    /**
      * @param array<string, string> $row
      */
-    public function __construct(private array $row = [])
+    public function __construct(array $row = [])
     {
+        $this->row = $row;
     }
 
     /**
@@ -65,6 +71,11 @@ final class AccountUrlsModel
     public function getQuizAttemptsUrl(): string
     {
         return (string) ($this->row['account_quiz_attempts'] ?? '');
+    }
+
+    public function getCertificatesUrl(): string
+    {
+        return (string) ($this->row['account_certificates'] ?? '');
     }
 
     public function getLearnHubUrl(): string

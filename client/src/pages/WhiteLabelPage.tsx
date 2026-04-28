@@ -5,6 +5,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -71,7 +72,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
   const [courseOverrides, setCourseOverrides] = useState<Record<string, unknown>>({});
   const [courseLoading, setCourseLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const toast = useTopRightToast();
 
   const loader = useCallback(async () => {
     if (!enabled) return { ok: true, options: {} as Options };
@@ -85,11 +86,10 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
 
   const onSave = async (e: FormEvent) => {
     e.preventDefault();
-    setMsg(null);
     setSaving(true);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.whiteLabel, opts);
-      setMsg('Saved. Applying…');
+      toast.success('Saved', embedded ? 'Changes saved.' : 'Saved. Applying…');
       refetch();
       // The shell branding is injected server-side into the bootstrap config.
       // Reload so all pages pick up updated colors/menu branding immediately.
@@ -97,7 +97,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
         window.setTimeout(() => window.location.reload(), 350);
       }
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : 'Save failed');
+      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -113,7 +113,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
         );
         setCourseOverrides(r.overrides || {});
       } catch (err) {
-        setMsg(err instanceof Error ? err.message : 'Could not load course overrides');
+        toast.error('Could not load', err instanceof Error ? err.message : 'Could not load course overrides');
       } finally {
         setCourseLoading(false);
       }
@@ -124,12 +124,11 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
   const saveCourseOverrides = async () => {
     if (!enabled || !courseId) return;
     setSaving(true);
-    setMsg(null);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.whiteLabelCourse(courseId), courseOverrides);
-      setMsg('Course overrides saved.');
+      toast.success('Saved', 'Course overrides saved.');
     } catch (err) {
-      setMsg(err instanceof Error ? err.message : 'Course override save failed');
+      toast.error('Save failed', err instanceof Error ? err.message : 'Course override save failed');
     } finally {
       setSaving(false);
     }
@@ -140,8 +139,9 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
       embedded={embedded}
       config={config}
       title={title}
-      subtitle={`Match ${platformName} to your school’s brand on login and admin screens.`}
+      subtitle={`Match ${platformName} to your brand on login and admin screens.`}
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <GatedFeatureWorkspace
         mode={mode}
         featureId="white_label"
@@ -153,7 +153,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
         addonEnableDescription="Enable the White label add-on to apply branding overrides to admin and login screens."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {error ? <ApiErrorPanel error={error} title="Could not load branding settings" onRetry={() => refetch()} /> : null}
@@ -367,8 +367,8 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                 <label className="block text-sm">
                   <span className="font-medium text-slate-900 dark:text-white">Admin accent colour</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-                    Drives link, primary button, and focus colours in the React admin (top bar stays default). Sidebar
-                    colour is used first when it is a strong tone; otherwise this value fills in.
+                    Drives link, primary button, and focus colours in the React admin (the content header stays
+                    neutral). Sidebar colour is used first when it is a strong tone; otherwise this value fills in.
                   </span>
                   <div className="mt-2 flex items-center gap-3">
                     <input
@@ -623,7 +623,6 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                 <ButtonPrimary type="submit" disabled={saving}>
                   {saving ? 'Saving…' : 'Save branding'}
                 </ButtonPrimary>
-                {msg ? <span className="text-sm text-slate-600 dark:text-slate-400">{msg}</span> : null}
               </div>
             </form>
           )}

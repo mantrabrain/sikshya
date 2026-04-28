@@ -1,0 +1,1 @@
+import{r as o}from"./sikshya-admin-sikshya-react-E_TY_un4.js";function s(e,t){const[n,r]=o.useState(e);return o.useEffect(()=>{const u=window.setTimeout(()=>r(e),t);return()=>window.clearTimeout(u)},[e,t]),n}export{s as u};

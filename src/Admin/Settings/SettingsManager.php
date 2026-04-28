@@ -277,11 +277,38 @@ class SettingsManager
 
         // Save the settings
         $ok = $this->saveSettings($settings_to_save);
+        if ($ok && $tab === 'general') {
+            $this->syncWordPressMirrorsFromGeneralTab($settings_to_save);
+        }
         if ($ok && $tab === 'permalinks') {
             flush_rewrite_rules(false);
         }
 
         return $ok;
+    }
+
+    /**
+     * Keep WordPress core date/time options aligned with Sikshya General tab (used by wp_date(), etc.).
+     *
+     * @param array<string, mixed> $values
+     */
+    private function syncWordPressMirrorsFromGeneralTab(array $values): void
+    {
+        if (isset($values['timezone']) && is_string($values['timezone']) && $values['timezone'] !== '') {
+            update_option('timezone_string', sanitize_text_field($values['timezone']));
+        }
+        if (isset($values['date_format']) && is_string($values['date_format']) && $values['date_format'] !== '') {
+            update_option('date_format', sanitize_text_field($values['date_format']));
+        }
+        if (isset($values['time_format']) && is_string($values['time_format']) && $values['time_format'] !== '') {
+            update_option('time_format', sanitize_text_field($values['time_format']));
+        }
+        if (isset($values['site_title']) && is_string($values['site_title']) && trim($values['site_title']) !== '') {
+            update_option('blogname', sanitize_text_field($values['site_title']));
+        }
+        if (isset($values['site_description']) && is_string($values['site_description'])) {
+            update_option('blogdescription', sanitize_textarea_field($values['site_description']));
+        }
     }
 
     /**
@@ -485,13 +512,21 @@ class SettingsManager
                     $addon_label = (string) $def['label'];
                 }
                 $tier = isset($def['tier']) ? (string) $def['tier'] : '';
-                $plan_label = match ($tier) {
-                    'starter' => __('Starter', 'sikshya'),
+                switch ($tier) {
+                    case 'starter':
+                        $plan_label = __('Starter', 'sikshya');
+                        break;
                     // Product copy: `pro` tier maps to the "Growth" plan in UI/marketing.
-                    'pro' => __('Growth', 'sikshya'),
-                    'scale' => __('Scale', 'sikshya'),
-                    default => '',
-                };
+                    case 'pro':
+                        $plan_label = __('Growth', 'sikshya');
+                        break;
+                    case 'scale':
+                        $plan_label = __('Scale', 'sikshya');
+                        break;
+                    default:
+                        $plan_label = '';
+                        break;
+                }
             }
         }
 
@@ -860,7 +895,7 @@ class SettingsManager
                     [
                         'key' => 'site_title',
                         'type' => 'text',
-                        'label' => __('School or course area name', 'sikshya'),
+                        'label' => __('Site or platform name', 'sikshya'),
                         'description' => __('Shown in the browser tab and in Sikshya emails where a site name is needed. Usually matches your WordPress site name.', 'sikshya'),
                         'placeholder' => __('e.g. Acme Online Academy', 'sikshya'),
                         'default' => get_bloginfo('name'),
@@ -1050,32 +1085,6 @@ class SettingsManager
                 ]
             ],
             [
-                'title' => __('Language & Localization', 'sikshya'),
-                'icon' => 'fas fa-language',
-                'fields' => [
-                    [
-                        'key' => 'language',
-                        'type' => 'select',
-                        'label' => __('Default Language', 'sikshya'),
-                        'description' => __('Preferred language label for Sikshya where a single default is stored. Your WordPress site language still controls most of the admin.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'en',
-                        'options' => [
-                            'en' => __('English', 'sikshya'),
-                            'es' => __('Spanish', 'sikshya'),
-                            'fr' => __('French', 'sikshya'),
-                            'de' => __('German', 'sikshya'),
-                            'it' => __('Italian', 'sikshya'),
-                            'pt' => __('Portuguese', 'sikshya'),
-                            'ru' => __('Russian', 'sikshya'),
-                            'zh' => __('Chinese', 'sikshya'),
-                            'ja' => __('Japanese', 'sikshya'),
-                            'ko' => __('Korean', 'sikshya'),
-                            'ar' => __('Arabic', 'sikshya'),
-                            'hi' => __('Hindi', 'sikshya')
-                        ]
-                    ]
-                ]
             ]
         ];
     }
@@ -1089,58 +1098,11 @@ class SettingsManager
     {
         return [
             [
-                'section_key' => 'course_display',
-                'title' => __('Course Display', 'sikshya'),
-                'icon' => 'fas fa-list',
-                'description' => __(
-                    'Controls how the public “all courses” listing looks: how many courses load at once and the page layout.',
-                    'sikshya'
-                ),
-                'fields' => [
-                    [
-                        'key' => 'courses_per_page',
-                        'type' => 'number',
-                        'label' => __('Courses per page', 'sikshya'),
-                        'description' => __('How many course cards appear before “next page” on the course catalog.', 'sikshya'),
-                        'placeholder' => __('e.g. 12', 'sikshya'),
-                        'default' => 12,
-                        'min' => 1,
-                        'max' => 50
-                    ],
-                    [
-                        'key' => 'course_archive_layout',
-                        'type' => 'select',
-                        'label' => __('Course catalog layout', 'sikshya'),
-                        'description' => __('Grid shows multiple columns; list is stacked rows; masonry fits cards of different heights.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'grid',
-                        'options' => [
-                            'grid' => __('Grid Layout', 'sikshya'),
-                            'list' => __('List Layout', 'sikshya'),
-                            'masonry' => __('Masonry Layout', 'sikshya')
-                        ]
-                    ],
-                    [
-                        'key' => 'course_single_layout',
-                        'type' => 'select',
-                        'label' => __('Single course page layout', 'sikshya'),
-                        'description' => __('How one course’s sales page is arranged: sidebar, full width, or the default theme layout.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'default',
-                        'options' => [
-                            'default' => __('Default Layout', 'sikshya'),
-                            'sidebar' => __('Sidebar Layout', 'sikshya'),
-                            'fullwidth' => __('Full Width Layout', 'sikshya')
-                        ]
-                    ]
-                ]
-            ],
-            [
                 'section_key' => 'course_tax',
-                'title' => __('Categories & Tags', 'sikshya'),
-                'icon' => 'fas fa-tags',
+                'title' => __('Categories', 'sikshya'),
+                'icon' => 'fas fa-folder',
                 'description' => __(
-                    'Categories group courses into broad topics; tags add flexible labels. Both help learners browse and search.',
+                    'Categories group courses into broad topics and help learners browse and search.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -1149,13 +1111,6 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Use course categories', 'sikshya'),
                         'description' => __('Turns on hierarchical topics (for example “Design”, “Development”).', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'enable_course_tags',
-                        'type' => 'checkbox',
-                        'label' => __('Use course tags', 'sikshya'),
-                        'description' => __('Optional keywords you can attach to courses (like blog tags).', 'sikshya'),
                         'default' => true
                     ],
                     [
@@ -1220,8 +1175,8 @@ class SettingsManager
                     [
                         'key' => 'search_categories',
                         'type' => 'checkbox',
-                        'label' => __('Match categories and tags', 'sikshya'),
-                        'description' => __('Include category and tag names so searches like “beginner” find tagged courses.', 'sikshya'),
+                        'label' => __('Match categories', 'sikshya'),
+                        'description' => __('Include category names so searches can find courses by topic.', 'sikshya'),
                         'default' => true
                     ]
                 ]
@@ -1252,37 +1207,6 @@ class SettingsManager
                         'label' => __('Track lesson progress', 'sikshya'),
                         'description' => __('Record when learners complete individual lessons (used in the player and reports).', 'sikshya'),
                         'default' => '1',
-                    ],
-                ],
-            ],
-            [
-                'section_key' => 'lesson_preview',
-                'title' => __('Free preview', 'sikshya'),
-                'icon' => 'fas fa-eye',
-                'description' => __(
-                    'Let visitors try part of a course before paying. You can mark specific lessons as preview in each course.',
-                    'sikshya'
-                ),
-                'fields' => [
-                    [
-                        'key' => 'enable_course_preview',
-                        'type' => 'checkbox',
-                        'label' => __('Enable lesson preview for visitors', 'sikshya'),
-                        'description' => __('Allow non-enrolled users to open previewable lessons (subject to per-course settings and the limit below).', 'sikshya'),
-                        'default' => true,
-                    ],
-                    [
-                        'key' => 'preview_lessons_count',
-                        'type' => 'number',
-                        'label' => __('How many lessons can be free previews', 'sikshya'),
-                        'description' => __(
-                            'From the beginning of the course outline, up to this many lessons may open for guests when preview is enabled on the course. Use 0 to require enrollment for all lessons.',
-                            'sikshya'
-                        ),
-                        'placeholder' => __('e.g. 3', 'sikshya'),
-                        'default' => 3,
-                        'min' => 0,
-                        'max' => 100,
                     ],
                 ],
             ],
@@ -1339,6 +1263,112 @@ class SettingsManager
                         ),
                         'default' => false,
                     ],
+                    [
+                        'key' => 'enable_guest_checkout',
+                        'type' => 'checkbox',
+                        'label' => __('Enable guest checkout (recommended)', 'sikshya'),
+                        'description' => __(
+                            'Let new visitors purchase without logging in first. Sikshya will create a student account automatically after payment succeeds and enroll them.',
+                            'sikshya'
+                        ),
+                        'default' => true,
+                    ],
+                ],
+            ],
+            [
+                'section_key' => 'enrollment_dynamic_checkout_fields',
+                'title' => __('Dynamic checkout fields', 'sikshya'),
+                'icon' => 'fas fa-list-check',
+                'description' => __(
+                    'Add extra questions to the checkout form (company, VAT, referral, consent) and show/hide them based on answers.',
+                    'sikshya'
+                ),
+                'required_addon' => 'dynamic_checkout_fields',
+                'required_feature' => 'dynamic_checkout_fields',
+                'fields' => [
+                    [
+                        'key' => 'checkout_dynamic_fields_schema',
+                        'type' => 'dynamic_fields_builder',
+                        'label' => __('Checkout fields', 'sikshya'),
+                        'description' => __('Add, reorder, and configure custom checkout fields. Values are saved to the order and can be used again for the same user.', 'sikshya'),
+                        'default' => wp_json_encode(
+                            [
+                                [
+                                    'id' => 'email',
+                                    'label' => __('Email', 'sikshya'),
+                                    'type' => 'email',
+                                    'required' => true,
+                                    'enabled' => true,
+                                    'system' => true,
+                                    'locked' => true,
+                                    'width' => 'full',
+                                ],
+                                [
+                                    'id' => 'name',
+                                    'label' => __('Name', 'sikshya'),
+                                    'type' => 'text',
+                                    'required' => false,
+                                    'enabled' => true,
+                                    'width' => 'full',
+                                    'placeholder' => __('Your name', 'sikshya'),
+                                    'persist_to_user' => true,
+                                ],
+                                [
+                                    'id' => 'phone',
+                                    'label' => __('Phone', 'sikshya'),
+                                    'type' => 'tel',
+                                    'required' => true,
+                                    'enabled' => true,
+                                    'width' => 'half',
+                                    'placeholder' => __('Phone number', 'sikshya'),
+                                    'persist_to_user' => true,
+                                ],
+                                [
+                                    'id' => 'country',
+                                    'label' => __('Country', 'sikshya'),
+                                    'type' => 'country',
+                                    'required' => true,
+                                    'enabled' => true,
+                                    'width' => 'half',
+                                    'placeholder' => __('Country', 'sikshya'),
+                                    'persist_to_user' => true,
+                                ],
+                                [
+                                    'id' => 'address_1',
+                                    'label' => __('Address line 1', 'sikshya'),
+                                    'type' => 'text',
+                                    'required' => true,
+                                    'enabled' => true,
+                                    'width' => 'full',
+                                    'placeholder' => __('Street address', 'sikshya'),
+                                    'persist_to_user' => true,
+                                ],
+                                [
+                                    'id' => 'city',
+                                    'label' => __('City', 'sikshya'),
+                                    'type' => 'text',
+                                    'required' => true,
+                                    'enabled' => true,
+                                    'width' => 'half',
+                                    'placeholder' => __('City', 'sikshya'),
+                                    'persist_to_user' => true,
+                                ],
+                                [
+                                    'id' => 'postcode',
+                                    'label' => __('Postal code', 'sikshya'),
+                                    'type' => 'text',
+                                    'required' => false,
+                                    'enabled' => true,
+                                    'width' => 'half',
+                                    'placeholder' => __('Postal code', 'sikshya'),
+                                    'persist_to_user' => true,
+                                ],
+                            ],
+                            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                        ),
+                        'required_addon' => 'dynamic_checkout_fields',
+                        'required_feature' => 'dynamic_checkout_fields',
+                    ],
                 ],
             ],
             [
@@ -1373,44 +1403,6 @@ class SettingsManager
                         'default' => 80,
                         'min' => 1,
                         'max' => 100,
-                    ],
-                ],
-            ],
-            [
-                'section_key' => 'enrollment_access',
-                'title' => __('Who can enroll & access content', 'sikshya'),
-                'icon' => 'fas fa-user-plus',
-                'description' => __(
-                    'Control guest checkout, login requirements, and waitlists. Stricter settings reduce spam; looser settings reduce friction. Note: “Allow guest enrollment” and “Require login for course access” both ON is usually contradictory — guests have no WordPress login to satisfy a hard login gate.',
-                    'sikshya'
-                ),
-                'fields' => [
-                    [
-                        'key' => 'allow_guest_enrollment',
-                        'type' => 'checkbox',
-                        'label' => __('Allow guest enrollment', 'sikshya'),
-                        'description' => __(
-                            'Allow visitors to enroll without creating an account (if your theme supports it). If you also require a WordPress login to view lessons, guest learners may be blocked — turn off guest enrollment or relax the login requirement.',
-                            'sikshya'
-                        ),
-                        'default' => false,
-                    ],
-                    [
-                        'key' => 'require_login',
-                        'type' => 'checkbox',
-                        'label' => __('Require login for course access', 'sikshya'),
-                        'description' => __(
-                            'When on, only logged-in users can open course/lesson content after they are enrolled. Turn off if you rely on guest checkout or email-only access flows.',
-                            'sikshya'
-                        ),
-                        'default' => true,
-                    ],
-                    [
-                        'key' => 'enable_waitlist',
-                        'type' => 'checkbox',
-                        'label' => __('Enable waitlist', 'sikshya'),
-                        'description' => __('Let students join a waitlist when a course is full.', 'sikshya'),
-                        'default' => false,
                     ],
                 ],
             ],
@@ -1679,24 +1671,35 @@ class SettingsManager
                         'default' => '',
                     ],
                     [
+                        'key' => 'paypal_integration_mode',
+                        'type' => 'select',
+                        'label' => __('PayPal — Integration mode', 'sikshya'),
+                        'description' => __(
+                            'Match Yatra: Simple uses only PayPal email + IPN (no REST API). Advanced uses REST API (Client ID + Secret) for capture and webhooks.',
+                            'sikshya'
+                        ),
+                        'select_placeholder' => __('Choose one…', 'sikshya'),
+                        'default' => 'advanced',
+                        'options' => [
+                            'simple' => __('Simple (email + IPN)', 'sikshya'),
+                            'advanced' => __('Advanced (REST API)', 'sikshya'),
+                        ],
+                    ],
+                    [
+                        'key' => 'paypal_email',
+                        'type' => 'email',
+                        'label' => __('PayPal — Email (Simple mode)', 'sikshya'),
+                        'description' => __('Your PayPal Business email for Simple (hosted) checkout.', 'sikshya'),
+                        'placeholder' => 'your-paypal@example.com',
+                        'default' => '',
+                    ],
+                    [
                         'key' => 'paypal_secret',
                         'type' => 'password',
                         'label' => __('PayPal — Secret', 'sikshya'),
                         'description' => __('Same app’s secret key—never share or paste into public pages.', 'sikshya'),
                         'placeholder' => __('Paste secret from PayPal', 'sikshya'),
                         'default' => '',
-                    ],
-                    [
-                        'key' => 'paypal_mode',
-                        'type' => 'select',
-                        'label' => __('PayPal — API mode', 'sikshya'),
-                        'description' => __('Sandbox for testing; Live for production.', 'sikshya'),
-                        'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'sandbox',
-                        'options' => [
-                            'sandbox' => __('Sandbox (Test)', 'sikshya'),
-                            'live' => __('Live (Production)', 'sikshya'),
-                        ],
                     ],
                     [
                         'key' => 'paypal_webhook_id',
@@ -1763,6 +1766,17 @@ class SettingsManager
                         'default' => '',
                     ],
                     [
+                        'key' => 'mollie_payment_methods',
+                        'type' => 'text',
+                        'label' => __('Mollie — Payment methods (optional)', 'sikshya'),
+                        'description' => __(
+                            'Match Yatra Pro: comma-separated method ids like creditcard,ideal,paypal,sepadirectdebit.',
+                            'sikshya'
+                        ),
+                        'placeholder' => 'creditcard,ideal,paypal',
+                        'default' => 'creditcard,ideal,paypal',
+                    ],
+                    [
                         'key' => 'mollie_webhook_secret',
                         'type' => 'password',
                         'label' => __('Mollie — Webhook secret', 'sikshya'),
@@ -1779,6 +1793,17 @@ class SettingsManager
                         'default' => '',
                     ],
                     [
+                        'key' => 'paystack_payment_channels',
+                        'type' => 'text',
+                        'label' => __('Paystack — Payment channels (optional)', 'sikshya'),
+                        'description' => __(
+                            'Match Yatra Pro: comma-separated list like card,bank,ussd,qr,mobile_money.',
+                            'sikshya'
+                        ),
+                        'placeholder' => 'card,bank,ussd',
+                        'default' => 'card,bank,ussd',
+                    ],
+                    [
                         'key' => 'paystack_secret_key',
                         'type' => 'password',
                         'label' => __('Paystack — Secret key', 'sikshya'),
@@ -1792,6 +1817,14 @@ class SettingsManager
                         'label' => __('Paystack — Webhook secret', 'sikshya'),
                         'description' => __('Signing secret for Paystack webhook URL in your dashboard.', 'sikshya'),
                         'placeholder' => __('Webhook secret if configured', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'square_application_id',
+                        'type' => 'text',
+                        'label' => __('Square — Application ID', 'sikshya'),
+                        'description' => __('Match Yatra Pro: Square Developer Dashboard → Application ID.', 'sikshya'),
+                        'placeholder' => __('sandbox-sq0idb-… or sq0idp-…', 'sikshya'),
                         'default' => '',
                     ],
                     [
@@ -1827,6 +1860,14 @@ class SettingsManager
                         'default' => '',
                     ],
                     [
+                        'key' => 'authorize_net_public_client_key',
+                        'type' => 'text',
+                        'label' => __('Authorize.Net — Public client key', 'sikshya'),
+                        'description' => __('Match Yatra Pro: used for Accept.js tokenization.', 'sikshya'),
+                        'placeholder' => __('Public client key', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
                         'key' => 'authorize_net_transaction_key',
                         'type' => 'password',
                         'label' => __('Authorize.Net — Transaction key', 'sikshya'),
@@ -1840,6 +1881,38 @@ class SettingsManager
                         'label' => __('Authorize.Net — Signature key', 'sikshya'),
                         'description' => __('Only if you verify silent posts or webhooks with Authorize.Net.', 'sikshya'),
                         'placeholder' => __('Optional signature key', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'bank_transfer_bank_name',
+                        'type' => 'text',
+                        'label' => __('Bank transfer — Bank name', 'sikshya'),
+                        'description' => __('Match Yatra Pro: bank name shown after checkout.', 'sikshya'),
+                        'placeholder' => __('e.g. HSBC', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'bank_transfer_account_name',
+                        'type' => 'text',
+                        'label' => __('Bank transfer — Account name', 'sikshya'),
+                        'description' => __('Match Yatra Pro: account holder name.', 'sikshya'),
+                        'placeholder' => __('e.g. Sikshya Academy', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'bank_transfer_account_number',
+                        'type' => 'text',
+                        'label' => __('Bank transfer — Account number', 'sikshya'),
+                        'description' => __('Match Yatra Pro: account number / IBAN.', 'sikshya'),
+                        'placeholder' => __('Account number / IBAN', 'sikshya'),
+                        'default' => '',
+                    ],
+                    [
+                        'key' => 'bank_transfer_routing_code',
+                        'type' => 'text',
+                        'label' => __('Bank transfer — Routing / SWIFT code', 'sikshya'),
+                        'description' => __('Match Yatra Pro: routing number or SWIFT/BIC.', 'sikshya'),
+                        'placeholder' => __('SWIFT/BIC', 'sikshya'),
                         'default' => '',
                     ],
                     [
@@ -1857,35 +1930,50 @@ class SettingsManager
                         'key' => 'enable_test_mode',
                         'type' => 'checkbox',
                         'label' => __('Test mode (sandbox)', 'sikshya'),
-                        'description' => __('Use fake money and test keys until you go live—recommended while setting up.', 'sikshya'),
+                        'description' => __(
+                            'Same idea as Yatra’s “Payment test mode”: when PayPal’s API mode is unset, Sikshya uses this to pick sandbox vs live PayPal. Stripe live vs test is determined by your Stripe API keys (sk_live_ / sk_test_).',
+                            'sikshya'
+                        ),
                         'default' => true
                     ],
                     [
                         'key' => 'accept_credit_cards',
                         'type' => 'checkbox',
                         'label' => __('Offer card payments', 'sikshya'),
-                        'description' => __('Visa, Mastercard, etc., when your gateway supports cards.', 'sikshya'),
+                        'description' => __(
+                            'Reserved for future use. Actual card acceptance is controlled by each gateway (e.g. Stripe, PayPal). Yatra does not use this toggle.',
+                            'sikshya'
+                        ),
                         'default' => true
                     ],
                     [
                         'key' => 'accept_bank_transfer',
                         'type' => 'checkbox',
                         'label' => __('Offer bank transfer', 'sikshya'),
-                        'description' => __('Let buyers pay manually from their bank (slower but no card fees).', 'sikshya'),
+                        'description' => __(
+                            'Reserved for future use. Use “Enable Bank Transfer at checkout (Pro)” and Bank transfer instructions instead. Yatra does not use this toggle.',
+                            'sikshya'
+                        ),
                         'default' => false
                     ],
                     [
                         'key' => 'accept_digital_wallets',
                         'type' => 'checkbox',
                         'label' => __('Offer digital wallets', 'sikshya'),
-                        'description' => __('Apple Pay, Google Pay, PayPal balance, etc., depending on the gateway.', 'sikshya'),
+                        'description' => __(
+                            'Reserved for future use. Wallet support depends on the gateway you enable. Yatra does not use this toggle.',
+                            'sikshya'
+                        ),
                         'default' => false
                     ],
                     [
                         'key' => 'accept_cryptocurrency',
                         'type' => 'checkbox',
                         'label' => __('Offer cryptocurrency', 'sikshya'),
-                        'description' => __('Only if your payment provider supports crypto—most schools leave this off.', 'sikshya'),
+                        'description' => __(
+                            'Reserved for future use. Yatra does not use this toggle.',
+                            'sikshya'
+                        ),
                         'default' => false
                     ]
                 ]
@@ -1962,7 +2050,7 @@ class SettingsManager
                 'title' => __('Invoicing & Receipts', 'sikshya'),
                 'icon' => 'fas fa-receipt',
                 'description' => __(
-                    'Paper trail for accounting: invoices and emailed receipts after successful payments.',
+                    'Paper trail for accounting: invoices and invoice numbering. To email the buyer after a successful payment, use Sikshya → Email hub → Email templates (“Payment receipt”).',
                     'sikshya'
                 ),
                 'fields' => [
@@ -1971,13 +2059,6 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Create invoices automatically', 'sikshya'),
                         'description' => __('Generate a numbered invoice when a payment succeeds (if your setup supports it).', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'send_payment_receipts',
-                        'type' => 'checkbox',
-                        'label' => __('Email payment receipts', 'sikshya'),
-                        'description' => __('Send the buyer a confirmation email with amount and order details.', 'sikshya'),
                         'default' => true
                     ],
                     [
@@ -2094,7 +2175,7 @@ class SettingsManager
                         'key' => 'from_name',
                         'type' => 'text',
                         'label' => __('“From” name for learners', 'sikshya'),
-                        'description' => __('Friendly label next to the address (your school or site name).', 'sikshya'),
+                        'description' => __('Friendly label next to the address (your brand or site name).', 'sikshya'),
                         'placeholder' => 'Your LMS Name',
                         'default' => get_bloginfo('name'),
                     ],
@@ -2575,10 +2656,10 @@ class SettingsManager
                 ],
             ],
             [
-                'title' => __('Taxonomy bases', 'sikshya'),
-                'icon' => 'fas fa-tags',
+                'title' => __('Taxonomy base', 'sikshya'),
+                'icon' => 'fas fa-folder',
                 'description' => __(
-                    'URLs for browsing all courses in a category or tag. Pick slugs that do not clash with normal WordPress pages.',
+                    'URL segment for browsing all courses in a category. Pick a slug that does not clash with normal WordPress pages.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -2592,16 +2673,6 @@ class SettingsManager
                         ),
                         'placeholder' => __('course-category', 'sikshya'),
                         'default' => $defaults['rewrite_tax_course_category'],
-                        'sanitize_callback' => 'sanitize_title',
-                        'validate_callback' => $slug_validate,
-                    ],
-                    [
-                        'key' => 'rewrite_tax_course_tag',
-                        'type' => 'text',
-                        'label' => __('Course tag base', 'sikshya'),
-                        'description' => __('Segment for tag archive pages (courses sharing a keyword).', 'sikshya'),
-                        'placeholder' => __('course-tag', 'sikshya'),
-                        'default' => $defaults['rewrite_tax_course_tag'],
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
                     ],
@@ -2654,18 +2725,19 @@ class SettingsManager
             ],
             [
                 'title' => __('Privacy & Usage', 'sikshya'),
+                'section_key' => 'privacy_usage',
                 'icon' => 'fas fa-user-shield',
                 'description' => __(
-                    'Control whether Sikshya can send anonymous usage data to help improve the product. We never send learner/customer PII.',
+                    'Control whether Sikshya can send non-sensitive usage data to help improve the product. We never send learner/customer PII.',
                     'sikshya'
                 ),
                 'fields' => [
                     [
                         'key' => 'allow_usage_tracking',
                         'type' => 'checkbox',
-                        'label' => __('Share anonymous usage data', 'sikshya'),
+                        'label' => __('Help us improve the product by sharing non-sensitive data', 'sikshya'),
                         'description' => __(
-                            'Helps us prioritize features and fix bugs faster. Sends only high-level environment and usage counts (no emails, no student names, no orders).',
+                            'No personal or learner details—only technical signals.',
                             'sikshya'
                         ),
                         'default' => '0'

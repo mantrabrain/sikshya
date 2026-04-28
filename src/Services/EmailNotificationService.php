@@ -3,6 +3,8 @@
 namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\CertificateRepository;
+use Sikshya\Database\Repositories\OrderRepository;
+use Sikshya\Frontend\Public\PublicPageUrls;
 
 /**
  * Basic email notifications (wp_mail) with editable templates.
@@ -97,6 +99,111 @@ final class EmailNotificationService
         $ctx = $this->buildCourseContext($user_id, $course_id);
 
         return $this->sendSystemTemplate('learner_progress_reminder', $ctx);
+    }
+
+    /**
+     * Payment receipt after order is marked paid ({@see 'sikshya_order_fulfilled'}). Uses Email templates → “Payment receipt”.
+     *
+     * @param object $order Order row (must include user_id, totals, currency, gateway).
+     */
+    public function sendPaymentReceiptForOrder(int $order_id, $order): bool
+    {
+        $ctx = $this->buildMergeContextForPaidOrder($order_id, $order);
+        if ($ctx === null) {
+            return false;
+        }
+
+        return $this->sendSystemTemplate('learner_payment_receipt', $ctx);
+    }
+
+    /**
+     * Merge context for {@see learner_payment_receipt} (and previews).
+     *
+     * @param object $order Order row from {@see OrderRepository::findById()}.
+     *
+     * @return array<string, string>|null
+     */
+    public function buildMergeContextForPaidOrder(int $order_id, $order): ?array
+    {
+        if (!is_object($order)) {
+            return null;
+        }
+        $user_id = isset($order->user_id) ? (int) $order->user_id : 0;
+        if ($user_id <= 0) {
+            return null;
+        }
+
+        $base = $this->buildUserContext($user_id);
+        $currency = strtoupper((string) ($order->currency ?? 'USD'));
+        if (strlen($currency) !== 3) {
+            $currency = 'USD';
+        }
+        $subtotal = isset($order->subtotal) ? (float) $order->subtotal : 0.0;
+        $discount = isset($order->discount_total) ? (float) $order->discount_total : 0.0;
+        $total = isset($order->total) ? (float) $order->total : 0.0;
+        $gateway = sanitize_key((string) ($order->gateway ?? ''));
+
+        $repo = new OrderRepository();
+        $public_token = isset($order->public_token) && is_string($order->public_token) && $order->public_token !== ''
+            ? (string) $order->public_token
+            : $repo->ensurePublicToken($order_id);
+        $receipt_url = $public_token !== '' ? PublicPageUrls::orderView($public_token) : home_url('/');
+
+        $lines_html = '';
+        foreach ($repo->getItems($order_id) as $item) {
+            if (!is_object($item)) {
+                continue;
+            }
+            $cid = isset($item->course_id) ? (int) $item->course_id : 0;
+            $title = $cid > 0 ? get_the_title($cid) : '';
+            if (!is_string($title) || $title === '') {
+                $title = '#' . (string) $cid;
+            }
+            $line_total = isset($item->line_total) ? (float) $item->line_total : 0.0;
+            $line_fmt = function_exists('sikshya_format_price_plain')
+                ? sikshya_format_price_plain($line_total, $currency)
+                : number_format_i18n($line_total, 2) . ' ' . $currency;
+            $lines_html .= '<li style="margin:0 0 8px;">' . esc_html($title) . ' — <strong>' . esc_html($line_fmt) . '</strong></li>';
+        }
+        if ($lines_html !== '') {
+            $lines_html = '<ul style="margin:0;padding-left:20px;">' . $lines_html . '</ul>';
+        } else {
+            $lines_html = '<p style="margin:0;color:#64748b;">' . esc_html__('(No line items)', 'sikshya') . '</p>';
+        }
+
+        $fmt = static function (float $a, string $cur): string {
+            return function_exists('sikshya_format_price_plain')
+                ? sikshya_format_price_plain($a, $cur)
+                : number_format_i18n($a, 2) . ' ' . $cur;
+        };
+
+        $base['{{order_id}}'] = (string) $order_id;
+        $base['{{order_currency}}'] = $currency;
+        $base['{{order_subtotal}}'] = $fmt($subtotal, $currency);
+        $base['{{order_discount}}'] = $discount > 0.00001 ? $fmt($discount, $currency) : '—';
+        $base['{{order_total}}'] = $fmt($total, $currency);
+        $base['{{payment_method}}'] = $this->paymentGatewayLabel($gateway);
+        $base['{{order_lines_html}}'] = $lines_html;
+        $base['{{order_receipt_url}}'] = esc_url($receipt_url);
+
+        return $base;
+    }
+
+    private function paymentGatewayLabel(string $gateway): string
+    {
+        $map = [
+            'offline' => __('Offline / manual', 'sikshya'),
+            'bank_transfer' => __('Bank transfer', 'sikshya'),
+            'stripe' => __('Stripe', 'sikshya'),
+            'paypal' => __('PayPal', 'sikshya'),
+            'mollie' => __('Mollie', 'sikshya'),
+            'paystack' => __('Paystack', 'sikshya'),
+            'razorpay' => __('Razorpay', 'sikshya'),
+            'square' => __('Square', 'sikshya'),
+            'authorize_net' => __('Authorize.Net', 'sikshya'),
+        ];
+
+        return $map[$gateway] ?? ($gateway !== '' ? $gateway : __('Unknown', 'sikshya'));
     }
 
     /**
@@ -240,10 +347,12 @@ final class EmailNotificationService
      */
     public function buildSampleMergeContext(): array
     {
-        $admin = trim((string) Settings::get('admin_notification_email', ''));
-        if ($admin === '' || ! is_email($admin)) {
-            $admin = (string) get_option('admin_email', 'admin@example.com');
+        $admin = $this->resolveAdminContactEmail();
+        if ($admin === '') {
+            $admin = 'admin@example.com';
         }
+
+        $sample_cur = 'USD';
 
         return [
             '{{site_name}}' => get_bloginfo('name'),
@@ -254,13 +363,30 @@ final class EmailNotificationService
             '{{student_email}}' => 'student@example.com',
             '{{instructor_name}}' => __('Dr. Sample Instructor', 'sikshya'),
             '{{instructor_email}}' => 'instructor@example.com',
-            '{{admin_email}}' => is_email($admin) ? $admin : 'admin@example.com',
+            '{{admin_email}}' => $admin,
             '{{course_title}}' => __('🎓 Introduction to Sample Course', 'sikshya'),
             '{{course_url}}' => home_url('/courses/sample-course/'),
             '{{certificate_url}}' => home_url('/certificates/preview/'),
             '{{certificate_number}}' => 'SK-CERT-PREVIEW-001',
             '{{lesson_title}}' => __('Sample lesson: Getting started', 'sikshya'),
             '{{lesson_url}}' => home_url('/learn/sample-lesson/'),
+            '{{order_id}}' => '10042',
+            '{{order_currency}}' => $sample_cur,
+            '{{order_subtotal}}' => function_exists('sikshya_format_price_plain')
+                ? sikshya_format_price_plain(120.0, $sample_cur)
+                : '120.00 ' . $sample_cur,
+            '{{order_discount}}' => function_exists('sikshya_format_price_plain')
+                ? sikshya_format_price_plain(20.0, $sample_cur)
+                : '20.00 ' . $sample_cur,
+            '{{order_total}}' => function_exists('sikshya_format_price_plain')
+                ? sikshya_format_price_plain(100.0, $sample_cur)
+                : '100.00 ' . $sample_cur,
+            '{{payment_method}}' => __('Stripe', 'sikshya'),
+            '{{order_lines_html}}' => '<ul style="margin:0;padding-left:20px;">'
+                . '<li style="margin:0 0 8px;">' . esc_html__('Sample course A', 'sikshya') . ' — <strong>60.00 USD</strong></li>'
+                . '<li style="margin:0 0 8px;">' . esc_html__('Sample course B', 'sikshya') . ' — <strong>40.00 USD</strong></li>'
+                . '</ul>',
+            '{{order_receipt_url}}' => esc_url(home_url('/?sikshya_order_preview=1')),
         ];
     }
 
@@ -358,10 +484,7 @@ final class EmailNotificationService
         $name = $user ? $user->display_name : '';
         $email = $user && !empty($user->user_email) ? $user->user_email : '';
 
-        $admin = trim((string) Settings::get('admin_notification_email', ''));
-        if ($admin === '' || ! is_email($admin)) {
-            $admin = (string) get_option('admin_email', '');
-        }
+        $admin = $this->resolveAdminContactEmail();
 
         return [
             '{{site_name}}' => get_bloginfo('name'),
@@ -370,7 +493,7 @@ final class EmailNotificationService
             '{{learner_email}}' => $email,
             '{{student_name}}' => $name,
             '{{student_email}}' => $email,
-            '{{admin_email}}' => is_email($admin) ? $admin : '',
+            '{{admin_email}}' => $admin,
             '{{instructor_name}}' => '',
             '{{instructor_email}}' => '',
             '{{course_title}}' => '',
@@ -484,11 +607,18 @@ final class EmailNotificationService
             wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES)
         );
 
-        return $this->send($to, $subject, $html);
+        return $this->send($to, $subject, $html, true);
     }
 
-    private function send(string $to, string $subject, string $html): bool
+    /**
+     * @param bool $ignore_notification_toggle When true, sends even if “Email notices” is off (e.g. delivery test).
+     */
+    private function send(string $to, string $subject, string $html, bool $ignore_notification_toggle = false): bool
     {
+        if (!$ignore_notification_toggle && !Settings::isTruthy(Settings::get('enable_email_notifications', '1'))) {
+            return false;
+        }
+
         $headers = ['Content-Type: text/html; charset=UTF-8'];
 
         $from_email = trim((string) Settings::get('from_email', ''));
@@ -507,6 +637,26 @@ final class EmailNotificationService
         }
 
         return (bool) wp_mail($to, $subject, $html, $headers);
+    }
+
+    /**
+     * Admin-facing address for merge tags: LMS notification setting → Global Settings contact → WordPress admin email.
+     */
+    private function resolveAdminContactEmail(): string
+    {
+        $from_settings = trim((string) Settings::get('admin_notification_email', ''));
+        if ($from_settings !== '' && is_email($from_settings)) {
+            return $from_settings;
+        }
+
+        $main = trim((string) Settings::get('admin_email', ''));
+        if ($main !== '' && is_email($main)) {
+            return $main;
+        }
+
+        $wp = trim((string) get_option('admin_email', ''));
+
+        return is_email($wp) ? $wp : '';
     }
 
     private function wrapHtml(string $inner): string

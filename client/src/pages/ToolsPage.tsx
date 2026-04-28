@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import type { SikshyaReactConfig } from '../types';
 
 type ToolsTab = 'status' | 'export' | 'maintenance';
@@ -31,7 +32,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
   const [tab, setTab] = useState<ToolsTab>('status');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const toast = useTopRightToast();
   const [systemRows, setSystemRows] = useState<Record<string, string | number | boolean> | null>(null);
   const [exportKind, setExportKind] = useState<
     'settings' | 'courses' | 'certificates' | 'lessons' | 'quizzes' | 'assignments' | 'questions' | 'chapters'
@@ -42,7 +43,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
   const runTool = useCallback(async (body: Record<string, unknown>) => {
     setBusy(true);
     setError(null);
-    setMessage(null);
+    toast.clear();
     try {
       const res = await getSikshyaApi().post<{
         success?: boolean;
@@ -68,14 +69,14 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
         if (data && typeof data === 'object') {
           setSystemRows(data);
         }
-        setMessage(res.message ?? 'System information loaded.');
+        toast.success('Done', res.message ?? 'System information loaded.');
       })
       .catch(() => void 0);
   };
 
   const clearCache = () => {
     void runTool({ action_type: 'clear_cache' })
-      .then((res) => setMessage(res.message ?? 'Done.'))
+      .then((res) => toast.success('Done', res.message ?? 'Done.'))
       .catch(() => void 0);
   };
 
@@ -100,7 +101,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
                 .map(([k, v]) => `${k}: ${v}`)
                 .join(', ')
             : '';
-          setMessage(bits ? `${res.message ?? 'Done.'} (${bits})` : (res.message ?? 'Done.'));
+          toast.success('Done', bits ? `${res.message ?? 'Done.'} (${bits})` : (res.message ?? 'Done.'));
         })
         .catch(() => void 0);
     })();
@@ -118,7 +119,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
         return;
       }
       void runTool({ action_type: 'reset_settings' })
-        .then((res) => setMessage(res.message ?? 'Done.'))
+        .then((res) => toast.success('Done', res.message ?? 'Done.'))
         .catch(() => void 0);
     })();
   };
@@ -128,7 +129,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       void runTool({ action_type: 'export_settings' })
         .then((res) => {
           downloadJson(`sikshya-settings-${new Date().toISOString().slice(0, 10)}.json`, res.data ?? {});
-          setMessage(res.message ?? 'Download started.');
+          toast.success('Download started', res.message ?? 'Download started.');
         })
         .catch(() => void 0);
       return;
@@ -140,7 +141,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
           exported_at: new Date().toISOString(),
           items: res.data ?? [],
         });
-        setMessage(res.message ?? 'Download started.');
+        toast.success('Download started', res.message ?? 'Download started.');
       })
       .catch(() => void 0);
   };
@@ -162,7 +163,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       settings: parsed,
       overwrite: importOverwrite,
     })
-      .then((res) => setMessage(res.message ?? 'Import finished.'))
+      .then((res) => toast.success('Import finished', res.message ?? 'Import finished.'))
       .catch(() => void 0);
   };
 
@@ -173,6 +174,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       title={title}
       subtitle="Diagnostics, exports, and maintenance for administrators"
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {config.setupWizardUrl ? (
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
           <h2 className="text-base font-semibold text-slate-900 dark:text-white">Setup wizard</h2>
@@ -209,12 +211,6 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
           </button>
         ))}
       </div>
-
-      {message ? (
-        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-100">
-          {message}
-        </div>
-      ) : null}
 
       {error ? (
         <div className="mt-4">

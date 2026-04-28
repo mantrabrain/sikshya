@@ -21,6 +21,21 @@
   --sik-acc-shadow-md: 0 4px 24px rgba(15, 23, 42, 0.08);
   --sik-acc-sidebar-w: 260px;
   --sik-acc-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Spacing scale (keeps UI rhythm consistent across partials/hooks) */
+  --sik-acc-space-6: 6px;
+  --sik-acc-space-8: 8px;
+  --sik-acc-space-10: 10px;
+  --sik-acc-space-12: 12px;
+  --sik-acc-space-16: 16px;
+  --sik-acc-space-20: 20px;
+  --sik-acc-space-24: 24px;
+
+  /* Main column: full width of content area with symmetric page gutters */
+  --sik-acc-page-pad-x: clamp(16px, 3vw, 36px);
+  --sik-acc-page-pad-y: clamp(16px, 2.4vw, 28px);
+  /* Full width inside `.sik-acc-main`; gutters come from `--sik-acc-page-pad-x` */
+  --sik-acc-content-max: none;
 }
 
 *,
@@ -50,6 +65,97 @@ body.sikshya-account-shell {
   color: var(--sik-acc-text);
   background: var(--sik-acc-bg);
   line-height: 1.5;
+}
+
+body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
+  overflow: hidden;
+}
+
+.sik-acc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sik-acc-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.65rem 1rem;
+  border-radius: var(--sik-acc-radius-sm);
+  background: var(--sik-acc-text);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sik-acc-skip-link:focus {
+  left: 0.75rem;
+  outline: none;
+}
+
+.sik-acc-skip-link:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.45);
+  outline-offset: 2px;
+}
+
+/* Mobile nav drawer: checkbox + scrim + toggle (see account.php) */
+.sik-acc-nav-state {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+.sik-acc-nav-scrim {
+  display: none;
+}
+
+.sik-acc-nav-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  margin-right: 0.75rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--sik-acc-radius-sm);
+  border: 1px solid var(--sik-acc-border);
+  background: var(--sik-acc-surface);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sik-acc-text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sik-acc-nav-toggle:hover {
+  background: #f8fafc;
+}
+
+.sik-acc-nav-toggle__bars {
+  width: 1.1rem;
+  height: 1rem;
+  display: inline-block;
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 50% / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 100% / 100% 2px no-repeat;
+  opacity: 0.85;
+}
+
+.sik-acc-nav-toggle__text {
+  font-size: 0.8125rem;
 }
 
 .sik-acc-app {
@@ -157,6 +263,7 @@ body.sikshya-account-shell {
 .sik-acc-sidebar__footer {
   padding: 1rem 1.25rem 1.25rem;
   border-top: 1px solid var(--sik-acc-border);
+  margin-top: auto;
 }
 
 .sik-acc-sidebar__footer a {
@@ -187,7 +294,7 @@ body.sikshya-account-shell {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1.1rem var(--sik-acc-page-pad-x) 1.15rem;
   background: var(--sik-acc-surface);
   border-bottom: 1px solid var(--sik-acc-border);
 }
@@ -294,14 +401,23 @@ body.sikshya-account-shell {
 }
 
 .sik-acc-content {
-  padding: 1.25rem 1.5rem 2.5rem;
+  box-sizing: border-box;
   flex: 1;
+  width: 100%;
+  max-width: var(--sik-acc-content-max);
+  margin: 0 auto;
+  padding: var(--sik-acc-page-pad-y) var(--sik-acc-page-pad-x)
+    calc(var(--sik-acc-page-pad-y) + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sik-acc-space-20);
+  min-width: 0;
 }
 
 .sik-acc-hero {
   border-radius: var(--sik-acc-radius);
   padding: 1.5rem 1.75rem;
-  margin-bottom: 1.5rem;
+  margin: 0;
   background: linear-gradient(120deg, #2563eb 0%, #4f46e5 45%, #7c3aed 100%);
   color: #fff;
   box-shadow: var(--sik-acc-shadow-md);
@@ -335,7 +451,7 @@ body.sikshya-account-shell {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin: 0;
 }
 
 .sik-acc-metric {
@@ -373,6 +489,10 @@ body.sikshya-account-shell {
   gap: 1.25rem;
 }
 
+.sik-acc-grid__main {
+  min-width: 0;
+}
+
 @media (min-width: 1024px) {
   .sik-acc-grid--split {
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
@@ -391,11 +511,17 @@ body.sikshya-account-shell {
 .sik-acc-panel__head {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1.15rem;
   border-bottom: 1px solid var(--sik-acc-border);
+}
+
+.sik-acc-panel__head > div:only-child,
+.sik-acc-panel__head .sik-acc-panel__title-block {
+  flex: 1;
+  min-width: min(100%, 14rem);
 }
 
 .sik-acc-panel__title {
@@ -557,44 +683,115 @@ body.sikshya-account-shell {
   margin-bottom: 0.35rem;
 }
 
+/* -------------------------------------------------------------------------
+   Mobile / narrow: slide-out navigation (drawer + scrim)
+   Checkbox `#sik-acc-nav-open` lives before `.sik-acc-app` in account.php.
+   ------------------------------------------------------------------------- */
 @media (max-width: 900px) {
   .sik-acc-app {
-    flex-direction: column;
+    position: relative;
+    flex-direction: row;
+    min-height: 100vh;
   }
 
   .sik-acc-sidebar {
-    width: 100%;
-    min-height: 0;
-    position: relative;
-    border-right: none;
-    border-bottom: 1px solid var(--sik-acc-border);
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: min(18rem, 88vw);
+    max-width: var(--sik-acc-sidebar-w);
+    min-height: 100vh;
+    transform: translateX(-102%);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    z-index: 50;
+    border-right: 1px solid var(--sik-acc-border);
+    border-bottom: none;
+    box-shadow: none;
+    align-self: stretch;
+    overscroll-behavior: contain;
+  }
+
+  #sik-acc-nav-open:checked ~ .sik-acc-app .sik-acc-sidebar {
+    transform: translateX(0);
+    box-shadow: 8px 0 32px rgba(15, 23, 42, 0.12);
+  }
+
+  .sik-acc-nav-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    margin: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
+
+  #sik-acc-nav-open:checked ~ .sik-acc-app .sik-acc-nav-scrim {
+    display: block;
+  }
+
+  .sik-acc-nav-toggle {
+    display: inline-flex;
   }
 
   .sik-acc-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    padding: 0.5rem 0.75rem 0.75rem;
-    overflow: visible;
+    display: block;
+    padding: 0.5rem 0 1rem;
+    overflow: auto;
+    max-height: calc(100vh - 8rem);
   }
 
   .sik-acc-nav__label {
-    width: 100%;
-    padding: 0.35rem 0.5rem;
+    width: auto;
+    padding: 0.5rem 1.25rem 0.25rem;
   }
 
   .sik-acc-nav a {
-    border-left: none;
-    border-radius: var(--sik-acc-radius-sm);
-    padding: 0.5rem 0.75rem;
+    border-left: 3px solid transparent;
+    border-radius: 0;
   }
 
   .sik-acc-nav a.is-active {
-    border-left: none;
+    border-left-color: var(--sik-acc-brand);
   }
 
   .sik-acc-sidebar__footer {
-    display: none;
+    display: block;
+    margin-top: auto;
+  }
+
+  .sik-acc-main {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sik-acc-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+    align-items: center;
+  }
+
+  .sik-acc-topbar__titles {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sik-acc-topbar__titles h1 {
+    font-size: 1.0625rem;
+  }
+
+  .sik-acc-topbar__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .sik-acc-user__email {
+    max-width: 14rem;
   }
 }
 
@@ -603,7 +800,7 @@ body.sikshya-account-shell {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin: 0;
 }
 
 .sik-acc-lib-card {
@@ -802,4 +999,319 @@ a.sik-acc-cal__title:hover {
 .sik-acc-cal__sub {
   font-size: 0.75rem;
   color: var(--sik-acc-muted);
+}
+
+/* -------------------------------------------------------------------------
+   Pro panels + marketplace: structured headings, lists, forms
+   ------------------------------------------------------------------------- */
+.sik-acc-panel__title-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.sik-acc-panel__title-block .sik-acc-panel__title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-panel__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--sik-acc-muted);
+  max-width: 44rem;
+}
+
+.sik-acc-panel__meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sik-acc-muted);
+  white-space: nowrap;
+}
+
+.sik-acc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sik-acc-list__item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--sik-acc-border);
+}
+
+.sik-acc-list__item:last-child {
+  border-bottom: none;
+}
+
+.sik-acc-list__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sik-acc-list__main strong {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sik-acc-list__sub {
+  font-weight: 400;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-list__meta {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-list__aside {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.sik-acc-list__score {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sik-acc-list__score--pass {
+  color: var(--sik-acc-success);
+}
+
+.sik-acc-list__score--fail {
+  color: #b91c1c;
+}
+
+.sik-acc-list__score--muted {
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.sik-acc-sub-card {
+  padding: 1rem 1.15rem 1.15rem;
+  border-top: 1px solid var(--sik-acc-border);
+  background: #fafbfc;
+}
+
+.sik-acc-sub-card__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sik-acc-sub-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sik-acc-sub-card__plan {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sik-acc-sub-card__detail {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  padding: 0 1.15rem 1rem;
+}
+
+.sik-acc-stat-tile {
+  border: 1px solid var(--sik-acc-border);
+  border-radius: var(--sik-acc-radius-sm);
+  background: var(--sik-acc-surface);
+  padding: 0.85rem 1rem;
+}
+
+.sik-acc-stat-tile__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-stat-tile__value {
+  margin-top: 0.35rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sik-acc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  padding: 0 1.15rem 1.15rem;
+}
+
+.sik-acc-form-grid--full {
+  grid-template-columns: 1fr;
+}
+
+.sik-acc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.sik-acc-field__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-input,
+.sik-acc-textarea,
+.sik-acc-select {
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.45;
+  color: var(--sik-acc-text);
+  background: var(--sik-acc-surface);
+  border: 1px solid var(--sik-acc-border);
+  border-radius: var(--sik-acc-radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sik-acc-textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+.sik-acc-input:focus,
+.sik-acc-textarea:focus,
+.sik-acc-select:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.sik-acc-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0 1.15rem 1.15rem;
+}
+
+.sik-acc-form-actions--full,
+.sik-acc-field--full {
+  grid-column: 1 / -1;
+}
+
+.sik-acc-form-status {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-form-status--ok {
+  color: var(--sik-acc-success);
+}
+
+.sik-acc-form-status--err {
+  color: #b91c1c;
+}
+
+.sik-acc-lib-card--static {
+  cursor: default;
+}
+
+.sik-acc-lib-card--static:hover {
+  border-color: var(--sik-acc-border);
+  box-shadow: var(--sik-acc-shadow);
+}
+
+.sik-acc-shortcut__desc--in-card {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.sik-acc-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  border-radius: 9999px;
+  border: 1px solid var(--sik-acc-border);
+  background: #f8fafc;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-pill--success {
+  background: var(--sik-acc-success-bg);
+  border-color: rgba(5, 150, 105, 0.22);
+  color: var(--sik-acc-success);
+}
+
+.sik-acc-pill--danger {
+  background: #fef2f2;
+  border-color: rgba(185, 28, 28, 0.25);
+  color: #b91c1c;
+}
+
+.sik-acc-pill--muted {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.sik-acc-panel__lead--tight {
+  margin: 0 1.15rem 1rem;
+}
+
+.sik-acc-status-line {
+  margin: 0;
+  padding: 0.85rem 1.15rem 1.15rem;
+  font-size: 0.875rem;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-status-line__meta {
+  color: var(--sik-acc-muted);
+  font-weight: 500;
+}
+
+.sik-acc-apply-body {
+  padding: 1rem 1.15rem 1.25rem;
+}
+
+.sik-acc-metrics--panel {
+  padding: 0 1.15rem 1.15rem;
 }

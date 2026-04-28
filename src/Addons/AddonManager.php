@@ -4,6 +4,7 @@ namespace Sikshya\Addons;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Licensing\FeatureRegistry;
+use Sikshya\Licensing\Pro;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -71,6 +72,10 @@ final class AddonManager
             foreach ($addon->dependencies() as $dep) {
                 $dep = sanitize_key((string) $dep);
                 if ($dep === '' || !isset($registry[$dep])) {
+                    continue;
+                }
+                $depTier = $registry[$dep]->tier();
+                if (($depTier === 'starter' || $depTier === 'pro' || $depTier === 'scale') && !Pro::feature($dep)) {
                     continue;
                 }
                 if (!Addons::isEnabled($dep)) {

@@ -14,10 +14,16 @@ if (!defined('ABSPATH')) {
 final class SingleCourseUrlsModel
 {
     /**
+     * @var array<string, string>
+     */
+    private array $row;
+
+    /**
      * @param array<string, string> $row
      */
-    public function __construct(private array $row = [])
+    public function __construct(array $row = [])
     {
+        $this->row = $row;
     }
 
     /**

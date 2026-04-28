@@ -15,7 +15,8 @@ declare(strict_types=1);
 namespace Ramsey\Uuid\Generator;
 
 /**
- * RandomGeneratorFactory retrieves a default random generator, based on the environment
+ * RandomGeneratorFactory retrieves a default random generator, based on the
+ * environment
  */
 class RandomGeneratorFactory
 {

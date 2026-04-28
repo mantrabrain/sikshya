@@ -37,7 +37,8 @@ class UserController
         $user_id = get_current_user_id();
 
         if (!$user_id) {
-            wp_redirect(wp_login_url());
+            $req = (string) (is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : home_url('/'));
+            wp_safe_redirect(PublicPageUrls::login($req));
             exit;
         }
 
@@ -54,7 +55,8 @@ class UserController
         $user_id = get_current_user_id();
 
         if (!$user_id) {
-            wp_redirect(wp_login_url());
+            $req = (string) (is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : home_url('/'));
+            wp_safe_redirect(PublicPageUrls::login($req));
             exit;
         }
 

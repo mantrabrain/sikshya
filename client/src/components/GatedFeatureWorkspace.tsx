@@ -20,7 +20,7 @@ type Props = {
   addonEnableDescription: string;
   canEnable: boolean;
   enableBusy: boolean;
-  onEnable: () => void;
+  onEnable: () => Promise<void>;
   addonError?: unknown;
   children: ReactNode;
 };

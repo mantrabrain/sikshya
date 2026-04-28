@@ -568,6 +568,144 @@
   line-height: 1.4;
 }
 
+/* Chips (compact meta labels) */
+.sikshya-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--sikshya-gray-300);
+  background: var(--sikshya-white);
+  color: var(--sikshya-gray-800);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sikshya-meta-chip--muted {
+  background: var(--sikshya-gray-50);
+  color: var(--sikshya-gray-700);
+}
+
+/* Rating (course card) */
+.sikshya-rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #f5a623;
+  line-height: 1;
+  font-size: 0.95rem;
+}
+.sikshya-rating-star { color: #d1d5db; display: inline-block; }
+.sikshya-rating-star--full { color: #f5a623; }
+.sikshya-rating-star--half {
+  background: linear-gradient(90deg, #f5a623 50%, #d1d5db 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sikshya-course-card-author {
+  margin: 8px 0 6px;
+  font-size: 0.875rem;
+  color: var(--sikshya-gray-600);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.sikshya-course-card-author__label {
+  color: var(--sikshya-gray-500);
+}
+.sikshya-course-card-author__name {
+  color: var(--sikshya-gray-800);
+  font-weight: 600;
+}
+
+.sikshya-course-card-submeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 2px;
+}
+.sikshya-course-card-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sikshya-gray-800);
+}
+.sikshya-course-card-rating__count {
+  font-size: 0.8125rem;
+  color: var(--sikshya-gray-500);
+  font-weight: 600;
+}
+.sikshya-course-card-level {
+  margin-left: auto;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+/* List view: rating + level live in the right aside */
+.sikshya-course-aside-rating,
+.sikshya-course-aside-level {
+  display: none;
+}
+.sikshya-course-grid--list .sikshya-course-card-submeta {
+  display: none;
+}
+.sikshya-course-grid--list .sikshya-course-aside-rating,
+.sikshya-course-grid--list .sikshya-course-aside-level {
+  display: flex;
+}
+.sikshya-course-grid--list .sikshya-course-card-rating--aside .sikshya-rating-stars {
+  font-size: 0.95rem;
+}
+
+.sikshya-course-card-action--icon {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.sikshya-course-card-action--icon .sikshya-button__label {
+  display: none;
+}
+
+/* Match the curriculum badge tooltip style for icon-only actions */
+.sikshya-course-card-action--icon {
+  position: relative;
+}
+.sikshya-course-card-action__tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 1.5rem));
+  padding: 5px 8px;
+  border-radius: var(--sikshya-radius);
+  background: var(--sikshya-gray-900);
+  color: var(--sikshya-white);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.14s ease, visibility 0.14s ease;
+  z-index: 50;
+}
+.sikshya-course-card-action--icon:hover .sikshya-course-card-action__tooltip,
+.sikshya-course-card-action--icon:focus-visible .sikshya-course-card-action__tooltip,
+.sikshya-course-card-action--icon:focus-within .sikshya-course-card-action__tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
 .sikshya-course-aside-price {
   display: flex;
   flex-wrap: wrap;
@@ -655,18 +793,24 @@
 }
 
 .sikshya-course-category {
-  padding: 0;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: rgba(37, 99, 235, 0.08);
   color: var(--sikshya-primary);
-  border-radius: 0;
   font-size: var(--sikshya-font-size-xs);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
 }
 
 a.sikshya-course-category:hover {
   color: var(--sikshya-primary-dark);
-  text-decoration: underline;
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.26);
+  text-decoration: none;
 }
 
 a.sikshya-course-category:focus-visible {
@@ -705,6 +849,52 @@ a.sikshya-course-category:focus-visible {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Pro/addon meta items injected via `sikshya_course_card_meta` */
+.sikshya-course-card__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--sikshya-gray-200);
+  background: var(--sikshya-gray-50);
+  color: var(--sikshya-gray-700);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 100%;
+}
+
+.sikshya-course-card-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.sikshya-course-card-byline .sikshya-course-card__meta-item {
+  margin-top: 0;
+}
+.sikshya-course-card__meta-item .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  color: var(--sikshya-gray-500);
+}
+.sikshya-course-card__meta-item > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Marketplace vendor on cards: remove hard-coded dot separator */
+.sik-marketplace-card-vendor > span[aria-hidden="true"] {
+  display: none;
 }
 
 /* Primary CTA left, curriculum badges right — grid + list (single row; scroll if tight) */
@@ -841,8 +1031,9 @@ a.sikshya-course-category:focus-visible {
 
 .sikshya-course-card-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
+  gap: 10px;
 }
 
 .sikshya-course-card-action-form {

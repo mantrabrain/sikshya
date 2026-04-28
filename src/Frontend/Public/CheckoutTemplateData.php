@@ -2,6 +2,7 @@
 
 namespace Sikshya\Frontend\Public;
 
+use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Licensing\Pro;
 use Sikshya\Services\Settings;
 
@@ -11,9 +12,33 @@ use Sikshya\Services\Settings;
 final class CheckoutTemplateData
 {
     /**
-     * Which gateways are offered on checkout (offline is on by default; Stripe/PayPal need credentials).
+     * Gateways toggled on in settings (does not imply configured).
      *
-     * @return array{offline: bool, stripe: bool, paypal: bool}
+     * @return array<string, bool>
+     */
+    public static function gatewaysEnabled(): array
+    {
+        $out = [];
+        foreach (PaymentGatewayRegistry::all() as $g) {
+            $id = isset($g['id']) ? sanitize_key((string) $g['id']) : '';
+            if ($id === '') {
+                continue;
+            }
+            $enabled_key = isset($g['enabled_setting_key']) ? sanitize_key((string) $g['enabled_setting_key']) : '';
+            if ($enabled_key === '') {
+                $out[$id] = true;
+                continue;
+            }
+            $default = $id === 'offline' || $id === 'paypal' ? '1' : '0';
+            $out[$id] = self::isTruthyGatewayOption(Settings::get($enabled_key, $default));
+        }
+        return $out;
+    }
+
+    /**
+     * Which gateways are offered on checkout (each needs enabled + configured; Pro gates premium methods).
+     *
+     * @return array<string, bool>
      */
     public static function gatewaysConfigured(): array
     {
@@ -35,10 +60,17 @@ final class CheckoutTemplateData
             && self::isTruthyGatewayOption($enable_stripe)
             && (string) Settings::get('stripe_secret_key', '') !== '';
 
+        $paypal_mode = sanitize_key((string) Settings::get('paypal_integration_mode', 'advanced'));
+        if (!in_array($paypal_mode, ['simple', 'advanced'], true)) {
+            $paypal_mode = 'advanced';
+        }
+        // Be forgiving: if PayPal email is configured, show PayPal on checkout (simple flow),
+        // even if the integration mode is still set to "advanced".
+        $paypal_email_ok = is_email((string) Settings::get('paypal_email', ''));
+        $paypal_rest_ok = (string) Settings::get('paypal_client_id', '') !== '' && (string) Settings::get('paypal_secret', '') !== '';
         $paypal = $isWired('paypal', true)
             && self::isTruthyGatewayOption($enable_paypal)
-            && (string) Settings::get('paypal_client_id', '') !== ''
-            && (string) Settings::get('paypal_secret', '') !== '';
+            && ($paypal_email_ok || ($paypal_mode === 'advanced' && $paypal_rest_ok));
 
         // Pro gateways (configured + enabled) — actual session handling lives in Pro.
         $razorpay = Pro::isActive()
@@ -61,6 +93,7 @@ final class CheckoutTemplateData
         $square = Pro::isActive()
             && $isWired('square', false)
             && self::isTruthyGatewayOption(Settings::get('enable_square_payment', '0'))
+            && (string) Settings::get('square_application_id', '') !== ''
             && (string) Settings::get('square_access_token', '') !== ''
             && (string) Settings::get('square_location_id', '') !== '';
 
@@ -68,12 +101,16 @@ final class CheckoutTemplateData
             && $isWired('authorize_net', false)
             && self::isTruthyGatewayOption(Settings::get('enable_authorize_net_payment', '0'))
             && (string) Settings::get('authorize_net_login_id', '') !== ''
+            && (string) Settings::get('authorize_net_public_client_key', '') !== ''
             && (string) Settings::get('authorize_net_transaction_key', '') !== '';
 
         $bank_transfer = Pro::isActive()
             && $isWired('bank_transfer', true)
             && self::isTruthyGatewayOption(Settings::get('enable_bank_transfer_payment', '0'))
-            && (string) Settings::get('bank_transfer_instructions', '') !== '';
+            && (
+                (string) Settings::get('bank_transfer_instructions', '') !== ''
+                || (string) Settings::get('bank_transfer_account_number', '') !== ''
+            );
 
         return [
             'offline' => $isWired('offline', true) && self::isTruthyGatewayOption($enable_offline),
@@ -103,7 +140,7 @@ final class CheckoutTemplateData
      */
     public static function checkoutGatewayIdsOrdered(): array
     {
-        $configured = self::gatewaysConfigured();
+        $enabled = self::gatewaysEnabled();
         $orderRaw = trim((string) Settings::get('payment_gateways_order', ''));
         $parts = $orderRaw === '' ? [] : array_map('trim', explode(',', $orderRaw));
         $order = [];
@@ -116,11 +153,11 @@ final class CheckoutTemplateData
 
         $out = [];
         foreach ($order as $id) {
-            if (!empty($configured[$id])) {
+            if (!empty($enabled[$id])) {
                 $out[] = $id;
             }
         }
-        foreach ($configured as $id => $on) {
+        foreach ($enabled as $id => $on) {
             if ($on && !in_array($id, $out, true)) {
                 $out[] = $id;
             }
@@ -150,7 +187,7 @@ final class CheckoutTemplateData
     }
 
     /**
-     * @return array{lines: array<int, array<string, mixed>>, course_ids: array<int, int>, empty: bool, subtotal_hint: float, currency: string, rest_nonce: string, rest_url: string, gateways: array{offline: bool, stripe: bool, paypal: bool}, urls: array{home: string, cart: string, checkout: string, account: string}, viewer: array{display_name: string, email: string}}
+     * @return array<string, mixed>
      */
     public static function build(): array
     {
@@ -168,6 +205,51 @@ final class CheckoutTemplateData
             $display = (string) $user->user_login;
         }
 
+        $enabled = self::gatewaysEnabled();
+        $configured = self::gatewaysConfigured();
+        $gateway_statuses = [];
+        $wired_defaults = [
+            'offline' => true,
+            'paypal' => true,
+            'stripe' => true,
+            'razorpay' => true,
+            'mollie' => true,
+            'paystack' => true,
+            'bank_transfer' => true,
+            'square' => false,
+            'authorize_net' => false,
+        ];
+        $is_wired = static function (string $id) use ($wired_defaults): bool {
+            $d = array_key_exists($id, $wired_defaults) ? (bool) $wired_defaults[$id] : true;
+            return (bool) apply_filters('sikshya_payment_gateway_wired', $d, $id);
+        };
+        $pro_active = Pro::isActive();
+        $tiers = [];
+        foreach (PaymentGatewayRegistry::all() as $g) {
+            $id = isset($g['id']) ? sanitize_key((string) $g['id']) : '';
+            if ($id === '') {
+                continue;
+            }
+            $tier = isset($g['tier']) && (string) $g['tier'] === 'pro' ? 'pro' : 'free';
+            $tiers[$id] = $tier;
+        }
+
+        foreach ($enabled as $gid => $is_on) {
+            $gid = sanitize_key((string) $gid);
+            if ($gid === '') {
+                continue;
+            }
+            $tier = $tiers[$gid] ?? 'free';
+            $is_pro_gateway = $tier === 'pro';
+            $gateway_statuses[$gid] = [
+                'enabled' => (bool) $is_on,
+                'configured' => !empty($configured[$gid]),
+                'wired' => $is_wired($gid),
+                'locked' => $is_pro_gateway && !$pro_active,
+                'locked_reason' => $is_pro_gateway && !$pro_active ? __('Requires Sikshya Pro.', 'sikshya') : '',
+            ];
+        }
+
         return apply_filters(
             'sikshya_checkout_template_data',
             [
@@ -181,6 +263,7 @@ final class CheckoutTemplateData
                 'rest_url' => esc_url_raw(rest_url('sikshya/v1/')),
                 'gateways' => self::gatewaysConfigured(),
                 'checkout_gateway_ids' => self::checkoutGatewayIdsOrdered(),
+                'gateway_statuses' => $gateway_statuses,
                 'urls' => [
                     'home' => home_url('/'),
                     'cart' => PublicPageUrls::url('cart'),

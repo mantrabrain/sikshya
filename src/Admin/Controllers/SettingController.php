@@ -55,7 +55,14 @@ class SettingController extends BaseView
      */
     public function enqueueAssets(): void
     {
+        // Settings UI is now the React shell (`admin.php?page=sikshya&view=settings`).
+        // The legacy `sikshya-admin` jQuery bundle is deprecated and no longer enqueued.
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        $screen_id = $screen ? (string) ($screen->id ?? '') : '';
+        if ($screen_id === 'toplevel_page_sikshya') {
+            return;
+        }
+
         wp_enqueue_style('sikshya-admin');
-        wp_enqueue_script('sikshya-admin');
     }
 }

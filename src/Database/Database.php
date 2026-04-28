@@ -14,6 +14,7 @@ use Sikshya\Database\Tables\OrderItemsTable;
 use Sikshya\Database\Tables\CouponsTable;
 use Sikshya\Database\Tables\CouponRedemptionsTable;
 use Sikshya\Database\Tables\ReviewsTable;
+use Sikshya\Services\EmailTemplateStore;
 
 /**
  * Database Management Class
@@ -66,6 +67,8 @@ class Database
     {
         // Idempotent normalization: ensure tables exist even when version flags are already current.
         $this->ensureTablesPresent();
+
+        $this->migrateLegacyPaymentReceiptEmailSetting();
 
         $current = Settings::getRaw('sikshya_db_version', '0');
         if (version_compare((string) $current, '1.1.0', '<')) {
@@ -123,6 +126,27 @@ class Database
                 dbDelta($tableClass::createSql($charset_collate));
             }
         }
+    }
+
+    /**
+     * Move legacy Settings → Payment “Email payment receipts” into Email templates (disabled row if it was off).
+     */
+    private function migrateLegacyPaymentReceiptEmailSetting(): void
+    {
+        $legacy = get_option(Settings::PREFIX . 'send_payment_receipts', null);
+        if ($legacy === null) {
+            return;
+        }
+        if (!Settings::isTruthy($legacy)) {
+            $store = EmailTemplateStore::getStore();
+            $row = isset($store['learner_payment_receipt']) && is_array($store['learner_payment_receipt'])
+                ? $store['learner_payment_receipt']
+                : [];
+            $row['enabled'] = false;
+            $store['learner_payment_receipt'] = $row;
+            EmailTemplateStore::saveStore($store);
+        }
+        delete_option(Settings::PREFIX . 'send_payment_receipts');
     }
 
     private function migrateTo110(): void

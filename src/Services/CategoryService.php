@@ -11,6 +11,7 @@ namespace Sikshya\Services;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Core\ServiceResult;
 use Sikshya\Database\Repositories\TaxonomyRepository;
+use Sikshya\Utils\RichText;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -75,7 +76,7 @@ class CategoryService
 
         $term_id = isset($input['term_id']) ? (int) $input['term_id'] : 0;
         $name = sanitize_text_field($input['name'] ?? '');
-        $description = sanitize_textarea_field($input['description'] ?? '');
+        $description = RichText::sanitize(isset($input['description']) ? (string) $input['description'] : '');
         $slug = sanitize_title($input['slug'] ?? '');
         $parent = isset($input['parent']) ? (int) $input['parent'] : 0;
         $image_id = isset($input['image']) ? (int) $input['image'] : 0;

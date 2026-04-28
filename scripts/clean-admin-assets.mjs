@@ -1,6 +1,6 @@
 /**
- * Remove the Vite outDir before `npm run build` so each build starts clean.
- * (Vite's emptyOutDir also clears; this makes the intent obvious from the root package scripts.)
+ * Remove the Vite outDir (`assets/admin/react`). Invoked as the first step of `npm run build`
+ * so stale hashed chunks cannot linger. Vite's `emptyOutDir` is a second safeguard.
  */
 import { rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

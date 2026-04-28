@@ -327,7 +327,7 @@ class Frontend
         // Legacy object expected by assets/js/frontend.js (snake_case + enroll AJAX nonce).
         wp_localize_script('sikshya-frontend', 'sikshya_frontend', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'login_url' => wp_login_url(),
+            'login_url' => \Sikshya\Frontend\Public\PublicPageUrls::login(),
             'is_user_logged_in' => is_user_logged_in(),
             'nonce' => wp_create_nonce('sikshya_enroll_nonce'),
             'strings' => [
@@ -408,7 +408,11 @@ class Frontend
                         'networkError' => __('Network error. Please try again.', 'sikshya'),
                         'updatingTotals' => __('Updating totals…', 'sikshya'),
                         'stripeSessionReady' => __(
-                            'Payment session ready. Your site should confirm the Stripe PaymentIntent on return (see Sikshya checkout docs).',
+                            'Payment session ready. If you are not redirected automatically, your checkout may still be using a legacy Stripe response—contact support.',
+                            'sikshya'
+                        ),
+                        'stripeCancelled' => __(
+                            'Stripe checkout was cancelled. You can choose a payment method again.',
                             'sikshya'
                         ),
                         'checkoutStarted' => __('Checkout started.', 'sikshya'),
@@ -719,6 +723,7 @@ class Frontend
                 'order' => 'order.php',
                 'account' => 'account.php',
                 'learn' => 'learn.php',
+                'login' => 'login.php',
             ] as $key => $file
         ) {
             if (PublicPageUrls::isCurrentVirtualPage($key)) {
@@ -763,7 +768,7 @@ class Frontend
             $classes[] = 'sikshya-course-archive';
         }
 
-        foreach (['cart' => 'sikshya-cart-page', 'checkout' => 'sikshya-checkout-page', 'order' => 'sikshya-order-page', 'account' => 'sikshya-account-page', 'learn' => 'sikshya-learn-page'] as $k => $class) {
+        foreach (['cart' => 'sikshya-cart-page', 'checkout' => 'sikshya-checkout-page', 'order' => 'sikshya-order-page', 'account' => 'sikshya-account-page', 'learn' => 'sikshya-learn-page', 'login' => 'sikshya-login-page'] as $k => $class) {
             if (PublicPageUrls::isCurrentVirtualPage($k)) {
                 $classes[] = $class;
             }

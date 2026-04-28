@@ -179,33 +179,311 @@ final class StatsUsage
      */
     public function build_payload(): array
     {
-        global $wp_version;
+        global $wpdb, $wp_version;
 
         $courses = wp_count_posts('sikshya_course');
         $lessons = wp_count_posts('sikshya_lesson');
 
-        return [
-            'product' => 'sikshya',
-            'instance_id' => $this->ensure_instance_id(),
-            'sent_at' => time(),
-            'site' => [
-                'home_url' => home_url('/'),
-                'language' => (string) get_locale(),
-            ],
-            'env' => [
-                'wp_version' => (string) $wp_version,
-                'php_version' => PHP_VERSION,
-                'multisite' => is_multisite(),
-            ],
-            'plugin' => [
-                'version' => defined('SIKSHYA_VERSION') ? (string) SIKSHYA_VERSION : '',
-            ],
-            'usage' => [
-                'courses_published' => isset($courses->publish) ? (int) $courses->publish : 0,
-                'lessons_published' => isset($lessons->publish) ? (int) $lessons->publish : 0,
-                'setup_completed' => Settings::isTruthy(Settings::get('setup_completed', '0')),
-            ],
+        $metricDate = gmdate('Y-m-d');
+
+        $pluginVersion = defined('SIKSHYA_VERSION') ? (string) SIKSHYA_VERSION : '';
+        $siteUrl = untrailingslashit(site_url());
+
+        // Addons: enabled/disabled inventory (non-sensitive).
+        $addonEnabled = [];
+        $addonCatalog = [];
+        if (class_exists('\\Sikshya\\Addons\\Addons') && class_exists('\\Sikshya\\Addons\\AddonManager')) {
+            $addonEnabled = \Sikshya\Addons\Addons::enabledIds();
+            try {
+                $mgr = new \Sikshya\Addons\AddonManager();
+                $addonCatalog = $mgr->registry();
+            } catch (\Throwable $e) {
+                unset($e);
+                $addonCatalog = [];
+            }
+        }
+        $addonEnabled = is_array($addonEnabled) ? array_values(array_filter(array_map('sanitize_key', $addonEnabled))) : [];
+
+        // Only report the official Sikshya addon catalog (keep in sync with Addons UI order).
+        $allowedAddonIds = [
+            'email_advanced_customization',
+            'subscriptions',
+            'content_drip',
+            'course_bundles',
+            'coupons_advanced',
+            'multi_instructor',
+            'prerequisites',
+            'drip_notifications',
+            'reports_advanced',
+            'gradebook',
+            'certificates_advanced',
+            'activity_log',
+            'assignments_advanced',
+            'quiz_advanced',
+            'instructor_dashboard',
+            'email_marketing',
+            'live_classes',
+            'calendar',
+            'social_login',
+            'scorm_h5p_pro',
+            'marketplace_multivendor',
+            'white_label',
+            'webhooks',
+            'zapier',
+            'public_api_keys',
+            'enterprise_reports',
+            'multilingual_enterprise',
+            'multisite_scale',
         ];
+        $allowedSet = array_fill_keys($allowedAddonIds, true);
+
+        $addonEnabled = array_values(array_filter($addonEnabled, static function (string $id) use ($allowedSet): bool {
+            return isset($allowedSet[$id]);
+        }));
+
+        $addonCatalogIds = is_array($addonCatalog) ? array_keys($addonCatalog) : [];
+        $addonCatalogIds = array_values(array_filter(array_map('sanitize_key', $addonCatalogIds), static function (string $id) use ($allowedSet): bool {
+            return isset($allowedSet[$id]);
+        }));
+
+        $addonEnabledCount = count($addonEnabled);
+        $addonCatalogCount = count($allowedAddonIds);
+        $addonDisabledCount = max(0, $addonCatalogCount - $addonEnabledCount);
+
+        // Active plugins/themes (non-sensitive). These become products in the warehouse.
+        $activePlugins = [];
+        if (function_exists('get_plugins')) {
+            $all = (array) get_plugins();
+            $active = (array) get_option('active_plugins', []);
+            foreach ($active as $file) {
+                $file = is_string($file) ? $file : '';
+                if ($file === '' || !isset($all[$file]) || !is_array($all[$file])) {
+                    continue;
+                }
+                $slug = sanitize_title(dirname($file));
+                if ($slug === '.' || $slug === '') {
+                    $slug = sanitize_title(basename($file, '.php'));
+                }
+                if ($slug === '') {
+                    continue;
+                }
+                // Sikshya is already represented as the primary product row (with parameters).
+                if ($slug === 'sikshya') {
+                    continue;
+                }
+                $meta = $all[$file];
+                $activePlugins[] = [
+                    'product_slug' => $slug,
+                    'product_name' => isset($meta['Name']) ? (string) $meta['Name'] : $slug,
+                    'product_type' => 'plugin',
+                    'product_version' => isset($meta['Version']) ? (string) $meta['Version'] : '',
+                    'parameters' => [],
+                ];
+            }
+        }
+
+        $activeThemes = [];
+        if (function_exists('wp_get_theme')) {
+            $theme = wp_get_theme();
+            if ($theme && $theme->exists()) {
+                $slug = sanitize_title((string) $theme->get_stylesheet());
+                if ($slug === '') {
+                    $slug = sanitize_title((string) $theme->get('Name'));
+                }
+                if ($slug !== '') {
+                    $activeThemes[] = [
+                        'product_slug' => $slug,
+                        'product_name' => (string) $theme->get('Name'),
+                        'product_type' => 'theme',
+                        'product_version' => (string) $theme->get('Version'),
+                        'parameters' => [],
+                    ];
+                }
+                $parent = $theme->parent();
+                if ($parent && $parent->exists()) {
+                    $pslug = sanitize_title((string) $parent->get_stylesheet());
+                    if ($pslug === '') {
+                        $pslug = sanitize_title((string) $parent->get('Name'));
+                    }
+                    if ($pslug !== '') {
+                        $activeThemes[] = [
+                            'product_slug' => $pslug,
+                            'product_name' => (string) $parent->get('Name'),
+                            'product_type' => 'theme',
+                            'product_version' => (string) $parent->get('Version'),
+                            'parameters' => [],
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Addon rows as separate "products" (lets the warehouse query adoption across sites).
+        $addonProducts = [];
+        if (is_array($addonCatalog) && $addonCatalog !== []) {
+            foreach ($allowedAddonIds as $id) {
+                if (!isset($addonCatalog[$id]) || !$addonCatalog[$id] instanceof \Sikshya\Addons\AddonInterface) {
+                    continue;
+                }
+                /** @var \Sikshya\Addons\AddonInterface $addon */
+                $addon = $addonCatalog[$id];
+                $enabled = in_array($id, $addonEnabled, true);
+                $addonProducts[] = [
+                    'product_slug' => $id,
+                    'product_name' => (string) $addon->label(),
+                    'product_type' => 'addon',
+                    'parent_slug' => 'sikshya',
+                    'parent_name' => function_exists('sikshya_brand_name') ? (string) sikshya_brand_name('admin') : 'Sikshya',
+                    'product_version' => $pluginVersion,
+                    'parameters' => [
+                        [
+                            'parameter_id' => 'addon.enabled',
+                            'parameter_name' => 'Enabled',
+                            'value' => $enabled ? 1 : 0,
+                            'is_json' => false,
+                            'metric_date' => $metricDate,
+                        ],
+                        [
+                            'parameter_id' => 'addon.tier',
+                            'parameter_name' => 'Tier',
+                            'value' => (string) $addon->tier(),
+                            'is_json' => false,
+                            'metric_date' => $metricDate,
+                        ],
+                        [
+                            'parameter_id' => 'addon.group',
+                            'parameter_name' => 'Group',
+                            'value' => (string) $addon->group(),
+                            'is_json' => false,
+                            'metric_date' => $metricDate,
+                        ],
+                    ],
+                ];
+            }
+        }
+
+        return [
+            // Canonical warehouse shape (consumed by `mantrabrain-usage-stats` collector):
+            // website + products[].parameters[].
+            'website' => [
+                'website_url' => $siteUrl,
+                'php_version' => PHP_VERSION,
+                'mysql_version' => is_object($wpdb) ? (string) $wpdb->db_version() : '',
+                'wordpress_version' => (string) ($wp_version ?? ''),
+                'language' => (string) get_locale(),
+                'multisite' => is_multisite(),
+                'instance_id' => $this->ensure_instance_id(),
+                // Helps the collector attribute the sender (also set via headers).
+                'ingest_source_plugin' => 'sikshya',
+                'ingest_source_plugin_version' => $pluginVersion,
+                'telemetry_schema_version' => 1,
+                'telemetry_sent_at' => gmdate('c'),
+                'blog_id' => is_multisite() ? get_current_blog_id() : 1,
+            ],
+            'products' => $this->dedupeProducts(
+                array_values(
+                    array_filter(
+                        array_merge(
+                            [
+                                [
+                                    'product_slug' => 'sikshya',
+                                    'product_name' => function_exists('sikshya_brand_name') ? (string) sikshya_brand_name('admin') : 'Sikshya',
+                                    'product_type' => 'plugin',
+                                    'product_version' => $pluginVersion,
+                                    'parameters' => [
+                                        [
+                                            'parameter_id' => 'usage.courses_published',
+                                            'parameter_name' => 'Courses published',
+                                            'value' => isset($courses->publish) ? (int) $courses->publish : 0,
+                                            'is_json' => false,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                        [
+                                            'parameter_id' => 'usage.lessons_published',
+                                            'parameter_name' => 'Lessons published',
+                                            'value' => isset($lessons->publish) ? (int) $lessons->publish : 0,
+                                            'is_json' => false,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                        [
+                                            'parameter_id' => 'usage.setup_completed',
+                                            'parameter_name' => 'Setup completed',
+                                            'value' => Settings::isTruthy(Settings::get('setup_completed', '0')) ? 1 : 0,
+                                            'is_json' => false,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                        [
+                                            'parameter_id' => 'addons.enabled_ids',
+                                            'parameter_name' => 'Enabled addons (IDs)',
+                                            'value' => $addonEnabled,
+                                            'is_json' => true,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                        [
+                                            'parameter_id' => 'addons.enabled_count',
+                                            'parameter_name' => 'Enabled addons count',
+                                            'value' => $addonEnabledCount,
+                                            'is_json' => false,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                        [
+                                            'parameter_id' => 'addons.catalog_count',
+                                            'parameter_name' => 'Addon catalog count',
+                                            'value' => $addonCatalogCount,
+                                            'is_json' => false,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                        [
+                                            'parameter_id' => 'addons.disabled_count',
+                                            'parameter_name' => 'Disabled addons count',
+                                            'value' => $addonDisabledCount,
+                                            'is_json' => false,
+                                            'metric_date' => $metricDate,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                            $addonProducts,
+                            $activePlugins,
+                            $activeThemes
+                        ),
+                        static function ($row): bool {
+                            return is_array($row) && !empty($row['product_slug']);
+                        }
+                    )
+                )
+            ),
+        ];
+    }
+
+    /**
+     * Prevent duplicate product rows in a single payload.
+     *
+     * @param array<int, array<string,mixed>> $products
+     * @return array<int, array<string,mixed>>
+     */
+    private function dedupeProducts(array $products): array
+    {
+        $seen = [];
+        $out = [];
+        foreach ($products as $p) {
+            if (!is_array($p)) {
+                continue;
+            }
+            $slug = isset($p['product_slug']) ? sanitize_title((string) $p['product_slug']) : '';
+            $type = isset($p['product_type']) ? sanitize_key((string) $p['product_type']) : '';
+            if ($slug === '') {
+                continue;
+            }
+            $key = $type . ':' . $slug;
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $out[] = $p;
+        }
+
+        return $out;
     }
 
     public function get_last_send_error()
@@ -226,6 +504,8 @@ final class StatsUsage
                 'timeout' => 12,
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'X-Plugin' => 'sikshya',
+                    'X-Version' => defined('SIKSHYA_VERSION') ? (string) SIKSHYA_VERSION : '',
                 ],
                 'body' => wp_json_encode($payload),
             ]
@@ -251,6 +531,22 @@ final class StatsUsage
             );
             $this->set_backoff(null, $code);
 
+            return false;
+        }
+
+        // The collector can accept the request but ignore it (e.g. local/dev host blocklist).
+        $decoded = json_decode($body, true);
+        if (is_array($decoded) && !empty($decoded['ignored'])) {
+            update_option(
+                self::OPT_LAST_SEND_ERROR,
+                [
+                    'code' => $code,
+                    'ignored' => true,
+                    'reason' => isset($decoded['reason']) ? (string) $decoded['reason'] : '',
+                ],
+                false
+            );
+            $this->set_backoff(null, 200);
             return false;
         }
 

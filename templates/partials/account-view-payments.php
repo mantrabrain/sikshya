@@ -68,7 +68,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
             </section>
 
             <?php if ($page_model->getLegacyPayments() !== []) : ?>
-            <section class="sik-acc-panel" style="margin-top:1.25rem;" aria-label="<?php esc_attr_e('Payment records', 'sikshya'); ?>">
+            <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Payment records', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Payment records', 'sikshya'); ?></h2>
                 </div>

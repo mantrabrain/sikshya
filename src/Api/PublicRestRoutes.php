@@ -87,6 +87,38 @@ class PublicRestRoutes
         }
 
         try {
+            // Prevent bypassing checkout for paid courses.
+            // Note: add-ons may override this via `sikshya_rest_me_enroll_allowed`.
+            $price = (float) $courseService->getCoursePrice($course_id);
+            $sale = (float) $courseService->getCourseSalePrice($course_id);
+            $effective = $sale > 0.00001 ? $sale : $price;
+
+            /**
+             * Filter whether `/me/enroll` may enroll into a paid course (without checkout).
+             *
+             * @param bool $allowed
+             * @param int  $user_id
+             * @param int  $course_id
+             * @param float $effective_price
+             */
+            $allowPaid = (bool) apply_filters(
+                'sikshya_rest_me_enroll_allowed',
+                false,
+                (int) get_current_user_id(),
+                (int) $course_id,
+                (float) $effective
+            );
+
+            if ($effective > 0.00001 && !$allowPaid) {
+                return new WP_REST_Response(
+                    [
+                        'success' => false,
+                        'message' => __('This course requires purchase. Please use checkout.', 'sikshya'),
+                    ],
+                    403
+                );
+            }
+
             $courseService->enrollUser(get_current_user_id(), $course_id, []);
             return new WP_REST_Response(['success' => true, 'message' => __('Enrolled successfully.', 'sikshya')], 200);
         } catch (\InvalidArgumentException $e) {

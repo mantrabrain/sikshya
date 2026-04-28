@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AppShell } from '../components/AppShell';
+import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
@@ -17,10 +18,13 @@ import {
 } from '../components/shared/AddContentTypePickerModal';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { appViewHref } from '../lib/appUrl';
+import { getCatalogEntry, getLicensing, isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
+import { useAddonEnabled } from '../hooks/useAddons';
 import { useAdminRouting } from '../lib/adminRouting';
 import type { FieldConfig, NavItem, SikshyaReactConfig, TabFieldsMap } from '../types';
 import { DateTimePickerField } from '../components/shared/DateTimePickerField';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
+import { QuillField } from '../components/shared/QuillField';
 import { term, termLower } from '../lib/terminology';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
@@ -379,6 +383,103 @@ function buildFieldLayoutRows(entries: [string, FieldConfig][]): LayoutRow[] {
   return rows;
 }
 
+/** Pricing-tab surface for Content drip (Sikshya Pro); rules live under Learning rules → Scheduled access. */
+function ContentDripCourseBuilderGateInput(props: { config: SikshyaReactConfig; courseId: number }) {
+  const { config, courseId } = props;
+  const featureOk = isFeatureEnabled(config, 'content_drip');
+  const addon = useAddonEnabled('content_drip');
+  const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
+  const lic = getLicensing(config);
+  const upgradeUrl =
+    lic?.upgradeUrl || config.brandLinks?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya/#pricing';
+  const catalog = getCatalogEntry(config, 'content_drip');
+  const featureTitle = catalog?.label || 'Content drip & scheduled unlock';
+  const [enableBusy, setEnableBusy] = useState(false);
+
+  const rulesHref =
+    courseId > 0
+      ? appViewHref(config, 'learning-rules', { tab: 'drip', course_id: String(courseId) })
+      : appViewHref(config, 'learning-rules', { tab: 'drip' });
+
+  if (mode === 'pending-addon') {
+    return (
+      <div className="rounded-xl border border-amber-200/80 bg-amber-50/60 px-4 py-3 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100">
+        Checking add-on status…
+      </div>
+    );
+  }
+
+  if (mode === 'locked-plan') {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+        <p className="text-sm font-medium text-slate-900 dark:text-white">{featureTitle}</p>
+        <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+          Your plan does not include this module yet. Upgrade to unlock scheduled lesson releases and the Learning rules
+          workspace.
+        </p>
+        <a
+          href={upgradeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-flex items-center rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700"
+        >
+          View plans
+        </a>
+      </div>
+    );
+  }
+
+  if (mode === 'addon-off') {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900">
+        <AddonEnablePanel
+          title="Content drip is not enabled"
+          description="Turn on the Content Drip add-on to load unlock schedules. Edit rules under Learning rules → Scheduled access."
+          canEnable={Boolean(addon.licenseOk)}
+          enableBusy={enableBusy}
+          onEnable={async () => {
+            setEnableBusy(true);
+            try {
+              await addon.enable();
+            } finally {
+              setEnableBusy(false);
+            }
+          }}
+          upgradeUrl={upgradeUrl}
+          error={addon.error}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/25">
+      <p className="text-sm font-medium text-slate-900 dark:text-white">Content drip is ready</p>
+      <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+        Configure per-lesson delays and fixed unlock dates in Learning rules. Use the button below to jump straight to
+        schedules for this course.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a
+          href={rulesHref}
+          className="inline-flex items-center rounded-lg bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700"
+        >
+          Open scheduled access
+        </a>
+        <a
+          href={appViewHref(config, 'addons')}
+          className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Add-ons
+        </a>
+      </div>
+      {courseId <= 0 ? (
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Save the course first to pre-select it on the drip screen.</p>
+      ) : null}
+    </div>
+  );
+}
+
 function FieldInput(props: {
   id: string;
   fieldKey?: string;
@@ -428,14 +529,28 @@ function FieldInput(props: {
   }, [subscriptionPlanPicker]);
 
   if (t === 'textarea') {
+    // Meta description should remain plain-text-ish (SEO snippet), not rich text.
+    if (fieldKey === 'meta_description') {
+      return (
+        <textarea
+          id={id}
+          rows={4}
+          className={`${FIELD_INPUT} min-h-[110px] resize-y`}
+          placeholder={cfg.placeholder}
+          value={(value as string) ?? ''}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={Boolean(cfg.disabled)}
+        />
+      );
+    }
     return (
-      <textarea
-        id={id}
-        rows={5}
-        className={`${FIELD_INPUT} min-h-[120px] resize-y`}
-        placeholder={cfg.placeholder}
+      <QuillField
+        label={cfg.label || fieldKey || 'Text'}
         value={(value as string) ?? ''}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(html) => onChange(html)}
+        placeholder={cfg.placeholder}
+        disabled={Boolean(cfg.disabled)}
+        minHeightPx={260}
       />
     );
   }
@@ -760,7 +875,11 @@ function FieldInput(props: {
 
   if (t === 'repeater_group' && cfg.subfields) {
     const rows = Array.isArray(value) ? (value as Record<string, string>[]) : [];
-    const subKeys = Object.keys(cfg.subfields);
+    const subKeysBase = Object.keys(cfg.subfields);
+    const subKeys =
+      fieldKey === 'course_resources'
+        ? subKeysBase.filter((k) => k !== 'attachment_id')
+        : subKeysBase;
     return (
       <div className="mt-1.5 space-y-4">
         {(rows.length ? rows : [{}]).map((row, idx) => (
@@ -789,10 +908,58 @@ function FieldInput(props: {
                 const sub = cfg.subfields![sk];
                 const st = sub.type || 'text';
                 const sv = row[sk] ?? '';
+                const attachmentIdRaw = fieldKey === 'course_resources' ? (row.attachment_id ?? '0') : '0';
+                const attachmentId = fieldKey === 'course_resources' ? Number(attachmentIdRaw) || 0 : 0;
                 return (
                   <label key={sk} className={`block min-w-0 ${st === 'textarea' ? 'sm:col-span-2' : ''}`}>
                     <span className={FIELD_LABEL}>{sub.label || sk}</span>
-                    {st === 'textarea' ? (
+                    {fieldKey === 'course_resources' && sk === 'url' ? (
+                      <div className="mt-1.5 space-y-2">
+                        <div className="rounded-xl border border-slate-200/90 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">Choose from Media</div>
+                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            Pick a file from the WordPress media library (recommended), or paste a URL below.
+                          </p>
+                          <div className="mt-2">
+                            <WPMediaPickerField
+                              id={`${id}-${idx}-resource-media`}
+                              value={typeof sv === 'string' ? sv : ''}
+                              onChange={(url) => {
+                                const next = [...(rows.length ? rows : [{}])];
+                                next[idx] = { ...next[idx], url, attachment_id: String(next[idx]?.attachment_id || attachmentId || 0) };
+                                onChange(next);
+                              }}
+                              onAttachmentIdChange={(aid) => {
+                                const next = [...(rows.length ? rows : [{}])];
+                                next[idx] = { ...next[idx], attachment_id: String(aid || 0) };
+                                onChange(next);
+                              }}
+                              imageOnly={false}
+                              placeholder="Upload or choose a file (PDF, ZIP, DOCX, etc.)"
+                              className={FIELD_INPUT}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/90 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/40">
+                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">Or paste a URL</div>
+                          <input
+                            type="url"
+                            className={`${FIELD_INPUT} mt-2`}
+                            placeholder={sub.placeholder || 'https://'}
+                            title={sub.description}
+                            value={typeof sv === 'string' ? sv : ''}
+                            onChange={(e) => {
+                              const url = e.target.value;
+                              const next = [...(rows.length ? rows : [{}])];
+                              // If user pastes a URL manually, treat it as URL-mode (clear attachment id).
+                              next[idx] = { ...next[idx], url, attachment_id: '0' };
+                              onChange(next);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : st === 'textarea' ? (
                       <textarea
                         rows={3}
                         className={`${FIELD_INPUT} min-h-[88px] resize-y`}
@@ -829,9 +996,12 @@ function FieldInput(props: {
           className="inline-flex items-center gap-1.5 rounded-lg text-sm font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400"
           onClick={() => {
             const empty: Record<string, string> = {};
-            subKeys.forEach((k) => {
+            subKeysBase.forEach((k) => {
               empty[k] = '';
             });
+            if (fieldKey === 'course_resources') {
+              empty.attachment_id = '0';
+            }
             onChange([...(rows.length ? rows : []), empty]);
           }}
         >
@@ -874,10 +1044,19 @@ function BuilderFieldBlock(props: {
   values: Record<string, unknown>;
   users: UserOpt[];
   siteUrl: string;
+  courseId: number;
   onFieldChange: (fid: string, v: unknown) => void;
 }) {
-  const { config, fid, fcfg, values, users, siteUrl, onFieldChange } = props;
+  const { config, fid, fcfg, values, users, siteUrl, courseId, onFieldChange } = props;
   const isCheckbox = (fcfg.type || 'text') === 'checkbox';
+
+  if (fcfg.widget === 'content_drip_course_builder_gate') {
+    return (
+      <div className="min-w-0">
+        <ContentDripCourseBuilderGateInput config={config} courseId={courseId} />
+      </div>
+    );
+  }
 
   if (isCheckbox) {
     return (
@@ -937,6 +1116,11 @@ function AddChapterModal(props: {
 }) {
   const { open, title, onTitleChange, onClose, onSubmit, busy } = props;
   const inputRef = useRef<HTMLInputElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) {
@@ -948,7 +1132,7 @@ function AddChapterModal(props: {
     }, 50);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
       }
     };
     window.addEventListener('keydown', onKey);
@@ -956,7 +1140,7 @@ function AddChapterModal(props: {
       window.clearTimeout(t);
       window.removeEventListener('keydown', onKey);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) {
     return null;
@@ -1118,6 +1302,7 @@ function sectionIconName(sectionKey: string): string {
     access_enrollment: 'users',
     prerequisites: 'badge',
     advanced_features: 'cog',
+    content_drip: 'schedule',
     course_settings: 'cog',
     completion_rules: 'badge',
     interaction_features: 'helpCircle',
@@ -1223,34 +1408,37 @@ function BuilderSectionMenu({
   );
 }
 
-export function CourseBuilderPage(props: { config: SikshyaReactConfig; title: string }) {
+export function CourseBuilderPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const { confirm } = useSikshyaDialog();
   const q = config.query || {};
   const courseIdFromUrl = Number(q.course_id || q.id || 0) || 0;
 
   if (!courseIdFromUrl) {
-    return <CourseBuilderMissingSelection config={config} title={title} />;
+    return <CourseBuilderMissingSelection embedded={props.embedded} config={config} title={title} />;
   }
 
-  return <CourseBuilderEditor config={config} title={title} courseId={courseIdFromUrl} />;
+  return <CourseBuilderEditor embedded={props.embedded} config={config} title={title} courseId={courseIdFromUrl} />;
 }
 
-function CourseBuilderMissingSelection({ config, title }: { config: SikshyaReactConfig; title: string }) {
+function CourseBuilderMissingSelection({
+  embedded,
+  config,
+  title,
+}: {
+  embedded?: boolean;
+  config: SikshyaReactConfig;
+  title: string;
+}) {
   const [createOpen, setCreateOpen] = useState(false);
   const courseLower = termLower(config, 'course');
   const coursesLower = termLower(config, 'courses');
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle={`Select or create a ${courseLower} to edit`}
-      pageActions={null}
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
       <div className="flex min-h-[min(60vh,520px)] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white px-8 py-16 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
@@ -1271,15 +1459,17 @@ function CourseBuilderMissingSelection({ config, title }: { config: SikshyaReact
           </a>
         </div>
       </div>
-    </AppShell>
+    </EmbeddableShell>
   );
 }
 
 function CourseBuilderEditor({
+  embedded,
   config,
   title,
   courseId: initialCid,
 }: {
+  embedded?: boolean;
   config: SikshyaReactConfig;
   title: string;
   courseId: number;
@@ -1305,6 +1495,7 @@ function CourseBuilderEditor({
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
+  const activeEmbeddedSaveRef = useRef<null | (() => Promise<boolean>)>(null);
   const [openSectionKey, setOpenSectionKey] = useState<string | null>(null);
   const [chapterModalOpen, setChapterModalOpen] = useState(false);
   const [newChapterTitle, setNewChapterTitle] = useState('New chapter');
@@ -1347,8 +1538,12 @@ function CourseBuilderEditor({
     });
     if (!bootOnceRef.current) {
       const req = String(config.query?.tab || '').trim();
-      const nextTab = req && d.tabs.some((t) => t.id === req) ? req : d.tabs[0]?.id || 'course';
-      setActiveTab(nextTab);
+      const serverTabs = Array.isArray(d.tabs) ? d.tabs : [];
+      const hasReq = req !== '' && serverTabs.some((t) => t.id === req);
+      const preferredDefault = serverTabs.some((t) => t.id === 'discovery')
+        ? 'discovery'
+        : serverTabs[0]?.id || 'course';
+      setActiveTab(hasReq ? req : preferredDefault);
       bootOnceRef.current = true;
     }
   }, [bootstrap.data, config.query?.tab]);
@@ -1421,8 +1616,21 @@ function CourseBuilderEditor({
   }, [activeTab, courseId, curriculumSelection, curriculumTree]);
 
   const tabFields = bootstrap.data?.tabFields || {};
-  const tabs = bootstrap.data?.tabs || [];
+  const rawTabs = bootstrap.data?.tabs || [];
   const users = bootstrap.data?.users || [];
+
+  const tabs = useMemo(() => {
+    if (!rawTabs.length) {
+      return [];
+    }
+    const hasVisible = (tabId: string): boolean => {
+      const raw = tabFields[tabId] || {};
+      const entries = Object.entries(raw) as SectionEntry[];
+      return entries.some(([, sec]) => sectionHasVisibleFields(tabId, sec));
+    };
+    const filtered = rawTabs.filter((t) => hasVisible(t.id));
+    return filtered.length ? filtered : rawTabs;
+  }, [rawTabs, tabFields]);
 
   useEffect(() => {
     if (tabs.length === 0) {
@@ -1430,7 +1638,7 @@ function CourseBuilderEditor({
     }
     const ids = tabs.map((t) => t.id);
     if (!ids.includes(activeTab)) {
-      setActiveTab(ids[0] || 'course');
+      setActiveTab(ids.includes('discovery') ? 'discovery' : ids[0] || 'course');
     }
   }, [tabs, activeTab]);
 
@@ -1470,6 +1678,13 @@ function CourseBuilderEditor({
   };
 
   const onSave = async (status: string) => {
+    if (status === 'publish' && activeEmbeddedSaveRef.current) {
+      const ok = await activeEmbeddedSaveRef.current();
+      if (!ok) {
+        setSaveError(new Error('Could not save the open content item. Fix errors in the editor and try Publish again.'));
+        return;
+      }
+    }
     setSaving(true);
     setSaveSuccess(null);
     setSaveError(null);
@@ -1795,13 +2010,9 @@ function CourseBuilderEditor({
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={embedded}
+      config={config}
       title={title}
       subtitle={subtitle}
       badge={isBundleUi ? 'Bundle' : courseId ? 'Editing' : 'Draft'}
@@ -1892,36 +2103,40 @@ function CourseBuilderEditor({
         <div className="rounded-xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="rounded-t-xl border-b border-slate-100 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-900/90">
             <div className="flex flex-col gap-3 px-2 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3">
-              <nav
-                className="flex min-w-0 flex-1 gap-0 overflow-x-auto pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                aria-label="Course builder steps"
-              >
-                {tabs.map((tab) => {
-                  const active = activeTab === tab.id;
-                  const short = builderTabShortLabel(tab.id, tab.title);
-                  const ic = builderTabIcon(tab.id);
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      title={tab.description ? `${tab.title} — ${tab.description}` : tab.title}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`relative flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 sm:px-4 ${
-                        active
-                          ? 'border-brand-600 text-brand-700 dark:border-brand-400 dark:text-brand-300'
-                          : 'border-transparent text-slate-500 hover:border-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <NavIcon
-                        name={ic}
-                        className={`h-4 w-4 shrink-0 sm:h-[18px] sm:w-[18px] ${active ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'}`}
-                      />
-                      <span className="sm:hidden">{short}</span>
-                      <span className="hidden sm:inline">{tab.title}</span>
-                    </button>
-                  );
-                })}
-              </nav>
+              {tabs.length > 1 ? (
+                <nav
+                  className="flex min-w-0 flex-1 gap-0 overflow-x-auto pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  aria-label="Course builder steps"
+                >
+                  {tabs.map((tab) => {
+                    const active = activeTab === tab.id;
+                    const short = builderTabShortLabel(tab.id, tab.title);
+                    const ic = builderTabIcon(tab.id);
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        title={tab.description ? `${tab.title} — ${tab.description}` : tab.title}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`relative flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 sm:px-4 ${
+                          active
+                            ? 'border-brand-600 text-brand-700 dark:border-brand-400 dark:text-brand-300'
+                            : 'border-transparent text-slate-500 hover:border-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        <NavIcon
+                          name={ic}
+                          className={`h-4 w-4 shrink-0 sm:h-[18px] sm:w-[18px] ${active ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400'}`}
+                        />
+                        <span className="sm:hidden">{short}</span>
+                        <span className="hidden sm:inline">{tab.title}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              ) : (
+                <div className="min-w-0 flex-1" />
+              )}
               <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-100/80 pt-2 sm:border-t-0 sm:pt-0">
                 {previewUrl ? (
                   <a
@@ -1957,7 +2172,9 @@ function CourseBuilderEditor({
           </div>
 
           <div
-            className={`grid min-h-[min(70vh,720px)] grid-cols-1 divide-y divide-slate-200 dark:divide-slate-800 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:divide-x lg:divide-y-0`}
+            className={`grid ${
+              activeTab === 'curriculum' ? 'min-h-[min(70vh,720px)]' : 'min-h-0'
+            } grid-cols-1 divide-y divide-slate-200 dark:divide-slate-800 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:divide-x lg:divide-y-0`}
           >
             {/* Left: curriculum outline OR in-page section nav */}
             <aside className="order-2 flex min-h-0 flex-col bg-slate-50/50 text-slate-900 dark:bg-slate-950/40 dark:text-slate-100 lg:sticky lg:top-4 lg:order-none lg:self-start lg:shrink-0">
@@ -2472,6 +2689,9 @@ function CourseBuilderEditor({
                         entityLabel: 'Chapter',
                         embedded: true,
                         forcedCourseId: courseId,
+                        exposeSave: (fn) => {
+                          activeEmbeddedSaveRef.current = fn;
+                        },
                       })}
                     </div>
                   ) : (
@@ -2483,6 +2703,9 @@ function CourseBuilderEditor({
                         backHref: builderBackHref,
                         entityLabel: entityLabelForContent(curriculumSelection.item.type),
                         embedded: true,
+                        exposeSave: (fn) => {
+                          activeEmbeddedSaveRef.current = fn;
+                        },
                       })}
                     </div>
                   )}
@@ -2536,6 +2759,7 @@ function CourseBuilderEditor({
                               values={values}
                               users={users}
                               siteUrl={siteUrl}
+                              courseId={courseId}
                               onFieldChange={handleFieldChange}
                             />
                           ));
@@ -2552,6 +2776,7 @@ function CourseBuilderEditor({
                                 values={values}
                                 users={users}
                                 siteUrl={siteUrl}
+                                courseId={courseId}
                                 onFieldChange={handleFieldChange}
                               />
                             ))}
@@ -2566,6 +2791,6 @@ function CourseBuilderEditor({
           </div>
         </div>
       )}
-    </AppShell>
+    </EmbeddableShell>
   );
 }

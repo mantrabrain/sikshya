@@ -49,7 +49,7 @@ final class AccountPageService
         $page = AccountPageModel::fromLegacy($legacy);
 
         if ($page->getUserId() <= 0) {
-            wp_safe_redirect(wp_login_url(PublicPageUrls::url('account')));
+            wp_safe_redirect(PublicPageUrls::login(PublicPageUrls::url('account')));
             exit;
         }
 

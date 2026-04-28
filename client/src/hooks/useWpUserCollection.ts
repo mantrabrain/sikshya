@@ -21,13 +21,15 @@ export function useWpUserCollection(query: WpUserCollectionQuery) {
   const { roleSlug, search, orderby, order, page = 1, perPage = 20, refreshToken } = query;
 
   return useAsyncData(async () => {
+    // WordPress core expects `roles` (CSV or single slug), not `role`. Using the wrong
+    // key silently skips server-side filtering so Students and Instructors lists match.
     const params = new URLSearchParams({
       per_page: String(perPage),
       page: String(page),
       context: 'edit',
       orderby,
       order,
-      role: roleSlug,
+      roles: roleSlug,
     });
     const q = search.trim();
     if (q) {

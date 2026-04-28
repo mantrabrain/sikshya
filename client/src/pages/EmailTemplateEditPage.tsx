@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AppShell } from '../components/AppShell';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { EmailPreviewModal } from '../components/email/EmailPreviewModal';
 import { LinkButtonSecondary } from '../components/shared/buttons';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -14,7 +14,7 @@ import { SIKSHYA_ADMIN_PAGE_FULL_WIDTH } from '../constants/shellLayout';
 /**
  * Full-page create (`template_id=new`) or edit for a single email template (no modal).
  */
-export function EmailTemplateEditPage(props: { config: SikshyaReactConfig; title: string }) {
+export function EmailTemplateEditPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const { navigateHref } = useAdminRouting();
   const rawId = (config.query.template_id || 'new').trim();
@@ -91,16 +91,12 @@ export function EmailTemplateEditPage(props: { config: SikshyaReactConfig; title
   };
 
   return (
-    <AppShell
-      page={config.page}
-      sidebarActivePage="email-hub"
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle={isNew ? 'Create a custom transactional template' : 'Edit subject, body, and availability'}
+      sidebarActivePage="email-hub"
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           <LinkButtonSecondary href={listHref}>← All templates</LinkButtonSecondary>
@@ -153,6 +149,6 @@ export function EmailTemplateEditPage(props: { config: SikshyaReactConfig; title
         html={previewHtml}
         onClose={() => setPreviewOpen(false)}
       />
-    </AppShell>
+    </EmbeddableShell>
   );
 }

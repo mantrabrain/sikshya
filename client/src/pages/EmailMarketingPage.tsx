@@ -6,6 +6,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { SkeletonCard } from '../components/shared/Skeleton';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -205,7 +206,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
   const [opts, setOpts] = useState<Record<string, unknown>>({});
   const [schema, setSchema] = useState<Schema>({});
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
+  const toast = useTopRightToast();
   const [toolUserId, setToolUserId] = useState('');
   const [toolCourseId, setToolCourseId] = useState('');
   const [toolBusy, setToolBusy] = useState(false);
@@ -291,14 +292,13 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
 
   const onSave = async (e: FormEvent) => {
     e.preventDefault();
-    setMsg(null);
     setSaving(true);
     try {
       await getSikshyaApi().post(`/pro/addons/${encodeURIComponent(addonId)}/settings`, opts);
-      setMsg({ kind: 'success', text: 'Settings saved.' });
+      toast.success('Saved', 'Settings saved.');
       void refetch();
     } catch (err) {
-      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Save failed' });
+      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -355,7 +355,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
   };
 
   const createDefaultRule = async (event_key: string) => {
-    setMsg(null);
+    toast.clear();
     try {
       const payload: Record<string, unknown> = {
         name: event_key.replace(/_/g, ' '),
@@ -367,16 +367,16 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         actions: { upsert: true, tags_add: [event_key] },
       };
       await getSikshyaApi().post(`/pro/email-marketing/rules`, payload);
-      setMsg({ kind: 'success', text: 'Rule created.' });
+      toast.success('Created', 'Rule created.');
       void refetchRules();
       setTab('rules');
     } catch (err) {
-      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Could not create rule' });
+      toast.error('Create failed', err instanceof Error ? err.message : 'Could not create rule');
     }
   };
 
   const runToolTest = async () => {
-    setMsg(null);
+    toast.clear();
     setToolBusy(true);
     try {
       const user_id = Number(toolUserId) || 0;
@@ -389,18 +389,18 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         course_id,
         event_key: 'sikshya_user_enrolled',
       });
-      setMsg({ kind: 'success', text: 'Test queued (if consent + rule match).' });
+      toast.success('Queued', 'Test queued (if consent + rule match).');
       setTab('logs');
       void refetchLogs();
     } catch (err) {
-      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Tool failed' });
+      toast.error('Tool failed', err instanceof Error ? err.message : 'Tool failed');
     } finally {
       setToolBusy(false);
     }
   };
 
   const runToolBackfill = async () => {
-    setMsg(null);
+    toast.clear();
     setToolBusy(true);
     try {
       const course_id = Number(toolCourseId) || 0;
@@ -409,11 +409,11 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         max: 200,
         days: 365,
       });
-      setMsg({ kind: 'success', text: `Backfill queued ${res?.queued ?? 0} enrollments.` });
+      toast.success('Queued', `Backfill queued ${res?.queued ?? 0} enrollments.`);
       setTab('logs');
       void refetchLogs();
     } catch (err) {
-      setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Backfill failed' });
+      toast.error('Backfill failed', err instanceof Error ? err.message : 'Backfill failed');
     } finally {
       setToolBusy(false);
     }
@@ -426,6 +426,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
       title={title}
       subtitle="Sync learners into your email marketing provider when they enroll or complete courses."
     >
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <GatedFeatureWorkspace
         mode={mode}
         featureId={addonId}
@@ -437,7 +438,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         addonEnableDescription="Turn on the Email marketing add-on to configure provider sync and beginner-friendly setup."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <div className="space-y-6">
@@ -461,7 +462,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
               {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
 
               <ListPanel className="p-6">
-                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+                <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
                   <div>
                     <h2 className="text-base font-semibold text-slate-900 dark:text-white">Beginner-friendly setup</h2>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -628,17 +629,6 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                   <ButtonPrimary type="submit" disabled={saving}>
                     {saving ? 'Saving…' : '4. Save settings'}
                   </ButtonPrimary>
-                  {msg ? (
-                    <span
-                      className={
-                        msg.kind === 'success'
-                          ? 'text-sm text-emerald-700 dark:text-emerald-300'
-                          : 'text-sm text-rose-700 dark:text-rose-300'
-                      }
-                    >
-                      {msg.text}
-                    </span>
-                  ) : null}
                 </div>
                   </form>
                 )}
@@ -736,7 +726,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                                     });
                                     void refetchRules();
                                   } catch (err) {
-                                    setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Update failed' });
+                                    toast.error('Update failed', err instanceof Error ? err.message : 'Update failed');
                                   }
                                 })();
                               }}
@@ -752,7 +742,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                                     await getSikshyaApi().delete(`/pro/email-marketing/rules/${encodeURIComponent(String(r.id))}`);
                                     void refetchRules();
                                   } catch (err) {
-                                    setMsg({ kind: 'error', text: err instanceof Error ? err.message : 'Delete failed' });
+                                    toast.error('Delete failed', err instanceof Error ? err.message : 'Delete failed');
                                   }
                                 })();
                               }}

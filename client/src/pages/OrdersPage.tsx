@@ -7,10 +7,12 @@ import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { Modal } from '../components/shared/Modal';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
+import { useAdminRouting } from '../lib/adminRouting';
 import type { SikshyaReactConfig, WpRestUser } from '../types';
 
 type OrderLine = { course_id: number; course_title: string; line_total: number };
@@ -29,6 +31,8 @@ type OrderRow = {
   payer_name: string;
   payer_email: string;
   lines: OrderLine[];
+  dynamic_fields?: Record<string, unknown>;
+  dynamic_fields_display?: Array<{ id: string; label: string; value: string }>;
 };
 
 type ListResponse = {
@@ -62,6 +66,7 @@ function canMarkOrderPaid(r: OrderRow): boolean {
 export function OrdersPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
+  const { navigateView } = useAdminRouting();
   const [page, setPage] = useState(1);
   const [markBusyId, setMarkBusyId] = useState<number | null>(null);
 
@@ -75,6 +80,10 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
   const [couponCode, setCouponCode] = useState('');
   const [markPaidNow, setMarkPaidNow] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editStatus, setEditStatus] = useState<'pending' | 'on-hold' | 'paid'>('pending');
 
   const loader = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), per_page: '30' });
@@ -130,6 +139,12 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
     setCourseIds([]);
     setCouponCode('');
     setMarkPaidNow(false);
+  };
+
+  const openEdit = (r: OrderRow) => {
+    setEditId(r.id);
+    setEditStatus((r.status === 'paid' ? 'paid' : r.status === 'on-hold' ? 'on-hold' : 'pending') as any);
+    setEditOpen(true);
   };
 
   const openCreate = () => {
@@ -353,6 +368,72 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
         </form>
       </Modal>
 
+      <Modal
+        open={editOpen}
+        title={editId ? `Edit order #${editId}` : 'Edit order'}
+        description="Change order status. Use Mark paid for offline orders to apply enrollments."
+        size="lg"
+        onClose={() => {
+          if (!markBusyId) {
+            setEditOpen(false);
+          }
+        }}
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              disabled={markBusyId !== null}
+              onClick={() => setEditOpen(false)}
+            >
+              Cancel
+            </button>
+            <ButtonPrimary
+              type="button"
+              disabled={markBusyId !== null || !editId}
+              onClick={async () => {
+                if (!editId) return;
+                setMarkBusyId(editId);
+                try {
+                  await getSikshyaApi().patch<{ ok?: boolean; message?: string }>(
+                    SIKSHYA_ENDPOINTS.admin.orderUpdate(editId),
+                    { status: editStatus }
+                  );
+                  setEditOpen(false);
+                  await refetch();
+                } catch (err) {
+                  window.alert(getErrorSummary(err));
+                } finally {
+                  setMarkBusyId(null);
+                }
+              }}
+            >
+              {markBusyId === editId ? 'Saving…' : 'Save'}
+            </ButtonPrimary>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <label className="block text-sm text-slate-700 dark:text-slate-200">
+            Status
+            <select
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+              value={editStatus}
+              onChange={(e) => setEditStatus(e.target.value as any)}
+              disabled={markBusyId !== null}
+            >
+              <option value="pending">pending</option>
+              <option value="on-hold">on-hold</option>
+              <option value="paid">paid</option>
+            </select>
+          </label>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Setting status to <strong>paid</strong> here updates the row, but does not run fulfillment hooks. For offline
+            payments, prefer <strong>Mark paid</strong>.
+          </div>
+        </div>
+      </Modal>
+
       <ListPanel>
         {loading ? (
           <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading orders…</div>
@@ -381,6 +462,16 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                     <tr key={r.id} className="bg-white dark:bg-slate-900">
                       <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-400">
                         {formatPostDate(r.created_at)}
+                        <div className="mt-1">
+                          <button
+                            type="button"
+                            className="text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400"
+                            onClick={() => navigateView('order', { id: String(r.id) })}
+                            title="View order details"
+                          >
+                            Order #{r.id}
+                          </button>
+                        </div>
                       </td>
                       <td className="px-5 py-3.5">
                         <a
@@ -427,31 +518,44 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                         <StatusBadge status={r.status} />
                       </td>
                       <td className="px-5 py-3.5">
-                        {canMarkOrderPaid(r) ? (
-                          <button
-                            type="button"
-                            disabled={markBusyId === r.id || loading}
-                            onClick={async () => {
-                              setMarkBusyId(r.id);
-                              try {
-                                await getSikshyaApi().post<{ ok?: boolean; message?: string }>(
-                                  SIKSHYA_ENDPOINTS.admin.ordersMarkPaid(r.id),
-                                  {}
-                                );
-                                await refetch();
-                              } catch (err) {
-                                window.alert(getErrorSummary(err));
-                              } finally {
-                                setMarkBusyId(null);
-                              }
-                            }}
-                            className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/40"
-                          >
-                            {markBusyId === r.id ? 'Marking…' : 'Mark paid'}
-                          </button>
-                        ) : (
-                          <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
-                        )}
+                        <div onClick={(e) => e.stopPropagation()} className="flex justify-end">
+                          {(() => {
+                            const items: RowActionItem[] = [
+                              {
+                                key: 'view',
+                                label: 'View details',
+                                onClick: () => navigateView('order', { id: String(r.id) }),
+                              },
+                              {
+                                key: 'edit',
+                                label: 'Change status',
+                                onClick: () => openEdit(r),
+                              },
+                            ];
+                            if (canMarkOrderPaid(r)) {
+                              items.push({
+                                key: 'mark_paid',
+                                label: markBusyId === r.id ? 'Marking…' : 'Mark paid',
+                                disabled: markBusyId === r.id || loading,
+                                onClick: async () => {
+                                  setMarkBusyId(r.id);
+                                  try {
+                                    await getSikshyaApi().post<{ ok?: boolean; message?: string }>(
+                                      SIKSHYA_ENDPOINTS.admin.ordersMarkPaid(r.id),
+                                      {}
+                                    );
+                                    await refetch();
+                                  } catch (err) {
+                                    window.alert(getErrorSummary(err));
+                                  } finally {
+                                    setMarkBusyId(null);
+                                  }
+                                },
+                              });
+                            }
+                            return <RowActionsMenu items={items} ariaLabel={`Order actions for #${r.id}`} />;
+                          })()}
+                        </div>
                       </td>
                     </tr>
                   ))}

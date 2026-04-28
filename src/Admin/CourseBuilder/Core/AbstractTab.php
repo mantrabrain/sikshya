@@ -165,6 +165,10 @@ abstract class AbstractTab implements TabInterface
             $section_fields = $section_config['fields'] ?? [];
 
             foreach ($section_fields as $field_id => $field_config) {
+                if (!empty($field_config['skip_persistence'])) {
+                    continue;
+                }
+
                 if (!$this->fieldDependenciesMet($data, $field_config)) {
                     continue;
                 }
@@ -350,6 +354,10 @@ abstract class AbstractTab implements TabInterface
                 // featured_image is stored as _thumbnail_id via set_post_thumbnail();
                 // skip the redundant _sikshya_featured_image URL meta.
                 if ($field_id === 'featured_image') {
+                    continue;
+                }
+
+                if (!empty($field_config['skip_persistence'])) {
                     continue;
                 }
 
@@ -539,6 +547,10 @@ abstract class AbstractTab implements TabInterface
             $section_fields = $section_config['fields'] ?? [];
 
             foreach ($section_fields as $field_id => $field_config) {
+                if (!empty($field_config['skip_persistence'])) {
+                    continue;
+                }
+
                 $meta_key = '_sikshya_' . $field_id;
                 $value = $meta_repo
                     ? $meta_repo->get($course_id, $meta_key, true)
@@ -680,6 +692,10 @@ abstract class AbstractTab implements TabInterface
                 $current_group = [];
 
                 foreach ($section_fields as $field_id => $field_config) {
+                    if (!empty($field_config['skip_persistence'])) {
+                        continue;
+                    }
+
                     $layout = $field_config['layout'] ?? 'single';
 
                     // If layout changed, render the current group

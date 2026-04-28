@@ -27,7 +27,7 @@ use Ramsey\Uuid\Type\NumberInterface;
 /**
  * A calculator using the brick/math library for arbitrary-precision arithmetic
  *
- * @immutable
+ * @psalm-immutable
  */
 final class BrickMathCalculator implements CalculatorInterface
 {
@@ -52,7 +52,6 @@ final class BrickMathCalculator implements CalculatorInterface
             $sum = $sum->plus($addend->toString());
         }
 
-        /** @phpstan-ignore possiblyImpure.new */
         return new IntegerObject((string) $sum);
     }
 
@@ -64,7 +63,6 @@ final class BrickMathCalculator implements CalculatorInterface
             $difference = $difference->minus($subtrahend->toString());
         }
 
-        /** @phpstan-ignore possiblyImpure.new */
         return new IntegerObject((string) $difference);
     }
 
@@ -76,7 +74,6 @@ final class BrickMathCalculator implements CalculatorInterface
             $product = $product->multipliedBy($multiplier->toString());
         }
 
-        /** @phpstan-ignore possiblyImpure.new */
         return new IntegerObject((string) $product);
     }
 
@@ -84,9 +81,8 @@ final class BrickMathCalculator implements CalculatorInterface
         int $roundingMode,
         int $scale,
         NumberInterface $dividend,
-        NumberInterface ...$divisors,
+        NumberInterface ...$divisors
     ): NumberInterface {
-        /** @phpstan-ignore possiblyImpure.methodCall */
         $brickRounding = $this->getBrickRoundingMode($roundingMode);
 
         $quotient = BigDecimal::of($dividend->toString());
@@ -96,18 +92,15 @@ final class BrickMathCalculator implements CalculatorInterface
         }
 
         if ($scale === 0) {
-            /** @phpstan-ignore possiblyImpure.new */
             return new IntegerObject((string) $quotient->toBigInteger());
         }
 
-        /** @phpstan-ignore possiblyImpure.new */
         return new Decimal((string) $quotient);
     }
 
     public function fromBase(string $value, int $base): IntegerObject
     {
         try {
-            /** @phpstan-ignore possiblyImpure.new */
             return new IntegerObject((string) BigInteger::fromBase($value, $base));
         } catch (MathException | \InvalidArgumentException $exception) {
             throw new InvalidArgumentException(
@@ -133,7 +126,6 @@ final class BrickMathCalculator implements CalculatorInterface
 
     public function toHexadecimal(IntegerObject $value): Hexadecimal
     {
-        /** @phpstan-ignore possiblyImpure.new */
         return new Hexadecimal($this->toBase($value, 16));
     }
 
@@ -144,11 +136,9 @@ final class BrickMathCalculator implements CalculatorInterface
 
     /**
      * Maps ramsey/uuid rounding modes to those used by brick/math
-     *
-     * @return BrickMathRounding::*
      */
-    private function getBrickRoundingMode(int $roundingMode)
+    private function getBrickRoundingMode(int $roundingMode): int
     {
-        return self::ROUNDING_MODE_MAP[$roundingMode] ?? BrickMathRounding::UNNECESSARY;
+        return self::ROUNDING_MODE_MAP[$roundingMode] ?? 0;
     }
 }

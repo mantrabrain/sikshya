@@ -112,7 +112,7 @@ class CourseInfoTab extends AbstractTab
             'basic_info' => [
                 'section' => [
                     'title' => __('Basic information', 'sikshya'),
-                    'description' => __('Title, summary, and topic tags — the first things people read on your course page.', 'sikshya'),
+                    'description' => __('Title, summary, and category — the first things people read on your course page.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>',
@@ -162,14 +162,6 @@ class CourseInfoTab extends AbstractTab
                         ? (string) (sikshya_brand_profile('admin')['brandShortName'] ?? __('Sikshya', 'sikshya'))
                         : __('Sikshya', 'sikshya')
                 ),
-                        'sanitization' => 'sanitize_text_field',
-                        'layout' => 'two_column',
-                ],
-                'course_tags' => [
-                'type' => 'text',
-                'label' => __('Tags (optional)', 'sikshya'),
-                'placeholder' => __('wordpress, beginner, business', 'sikshya'),
-                'description' => __('Comma-separated keywords to help people find this course. No # symbols needed.', 'sikshya'),
                         'sanitization' => 'sanitize_text_field',
                         'layout' => 'two_column',
                 ],
@@ -344,13 +336,41 @@ class CourseInfoTab extends AbstractTab
                                 'label' => __('Title', 'sikshya'),
                                 'placeholder' => __('Resource name', 'sikshya'),
                             ],
+                            'attachment_id' => [
+                                'type' => 'number',
+                                'label' => __('Media file (attachment ID)', 'sikshya'),
+                                'placeholder' => '',
+                            ],
                             'url' => [
                                 'type' => 'url',
-                                'label' => __('URL', 'sikshya'),
+                                'label' => __('File URL', 'sikshya'),
                                 'placeholder' => 'https://',
                             ],
                         ],
                         'sanitization' => 'sanitize_text_field',
+                    ],
+                    'course_announcements' => [
+                        'type' => 'repeater_group',
+                        'label' => __('Announcements', 'sikshya'),
+                        'add_button_text' => __('Add announcement', 'sikshya'),
+                        'description' => __('Messages shown to enrolled learners inside the Learn UI (lesson/quiz/assignment screens).', 'sikshya'),
+                        'subfields' => [
+                            'title' => [
+                                'type' => 'text',
+                                'label' => __('Title', 'sikshya'),
+                                'placeholder' => __('Announcement title', 'sikshya'),
+                            ],
+                            'message' => [
+                                'type' => 'textarea',
+                                'label' => __('Message', 'sikshya'),
+                                'placeholder' => __('Short update for learners…', 'sikshya'),
+                            ],
+                            'date' => [
+                                'type' => 'date',
+                                'label' => __('Date', 'sikshya'),
+                                'placeholder' => __('YYYY-MM-DD', 'sikshya'),
+                            ],
+                        ],
                     ],
                 ],
             ],
@@ -429,7 +449,7 @@ class CourseInfoTab extends AbstractTab
     }
 
     /**
-     * Assign course category and tags from builder data.
+     * Assign course category from builder data.
      *
      * @param int   $course_id Course post ID.
      * @param array $data      Form data.
@@ -444,16 +464,6 @@ class CourseInfoTab extends AbstractTab
             }
         } else {
             wp_set_object_terms($course_id, [], Taxonomies::COURSE_CATEGORY, false);
-        }
-
-        if (array_key_exists('course_tags', $data)) {
-            $raw = sanitize_text_field(wp_unslash((string) $data['course_tags']));
-            $tags = array_filter(array_map('trim', explode(',', $raw)));
-            if (!empty($tags)) {
-                wp_set_object_terms($course_id, $tags, Taxonomies::COURSE_TAG, false);
-            } else {
-                wp_set_object_terms($course_id, [], Taxonomies::COURSE_TAG, false);
-            }
         }
     }
 
@@ -489,11 +499,6 @@ class CourseInfoTab extends AbstractTab
         $cat_terms = wp_get_post_terms($course_id, Taxonomies::COURSE_CATEGORY, ['number' => 1]);
         if (!is_wp_error($cat_terms) && !empty($cat_terms)) {
             $data['category'] = $cat_terms[0]->slug;
-        }
-
-        $tag_terms = wp_get_post_terms($course_id, Taxonomies::COURSE_TAG, ['fields' => 'names']);
-        if (!is_wp_error($tag_terms) && !empty($tag_terms)) {
-            $data['course_tags'] = implode(', ', $tag_terms);
         }
 
         $thumb_id = (int) get_post_thumbnail_id($course_id);

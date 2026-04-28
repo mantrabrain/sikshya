@@ -66,7 +66,7 @@ export function WPMediaPickerField(props: Props) {
     frameRef.current.open();
   }, [imageOnly, onChange, onAttachmentIdChange]);
 
-  const zoneLabel = value ? 'Replace image' : 'Upload or choose image';
+  const zoneLabel = value ? (imageOnly ? 'Replace image' : 'Replace file') : imageOnly ? 'Upload or choose image' : 'Upload or choose file';
   const hint = placeholder || 'Opens the WordPress media library. You can upload a new file and insert it.';
 
   const zoneClass = value
@@ -88,9 +88,15 @@ export function WPMediaPickerField(props: Props) {
         className={`group relative flex w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/80 px-3 text-center transition hover:border-brand-300 hover:bg-brand-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800/40 dark:hover:border-brand-500/50 dark:hover:bg-brand-950/20 ${zoneClass}`}
       >
         {value ? (
-          <div className="pointer-events-none absolute inset-1.5 overflow-hidden rounded-lg border border-slate-200/80 bg-white dark:border-slate-700 dark:bg-slate-900">
-            <img src={value} alt="" className="h-full w-full object-contain object-center" />
-          </div>
+          imageOnly ? (
+            <div className="pointer-events-none absolute inset-1.5 overflow-hidden rounded-lg border border-slate-200/80 bg-white dark:border-slate-700 dark:bg-slate-900">
+              <img src={value} alt="" className="h-full w-full object-contain object-center" />
+            </div>
+          ) : (
+            <div className="pointer-events-none absolute inset-1.5 flex items-center justify-center overflow-hidden rounded-lg border border-slate-200/80 bg-white px-3 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              <span className="truncate">{value}</span>
+            </div>
+          )
         ) : (
           <>
             <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-600">
@@ -118,15 +124,15 @@ export function WPMediaPickerField(props: Props) {
               onChange('');
             }}
           >
-            Remove image
+            {imageOnly ? 'Remove image' : 'Remove file'}
           </button>
           <input
             type="text"
             readOnly
             className={className ? `${className} max-w-full text-xs` : 'max-w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300'}
             value={value}
-            title="Image URL"
-            aria-label="Image URL"
+            title={imageOnly ? 'Image URL' : 'File URL'}
+            aria-label={imageOnly ? 'Image URL' : 'File URL'}
           />
         </div>
       ) : (

@@ -8,9 +8,10 @@ use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Licensing\Pro;
+use Sikshya\Services\Settings;
 
 /**
- * One-time checkout: offline (manual), Stripe PaymentIntent, PayPal order creation.
+ * One-time checkout: offline (manual), Stripe Checkout Session, PayPal order creation, etc.
  *
  * @package Sikshya\Commerce
  */
@@ -200,8 +201,8 @@ final class CheckoutService
      */
     public function quoteTotalsForCourses(int $user_id, array $course_ids, string $coupon_code = '', int $bundle_id = 0): array
     {
-        if ($user_id <= 0) {
-            throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
+        if ($user_id <= 0 && !Settings::isTruthy(Settings::get('enable_guest_checkout', true))) {
+            throw new \InvalidArgumentException(__('Please sign in to continue checkout.', 'sikshya'));
         }
 
         $this->assertCheckoutOrderEligibility($user_id, $course_ids);
@@ -233,8 +234,8 @@ final class CheckoutService
      */
     public function createPendingOrderForCourses(int $user_id, array $course_ids, string $coupon_code = '', int $bundle_id = 0): array
     {
-        if ($user_id <= 0) {
-            throw new \InvalidArgumentException(__('Invalid checkout parameters.', 'sikshya'));
+        if ($user_id <= 0 && !Settings::isTruthy(Settings::get('enable_guest_checkout', true))) {
+            throw new \InvalidArgumentException(__('Please sign in to continue checkout.', 'sikshya'));
         }
 
         $this->assertCheckoutOrderEligibility($user_id, $course_ids);
@@ -432,13 +433,26 @@ final class CheckoutService
             if (!$this->isStripeEnabled()) {
                 throw new \RuntimeException(__('Stripe is not available on this site.', 'sikshya'));
             }
-            return $this->createStripePaymentIntent($order);
+            return $this->createStripeCheckoutSession($order);
         }
 
         if ($gateway === 'paypal') {
             if (!$this->isPayPalEnabled()) {
                 throw new \RuntimeException(__('PayPal is disabled.', 'sikshya'));
             }
+            $mode = sanitize_key((string) $this->settings()->getSetting('paypal_integration_mode', 'advanced'));
+            if (!in_array($mode, ['simple', 'advanced'], true)) {
+                $mode = 'advanced';
+            }
+            // If email is configured, use simple flow even if mode is still "advanced".
+            $email = trim((string) $this->settings()->getSetting('paypal_email', ''));
+            if ($email !== '' && is_email($email)) {
+                $mode = 'simple';
+            }
+            if ($mode === 'simple') {
+                return $this->createPayPalStandardRedirect($order);
+            }
+
             return $this->createPayPalOrder($order);
         }
 
@@ -488,7 +502,10 @@ final class CheckoutService
         throw new \InvalidArgumentException(__('Unsupported gateway.', 'sikshya'));
     }
 
-    private function createStripePaymentIntent(object $order): array
+    /**
+     * Stripe Checkout hosted page (redirect). Matches the redirect pattern used for PayPal / Mollie.
+     */
+    private function createStripeCheckoutSession(object $order): array
     {
         $secret = (string) $this->settings()->getSetting('stripe_secret_key', '');
         if ($secret === '') {
@@ -497,17 +514,63 @@ final class CheckoutService
 
         $amount = (float) $order->total;
         $currency = strtolower((string) $order->currency);
+        if (strlen($currency) !== 3) {
+            $currency = 'usd';
+        }
         $minor = self::toMinorUnits($amount, $currency);
 
+        $checkoutBase = PublicPageUrls::url('checkout');
+
+        // Guests return from Stripe without a WP session. Include public_token so
+        // the checkout return page can confirm payment and redirect to receipt.
+        $publicToken = isset($order->public_token) && is_string($order->public_token) ? (string) $order->public_token : '';
+        if ($publicToken === '') {
+            $publicToken = (new \Sikshya\Database\Repositories\OrderRepository())->ensurePublicToken((int) $order->id);
+        }
+
+        // Stripe replaces the literal `{CHECKOUT_SESSION_ID}` in success_url; do not URL-encode that placeholder.
+        $successUrl = add_query_arg(
+            [
+                'sikshya_stripe_return' => '1',
+                'order_id' => (string) $order->id,
+                'public_token' => $publicToken,
+            ],
+            $checkoutBase
+        );
+        $successUrl .= (strpos($successUrl, '?') !== false ? '&' : '?') . 'checkout_session_id={CHECKOUT_SESSION_ID}';
+        $cancelUrl = add_query_arg(
+            [
+                'sikshya_stripe_cancel' => '1',
+                'order_id' => (string) $order->id,
+                'public_token' => $publicToken,
+            ],
+            $checkoutBase
+        );
+
+        $user = wp_get_current_user();
+        $email = ($user && $user->exists()) ? (string) $user->user_email : '';
+
         $body = [
-            'amount' => (string) $minor,
-            'currency' => $currency,
+            'mode' => 'payment',
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'client_reference_id' => (string) $order->id,
             'metadata[order_id]' => (string) $order->id,
-            'automatic_payment_methods[enabled]' => 'true',
+            'line_items[0][price_data][currency]' => $currency,
+            'line_items[0][price_data][unit_amount]' => (string) $minor,
+            'line_items[0][price_data][product_data][name]' => sprintf(
+                /* translators: %d: order id */
+                __('Sikshya order %d', 'sikshya'),
+                (int) $order->id
+            ),
+            'line_items[0][quantity]' => '1',
         ];
+        if ($email !== '' && is_email($email)) {
+            $body['customer_email'] = $email;
+        }
 
         $response = wp_remote_post(
-            'https://api.stripe.com/v1/payment_intents',
+            'https://api.stripe.com/v1/checkout/sessions',
             [
                 'timeout' => 30,
                 'headers' => [
@@ -523,36 +586,29 @@ final class CheckoutService
 
         $code = wp_remote_retrieve_response_code($response);
         $json = json_decode((string) wp_remote_retrieve_body($response), true);
-        if ($code >= 400 || !is_array($json) || empty($json['id'])) {
-            $msg = is_array($json) && isset($json['error']['message']) ? (string) $json['error']['message'] : 'Stripe error';
+        if ($code >= 400 || !is_array($json) || empty($json['id']) || empty($json['url'])) {
+            $msg = is_array($json) && isset($json['error']['message']) ? (string) $json['error']['message'] : __('Stripe Checkout session could not be created.', 'sikshya');
             throw new \RuntimeException($msg);
         }
 
-        $pi_id = (string) $json['id'];
-        $client_secret = (string) ($json['client_secret'] ?? '');
-        $this->orders->updateOrder((int) $order->id, ['gateway_intent_id' => $pi_id]);
+        $sessionId = (string) $json['id'];
+        $this->orders->updateOrder((int) $order->id, ['gateway_intent_id' => $sessionId]);
 
         return [
-            'payment_intent_id' => $pi_id,
-            'client_secret' => $client_secret,
+            'approval_url' => (string) $json['url'],
+            'stripe_checkout_session_id' => $sessionId,
         ];
     }
 
     /**
-     * PayPal REST host: explicit {@see paypal_mode}, else derive from {@see enable_test_mode}.
+     * PayPal REST host: uses global {@see enable_test_mode} only.
      */
     private function paypalRestBase(): string
     {
-        $mode = strtolower(trim((string) $this->settings()->getSetting('paypal_mode', '')));
-        if ($mode === '') {
-            $test = $this->settings()->getSetting('enable_test_mode', true);
-            $is_test = $test === true || $test === 1 || $test === '1' || $test === 'true' || $test === 'yes';
-            $mode = $is_test ? 'sandbox' : 'live';
-        }
+        $test = $this->settings()->getSetting('enable_test_mode', true);
+        $is_test = $test === true || $test === 1 || $test === '1' || $test === 'true' || $test === 'yes' || $test === 'on';
 
-        return in_array($mode, ['live', 'production'], true)
-            ? 'https://api-m.paypal.com'
-            : 'https://api-m.sandbox.paypal.com';
+        return $is_test ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
     }
 
     private function createPayPalOrder(object $order): array
@@ -662,7 +718,183 @@ final class CheckoutService
     }
 
     /**
-     * Confirm Stripe PaymentIntent server-side.
+     * PayPal Standard (email-only) redirect, mirroring Yatra "Simple mode".
+     *
+     * This flow completes via PayPal IPN callback to `/sikshya/v1/webhooks/paypal-ipn`.
+     *
+     * @return array{approval_url: string}
+     */
+    private function createPayPalStandardRedirect(object $order): array
+    {
+        $email = trim((string) $this->settings()->getSetting('paypal_email', ''));
+        if ($email === '' || !is_email($email)) {
+            throw new \RuntimeException(__('PayPal email is required for Simple mode.', 'sikshya'));
+        }
+
+        $test = $this->settings()->getSetting('enable_test_mode', true);
+        $is_test = $test === true || $test === 1 || $test === '1' || $test === 'true' || $test === 'yes' || $test === 'on';
+        $paypalUrl = $is_test ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr';
+
+        $amount = number_format((float) $order->total, 2, '.', '');
+        $currency = strtoupper((string) $order->currency);
+        if (strlen($currency) !== 3) {
+            $currency = 'USD';
+        }
+
+        // After payment, PayPal returns here (we do NOT auto-confirm in-browser; IPN is source of truth).
+        $returnUrl = \Sikshya\Frontend\Public\PublicPageUrls::orderView((string) ($order->public_token ?? ''));
+        $cancelUrl = add_query_arg(
+            [
+                'sikshya_paypal_cancel' => '1',
+                'order_id' => (string) $order->id,
+            ],
+            \Sikshya\Frontend\Public\PublicPageUrls::url('checkout')
+        );
+
+        $params = [
+            'cmd' => '_xclick',
+            'business' => $email,
+            'item_name' => sprintf(
+                /* translators: %d: order id */
+                __('Sikshya order %d', 'sikshya'),
+                (int) $order->id
+            ),
+            'item_number' => (string) $order->id,
+            'amount' => $amount,
+            'currency_code' => $currency,
+            'return' => $returnUrl,
+            'cancel_return' => $cancelUrl,
+            'notify_url' => rest_url('sikshya/v1/webhooks/paypal-ipn'),
+            'custom' => wp_json_encode(['order_id' => (int) $order->id]),
+            'no_shipping' => '1',
+            'no_note' => '1',
+            'rm' => '2',
+        ];
+
+        $this->orders->updateOrder((int) $order->id, [
+            'gateway_intent_id' => 'paypal-std-' . (int) $order->id,
+        ]);
+
+        return [
+            'approval_url' => $paypalUrl . '?' . http_build_query($params),
+        ];
+    }
+
+    /**
+     * Create or reuse a Stripe PaymentIntent for inline checkout (Payment Element).
+     *
+     * @return array{payment_intent_id: string, client_secret: string}
+     */
+    public function createOrReuseStripePaymentIntent(object $order, string $receipt_email = ''): array
+    {
+        $secret = (string) $this->settings()->getSetting('stripe_secret_key', '');
+        if ($secret === '') {
+            throw new \RuntimeException(__('Stripe is not configured.', 'sikshya'));
+        }
+
+        $currency = strtoupper((string) $order->currency);
+        $amount = (float) $order->total;
+        $minor = self::toMinorUnits($amount, $currency);
+
+        $existing = isset($order->gateway_intent_id) ? (string) $order->gateway_intent_id : '';
+        if (is_string($existing) && str_starts_with($existing, 'pi_')) {
+            $pi = $this->retrieveStripePaymentIntent($existing);
+            $status = is_array($pi) ? (string) ($pi['status'] ?? '') : '';
+            $piAmt = is_array($pi) ? (int) ($pi['amount'] ?? 0) : 0;
+            $piCur = is_array($pi) && isset($pi['currency']) ? strtoupper((string) $pi['currency']) : '';
+            $clientSecret = is_array($pi) ? (string) ($pi['client_secret'] ?? '') : '';
+            if ($clientSecret !== '' && $status !== 'succeeded' && $piAmt === $minor && ($piCur === '' || $piCur === $currency)) {
+                return [
+                    'payment_intent_id' => $existing,
+                    'client_secret' => $clientSecret,
+                ];
+            }
+        }
+
+        $body = [
+            'amount' => (string) $minor,
+            'currency' => strtolower($currency),
+            'metadata[order_id]' => (string) (int) $order->id,
+            'description' => sprintf(
+                /* translators: %d: order id */
+                __('Sikshya order %d', 'sikshya'),
+                (int) $order->id
+            ),
+            // Let Stripe decide eligible methods for the Payment Element.
+            'automatic_payment_methods[enabled]' => 'true',
+            'automatic_payment_methods[allow_redirects]' => 'never',
+        ];
+        if ($receipt_email !== '' && is_email($receipt_email)) {
+            $body['receipt_email'] = $receipt_email;
+        }
+
+        $response = wp_remote_post(
+            'https://api.stripe.com/v1/payment_intents',
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $secret,
+                ],
+                'body' => $body,
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            throw new \RuntimeException($response->get_error_message());
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+        if ($code >= 400 || !is_array($json) || empty($json['id']) || empty($json['client_secret'])) {
+            $msg = is_array($json) && isset($json['error']['message']) ? (string) $json['error']['message'] : __('Stripe PaymentIntent could not be created.', 'sikshya');
+            throw new \RuntimeException($msg);
+        }
+
+        $pid = (string) $json['id'];
+        $client_secret = (string) $json['client_secret'];
+
+        $this->orders->updateOrder((int) $order->id, [
+            'gateway' => 'stripe',
+            'gateway_intent_id' => $pid,
+        ]);
+
+        return [
+            'payment_intent_id' => $pid,
+            'client_secret' => $client_secret,
+        ];
+    }
+
+    /**
+     * Load a Stripe Checkout Session (after customer returns from hosted checkout).
+     */
+    public function retrieveStripeCheckoutSession(string $session_id): ?array
+    {
+        $secret = (string) $this->settings()->getSetting('stripe_secret_key', '');
+        if ($secret === '' || $session_id === '') {
+            return null;
+        }
+
+        $response = wp_remote_get(
+            'https://api.stripe.com/v1/checkout/sessions/' . rawurlencode($session_id),
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $secret,
+                ],
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        $json = json_decode((string) wp_remote_retrieve_body($response), true);
+
+        return is_array($json) ? $json : null;
+    }
+
+    /**
+     * Confirm Stripe PaymentIntent server-side (legacy in-flight payments).
      */
     public function retrieveStripePaymentIntent(string $payment_intent_id): ?array
     {

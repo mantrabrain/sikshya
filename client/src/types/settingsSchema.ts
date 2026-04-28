@@ -14,6 +14,11 @@ export type SettingsField = {
   max?: number;
   /** For number inputs (e.g. tax rate decimals). */
   step?: number;
+  /** Conditional visibility (mirrors FieldConfig). */
+  depends_on?: string;
+  depends_value?: string;
+  depends_in?: string[];
+  depends_all?: Array<{ on: string; value?: string }>;
   /**
    * Pro-gating metadata populated by `SettingsManager::decorateSchemaGating()`.
    * When `locked` is true the field is read-only and rendered with an upgrade

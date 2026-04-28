@@ -304,22 +304,162 @@
 }
 
 .sikshya-checkout-gateways {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--sikshya-spacing-3);
 }
 
 @media (min-width: 480px) {
   .sikshya-checkout-gateways {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
   }
 }
 
 .sikshya-checkout-page__gateway-btn {
-  min-height: 2.75rem;
-  justify-content: center;
+  width: 100%;
+  min-height: 3.25rem;
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  gap: var(--sikshya-spacing-3);
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-xl);
+}
+
+.sikshya-checkout-gateways__selector {
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 999px;
+  border: 2px solid var(--sik-f-border);
+  background: var(--sik-f-surface);
+  box-shadow: inset 0 0 0 4px var(--sik-f-surface);
+  flex: 0 0 auto;
+}
+
+.sikshya-checkout-page__gateway-btn.is-selected .sikshya-checkout-gateways__selector {
+  border-color: var(--sikshya-primary);
+  box-shadow: inset 0 0 0 4px var(--sikshya-primary);
+}
+
+.sikshya-checkout-errors {
+  margin-bottom: var(--sikshya-spacing-4);
+  padding: var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-xl);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  background: rgba(244, 63, 94, 0.08);
+  color: #9f1239;
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.5;
+}
+
+.sikshya-checkout-errors__title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-weight: 800;
+  color: #881337;
+}
+
+.sikshya-checkout-errors__text {
+  margin: 0;
+}
+
+.sikshya-checkout-page__gateway-btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  filter: grayscale(0.1);
+}
+
+.sikshya-checkout-gateways__icon {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.sikshya-checkout-gateways__meta {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+  align-items: flex-start;
+}
+
+.sikshya-checkout-gateways__label {
+  font-weight: 700;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-gateways__hint {
+  font-size: var(--sikshya-font-size-xs);
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-page__gateway-btn.is-selected {
+  border-color: var(--sikshya-primary-light);
+  box-shadow: 0 0 0 1px var(--sikshya-primary-light);
+}
+
+.sikshya-checkout-gateway-details {
+  margin-top: var(--sikshya-spacing-3);
+  padding: var(--sikshya-spacing-4);
+  background: var(--sik-f-surface-muted);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-xl);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text);
+}
+
+.sikshya-checkout-gateway-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-checkout-gateway-ui {
+  padding: var(--sikshya-spacing-4);
+  background: var(--sik-f-surface-muted);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-xl);
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text);
+}
+
+.sikshya-checkout-gateway-ui__title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-weight: 700;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-gateway-ui__text {
+  margin: 0;
+  color: var(--sik-f-text-muted);
+  line-height: 1.5;
+}
+
+.sikshya-checkout-gateway-details__title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-weight: 700;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-gateway-details__text {
+  margin: 0;
+  color: var(--sik-f-text-muted);
+  line-height: 1.5;
+}
+
+.sikshya-checkout-gateways__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  border: 1px solid var(--sik-f-border);
+  background: var(--sik-f-surface-muted);
+  color: var(--sik-f-text-muted);
 }
 
 .sikshya-checkout-page__gateway-btn:focus-visible {
@@ -378,6 +518,7 @@
   padding: var(--sikshya-spacing-3) 0;
   border-bottom: 1px solid var(--sikshya-gray-100);
   font-size: var(--sikshya-font-size-sm);
+  align-items: center;
 }
 
 .sikshya-checkout-page__line-thumb {

@@ -65,11 +65,12 @@ final class InstructorAccountView
         $is_instructor = InstructorContext::isInstructor($uid);
         $acc['is_instructor'] = $is_instructor;
         $acc['urls']['account_instructor'] = PublicPageUrls::accountViewUrl(self::VIEW_SLUG);
+        // Prefer Sikshya's admin React course manager (consistent UX + builder entrypoint).
         $acc['urls']['edit_courses'] = current_user_can('edit_sikshya_courses')
-            ? admin_url('edit.php?post_type=' . PostTypes::COURSE)
+            ? admin_url('admin.php?page=sikshya&view=courses')
             : '';
         $acc['urls']['add_new_course'] = current_user_can('edit_sikshya_courses')
-            ? admin_url('post-new.php?post_type=' . PostTypes::COURSE)
+            ? admin_url('admin.php?page=sikshya&view=courses&create=1')
             : '';
 
         if (!$is_instructor || $uid <= 0) {
@@ -156,7 +157,7 @@ final class InstructorAccountView
         $completed = (int) ($data['enrollments_completed'] ?? 0);
         $url = (string) ($acc['urls']['account_instructor'] ?? '');
 
-        echo '<section class="sik-acc-panel" aria-label="' . esc_attr__('Teaching summary', 'sikshya') . '" style="margin-top:0.5rem;">';
+        echo '<section class="sik-acc-panel" aria-label="' . esc_attr__('Teaching summary', 'sikshya') . '">';
         echo '<div class="sik-acc-panel__head">';
         echo '<h2 class="sik-acc-panel__title">' . esc_html__('Teaching summary', 'sikshya') . '</h2>';
         if ($url !== '') {

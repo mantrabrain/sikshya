@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { AppShell } from '../components/AppShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
+import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
@@ -31,7 +31,7 @@ type GradeScaleRow = {
 type GradeScaleListResp = { ok?: boolean; scales?: GradeScale[] };
 type GradeScaleGetResp = { ok?: boolean; scale?: GradeScale; rows?: GradeScaleRow[] };
 
-export function GradingPage(props: { config: SikshyaReactConfig; title: string }) {
+export function GradingPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const featureOk = isFeatureEnabled(config, 'gradebook');
   const addon = useAddonEnabled('gradebook');
@@ -157,14 +157,9 @@ export function GradingPage(props: { config: SikshyaReactConfig; title: string }
   };
 
   return (
-    <AppShell
-      page={config.page}
-      version={config.version}
-      navigation={config.navigation as NavItem[]}
-      adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
-      branding={config.branding}
+    <EmbeddableShell
+      embedded={props.embedded}
+      config={config}
       title={title}
       subtitle="Configure grading scales (letters, points/GPA) and reuse them across courses."
       pageActions={
@@ -191,14 +186,14 @@ export function GradingPage(props: { config: SikshyaReactConfig; title: string }
         addonEnableDescription="Enable the Gradebook add-on for scales, course weights in the builder, and the full admin gradebook."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {scaleListError ? (
           <ApiErrorPanel error={scaleListError} title="Could not load grade scales" onRetry={() => refetchScales()} />
         ) : (
           <ListPanel className="p-5">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
               <div className="lg:col-span-1">
                 <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
                   {scaleListLoading ? (
@@ -308,7 +303,7 @@ export function GradingPage(props: { config: SikshyaReactConfig; title: string }
             </div>
           }
         >
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <label className="block text-sm text-slate-700 dark:text-slate-300">
               Name
               <input
@@ -446,7 +441,7 @@ export function GradingPage(props: { config: SikshyaReactConfig; title: string }
           </div>
         </Modal>
       </GatedFeatureWorkspace>
-    </AppShell>
+    </EmbeddableShell>
   );
 }
 

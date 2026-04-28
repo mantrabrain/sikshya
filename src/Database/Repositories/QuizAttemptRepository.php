@@ -35,7 +35,7 @@ class QuizAttemptRepository
 
         return (int) $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$this->attempts_table} WHERE user_id = %d AND quiz_id = %d AND status IN ('completed','graded')",
+                "SELECT COUNT(*) FROM {$this->attempts_table} WHERE user_id = %d AND quiz_id = %d AND status IN ('completed','graded','passed')",
                 $user_id,
                 $quiz_id
             )
@@ -139,6 +139,22 @@ class QuizAttemptRepository
         return is_array($rows) ? $rows : [];
     }
 
+    public function getLatestInProgressAttemptForUserQuiz(int $user_id, int $quiz_id): ?object
+    {
+        global $wpdb;
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->attempts_table}
+                 WHERE user_id = %d AND quiz_id = %d AND status = 'in_progress'
+                 ORDER BY started_at DESC, id DESC
+                 LIMIT 1",
+                $user_id,
+                $quiz_id
+            )
+        );
+        return $row ?: null;
+    }
+
     public function updateAnswersData(int $attempt_id, int $user_id, string $answers_json): bool
     {
         global $wpdb;
@@ -193,9 +209,9 @@ class QuizAttemptRepository
             'total_questions' => 0,
             'correct_answers' => 0,
             'time_taken' => 0,
-            'status' => 'completed',
+            'status' => 'in_progress',
             'started_at' => current_time('mysql'),
-            'completed_at' => current_time('mysql'),
+            'completed_at' => null,
             'answers_data' => null,
         ];
         $row = wp_parse_args($row, $defaults);

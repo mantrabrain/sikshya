@@ -28,7 +28,9 @@ type Props = {
 export function EmbeddableShell(props: Props) {
   const { embedded, config, title, subtitle, badge, pageActions, sidebarActivePage, children } = props;
 
-  if (embedded) {
+  // Default to embedded mode to avoid "shell inside shell" when a route forgets to pass `embedded`.
+  // Only render a standalone `AppShell` when explicitly requested.
+  if (embedded !== false) {
     return (
       <div className="space-y-4">
         {pageActions ? (
@@ -46,8 +48,8 @@ export function EmbeddableShell(props: Props) {
       version={config.version}
       navigation={config.navigation as NavItem[]}
       adminUrl={config.adminUrl}
-      userName={config.user.name}
-      userAvatarUrl={config.user.avatarUrl}
+      pluginUrl={config.pluginUrl}
+      user={config.user}
       branding={config.branding}
       title={title}
       subtitle={subtitle}

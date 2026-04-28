@@ -3,7 +3,7 @@ import { useShellState } from '../context/ShellStateContext';
 import { ShellAlertStrip } from './ShellAlertStrip';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
-import type { NavItem } from '../types';
+import type { NavItem, SikshyaShellUser } from '../types';
 
 const THEME_KEY = 'sikshya-admin-theme';
 
@@ -14,12 +14,11 @@ type Props = {
   version: string;
   navigation: NavItem[];
   adminUrl: string;
-  userName: string;
-  userAvatarUrl?: string;
+  user?: SikshyaShellUser;
   title: string;
   subtitle?: string;
   badge?: string;
-  /** Sidebar + logos; top header always uses default chrome (see `TopBar`). */
+  /** Sidebar brand strip (logo, colours, name). Top bar is title-only — see `TopBar`. */
   branding?: {
     pluginName?: string;
     logoUrl?: string;
@@ -32,6 +31,8 @@ type Props = {
   pageActions?: React.ReactNode;
   /** Optional override for pages that need full-bleed workspace layouts. */
   contentClassName?: string;
+  /** Plugin root URL (for bundled default sidebar logo). Falls back to `getConfig()` when omitted. */
+  pluginUrl?: string;
   children: React.ReactNode;
 };
 
@@ -41,17 +42,18 @@ export function AppShell({
   version,
   navigation,
   adminUrl,
-  userName,
-  userAvatarUrl,
+  user,
   title,
   subtitle,
   badge,
   branding,
   pageActions,
   contentClassName,
+  pluginUrl,
   children,
 }: Props) {
   const [isDark, setIsDark] = useState(false);
+  const safeUser: SikshyaShellUser = user || { name: 'Admin', avatarUrl: '' };
 
   useEffect(() => {
     const root = document.documentElement;
@@ -95,6 +97,7 @@ export function AppShell({
         proPluginVersion={proPluginVersion || undefined}
         proLicensed={Boolean(licensing?.isProActive)}
         adminUrl={adminUrl}
+        pluginUrl={pluginUrl}
         branding={branding}
       />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -102,8 +105,7 @@ export function AppShell({
           title={title}
           subtitle={subtitle}
           badge={badge}
-          userName={userName}
-          userAvatarUrl={userAvatarUrl}
+          user={safeUser}
           adminUrl={adminUrl}
           toolsHref={toolsHref}
           isDark={isDark}
@@ -111,7 +113,8 @@ export function AppShell({
         />
         <main
           className={
-            contentClassName ?? 'min-h-0 flex-1 overflow-y-auto bg-slate-50 p-6 dark:bg-slate-950'
+            contentClassName ??
+            'min-h-0 flex-1 overflow-y-auto bg-slate-50 px-6 pb-8 pt-6 dark:bg-slate-950'
           }
         >
           <ShellAlertStrip alerts={shellAlerts} />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavIcon } from '../NavIcon';
 import { ButtonPrimary } from '../shared/buttons';
+import { QuillField } from '../shared/QuillField';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../../api';
 import type { EmailTemplateApi } from '../../types/emailTemplate';
 import { TriggerEventSelect } from './TriggerEventSelect';
@@ -180,13 +181,13 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
             />
           </label>
           <label className="block">
-            <span className={LB}>Description</span>
-            <textarea
-              className={`${FT_INPUT} min-h-[72px]`}
+            <QuillField
+              label="Description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(html) => setDescription(html)}
               disabled={fieldLock}
               placeholder="Short note for admins: when this email should be used"
+              minHeightPx={96}
             />
           </label>
           <div>
@@ -380,12 +381,12 @@ export function EmailTemplateCreateForm(props: CreateProps) {
             />
           </label>
           <label className="block">
-            <span className={LB}>Description</span>
-            <textarea
-              className={`${FT_INPUT} min-h-[64px]`}
+            <QuillField
+              label="Description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(html) => setDescription(html)}
               placeholder="When to send this template (internal note)"
+              minHeightPx={160}
             />
           </label>
           <div>

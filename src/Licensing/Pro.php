@@ -96,12 +96,16 @@ final class Pro
      */
     public static function siteTierLabel(): string
     {
-        return match (self::siteTier()) {
-            self::TIER_STARTER => __('Starter', 'sikshya'),
-            self::TIER_GROWTH => __('Growth', 'sikshya'),
-            self::TIER_SCALE => __('Scale', 'sikshya'),
-            default => __('Free', 'sikshya'),
-        };
+        switch (self::siteTier()) {
+            case self::TIER_STARTER:
+                return __('Starter', 'sikshya');
+            case self::TIER_GROWTH:
+                return __('Growth', 'sikshya');
+            case self::TIER_SCALE:
+                return __('Scale', 'sikshya');
+            default:
+                return __('Free', 'sikshya');
+        }
     }
 
     /**
@@ -111,13 +115,18 @@ final class Pro
     {
         $site = self::normalizeSiteTierString($site);
 
-        return match ($site) {
-            self::TIER_FREE => 0,
-            self::TIER_STARTER => 1,
-            self::TIER_GROWTH => 2,
-            self::TIER_SCALE => 3,
-            default => 0,
-        };
+        switch ($site) {
+            case self::TIER_FREE:
+                return 0;
+            case self::TIER_STARTER:
+                return 1;
+            case self::TIER_GROWTH:
+                return 2;
+            case self::TIER_SCALE:
+                return 3;
+            default:
+                return 0;
+        }
     }
 
     /**
@@ -127,13 +136,18 @@ final class Pro
     {
         $need = strtolower(trim($need));
 
-        return match ($need) {
-            'free' => 0,
-            'starter' => 1,
-            'pro' => 2,
-            'scale' => 3,
-            default => 99,
-        };
+        switch ($need) {
+            case 'free':
+                return 0;
+            case 'starter':
+                return 1;
+            case 'pro':
+                return 2;
+            case 'scale':
+                return 3;
+            default:
+                return 99;
+        }
     }
 
     /**
@@ -189,7 +203,7 @@ final class Pro
     {
         $upgradeUrl = apply_filters(
             'sikshya_pro_upgrade_url',
-            'https://store.mantrabrain.com/downloads/sikshya-pro/'
+            'https://mantrabrain.com/plugins/sikshya/#pricing'
         );
 
         return [
@@ -197,7 +211,7 @@ final class Pro
             'proPluginInstalled' => defined('SIKSHYA_PRO_VERSION'),
             'siteTier' => self::siteTier(),
             'siteTierLabel' => self::siteTierLabel(),
-            'upgradeUrl' => is_string($upgradeUrl) ? $upgradeUrl : 'https://store.mantrabrain.com/downloads/sikshya-pro/',
+            'upgradeUrl' => is_string($upgradeUrl) ? $upgradeUrl : 'https://mantrabrain.com/plugins/sikshya/#pricing',
             'featureStates' => self::featureStates(),
             'catalog' => FeatureRegistry::catalogForClient(),
         ];

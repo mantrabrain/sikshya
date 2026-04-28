@@ -3,8 +3,8 @@
 namespace Sikshya\Frontend\Public;
 
 use Sikshya\Constants\PostTypes;
-use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
+use Sikshya\Services\CourseService;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PublicCurriculumService;
@@ -42,8 +42,8 @@ final class QuizTemplateData
         if ($course_id <= 0) {
             $error = __('This quiz is not linked to a course.', 'sikshya');
         } else {
-            $repo     = new EnrollmentRepository();
-            $enrolled = $repo->findByUserAndCourse($uid, $course_id) !== null;
+            $courses  = new CourseService();
+            $enrolled = $uid > 0 && $courses->isUserEnrolled($uid, $course_id);
             $raw    = PublicCurriculumService::getCourseCurriculum($course_id);
 
             // Quizzes can be previewed only when explicitly marked free.
@@ -134,7 +134,7 @@ final class QuizTemplateData
                 'is_preview' => $is_preview,
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
-                    'login' => wp_login_url(get_permalink($post) ?: ''),
+                    'login' => PublicPageUrls::login(get_permalink($post) ?: ''),
                     'course' => $course_post ? (get_permalink($course_post) ?: '') : '',
                     'learn' => PublicPageUrls::learnForCourse($course_id),
                     'account' => PublicPageUrls::url('account'),
@@ -151,13 +151,6 @@ final class QuizTemplateData
 
     private static function canPreviewQuiz(int $course_id, int $quiz_id): bool
     {
-        if (!Settings::isTruthy(Settings::get('enable_course_preview', true))) {
-            return false;
-        }
-        $course_preview = get_post_meta($course_id, '_sikshya_enable_course_preview', true);
-        if (!Settings::isTruthy($course_preview)) {
-            return false;
-        }
         // quizzes are previewable only if explicitly marked free
         return Settings::isTruthy(get_post_meta($quiz_id, '_sikshya_is_free', true));
     }
