@@ -186,4 +186,17 @@ final class PublicPageUrls
 
         return add_query_arg('order_key', 'SIK-ORD-' . $t, self::url('order'));
     }
+
+    /**
+     * Printable invoice URL (same bearer token rules as {@see self::orderView()}).
+     */
+    public static function orderInvoiceView(string $public_token): string
+    {
+        $base = self::orderView($public_token);
+        if ($base === self::url('order')) {
+            return $base;
+        }
+
+        return add_query_arg('invoice', '1', $base);
+    }
 }

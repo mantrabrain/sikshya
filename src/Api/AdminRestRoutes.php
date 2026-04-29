@@ -2679,6 +2679,14 @@ class AdminRestRoutes
         $public_token = isset($row->public_token) && is_string($row->public_token) ? (string) $row->public_token : '';
         $receipt_url = $public_token !== '' ? \Sikshya\Frontend\Public\PublicPageUrls::orderView($public_token) : '';
 
+        $clean_token = \Sikshya\Database\Repositories\OrderRepository::sanitizePublicToken($public_token);
+        $inv = (isset($meta['invoice']) && is_array($meta['invoice'])) ? $meta['invoice'] : [];
+        $invoice_number = isset($inv['number']) ? (string) $inv['number'] : '';
+        $invoice_issued_at = isset($inv['issued_at']) ? (string) $inv['issued_at'] : '';
+        $invoice_url = ($clean_token !== '' && $invoice_number !== '' && (string) $row->status === 'paid')
+            ? \Sikshya\Frontend\Public\PublicPageUrls::orderInvoiceView($clean_token)
+            : '';
+
         return new WP_REST_Response(
             [
                 'ok' => true,
@@ -2700,6 +2708,9 @@ class AdminRestRoutes
                     'dynamic_fields' => $dynamic_fields,
                     'dynamic_fields_display' => $dynamic_fields_display,
                     'receipt_url' => $receipt_url,
+                    'invoice_number' => $invoice_number,
+                    'invoice_issued_at' => $invoice_issued_at,
+                    'invoice_url' => $invoice_url,
                     'lines' => $lines,
                 ],
             ],

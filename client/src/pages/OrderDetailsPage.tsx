@@ -37,6 +37,9 @@ type OrderDetails = {
   dynamic_fields?: Record<string, unknown>;
   dynamic_fields_display?: Array<{ id: string; label: string; value: string }>;
   receipt_url?: string;
+  invoice_number?: string;
+  invoice_issued_at?: string;
+  invoice_url?: string;
   lines: OrderLine[];
 };
 
@@ -219,6 +222,16 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                     rel="noreferrer"
                   >
                     View receipt
+                  </a>
+                ) : null}
+                {order.invoice_url ? (
+                  <a
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950/20 dark:text-slate-200 dark:hover:bg-slate-800"
+                    href={order.invoice_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {order.invoice_number ? `Invoice ${order.invoice_number}` : 'View invoice'}
                   </a>
                 ) : null}
               </div>

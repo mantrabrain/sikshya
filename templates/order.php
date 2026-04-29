@@ -7,6 +7,16 @@
 
 use Sikshya\Services\Frontend\OrderPageService;
 use Sikshya\Presentation\Models\OrderPageModel;
+use Sikshya\Core\Plugin;
+use Sikshya\Frontend\Public\PublicPageUrls;
+
+if (!empty($_GET['invoice'])) {
+    $invoice_tpl = Plugin::getInstance()->getTemplatePath('order-invoice.php');
+    if (is_string($invoice_tpl) && is_readable($invoice_tpl)) {
+        require $invoice_tpl;
+        return;
+    }
+}
 
 /** @var OrderPageModel $page_model */
 $page_model = OrderPageService::fromRequest();
@@ -86,6 +96,19 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 $currency = (string) $o->currency;
                 $discount = isset($o->discount_total) ? (float) $o->discount_total : 0.0;
                 $subtotal = isset($o->subtotal) ? (float) $o->subtotal : (float) $o->total + $discount;
+                $order_meta = [];
+                if (isset($o->meta) && is_string($o->meta) && $o->meta !== '') {
+                    $decoded_meta = json_decode((string) $o->meta, true);
+                    if (is_array($decoded_meta)) {
+                        $order_meta = $decoded_meta;
+                    }
+                }
+                $invoice = (isset($order_meta['invoice']) && is_array($order_meta['invoice'])) ? $order_meta['invoice'] : [];
+                $invoice_no = isset($invoice['number']) ? (string) $invoice['number'] : '';
+                $public_tok = isset($o->public_token) ? \Sikshya\Database\Repositories\OrderRepository::sanitizePublicToken((string) $o->public_token) : '';
+                $invoice_href = ($invoice_no !== '' && $public_tok !== '' && (string) $o->status === 'paid')
+                    ? PublicPageUrls::orderInvoiceView($public_tok)
+                    : '';
                 ?>
             <div class="sikshya-order-page__layout">
                 <div class="sikshya-order-page__main">
@@ -162,6 +185,12 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                                 <span class="sikshya-order-page__summary-label"><?php esc_html_e('Payment method', 'sikshya'); ?></span>
                                 <span class="sikshya-order-page__summary-value"><?php echo esc_html($page_model->getGatewayLabel()); ?></span>
                             </div>
+                            <?php if ($invoice_no !== '') : ?>
+                                <div class="sikshya-order-page__summary-row">
+                                    <span class="sikshya-order-page__summary-label"><?php esc_html_e('Invoice', 'sikshya'); ?></span>
+                                    <span class="sikshya-order-page__summary-value"><?php echo esc_html($invoice_no); ?></span>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         <?php if ($discount > 0.00001) : ?>
                             <div class="sikshya-order-page__summary-row sikshya-order-page__summary-row--subtotal">
@@ -184,6 +213,11 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                         </div>
                         <div class="sikshya-order-page__actions">
                             <a class="sikshya-btn sikshya-btn--primary" href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('My account', 'sikshya'); ?></a>
+                        <?php if ($invoice_href !== '') : ?>
+                            <a class="sikshya-btn sikshya-btn--ghost" href="<?php echo esc_url($invoice_href); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php esc_html_e('View invoice', 'sikshya'); ?>
+                            </a>
+                        <?php endif; ?>
                         <a class="sikshya-btn sikshya-btn--ghost" href="<?php echo esc_url($u->getCoursesUrl()); ?>">
                             <?php echo esc_html(sprintf(__('Browse %s', 'sikshya'), strtolower($label_courses))); ?>
                         </a>

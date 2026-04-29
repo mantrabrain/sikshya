@@ -286,6 +286,16 @@ final class Plugin
             );
         }
 
+        add_action(
+            'sikshya_order_fulfilled',
+            static function ($order_id, $order): void {
+                $issuer = new \Sikshya\Services\InvoiceIssuanceService();
+                $issuer->maybeIssueForFulfilledOrder((int) $order_id, $order);
+            },
+            15,
+            2
+        );
+
         InstructorAccountView::init();
         InstructorApplicationView::init();
         \Sikshya\Frontend\Public\CertificatesAccountView::init();

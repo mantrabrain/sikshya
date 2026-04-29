@@ -24,6 +24,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                             <thead>
                             <tr>
                                 <th scope="col"><?php esc_html_e('Order', 'sikshya'); ?></th>
+                                <th scope="col"><?php esc_html_e('Invoice', 'sikshya'); ?></th>
                                 <th scope="col"><?php esc_html_e('Total', 'sikshya'); ?></th>
                                 <th scope="col"><?php esc_html_e('Gateway', 'sikshya'); ?></th>
                                 <th scope="col"><?php esc_html_e('Status', 'sikshya'); ?></th>
@@ -41,6 +42,18 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                                 $currency = strtoupper((string) ($ord->currency ?? 'USD'));
                                 $total = isset($ord->total) ? (float) $ord->total : 0.0;
                                 $gateway = (string) ($ord->gateway ?? '');
+                                $meta = [];
+                                if (isset($ord->meta) && is_string($ord->meta) && $ord->meta !== '') {
+                                    $decoded = json_decode((string) $ord->meta, true);
+                                    if (is_array($decoded)) {
+                                        $meta = $decoded;
+                                    }
+                                }
+                                $inv = (isset($meta['invoice']) && is_array($meta['invoice'])) ? $meta['invoice'] : [];
+                                $inv_no = isset($inv['number']) ? (string) $inv['number'] : '';
+                                $invoice_href = ($inv_no !== '' && $otok !== '' && in_array($ostatus, ['paid', 'completed'], true))
+                                    ? PublicPageUrls::orderInvoiceView($otok)
+                                    : '';
                                 ?>
                                 <tr>
                                     <td>
@@ -48,6 +61,16 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                                             <?php printf(esc_html__('Order #%d', 'sikshya'), (int) $ord->id); ?>
                                         </a>
                                         <div class="sik-acc-muted"><?php esc_html_e('View receipt', 'sikshya'); ?></div>
+                                    </td>
+                                    <td>
+                                        <?php if ($invoice_href !== '') : ?>
+                                            <a href="<?php echo esc_url($invoice_href); ?>" target="_blank" rel="noopener noreferrer">
+                                                <?php echo esc_html($inv_no); ?>
+                                            </a>
+                                            <div class="sik-acc-muted"><?php esc_html_e('Open invoice', 'sikshya'); ?></div>
+                                        <?php else : ?>
+                                            <span class="sik-acc-muted">—</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td><?php echo esc_html(number_format_i18n($total, 2) . ' ' . $currency); ?></td>
                                     <td><?php echo esc_html($gateway !== '' ? $gateway : '—'); ?></td>
