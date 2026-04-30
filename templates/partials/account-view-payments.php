@@ -13,8 +13,10 @@ use Sikshya\Frontend\Public\PublicPageUrls;
 ?>
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Orders', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Orders', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page_model->getUrls()->getCheckoutUrl()); ?>"><?php esc_html_e('Checkout', 'sikshya'); ?></a>
+                    <div class="sik-acc-panel__title-block">
+                        <h2 class="sik-acc-panel__title"><?php esc_html_e('Orders', 'sikshya'); ?></h2>
+                        <p class="sik-acc-panel__sub"><?php esc_html_e('Receipt and invoice history for your purchases.', 'sikshya'); ?></p>
+                    </div>
                 </div>
                 <?php if ($page_model->getOrders() === []) : ?>
                     <div class="sik-acc-empty"><?php esc_html_e('No orders yet.', 'sikshya'); ?></div>
@@ -93,9 +95,11 @@ use Sikshya\Frontend\Public\PublicPageUrls;
             <?php if ($page_model->getLegacyPayments() !== []) : ?>
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Payment records', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Payment records', 'sikshya'); ?></h2>
+                    <div class="sik-acc-panel__title-block">
+                        <h2 class="sik-acc-panel__title"><?php esc_html_e('Payment records', 'sikshya'); ?></h2>
+                        <p class="sik-acc-panel__sub"><?php esc_html_e('Additional gateway or legacy payment rows linked to your account.', 'sikshya'); ?></p>
+                    </div>
                 </div>
-                <p class="sik-acc-panel__lead"><?php esc_html_e('Additional payment entries stored for your account (legacy or gateway logs).', 'sikshya'); ?></p>
                 <div class="sik-acc-table-wrap">
                     <table class="sik-acc-table sik-acc-table--wide">
                         <thead>

@@ -20,7 +20,7 @@ final class PublicPageUrls
      */
     public static function allowedAccountViews(): array
     {
-        $core = ['dashboard', 'learning', 'payments', 'quiz-attempts'];
+        $core = ['dashboard', 'learning', 'payments', 'quiz-attempts', 'profile'];
         $merged = apply_filters('sikshya_account_allowed_views', $core);
         if (!is_array($merged)) {
             return $core;

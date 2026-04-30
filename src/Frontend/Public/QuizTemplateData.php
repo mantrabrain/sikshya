@@ -166,6 +166,7 @@ final class QuizTemplateData
         // Learn-page tabs should only show when the UI exists.
         $reviews_available = (bool) apply_filters('sikshya_feature_reviews_available', false, $course_id, 'learn');
         $discussions_available = (bool) apply_filters('sikshya_feature_discussions_available', false, $course_id, 'learn');
+        $qa_available = (bool) apply_filters('sikshya_feature_qa_available', false, $course_id, 'learn');
 
         return [
             'reviews' => $reviews_available
@@ -173,8 +174,15 @@ final class QuizTemplateData
                 && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
             'ratings' => $global_ratings,
             'discussions' => $discussions_available
-                && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
-            'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
+                && (static function () use ($course_id): bool {
+                    $raw = get_post_meta($course_id, '_sikshya_enable_discussions', true);
+                    return $raw === '' || Settings::isTruthy($raw);
+                })(),
+            'qa' => $qa_available
+                && (static function () use ($course_id): bool {
+                    $raw = get_post_meta($course_id, '_sikshya_enable_qa', true);
+                    return $raw !== '' && Settings::isTruthy($raw);
+                })(),
             'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),
         ];
     }

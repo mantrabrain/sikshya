@@ -170,6 +170,7 @@ final class AccountTemplateData
                     'account_learning' => PublicPageUrls::accountViewUrl('learning'),
                     'account_payments' => PublicPageUrls::accountViewUrl('payments'),
                     'account_quiz_attempts' => PublicPageUrls::accountViewUrl('quiz-attempts'),
+                    'account_profile' => PublicPageUrls::accountViewUrl('profile'),
                     'learn' => PublicPageUrls::url('learn'),
                     'cart' => PublicPageUrls::url('cart'),
                     'checkout' => PublicPageUrls::url('checkout'),

@@ -42,19 +42,23 @@ final class AccountPageModel
         $headlines = [
             'dashboard' => [
                 'title' => __('Overview', 'sikshya'),
-                'subtitle' => __('Summary, metrics, and quick links.', 'sikshya'),
+                'subtitle' => __('Your learning snapshot and shortcuts in one place.', 'sikshya'),
             ],
             'learning' => [
                 'title' => __('My learning', 'sikshya'),
                 'subtitle' => __('Courses in progress and completed.', 'sikshya'),
             ],
             'payments' => [
-                'title' => __('Payments', 'sikshya'),
-                'subtitle' => __('Orders, receipts, and payment records.', 'sikshya'),
+                'title' => __('My orders & payments', 'sikshya'),
+                'subtitle' => __('Orders, invoices, receipts, and payment records.', 'sikshya'),
             ],
             'quiz-attempts' => [
                 'title' => __('Quiz attempts', 'sikshya'),
                 'subtitle' => __('Usage and limits for quizzes in your courses.', 'sikshya'),
+            ],
+            'profile' => [
+                'title' => __('Profile & security', 'sikshya'),
+                'subtitle' => __('Update your account details and password.', 'sikshya'),
             ],
             'certificates' => [
                 'title' => __('My certificates', 'sikshya'),

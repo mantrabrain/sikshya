@@ -50,12 +50,16 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
         <nav class="sik-acc-nav" aria-label="<?php esc_attr_e('Primary', 'sikshya'); ?>">
             <p class="sik-acc-nav__label"><?php esc_html_e('Learn', 'sikshya'); ?></p>
             <a class="<?php echo $view === 'dashboard' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getDashboardUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">◉</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true">⌂</span>
                 <?php esc_html_e('Overview', 'sikshya'); ?>
             </a>
             <a class="<?php echo $view === 'learning' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getLearningUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▣</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true">▦</span>
                 <?php esc_html_e('My learning', 'sikshya'); ?>
+            </a>
+            <a href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>">
+                <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
+                <?php esc_html_e('Learning hub', 'sikshya'); ?>
             </a>
             <a class="<?php echo $view === 'quiz-attempts' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getQuizAttemptsUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">◎</span>
@@ -67,13 +71,13 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                 ));
                 ?>
             </a>
-            <a href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▤</span>
-                <?php echo esc_html($label_courses); ?>
+            <a class="<?php echo $view === 'profile' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getProfileUrl()); ?>">
+                <span class="sik-acc-nav__icon" aria-hidden="true">⚙</span>
+                <?php esc_html_e('Profile & security', 'sikshya'); ?>
             </a>
-            <a href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
-                <?php esc_html_e('Learning hub', 'sikshya'); ?>
+            <a href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
+                <span class="sik-acc-nav__icon" aria-hidden="true">▥</span>
+                <?php echo esc_html($label_courses); ?>
             </a>
             <?php
             /**
@@ -87,19 +91,11 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
             ?>
             <p class="sik-acc-nav__label"><?php esc_html_e('Commerce', 'sikshya'); ?></p>
             <p class="sik-acc-nav__hint">
-                <?php esc_html_e('Cart holds courses before you pay. Checkout is the secure payment step. Receipts live under Payments.', 'sikshya'); ?>
+                <?php esc_html_e('View order history, receipts, and invoices.', 'sikshya'); ?>
             </p>
             <a class="<?php echo $view === 'payments' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getPaymentsUrl()); ?>">
                 <span class="sik-acc-nav__icon" aria-hidden="true">≡</span>
-                <?php esc_html_e('Payments', 'sikshya'); ?>
-            </a>
-            <a href="<?php echo esc_url($page_model->getUrls()->getCartUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">◇</span>
-                <?php esc_html_e('Cart', 'sikshya'); ?>
-            </a>
-            <a href="<?php echo esc_url($page_model->getUrls()->getCheckoutUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">✓</span>
-                <?php esc_html_e('Checkout', 'sikshya'); ?>
+                <?php esc_html_e('My orders & payments', 'sikshya'); ?>
             </a>
             <?php
             /*

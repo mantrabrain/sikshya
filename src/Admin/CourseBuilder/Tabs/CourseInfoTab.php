@@ -47,7 +47,7 @@ class CourseInfoTab extends AbstractTab
      */
     public function getDescription(): string
     {
-        return __('Name your course, write the sales description, set difficulty, and add images or a trailer — what learners see before they enroll.', 'sikshya');
+        return __('Everything learners and search engines see before they enroll: title, description, images, instructor, and SEO.', 'sikshya');
     }
 
     /**
@@ -252,8 +252,8 @@ class CourseInfoTab extends AbstractTab
             ],
             'learning_outcomes' => [
                 'section' => [
-                    'title' => __('Learning outcomes', 'sikshya'),
-                    'description' => __('Bullet points that answer: “After this course I can…” — specific and measurable is best.', 'sikshya'),
+                    'title' => __('What students will learn', 'sikshya'),
+                    'description' => __('Bullet points that finish the sentence “After this course I can…”. Specific and measurable works best.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>',
@@ -273,7 +273,7 @@ class CourseInfoTab extends AbstractTab
             'instructors_section' => [
                 'section' => [
                     'title' => __('Instructor', 'sikshya'),
-                    'description' => __('Select the primary instructor for this course. (Multiple instructors require Sikshya Pro.)', 'sikshya'),
+                    'description' => __('Choose who teaches this course. The Multi-instructor add-on lets you add co-teachers and revenue splits.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>',
@@ -291,8 +291,8 @@ class CourseInfoTab extends AbstractTab
             ],
             'marketing' => [
                 'section' => [
-                    'title' => __('Highlights, FAQ & downloads', 'sikshya'),
-                    'description' => __('Optional extras: selling points, common questions, and links to PDFs or files.', 'sikshya'),
+                    'title' => __('Highlights, FAQ & resources', 'sikshya'),
+                    'description' => __('Optional extras shown on the course page: selling points, common questions, downloadable files, and announcements for enrolled learners.', 'sikshya'),
                     'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>',
@@ -371,6 +371,41 @@ class CourseInfoTab extends AbstractTab
                                 'placeholder' => __('YYYY-MM-DD', 'sikshya'),
                             ],
                         ],
+                    ],
+                ],
+            ],
+            'seo_settings' => [
+                'section' => [
+                    'title' => __('Search engine listing (SEO)', 'sikshya'),
+                    'description' => __('Optional. Tune how this course appears in Google and other search engines.', 'sikshya'),
+                    'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>',
+                ],
+                'fields' => [
+                    'seo_title' => [
+                        'type' => 'text',
+                        'label' => __('SEO title', 'sikshya'),
+                        'placeholder' => __('Title used by search engines (defaults to course title)', 'sikshya'),
+                        'description' => __('Custom title shown in search results. Aim for under 60 characters.', 'sikshya'),
+                        'validation' => 'max:60',
+                        'sanitization' => 'sanitize_text_field',
+                    ],
+                    'meta_description' => [
+                        'type' => 'textarea',
+                        'label' => __('Meta description', 'sikshya'),
+                        'placeholder' => __('1–2 sentence summary search engines display under the title', 'sikshya'),
+                        'description' => __('Short pitch shown beneath the search-result title. Aim for under 160 characters.', 'sikshya'),
+                        'validation' => 'max:160',
+                        'sanitization' => 'sanitize_textarea_field',
+                    ],
+                    'focus_keywords' => [
+                        'type' => 'text',
+                        'label' => __('Focus keywords', 'sikshya'),
+                        'placeholder' => __('keyword1, keyword2, keyword3', 'sikshya'),
+                        'description' => __('Comma-separated keywords used by SEO plugins for this course.', 'sikshya'),
+                        'validation' => 'max:200',
+                        'sanitization' => 'sanitize_text_field',
                     ],
                 ],
             ],

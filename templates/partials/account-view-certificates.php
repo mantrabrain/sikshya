@@ -16,7 +16,10 @@ $certs = is_array($acc['certificates'] ?? null) ? (array) $acc['certificates'] :
 ?>
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Certificates', 'sikshya'); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Certificates', 'sikshya'); ?></h2>
+                    <div class="sik-acc-panel__title-block">
+                        <h2 class="sik-acc-panel__title"><?php esc_html_e('Certificates', 'sikshya'); ?></h2>
+                        <p class="sik-acc-panel__sub"><?php esc_html_e('Download completion certificates issued for your finished courses.', 'sikshya'); ?></p>
+                    </div>
                 </div>
 
                 <?php if ($certs === []) : ?>

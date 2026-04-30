@@ -73,6 +73,11 @@ final class AccountUrlsModel
         return (string) ($this->row['account_quiz_attempts'] ?? '');
     }
 
+    public function getProfileUrl(): string
+    {
+        return (string) ($this->row['account_profile'] ?? '');
+    }
+
     public function getCertificatesUrl(): string
     {
         return (string) ($this->row['account_certificates'] ?? '');

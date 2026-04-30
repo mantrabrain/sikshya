@@ -716,6 +716,13 @@ class Frontend
             }
         }
 
+        if ((string) get_query_var(PermalinkService::INSTRUCTOR_VAR) !== '') {
+            $custom_template = $this->plugin->getTemplatePath('author.php');
+            if (file_exists($custom_template)) {
+                return $custom_template;
+            }
+        }
+
         foreach (
             [
                 'cart' => 'cart.php',

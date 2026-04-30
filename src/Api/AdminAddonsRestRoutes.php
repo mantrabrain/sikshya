@@ -234,6 +234,7 @@ final class AdminAddonsRestRoutes
             'email_advanced_customization',
             'subscriptions',
             'content_drip',
+            'community_discussions',
             'course_bundles',
             'coupons_advanced',
             'multi_instructor',

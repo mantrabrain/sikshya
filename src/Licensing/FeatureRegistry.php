@@ -173,6 +173,19 @@ final class FeatureRegistry
                     'sikshya'
                 ),
             ],
+            'community_discussions' => [
+                'label' => __('Course discussions & Q&A', 'sikshya'),
+                'tier' => 'pro',
+                'group' => 'communication',
+                'description' => __(
+                    "Adds learner discussion threads and Q&A areas for courses, including instructor-author replies and moderation workflows.\n\nTurn on when your teaching model needs in-course conversation.\n\nTurn off when you prefer comments disabled or only external community tools.",
+                    'sikshya'
+                ),
+                'detail_description' => __(
+                    "What you get: Discussion/Q&A tabs inside learning pages, posting and threaded replies, and instructor response controls. This is intended for cohort and instructor-led experiences where questions are answered in context.\n\nPlan: Growth or higher with Sikshya Pro.",
+                    'sikshya'
+                ),
+            ],
             'prerequisites' => [
                 'label' => __('Prerequisites (lessons & courses)', 'sikshya'),
                 'tier' => 'starter',

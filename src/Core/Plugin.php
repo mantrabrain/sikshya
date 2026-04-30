@@ -93,6 +93,16 @@ final class Plugin
         $this->loadTextdomain();
         $this->initializeServices();
         $this->initializeComponents();
+
+        // Wire the legacy `sikshya-old` -> rewrite migration runner during
+        // file-include time (before `plugins_loaded` fires) so the
+        // pending-detection listener has a chance to register itself. The
+        // `class_exists` guard means the entire `src/Migration/` directory
+        // can be deleted in a future release with no impact on the rest of
+        // the plugin (see src/Migration/README.md).
+        if (class_exists('\\Sikshya\\Migration\\LegacyMigrator')) {
+            \Sikshya\Migration\LegacyMigrator::register();
+        }
     }
 
     /**

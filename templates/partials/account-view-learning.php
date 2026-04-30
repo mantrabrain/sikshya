@@ -52,10 +52,10 @@ $render_enrollment_row = static function ($row) use ($certs_by_course): void {
 ?>
             <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('Ongoing %s', 'sikshya'), strtolower($label_courses))); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Ongoing', 'sikshya'); ?></h2>
-                    <a class="sik-acc-panel__link" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
-                        <?php echo esc_html(sprintf(__('Browse all %s', 'sikshya'), strtolower($label_courses))); ?>
-                    </a>
+                    <div class="sik-acc-panel__title-block">
+                        <h2 class="sik-acc-panel__title"><?php esc_html_e('Ongoing', 'sikshya'); ?></h2>
+                        <p class="sik-acc-panel__sub"><?php echo esc_html(sprintf(__('Continue your active %s and jump into the player directly.', 'sikshya'), strtolower($label_courses))); ?></p>
+                    </div>
                 </div>
                 <?php if ($page_model->getEnrollmentsOngoing() === []) : ?>
                     <div class="sik-acc-empty">
@@ -91,7 +91,10 @@ $render_enrollment_row = static function ($row) use ($certs_by_course): void {
 
             <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('Completed %s', 'sikshya'), strtolower($label_courses))); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Completed', 'sikshya'); ?></h2>
+                    <div class="sik-acc-panel__title-block">
+                        <h2 class="sik-acc-panel__title"><?php esc_html_e('Completed', 'sikshya'); ?></h2>
+                        <p class="sik-acc-panel__sub"><?php echo esc_html(sprintf(__('Finished %s and certificate shortcuts.', 'sikshya'), strtolower($label_courses))); ?></p>
+                    </div>
                 </div>
                 <?php if ($page_model->getEnrollmentsCompleted() === []) : ?>
                     <div class="sik-acc-empty">

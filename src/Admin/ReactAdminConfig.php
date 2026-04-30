@@ -252,14 +252,25 @@ final class ReactAdminConfig
                 'href' => self::reactAppUrl('reviews'),
                 'cap' => 'edit_posts',
             ], 'course_reviews'),
-            self::withNavGate([
-                'id' => 'course-team',
-                'label' => __('Course staff', 'sikshya'),
-                'icon' => 'course',
-                'href' => self::reactAppUrl('course-team'),
-                'cap' => 'edit_posts',
-            ], 'multi_instructor'),
         ];
+
+        if (Pro::feature('community_discussions') && Addons::isEnabled('community_discussions')) {
+            $course_children[] = [
+                'id' => 'discussions',
+                'label' => __('Discussions & Q&A', 'sikshya'),
+                'icon' => 'plusDocument',
+                'href' => self::reactAppUrl('discussions'),
+                'cap' => 'edit_posts',
+            ];
+        }
+
+        $course_children[] = self::withNavGate([
+            'id' => 'course-team',
+            'label' => __('Course staff', 'sikshya'),
+            'icon' => 'course',
+            'href' => self::reactAppUrl('course-team'),
+            'cap' => 'edit_posts',
+        ], 'multi_instructor');
 
         $children = self::filterNavChildren($course_children);
         if ($children !== []) {

@@ -164,7 +164,7 @@ final class InstructorAccountView
             echo '<a class="sik-acc-btn" href="' . esc_url($url) . '">' . esc_html__('Open instructor view', 'sikshya') . ' →</a>';
         }
         echo '</div>';
-        echo '<div class="sik-acc-metrics">';
+        echo '<div class="sik-acc-metrics sik-acc-metrics--panel">';
         echo '<div class="sik-acc-metric"><div class="sik-acc-metric__value">' . esc_html((string) $published) . '</div><div class="sik-acc-metric__label">' . esc_html__('Published courses', 'sikshya') . '</div></div>';
         echo '<div class="sik-acc-metric"><div class="sik-acc-metric__value">' . esc_html((string) $enrollments) . '</div><div class="sik-acc-metric__label">' . esc_html__('Enrollments on my courses', 'sikshya') . '</div></div>';
         echo '<div class="sik-acc-metric"><div class="sik-acc-metric__value">' . esc_html((string) $completed) . '</div><div class="sik-acc-metric__label">' . esc_html__('Completions', 'sikshya') . '</div></div>';

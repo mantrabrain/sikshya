@@ -78,6 +78,14 @@ function sikshya() {
 // Activation hook
 register_activation_hook(__FILE__, function() {
     \Sikshya\Core\Activator::activate();
+
+    // Schedule the legacy `sikshya-old` -> rewrite migration if any legacy
+    // data is detected on activation. The migrator class is gated on
+    // `class_exists` so deleting `src/Migration/` after the installed base
+    // has migrated turns this into a no-op (see src/Migration/README.md).
+    if (class_exists('\\Sikshya\\Migration\\LegacyMigrator')) {
+        \Sikshya\Migration\LegacyMigrator::scheduleIfPending();
+    }
 });
 
 // Deactivation hook

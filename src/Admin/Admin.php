@@ -394,6 +394,7 @@ class Admin
             'orders',
             'coupons',
             'gradebook',
+            'discussions',
             'activity-log',
             'content-drip',
             'subscriptions',

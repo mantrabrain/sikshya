@@ -1284,35 +1284,51 @@ function builderTabShortLabel(tabId: string, fallback: string): string {
 type SectionEntry = [string, { section?: { title?: string; description?: string }; fields?: Record<string, FieldConfig> }];
 
 function sectionHasVisibleFields(activeTab: string, section: SectionEntry[1]): boolean {
-  return Object.entries(section.fields || {}).some(
-    ([_, fcfg]) => !(activeTab === 'curriculum' && fcfg.type === 'curriculum_builder')
-  );
+  // Curriculum uses a custom builder surface (outline + editor) and should remain
+  // a visible tab even though its schema field is not rendered as a normal form field.
+  if (activeTab === 'curriculum') {
+    return true;
+  }
+  return Object.entries(section.fields || {}).some(([, fcfg]) => fcfg.type !== 'curriculum_builder');
 }
 
 /** Icon keys from `icons.json` for left sidebar section rows. */
 function sectionIconName(sectionKey: string): string {
   const m: Record<string, string> = {
+    // Course details (tab: course)
     basic_info: 'course',
     media_visuals: 'photoImage',
     learning_outcomes: 'badge',
     instructors_section: 'users',
     marketing: 'plusDocument',
-    pricing: 'chart',
-    schedule: 'clipboard',
-    access_enrollment: 'users',
-    prerequisites: 'badge',
-    advanced_features: 'cog',
-    content_drip: 'schedule',
-    course_settings: 'cog',
-    completion_rules: 'badge',
-    interaction_features: 'helpCircle',
-    certificate_settings: 'badge',
     seo_settings: 'search',
     seo: 'search',
-    advanced_settings: 'cog',
-    advanced: 'cog',
+    // Pricing & access (tab: pricing)
+    pricing: 'chart',
+    access_enrollment: 'schedule',
+    schedule: 'schedule',
+    prerequisites: 'helpCircle',
+    marketplace_section: 'tag',
+    content_drip: 'clipboard',
+    // Course options (tab: settings)
+    course_settings: 'cog',
+    completion_rules: 'badge',
+    certificate_settings: 'star',
+    interaction_features: 'helpCircle',
+    integrations_overrides: 'puzzle',
+    pro_scorm_h5p_course: 'layers',
+    analytics_visibility: 'chart',
+    // Grading (tab: grading)
+    grading_scale: 'badge',
+    grading_weights: 'badge',
+    gradebook_visibility: 'wrench',
+    // Curriculum (custom outline surface)
     curriculum: 'curriculumOutline',
     curriculum_outline: 'curriculumOutline',
+    // Legacy keys kept so old saved bookmarks don't break.
+    advanced_features: 'cog',
+    advanced_settings: 'cog',
+    advanced: 'cog',
   };
   return m[sectionKey] || 'plusDocument';
 }
@@ -1324,6 +1340,7 @@ function builderTabIcon(tabId: string): string {
     pricing: 'chart',
     curriculum: 'curriculumOutline',
     settings: 'cog',
+    grading: 'badge',
   };
   return m[tabId] || 'course';
 }

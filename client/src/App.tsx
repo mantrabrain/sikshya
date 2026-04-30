@@ -21,6 +21,9 @@ const ContentPostEditorPage = lazy(() =>
   import('./pages/ContentPostEditorPage').then((m) => ({ default: m.ContentPostEditorPage }))
 );
 const CouponsPage = lazy(() => import('./pages/CouponsPage').then((m) => ({ default: m.CouponsPage })));
+const DiscussionsPage = lazy(() =>
+  import('./pages/DiscussionsPage').then((m) => ({ default: m.DiscussionsPage }))
+);
 const CourseBuilderPage = lazy(() =>
   import('./pages/CourseBuilderPage').then((m) => ({ default: m.CourseBuilderPage }))
 );
@@ -267,6 +270,8 @@ function RoutedApp() {
       return <CouponsPage embedded config={config} title="Coupons" />;
     case 'reviews':
       return <ReviewsPage embedded config={config} title="Course reviews" />;
+    case 'discussions':
+      return <DiscussionsPage embedded config={config} title="Discussions & Q&A" />;
     case 'gradebook':
       return <GradebookPage embedded config={config} title="Gradebook" />;
     case 'grading':

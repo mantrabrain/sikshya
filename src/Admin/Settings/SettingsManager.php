@@ -2653,6 +2653,16 @@ class SettingsManager
                         'sanitize_callback' => 'sanitize_title',
                         'validate_callback' => $slug_validate,
                     ],
+                    [
+                        'key' => 'rewrite_base_author',
+                        'type' => 'text',
+                        'label' => __('Instructor archive base', 'sikshya'),
+                        'description' => __('Sikshya instructor course listing URL base (separate from regular WordPress post-author archives).', 'sikshya'),
+                        'placeholder' => __('author', 'sikshya'),
+                        'default' => $defaults['rewrite_base_author'],
+                        'sanitize_callback' => 'sanitize_title',
+                        'validate_callback' => $slug_validate,
+                    ],
                 ],
             ],
             [

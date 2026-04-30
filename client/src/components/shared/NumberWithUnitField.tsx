@@ -36,8 +36,8 @@ export function NumberWithUnitField(props: {
       </label>
       {hint ? <p className={hintClassName || 'mt-1 text-xs text-slate-500 dark:text-slate-400'}>{hint}</p> : null}
 
-      <div className="mt-1.5 flex flex-wrap items-stretch gap-2">
-        <div className="min-w-[min(100%,14rem)] flex-1">
+      <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-stretch">
+        <div className="min-w-0 flex-1">
           <input
             id={id}
             inputMode="decimal"
@@ -47,7 +47,7 @@ export function NumberWithUnitField(props: {
             placeholder={placeholder}
           />
         </div>
-        <div className="w-[10.5rem] min-w-[9.5rem]">
+        <div className="shrink-0 sm:w-40">
           <select
             className={fieldClassName}
             value={unit}

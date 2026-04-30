@@ -168,6 +168,7 @@ final class LessonPageService
         // unless a Pro/add-on provides it. Default to "not available" to avoid dead tabs.
         $reviews_available = (bool) apply_filters('sikshya_feature_reviews_available', false, $course_id, 'learn');
         $discussions_available = (bool) apply_filters('sikshya_feature_discussions_available', false, $course_id, 'learn');
+        $qa_available = (bool) apply_filters('sikshya_feature_qa_available', false, $course_id, 'learn');
 
         return [
             'reviews' => $reviews_available
@@ -175,8 +176,17 @@ final class LessonPageService
                 && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_reviews', true)),
             'ratings' => $global_ratings,
             'discussions' => $discussions_available
-                && Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_discussions', true)),
-            'qa' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_qa', true)),
+                && (static function () use ($course_id): bool {
+                    $raw = get_post_meta($course_id, '_sikshya_enable_discussions', true);
+                    // Default ON unless explicitly disabled (empty meta means "use default").
+                    return $raw === '' || Settings::isTruthy($raw);
+                })(),
+            'qa' => $qa_available
+                && (static function () use ($course_id): bool {
+                    $raw = get_post_meta($course_id, '_sikshya_enable_qa', true);
+                    // Default OFF unless explicitly enabled.
+                    return $raw !== '' && Settings::isTruthy($raw);
+                })(),
             'certificate' => Settings::isTruthy(get_post_meta($course_id, '_sikshya_enable_certificate', true)),
         ];
     }

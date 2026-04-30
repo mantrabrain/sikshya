@@ -13,6 +13,7 @@ namespace Sikshya\Services;
 final class PermalinkService
 {
     public const QUERY_VAR = 'sikshya_page';
+    public const INSTRUCTOR_VAR = 'sikshya_instructor';
     /** Sub-view for the virtual account page (dashboard, learning, payments, …). */
     public const ACCOUNT_VIEW_VAR = 'sikshya_account_view';
     public const LEARN_TYPE_VAR = 'sikshya_learn_type';
@@ -38,6 +39,7 @@ final class PermalinkService
             'rewrite_base_quiz' => 'quizzes',
             'rewrite_base_assignment' => 'assignments',
             'rewrite_base_certificate' => 'certificates',
+            'rewrite_base_author' => 'author',
             'rewrite_tax_course_category' => 'course-category',
         ];
     }
@@ -165,6 +167,7 @@ final class PermalinkService
     public static function filterQueryVars(array $vars): array
     {
         $vars[] = self::QUERY_VAR;
+        $vars[] = self::INSTRUCTOR_VAR;
         $vars[] = self::ACCOUNT_VIEW_VAR;
         $vars[] = self::LEARN_TYPE_VAR;
         $vars[] = self::LEARN_SLUG_VAR;
@@ -240,6 +243,15 @@ final class PermalinkService
             'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=$matches[1]&' . self::LEARN_SLUG_VAR . '=$matches[2]',
             'top'
         );
+
+        // Sikshya instructor archive (separate from core WP author archives).
+        $author_base = self::sanitizeSlug($p['rewrite_base_author'] ?? 'author');
+        $author_re   = preg_quote($author_base, '/');
+        add_rewrite_rule(
+            '^' . $author_re . '/([^/]+)/?$',
+            'index.php?' . self::INSTRUCTOR_VAR . '=$matches[1]',
+            'top'
+        );
     }
 
     /**
@@ -249,6 +261,10 @@ final class PermalinkService
     {
         $v = $wp_query->get(self::QUERY_VAR);
         if (! empty($v)) {
+            return true;
+        }
+        $instructor = $wp_query->get(self::INSTRUCTOR_VAR);
+        if (!empty($instructor)) {
             return true;
         }
 

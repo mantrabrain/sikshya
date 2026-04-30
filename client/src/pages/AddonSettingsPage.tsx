@@ -225,24 +225,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
   };
 
   // Group bool fields together at the bottom for visual scan; keep schema order otherwise.
-  const fieldEntries = Object.entries(schema).filter(([name, def]) => {
-    // Hide removed / confusing settings.
-    // "Use legacy certificate links (no pretty URL)" conflicts with Sikshya permalink handling and should not be exposed.
-    if (addonId === 'certificates_advanced') {
-      const label = (def.label || '').toLowerCase();
-      const help = (def.help || '').toLowerCase();
-      if (
-        label.includes('legacy certificate') ||
-        label.includes('no pretty url') ||
-        help.includes('query-style') ||
-        help.includes('qr images are omitted') ||
-        name.toLowerCase().includes('legacy')
-      ) {
-        return false;
-      }
-    }
-    return true;
-  });
+  const fieldEntries = Object.entries(schema);
   const inputFields = fieldEntries.filter(([, d]) => d.type !== 'bool');
   const boolFields = fieldEntries.filter(([, d]) => d.type === 'bool');
 

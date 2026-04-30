@@ -93,6 +93,32 @@ export const SIKSHYA_ENDPOINTS = {
     reviewReject: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}/reject`,
     reviewDelete: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}`,
     reviewReply: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}/reply`,
+    /** Community discussions / Q&A admin moderation (Pro `community_discussions` addon). */
+    discussions: (params?: {
+      course_id?: number;
+      content_type?: 'lesson' | 'quiz';
+      thread_type?: 'discussion' | 'qa';
+      status?: 'pending' | 'approved' | 'spam' | 'all';
+      search?: string;
+      page?: number;
+      per_page?: number;
+    }) => {
+      const q = new URLSearchParams();
+      if (params?.course_id && params.course_id > 0) q.set('course_id', String(params.course_id));
+      if (params?.content_type) q.set('content_type', params.content_type);
+      if (params?.thread_type) q.set('thread_type', params.thread_type);
+      if (params?.status) q.set('status', params.status);
+      if (params?.search) q.set('search', params.search);
+      if (params?.page) q.set('page', String(params.page));
+      if (params?.per_page) q.set('per_page', String(params.per_page));
+      const s = q.toString();
+      return s ? `/admin/discussions?${s}` : '/admin/discussions';
+    },
+    discussionsSummary: '/admin/discussions/summary',
+    discussion: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}`,
+    discussionReply: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/reply`,
+    discussionApprove: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/approve`,
+    discussionReject: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/reject`,
     /** Editable transactional email templates (system + custom). */
     emailTemplates: '/admin/email-templates',
     emailTemplate: (id: string) => `/admin/email-templates/${encodeURIComponent(id)}`,

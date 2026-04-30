@@ -56,6 +56,8 @@ while (have_posts()) {
                     return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
                 case 'x':
                     return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+                case 'exit-learn':
+                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 case 'chevron-up':
                     return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 case 'chevron-right':
@@ -164,7 +166,7 @@ while (have_posts()) {
             <div class="sikshya-learnTopbar__right">
                 <?php if ($page_model->getUrlAccount() !== '') : ?>
                     <a class="sikshya-btn sikshya-btn--outline sikshya-btn--sm" href="<?php echo esc_url($page_model->getUrlAccount()); ?>">
-                        <?php echo sikshya_learn_icon('x'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                        <?php echo sikshya_learn_icon('exit-learn'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                         <?php esc_html_e('Exit', 'sikshya'); ?>
                     </a>
                 <?php endif; ?>
@@ -278,6 +280,21 @@ while (have_posts()) {
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
+                    <?php
+                    /**
+                     * Footer slot inside the Learn sidebar (Pro add-ons render
+                     * compact widgets here: Discussions/Q&A, Activity log,
+                     * Certificate share, Coupons, etc.).
+                     *
+                     * The legacy view array is materialized inline because this
+                     * hook fires before the quiz body where $legacy is
+                     * otherwise computed.
+                     *
+                     * @param array<string, mixed> $legacy_vm Legacy view array.
+                     * @param \Sikshya\Presentation\Models\SingleQuizPageModel $page_model
+                     */
+                    do_action('sikshya_learn_sidebar_footer', $page_model->toLegacyViewArray(), $page_model);
+                    ?>
                 </div>
             </aside>
 
@@ -388,23 +405,6 @@ while (have_posts()) {
                                                 ><?php esc_html_e('Start quiz', 'sikshya'); ?></button>
                                                 <span class="sikshya-tooltip" role="tooltip">
                                                     <?php esc_html_e('This quiz does not have questions yet.', 'sikshya'); ?>
-                                                </span>
-                                            </span>
-                                        <?php else : ?>
-                                            <?php
-                                            $lock_tip = $attempts_message !== ''
-                                                ? $attempts_message
-                                                : __('You have reached the maximum number of attempts for this quiz.', 'sikshya');
-                                            ?>
-                                            <span class="sikshya-tooltipWrap" data-sikshya-tooltip-wrap>
-                                                <button
-                                                    type="button"
-                                                    class="sikshya-btn sikshya-btn--primary sikshya-btn--sm"
-                                                    disabled
-                                                    aria-disabled="true"
-                                                ><?php esc_html_e('Quiz locked', 'sikshya'); ?></button>
-                                                <span class="sikshya-tooltip" role="tooltip">
-                                                    <?php echo esc_html($lock_tip); ?>
                                                 </span>
                                             </span>
                                         <?php endif; ?>
@@ -533,6 +533,15 @@ while (have_posts()) {
                                     <?php echo $attempts_exhausted ? '' : 'hidden'; ?>
                                 >
                                     <?php if ($attempts_exhausted) : ?>
+                                        <?php
+                                        $lock_message = $attempts_message !== ''
+                                            ? $attempts_message
+                                            : __('You have reached the maximum number of attempts for this quiz.', 'sikshya');
+                                        ?>
+                                        <div class="sikshya-quizLockNotice" role="alert">
+                                            <p class="sikshya-quizLockNotice__title"><?php esc_html_e('This quiz is currently locked', 'sikshya'); ?></p>
+                                            <p class="sikshya-quizLockNotice__desc"><?php echo esc_html($lock_message); ?></p>
+                                        </div>
                                         <fieldset disabled aria-disabled="true">
                                     <?php endif; ?>
                                     <?php foreach ($page_model->getQuestions() as $qi => $q) : ?>
@@ -549,7 +558,7 @@ while (have_posts()) {
                                     <div class="sikshya-quiz-result" hidden aria-live="polite"></div>
                                     <div class="sikshya-quizActions">
                                         <?php
-                                        $submit_label = $attempts_exhausted ? __('Quiz locked', 'sikshya') : __('Submit quiz', 'sikshya');
+                                        $submit_label = $attempts_exhausted ? __('No attempts remaining', 'sikshya') : __('Submit quiz', 'sikshya');
                                         $submit_title = '';
                                         if ($attempts_exhausted) {
                                             $submit_title = $attempts_message !== '' ? $attempts_message : __('No quiz attempts remaining.', 'sikshya');
@@ -580,9 +589,6 @@ while (have_posts()) {
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="notes"><?php esc_html_e('Notes', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
-                            <?php if ($page_model->isCourseFeatureDiscussions()) : ?>
-                                <button type="button" class="sikshya-tabBtn" data-sikshya-tab="discussions"><?php esc_html_e('Discussions', 'sikshya'); ?></button>
-                            <?php endif; ?>
                             <?php if ($page_model->isCourseFeatureReviews()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
                             <?php endif; ?>
@@ -736,14 +742,12 @@ while (have_posts()) {
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <?php if ($page_model->isCourseFeatureDiscussions()) : ?>
-                            <div class="sikshya-tabPanel" data-sikshya-panel="discussions">
-                                <div class="sikshya-contentPanel sikshya-contentPanel--plain">
-                                    <h3 class="sikshya-learnH3"><?php esc_html_e('Discussions', 'sikshya'); ?></h3>
-                                    <p class="sikshya-zeroMargin"><?php esc_html_e('Discussions are enabled for this course, but the discussion UI is not available yet.', 'sikshya'); ?></p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                        <?php
+                        // Discussions/Q&A now live in the Learn page left sidebar footer
+                        // (rendered by the Community Discussions Pro add-on via
+                        // `sikshya_learn_sidebar_footer`). The standalone tab here is removed
+                        // to keep a single source of truth for course conversations.
+                        ?>
                         <?php if ($page_model->isCourseFeatureReviews()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
                                 <div class="sikshya-contentPanel sikshya-contentPanel--plain">

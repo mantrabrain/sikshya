@@ -17,7 +17,10 @@
             ?>
             <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('%s attempts', 'sikshya'), $label_quiz)); ?>">
                 <div class="sik-acc-panel__head">
-                    <h2 class="sik-acc-panel__title"><?php echo esc_html(sprintf(__('%s attempts', 'sikshya'), $label_quiz)); ?></h2>
+                    <div class="sik-acc-panel__title-block">
+                        <h2 class="sik-acc-panel__title"><?php echo esc_html(sprintf(__('%s attempts', 'sikshya'), $label_quiz)); ?></h2>
+                        <p class="sik-acc-panel__sub"><?php esc_html_e('Track attempt limits and availability for quizzes inside your enrolled courses.', 'sikshya'); ?></p>
+                    </div>
                 </div>
                 <?php if ($page_model->getQuizAttempts() === []) : ?>
                     <div class="sik-acc-empty">
