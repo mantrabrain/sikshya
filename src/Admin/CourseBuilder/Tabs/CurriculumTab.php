@@ -406,7 +406,7 @@ class CurriculumTab extends AbstractTab
                         <label for="content-<?php echo esc_attr($content_id); ?>"></label>
                     </div>
                     <div class="sikshya-lesson-icon">
-                        <?php echo $this->getContentTypeIcon($content_type); ?>
+                        <?php echo $this->getContentTypeIcon((int) $content_id, $content_type); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
                 </div>
                 
@@ -438,20 +438,33 @@ class CurriculumTab extends AbstractTab
     }
 
     /**
-     * Get content type icon
+     * Same glyphs as Learn sidebar + single-course curriculum outline.
      *
-     * @param string $content_type
-     * @return string
+     * @param int $content_id Post ID (`_sikshya_lesson_type` when item is a lesson).
+     * @param string $content_type Derived slug (`lesson`|`quiz`|`assignment`).
+     *
+     * @return string Inline SVG markup
      */
-    private function getContentTypeIcon(string $content_type): string
+    private function getContentTypeIcon(int $content_id, string $content_type): string
     {
-        $icons = [
-            'lesson' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>',
-            'quiz' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-            'assignment' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-        ];
+        $slug = sanitize_key($content_type);
+        $outline = 'lesson';
+        if ($slug === 'quiz') {
+            $outline = 'quiz';
+        } elseif ($slug === 'assignment') {
+            $outline = 'assignment';
+        }
 
-        return $icons[$content_type] ?? $icons['lesson'];
+        $lesson_type = '';
+        if ($outline === 'lesson') {
+            $lesson_type = sanitize_key((string) get_post_meta($content_id, '_sikshya_lesson_type', true));
+        }
+
+        if (function_exists('sikshya_curriculum_outline_row_type_icon_html')) {
+            return sikshya_curriculum_outline_row_type_icon_html($outline, $lesson_type, 'learn');
+        }
+
+        return '<svg class="sikshya-curriculum-type-svg" width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
     }
 
     /**

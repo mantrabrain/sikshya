@@ -102,7 +102,7 @@ export function ContentLibraryHubPage({ config, title }: Props) {
         {
           id: 'chapters',
           label: T.chapters,
-          icon: 'layers',
+          icon: 'chapterStack',
           render: (c) => (
             <WpEntityListPage embedded config={c} title={T.chapters} subtitle={`All ${T.chapter.toLowerCase()}s`} restBase="sik_chapter" />
           ),
@@ -110,7 +110,7 @@ export function ContentLibraryHubPage({ config, title }: Props) {
         {
           id: 'question-banks',
           label: 'Question banks',
-          icon: 'puzzle',
+          icon: 'layers',
           hidden: !isFeatureEnabled(config, 'quiz_advanced'),
           render: (c) => (
             <QuizAdvancedWorkspacePage embedded config={c} title="Question banks" />
@@ -163,7 +163,7 @@ export function PeopleHubPage({ config, title }: Props) {
         {
           id: 'instructor-applications',
           label: 'Applications',
-          icon: 'clipboard',
+          icon: 'userPlus',
           render: (c) => (
             <InstructorApplicationsPage
               embedded
@@ -190,7 +190,7 @@ export function CertificatesHubPage({ config, title }: Props) {
         {
           id: 'templates',
           label: 'Templates',
-          icon: 'badge',
+          icon: 'documentText',
           render: (c) => (
             <WpEntityListPage
               embedded
@@ -204,7 +204,7 @@ export function CertificatesHubPage({ config, title }: Props) {
         {
           id: 'issued',
           label: 'Issued',
-          icon: 'clipboard',
+          icon: 'documentText',
           render: (c) => <IssuedCertificatesPage embedded config={c} title="Issued certificates" />,
         },
         {
@@ -260,13 +260,13 @@ export function SalesHubPage({ config, title }: Props) {
         {
           id: 'orders',
           label: 'Orders',
-          icon: 'table',
+          icon: 'documentText',
           render: (c) => <OrdersPage embedded config={c} title="Orders" />,
         },
         {
           id: 'payments',
           label: 'Payments',
-          icon: 'columns',
+          icon: 'creditCard',
           render: (c) => <PaymentsPage embedded config={c} title="Payments" />,
         },
       ]}
@@ -301,13 +301,13 @@ export function EmailHubPage({ config, title }: Props) {
         {
           id: 'delivery',
           label: 'Delivery',
-          icon: 'cog',
+          icon: 'mail',
           render: (c) => <EmailPage embedded config={c} title="Email" />,
         },
         {
           id: 'templates',
           label: 'Templates',
-          icon: 'table',
+          icon: 'documentText',
           render: (c) => <EmailTemplatesListPage embedded config={c} title="Email templates" />,
         },
       ]}
@@ -330,7 +330,7 @@ export function BrandingHubPage({ config, title }: Props) {
         {
           id: 'white-label',
           label: 'White label',
-          icon: 'badge',
+          icon: 'swatch',
           render: (c) => <WhiteLabelPage embedded config={c} title="White label" />,
         },
         {
@@ -357,7 +357,7 @@ export function IntegrationsHubPage({ config, title }: Props) {
         {
           id: 'webhooks',
           label: 'Webhooks & API',
-          icon: 'columns',
+          icon: 'link',
           render: (c) => <IntegrationsPage embedded config={c} title="Webhooks & API" />,
         },
         {
@@ -383,7 +383,7 @@ export function IntegrationsHubPage({ config, title }: Props) {
         {
           id: 'multilingual',
           label: 'Multilingual',
-          icon: 'helpCircle',
+          icon: 'translate',
           hidden: !isFeatureEnabled(config, 'multilingual_enterprise'),
           render: (c) => (
             <AddonSettingsPage
@@ -435,7 +435,7 @@ export function LearningRulesHubPage({ embedded, config, title }: Props) {
         {
           id: 'prerequisites',
           label: 'Prerequisites',
-          icon: 'puzzle',
+          icon: 'lockClosed',
           render: (c) => <PrerequisitesPage embedded config={c} title="Prerequisites" />,
         },
       ]}
@@ -498,7 +498,7 @@ export function ToolsHubPage({ embedded, config, title }: Props) {
         {
           id: 'activity',
           label: 'Activity log',
-          icon: 'clipboard',
+          icon: 'bolt',
           render: (c) => <ActivityLogPage embedded config={c} title="Activity log" />,
         },
       ]}

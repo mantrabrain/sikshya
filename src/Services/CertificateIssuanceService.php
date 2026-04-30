@@ -5,6 +5,7 @@ namespace Sikshya\Services;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Certificates\CertificateRenderer;
+use Sikshya\Certificates\CertificateTemplateDefaults;
 
 /**
  * Creates rows in sikshya_certificates when a learner completes a course.
@@ -97,8 +98,13 @@ final class CertificateIssuanceService
             return '';
         }
 
-        if ($slug === '' || $slug === 'default' || in_array($slug, ['classic', 'modern'], true)) {
-            $key = ($slug === '' || $slug === 'default' || $slug === 'classic') ? 'classic' : 'modern';
+        if (
+            $slug === ''
+            || $slug === 'default'
+            || in_array($slug, ['classic', 'modern', 'heritage', 'vertex'], true)
+        ) {
+            $canonical = ($slug === '' || $slug === 'default') ? 'default' : $slug;
+            $key = self::canonicalDefaultCertificateKey($canonical);
             $pid = self::findPublishedTemplateIdByDefaultKey($key);
 
             return $pid > 0 ? (string) $pid : '';
@@ -144,7 +150,7 @@ final class CertificateIssuanceService
      *
      * - Numeric `_sikshya_certificate_template`: that published `sikshya_certificate` post (Course Builder).
      * - `custom`: `_sikshya_certificate` template post id (legacy).
-     * - `default` / `classic` / `modern` / empty: seeded defaults via `_sikshya_certificate_default_key`.
+     * - `default` / `classic`/`heritage` / `modern`/`vertex` / empty: seeded defaults via `_sikshya_certificate_default_key`.
      */
     private function resolveTemplatePostIdForCourse(int $course_id): int
     {
@@ -173,12 +179,26 @@ final class CertificateIssuanceService
             return $custom_id > 0 ? $custom_id : 0;
         }
 
-        $key = $choice === 'default' ? 'classic' : $choice;
-        if (!in_array($key, ['classic', 'modern'], true)) {
-            $key = 'classic';
-        }
+        $key = self::canonicalDefaultCertificateKey($choice === 'default' ? 'default' : $choice);
 
         return self::findPublishedTemplateIdByDefaultKey($key);
+    }
+
+    /**
+     * Map course-meta slugs (including legacy classic/modern) to current seeded `_sikshya_certificate_default_key`.
+     */
+    private static function canonicalDefaultCertificateKey(string $slug): string
+    {
+        $s = sanitize_key($slug);
+        if ($s === '' || $s === 'default' || $s === 'classic' || $s === 'heritage') {
+            return CertificateTemplateDefaults::KEY_HERITAGE;
+        }
+
+        if ($s === 'modern' || $s === 'vertex') {
+            return CertificateTemplateDefaults::KEY_VERTEX;
+        }
+
+        return CertificateTemplateDefaults::KEY_HERITAGE;
     }
 
     public function certificatesEnabled(): bool

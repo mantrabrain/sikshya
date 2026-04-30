@@ -10,6 +10,7 @@ import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig, WpPost } from '../types';
 import { getWpApi } from '../api';
 import { NavIcon } from '../components/NavIcon';
+import { FeaturedThumb } from '../components/shared/list/FeaturedThumb';
 import {
   AddContentTypePickerModal,
   type ContentPickerType,
@@ -17,11 +18,7 @@ import {
 } from '../components/shared/AddContentTypePickerModal';
 import { CreateCertificateModal } from '../components/shared/CreateCertificateModal';
 import { term } from '../lib/terminology';
-
-function certificatePreviewSrc(r: WpPost): string | null {
-  const url = r._embedded?.['wp:featuredmedia']?.[0]?.source_url;
-  return typeof url === 'string' && url.length > 0 ? url : null;
-}
+import { navIconForCurriculumRow } from '../lib/curriculumIcons';
 
 /** Map a picker selection to the WordPress post type the new item lives under. */
 function postTypeForPickerType(t: ContentPickerType): 'sik_lesson' | 'sik_quiz' | 'sik_assignment' {
@@ -137,19 +134,30 @@ export function WpEntityListPage(props: {
 
       const previewCol: Column<WpPost> = {
         id: 'preview',
-        header: 'Preview',
+        header: '',
+        columnPickerLabel: 'Image',
+        alwaysVisible: true,
         defaultHidden: false,
-        cellClassName: 'w-20',
+        headerClassName: 'w-16',
+        cellClassName: 'w-16',
         render: (r) => {
-          const src = certificatePreviewSrc(r);
           return (
-            <div className="flex h-12 w-16 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-800">
-              {src ? (
-                <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <NavIcon name="badge" className="h-5 w-5 text-slate-300 dark:text-slate-600" />
-              )}
-            </div>
+            <FeaturedThumb post={r} emptyIcon="badge" />
+          );
+        },
+      };
+
+      /** Featured image column for lessons, quizzes, assignments, chapters, questions. */
+      const thumbCol: Column<WpPost> = {
+        id: 'thumb',
+        header: '',
+        columnPickerLabel: 'Image',
+        alwaysVisible: true,
+        headerClassName: 'w-16',
+        cellClassName: 'w-16',
+        render: (r) => {
+          return (
+            <FeaturedThumb post={r} emptyIcon="badge" />
           );
         },
       };
@@ -173,9 +181,7 @@ export function WpEntityListPage(props: {
                   {isLessonList ? (
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200">
                       <NavIcon
-                        name={
-                          String(meta?._sikshya_lesson_type || '').toLowerCase() === 'video' ? 'video' : 'bookOpen'
-                        }
+                        name={navIconForCurriculumRow('lesson', String(meta?._sikshya_lesson_type ?? ''))}
                         className="h-4 w-4"
                       />
                     </span>
@@ -392,7 +398,7 @@ export function WpEntityListPage(props: {
 
       return isCertificateList
         ? [idCol, previewCol, titleCol, dateCol, ...rest]
-        : [idCol, titleCol, dateCol, ...rest];
+        : [idCol, thumbCol, titleCol, dateCol, ...rest];
     },
     [config, restBase, isLessonList, isCertificateList, isQuizList, isQuestionList, isChapterList, isAssignmentList]
   );
@@ -420,7 +426,9 @@ export function WpEntityListPage(props: {
           return r.link;
         }
         const href = String(r.sikshya_certificate_preview_url || '').trim();
-        return href || null;
+        // If the REST field isn't present for some reason, fall back to the standard permalink.
+        // Returning `null` would hide View entirely.
+        return href || r.link || null;
       },
     }),
     [config, restBase, isCertificateList]
@@ -484,7 +492,12 @@ export function WpEntityListPage(props: {
         ]}
         defaultSortField="id"
         columnPickerStorageKey={pickerKey}
-        collectionQueryExtras={{ embed: '1' }}
+        collectionQueryExtras={{
+          embed: '1',
+          // Ensure featured media is available for thumbnail column.
+          fields:
+            'id,title,slug,status,link,meta,featured_media,sikshya_preview_link,sikshya_certificate_preview_url,_embedded.wp:featuredmedia,_embedded.wp:term,_embedded.author,date,modified,excerpt,author',
+        }}
         postRowActions={postRowActions}
         columns={columns}
         emptyMessage="No items match your filters."
@@ -501,12 +514,12 @@ export function WpEntityListPage(props: {
         }
         skeletonHeaders={
           isCertificateList
-            ? ['ID', 'Preview', 'Title', 'Published', 'Updated', 'Status']
+            ? ['ID', '', 'Title', 'Published', 'Updated', 'Status']
             : isLessonList
-              ? ['ID', 'Title', 'Published', 'Course', 'Type', 'Updated', 'Status']
+              ? ['ID', '', 'Title', 'Published', 'Course', 'Type', 'Updated', 'Status']
               : isQuizList
-                ? ['ID', 'Title', 'Published', 'Course', 'Pass %', 'Updated', 'Status']
-                : ['ID', 'Title', 'Published', 'Updated', 'Status']
+                ? ['ID', '', 'Title', 'Published', 'Course', 'Pass %', 'Updated', 'Status']
+                : ['ID', '', 'Title', 'Published', 'Updated', 'Status']
         }
       />
     </EmbeddableShell>

@@ -748,11 +748,16 @@ export function ProLessonFields(props: { values: ProLessonValues; onChange: (v: 
 /** Upper bound from `QuizAdvancedAddonSettings` PHP schema (`max` on `max_random_draw_per_quiz`). */
 export const QUIZ_ADVANCED_BANK_DRAW_HARD_MAX = 200;
 
+/** Positive draw counts are clamped to this ceiling (aligns with global Advanced quiz setting). */
+export function effectiveQuizBankDrawCap(maxRandomDrawPerQuiz: number): number {
+  return Math.max(1, Math.min(QUIZ_ADVANCED_BANK_DRAW_HARD_MAX, Math.floor(maxRandomDrawPerQuiz)));
+}
+
 /**
  * Caps stored draw count: 0 = unlimited matching pool; otherwise 1..min(hard max, global addon cap).
  */
 export function clampQuizBankCount(raw: number, maxRandomDrawPerQuiz: number): number {
-  const cap = Math.max(1, Math.min(QUIZ_ADVANCED_BANK_DRAW_HARD_MAX, Math.floor(maxRandomDrawPerQuiz)));
+  const cap = effectiveQuizBankDrawCap(maxRandomDrawPerQuiz);
   const n = Number(raw) || 0;
   if (n <= 0) {
     return 0;
@@ -874,10 +879,17 @@ export function ProGradebookAssignmentWeightFields(props: {
   );
 }
 
-export function ProQuizFields(props: { values: ProQuizValues; onChange: (v: ProQuizValues) => void }) {
-  const { values, onChange } = props;
+export function ProQuizFields(props: {
+  values: ProQuizValues;
+  onChange: (v: ProQuizValues) => void;
+  /** Global addon cap; must match {@link buildProQuizMeta} / {@link clampQuizBankCount}. */
+  maxRandomDrawPerQuiz?: number;
+}) {
+  const { values, onChange, maxRandomDrawPerQuiz = QUIZ_ADVANCED_BANK_DRAW_HARD_MAX } = props;
   const adv = useAddonEnabled('quiz_advanced');
   if (!adv.enabled || !adv.licenseOk) return null;
+
+  const drawCap = effectiveQuizBankDrawCap(maxRandomDrawPerQuiz);
 
   const set = <K extends keyof ProQuizValues>(k: K, val: ProQuizValues[K]) => onChange({ ...values, [k]: val });
 

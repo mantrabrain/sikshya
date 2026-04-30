@@ -13,6 +13,7 @@ import { embeddedTermNames } from '../lib/wpPostTerms';
 import { formatPostDate } from '../lib/formatPostDate';
 import { term, termLower } from '../lib/terminology';
 import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
+import { FeaturedThumb } from '../components/shared/list/FeaturedThumb';
 
 function isBundleRow(r: WpPost): boolean {
   const m = r.meta as Record<string, unknown> | undefined;
@@ -35,11 +36,6 @@ function isSubscriptionRow(r: WpPost): boolean {
 
 function stripTags(html: string): string {
   return html.replace(/<[^>]*>/g, '').trim();
-}
-
-function featuredThumbSrc(r: WpPost): string | null {
-  const url = r._embedded?.['wp:featuredmedia']?.[0]?.source_url;
-  return typeof url === 'string' && url.length > 0 ? url : null;
 }
 
 function excerptPlain(r: WpPost): string {
@@ -91,15 +87,8 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
         headerClassName: 'w-16',
         cellClassName: 'w-16',
         render: (r) => {
-          const src = featuredThumbSrc(r);
           return (
-            <div className="flex h-12 w-14 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-800">
-              {src ? (
-                <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">—</span>
-              )}
-            </div>
+            <FeaturedThumb post={r} emptyIcon="badge" />
           );
         },
       },
@@ -236,7 +225,7 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
           embed: '1',
           // Ensure bundle type meta is present in the collection response so the badge renders reliably.
           fields:
-            'id,title,slug,status,link,meta,sikshya_course_type,sikshya_course_price,sikshya_course_duration,sikshya_course_level,sikshya_preview_link,_embedded,date,modified,excerpt,author',
+            'id,title,slug,status,link,meta,featured_media,sikshya_course_type,sikshya_course_price,sikshya_course_duration,sikshya_course_level,sikshya_preview_link,_embedded.wp:featuredmedia,_embedded.wp:term,_embedded.author,date,modified,excerpt,author',
           ...(typeFilter !== 'any' ? { sikshya_course_type: typeFilter } : null),
         }}
         toolbarTrailing={

@@ -52,6 +52,7 @@ import {
   substituteMergePreview,
   type CertLayoutFile,
 } from './certificateLayout';
+import { cloneRegaliaSeed, cloneVertexSeed } from './certificateTemplateSeeds';
 
 const FIELD =
   'mt-1.5 w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 transition-colors focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200/80 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:border-slate-500 dark:focus:ring-slate-600/50';
@@ -716,7 +717,12 @@ function CanvasDropArea(props: {
       w = h * ar;
     }
 
-    return { w: Math.max(320, w), h: Math.max(320, h) };
+    w = Math.max(320, w);
+    h = Math.max(320, h);
+    // One rounded edge + height from exact paper ratio — avoids footer/frame drift vs exported HTML.
+    const rw = Math.round(w);
+    const rh = Math.max(320, Math.round((rw * paperPx.h0) / paperPx.w0));
+    return { w: rw, h: rh };
   }, [paperPx.h0, paperPx.w0, viewportSize.h, viewportSize.w]);
 
   return (
@@ -1804,80 +1810,9 @@ export function CertificateVisualBuilder(props: Props) {
       emerald: '#065f46',
     } as const;
 
-    // ---------- 1. Classic Gold (landscape, cream + diploma gold art) ----------
-    const classicGold = (): CertLayoutFile => {
-      const eyebrow = createBlock('text');
-      const heading = createBlock('heading');
-      const divTop = createBlock('divider');
-      const presented = createBlock('text');
-      const student = createBlock('merge_field');
-      const divBot = createBlock('divider');
-      const forLine = createBlock('text');
-      const course = createBlock('merge_field');
-      const dateLabel = createBlock('text');
-      const date = createBlock('merge_field');
-      const signatureLabel = createBlock('text');
-      const instructor = createBlock('merge_field');
-      const qr = createBlock('qr');
-      const verifyLabel = createBlock('text');
-      const verifyCode = createBlock('merge_field');
-      return {
-        version: CERT_LAYOUT_VERSION,
-        blocks: [
-          { ...eyebrow, props: { ...eyebrow.props, x: 10, y: 9, w: 80, h: 4, z: 1, text: 'CERTIFICATE OF ACHIEVEMENT', align: 'center', fontSize: 12, color: INK.gold } },
-          { ...heading, props: { ...heading.props, x: 8, y: 14, w: 84, h: 12, z: 2, text: 'Certificate of Excellence', tag: 'h1', align: 'center', fontSize: 40, fontWeight: '700', color: INK.slate900 } },
-          { ...divTop, props: { ...divTop.props, x: 36, y: 27, w: 28, h: 2, z: 1, color: INK.goldSoft, thickness: 2 } },
-          { ...presented, props: { ...presented.props, x: 10, y: 33, w: 80, h: 5, z: 1, text: 'This certificate is proudly presented to', align: 'center', fontSize: 14, color: INK.slate500 } },
-          { ...student, props: { ...student.props, x: 8, y: 40, w: 84, h: 11, z: 2, field: 'student_name', align: 'center', fontSize: 34, color: INK.slate900 } },
-          { ...divBot, props: { ...divBot.props, x: 26, y: 54, w: 48, h: 2, z: 1, color: INK.slate200, thickness: 1 } },
-          { ...forLine, props: { ...forLine.props, x: 10, y: 58, w: 80, h: 5, z: 1, text: 'for successfully completing the course', align: 'center', fontSize: 14, color: INK.slate500 } },
-          { ...course, props: { ...course.props, x: 10, y: 64, w: 80, h: 8, z: 2, field: 'course_name', align: 'center', fontSize: 22, color: INK.slate700 } },
-          { ...qr, props: { ...qr.props, x: 10, y: 78, w: 14, h: 18, z: 3, size: 120 } },
-          { ...verifyLabel, props: { ...verifyLabel.props, x: 26, y: 80, w: 28, h: 3.5, z: 2, text: 'VERIFICATION ID', align: 'left', fontSize: 10, color: INK.slate500, fontWeight: '600' } },
-          {
-            ...verifyCode,
-            props: { ...verifyCode.props, x: 26, y: 84, w: 28, h: 6, z: 2, field: 'verification_code', align: 'left', fontSize: 12, color: INK.slate900, fontWeight: '500' },
-          },
-          { ...dateLabel, props: { ...dateLabel.props, x: 58, y: 80, w: 16, h: 3.5, z: 1, text: 'DATE', align: 'center', fontSize: 10, color: INK.slate500 } },
-          { ...date, props: { ...date.props, x: 58, y: 84, w: 16, h: 6, z: 2, field: 'completion_date', align: 'center', fontSize: 14, color: INK.slate900 } },
-          { ...signatureLabel, props: { ...signatureLabel.props, x: 76, y: 80, w: 16, h: 3.5, z: 1, text: 'INSTRUCTOR', align: 'center', fontSize: 10, color: INK.slate500 } },
-          { ...instructor, props: { ...instructor.props, x: 76, y: 84, w: 16, h: 6, z: 2, field: 'instructor_name', align: 'center', fontSize: 14, color: INK.slate900 } },
-        ],
-      };
-    };
-
-    // ---------- 2. Modern Minimal (landscape, pure white, thin lines) ----------
-    const modernMinimal = (): CertLayoutFile => {
-      const eyebrow = createBlock('text');
-      const heading = createBlock('heading');
-      const dTop = createBlock('divider');
-      const label = createBlock('text');
-      const student = createBlock('merge_field');
-      const subLabel = createBlock('text');
-      const course = createBlock('merge_field');
-      const dBot = createBlock('divider');
-      const dateLabel = createBlock('text');
-      const date = createBlock('merge_field');
-      const numberLabel = createBlock('text');
-      const number = createBlock('merge_field');
-      return {
-        version: CERT_LAYOUT_VERSION,
-        blocks: [
-          { ...eyebrow, props: { ...eyebrow.props, x: 8, y: 10, w: 60, h: 4, z: 1, text: '— CERTIFICATE OF COMPLETION', align: 'left', fontSize: 11, color: INK.slate500 } },
-          { ...heading, props: { ...heading.props, x: 8, y: 16, w: 80, h: 12, z: 2, text: 'Completed', tag: 'h1', align: 'left', fontSize: 42, fontWeight: '700', color: INK.slate900 } },
-          { ...dTop, props: { ...dTop.props, x: 8, y: 30, w: 84, h: 2, z: 1, color: INK.slate200, thickness: 1 } },
-          { ...label, props: { ...label.props, x: 8, y: 36, w: 40, h: 4, z: 1, text: 'Awarded to', align: 'left', fontSize: 12, color: INK.slate500 } },
-          { ...student, props: { ...student.props, x: 8, y: 40, w: 84, h: 11, z: 2, field: 'student_name', align: 'left', fontSize: 32, color: INK.slate900 } },
-          { ...subLabel, props: { ...subLabel.props, x: 8, y: 54, w: 60, h: 4, z: 1, text: 'For the successful completion of', align: 'left', fontSize: 12, color: INK.slate500 } },
-          { ...course, props: { ...course.props, x: 8, y: 58, w: 84, h: 8, z: 2, field: 'course_name', align: 'left', fontSize: 20, color: INK.slate700 } },
-          { ...dBot, props: { ...dBot.props, x: 8, y: 78, w: 84, h: 2, z: 1, color: INK.slate200, thickness: 1 } },
-          { ...dateLabel, props: { ...dateLabel.props, x: 8, y: 82, w: 30, h: 4, z: 1, text: 'DATE', align: 'left', fontSize: 10, color: INK.slate500 } },
-          { ...date, props: { ...date.props, x: 8, y: 86, w: 30, h: 6, z: 2, field: 'completion_date', align: 'left', fontSize: 14, color: INK.slate900 } },
-          { ...numberLabel, props: { ...numberLabel.props, x: 62, y: 82, w: 30, h: 4, z: 1, text: 'CERTIFICATE №', align: 'right', fontSize: 10, color: INK.slate500 } },
-          { ...number, props: { ...number.props, x: 62, y: 86, w: 30, h: 6, z: 2, field: 'certificate_number', align: 'right', fontSize: 14, color: INK.slate900 } },
-        ],
-      };
-    };
+    // ---------- 1–2. Seeded defaults (mirror PHP Installer / Pro migration) ----------
+    const regaliaHeritage = (): CertLayoutFile => cloneRegaliaSeed();
+    const vertexModern = (): CertLayoutFile => cloneVertexSeed();
 
     // ---------- 3. Corporate Navy (landscape, corporate letter deco) ----------
     const corporateNavy = (): CertLayoutFile => {
@@ -2002,20 +1937,20 @@ export function CertificateVisualBuilder(props: Props) {
 
     const list: Tpl[] = [
       {
-        id: 'classic-gold',
-        name: 'Classic Gold',
-        description: 'Elegant award · landscape',
-        accent: { bg: '#fdf7e7', ink: INK.slate900, line: INK.goldSoft },
-        build: classicGold,
+        id: 'regalia-heritage',
+        name: 'Regalia · Heritage',
+        description: 'Warm ivory, gold deco, serif honor line · seeded default',
+        accent: { bg: '#fffbf0', ink: '#422006', line: '#d97706' },
+        build: regaliaHeritage,
         page: { orientation: 'landscape', pageSize: 'a4' },
-        finish: { pageColor: '#fbf7ec', pagePattern: 'paperGrain', pageDeco: 'diplomaGold' },
+        finish: { pageColor: '#fffbf0', pagePattern: 'paperGrain', pageDeco: 'diplomaGold' },
       },
       {
-        id: 'modern-minimal',
-        name: 'Modern Minimal',
-        description: 'Bold + structured · landscape',
-        accent: { bg: '#ffffff', ink: INK.slate900, line: INK.slate300 },
-        build: modernMinimal,
+        id: 'vertex-modern',
+        name: 'Vertex · Modern',
+        description: 'Teal accent strip, airy sans layout · seeded default',
+        accent: { bg: '#ffffff', ink: '#0f172a', line: '#0d9488' },
+        build: vertexModern,
         page: { orientation: 'landscape', pageSize: 'a4' },
         finish: { pageColor: '#ffffff', pagePattern: 'microDots', pageDeco: 'minimalFrame' },
       },

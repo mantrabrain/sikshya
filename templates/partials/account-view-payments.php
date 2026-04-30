@@ -56,6 +56,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                                 $invoice_href = ($inv_no !== '' && $otok !== '' && in_array($ostatus, ['paid', 'completed'], true))
                                     ? PublicPageUrls::orderInvoiceView($otok)
                                     : '';
+                                $invoice_pdf_href = $invoice_href !== '' ? add_query_arg('pdf', '1', $invoice_href) : '';
                                 ?>
                                 <tr>
                                     <td>
@@ -70,6 +71,11 @@ use Sikshya\Frontend\Public\PublicPageUrls;
                                                 <?php echo esc_html($inv_no); ?>
                                             </a>
                                             <div class="sik-acc-muted"><?php esc_html_e('Open invoice', 'sikshya'); ?></div>
+                                            <div class="sik-acc-muted">
+                                                <a href="<?php echo esc_url($invoice_pdf_href); ?>" target="_blank" rel="noopener noreferrer">
+                                                    <?php esc_html_e('Download PDF', 'sikshya'); ?>
+                                                </a>
+                                            </div>
                                         <?php else : ?>
                                             <span class="sik-acc-muted">—</span>
                                         <?php endif; ?>

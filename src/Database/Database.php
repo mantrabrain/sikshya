@@ -14,6 +14,7 @@ use Sikshya\Database\Tables\OrderItemsTable;
 use Sikshya\Database\Tables\CouponsTable;
 use Sikshya\Database\Tables\CouponRedemptionsTable;
 use Sikshya\Database\Tables\ReviewsTable;
+use Sikshya\Database\Tables\PaymentsTable;
 use Sikshya\Services\EmailTemplateStore;
 
 /**
@@ -24,9 +25,9 @@ use Sikshya\Services\EmailTemplateStore;
 class Database
 {
     /**
-     * Bump when schema or migrations change (incremental upgrades via maybeUpgrade).
+     * Current DB schema version.
      */
-    public const SCHEMA_VERSION = '1.8.0';
+    public const SCHEMA_VERSION = '1.9.0';
 
     /**
      * Plugin instance
@@ -61,51 +62,13 @@ class Database
     }
 
     /**
-     * Run incremental migrations after updates (safe to call on every request; version-gated).
+     * Reserved for future upgrades.
+     *
+     * v1.0.0: no incremental migrations are executed at runtime.
      */
     public function maybeUpgrade(): void
     {
-        // Idempotent normalization: ensure tables exist even when version flags are already current.
-        $this->ensureTablesPresent();
-
-        $this->migrateLegacyPaymentReceiptEmailSetting();
-
-        $current = Settings::getRaw('sikshya_db_version', '0');
-        if (version_compare((string) $current, '1.1.0', '<')) {
-            $this->migrateTo110();
-            Settings::setRaw('sikshya_db_version', '1.1.0');
-            $current = '1.1.0';
-        }
-        if (version_compare((string) $current, '1.2.0', '<')) {
-            $this->migrateTo120();
-            Settings::setRaw('sikshya_db_version', '1.2.0');
-            $current = '1.2.0';
-        }
-        if (version_compare((string) $current, '1.3.0', '<')) {
-            $this->migrateTo130();
-            Settings::setRaw('sikshya_db_version', '1.3.0');
-            $current = '1.3.0';
-        }
-        if (version_compare((string) $current, '1.4.0', '<')) {
-            $this->migrateTo140();
-            Settings::setRaw('sikshya_db_version', '1.4.0');
-            $current = '1.4.0';
-        }
-        if (version_compare((string) $current, '1.5.0', '<')) {
-            $this->migrateTo150();
-            Settings::setRaw('sikshya_db_version', '1.5.0');
-            $current = '1.5.0';
-        }
-        if (version_compare((string) $current, '1.6.0', '<')) {
-            $this->migrateTo160();
-            Settings::setRaw('sikshya_db_version', '1.6.0');
-            $current = '1.6.0';
-        }
-        if (version_compare((string) $current, '1.7.0', '<')) {
-            $this->migrateTo170();
-            Settings::setRaw('sikshya_db_version', '1.7.0');
-            $current = '1.7.0';
-        }
+        return;
     }
 
     /**
@@ -280,6 +243,32 @@ class Database
         $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN rubric_scores_json longtext NULL AFTER feedback");
     }
 
+    /**
+     * Payments: charge_kind distinguishes checkout fulfillment rows from automated subscription renewals.
+     */
+    private function migrateTo190PaymentsChargeKind(): void
+    {
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+        dbDelta(PaymentsTable::createSql($charset_collate));
+
+        $table = PaymentsTable::getTableName();
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- escaped table identifier
+        $has = $wpdb->get_results("SHOW COLUMNS FROM `{$table}` LIKE 'charge_kind'");
+        if (is_array($has) && $has !== []) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table identifier from helper
+        $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN charge_kind varchar(32) NOT NULL DEFAULT 'checkout' AFTER status");
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $wpdb->query("ALTER TABLE `{$table}` ADD KEY charge_kind (charge_kind)");
+    }
 
     private function getEnrollmentsCreateSql(): string
     {

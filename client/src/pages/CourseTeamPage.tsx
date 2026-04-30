@@ -6,6 +6,7 @@ import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
@@ -42,6 +43,7 @@ const STAFF_SEARCH_ROLES = ['administrator', 'editor', 'author', 'sikshya_instru
 
 export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const dialog = useSikshyaDialog();
   const featureOk = isFeatureEnabled(config, 'multi_instructor');
   const addon = useAddonEnabled('multi_instructor');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
@@ -399,7 +401,13 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
   const deleteMember = async (userId: number) => {
     const cid = parseInt(courseId, 10);
     if (!Number.isFinite(cid) || cid <= 0) return;
-    if (!window.confirm('Remove this person from the course staff list?')) return;
+    const ok = await dialog.confirm({
+      title: 'Remove staff member?',
+      message: 'Remove this person from the course staff list?',
+      confirmLabel: 'Remove',
+      variant: 'danger',
+    });
+    if (!ok) return;
     setSaving(true);
     setMsg(null);
     try {

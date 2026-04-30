@@ -639,9 +639,46 @@ class CheckoutRestRoutes
             );
         }
 
+        $transaction_id = '';
+        $gateway_snapshot = null;
+
+        // Subscription-mode confirm: gateways that implement recurring billing should verify/capture
+        // their subscription activation here. Core one-time logic runs only when not subscription checkout.
+        $metaDecoded = [];
+        if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+            $decoded = json_decode((string) $order->meta, true);
+            if (is_array($decoded)) {
+                $metaDecoded = $decoded;
+            }
+        }
+        $is_sub_checkout = is_array($metaDecoded)
+            && isset($metaDecoded['checkout_mode'])
+            && (string) $metaDecoded['checkout_mode'] === 'subscription'
+            && isset($metaDecoded['subscription_plan_id'])
+            && (int) $metaDecoded['subscription_plan_id'] > 0;
+        if ($is_sub_checkout) {
+            $handled = apply_filters('sikshya_checkout_confirm_subscription_gateway', false, $gateway, $order, $params);
+            if ($handled instanceof \WP_REST_Response) {
+                return $handled;
+            }
+            if ($handled !== true) {
+                return new WP_REST_Response(
+                    ['ok' => false, 'code' => 'subscription_gateway_not_supported', 'message' => __('This gateway is not configured for recurring subscriptions.', 'sikshya')],
+                    400
+                );
+            }
+            // Handlers may update gateway_intent_id / meta; reload before persisting payment snapshot.
+            $refreshed = $orders->findById($order_id);
+            if ($refreshed) {
+                $order = $refreshed;
+            }
+            // Subscription gateway has verified activation; proceed to fulfillment + redirect below.
+        } else
         if ($gateway === 'stripe') {
             if ($pi !== '') {
                 $intent = $this->checkoutService()->retrieveStripePaymentIntent($pi);
+                $transaction_id = $pi;
+                $gateway_snapshot = is_array($intent) ? $intent : null;
                 $st = is_array($intent) ? (string) ($intent['status'] ?? '') : '';
                 if ($st !== 'succeeded') {
                     return new WP_REST_Response(
@@ -674,6 +711,8 @@ class CheckoutRestRoutes
                 }
             } elseif ($checkout_session_id !== '') {
                 $sess = $this->checkoutService()->retrieveStripeCheckoutSession($checkout_session_id);
+                $transaction_id = $checkout_session_id;
+                $gateway_snapshot = is_array($sess) ? $sess : null;
                 $payStatus = is_array($sess) ? (string) ($sess['payment_status'] ?? '') : '';
                 if ($payStatus !== 'paid') {
                     return new WP_REST_Response(
@@ -758,6 +797,8 @@ class CheckoutRestRoutes
                 );
             }
             $cap = $this->checkoutService()->capturePayPalOrder($paypal_order);
+            $transaction_id = $paypal_order;
+            $gateway_snapshot = is_array($cap) ? $cap : null;
             $cap_status = is_array($cap) ? (string) ($cap['status'] ?? '') : '';
             if ($cap_status !== 'COMPLETED') {
                 return new WP_REST_Response(
@@ -797,6 +838,8 @@ class CheckoutRestRoutes
                 );
             }
             $m = $this->checkoutService()->getMolliePayment($pid);
+            $transaction_id = $pid;
+            $gateway_snapshot = is_array($m) ? $m : null;
             $status = is_array($m) ? (string) ($m['status'] ?? '') : '';
             if ($status !== 'paid') {
                 return new WP_REST_Response(
@@ -835,6 +878,8 @@ class CheckoutRestRoutes
                 );
             }
             $data = $this->checkoutService()->verifyPaystackReference($ref);
+            $transaction_id = $ref;
+            $gateway_snapshot = is_array($data) ? $data : null;
             if (!$data || (string) ($data['status'] ?? '') !== 'success') {
                 return new WP_REST_Response(
                     ['ok' => false, 'code' => 'payment_pending', 'message' => __('Paystack payment not verified.', 'sikshya')],
@@ -873,6 +918,8 @@ class CheckoutRestRoutes
                 );
             }
             $link = $this->checkoutService()->getRazorpayPaymentLink($lid);
+            $transaction_id = $lid;
+            $gateway_snapshot = is_array($link) ? $link : null;
             $st = is_array($link) ? (string) ($link['status'] ?? '') : '';
             if ($st !== 'paid') {
                 return new WP_REST_Response(
@@ -921,6 +968,31 @@ class CheckoutRestRoutes
                     400
                 );
             }
+        }
+
+        // Persist payment identifiers + gateway response for admin "Payment Details".
+        try {
+            $meta = [];
+            if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+                $decoded = json_decode($order->meta, true);
+                if (is_array($decoded)) {
+                    $meta = $decoded;
+                }
+            }
+            $meta['payment'] = [
+                'gateway' => $gateway,
+                'transaction_id' => $transaction_id !== '' ? $transaction_id : (string) ($order->gateway_intent_id ?? ''),
+                'verified_at' => current_time('mysql'),
+                'gateway_response' => $gateway_snapshot,
+            ];
+
+            $patch = ['meta' => $meta];
+            if ($transaction_id !== '') {
+                $patch['gateway_intent_id'] = $transaction_id;
+            }
+            (new OrderRepository())->updateOrder($order_id, $patch);
+        } catch (\Throwable $e) {
+            // Ignore persistence failures; fulfillment can proceed.
         }
 
         // Payment verified. For guest orders, create/link a student account now.

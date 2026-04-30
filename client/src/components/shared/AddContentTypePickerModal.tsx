@@ -25,7 +25,8 @@ export type ContentPickerType =
 type PickerOpt = {
   type: ContentPickerType;
   label: string;
-  icon: 'bookOpen' | 'video' | 'puzzle' | 'clipboard' | 'schedule' | 'layers';
+  /** Matches `NavIcon` registry / curriculum outline parity. */
+  icon: string;
   /** Pro addon required (and licensed) to enable this kind. */
   addonId?: 'live_classes' | 'scorm_h5p_pro';
   /** Marketing badge shown when the type is locked behind that addon. */
@@ -38,13 +39,13 @@ type PickerOpt = {
  * curriculum builder modal. There is intentionally only one definition.
  */
 export const CONTENT_PICKER_TYPES: PickerOpt[] = [
-  { type: 'lesson_text', label: 'Text lesson', icon: 'bookOpen' },
-  { type: 'lesson_video', label: 'Video lesson', icon: 'video' },
-  { type: 'lesson_live', label: 'Live class', icon: 'schedule', addonId: 'live_classes', proLabel: 'Pro' },
-  { type: 'lesson_scorm', label: 'SCORM package', icon: 'layers', addonId: 'scorm_h5p_pro', proLabel: 'Pro' },
-  { type: 'lesson_h5p', label: 'H5P interactive', icon: 'puzzle', addonId: 'scorm_h5p_pro', proLabel: 'Pro' },
-  { type: 'quiz', label: 'Quiz', icon: 'puzzle' },
-  { type: 'assignment', label: 'Assignment', icon: 'clipboard' },
+  { type: 'lesson_text', label: 'Text lesson', icon: 'plusDocument' },
+  { type: 'lesson_video', label: 'Video lesson', icon: 'curriculumLessonVideo' },
+  { type: 'lesson_live', label: 'Live class', icon: 'curriculumLessonLive', addonId: 'live_classes', proLabel: 'Pro' },
+  { type: 'lesson_scorm', label: 'SCORM package', icon: 'curriculumLessonScorm', addonId: 'scorm_h5p_pro', proLabel: 'Pro' },
+  { type: 'lesson_h5p', label: 'H5P interactive', icon: 'curriculumLessonH5p', addonId: 'scorm_h5p_pro', proLabel: 'Pro' },
+  { type: 'quiz', label: 'Quiz', icon: 'curriculumQuiz' },
+  { type: 'assignment', label: 'Assignment', icon: 'curriculumAssignment' },
 ];
 
 export function defaultTitleFor(type: ContentPickerType, config?: SikshyaReactConfig): string {

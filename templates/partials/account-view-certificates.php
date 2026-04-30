@@ -44,6 +44,11 @@ $certs = is_array($acc['certificates'] ?? null) ? (array) $acc['certificates'] :
                                 $issued_ts = $issued_raw !== '' ? strtotime($issued_raw) : false;
                                 $issued_disp = $issued_ts ? wp_date(get_option('date_format'), $issued_ts) : '—';
                                 $dl = (string) ($c['download_url'] ?? '');
+                                $hash = (string) ($c['verification_code'] ?? '');
+                                // Back-compat: if older rows are missing download_url, build it from the verification code.
+                                if ($dl === '' && $hash !== '') {
+                                    $dl = \Sikshya\Certificates\CertificateRenderer::publicUrlForHash($hash);
+                                }
                                 ?>
                                 <tr>
                                     <td>
@@ -57,6 +62,9 @@ $certs = is_array($acc['certificates'] ?? null) ? (array) $acc['certificates'] :
                                     <td>
                                         <?php if ($dl !== '') : ?>
                                             <a class="sikshya-btn sikshya-btn--primary sikshya-btn--sm" href="<?php echo esc_url($dl); ?>" target="_blank" rel="noopener">
+                                                <?php esc_html_e('View', 'sikshya'); ?>
+                                            </a>
+                                            <a class="sikshya-btn sikshya-btn--sm" href="<?php echo esc_url($dl); ?>" target="_blank" rel="noopener">
                                                 <?php esc_html_e('Download', 'sikshya'); ?>
                                             </a>
                                         <?php else : ?>

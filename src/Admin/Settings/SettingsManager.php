@@ -675,7 +675,7 @@ class SettingsManager
     {
         $settings = $this->getTabSettings($tab);
         if (empty($settings)) {
-            return '<p>No settings found for this tab.</p>';
+            return '<p>' . esc_html__('No settings found for this tab.', 'sikshya') . '</p>';
         }
 
         $output = '<div class="sikshya-settings-tab-content">';
@@ -896,7 +896,7 @@ class SettingsManager
                         'key' => 'site_title',
                         'type' => 'text',
                         'label' => __('Site or platform name', 'sikshya'),
-                        'description' => __('Shown in the browser tab and in Sikshya emails where a site name is needed. Usually matches your WordPress site name.', 'sikshya'),
+                        'description' => __('Shown in the browser tab and as the public site name across Sikshya. Usually matches your WordPress site title.', 'sikshya'),
                         'placeholder' => __('e.g. Acme Online Academy', 'sikshya'),
                         'default' => get_bloginfo('name'),
                         'required' => true,
@@ -915,19 +915,6 @@ class SettingsManager
                         'sanitize_callback' => 'sanitize_textarea_field',
                         'validate_callback' => function ($value) {
                             return strlen($value) <= 500 ? true : __('Description cannot exceed 500 characters.', 'sikshya');
-                        }
-                    ],
-                    [
-                        'key' => 'admin_email',
-                        'type' => 'email',
-                        'label' => __('Main contact email', 'sikshya'),
-                        'description' => __('Where Sikshya sends important notices for this plugin (orders, errors, etc.). Use an address you check often.', 'sikshya'),
-                        'placeholder' => __('you@example.com', 'sikshya'),
-                        'default' => Settings::getRaw('admin_email'),
-                        'required' => true,
-                        'sanitize_callback' => 'sanitize_email',
-                        'validate_callback' => function ($value) {
-                            return is_email($value) ? true : __('Please enter a valid email address.', 'sikshya');
                         }
                     ],
                     [
@@ -1084,8 +1071,6 @@ class SettingsManager
                     ]
                 ]
             ],
-            [
-            ]
         ];
     }
 
@@ -1574,7 +1559,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Enable offline / manual payment at checkout', 'sikshya'),
                         'description' => __(
-                            'Shows “Offline payment” on checkout (no API keys). Use instructions below for bank details or invoicing.',
+                            'Shows “Offline payment” on checkout (no API keys). Add clear instructions below (bank details, reference format, and how to send proof).',
                             'sikshya'
                         ),
                         'default' => true
@@ -1584,7 +1569,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Enable PayPal at checkout', 'sikshya'),
                         'description' => __(
-                            'Shows PayPal on checkout when enabled and credentials are configured.',
+                            'Shows PayPal on checkout when enabled and configured. Choose “Simple” (email + IPN) or “Advanced” (REST API capture).',
                             'sikshya'
                         ),
                         'default' => true,
@@ -1594,7 +1579,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Enable Stripe at checkout (Pro)', 'sikshya'),
                         'description' => __(
-                            'Shows Stripe on checkout when Pro is active, enabled, and keys are configured.',
+                            'Shows Stripe on checkout when Pro is active, enabled, and API keys are added below.',
                             'sikshya'
                         ),
                         'default' => false,
@@ -1603,42 +1588,42 @@ class SettingsManager
                         'key' => 'enable_razorpay_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Razorpay at checkout (Pro)', 'sikshya'),
-                        'description' => __('Popular in India—requires Sikshya Pro and keys below.', 'sikshya'),
+                        'description' => __('Requires Sikshya Pro. Add your Razorpay API keys below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_mollie_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Mollie at checkout (Pro)', 'sikshya'),
-                        'description' => __('Common in Europe—requires Sikshya Pro and API key.', 'sikshya'),
+                        'description' => __('Requires Sikshya Pro. Add your Mollie API key below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_paystack_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Paystack at checkout (Pro)', 'sikshya'),
-                        'description' => __('Popular in Africa—requires Sikshya Pro and keys.', 'sikshya'),
+                        'description' => __('Requires Sikshya Pro. Add your Paystack API keys below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_square_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Square at checkout (Pro)', 'sikshya'),
-                        'description' => __('In-person and online—requires Sikshya Pro and Square credentials.', 'sikshya'),
+                        'description' => __('Requires Sikshya Pro. Add your Square credentials below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_authorize_net_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Authorize.Net at checkout (Pro)', 'sikshya'),
-                        'description' => __('US-focused gateway—requires Sikshya Pro and merchant API keys.', 'sikshya'),
+                        'description' => __('Requires Sikshya Pro. Add your Authorize.Net API credentials below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_bank_transfer_payment',
                         'type' => 'checkbox',
                         'label' => __('Enable Bank Transfer at checkout (Pro)', 'sikshya'),
-                        'description' => __('Structured bank transfer flow—requires Sikshya Pro and instructions below.', 'sikshya'),
+                        'description' => __('Requires Sikshya Pro. Show structured bank transfer details after checkout.', 'sikshya'),
                         'default' => false,
                     ],
                     [
@@ -1666,7 +1651,11 @@ class SettingsManager
                         'key' => 'paypal_client_id',
                         'type' => 'text',
                         'label' => __('PayPal — Client ID', 'sikshya'),
-                        'description' => __('From developer.paypal.com → your REST app → Client ID (public).', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: PayPal developer dashboard link */
+                            __('For “Advanced (REST API)”. Copy from your PayPal REST app: %s → My Apps & Credentials → Client ID. (Public key, safe to expose to the browser.)', 'sikshya'),
+                            '<a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer">developer.paypal.com</a>'
+                        ),
                         'placeholder' => __('Starts with A…', 'sikshya'),
                         'default' => '',
                     ],
@@ -1675,7 +1664,7 @@ class SettingsManager
                         'type' => 'select',
                         'label' => __('PayPal — Integration mode', 'sikshya'),
                         'description' => __(
-                            'Match Yatra: Simple uses only PayPal email + IPN (no REST API). Advanced uses REST API (Client ID + Secret) for capture and webhooks.',
+                            'Simple: PayPal email + IPN (no REST API). Advanced: REST API capture (Client ID + Secret) and stronger verification.',
                             'sikshya'
                         ),
                         'select_placeholder' => __('Choose one…', 'sikshya'),
@@ -1689,7 +1678,11 @@ class SettingsManager
                         'key' => 'paypal_email',
                         'type' => 'email',
                         'label' => __('PayPal — Email (Simple mode)', 'sikshya'),
-                        'description' => __('Your PayPal Business email for Simple (hosted) checkout.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: PayPal account link */
+                            __('For “Simple (email + IPN)”. Use your PayPal Business account email. You can verify it in your PayPal profile: %s.', 'sikshya'),
+                            '<a href="https://www.paypal.com/myaccount/settings/" target="_blank" rel="noopener noreferrer">paypal.com</a>'
+                        ),
                         'placeholder' => 'your-paypal@example.com',
                         'default' => '',
                     ],
@@ -1697,7 +1690,11 @@ class SettingsManager
                         'key' => 'paypal_secret',
                         'type' => 'password',
                         'label' => __('PayPal — Secret', 'sikshya'),
-                        'description' => __('Same app’s secret key—never share or paste into public pages.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: PayPal developer dashboard link */
+                            __('For “Advanced (REST API)”. Copy from the same REST app as the Client ID: %s → My Apps & Credentials → Secret. Keep this private.', 'sikshya'),
+                            '<a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer">developer.paypal.com</a>'
+                        ),
                         'placeholder' => __('Paste secret from PayPal', 'sikshya'),
                         'default' => '',
                     ],
@@ -1705,7 +1702,11 @@ class SettingsManager
                         'key' => 'paypal_webhook_id',
                         'type' => 'text',
                         'label' => __('PayPal — Webhook ID', 'sikshya'),
-                        'description' => __('Optional ID from PayPal webhooks so this site can confirm events really came from PayPal.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: PayPal webhooks link */
+                            __('Optional (Advanced mode). Create a webhook in your PayPal app and paste the Webhook ID here to strengthen verification: %s.', 'sikshya'),
+                            '<a href="https://developer.paypal.com/dashboard/applications/live" target="_blank" rel="noopener noreferrer">PayPal app settings</a>'
+                        ),
                         'placeholder' => __('Webhook ID if you use instant payment notifications', 'sikshya'),
                         'default' => '',
                     ],
@@ -1713,7 +1714,11 @@ class SettingsManager
                         'key' => 'stripe_publishable_key',
                         'type' => 'text',
                         'label' => __('Stripe — Publishable key', 'sikshya'),
-                        'description' => __('Starts with pk_.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Stripe API keys link */
+                            __('Copy from %s → Developers → API keys. Use pk_test_… for testing and pk_live_… for production.', 'sikshya'),
+                            '<a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer">dashboard.stripe.com</a>'
+                        ),
                         'placeholder' => 'pk_test_...',
                         'default' => '',
                     ],
@@ -1721,7 +1726,11 @@ class SettingsManager
                         'key' => 'stripe_secret_key',
                         'type' => 'password',
                         'label' => __('Stripe — Secret key', 'sikshya'),
-                        'description' => __('Starts with sk_. Server-side only.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Stripe API keys link */
+                            __('Copy from %s → Developers → API keys. Use sk_test_… for testing and sk_live_… for production. Keep this private.', 'sikshya'),
+                            '<a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer">dashboard.stripe.com</a>'
+                        ),
                         'placeholder' => 'sk_test_...',
                         'default' => '',
                     ],
@@ -1729,7 +1738,11 @@ class SettingsManager
                         'key' => 'stripe_webhook_secret',
                         'type' => 'password',
                         'label' => __('Stripe — Webhook secret', 'sikshya'),
-                        'description' => __('Signing secret from the Stripe webhook endpoint (whsec_...).', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Stripe webhooks link */
+                            __('Optional but recommended. Create a webhook endpoint in %s and copy the signing secret (whsec_…).', 'sikshya'),
+                            '<a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer">Stripe webhooks</a>'
+                        ),
                         'placeholder' => 'whsec_...',
                         'default' => '',
                     ],
@@ -1737,7 +1750,11 @@ class SettingsManager
                         'key' => 'razorpay_key_id',
                         'type' => 'text',
                         'label' => __('Razorpay — Key ID', 'sikshya'),
-                        'description' => __('Dashboard → Account & Settings → API Keys → Key ID (publishable).', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Razorpay API keys link */
+                            __('Copy from %s → Settings → API Keys. Key ID is public (rzp_test_… / rzp_live_…).', 'sikshya'),
+                            '<a href="https://dashboard.razorpay.com/app/keys" target="_blank" rel="noopener noreferrer">dashboard.razorpay.com</a>'
+                        ),
                         'placeholder' => __('rzp_live_… or rzp_test_…', 'sikshya'),
                         'default' => '',
                     ],
@@ -1745,7 +1762,11 @@ class SettingsManager
                         'key' => 'razorpay_key_secret',
                         'type' => 'password',
                         'label' => __('Razorpay — Key secret', 'sikshya'),
-                        'description' => __('The secret key from the same page—treat like a password.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Razorpay API keys link */
+                            __('Copy from the same page as Key ID: %s → Settings → API Keys. Keep this private.', 'sikshya'),
+                            '<a href="https://dashboard.razorpay.com/app/keys" target="_blank" rel="noopener noreferrer">dashboard.razorpay.com</a>'
+                        ),
                         'placeholder' => __('Paste key secret', 'sikshya'),
                         'default' => '',
                     ],
@@ -1753,7 +1774,11 @@ class SettingsManager
                         'key' => 'razorpay_webhook_secret',
                         'type' => 'password',
                         'label' => __('Razorpay — Webhook secret', 'sikshya'),
-                        'description' => __('From Webhooks section—used to verify payment events.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Razorpay webhooks link */
+                            __('Optional but recommended. Create a webhook in %s and paste the webhook secret to verify events.', 'sikshya'),
+                            '<a href="https://dashboard.razorpay.com/app/webhooks" target="_blank" rel="noopener noreferrer">Razorpay webhooks</a>'
+                        ),
                         'placeholder' => __('Webhook signing secret', 'sikshya'),
                         'default' => '',
                     ],
@@ -1761,7 +1786,11 @@ class SettingsManager
                         'key' => 'mollie_api_key',
                         'type' => 'password',
                         'label' => __('Mollie — API key', 'sikshya'),
-                        'description' => __('Profile → Developers → API keys. Use test_… while experimenting.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Mollie API keys link */
+                            __('Copy from %s → Developers → API keys. Use test_… for testing and live_… for production. Keep this private.', 'sikshya'),
+                            '<a href="https://my.mollie.com/dashboard/developers/api-keys" target="_blank" rel="noopener noreferrer">my.mollie.com</a>'
+                        ),
                         'placeholder' => __('live_… or test_…', 'sikshya'),
                         'default' => '',
                     ],
@@ -1770,7 +1799,7 @@ class SettingsManager
                         'type' => 'text',
                         'label' => __('Mollie — Payment methods (optional)', 'sikshya'),
                         'description' => __(
-                            'Match Yatra Pro: comma-separated method ids like creditcard,ideal,paypal,sepadirectdebit.',
+                            'Optional. Comma-separated method IDs to limit which methods Mollie shows (example: creditcard,ideal,paypal). Leave blank to let Mollie decide.',
                             'sikshya'
                         ),
                         'placeholder' => 'creditcard,ideal,paypal',
@@ -1780,7 +1809,11 @@ class SettingsManager
                         'key' => 'mollie_webhook_secret',
                         'type' => 'password',
                         'label' => __('Mollie — Webhook secret', 'sikshya'),
-                        'description' => __('Only if your integration verifies webhook signatures.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Mollie webhooks link */
+                            __('Optional. If you enable Mollie webhooks, paste the webhook signing secret here to verify events. Manage webhooks in %s.', 'sikshya'),
+                            '<a href="https://my.mollie.com/dashboard/developers/webhooks" target="_blank" rel="noopener noreferrer">my.mollie.com</a>'
+                        ),
                         'placeholder' => __('Optional webhook secret', 'sikshya'),
                         'default' => '',
                     ],
@@ -1788,7 +1821,11 @@ class SettingsManager
                         'key' => 'paystack_public_key',
                         'type' => 'text',
                         'label' => __('Paystack — Public key', 'sikshya'),
-                        'description' => __('Dashboard → Settings → API Keys & Webhooks → Public key.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Paystack API keys link */
+                            __('Copy from %s → Settings → API Keys & Webhooks → Public key (pk_test_… / pk_live_…).', 'sikshya'),
+                            '<a href="https://dashboard.paystack.com/#/settings/developer" target="_blank" rel="noopener noreferrer">dashboard.paystack.com</a>'
+                        ),
                         'placeholder' => __('pk_test_… or pk_live_…', 'sikshya'),
                         'default' => '',
                     ],
@@ -1797,7 +1834,7 @@ class SettingsManager
                         'type' => 'text',
                         'label' => __('Paystack — Payment channels (optional)', 'sikshya'),
                         'description' => __(
-                            'Match Yatra Pro: comma-separated list like card,bank,ussd,qr,mobile_money.',
+                            'Optional. Comma-separated channels to limit which payment methods Paystack shows (example: card,bank,ussd). Leave blank to allow Paystack defaults.',
                             'sikshya'
                         ),
                         'placeholder' => 'card,bank,ussd',
@@ -1807,7 +1844,11 @@ class SettingsManager
                         'key' => 'paystack_secret_key',
                         'type' => 'password',
                         'label' => __('Paystack — Secret key', 'sikshya'),
-                        'description' => __('Secret key from the same screen—never expose to browsers.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Paystack API keys link */
+                            __('Copy from %s → Settings → API Keys & Webhooks → Secret key (sk_test_… / sk_live_…). Keep this private.', 'sikshya'),
+                            '<a href="https://dashboard.paystack.com/#/settings/developer" target="_blank" rel="noopener noreferrer">dashboard.paystack.com</a>'
+                        ),
                         'placeholder' => __('sk_test_… or sk_live_…', 'sikshya'),
                         'default' => '',
                     ],
@@ -1815,7 +1856,11 @@ class SettingsManager
                         'key' => 'paystack_webhook_secret',
                         'type' => 'password',
                         'label' => __('Paystack — Webhook secret', 'sikshya'),
-                        'description' => __('Signing secret for Paystack webhook URL in your dashboard.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Paystack webhooks link */
+                            __('Optional but recommended. Configure a webhook URL in %s and paste the webhook secret / signature key here to verify events.', 'sikshya'),
+                            '<a href="https://dashboard.paystack.com/#/settings/developer" target="_blank" rel="noopener noreferrer">Paystack settings</a>'
+                        ),
                         'placeholder' => __('Webhook secret if configured', 'sikshya'),
                         'default' => '',
                     ],
@@ -1823,7 +1868,11 @@ class SettingsManager
                         'key' => 'square_application_id',
                         'type' => 'text',
                         'label' => __('Square — Application ID', 'sikshya'),
-                        'description' => __('Match Yatra Pro: Square Developer Dashboard → Application ID.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Square developer dashboard link */
+                            __('Copy from %s → Applications → your app → Credentials → Application ID.', 'sikshya'),
+                            '<a href="https://developer.squareup.com/apps" target="_blank" rel="noopener noreferrer">developer.squareup.com</a>'
+                        ),
                         'placeholder' => __('sandbox-sq0idb-… or sq0idp-…', 'sikshya'),
                         'default' => '',
                     ],
@@ -1831,7 +1880,11 @@ class SettingsManager
                         'key' => 'square_access_token',
                         'type' => 'password',
                         'label' => __('Square — Access token', 'sikshya'),
-                        'description' => __('Square Developer → Applications → Credentials. Use sandbox token while testing.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Square developer dashboard link */
+                            __('Copy from %s → Applications → your app → Credentials → Access token. Use Sandbox token while testing. Keep this private.', 'sikshya'),
+                            '<a href="https://developer.squareup.com/apps" target="_blank" rel="noopener noreferrer">developer.squareup.com</a>'
+                        ),
                         'placeholder' => __('EAAA… or sandbox token', 'sikshya'),
                         'default' => '',
                     ],
@@ -1839,7 +1892,11 @@ class SettingsManager
                         'key' => 'square_location_id',
                         'type' => 'text',
                         'label' => __('Square — Location ID', 'sikshya'),
-                        'description' => __('Which store or branch receives the payment—copy from Locations in Square.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Square locations link */
+                            __('Choose the Square location that receives payments. Copy the Location ID from %s.', 'sikshya'),
+                            '<a href="https://squareup.com/dashboard/locations" target="_blank" rel="noopener noreferrer">Square Dashboard → Locations</a>'
+                        ),
                         'placeholder' => __('e.g. LXXXXXXX', 'sikshya'),
                         'default' => '',
                     ],
@@ -1847,7 +1904,11 @@ class SettingsManager
                         'key' => 'square_webhook_signature_key',
                         'type' => 'password',
                         'label' => __('Square — Webhook signature key', 'sikshya'),
-                        'description' => __('From your webhook subscription in Square—proves events are genuine.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Square webhooks docs link */
+                            __('Optional but recommended. In the Square Developer Dashboard, create a webhook subscription and copy the “Signature key” here to verify events. Docs: %s.', 'sikshya'),
+                            '<a href="https://developer.squareup.com/docs/webhooks/overview" target="_blank" rel="noopener noreferrer">Square webhooks</a>'
+                        ),
                         'placeholder' => __('Signature key from Square webhooks', 'sikshya'),
                         'default' => '',
                     ],
@@ -1855,7 +1916,11 @@ class SettingsManager
                         'key' => 'authorize_net_login_id',
                         'type' => 'text',
                         'label' => __('Authorize.Net — API Login ID', 'sikshya'),
-                        'description' => __('Merchant Interface → Account → API Credentials & Keys.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Authorize.Net docs link */
+                            __('Copy from your Authorize.Net Merchant Interface → Account → API Credentials & Keys. Docs: %s.', 'sikshya'),
+                            '<a href="https://developer.authorize.net/api/reference/features/authentication.html" target="_blank" rel="noopener noreferrer">developer.authorize.net</a>'
+                        ),
                         'placeholder' => __('Your API Login ID', 'sikshya'),
                         'default' => '',
                     ],
@@ -1863,7 +1928,11 @@ class SettingsManager
                         'key' => 'authorize_net_public_client_key',
                         'type' => 'text',
                         'label' => __('Authorize.Net — Public client key', 'sikshya'),
-                        'description' => __('Match Yatra Pro: used for Accept.js tokenization.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Accept.js link */
+                            __('Public key used for Accept.js tokenization. Copy from API Credentials & Keys. Learn more: %s.', 'sikshya'),
+                            '<a href="https://developer.authorize.net/api/reference/features/acceptjs.html" target="_blank" rel="noopener noreferrer">Accept.js docs</a>'
+                        ),
                         'placeholder' => __('Public client key', 'sikshya'),
                         'default' => '',
                     ],
@@ -1871,7 +1940,7 @@ class SettingsManager
                         'key' => 'authorize_net_transaction_key',
                         'type' => 'password',
                         'label' => __('Authorize.Net — Transaction key', 'sikshya'),
-                        'description' => __('Generated with the Login ID—keep confidential.', 'sikshya'),
+                        'description' => __('Secret credential from API Credentials & Keys. Keep this private.', 'sikshya'),
                         'placeholder' => __('Transaction key', 'sikshya'),
                         'default' => '',
                     ],
@@ -1879,7 +1948,11 @@ class SettingsManager
                         'key' => 'authorize_net_signature_key',
                         'type' => 'password',
                         'label' => __('Authorize.Net — Signature key', 'sikshya'),
-                        'description' => __('Only if you verify silent posts or webhooks with Authorize.Net.', 'sikshya'),
+                        'description' => sprintf(
+                            /* translators: %s: Authorize.Net webhooks docs link */
+                            __('Optional. Use if your setup verifies Authorize.Net webhooks / silent posts. Docs: %s.', 'sikshya'),
+                            '<a href="https://developer.authorize.net/api/reference/features/webhooks.html" target="_blank" rel="noopener noreferrer">Authorize.Net webhooks</a>'
+                        ),
                         'placeholder' => __('Optional signature key', 'sikshya'),
                         'default' => '',
                     ],
@@ -1887,7 +1960,7 @@ class SettingsManager
                         'key' => 'bank_transfer_bank_name',
                         'type' => 'text',
                         'label' => __('Bank transfer — Bank name', 'sikshya'),
-                        'description' => __('Match Yatra Pro: bank name shown after checkout.', 'sikshya'),
+                        'description' => __('Shown to the buyer after checkout (example: “HSBC”, “Chase”, “Nabil Bank”).', 'sikshya'),
                         'placeholder' => __('e.g. HSBC', 'sikshya'),
                         'default' => '',
                     ],
@@ -1895,7 +1968,7 @@ class SettingsManager
                         'key' => 'bank_transfer_account_name',
                         'type' => 'text',
                         'label' => __('Bank transfer — Account name', 'sikshya'),
-                        'description' => __('Match Yatra Pro: account holder name.', 'sikshya'),
+                        'description' => __('Account holder name shown to the buyer (your business / organization name).', 'sikshya'),
                         'placeholder' => __('e.g. Sikshya Academy', 'sikshya'),
                         'default' => '',
                     ],
@@ -1903,7 +1976,7 @@ class SettingsManager
                         'key' => 'bank_transfer_account_number',
                         'type' => 'text',
                         'label' => __('Bank transfer — Account number', 'sikshya'),
-                        'description' => __('Match Yatra Pro: account number / IBAN.', 'sikshya'),
+                        'description' => __('Bank account number or IBAN shown to the buyer.', 'sikshya'),
                         'placeholder' => __('Account number / IBAN', 'sikshya'),
                         'default' => '',
                     ],
@@ -1911,7 +1984,7 @@ class SettingsManager
                         'key' => 'bank_transfer_routing_code',
                         'type' => 'text',
                         'label' => __('Bank transfer — Routing / SWIFT code', 'sikshya'),
-                        'description' => __('Match Yatra Pro: routing number or SWIFT/BIC.', 'sikshya'),
+                        'description' => __('Routing number (US) or SWIFT/BIC code (international), if applicable.', 'sikshya'),
                         'placeholder' => __('SWIFT/BIC', 'sikshya'),
                         'default' => '',
                     ],
@@ -1920,7 +1993,7 @@ class SettingsManager
                         'type' => 'textarea',
                         'label' => __('Bank transfer — Instructions', 'sikshya'),
                         'description' => __(
-                            'Step-by-step text after checkout: bank name, IBAN, SWIFT, reference, and what to email you. Basic HTML allowed.',
+                            'Shown after checkout. Tell buyers exactly what to do: transfer amount, account details, what to use as the reference (recommend: order number), and where to send proof. Basic HTML allowed.',
                             'sikshya'
                         ),
                         'placeholder' => __('e.g. Transfer to … use order ID as reference …', 'sikshya'),
@@ -1931,7 +2004,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Test mode (sandbox)', 'sikshya'),
                         'description' => __(
-                            'Same idea as Yatra’s “Payment test mode”: when PayPal’s API mode is unset, Sikshya uses this to pick sandbox vs live PayPal. Stripe live vs test is determined by your Stripe API keys (sk_live_ / sk_test_).',
+                            'Use sandbox/test credentials while testing checkout. For Stripe/PayPal/Razorpay/Mollie/Paystack/Square, “test vs live” is ultimately determined by the keys you paste (e.g. sk_test_ vs sk_live_).',
                             'sikshya'
                         ),
                         'default' => true
@@ -2103,7 +2176,7 @@ class SettingsManager
                 'title' => __('Certificate Behavior', 'sikshya'),
                 'icon' => 'fas fa-cog',
                 'description' => __(
-                    'Automation: when to create the file and whether to email it. Expiry is rare—use 0 for certificates that never expire.',
+                    'Automation for PDF generation and expiry. Sending certificates by email is configured under Sikshya → Email → Delivery.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -2112,13 +2185,6 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Create certificate when course is finished', 'sikshya'),
                         'description' => __('As soon as a learner meets your completion rules, generate their certificate.', 'sikshya'),
-                        'default' => true
-                    ],
-                    [
-                        'key' => 'email_certificates',
-                        'type' => 'checkbox',
-                        'label' => __('Email the certificate to the learner', 'sikshya'),
-                        'description' => __('Sends a download link or attachment when the certificate is ready.', 'sikshya'),
                         'default' => true
                     ],
                     [
@@ -2143,25 +2209,45 @@ class SettingsManager
      */
     protected function getEmailSettings(): array
     {
-        $admin_default = (string) Settings::getRaw('admin_email', get_option('admin_email', ''));
+        $wp_admin = trim((string) get_option('admin_email', ''));
+        $stored_main = trim((string) Settings::get('admin_email', ''));
+        $main_default = ($stored_main !== '' && is_email($stored_main)) ? $stored_main : ($wp_admin !== '' ? $wp_admin : '');
 
         return [
             [
                 'section_key' => 'email_config',
-                'title' => __('Email Configuration', 'sikshya'),
+                'title' => __('Addresses & sender identity', 'sikshya'),
                 'icon' => 'fas fa-envelope',
                 'description' => __(
-                    'Who receives admin alerts and how outbound mail looks to learners. Match your domain to reduce spam folder issues.',
+                    'Platform contact addresses and how outbound mail appears. Match your sending domain where possible.',
                     'sikshya'
                 ),
                 'fields' => [
+                    [
+                        'key' => 'admin_email',
+                        'type' => 'email',
+                        'label' => __('Main LMS contact email', 'sikshya'),
+                        'description' => __(
+                            'Used as a fallback when “Where to send admin notices” is empty (merge tag {{admin_email}} and plugin notices).',
+                            'sikshya'
+                        ),
+                        'placeholder' => __('you@example.com', 'sikshya'),
+                        'default' => $main_default !== '' ? $main_default : $wp_admin,
+                        'required' => false,
+                        'sanitize_callback' => 'sanitize_email',
+                        'validate_callback' => function ($value) {
+                            return $value === '' || $value === null || is_email((string) $value)
+                                ? true
+                                : __('Please enter a valid email address.', 'sikshya');
+                        },
+                    ],
                     [
                         'key' => 'admin_notification_email',
                         'type' => 'email',
                         'label' => __('Where to send admin notices', 'sikshya'),
                         'description' => __('Orders, enrollment alerts, and similar messages go here.', 'sikshya'),
                         'placeholder' => 'admin@yoursite.com',
-                        'default' => $admin_default,
+                        'default' => $main_default !== '' ? $main_default : $wp_admin,
                     ],
                     [
                         'key' => 'from_email',
@@ -2169,7 +2255,7 @@ class SettingsManager
                         'label' => __('“From” address for learners', 'sikshya'),
                         'description' => __('What students see in the sender field. Use an address on your domain if possible.', 'sikshya'),
                         'placeholder' => 'noreply@yoursite.com',
-                        'default' => $admin_default,
+                        'default' => $main_default !== '' ? $main_default : $wp_admin,
                     ],
                     [
                         'key' => 'from_name',
@@ -2185,7 +2271,46 @@ class SettingsManager
                         'label' => __('Reply address (optional)', 'sikshya'),
                         'description' => __('When a student hits “Reply”, mail goes here—often support or helpdesk.', 'sikshya'),
                         'placeholder' => 'support@yoursite.com',
-                        'default' => $admin_default,
+                        'default' => $main_default !== '' ? $main_default : $wp_admin,
+                    ],
+                ],
+            ],
+            [
+                'section_key' => 'email_master_switches',
+                'title' => __('Sending rules', 'sikshya'),
+                'icon' => 'fas fa-paper-plane',
+                'description' => __(
+                    'Global toggles that affect Sikshya’s automated messages. Subject and body for each trigger are edited under Email → Email templates.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'enable_email_notifications',
+                        'type' => 'checkbox',
+                        'label' => __('Allow Sikshya to send transactional email', 'sikshya'),
+                        'description' => __(
+                            'When off, Sikshya will not enqueue or send LMS emails (welcome, receipts, moderation, drip, certificates, etc.). Does not disable marketing automations.',
+                            'sikshya'
+                        ),
+                        'default' => '1',
+                    ],
+                ],
+            ],
+            [
+                'section_key' => 'email_certificate_delivery',
+                'title' => __('Completion certificates', 'sikshya'),
+                'icon' => 'fas fa-certificate',
+                'description' => __(
+                    'Uses the issuance settings under Sikshya → Settings → Certificates. Turning this off stops the learner certificate-email only; downloading from the profile may still work.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'email_certificates',
+                        'type' => 'checkbox',
+                        'label' => __('Email the certificate to the learner', 'sikshya'),
+                        'description' => __('Sends a download link or attachment when the certificate is ready.', 'sikshya'),
+                        'default' => true,
                     ],
                 ],
             ],
@@ -2401,7 +2526,7 @@ class SettingsManager
                 'title' => __('Notification Settings', 'sikshya'),
                 'icon' => 'fas fa-bell',
                 'description' => __(
-                    'How Sikshya nudges learners and staff: in-browser alerts vs. email. Email usually works everywhere.',
+                    'In-dashboard and browser cues. LMS email sending (receipts, enrollments, etc.) lives under Sikshya → Email → Delivery.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -2412,13 +2537,6 @@ class SettingsManager
                         'description' => __('Short messages in the browser when the tab is open—learners must allow permission.', 'sikshya'),
                         'default' => '0'
                     ],
-                    [
-                        'key' => 'enable_email_notifications',
-                        'type' => 'checkbox',
-                        'label' => __('Email notices', 'sikshya'),
-                        'description' => __('Sends messages to the inbox for enrollments, reminders, etc.', 'sikshya'),
-                        'default' => '1'
-                    ]
                 ]
             ]
         ];
@@ -2732,6 +2850,31 @@ class SettingsManager
                         'max' => 168
                     ]
                 ]
+            ],
+            [
+                'title' => __('Uninstall', 'sikshya'),
+                'section_key' => 'uninstall',
+                'icon' => 'fas fa-trash',
+                'description' => __(
+                    'By default, Sikshya keeps your courses and records when the plugin is deleted. Enable this only if you are sure you want to permanently remove Sikshya data on uninstall.',
+                    'sikshya'
+                ),
+                'fields' => [
+                    [
+                        'key' => 'erase_data_on_uninstall',
+                        'type' => 'checkbox',
+                        'label' => __('Erase all Sikshya data on uninstall', 'sikshya'),
+                        'description' => __('Deletes courses/lessons/quizzes/assignments, custom tables, and plugin options when Sikshya is uninstalled.', 'sikshya'),
+                        'default' => '0',
+                    ],
+                    [
+                        'key' => 'erase_files_on_uninstall',
+                        'type' => 'checkbox',
+                        'label' => __('Also erase uploaded files', 'sikshya'),
+                        'description' => __('Deletes files under the WordPress uploads directory used by Sikshya. Requires the “Erase all data” option.', 'sikshya'),
+                        'default' => '0',
+                    ],
+                ],
             ],
             [
                 'title' => __('Privacy & Usage', 'sikshya'),

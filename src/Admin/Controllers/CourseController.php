@@ -11,6 +11,7 @@ namespace Sikshya\Admin\Controllers;
 
 use Sikshya\Admin\ReactAdminView;
 use Sikshya\Admin\Views\BaseView;
+use Sikshya\Security\AdminBackendAccess;
 use Sikshya\Core\Plugin;
 use Sikshya\Services\CourseService;
 
@@ -70,7 +71,7 @@ class CourseController extends BaseView
      */
     public function renderAddCoursePage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('Sorry, you are not allowed to access this page.', 'sikshya'));
         }
 

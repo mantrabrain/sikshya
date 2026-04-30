@@ -2,13 +2,10 @@
 
 namespace Sikshya\Frontend\Public;
 
-use Sikshya\Addons\Addons;
-use Sikshya\Licensing\Pro;
-
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
-use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Services\CourseService;
 use Sikshya\Services\Settings;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 use Sikshya\Services\Frontend\SingleCoursePageService;
@@ -45,8 +42,10 @@ final class SingleCourseTemplateData
         ];
 
         $uid = get_current_user_id();
-        $repo = new EnrollmentRepository();
-        $enrolled = $uid > 0 && $repo->findByUserAndCourse($uid, $course_id) !== null;
+        // Use CourseService so add-ons (e.g. active membership for the course's required plan) count as enrolled
+        // even when no enrollment row exists yet for this course.
+        $courses = new CourseService();
+        $enrolled = $uid > 0 && $courses->isUserEnrolled($uid, $course_id);
 
         $is_paid = null !== $pricing['effective'] && (float) $pricing['effective'] > 0;
 

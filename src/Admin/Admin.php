@@ -17,6 +17,7 @@ use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Admin\ReactAdminView;
+use Sikshya\Security\AdminBackendAccess;
 use Sikshya\Services\Settings;
 use Sikshya\Admin\SetupWizardController;
 
@@ -142,10 +143,19 @@ class Admin
             : 'dashicons-welcome-learn-more';
         $menu_icon = (string) apply_filters('sikshya_admin_menu_icon', $default_icon);
 
+        /**
+         * Instructors get capability `sikshya_access_admin_app` via Installer role sync (not students).
+         * Filter `sikshya_react_admin_menu_capability` for custom LMS teaching roles.
+         */
+        $react_menu_cap = (string) apply_filters(
+            'sikshya_react_admin_menu_capability',
+            'sikshya_access_admin_app'
+        );
+
         add_menu_page(
             $menu_label,
             $menu_label,
-            'edit_posts',
+            $react_menu_cap,
             AdminPages::DASHBOARD,
             [$this, 'renderSikshyaApp'],
             $menu_icon,
@@ -348,7 +358,7 @@ class Admin
      */
     public function renderSikshyaApp(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1062,7 +1072,7 @@ class Admin
      */
     public function renderCoursesPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1074,7 +1084,7 @@ class Admin
      */
     public function renderAddCoursePage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1105,7 +1115,7 @@ class Admin
      */
     public function renderLessonsPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1117,7 +1127,7 @@ class Admin
      */
     public function renderAddLessonPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1129,7 +1139,7 @@ class Admin
      */
     public function renderQuizzesPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1141,7 +1151,7 @@ class Admin
      */
     public function renderStudentsPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1153,7 +1163,7 @@ class Admin
      */
     public function renderInstructorsPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1165,7 +1175,7 @@ class Admin
      */
     public function renderReportsPage(): void
     {
-        if (!current_user_can('edit_posts')) {
+        if (!AdminBackendAccess::canAccessStaffBackend()) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'sikshya'));
         }
 
@@ -1297,11 +1307,17 @@ class Admin
                 echo esc_html($course->post_title);
                 echo '</a>';
                 echo '</div>';
-                echo '<div class="sikshya-list-item-subtitle">By ' . esc_html($author->display_name) . '</div>';
+                echo '<div class="sikshya-list-item-subtitle">'
+                    . esc_html(sprintf(
+                        /* translators: %s: author display name */
+                        __('By %s', 'sikshya'),
+                        $author ? $author->display_name : ''
+                    ))
+                    . '</div>';
                 echo '</div>';
                 echo '</div>';
                 echo '<div class="sikshya-list-item-meta">';
-                echo '<span class="sikshya-list-item-badge success">Published</span>';
+                echo '<span class="sikshya-list-item-badge success">' . esc_html__('Published', 'sikshya') . '</span>';
                 echo '<span>' . esc_html($course_date) . '</span>';
                 echo '</div>';
                 echo '</li>';
@@ -1312,7 +1328,7 @@ class Admin
             echo '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
             echo '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>';
             echo '</svg>';
-            echo '<p>' . __('No courses found. Create your first course to get started.', 'sikshya') . '</p>';
+            echo '<p>' . esc_html__('No courses found. Create your first course to get started.', 'sikshya') . '</p>';
             echo '</div>';
         }
         return ob_get_clean();

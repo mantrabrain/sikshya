@@ -86,6 +86,9 @@ final class LearnPageService
             'error'       => $error,
             'show_progress' => $show_progress,
             'course_thumb'=> $course_post ? get_the_post_thumbnail_url($course_post->ID, 'large') : '',
+            'learn_curriculum_sidebar_scrollable' => $course_id > 0 && Settings::isTruthy(
+                get_post_meta($course_id, '_sikshya_learn_curriculum_sidebar_scrollable', true)
+            ),
             'urls'        => [
                 'account' => PublicPageUrls::url('account'),
                 'course'  => $course_post ? (get_permalink($course_post) ?: '') : '',
@@ -131,8 +134,6 @@ final class LearnPageService
     {
         $out = [];
 
-        $course_url = $course_id > 0 ? (get_permalink($course_id) ?: '') : '';
-
         foreach ($raw as $row) {
             $chapter = $row['chapter'];
             $items = [];
@@ -145,30 +146,17 @@ final class LearnPageService
                 }
                 ++$idx;
 
-                $type_key = self::contentTypeKey($p->post_type);
+                $type_key = LearnOutlineItemAccess::contentTypeKey($p->post_type);
                 $pto = get_post_type_object($p->post_type);
                 $type_label = $pto && isset($pto->labels->singular_name) ? (string) $pto->labels->singular_name : $p->post_type;
 
-                $is_free = Settings::isTruthy(get_post_meta((int) $p->ID, '_sikshya_is_free', true));
-                $preview_allowed = false;
-
-                if ($type_key === 'lesson') {
-                    $preview_allowed = $is_free;
-                } elseif ($type_key === 'quiz') {
-                    // Quizzes are previewable only if explicitly free.
-                    $preview_allowed = $is_free;
-                } else {
-                    // Other types default to locked unless explicitly free.
-                    $preview_allowed = $is_free;
-                }
-
-                $item_url = $preview_allowed ? self::learnPermalinkFor($p, $type_key) : $course_url;
+                $access = LearnOutlineItemAccess::forContentPost($p, $type_key, $course_id, false, true);
                 $mins = CurriculumOutlineMeta::itemDurationMinutes($p, $type_key);
                 $section_mins += (int) $mins;
 
                 $items[] = [
                     'post' => $p,
-                    'permalink' => $item_url,
+                    'permalink' => $access['permalink'],
                     'title' => get_the_title($p),
                     'type_key' => $type_key,
                     'type_label' => $type_label,
@@ -178,9 +166,9 @@ final class LearnPageService
                     'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
                     'index_in_section' => $idx,
                     'completed' => false,
-                    'preview_allowed' => $preview_allowed,
-                    'locked' => !$preview_allowed,
-                    'lock_reason' => !$preview_allowed ? __('Enroll to unlock this content.', 'sikshya') : '',
+                    'preview_allowed' => $access['preview_allowed'],
+                    'locked' => $access['locked'],
+                    'lock_reason' => $access['lock_reason'],
                 ];
             }
 
@@ -217,7 +205,7 @@ final class LearnPageService
 
                 ++$idx;
 
-                $type_key   = self::contentTypeKey($p->post_type);
+                $type_key   = LearnOutlineItemAccess::contentTypeKey($p->post_type);
                 $pto        = get_post_type_object($p->post_type);
                 $type_label = $pto && isset($pto->labels->singular_name)
                     ? (string) $pto->labels->singular_name
@@ -286,20 +274,6 @@ final class LearnPageService
         }
 
         return $out;
-    }
-
-    private static function contentTypeKey(string $post_type): string
-    {
-        switch ($post_type) {
-            case PostTypes::LESSON:
-                return 'lesson';
-            case PostTypes::QUIZ:
-                return 'quiz';
-            case PostTypes::ASSIGNMENT:
-                return 'assignment';
-            default:
-                return 'content';
-        }
     }
 
     private static function learnPermalinkFor(\WP_Post $p, string $type_key): string
@@ -410,7 +384,7 @@ final class LearnPageService
                 if (!$p instanceof \WP_Post) {
                     continue;
                 }
-                $type_key = self::contentTypeKey((string) $p->post_type);
+                $type_key = LearnOutlineItemAccess::contentTypeKey((string) $p->post_type);
                 if (!in_array($type_key, ['lesson', 'quiz', 'assignment'], true)) {
                     continue;
                 }

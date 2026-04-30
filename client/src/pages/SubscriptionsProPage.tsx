@@ -6,6 +6,7 @@ import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs'
 import { DataTable, type Column } from '../components/shared/DataTable';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { BulkActionsBar } from '../components/shared/list/BulkActionsBar';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
@@ -19,6 +20,7 @@ import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig, WpRestUser } from '../types';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 
 type Plan = {
   id: number;
@@ -91,12 +93,15 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
         manualGrantAllowed: true,
       };
     }
-    const [subs, plans, settingsResp] = await Promise.all([
+    const [subs, plans, settingsResp, paymentValues] = await Promise.all([
       getSikshyaApi().get<{ ok?: boolean; subscriptions?: SubRow[] }>(SIKSHYA_ENDPOINTS.pro.subscriptions),
       getSikshyaApi().get<{ ok?: boolean; plans?: Plan[] }>(SIKSHYA_ENDPOINTS.pro.plans),
       getSikshyaApi()
         .get<{ ok?: boolean; options?: Record<string, unknown> }>('/pro/addons/subscriptions/settings')
         .catch(() => ({ ok: true, options: {} as Record<string, unknown> })),
+      getSikshyaApi()
+        .get<{ success?: boolean; data?: Record<string, unknown> }>(SIKSHYA_ENDPOINTS.settings.values('payment'))
+        .catch(() => ({ success: true, data: {} as Record<string, unknown> })),
     ]);
     const rawSubs = Array.isArray(subs.subscriptions) ? subs.subscriptions : [];
     const rawPlans = Array.isArray(plans.plans) ? plans.plans : [];
@@ -141,7 +146,12 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
         ? opts.allow_manual_subscription_grant !== false
         : true;
 
-    return { ok: true, subscriptions: normSubs, plans: normPlans, users, manualGrantAllowed: manualGrant };
+    const storeCurrency =
+      paymentValues && typeof paymentValues === 'object' && 'data' in paymentValues
+        ? String(((paymentValues as any).data?.values?.currency as unknown) || 'USD').toUpperCase()
+        : 'USD';
+
+    return { ok: true, subscriptions: normSubs, plans: normPlans, users, manualGrantAllowed: manualGrant, storeCurrency };
   }, [enabled]);
 
   const { loading, data, error, refetch } = useAsyncData(loader, [enabled]);
@@ -187,8 +197,8 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
           <HorizontalEditorTabs
             ariaLabel="Subscriptions sections"
             tabs={[
-              { id: 'list', label: 'Subscriptions', icon: 'table' },
-              { id: 'plans', label: 'Plans', icon: 'badge' },
+              { id: 'list', label: 'Subscriptions', icon: 'arrowPath' },
+              { id: 'plans', label: 'Plans', icon: 'documentText' },
               { id: 'settings', label: 'Add-on defaults', icon: 'cog' },
             ]}
             value={activeTab}
@@ -228,7 +238,13 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
             ]}
           />
         ) : activeTab === 'plans' ? (
-          <PlansTab loading={loading} plans={plans} onRefetch={refetch} onToast={pushToast} />
+          <PlansTab
+            loading={loading}
+            plans={plans}
+            storeCurrency={String((data as any)?.storeCurrency || 'USD')}
+            onRefetch={refetch}
+            onToast={pushToast}
+          />
         ) : (
           <SubscriptionsTab
             loading={loading}
@@ -251,22 +267,101 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
   );
 }
 
-function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => void; onToast: (t: ToastState) => void }) {
-  const { loading, plans, onRefetch, onToast } = props;
+function PlansTab(props: {
+  loading: boolean;
+  plans: Plan[];
+  storeCurrency: string;
+  onRefetch: () => void;
+  onToast: (t: ToastState) => void;
+}) {
+  const { loading, plans, storeCurrency, onRefetch, onToast } = props;
+  const dialog = useSikshyaDialog();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<number>(0);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkAction, setBulkAction] = useState('');
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('29');
-  const [currency, setCurrency] = useState('USD');
   const [interval, setInterval] = useState<'month' | 'year'>('month');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
+  useEffect(() => {
+    setSelectedIds([]);
+    setBulkAction('');
+  }, [plans.length]);
+
+  const toggleAll = (checked: boolean) => {
+    setSelectedIds(checked ? plans.map((p) => p.id) : []);
+  };
+
+  const toggleOne = (id: number, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const s = new Set(prev);
+      if (checked) s.add(id);
+      else s.delete(id);
+      return Array.from(s);
+    });
+  };
+
+  const applyBulk = async () => {
+    if (bulkBusy || selectedIds.length === 0 || !bulkAction) return;
+    if (bulkAction === 'delete') {
+      const ok = await dialog.confirm({
+        title: `Delete ${selectedIds.length} plan(s)?`,
+        message: 'Plans with existing subscriptions will be skipped. This cannot be undone.',
+        confirmLabel: 'Delete',
+        variant: 'danger',
+      });
+      if (!ok) return;
+    }
+    setBulkBusy(true);
+    try {
+      if (bulkAction.startsWith('status:')) {
+        const st = bulkAction.replace(/^status:/, '');
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.plansBulk, { action: 'status', status: st, ids: selectedIds });
+      } else if (bulkAction === 'delete') {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.plansBulk, { action: 'delete', ids: selectedIds });
+      }
+      setSelectedIds([]);
+      setBulkAction('');
+      onRefetch();
+      window.setTimeout(() => onRefetch(), 350);
+    } catch (e) {
+      onToast({ kind: 'error', text: getErrorSummary(e) || 'Could not apply bulk action.' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   const columns: Column<Plan>[] = useMemo(
     () => [
+      {
+        id: 'select',
+        header: (
+          <input
+            type="checkbox"
+            aria-label="Select all plans"
+            checked={plans.length > 0 && selectedIds.length === plans.length}
+            onChange={(e) => toggleAll(e.target.checked)}
+          />
+        ),
+        alwaysVisible: true,
+        headerClassName: 'w-10',
+        cellClassName: 'w-10',
+        render: (p) => (
+          <input
+            type="checkbox"
+            aria-label={`Select plan #${p.id}`}
+            checked={selectedIds.includes(p.id)}
+            onChange={(e) => toggleOne(p.id, e.target.checked)}
+          />
+        ),
+      },
       {
         id: 'id',
         header: 'ID',
@@ -319,7 +414,6 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
                   setEditingId(p.id);
                   setName(p.name || '');
                   setAmount(String(p.amount ?? 0));
-                  setCurrency(String(p.currency || 'USD'));
                   setInterval(p.interval_unit === 'year' ? 'year' : 'month');
                   setStatus(p.status === 'inactive' ? 'inactive' : 'active');
                   setEditOpen(true);
@@ -330,7 +424,12 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
                 label: 'Delete',
                 danger: true,
                 onClick: async () => {
-                  const ok = window.confirm(`Delete plan \"${p.name}\"? This cannot be undone.`);
+                  const ok = await dialog.confirm({
+                    title: `Delete plan “${p.name}”?`,
+                    message: 'This cannot be undone.',
+                    confirmLabel: 'Delete',
+                    variant: 'danger',
+                  });
                   if (!ok) return;
                   try {
                     await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.plan(p.id));
@@ -346,7 +445,7 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
         ),
       },
     ],
-    [onRefetch]
+    [dialog, onRefetch, plans.length, selectedIds, storeCurrency]
   );
 
   return (
@@ -358,7 +457,12 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
             Define the price and billing interval that subscriptions attach to.
           </p>
         </div>
-        <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
+        <ButtonPrimary
+          type="button"
+          onClick={() => {
+            setCreateOpen(true);
+          }}
+        >
           Add plan
         </ButtonPrimary>
       </div>
@@ -367,18 +471,39 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
         {loading ? (
           <DataTableSkeleton headers={['ID', 'Plan', 'Price', 'Interval', 'Status', '']} />
         ) : (
-          <DataTable
-            wrapInCard={false}
-            columns={columns}
-            rows={plans}
-            rowKey={(p) => p.id}
-            emptyContent={
-              <ListEmptyState
-                title="No plans yet"
-                description="Create your first membership plan to start selling subscriptions."
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+              <BulkActionsBar
+                selectedCount={selectedIds.length}
+                value={bulkAction}
+                onChange={setBulkAction}
+                onApply={() => void applyBulk()}
+                applyBusy={bulkBusy}
+                trashMode={false}
+                customOptions={[
+                  { value: 'delete', label: 'Delete permanently' },
+                  { value: 'status:active', label: 'Mark active' },
+                  { value: 'status:inactive', label: 'Mark inactive' },
+                ]}
+                selectId="plans-bulk"
               />
-            }
-          />
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {selectedIds.length > 0 ? `${selectedIds.length} selected` : ''}
+              </div>
+            </div>
+            <DataTable
+              wrapInCard={false}
+              columns={columns}
+              rows={plans}
+              rowKey={(p) => p.id}
+              emptyContent={
+                <ListEmptyState
+                  title="No plans yet"
+                  description="Create your first membership plan to start selling subscriptions."
+                />
+              }
+            />
+          </>
         )}
       </ListPanel>
 
@@ -412,7 +537,6 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
               await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.plans, {
                 name,
                 amount: parseFloat(amount) || 0,
-                currency: currency || 'USD',
                 interval_unit: interval,
                 status,
               });
@@ -446,14 +570,6 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
               min={0}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
-            />
-          </label>
-          <label className="text-sm text-slate-600 dark:text-slate-400">
-            Currency
-            <input
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             />
           </label>
@@ -513,7 +629,6 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
               await getSikshyaApi().put(SIKSHYA_ENDPOINTS.pro.plan(editingId), {
                 name,
                 amount: parseFloat(amount) || 0,
-                currency: currency || 'USD',
                 interval_unit: interval,
                 status,
               });
@@ -546,14 +661,6 @@ function PlansTab(props: { loading: boolean; plans: Plan[]; onRefetch: () => voi
               min={0}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
-            />
-          </label>
-          <label className="text-sm text-slate-600 dark:text-slate-400">
-            Currency
-            <input
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             />
           </label>
@@ -599,6 +706,7 @@ function SubscriptionsTab(props: {
 }) {
   const { loading, rows, plans, planById, userById, manualGrantAllowed, onRefetch, onJumpToPlans, onJumpToSettings, onToast } =
     props;
+  const dialog = useSikshyaDialog();
 
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -611,8 +719,59 @@ function SubscriptionsTab(props: {
   const [pickedPlanId, setPickedPlanId] = useState<number>(0);
   const [planQuery, setPlanQuery] = useState<string>('');
   const [planOpen, setPlanOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkAction, setBulkAction] = useState('');
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const canAdd = plans.length > 0 && manualGrantAllowed;
+
+  useEffect(() => {
+    setSelectedIds([]);
+    setBulkAction('');
+  }, [rows.length]);
+
+  const toggleAll = (checked: boolean) => {
+    setSelectedIds(checked ? rows.map((r) => r.id) : []);
+  };
+
+  const toggleOne = (id: number, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const s = new Set(prev);
+      if (checked) s.add(id);
+      else s.delete(id);
+      return Array.from(s);
+    });
+  };
+
+  const applyBulk = async () => {
+    if (bulkBusy || selectedIds.length === 0 || !bulkAction) return;
+    if (bulkAction === 'delete') {
+      const ok = await dialog.confirm({
+        title: `Delete ${selectedIds.length} subscription(s)?`,
+        message: 'This permanently removes the subscription rows. This cannot be undone.',
+        confirmLabel: 'Delete',
+        variant: 'danger',
+      });
+      if (!ok) return;
+    }
+    setBulkBusy(true);
+    try {
+      if (bulkAction.startsWith('status:')) {
+        const st = bulkAction.replace(/^status:/, '');
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.subscriptionsBulk, { action: 'status', status: st, ids: selectedIds });
+      } else if (bulkAction === 'delete') {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.subscriptionsBulk, { action: 'delete', ids: selectedIds });
+      }
+      setSelectedIds([]);
+      setBulkAction('');
+      onRefetch();
+      window.setTimeout(() => onRefetch(), 350);
+    } catch (e) {
+      onToast({ kind: 'error', text: getErrorSummary(e) || 'Could not apply bulk action.' });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   const filteredPlans = useMemo(() => {
     const q = planQuery.trim().toLowerCase();
@@ -660,6 +819,28 @@ function SubscriptionsTab(props: {
 
   const columns: Column<SubRow>[] = useMemo(
     () => [
+      {
+        id: 'select',
+        header: (
+          <input
+            type="checkbox"
+            aria-label="Select all subscriptions"
+            checked={rows.length > 0 && selectedIds.length === rows.length}
+            onChange={(e) => toggleAll(e.target.checked)}
+          />
+        ),
+        alwaysVisible: true,
+        headerClassName: 'w-10',
+        cellClassName: 'w-10',
+        render: (r) => (
+          <input
+            type="checkbox"
+            aria-label={`Select subscription #${r.id}`}
+            checked={selectedIds.includes(r.id)}
+            onChange={(e) => toggleOne(r.id, e.target.checked)}
+          />
+        ),
+      },
       {
         id: 'id',
         header: 'ID',
@@ -726,7 +907,12 @@ function SubscriptionsTab(props: {
                       label: 'Cancel',
                       danger: true,
                       onClick: async () => {
-                        const ok = window.confirm('Cancel this subscription?');
+                        const ok = await dialog.confirm({
+                          title: 'Cancel subscription?',
+                          message: 'This marks the row cancelled. It does not contact your gateway.',
+                          confirmLabel: 'Cancel subscription',
+                          variant: 'danger',
+                        });
                         if (!ok) return;
                         try {
                           await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.subscriptionsCancel, { id: r.id });
@@ -739,12 +925,33 @@ function SubscriptionsTab(props: {
                     },
                   ]
                 : []),
+              {
+                key: 'delete',
+                label: 'Delete',
+                danger: true,
+                onClick: async () => {
+                  const ok = await dialog.confirm({
+                    title: `Delete subscription #${r.id}?`,
+                    message: 'This permanently removes the subscription row. This cannot be undone.',
+                    confirmLabel: 'Delete',
+                    variant: 'danger',
+                  });
+                  if (!ok) return;
+                  try {
+                    await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.subscription(r.id));
+                    onRefetch();
+                    onToast({ kind: 'success', text: 'Subscription deleted.' });
+                  } catch (e) {
+                    onToast({ kind: 'error', text: getErrorSummary(e) || 'Could not delete subscription.' });
+                  }
+                },
+              },
             ]}
           />
         ),
       },
     ],
-    [manualGrantAllowed, onRefetch, planById, userById]
+    [dialog, onRefetch, planById, rows.length, selectedIds, userById]
   );
 
   return (
@@ -776,12 +983,12 @@ function SubscriptionsTab(props: {
 
       {!manualGrantAllowed && !loading ? (
         <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-600 dark:bg-slate-900/60 dark:text-slate-200">
-          Manual grants and cancellations are turned off under the{' '}
+          Manual subscription grants are turned off under the{' '}
           <button type="button" className="font-semibold underline" onClick={onJumpToSettings}>
             Add-on defaults
           </button>
           {' '}
-          tab. Checkout can still create subscriptions automatically.
+          tab. You can still cancel existing rows below. Checkout fulfillment and gateways are unchanged.
         </div>
       ) : null}
 
@@ -799,18 +1006,39 @@ function SubscriptionsTab(props: {
         {loading ? (
           <DataTableSkeleton headers={['ID', 'User', 'Plan', 'Status', 'Gateway', 'Period end', '']} />
         ) : (
-          <DataTable
-            wrapInCard={false}
-            columns={columns}
-            rows={rows}
-            rowKey={(r) => r.id}
-            emptyContent={
-              <ListEmptyState
-                title="No subscriptions yet"
-                description="Create a subscription manually, or connect a gateway to sync recurring billing."
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+              <BulkActionsBar
+                selectedCount={selectedIds.length}
+                value={bulkAction}
+                onChange={setBulkAction}
+                onApply={() => void applyBulk()}
+                applyBusy={bulkBusy}
+                trashMode={false}
+                customOptions={[
+                  { value: 'delete', label: 'Delete permanently' },
+                  { value: 'status:active', label: 'Mark active' },
+                  { value: 'status:cancelled', label: 'Mark cancelled' },
+                ]}
+                selectId="subs-bulk"
               />
-            }
-          />
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {selectedIds.length > 0 ? `${selectedIds.length} selected` : ''}
+              </div>
+            </div>
+            <DataTable
+              wrapInCard={false}
+              columns={columns}
+              rows={rows}
+              rowKey={(r) => r.id}
+              emptyContent={
+                <ListEmptyState
+                  title="No subscriptions yet"
+                  description="Create a subscription manually, or connect a gateway to sync recurring billing."
+                />
+              }
+            />
+          </>
         )}
       </ListPanel>
 

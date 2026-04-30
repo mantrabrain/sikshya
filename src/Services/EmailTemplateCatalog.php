@@ -342,6 +342,54 @@ final class EmailTemplateCatalog
                     ]
                 ),
             ],
+            'admin_order_fulfilled_notice' => [
+                'name' => __('New sale (admin notice)', 'sikshya'),
+                'description' => __(
+                    'Sent to the admin address when an order is fulfilled (paid and course access granted). Enable this to receive “new course sell” notifications.',
+                    'sikshya'
+                ),
+                'event' => 'sikshya_order_fulfilled',
+                'category' => 'commerce',
+                'recipient' => 'admin',
+                'recipient_to' => '{{admin_email}}',
+                'template_type' => 'system',
+                'default_subject' => __('💰 [{{site_name}}] New sale — order #{{order_id}}', 'sikshya'),
+                'default_body_html' => self::layout(
+                    '💰',
+                    esc_html__('New sale', 'sikshya'),
+                    '<p style="margin:0 0 16px;">' . esc_html__('A new order was fulfilled on your site. Summary:', 'sikshya') . '</p>'
+                    . self::factTable([
+                        ['label' => esc_html__('Buyer', 'sikshya'), 'value' => '{{student_name}} — {{student_email}}'],
+                        ['label' => esc_html__('Order', 'sikshya'), 'value' => '#' . '{{order_id}}'],
+                        ['label' => esc_html__('Payment method', 'sikshya'), 'value' => '{{payment_method}}'],
+                        ['label' => esc_html__('Total paid', 'sikshya'), 'value' => '{{order_total}}'],
+                    ])
+                    . '<p style="margin:18px 0 8px;font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">'
+                    . esc_html__('Items', 'sikshya')
+                    . '</p>'
+                    . '{{order_lines_html}}'
+                    . '<p style="margin:22px 0 0;text-align:center;">'
+                    . '<a href="{{order_receipt_url}}" style="display:inline-block;padding:14px 28px;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;border-radius:10px;">'
+                    . esc_html__('Open receipt →', 'sikshya')
+                    . '</a></p>'
+                    . '<p style="margin:14px 0 0;font-size:12px;color:#64748b;text-align:center;">'
+                    . esc_html__('Tip: change the recipient email under Email → Delivery (“Main LMS contact email”).', 'sikshya')
+                    . '</p>'
+                ),
+                'merge_tags' => array_merge(
+                    $tags_common,
+                    [
+                        '{{order_id}}',
+                        '{{order_total}}',
+                        '{{order_subtotal}}',
+                        '{{order_discount}}',
+                        '{{order_currency}}',
+                        '{{payment_method}}',
+                        '{{order_lines_html}}',
+                        '{{order_receipt_url}}',
+                    ]
+                ),
+            ],
             'drip_lesson_unlocked' => [
                 'name' => __('Drip: lesson unlocked', 'sikshya'),
                 'description' => __(

@@ -5,21 +5,13 @@
   var root = document.getElementById('sikshya-checkout-root');
   var cfgBoot =
     typeof window.sikshyaCheckoutConfig === 'object' && window.sikshyaCheckoutConfig ? window.sikshyaCheckoutConfig : {};
-  var bootRestUrl = String(cfgBoot.restUrl || '');
-  var dsRestUrl = root && root.dataset ? String(root.dataset.restUrl || '') : '';
-  if (!root || (!bootRestUrl && !dsRestUrl)) {
+  if (!root || !cfgBoot || !cfgBoot.restUrl) {
     return;
   }
 
   var isLoggedIn = cfgBoot.isLoggedIn === true || cfgBoot.isLoggedIn === 1 || cfgBoot.isLoggedIn === '1';
-  if (!cfgBoot || typeof cfgBoot.isLoggedIn === 'undefined') {
-    isLoggedIn = String(root.dataset.isLoggedIn || '') === '1';
-  }
   var guestEnabled = cfgBoot.guestEnabled === true || cfgBoot.guestEnabled === 1 || cfgBoot.guestEnabled === '1';
-  if (!cfgBoot || typeof cfgBoot.guestEnabled === 'undefined') {
-    guestEnabled = String(root.dataset.guestEnabled || '') === '1';
-  }
-  var guestNonce = String(cfgBoot.guestNonce || '') || String(root.dataset.guestNonce || '');
+  var guestNonce = String(cfgBoot.guestNonce || '');
 
   var dfEnabled = false;
   var dfSchema = [];
@@ -30,24 +22,6 @@
     dfSchema = Array.isArray(cfgBoot.df.schema) ? cfgBoot.df.schema : [];
     dfPrefills = cfgBoot.df.prefills && typeof cfgBoot.df.prefills === 'object' ? cfgBoot.df.prefills : {};
     dfCountries = cfgBoot.df.countries && typeof cfgBoot.df.countries === 'object' ? cfgBoot.df.countries : {};
-  } else {
-    dfEnabled = String(root.dataset.dfEnabled || '') === '1';
-    try {
-      dfSchema = JSON.parse(root.dataset.dfSchema || '[]');
-      if (!Array.isArray(dfSchema)) dfSchema = [];
-    } catch (e) {
-      dfSchema = [];
-    }
-    try {
-      dfPrefills = JSON.parse(root.dataset.dfPrefills || '{}') || {};
-    } catch (e) {
-      dfPrefills = {};
-    }
-    try {
-      dfCountries = JSON.parse(root.dataset.dfCountries || '{}') || {};
-    } catch (e) {
-      dfCountries = {};
-    }
   }
   var cfg =
     typeof window.sikshyaCheckout === 'object' && window.sikshyaCheckout
@@ -61,17 +35,25 @@
 
   var statusEl = document.getElementById('sikshya-checkout-status');
   var errorsEl = document.getElementById('sikshya-checkout-errors');
-  var restUrl = String(cfgBoot.restUrl || root.dataset.restUrl || '').replace(/\/?$/, '/');
-  var nonce = String(cfgBoot.restNonce || root.dataset.restNonce || '');
+  var restUrl = String(cfgBoot.restUrl || '').replace(/\/?$/, '/');
+  var nonce = String(cfgBoot.restNonce || '');
   var courseIds = [];
-  if (Array.isArray(cfgBoot.courseIds)) {
-    courseIds = cfgBoot.courseIds;
-  } else {
-    try {
-      courseIds = JSON.parse(root.dataset.courseIds || '[]');
-    } catch (e) {
-      courseIds = [];
+  courseIds = Array.isArray(cfgBoot.courseIds) ? cfgBoot.courseIds : [];
+
+  function getCheckoutFetchOptions(method) {
+    var headers = {
+      'Content-Type': 'application/json',
+      'X-Sikshya-Guest-Nonce': guestNonce,
+    };
+
+    if (isLoggedIn && nonce) {
+      headers['X-WP-Nonce'] = nonce;
+      return { method: method, credentials: 'same-origin', headers: headers };
     }
+
+    // Guest checkout: keep cookies so CartStorage works, but never send X-WP-Nonce.
+    // WP will only enforce cookie nonce checks when an auth cookie exists.
+    return { method: method, credentials: 'same-origin', headers: headers };
   }
 
   var subtotalEl = document.getElementById('sikshya-checkout-subtotal-display');
@@ -465,12 +447,8 @@
       setStatus(t('confirmingPayment', 'Confirming payment…'));
       fetch(restUrl + 'checkout/confirm', {
         method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce,
-          'X-Sikshya-Guest-Nonce': guestNonce,
-        },
+        credentials: getCheckoutFetchOptions('POST').credentials,
+        headers: getCheckoutFetchOptions('POST').headers,
         body: JSON.stringify({
           order_id: orderId,
           gateway: 'paypal',
@@ -502,12 +480,8 @@
     try {
       fetch(restUrl + 'checkout/clear-cart', {
         method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce,
-          'X-Sikshya-Guest-Nonce': guestNonce,
-        },
+        credentials: getCheckoutFetchOptions('POST').credentials,
+        headers: getCheckoutFetchOptions('POST').headers,
         body: JSON.stringify({}),
       })
         .then(function () {
@@ -598,12 +572,8 @@
     setStatus(t('updatingTotals', 'Updating totals…'));
     fetch(restUrl + 'checkout/quote', {
       method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': nonce,
-        'X-Sikshya-Guest-Nonce': guestNonce,
-      },
+      credentials: getCheckoutFetchOptions('POST').credentials,
+      headers: getCheckoutFetchOptions('POST').headers,
       body: JSON.stringify({
         course_ids: courseIds,
         coupon_code: couponCode || '',
@@ -673,12 +643,8 @@
     var marketingOptIn = marketingOptInEl ? Boolean(marketingOptInEl.checked) : null;
     fetch(restUrl + 'checkout/session', {
       method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': nonce,
-        'X-Sikshya-Guest-Nonce': guestNonce,
-      },
+      credentials: getCheckoutFetchOptions('POST').credentials,
+      headers: getCheckoutFetchOptions('POST').headers,
       body: JSON.stringify({
         course_ids: courseIds,
         gateway: gateway,
@@ -929,263 +895,35 @@
   // Handle PayPal redirect return by capturing + enrolling, then redirecting to receipt.
   confirmReturnIfNeeded();
 
-  // Handle Stripe redirect return by confirming + enrolling, then redirecting to receipt.
-  confirmStripeReturnIfNeeded();
-
-  confirmMollieReturnIfNeeded();
-  confirmPaystackReturnIfNeeded();
-  confirmRazorpayReturnIfNeeded();
-
-  function confirmStripeReturnIfNeeded() {
-    try {
-      var u = new URL(window.location.href);
-      if (u.searchParams.get('sikshya_stripe_cancel') === '1') {
-        setStatus(t('stripeCancelled', 'Stripe checkout was cancelled. You can choose a payment method again.'));
-        return;
-      }
-      var checkoutSessionId = u.searchParams.get('checkout_session_id') || '';
-      var explicitOrderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
-      var publicToken = u.searchParams.get('public_token') || '';
-
-      if (u.searchParams.get('sikshya_stripe_return') === '1' && checkoutSessionId && explicitOrderId) {
-        clearError();
-        setStatus(t('stripeConfirming', 'Finalizing Stripe payment…'));
-        fetch(restUrl + 'checkout/confirm', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': nonce,
-            'X-Sikshya-Guest-Nonce': guestNonce,
-          },
-          body: JSON.stringify({
-            gateway: 'stripe',
-            order_id: explicitOrderId,
-            checkout_session_id: checkoutSessionId,
-            public_token: publicToken,
-          }),
-        })
-          .then(function (r) {
-            return r.json();
-          })
-          .then(function (json) {
-            if (!json || !json.ok) {
-              showError((json && json.message) || t('stripeConfirmFailed', 'Could not confirm Stripe payment.'));
-              return;
-            }
-            try {
-              window.sessionStorage.removeItem('sikshya_stripe_checkout');
-            } catch (e) {
-              // ignore
-            }
-            var d = json.data || {};
-            if (d.redirect_url) {
-              clearCartThenRedirect(d.redirect_url);
-              return;
-            }
-            setStatus(t('stripeConfirmed', 'Payment confirmed.'));
-          })
-          .catch(function () {
-            showError(t('networkError', 'Network error. Please try again.'));
-          });
-        return;
-      }
-
-      var redirectStatus = u.searchParams.get('redirect_status') || '';
-      var pi = u.searchParams.get('payment_intent') || '';
-      var piSecret = u.searchParams.get('payment_intent_client_secret') || '';
-
-      if (!pi || redirectStatus !== 'succeeded') {
-        return;
-      }
-
-      var stored = null;
-      try {
-        stored = JSON.parse(window.sessionStorage.getItem('sikshya_stripe_checkout') || 'null');
-      } catch (e) {
-        stored = null;
-      }
-      var storedOrderId = stored && stored.order_id ? parseInt(stored.order_id, 10) || 0 : 0;
-      var orderId = explicitOrderId || storedOrderId;
-      if (!orderId) {
-        showError(t('stripeMissingOrder', 'Stripe returned successfully, but order context is missing.'));
-        return;
-      }
-
-      clearError();
-      setStatus(t('stripeConfirming', 'Finalizing Stripe payment…'));
-
-      fetch(restUrl + 'checkout/confirm', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce,
-          'X-Sikshya-Guest-Nonce': guestNonce,
-        },
-        body: JSON.stringify({
-          gateway: 'stripe',
-          order_id: orderId,
-          payment_intent_id: pi,
-          client_secret: piSecret || '',
-          public_token: publicToken,
-        }),
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (json) {
-          if (!json || !json.ok) {
-            showError((json && json.message) || t('stripeConfirmFailed', 'Could not confirm Stripe payment.'));
-            return;
-          }
-          try {
-            window.sessionStorage.removeItem('sikshya_stripe_checkout');
-          } catch (e) {
-            // ignore
-          }
-          var d = json.data || {};
-          if (d.redirect_url) {
-            clearCartThenRedirect(d.redirect_url);
-            return;
-          }
-          setStatus(t('stripeConfirmed', 'Payment confirmed.'));
-        })
-        .catch(function () {
-          showError(t('networkError', 'Network error. Please try again.'));
-        });
-    } catch (e) {
-      // ignore parsing errors
+  // Pro-only gateway confirm flows (Stripe / Mollie / Paystack / Razorpay) are registered by Sikshya Pro.
+  // Core exposes a tiny runtime API so Pro can show status/errors and redirect on success.
+  try {
+    window.sikshyaCheckoutRuntime = window.sikshyaCheckoutRuntime || {
+      t: t,
+      setStatus: setStatus,
+      showError: showError,
+      clearError: clearError,
+      clearCartThenRedirect: clearCartThenRedirect,
+      restUrl: restUrl,
+      nonce: nonce,
+      guestNonce: guestNonce,
+    };
+  } catch (e) {
+    /* ignore */
+  }
+  try {
+    var extra = window.sikshyaCheckoutReturnConfirmers;
+    if (Array.isArray(extra)) {
+      extra.forEach(function (fn) {
+        try {
+          if (typeof fn === 'function') fn(window.sikshyaCheckoutRuntime);
+        } catch (e) {
+          /* ignore */
+        }
+      });
     }
+  } catch (e) {
+    /* ignore */
   }
 
-  function confirmMollieReturnIfNeeded() {
-    try {
-      var u = new URL(window.location.href);
-      if (u.searchParams.get('sikshya_mollie_return') !== '1') {
-        return;
-      }
-      var orderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
-      var paymentId = u.searchParams.get('id') || '';
-      if (!orderId) {
-        return;
-      }
-      clearError();
-      setStatus(t('confirmingPayment', 'Confirming payment…'));
-      fetch(restUrl + 'checkout/confirm', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce,
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-          gateway: 'mollie',
-          mollie_payment_id: paymentId,
-        }),
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (json) {
-          if (json && json.ok && json.data && json.data.redirect_url) {
-            clearCartThenRedirect(json.data.redirect_url);
-            return;
-          }
-          showError((json && json.message) || t('confirmFailed', 'Could not confirm payment.'));
-        })
-        .catch(function () {
-          showError(t('networkError', 'Network error. Please try again.'));
-        });
-    } catch (e) {
-      /* ignore */
-    }
-  }
-
-  function confirmPaystackReturnIfNeeded() {
-    try {
-      var u = new URL(window.location.href);
-      if (u.searchParams.get('sikshya_paystack_return') !== '1') {
-        return;
-      }
-      var orderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
-      var ref = u.searchParams.get('reference') || u.searchParams.get('trxref') || '';
-      if (!orderId || !ref) {
-        return;
-      }
-      clearError();
-      setStatus(t('confirmingPayment', 'Confirming payment…'));
-      fetch(restUrl + 'checkout/confirm', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce,
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-          gateway: 'paystack',
-          paystack_reference: ref,
-        }),
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (json) {
-          if (json && json.ok && json.data && json.data.redirect_url) {
-            clearCartThenRedirect(json.data.redirect_url);
-            return;
-          }
-          showError((json && json.message) || t('confirmFailed', 'Could not confirm payment.'));
-        })
-        .catch(function () {
-          showError(t('networkError', 'Network error. Please try again.'));
-        });
-    } catch (e) {
-      /* ignore */
-    }
-  }
-
-  function confirmRazorpayReturnIfNeeded() {
-    try {
-      var u = new URL(window.location.href);
-      if (u.searchParams.get('sikshya_razorpay_return') !== '1') {
-        return;
-      }
-      var orderId = parseInt(u.searchParams.get('order_id') || '0', 10) || 0;
-      if (!orderId) {
-        return;
-      }
-      clearError();
-      setStatus(t('confirmingPayment', 'Confirming payment…'));
-      fetch(restUrl + 'checkout/confirm', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-WP-Nonce': nonce,
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-          gateway: 'razorpay',
-        }),
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (json) {
-          if (json && json.ok && json.data && json.data.redirect_url) {
-            clearCartThenRedirect(json.data.redirect_url);
-            return;
-          }
-          showError((json && json.message) || t('confirmFailed', 'Could not confirm payment.'));
-        })
-        .catch(function () {
-          showError(t('networkError', 'Network error. Please try again.'));
-        });
-    } catch (e) {
-      /* ignore */
-    }
-  }
 })();

@@ -155,7 +155,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Sender identity, SMTP, and global HTML wrappers — template copy lives under Email templates"
+      subtitle="Contact addresses, transactional send toggle, SMTP, wrappers, certificate email — template copies under Email templates"
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 

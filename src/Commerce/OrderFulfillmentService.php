@@ -70,6 +70,23 @@ final class OrderFulfillmentService
             }
 
             if ($this->payments->tableExists()) {
+                $meta = [];
+                if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+                    $decoded = json_decode($order->meta, true);
+                    if (is_array($decoded)) {
+                        $meta = $decoded;
+                    }
+                }
+                $payment_meta = isset($meta['payment']) && is_array($meta['payment']) ? $meta['payment'] : [];
+                $tx = '';
+                if (isset($payment_meta['transaction_id']) && is_string($payment_meta['transaction_id'])) {
+                    $tx = (string) $payment_meta['transaction_id'];
+                }
+                if ($tx === '') {
+                    $tx = (string) ($order->gateway_intent_id ?? '');
+                }
+                $gw_resp = isset($payment_meta['gateway_response']) ? $payment_meta['gateway_response'] : null;
+
                 $this->payments->create(
                     [
                         'user_id' => $user_id,
@@ -77,10 +94,11 @@ final class OrderFulfillmentService
                         'amount' => (float) $item->line_total,
                         'currency' => (string) $order->currency,
                         'payment_method' => (string) $order->gateway,
-                        'transaction_id' => (string) ($order->gateway_intent_id ?? ''),
+                        'transaction_id' => $tx,
                         'status' => 'completed',
+                        'charge_kind' => 'checkout',
                         'payment_date' => current_time('mysql'),
-                        'gateway_response' => ['order_id' => $order_id],
+                        'gateway_response' => $gw_resp !== null ? $gw_resp : ['order_id' => $order_id],
                     ]
                 );
             }

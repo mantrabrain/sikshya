@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactElement, type ReactNode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { ConfirmDialog } from './ConfirmDialog';
 
 export type SikshyaConfirmOptions = {
@@ -38,6 +39,86 @@ type DialogState = ConfirmState | AlertState | null;
 type Ctx = {
   confirm: (opts: SikshyaConfirmOptions) => Promise<boolean>;
   alert: (opts: SikshyaAlertOptions) => Promise<void>;
+};
+
+/**
+ * Imperative mounts when {@link SikshyaDialogProvider} is not an ancestor (or context is unavailable).
+ * Avoids `window.confirm` / `window.alert` so UX stays consistent.
+ */
+function mountDetachedDialog(node: ReactElement): () => void {
+  if (typeof document === 'undefined') {
+    return () => {};
+  }
+  const host = document.createElement('div');
+  host.setAttribute('data-sikshya-imperative-dialog', '');
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  root.render(node);
+  return () => {
+    queueMicrotask(() => {
+      root.unmount();
+      host.remove();
+    });
+  };
+}
+
+function detachedConfirm(opts: SikshyaConfirmOptions): Promise<boolean> {
+  if (typeof document === 'undefined') {
+    void opts;
+    return Promise.resolve(false);
+  }
+  return new Promise<boolean>((resolve) => {
+    let teardown: (() => void) | undefined;
+    const finish = (v: boolean): void => {
+      teardown?.();
+      resolve(v);
+    };
+    teardown = mountDetachedDialog(
+      <ConfirmDialog
+        open
+        type="confirm"
+        title={opts.title}
+        confirmLabel={opts.confirmLabel}
+        cancelLabel={opts.cancelLabel}
+        variant={opts.variant}
+        onClose={() => finish(false)}
+        onConfirm={() => finish(true)}
+      >
+        {opts.message}
+      </ConfirmDialog>
+    );
+  });
+}
+
+function detachedAlert(opts: SikshyaAlertOptions): Promise<void> {
+  if (typeof document === 'undefined') {
+    void opts;
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => {
+    let teardown: (() => void) | undefined;
+    const finish = (): void => {
+      teardown?.();
+      resolve();
+    };
+    teardown = mountDetachedDialog(
+      <ConfirmDialog
+        open
+        type="alert"
+        title={opts.title}
+        dismissLabel={opts.buttonLabel}
+        onClose={finish}
+      >
+        {opts.message}
+      </ConfirmDialog>
+    );
+  });
+}
+
+/** Used when React context is missing; still renders {@link ConfirmDialog}. */
+const FALLBACK_CTX: Ctx = {
+  confirm: detachedConfirm,
+  alert: detachedAlert,
 };
 
 const SikshyaDialogContext = createContext<Ctx | null>(null);
@@ -127,30 +208,5 @@ export function SikshyaDialogProvider({ children }: { children: ReactNode }) {
 
 export function useSikshyaDialog(): Ctx {
   const ctx = useContext(SikshyaDialogContext);
-  if (!ctx) {
-    // Defensive fallback: some wp-admin screens may mount a subset of the React bundle
-    // (or mount order can be disrupted by 3rd-party scripts). Avoid crashing.
-    return {
-      confirm: async ({ title, message, confirmLabel, cancelLabel }) => {
-        const text = `${title}\n\n${typeof message === 'string' ? message : ''}`;
-        // Prefer native confirm if possible; otherwise allow.
-        if (typeof window === 'undefined' || typeof window.confirm !== 'function') {
-          return true;
-        }
-        // Some browsers ignore button labels; keep them for signature compatibility.
-        void confirmLabel;
-        void cancelLabel;
-        return window.confirm(text);
-      },
-      alert: async ({ title, message, buttonLabel }) => {
-        const text = `${title}\n\n${typeof message === 'string' ? message : ''}`;
-        if (typeof window === 'undefined' || typeof window.alert !== 'function') {
-          return;
-        }
-        void buttonLabel;
-        window.alert(text);
-      },
-    };
-  }
-  return ctx;
+  return ctx ?? FALLBACK_CTX;
 }

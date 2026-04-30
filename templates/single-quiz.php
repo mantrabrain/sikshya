@@ -79,7 +79,13 @@ while (have_posts()) {
                 case 'chevron-down':
                     return '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 case 'play-video':
-                    return '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><rect x="4" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor"/></svg>';
+                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="4" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor"/></svg>';
+                case 'live':
+                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11h10M7 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+                case 'layers':
+                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+                case 'puzzle':
+                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 case 'check':
                     return '<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" focusable="false"><path d="M5.5 12.5l2.5 2.5 6.5-8" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 case 'lock':
@@ -260,7 +266,7 @@ while (have_posts()) {
 
         <main class="sikshya-learnMain">
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
-            <aside class="sikshya-learnSidebar" aria-label="<?php echo esc_attr(sprintf(__('%s content', 'sikshya'), $label_course)); ?>" data-sikshya-outline>
+            <aside class="sikshya-learnSidebar" aria-label="<?php echo esc_attr(sprintf(__('%s content', 'sikshya'), $label_course)); ?>" data-sikshya-outline<?php echo $page_model->isLearnCurriculumSidebarScrollable() ? ' data-sik-curriculum-scroll="1"' : ''; ?>>
                 <div class="sikshya-learnSidebar__inner">
                     <div class="sikshya-learnSidebar__head">
                         <h2 class="sikshya-learnSidebar__heading">
@@ -289,9 +295,7 @@ while (have_posts()) {
                      * The legacy view array is materialized inline because this
                      * hook fires before the quiz body where $legacy is
                      * otherwise computed.
-                     *
-                     * @param array<string, mixed> $legacy_vm Legacy view array.
-                     * @param \Sikshya\Presentation\Models\SingleQuizPageModel $page_model
+                     * Passed values: legacy view array + `$page_model`.
                      */
                     do_action('sikshya_learn_sidebar_footer', $page_model->toLegacyViewArray(), $page_model);
                     ?>
@@ -593,9 +597,7 @@ while (have_posts()) {
                             <?php
                             /**
                              * Extra tab buttons in the learner content chrome.
-                             *
-                             * @param array<string,mixed> $legacy_vm
-                             * @param mixed               $page_model
+                             * Passed values: legacy view array + `$page_model`.
                              */
                             do_action('sikshya_learn_tabs_bar_append', $page_model->toLegacyViewArray(), $page_model);
                             ?>
@@ -760,9 +762,7 @@ while (have_posts()) {
                         <?php
                         /**
                          * Extra tab panels (`data-sikshya-panel`).
-                         *
-                         * @param array<string,mixed> $legacy_vm
-                         * @param mixed               $page_model
+                         * Passed values: legacy view array + `$page_model`.
                          */
                         do_action('sikshya_learn_tab_panels_append', $page_model->toLegacyViewArray(), $page_model);
                         ?>

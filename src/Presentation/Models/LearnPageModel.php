@@ -234,6 +234,14 @@ final class LearnPageModel
     }
 
     /**
+     * Course Builder: fixed-height sidebar with scrolling outline list only.
+     */
+    public function isLearnCurriculumSidebarScrollable(): bool
+    {
+        return !empty($this->vm['learn_curriculum_sidebar_scrollable']);
+    }
+
+    /**
      * Same key layout as the legacy `sikshya_learn_template_data` filter (for add-ons that still read an array).
      *
      * @return array<string, mixed>

@@ -1339,7 +1339,7 @@ function sikshya_course_learn_entry_url(int $course_id): string
 }
 
 /**
- * Whether the current user is enrolled (DB-backed).
+ * Whether the user may access the course as a learner (enrollment row or add-on access such as an active subscription).
  */
 function sikshya_is_user_enrolled_in_course(int $course_id, int $user_id = 0): bool
 {
@@ -1347,9 +1347,9 @@ function sikshya_is_user_enrolled_in_course(int $course_id, int $user_id = 0): b
     if ($user_id <= 0 || $course_id <= 0) {
         return false;
     }
-    $repo = new \Sikshya\Database\Repositories\EnrollmentRepository();
+    $courses = new \Sikshya\Services\CourseService();
 
-    return $repo->findByUserAndCourse($user_id, $course_id) !== null;
+    return $courses->isUserEnrolled($user_id, $course_id);
 }
 
 /**
@@ -1480,30 +1480,152 @@ function sikshya_public_content_type_label(string $post_type): string
 }
 
 /**
- * Inline SVG icon for curriculum line items (lesson, quiz, assignment, other).
+ * Map Sikshya content post type to outline row key (`lesson`|`quiz`|`assignment`|`content`).
+ */
+function sikshya_outline_type_key_from_post_type(string $post_type): string
+{
+    switch ($post_type) {
+        case 'sik_lesson':
+            return 'lesson';
+        case 'sik_quiz':
+            return 'quiz';
+        case 'sik_assignment':
+            return 'assignment';
+        default:
+            return 'content';
+    }
+}
+
+/**
+ * Shared SVG open tag for curriculum type icons — matches Learn sidebar drawing box.
  *
- * Markup is fixed paths only; safe to print in templates.
+ * @param string $variant `learn`: 18px row icon. `course`: 20px accordion row on single course LP.
+ *
+ * @return string Attributes snippet (starts with space for concatenation).
+ */
+function sikshya_curriculum_type_icon_svg_open_attrs(string $variant): string
+{
+    $variant = sanitize_key($variant);
+
+    if ($variant === 'course') {
+        return ' class="sikshya-course-lp__type-svg sikshya-curriculum-type-svg" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
+    }
+
+    return ' class="sikshya-curriculum-type-svg" viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
+}
+
+/**
+ * Curriculum row type icon (same glyphs as Learn sidebar outline {@see templates/partials/learn-curriculum-outline.php}).
+ *
+ * @param string $outline_type_key `lesson`|`quiz`|`assignment`|`content`.
+ * @param string $lesson_type_key  Sanitized `_sikshya_lesson_type` when type is lesson.
+ * @param string $variant           `learn` or `course` (sizes / classes for landing vs shell).
+ *
+ * @return string SVG markup; safe fixed paths only.
+ */
+function sikshya_curriculum_outline_row_type_icon_html(
+    string $outline_type_key,
+    string $lesson_type_key = '',
+    string $variant = 'learn'
+): string {
+    $outline_type_key = sanitize_key($outline_type_key);
+    $lesson_type_key = sanitize_key($lesson_type_key);
+    $variant = sanitize_key($variant) === 'course' ? 'course' : 'learn';
+
+    $a = sikshya_curriculum_type_icon_svg_open_attrs($variant);
+    $body = '';
+
+    switch ($outline_type_key) {
+        case 'lesson':
+            switch ($lesson_type_key) {
+                case 'video':
+                    // Learn shell "play-video" glyph.
+                    $body = '<rect x="4" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor"/>';
+
+                    break;
+                case 'audio':
+                    $body = '<path d="M11 5L6 9H3v6h3l5 4V5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 8.5a4 4 0 010 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a7 7 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+
+                    break;
+                case 'live':
+                    $body = '<rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11h10M7 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+
+                    break;
+                case 'scorm':
+                    $body = '<path d="M12 2l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>';
+
+                    break;
+                case 'h5p':
+                    $body = '<path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+                    break;
+                case 'lesson':
+                case 'text':
+                default:
+                    // Learn shell "doc" glyph for text/read lessons.
+                    $body = '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+                    break;
+            }
+
+            break;
+        case 'quiz':
+            $body = '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+            break;
+        case 'assignment':
+            $body = '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+            break;
+        case 'content':
+        default:
+            $body = '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+            break;
+    }
+
+    return '<svg' . $a . '>' . $body . '</svg>';
+}
+
+/**
+ * Lock SVG shared by Learn sidebar outline and single course curriculum (same glyph).
+ *
+ * @return string Markup safe for templates (fixed paths).
+ */
+function sikshya_curriculum_lock_icon_html(): string
+{
+    return '<svg class="sikshya-curriculum-lock-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">'
+        . '<path d="M7 11V8a5 5 0 0110 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+        . '<path d="M6.5 11h11A2.5 2.5 0 0120 13.5v6A2.5 2.5 0 0117.5 22h-11A2.5 2.5 0 014 19.5v-6A2.5 2.5 0 016.5 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'
+        . '</svg>';
+}
+
+/**
+ * Inline SVG icon for curriculum line items — delegates to unified Learn/course glyphs.
+ *
+ * Uses default lesson subtype (document-style); prefer {@see sikshya_curriculum_outline_row_type_icon_html()} with lesson subtype on the course landing page.
  *
  * @param string $post_type Post type slug (e.g. sik_lesson).
+ *
  * @return string SVG element HTML.
  */
 function sikshya_public_content_type_icon_html(string $post_type): string
 {
-    $attrs = 'class="sikshya-course-lp__type-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
+    return sikshya_curriculum_outline_row_type_icon_html(
+        sikshya_outline_type_key_from_post_type($post_type),
+        '',
+        'course'
+    );
+}
 
-    switch ($post_type) {
-        case 'sik_lesson':
-            return '<svg ' . $attrs . '><path d="M8 5v14l11-7L8 5z" fill="currentColor"/></svg>';
-
-        case 'sik_quiz':
-            return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2" fill="none"/><path d="M8 9h8M8 13h6M8 17h4" fill="none"/></svg>';
-
-        case 'sik_assignment':
-            return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/></svg>';
-
-        default:
-            return '<svg ' . $attrs . ' stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="none"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>';
-    }
+/**
+ * Lock icon SVG for curriculum rows (aliases {@see sikshya_curriculum_lock_icon_html()}).
+ *
+ * @return string Markup safe to escape-print in templates (fixed paths).
+ */
+function sikshya_learner_lock_icon_svg_html(): string
+{
+    return sikshya_curriculum_lock_icon_html();
 }
 
 /**

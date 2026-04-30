@@ -53,7 +53,9 @@ $root_attrs = apply_filters('sikshya_checkout_root_attributes', $root_attrs, $co
 
 $checkout_js_config = [
     'restUrl' => (string) $page_model->getRestUrl(),
-    'restNonce' => (string) $page_model->getRestNonce(),
+    // WP REST nonce is only valid for logged-in cookie auth. For guests it can
+    // trigger `rest_cookie_check_errors` failures if sent, so omit it.
+    'restNonce' => $is_logged_in ? (string) $page_model->getRestNonce() : '',
     'courseIds' => $page_model->getCourseIds(),
     'isLoggedIn' => $is_logged_in,
     'guestEnabled' => $guest_enabled,
@@ -318,6 +320,18 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                         <p class="sikshya-checkout-page__panel-intro"><?php esc_html_e('Choose a payment method to continue.', 'sikshya'); ?></p>
 
                         <?php
+                        $sub_checkout = isset($co['subscription_checkout']) && is_array($co['subscription_checkout']) ? $co['subscription_checkout'] : [];
+                        $sub_enabled = !empty($sub_checkout['enabled']);
+                        $sub_notice = isset($sub_checkout['notice']) ? (string) $sub_checkout['notice'] : '';
+                        ?>
+                        <?php if ($sub_enabled && $sub_notice !== '') : ?>
+                            <div class="sikshya-checkout-page__notice" style="margin:0 0 0.75rem;padding:12px 14px;border:1px solid rgba(59,130,246,.25);background:rgba(59,130,246,.06);border-radius:12px;">
+                                <div style="font-weight:700;margin:0 0 4px;"><?php esc_html_e('Subscription checkout', 'sikshya'); ?></div>
+                                <div style="font-size:13px;opacity:.92;"><?php echo esc_html($sub_notice); ?></div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php
                         $gw_ids = $page_model->getCheckoutGatewayIds();
                         $gw_labels = \Sikshya\Frontend\Public\CheckoutTemplateData::gatewayCheckoutLabels();
                         $gw_statuses = isset($co['gateway_statuses']) && is_array($co['gateway_statuses']) ? $co['gateway_statuses'] : [];
@@ -473,6 +487,9 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                                 <?php
                                 $pr = $line['pricing'] ?? [];
                                 $eff = isset($pr['effective']) && $pr['effective'] !== null ? (float) $pr['effective'] : 0;
+                                $sub = isset($pr['subscription_display']) && is_array($pr['subscription_display']) ? $pr['subscription_display'] : null;
+                                $is_sub = is_array($sub) && !empty($sub);
+                                $is_primary = $is_sub && !empty($sub['is_primary']);
                                 ?>
                                 <li class="sikshya-checkout-page__line">
                                     <?php if (!empty($line['thumbnail'])) : ?>
@@ -488,8 +505,15 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                                         <?php
                                         if ($eff > 0) {
                                             echo wp_kses_post(sikshya_format_price($eff, $pr['currency'] ?? $page_model->getCurrency()));
+                                            if ($is_sub && isset($sub['interval_unit'])) {
+                                                echo ' <span class="sikshya-checkout-page__line-price-suffix" style="font-size:12px;opacity:.8;">/ ' . esc_html((string) $sub['interval_unit']) . '</span>';
+                                            }
                                         } else {
-                                            esc_html_e('Free', 'sikshya');
+                                            if ($is_sub && !$is_primary) {
+                                                esc_html_e('Included in plan', 'sikshya');
+                                            } else {
+                                                esc_html_e('Free', 'sikshya');
+                                            }
                                         }
                                         ?>
                                     </span>

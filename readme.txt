@@ -124,6 +124,80 @@ Unlock advanced drip and prerequisites, multi-instructor collaboration, subscrip
 
 👉 [Explore Sikshya Pro](https://mantrabrain.com/plugins/sikshya/?utm_source=wporg&utm_medium=readme&utm_campaign=pro_detail)
 
+👉 [Sikshya pricing & plans](https://mantrabrain.com/plugins/sikshya#pricing)
+
+### Sikshya Pro add-on catalog
+
+Below is the full commercial add-on line-up from the Sikshya feature registry. **Each title links to pricing** so you can compare plans. Availability varies by plan tier (Starter, Growth / Pro band, Scale); see the pricing page for the current matrix.
+
+#### Starter-band add-ons
+
+* **[Content drip & scheduled unlock](https://mantrabrain.com/plugins/sikshya#pricing)** — Release lessons over time (“day 3 after signup”, dates, cohort pace) instead of opening the full catalog on day one. Best for paced programs and term-style delivery; disable for purely self‑paced libraries.
+
+* **[Course reviews & ratings](https://mantrabrain.com/plugins/sikshya#pricing)** — Collect star ratings and written reviews on course pages with moderation before they go live. Builds social proof in the catalog; turn off when public reviews don’t fit your model.
+
+* **[Prerequisites (lessons & courses)](https://mantrabrain.com/plugins/sikshya#pricing)** — Require completion of chosen lessons or whole courses before the next step unlocks—ideal for sequencing, compliance, or leveled paths. Leave off when every course stands alone.
+
+* **[Instructor dashboard](https://mantrabrain.com/plugins/sikshya#pricing)** — Gives each teacher a concise snapshot (e.g. enrollments on their courses) without sharing the whole admin site. Useful when instructors should see **their** numbers only.
+
+* **[Drip & automation emails](https://mantrabrain.com/plugins/sikshya#pricing)** — Optional transactional emails when drip rules unlock lessons or schedules (templates in Email templates). Pair with Content drip when you want “lesson unlocked” style notices.
+
+* **[Calendar](https://mantrabrain.com/plugins/sikshya#pricing)** — Shows learners a dated schedule—enrollments, upcoming drip unlocks, assignment due dates—on My account plus REST data for custom UIs. Handy when deadlines and releases should appear in one place.
+
+#### Growth / Pro-band add-ons
+
+* **[Professional email delivery & branded templates](https://mantrabrain.com/plugins/sikshya#pricing)** — Route Sikshya emails through a proper ESP (SendGrid-style setup) and wrap messages with your branding. Improve deliverability versus generic PHP mail.
+
+* **[Course discussions & Q&A](https://mantrabrain.com/plugins/sikshya#pricing)** — In-course discussions and Q&A with instructor moderation for cohort-led learning. Skip when comments are handled entirely outside Sikshya.
+
+* **[Multi-instructor & co-authors](https://mantrabrain.com/plugins/sikshya#pricing)** — Assign multiple instructors per course with optional revenue splits for shared authoring and payouts. Keeps ledger-style splits disciplined at checkout.
+
+* **[Advanced analytics & exports](https://mantrabrain.com/plugins/sikshya#pricing)** — Download enrollment-style and progress-ready data for Excel/Sheets and offline planning. Bridges dashboard charts and spreadsheets when stakeholders need files.
+
+* **[Gradebook](https://mantrabrain.com/plugins/sikshya#pricing)** — Consolidates quizzes and graded assignments into a per‑learner, per‑course scores view plus export workflows. Targets real grading—not “completion only.”
+
+* **[Student activity log](https://mantrabrain.com/plugins/sikshya#pricing)** — Timeline of milestones (enrollment, completions, quizzes, submissions, checkout) when you must answer **what happened, when**. Helpful support and dispute trail.
+
+* **[Advanced certificates (builder, QR, verification)](https://mantrabrain.com/plugins/sikshya#pricing)** — Verification links/pages, richer layouts, and optional QR tying to proofs beyond the basic PDF. Use when authenticity checks matter externally.
+
+* **[Subscriptions & memberships](https://mantrabrain.com/plugins/sikshya#pricing)** — Sell ongoing access via recurring billing models instead of strictly one-shot course sales. Fits memberships and renewals layered on gateways you configure.
+
+* **[Course bundles](https://mantrabrain.com/plugins/sikshya#pricing)** — Sell several courses together for one bundled price—“bootcamp packs” or value SKUs—with enrollment logic tied to the pack.
+
+* **[Advanced coupons & upsells](https://mantrabrain.com/plugins/sikshya#pricing)** — Coupon rules beyond a flat discount—minimum order, applicability to chosen courses—and checkout guardrails accordingly.
+
+* **[Dynamic checkout fields](https://mantrabrain.com/plugins/sikshya#pricing)** — Add configurable checkout questions (text, select, checkbox) with simple visibility rules. Store answers on orders or profiles when you need VAT, referrals, consent, etc.
+
+* **[Advanced assignments](https://mantrabrain.com/plugins/sikshya#pricing)** — Rubric-style grading guidance and uploads restricted by file types for stricter coursework hand-ins.
+
+* **[Advanced quiz types](https://mantrabrain.com/plugins/sikshya#pricing)** — Groups / pools of reusable questions when you assemble many quizzes without duplicating stems—think organized question banking.
+
+* **[Live classes (Zoom / Meet / Classroom)](https://mantrabrain.com/plugins/sikshya#pricing)** — Persist meeting links and platform labels directly on lessons so learners always hit the correct live URL from the syllabus.
+
+* **[Social login](https://mantrabrain.com/plugins/sikshya#pricing)** — Let learners sign in with Google-style providers when policy allows fewer passwords-only accounts.
+
+* **[SCORM / H5P (Pro tier)](https://mantrabrain.com/plugins/sikshya#pricing)** — Embed packaged SCORM or H5P experiences inside Sikshya lessons—bridge vendor-built interactives inside your Sikshya path.
+
+#### Scale-band add-ons
+
+* **[Multi-vendor marketplace](https://mantrabrain.com/plugins/sikshya#pricing)** — Track vendor ownership per course plus platform-vs-seller splits for many independent sellers sharing one storefront.
+
+* **[White label & branding](https://mantrabrain.com/plugins/sikshya#pricing)** — Tune Sikshya-facing labels and learner/admin chrome toward your agency or customer brand—including login accents where supported.
+
+* **[Webhooks](https://mantrabrain.com/plugins/sikshya#pricing)** — Deliver signed JSON to your HTTPS endpoints whenever major LMS lifecycle events occur for custom automation backends.
+
+* **[Zapier](https://mantrabrain.com/plugins/sikshya#pricing)** — First-class Zapier workflow entry points so Sikshya events can fan into thousands of Zap actions without bespoke code projects.
+
+* **[Email marketing (Mailchimp / MailerLite)](https://mantrabrain.com/plugins/sikshya#pricing)** — Keep marketing lists synced from enrollments/completions so campaigns react to Sikshya learning milestones.
+
+* **[Public API & API keys](https://mantrabrain.com/plugins/sikshya#pricing)** — Issue revocable secrets for bespoke apps/partners integrating over REST without sharing WordPress passwords.
+
+* **[Multisite & network license tools](https://mantrabrain.com/plugins/sikshya#pricing)** — Guidance surfaces for multisite admins mapping licenses across subsites on true WordPress networks.
+
+* **[Enterprise reporting](https://mantrabrain.com/plugins/sikshya#pricing)** — Automated weekly KPI-style email rollups aimed at inbox-friendly executive snapshots—pair with analytics exports when you need detail too.
+
+* **[Multilingual (WPML / Weglot)](https://mantrabrain.com/plugins/sikshya#pricing)** — Bridges Sikshya’s front-end/interface strings into popular translation stacks so multi‑language sites localize consistently beside your theme/content.
+
 ### Use of third-party services
 
 Features you enable may connect to services **you** configure. Examples:

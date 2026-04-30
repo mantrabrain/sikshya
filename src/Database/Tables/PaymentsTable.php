@@ -21,6 +21,7 @@ final class PaymentsTable extends AbstractTable
             payment_method varchar(100) NOT NULL,
             transaction_id varchar(255) NULL,
             status varchar(50) NOT NULL DEFAULT 'pending',
+            charge_kind varchar(32) NOT NULL DEFAULT 'checkout',
             payment_date datetime NOT NULL,
             refund_date datetime NULL,
             refund_amount decimal(10,2) NULL,
@@ -32,6 +33,7 @@ final class PaymentsTable extends AbstractTable
             KEY course_id (course_id),
             KEY transaction_id (transaction_id),
             KEY status (status),
+            KEY charge_kind (charge_kind),
             KEY payment_date (payment_date)
         ) {$charset_collate};";
     }

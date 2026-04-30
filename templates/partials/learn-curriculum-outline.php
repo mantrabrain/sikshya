@@ -142,23 +142,35 @@ if ($outline_blocks === []) {
                                 </span>
                                 <span class="sikshya-curriculumOutline__itemIcon" aria-hidden="true">
                                     <?php
-                                    if ($icon === 'lesson') {
-                                        if ($lesson_type === 'video') {
-                                            echo sikshya_learn_icon('play-video');
-                                        } elseif ($lesson_type === 'audio') {
-                                            echo sikshya_learn_icon('audio');
+                                    if (function_exists('sikshya_curriculum_outline_row_type_icon_html')) {
+                                        // Same SVG set as single course curriculum (template-functions.php).
+                                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed SVG paths.
+                                        echo sikshya_curriculum_outline_row_type_icon_html($icon, $lesson_type, 'learn');
+                                    } else {
+                                        // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- legacy sikshya_learn_icon().
+                                        if ($icon === 'lesson') {
+                                            if ($lesson_type === 'video') {
+                                                echo sikshya_learn_icon('play-video');
+                                            } elseif ($lesson_type === 'audio') {
+                                                echo sikshya_learn_icon('audio');
+                                            } elseif ($lesson_type === 'live') {
+                                                echo sikshya_learn_icon('live');
+                                            } elseif ($lesson_type === 'scorm') {
+                                                echo sikshya_learn_icon('layers');
+                                            } elseif ($lesson_type === 'h5p') {
+                                                echo sikshya_learn_icon('puzzle');
+                                            } else {
+                                                echo sikshya_learn_icon('doc');
+                                            }
+                                        } elseif ($icon === 'quiz') {
+                                            echo sikshya_learn_icon('clipboard');
+                                        } elseif ($icon === 'assignment') {
+                                            echo sikshya_learn_icon('assignment');
                                         } else {
-                                            // text/document/unknown
                                             echo sikshya_learn_icon('doc');
                                         }
-                                    } elseif ($icon === 'quiz') {
-                                        echo sikshya_learn_icon('clipboard');
-                                    } elseif ($icon === 'assignment') {
-                                        echo sikshya_learn_icon('assignment');
-                                    } else {
-                                        echo sikshya_learn_icon('doc');
+                                        // phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
                                     }
-                                    // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
                                     ?>
                                 </span>
                                 <span class="sikshya-curriculumOutline__linkBody">
@@ -178,7 +190,16 @@ if ($outline_blocks === []) {
                                 </span>
                                 <?php if ($locked) : ?>
                                     <span class="sikshya-curriculumOutline__lock" aria-hidden="true">
-                                        <?php echo sikshya_learn_icon('lock'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                        <?php
+                                        if (function_exists('sikshya_curriculum_lock_icon_html')) {
+                                            // Same lock glyph as single course curriculum.
+                                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed SVG paths.
+                                            echo sikshya_curriculum_lock_icon_html();
+                                        } else {
+                                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                                            echo sikshya_learn_icon('lock');
+                                        }
+                                        ?>
                                     </span>
                                 <?php endif; ?>
                             </a>

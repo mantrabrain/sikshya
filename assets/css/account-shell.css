@@ -36,6 +36,8 @@
   --sik-acc-page-pad-y: clamp(16px, 2.4vw, 28px);
   /* Full width inside `.sik-acc-main`; gutters come from `--sik-acc-page-pad-x` */
   --sik-acc-content-max: none;
+  /* Keep sidebar brand + topbar height perfectly aligned */
+  --sik-acc-shell-header-h: 96px;
 }
 
 *,
@@ -181,8 +183,13 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-sidebar__brand {
-  padding: 1.25rem 1.25rem 1rem;
+  height: var(--sik-acc-shell-header-h);
+  padding: 1.15rem 1.25rem;
   border-bottom: 1px solid var(--sik-acc-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .sik-acc-sidebar__logo {
@@ -286,6 +293,10 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   padding: 1rem 1.25rem 1.25rem;
   border-top: 1px solid var(--sik-acc-border);
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .sik-acc-sidebar__footer a {
@@ -296,10 +307,23 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   font-weight: 500;
   color: var(--sik-acc-muted);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .sik-acc-sidebar__footer a:hover {
   color: var(--sik-acc-brand);
+}
+
+.sik-acc-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.sik-acc-icon svg {
+  display: block;
 }
 
 /* Main column */
@@ -313,12 +337,18 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 .sik-acc-topbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.1rem var(--sik-acc-page-pad-x) 1.15rem;
+  height: var(--sik-acc-shell-header-h);
+  padding: 1.05rem var(--sik-acc-page-pad-x);
   background: var(--sik-acc-surface);
   border-bottom: 1px solid var(--sik-acc-border);
+  overflow: hidden;
+}
+
+.sik-acc-topbar__titles {
+  min-width: 0;
 }
 
 .sik-acc-topbar__titles h1 {
@@ -326,6 +356,9 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sik-acc-topbar__titles p {
@@ -333,6 +366,9 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   font-size: 0.8125rem;
   color: var(--sik-acc-muted);
   max-width: 36rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sik-acc-topbar__actions {
@@ -340,6 +376,70 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
+}
+
+.sik-acc-user-menu {
+  position: relative;
+}
+
+.sik-acc-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.35rem;
+  border-radius: var(--sik-acc-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.sik-acc-user-btn:hover {
+  background: #f8fafc;
+  border-color: var(--sik-acc-border);
+}
+
+.sik-acc-user-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sik-acc-muted);
+  opacity: 0.9;
+}
+
+.sik-acc-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  padding: 0.4rem;
+  border-radius: var(--sik-acc-radius);
+  border: 1px solid var(--sik-acc-border);
+  background: var(--sik-acc-surface);
+  box-shadow: var(--sik-acc-shadow-md);
+  display: none;
+  z-index: 40;
+}
+
+.sik-acc-user-menu.is-open .sik-acc-user-dropdown {
+  display: block;
+}
+
+.sik-acc-user-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  color: var(--sik-acc-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sik-acc-user-dropdown a:hover {
+  background: #f8fafc;
 }
 
 .sik-acc-user {

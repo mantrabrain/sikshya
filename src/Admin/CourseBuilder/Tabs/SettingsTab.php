@@ -10,7 +10,9 @@
 namespace Sikshya\Admin\CourseBuilder\Tabs;
 
 use Sikshya\Admin\CourseBuilder\Core\AbstractTab;
+use Sikshya\Addons\Addons;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Licensing\Pro;
 use Sikshya\Services\CertificateIssuanceService;
 
 // Prevent direct access
@@ -216,6 +218,28 @@ class SettingsTab extends AbstractTab
                     ],
                 ],
             ],
+            'learn_layout' => [
+                'section' => [
+                    'title' => __('Learn layout', 'sikshya'),
+                    'description' => __('How the curriculum outline behaves in lesson, quiz, and course Learn pages.', 'sikshya'),
+                    'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M9 18h11"/>
+                    </svg>',
+                ],
+                'fields' => [
+                    'learn_curriculum_sidebar_scrollable' => [
+                        'type' => 'checkbox',
+                        'label' => __('Scrollable curriculum sidebar', 'sikshya'),
+                        'description' => __(
+                            'When checked, the sidebar stays a fixed height and only the outline list scrolls (best for very long curricula). When unchecked, the whole sidebar scrolls together — the previous default.',
+                            'sikshya'
+                        ),
+                        'default' => '0',
+                        'validation' => 'boolval',
+                        'sanitization' => 'boolval',
+                    ],
+                ],
+            ],
             'interaction_features' => [
                 'section' => [
                     'title' => __('Discussions & reviews', 'sikshya'),
@@ -288,14 +312,27 @@ class SettingsTab extends AbstractTab
             ],
         ];
 
-        /**
-         * Append or adjust fields on the Settings tab (React course builder).
-         *
-         * @param array<string, mixed> $fields Tab field tree from this tab.
-         * @param \Sikshya\Core\Plugin   $plugin Core plugin instance.
-         * @return array<string, mixed>
-         */
-        return apply_filters('sikshya_course_builder_settings_tab_fields', $fields, $this->plugin);
+        // Append or adjust fields on the Settings tab (React course builder).
+        $fields = apply_filters('sikshya_course_builder_settings_tab_fields', $fields, $this->plugin);
+
+        // Reviews are provided by the Pro `course_reviews` add-on. Hide the toggle when
+        // the feature is not licensed or the add-on is disabled.
+        $reviews_available = Pro::feature('course_reviews') && Addons::isEnabled('course_reviews');
+        if (!$reviews_available) {
+            if (isset($fields['interaction_features']['fields']['enable_reviews'])) {
+                unset($fields['interaction_features']['fields']['enable_reviews']);
+            }
+            // If no other add-on injected fields remain, remove the section entirely.
+            if (
+                isset($fields['interaction_features']['fields'])
+                && is_array($fields['interaction_features']['fields'])
+                && $fields['interaction_features']['fields'] === []
+            ) {
+                unset($fields['interaction_features']);
+            }
+        }
+
+        return $fields;
     }
 
     /**

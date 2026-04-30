@@ -72,7 +72,9 @@ final class LessonPageService
                     $course_id,
                     $raw,
                     $lesson_id,
-                    $track_progress && $show_progress
+                    $track_progress && $show_progress,
+                    $enrolled,
+                    $is_preview
                 );
             }
         }
@@ -106,6 +108,9 @@ final class LessonPageService
                 'current_completed' => $current_completed,
                 'course_features' => $course_features,
                 'lesson_type' => $lesson_type,
+                'learn_curriculum_sidebar_scrollable' => $course_id > 0 && Settings::isTruthy(
+                    get_post_meta($course_id, '_sikshya_learn_curriculum_sidebar_scrollable', true)
+                ),
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
                     'login' => PublicPageUrls::login(get_permalink($post) ?: ''),
@@ -222,8 +227,15 @@ final class LessonPageService
      * @param array<int, array{chapter: \WP_Post, contents: array<int, \WP_Post>}> $raw
      * @return array<int, array{chapter: \WP_Post, items: array<int, array<string, mixed>>, item_count: int, open: bool}>
      */
-    private static function enrichBlocks(int $user_id, int $course_id, array $raw, int $current_post_id, bool $with_progress): array
-    {
+    private static function enrichBlocks(
+        int $user_id,
+        int $course_id,
+        array $raw,
+        int $current_post_id,
+        bool $with_progress,
+        bool $enrolled,
+        bool $is_preview_mode
+    ): array {
         $progress = new ProgressRepository();
         $out      = [];
 
@@ -241,16 +253,18 @@ final class LessonPageService
 
                 $is_current = (int) $p->ID === $current_post_id;
 
-                $type_key   = self::contentTypeKey($p->post_type);
+                $type_key   = LearnOutlineItemAccess::contentTypeKey($p->post_type);
                 $pto        = get_post_type_object($p->post_type);
                 $type_label = $pto && isset($pto->labels->singular_name)
                     ? (string) $pto->labels->singular_name
                     : $p->post_type;
 
-                $items[] = [
+                $access = LearnOutlineItemAccess::forContentPost($p, $type_key, $course_id, $enrolled, $is_preview_mode);
+
+                $item = [
                     'post' => $p,
                     'id' => (int) $p->ID,
-                    'permalink' => self::learnPermalinkFor($p, $type_key),
+                    'permalink' => $access['permalink'],
                     'title' => get_the_title($p),
                     'type_key' => $type_key,
                     'type_label' => $type_label,
@@ -261,6 +275,39 @@ final class LessonPageService
                     'index_in_section' => $idx,
                     'completed' => $with_progress ? self::isItemCompleted($progress, $user_id, $course_id, $p) : false,
                     'current' => $is_current,
+                    'locked' => $access['locked'],
+                    'lock_reason' => $access['lock_reason'],
+                ];
+
+                if ($enrolled) {
+                    $item = apply_filters(
+                        'sikshya_learn_outline_item',
+                        $item,
+                        [
+                            'user_id' => $user_id,
+                            'course_id' => $course_id,
+                            'content_id' => (int) $p->ID,
+                            'type' => $type_key,
+                        ]
+                    );
+                }
+
+                $items[] = is_array($item) ? $item : [
+                    'post' => $p,
+                    'id' => (int) $p->ID,
+                    'permalink' => $access['permalink'],
+                    'title' => get_the_title($p),
+                    'type_key' => $type_key,
+                    'type_label' => $type_label,
+                    'lesson_type' => $type_key === 'lesson' ? sanitize_key((string) get_post_meta((int) $p->ID, '_sikshya_lesson_type', true)) : '',
+                    'meta_line' => CurriculumOutlineMeta::itemMetaLine($p, $type_key),
+                    'duration_minutes' => CurriculumOutlineMeta::itemDurationMinutes($p, $type_key),
+                    'subtitle_compact' => CurriculumOutlineMeta::itemSubtitleCompact($p, $type_key),
+                    'index_in_section' => $idx,
+                    'completed' => $with_progress ? self::isItemCompleted($progress, $user_id, $course_id, $p) : false,
+                    'current' => $is_current,
+                    'locked' => $access['locked'],
+                    'lock_reason' => $access['lock_reason'],
                 ];
             }
 
@@ -285,29 +332,6 @@ final class LessonPageService
         }
 
         return $out;
-    }
-
-    private static function contentTypeKey(string $post_type): string
-    {
-        switch ($post_type) {
-            case PostTypes::LESSON:
-                return 'lesson';
-            case PostTypes::QUIZ:
-                return 'quiz';
-            case PostTypes::ASSIGNMENT:
-                return 'assignment';
-            default:
-                return 'content';
-        }
-    }
-
-    private static function learnPermalinkFor(\WP_Post $p, string $type_key): string
-    {
-        if (in_array($type_key, ['lesson', 'quiz', 'assignment'], true)) {
-            return PublicPageUrls::learnContentForPost($p);
-        }
-
-        return get_permalink($p) ?: '';
     }
 
     private static function isItemCompleted(ProgressRepository $progress, int $user_id, int $course_id, \WP_Post $p): bool

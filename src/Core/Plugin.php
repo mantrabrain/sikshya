@@ -6,6 +6,7 @@ use Sikshya\Admin\Admin;
 use Sikshya\Frontend\Frontend;
 use Sikshya\Api\Api;
 use Sikshya\Database\Database;
+use Sikshya\Security\AdminBackendAccess;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\PostTypeService;
 use Sikshya\Services\TaxonomyService;
@@ -252,9 +253,7 @@ final class Plugin
             flush_rewrite_rules(false);
         }
 
-        if (isset($this->services['database']) && $this->services['database'] instanceof \Sikshya\Database\Database) {
-            $this->services['database']->maybeUpgrade();
-        }
+        AdminBackendAccess::registerFilters();
 
         // Initialize post types and taxonomies
         $this->services['postTypes']->register();
@@ -311,6 +310,9 @@ final class Plugin
      */
     public function onAdminInit(): void
     {
+        if (class_exists('\Sikshya\Certificates\CertificateTemplateDefaults')) {
+            \Sikshya\Certificates\CertificateTemplateDefaults::migrateLegacyTemplatesIfNeeded();
+        }
         do_action('sikshya_admin_init', $this);
     }
 

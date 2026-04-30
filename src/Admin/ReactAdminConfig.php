@@ -3,6 +3,7 @@
 namespace Sikshya\Admin;
 
 use Sikshya\Admin\Controllers\ReportController;
+use Sikshya\Security\AdminBackendAccess;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Addons\Addons;
@@ -201,7 +202,7 @@ final class ReactAdminConfig
     {
         $items = [];
 
-        if (current_user_can('edit_posts')) {
+        if (AdminBackendAccess::canAccessStaffBackend()) {
             $items[] = [
                 'id' => 'dashboard',
                 'label' => __('Dashboard', 'sikshya'),
@@ -218,9 +219,9 @@ final class ReactAdminConfig
             [
                 'id' => 'courses',
                 'label' => sikshya_label('courses', __('Courses', 'sikshya'), 'admin'),
-                'icon' => 'table',
+                'icon' => 'queueList',
                 'href' => self::reactAppUrl('courses'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ],
             [
                 'id' => 'course-categories',
@@ -232,9 +233,9 @@ final class ReactAdminConfig
             [
                 'id' => 'content-library',
                 'label' => __('Content library', 'sikshya'),
-                'icon' => 'bookOpen',
+                'icon' => 'folderStack',
                 'href' => self::reactAppUrl('content-library'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ],
             self::withLearningRulesNavBadge(
                 [
@@ -242,7 +243,7 @@ final class ReactAdminConfig
                     'label' => __('Learning rules', 'sikshya'),
                     'icon' => 'schedule',
                     'href' => self::reactAppUrl('learning-rules'),
-                    'cap' => 'edit_posts',
+                    'cap' => 'sikshya_staff',
                 ]
             ),
             self::withNavGate([
@@ -250,7 +251,7 @@ final class ReactAdminConfig
                 'label' => __('Reviews', 'sikshya'),
                 'icon' => 'star',
                 'href' => self::reactAppUrl('reviews'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ], 'course_reviews'),
         ];
 
@@ -258,9 +259,9 @@ final class ReactAdminConfig
             $course_children[] = [
                 'id' => 'discussions',
                 'label' => __('Discussions & Q&A', 'sikshya'),
-                'icon' => 'plusDocument',
+                'icon' => 'chatBubbles',
                 'href' => self::reactAppUrl('discussions'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ];
         }
 
@@ -269,7 +270,7 @@ final class ReactAdminConfig
             'label' => __('Course staff', 'sikshya'),
             'icon' => 'course',
             'href' => self::reactAppUrl('course-team'),
-            'cap' => 'edit_posts',
+            'cap' => 'sikshya_staff',
         ], 'multi_instructor');
 
         $children = self::filterNavChildren($course_children);
@@ -279,17 +280,6 @@ final class ReactAdminConfig
                 'label' => sikshya_label('course', __('Course', 'sikshya'), 'admin'),
                 'icon' => 'course',
                 'children' => $children,
-            ];
-        }
-
-        // Certificates: was a 2-child group (Templates + Issued) — now a single hub
-        // entry with those as tabs.
-        if (current_user_can('edit_posts')) {
-            $items[] = [
-                'id' => 'certificates-hub',
-                'label' => __('Certificates', 'sikshya'),
-                'icon' => 'badge',
-                'href' => self::reactAppUrl('certificates-hub'),
             ];
         }
 
@@ -306,12 +296,12 @@ final class ReactAdminConfig
                 ),
                 'icon' => 'users',
                 'href' => self::reactAppUrl('people'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ],
             [
                 'id' => 'enrollments',
                 'label' => sikshya_label('enrollments', __('Enrollments', 'sikshya'), 'admin'),
-                'icon' => 'clipboard',
+                'icon' => 'clipboardList',
                 'href' => self::reactAppUrl('enrollments'),
                 'cap' => 'sikshya_enrollments_nav',
             ],
@@ -326,6 +316,31 @@ final class ReactAdminConfig
             ];
         }
 
+        // Certificates: was a 2-child group (Templates + Issued) — now a single hub
+        // entry with those as tabs.
+        if (AdminBackendAccess::canAccessStaffBackend()) {
+            $items[] = [
+                'id' => 'certificates-hub',
+                'label' => __('Certificates', 'sikshya'),
+                'icon' => 'badge',
+                'href' => self::reactAppUrl('certificates-hub'),
+            ];
+        }
+
+        // Grading is used frequently by instructors and belongs near People/Reports,
+        // not buried under Settings.
+        if (current_user_can('manage_options')) {
+            $items[] = self::withNavGate(
+                [
+                    'id' => 'grading',
+                    'label' => __('Grading', 'sikshya'),
+                    'icon' => 'pencil',
+                    'href' => self::reactAppUrl('grading'),
+                ],
+                'gradebook'
+            );
+        }
+
         // Reports: Calendar moves into the Reports hub as a tab; Activity log moves to
         // Tools (it's an audit trail, not a report). Gradebook keeps its own entry —
         // grading is a different daily job from "view metrics".
@@ -335,14 +350,14 @@ final class ReactAdminConfig
                 'label' => __('Overview', 'sikshya'),
                 'icon' => 'chart',
                 'href' => self::reactAppUrl('reports'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ],
             [
                 'id' => 'gradebook',
                 'label' => __('Gradebook', 'sikshya'),
-                'icon' => 'table',
+                'icon' => 'chartPresentation',
                 'href' => self::reactAppUrl('gradebook'),
-                'cap' => 'edit_posts',
+                'cap' => 'sikshya_staff',
             ],
         ];
 
@@ -369,7 +384,7 @@ final class ReactAdminConfig
             [
                 'id' => 'sales',
                 'label' => __('Sales', 'sikshya'),
-                'icon' => 'columns',
+                'icon' => 'shoppingCart',
                 'href' => self::reactAppUrl('sales'),
                 'cap' => 'manage_options',
             ],
@@ -383,14 +398,14 @@ final class ReactAdminConfig
             [
                 'id' => 'subscriptions',
                 'label' => __('Subscriptions', 'sikshya'),
-                'icon' => 'plusCircle',
+                'icon' => 'arrowPath',
                 'href' => self::reactAppUrl('subscriptions'),
                 'cap' => 'manage_options',
             ],
             [
                 'id' => 'marketplace',
                 'label' => __('Marketplace', 'sikshya'),
-                'icon' => 'course',
+                'icon' => 'buildingStorefront',
                 'href' => self::reactAppUrl('marketplace'),
                 'cap' => 'manage_options',
             ],
@@ -409,16 +424,50 @@ final class ReactAdminConfig
             $items[] = [
                 'id' => 'commerce',
                 'label' => __('Commerce', 'sikshya'),
-                'icon' => 'columns',
+                'icon' => 'shoppingCart',
                 'children' => $commerce_children,
             ];
+        }
+
+        // Integrations: Webhooks/API + CRM automation are the same domain (outbound
+        // automation) so they collapse into one tabbed hub entry.
+        if (current_user_can('manage_options')) {
+            $items[] = self::withIntegrationsHubNavBadge(
+                [
+                    'id' => 'integrations-hub',
+                    'label' => __('Integrations', 'sikshya'),
+                    'icon' => 'link',
+                    'href' => self::reactAppUrl('integrations-hub'),
+                ]
+            );
+        }
+
+        // Email: Delivery + Templates collapse into one Email hub entry (tabs).
+        if (current_user_can('manage_options')) {
+            $items[] = [
+                'id' => 'email-hub',
+                'label' => __('Email', 'sikshya'),
+                'icon' => 'mail',
+                'href' => self::reactAppUrl('email-hub'),
+            ];
+        }
+
+        if (current_user_can('manage_options')) {
+            $items[] = self::withBrandingHubNavBadge(
+                [
+                    'id' => 'branding',
+                    'label' => __('Branding', 'sikshya'),
+                    'icon' => 'swatch',
+                    'href' => self::reactAppUrl('branding'),
+                ]
+            );
         }
 
         if (current_user_can('manage_options')) {
             $items[] = [
                 'id' => 'addons',
                 'label' => __('Addons', 'sikshya'),
-                'icon' => 'plusCircle',
+                'icon' => 'sparkles',
                 'href' => self::reactAppUrl('addons'),
             ];
         }
@@ -432,42 +481,6 @@ final class ReactAdminConfig
             ];
         }
 
-        // Integrations: Webhooks/API + CRM automation are the same domain (outbound
-        // automation) so they collapse into one tabbed hub entry.
-        if (current_user_can('manage_options')) {
-            $items[] = self::withIntegrationsHubNavBadge(
-                [
-                    'id' => 'integrations-hub',
-                    'label' => __('Integrations', 'sikshya'),
-                    'icon' => 'columns',
-                    'href' => self::reactAppUrl('integrations-hub'),
-                ]
-            );
-        }
-
-        // Branding: White label + Social login both shape the public-facing brand /
-        // auth surface, so they collapse into one tabbed hub entry.
-        if (current_user_can('manage_options')) {
-            $items[] = self::withBrandingHubNavBadge(
-                [
-                    'id' => 'branding',
-                    'label' => __('Branding', 'sikshya'),
-                    'icon' => 'badge',
-                    'href' => self::reactAppUrl('branding'),
-                ]
-            );
-        }
-
-        // Email: Delivery + Templates collapse into one Email hub entry (tabs).
-        if (current_user_can('manage_options')) {
-            $items[] = [
-                'id' => 'email-hub',
-                'label' => __('Email', 'sikshya'),
-                'icon' => 'plusDocument',
-                'href' => self::reactAppUrl('email-hub'),
-            ];
-        }
-
         if (current_user_can('manage_options')) {
             $items[] = [
                 'id' => 'settings',
@@ -478,19 +491,14 @@ final class ReactAdminConfig
         }
 
         if (current_user_can('manage_options')) {
-            $items[] = self::withNavGate(
-                [
-                    'id' => 'grading',
-                    'label' => __('Grading', 'sikshya'),
-                    'icon' => 'badge',
-                    'href' => self::reactAppUrl('grading'),
-                ],
-                'gradebook'
-            );
-        }
-
-        if (current_user_can('manage_options')) {
-            // Tools stays accessible from the top header. Remove from sidebar to reduce duplication.
+            // Tools is used by the top header button (Import sample data, maintenance).
+            // The sidebar hides it to avoid duplication.
+            $items[] = [
+                'id' => 'tools',
+                'label' => __('Tools', 'sikshya'),
+                'icon' => 'wrench',
+                'href' => self::reactAppUrl('tools'),
+            ];
         }
 
         return $items;
@@ -647,8 +655,12 @@ final class ReactAdminConfig
     {
         $out = [];
         foreach ($rows as $row) {
-            $cap = isset($row['cap']) ? (string) $row['cap'] : 'edit_posts';
-            if (!current_user_can($cap)) {
+            $cap = isset($row['cap']) ? (string) $row['cap'] : 'sikshya_staff';
+            if ($cap === 'sikshya_staff') {
+                if (!AdminBackendAccess::canAccessStaffBackend()) {
+                    continue;
+                }
+            } elseif (!current_user_can($cap)) {
                 continue;
             }
             unset($row['cap']);
@@ -668,9 +680,13 @@ final class ReactAdminConfig
     {
         $out = [];
         foreach ($rows as $row) {
-            $cap = isset($row['cap']) ? (string) $row['cap'] : 'edit_posts';
+            $cap = isset($row['cap']) ? (string) $row['cap'] : 'sikshya_staff';
             if ($cap === 'sikshya_enrollments_nav') {
                 if (!current_user_can('manage_sikshya') && !current_user_can('edit_sikshya_courses')) {
+                    continue;
+                }
+            } elseif ($cap === 'sikshya_staff') {
+                if (!AdminBackendAccess::canAccessStaffBackend()) {
                     continue;
                 }
             } elseif (!current_user_can($cap)) {

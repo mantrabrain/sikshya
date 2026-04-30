@@ -11,6 +11,83 @@ export function isTruthyCheckboxValue(v: unknown): boolean {
   return v === true || v === 1 || v === '1' || v === 'yes' || v === 'on';
 }
 
+function renderDescription(desc: string): ReactNode {
+  const raw = String(desc || '').trim();
+  if (!raw) return null;
+
+  // Allow only <a href="...">text</a> from server-provided schema descriptions.
+  // Everything else is rendered as plain text (with URL linkify).
+  if (raw.includes('<a') && typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
+    try {
+      const doc = new DOMParser().parseFromString(`<div>${raw}</div>`, 'text/html');
+      const root = doc.body.firstElementChild;
+      if (!root) return raw;
+
+      const out: ReactNode[] = [];
+      const walk = (node: ChildNode) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const t = node.textContent || '';
+          if (t) out.push(t);
+          return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        const el = node as HTMLElement;
+        if (el.tagName.toLowerCase() === 'a') {
+          const href = String(el.getAttribute('href') || '').trim();
+          const text = String(el.textContent || href || '').trim();
+          if (!href || !/^https?:\/\//i.test(href)) {
+            if (text) out.push(text);
+            return;
+          }
+          out.push(
+            <a
+              key={`a-${out.length}-${href}`}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-600 underline decoration-blue-300 underline-offset-2 hover:text-blue-700 hover:decoration-blue-400 dark:text-blue-400 dark:decoration-blue-700 dark:hover:text-blue-300 dark:hover:decoration-blue-600"
+            >
+              {text || href}
+            </a>
+          );
+          return;
+        }
+        // Any other element: render its text content only.
+        const t = el.textContent || '';
+        if (t) out.push(t);
+      };
+
+      root.childNodes.forEach((n) => walk(n));
+      return <>{out}</>;
+    } catch {
+      // Fall through to linkify.
+    }
+  }
+
+  // Linkify plain URLs.
+  const parts = raw.split(/(https?:\/\/[^\s)]+)\b/g);
+  if (parts.length <= 1) return raw;
+  return (
+    <>
+      {parts.map((p, idx) => {
+        const isUrl = /^https?:\/\//i.test(p);
+        if (!isUrl) return <span key={`t-${idx}`}>{p}</span>;
+        return (
+          <a
+            key={`u-${idx}-${p}`}
+            href={p}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-blue-600 underline decoration-blue-300 underline-offset-2 hover:text-blue-700 hover:decoration-blue-400 dark:text-blue-400 dark:decoration-blue-700 dark:hover:text-blue-300 dark:hover:decoration-blue-600"
+          >
+            {p}
+          </a>
+        );
+      })}
+    </>
+  );
+}
+
 /**
  * Wrap a locked field in a disabled overlay with a "Pro" pill and a friendly
  * reason.  Shared between the Settings page, the Email page, and any consumer
@@ -74,7 +151,9 @@ export function renderSettingsField(
         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
           {label}
         </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        {desc ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+        ) : null}
         <div className="mt-2">
           <DynamicFieldsBuilder
             value={cur ?? f.default ?? '[]'}
@@ -102,7 +181,9 @@ export function renderSettingsField(
           />
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-slate-900 dark:text-white">{label}</span>
-            {desc ? <span className="mt-1 block text-xs text-slate-400/90 dark:text-slate-500/80">{desc}</span> : null}
+            {desc ? (
+              <span className="mt-1 block text-xs text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</span>
+            ) : null}
           </span>
         </label>
       </div>
@@ -118,7 +199,9 @@ export function renderSettingsField(
         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
           {label}
         </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        {desc ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+        ) : null}
         <select
           id={k}
           className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
@@ -159,7 +242,9 @@ export function renderSettingsField(
         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
           {label}
         </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        {desc ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+        ) : null}
 
         <select
           id={k}
@@ -219,7 +304,9 @@ export function renderSettingsField(
         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
           {label}
         </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        {desc ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+        ) : null}
         <div className="mt-1.5 flex flex-wrap items-center gap-3">
           <input
             id={k}
@@ -240,7 +327,9 @@ export function renderSettingsField(
         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
           {label}
         </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        {desc ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+        ) : null}
         <textarea
           id={k}
           rows={4}
@@ -270,7 +359,9 @@ export function renderSettingsField(
         <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
           {label}
         </label>
-        {desc ? <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{desc}</p> : null}
+        {desc ? (
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
+        ) : null}
         <input
           id={k}
           type={inputType}

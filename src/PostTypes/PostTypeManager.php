@@ -162,6 +162,20 @@ class PostTypeManager
             ]
         );
 
+        register_post_meta(
+            PostTypes::COURSE,
+            '_sikshya_learn_curriculum_sidebar_scrollable',
+            [
+                'type' => 'string',
+                'single' => true,
+                'show_in_rest' => true,
+                'auth_callback' => $auth,
+                'sanitize_callback' => static function ($meta_value): string {
+                    return ($meta_value === '1' || $meta_value === 1 || $meta_value === true) ? '1' : '0';
+                },
+            ]
+        );
+
         $int_array_meta(PostTypes::COURSE, '_sikshya_bundle_course_ids');
 
         // Quiz (sik_quiz): _sikshya_quiz_* stored as sikshya_quiz_* in forms → DB key _sikshya_quiz_*.

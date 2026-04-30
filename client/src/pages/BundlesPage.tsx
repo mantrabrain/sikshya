@@ -8,6 +8,7 @@ import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs'
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -38,6 +39,7 @@ function courseBuilderHref(config: SikshyaReactConfig, courseId: number): string
 
 export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const dialog = useSikshyaDialog();
   const featureOk = isFeatureEnabled(config, 'course_bundles');
   const addon = useAddonEnabled('course_bundles');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
@@ -121,13 +123,22 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
   };
 
   const onDelete = async (id: number) => {
-    if (!window.confirm('Move this bundle to trash? Existing enrollments are not affected.')) return;
+    const ok = await dialog.confirm({
+      title: 'Move bundle to trash?',
+      message: 'Existing enrollments are not affected.',
+      confirmLabel: 'Move to trash',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.bundle(id));
       list.refetch();
       if (expandedId === id) setExpandedId(null);
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Delete failed.');
+      void dialog.alert({
+        title: 'Delete failed',
+        message: err instanceof Error ? err.message : 'Delete failed.',
+      });
     }
   };
 

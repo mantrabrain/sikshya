@@ -153,6 +153,8 @@ function RoutedApp() {
     typeof route.page === 'string' && route.page.trim() !== '' ? route.page.trim() : 'dashboard';
   const config = { ...baseConfig, page: pageKey, query: route.query ?? {} };
   const page = config.page;
+  const q = (config.query || {}) as Record<string, unknown>;
+  const isCertificateBuilder = page === 'edit-content' && String(q.post_type || '').trim() === 'sikshya_certificate';
   const platformName = config.branding?.pluginName?.trim() || 'Sikshya';
 
   useEffect(() => {
@@ -393,30 +395,72 @@ function RoutedApp() {
   }
   })();
 
-  return (
-    <SikshyaDialogProvider>
-      <AppShell
-        page={config.page}
-        version={config.version}
-        navigation={config.navigation as NavItem[]}
-        adminUrl={config.adminUrl}
-        pluginUrl={config.pluginUrl}
-        user={config.user}
-        branding={config.branding}
-        title={
-          page === 'settings'
-            ? 'Settings'
-            : page === 'dashboard'
-              ? 'Dashboard'
-              : page === 'courses'
-                ? T.courses
-                : platformName
+  const navTitle = (() => {
+    const items = config.navigation as NavItem[];
+    const walk = (rows: NavItem[] | undefined): string | null => {
+      if (!Array.isArray(rows)) return null;
+      for (const r of rows) {
+        if ((r as any)?.id === page && typeof (r as any)?.label === 'string' && (r as any).label.trim() !== '') {
+          return String((r as any).label).trim();
         }
-        subtitle={page === 'settings' ? 'Site-wide defaults for every course' : undefined}
-      >
-        <Suspense fallback={<AdminRouteFallback />}>{routes}</Suspense>
-      </AppShell>
-    </SikshyaDialogProvider>
+        const kids = (r as any)?.children as NavItem[] | undefined;
+        const hit = walk(kids);
+        if (hit) return hit;
+      }
+      return null;
+    };
+    return walk(items);
+  })();
+
+  const shellTitle = (() => {
+    if (navTitle) return navTitle;
+    if (page === 'dashboard') return 'Dashboard';
+    if (page === 'settings') return 'Settings';
+    if (page === 'courses') return T.courses;
+    if (page === 'add-course') return `${T.course} builder`;
+    if (page === 'bundle-builder') return 'Bundle builder';
+    if (page === 'edit-content') {
+      const postType = String(q.post_type || '').trim();
+      const id = Number(q.post_id || q.id || 0) || 0;
+      const label =
+        postType === 'sikshya_certificate'
+          ? 'Certificate'
+          : postType === 'sik_lesson'
+            ? T.lesson
+            : postType === 'sik_quiz'
+              ? T.quiz
+              : postType === 'sik_assignment'
+                ? T.assignment
+                : postType === 'sik_course'
+                  ? T.course
+                  : postType
+                    ? postType
+                    : 'Content';
+      return id > 0 ? `Edit ${label}` : `New ${label}`;
+    }
+    return platformName;
+  })();
+
+  // Certificate builder is a full-screen workspace with its own header/actions.
+  // Do not wrap it in the admin shell (no sidebar, no top bar).
+  if (isCertificateBuilder) {
+    return <Suspense fallback={<AdminRouteFallback />}>{routes}</Suspense>;
+  }
+
+  return (
+    <AppShell
+      page={config.page}
+      version={config.version}
+      navigation={config.navigation as NavItem[]}
+      adminUrl={config.adminUrl}
+      pluginUrl={config.pluginUrl}
+      user={config.user}
+      branding={config.branding}
+      title={shellTitle}
+      subtitle={page === 'settings' ? 'Site-wide defaults for every course' : undefined}
+    >
+      <Suspense fallback={<AdminRouteFallback />}>{routes}</Suspense>
+    </AppShell>
   );
 }
 
@@ -430,7 +474,9 @@ export default function App() {
   return (
     <AdminRoutingProvider baseConfig={normalizedBase}>
       <ShellStateProvider>
-        <RoutedApp />
+        <SikshyaDialogProvider>
+          <RoutedApp />
+        </SikshyaDialogProvider>
       </ShellStateProvider>
     </AdminRoutingProvider>
   );

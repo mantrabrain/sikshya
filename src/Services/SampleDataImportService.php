@@ -151,6 +151,8 @@ final class SampleDataImportService
                 update_post_meta($courseId, '_sikshya_chapters', $chapterIds);
                 update_post_meta($courseId, '_sikshya_chapter_order', $chapterIds);
             }
+
+            $this->invalidateCourseCurriculumCache($courseId, $chapterIds);
         }
 
         return [
@@ -192,6 +194,32 @@ final class SampleDataImportService
         }
 
         $postId = (int) $postId;
+
+        $postAfter = get_post($postId);
+        if ($postAfter instanceof \WP_Post && trim((string) $postAfter->post_name) === '') {
+            $fallback = sanitize_title($title);
+            if ($fallback === '') {
+                $fallback = sanitize_key((string) PostTypes::COURSE) . '-' . (string) $postId;
+            }
+            // Ensure the generated slug is unique (avoid collisions when importing
+            // multiple courses with the same title).
+            $fallback = wp_unique_post_slug($fallback, $postId, $postAfter->post_status, $postAfter->post_type, 0);
+            wp_update_post(
+                [
+                    'ID' => $postId,
+                    'post_name' => $fallback,
+                ]
+            );
+        }
+
+        $featured = isset($def['featured_image']) ? (string) $def['featured_image'] : '';
+        if ($featured !== '') {
+            $aid = $this->importBundledImageAttachment($featured, $title);
+            if ($aid > 0) {
+                set_post_thumbnail($postId, $aid);
+            }
+        }
+
         $meta = $def['meta'] ?? [];
         if (is_array($meta)) {
             foreach ($meta as $key => $value) {
@@ -223,6 +251,102 @@ final class SampleDataImportService
         return $postId;
     }
 
+    private function sampleDataBaseDir(): ?string
+    {
+        if (!defined('SIKSHYA_PLUGIN_FILE')) {
+            return null;
+        }
+
+        $base = dirname((string) constant('SIKSHYA_PLUGIN_FILE'));
+        if ($base === '') {
+            return null;
+        }
+
+        $dir = $base . '/sample-data';
+        return is_dir($dir) ? $dir : null;
+    }
+
+    /**
+     * Import a bundled image from `sample-data/` into the media library and return attachment ID.
+     *
+     * v1.0.0: expects small JPG/PNG/WebP assets under `sample-data/images/`.
+     */
+    private function importBundledImageAttachment(string $relativePath, string $fallbackTitle = ''): int
+    {
+        $rel = ltrim(str_replace('\\', '/', $relativePath), '/');
+        if ($rel === '' || strpos($rel, '../') !== false) {
+            return 0;
+        }
+
+        $base = $this->sampleDataBaseDir();
+        if ($base === null) {
+            return 0;
+        }
+
+        $abs = $base . '/' . $rel;
+        if (!is_readable($abs)) {
+            return 0;
+        }
+
+        $filename = basename($abs);
+        if ($filename === '' || $filename === '.' || $filename === '..') {
+            return 0;
+        }
+
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        if ($ext === '' || !in_array($ext, $allowed, true)) {
+            return 0;
+        }
+
+        $bytes = @file_get_contents($abs);
+        if (!is_string($bytes) || $bytes === '') {
+            return 0;
+        }
+
+        $upload = wp_upload_bits($filename, null, $bytes);
+        if (!empty($upload['error']) || empty($upload['file']) || empty($upload['url'])) {
+            return 0;
+        }
+
+        $file = (string) $upload['file'];
+        $url = (string) $upload['url'];
+
+        $type = wp_check_filetype($file);
+        $mime = isset($type['type']) && is_string($type['type']) && $type['type'] !== '' ? $type['type'] : 'image/jpeg';
+
+        $attachment = [
+            'post_mime_type' => $mime,
+            'post_title' => $fallbackTitle !== '' ? $fallbackTitle : preg_replace('/\\.[^.]+$/', '', $filename),
+            'post_content' => '',
+            'post_status' => 'inherit',
+            'guid' => $url,
+        ];
+
+        $aid = wp_insert_attachment($attachment, $file);
+        $aid = is_int($aid) ? (int) $aid : 0;
+        if ($aid <= 0) {
+            return 0;
+        }
+
+        // Generate intermediate sizes / attachment metadata so thumbnails work across themes.
+        if (function_exists('wp_generate_attachment_metadata')) {
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+            try {
+                $meta = wp_generate_attachment_metadata($aid, $file);
+                if (is_array($meta)) {
+                    wp_update_attachment_metadata($aid, $meta);
+                }
+            } catch (\Throwable $e) {
+                // Non-fatal: the attachment itself exists.
+            }
+        }
+
+        update_post_meta($aid, '_sikshya_sample_data_asset', 1);
+
+        return $aid;
+    }
+
     /**
      * Map sample JSON meta keys to keys the LMS uses everywhere (checkout, templates).
      */
@@ -232,9 +356,34 @@ final class SampleDataImportService
             '_sikshya_price' => '_sikshya_course_price',
             '_sikshya_duration' => '_sikshya_course_duration',
             '_sikshya_difficulty' => '_sikshya_course_level',
+            '_sikshya_sale_price' => '_sikshya_course_sale_price',
         ];
 
         return $map[$key] ?? $key;
+    }
+
+    /**
+     * Drop curriculum cache and refresh post caches so catalog / Learn work without re-saving courses.
+     *
+     * @param int        $courseId
+     * @param list<int>  $chapterIds
+     */
+    private function invalidateCourseCurriculumCache(int $courseId, array $chapterIds): void
+    {
+        $courseId = absint($courseId);
+        if ($courseId <= 0) {
+            return;
+        }
+
+        delete_transient('sikshya_cache_curriculum_' . $courseId);
+        clean_post_cache($courseId);
+
+        foreach ($chapterIds as $chId) {
+            $chId = absint((int) $chId);
+            if ($chId > 0) {
+                clean_post_cache($chId);
+            }
+        }
     }
 
     /**

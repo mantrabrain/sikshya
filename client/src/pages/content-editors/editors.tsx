@@ -223,10 +223,10 @@ export type ContentEditorProps = {
   /** When set, chapter editor locks parent course to this ID. */
   forcedCourseId?: number;
   /**
-   * When embedded, allows the parent (Course Builder) to trigger a save
-   * before publishing the course.
+   * When embedded, allows the parent (Course Builder) to flush pending edits
+   * before saving or publishing the course. Pass null on editor unmount.
    */
-  exposeSave?: (saveFn: () => Promise<boolean>) => void;
+  exposeSave?: (saveFn: (() => Promise<boolean>) | null) => void;
 };
 
 function useMoveToTrash(
@@ -370,9 +370,26 @@ export function LessonEditor(props: ContentEditorProps) {
   };
 
   useEffect(() => {
-    if (!embedded || !props.exposeSave) return;
+    if (!embedded || !props.exposeSave) {
+      return;
+    }
     props.exposeSave(onSave);
-  }, [embedded, props, title, content, excerpt, status, featured, durationValue, durationUnit, lessonType, videoUrl, proValues]);
+    return () => props.exposeSave?.(null);
+  }, [
+    embedded,
+    props.exposeSave,
+    title,
+    content,
+    excerpt,
+    status,
+    featured,
+    durationValue,
+    durationUnit,
+    lessonType,
+    videoUrl,
+    isFreePreview,
+    proValues,
+  ]);
 
   return (
     <EditorFormShell
@@ -443,13 +460,14 @@ export function LessonEditor(props: ContentEditorProps) {
                   Short summary
                 </label>
                 <p className={HINT}>A short blurb for lesson lists; optional but helps learners scan the outline.</p>
-                <QuillField
-                  label="Short summary"
+                <textarea
+                  id="sik-lesson-excerpt"
+                  className={`${FIELD} min-h-[72px]`}
                   value={excerpt}
-                  onChange={(html) => setExcerpt(html)}
+                  onChange={(e) => setExcerpt(e.target.value)}
                   placeholder="One or two sentences about this lesson"
                   disabled={editor.saving}
-                  minHeightPx={160}
+                  rows={3}
                 />
               </div>
               <div>
@@ -648,7 +666,7 @@ function EmbeddedSaveBar(props: { saving: boolean; entityLabel: string; canSave?
     <div id="sikshya-embedded-save" className="mt-6 border-t border-slate-100/90 pt-4 dark:border-slate-800/90">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          Saves this {entityLabel.toLowerCase()} only. Use the course toolbar for draft / publish.
+          Saves this {entityLabel.toLowerCase()} only. Save draft / Publish in the course toolbar also saves the open item here first.
         </p>
         <button
           type="button"
@@ -872,9 +890,25 @@ export function QuizEditor(props: ContentEditorProps) {
   };
 
   useEffect(() => {
-    if (!embedded || !props.exposeSave) return;
+    if (!embedded || !props.exposeSave) {
+      return;
+    }
     props.exposeSave(onSave);
-  }, [embedded, props, title, content, status, featured, timeLimit, passing, attempts, quizQuestionIds, proQuizValues, quizAdvMaxDraw]);
+    return () => props.exposeSave?.(null);
+  }, [
+    embedded,
+    props.exposeSave,
+    title,
+    content,
+    status,
+    featured,
+    timeLimit,
+    passing,
+    attempts,
+    quizQuestionIds,
+    proQuizValues,
+    quizAdvMaxDraw,
+  ]);
 
   return (
     <EditorFormShell
@@ -1484,9 +1518,30 @@ export function QuestionEditor(props: ContentEditorProps) {
   };
 
   useEffect(() => {
-    if (!embedded || !props.exposeSave) return;
+    if (!embedded || !props.exposeSave) {
+      return;
+    }
     props.exposeSave(onSave);
-  }, [embedded, props, title, content, status, featured, qType, points, options, correctAnswer, multiCorrect, matchLeft, matchRight, matchMap, orderItems, orderPerm]);
+    return () => props.exposeSave?.(null);
+  }, [
+    embedded,
+    props.exposeSave,
+    title,
+    content,
+    status,
+    featured,
+    qType,
+    points,
+    options,
+    correctAnswer,
+    multiCorrect,
+    matchLeft,
+    matchRight,
+    matchMap,
+    orderItems,
+    orderPerm,
+    proQuestionValues,
+  ]);
 
   const moveOrderSlot = (pos: number, dir: -1 | 1) => {
     setOrderPerm((prev) => {
@@ -2199,9 +2254,12 @@ export function AssignmentEditor(props: ContentEditorProps) {
   };
 
   useEffect(() => {
-    if (!embedded || !props.exposeSave) return;
+    if (!embedded || !props.exposeSave) {
+      return;
+    }
     props.exposeSave(onSave);
-  }, [embedded, props, title, content, status, featured, due, apoints, atype, proAsgValues]);
+    return () => props.exposeSave?.(null);
+  }, [embedded, props.exposeSave, title, content, status, featured, due, apoints, atype, proAsgValues]);
 
   return (
     <EditorFormShell
@@ -2469,9 +2527,12 @@ export function ChapterEditor(props: ContentEditorProps) {
   };
 
   useEffect(() => {
-    if (!embedded || !props.exposeSave) return;
+    if (!embedded || !props.exposeSave) {
+      return;
+    }
     props.exposeSave(onSave);
-  }, [embedded, props, title, content, status, featured, order, courseId, forcedCourseId]);
+    return () => props.exposeSave?.(null);
+  }, [embedded, props.exposeSave, title, content, status, featured, order, courseId, forcedCourseId]);
 
   return (
     <EditorFormShell
@@ -2930,21 +2991,23 @@ export function CertificateEditor(props: ContentEditorProps) {
     /* prevent any inherited WP/admin styles in the new window */
     *,*::before,*::after{box-sizing:border-box}
     img{max-width:100%;height:auto}
-    .stage{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
+    .stage{min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:28px;padding-bottom:40px}
     .sheet{
       width:min(1200px,calc(100vw - 56px));
-      max-height:calc(100vh - 56px);
-      aspect-ratio:${String(ar).replace(/[^0-9./\\s]/g, '')};
       background:#fff;
       box-shadow:0 30px 80px rgba(15,23,42,.18);
-      overflow:hidden;
+      overflow:visible;
+      flex:0 0 auto;
+      box-sizing:border-box;
     }
-    .sheet > .sikshya-certificate-layout{width:100%;height:100%}
+    .sheet:not(:has(.sikshya-certificate-layout)){aspect-ratio:${String(ar).replace(/[^0-9./\\s]/g, '')}}
+    .sheet:has(.sikshya-certificate-layout){height:auto;aspect-ratio:unset}
+    #sikshya-cert-sheet .sikshya-certificate-layout{width:100%;height:auto;max-height:none;display:block;box-sizing:border-box}
   </style>
 </head>
 <body>
   <div class="stage">
-    <div class="sheet">${raw}</div>
+    <div class="sheet" id="sikshya-cert-sheet">${raw}</div>
   </div>
 </body>
 </html>`;
@@ -2995,7 +3058,7 @@ export function CertificateEditor(props: ContentEditorProps) {
       saveMsg={null}
     >
       <section
-        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-slate-100 dark:bg-slate-950"
+        className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-100 dark:bg-slate-950"
         aria-label="Certificate editor"
       >
         <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
@@ -3162,7 +3225,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
     setFeatured(typeof p.featured_media === 'number' ? p.featured_media : 0);
   }, [editor.post, editor.isNew]);
 
-  const onSave = async () => {
+  const onSave = async (): Promise<boolean> => {
     setSaveMsg(null);
     editor.setError(null);
     try {
@@ -3176,15 +3239,25 @@ export function DefaultContentEditor(props: ContentEditorProps) {
         const id = (res as { id: number }).id;
         if (typeof id === 'number' && id > 0) {
           onSavedNewId?.(id);
-          return;
+          return true;
         }
       }
       setSaveMsg('Saved.');
       await editor.load();
+      return true;
     } catch {
       /* hook */
+      return false;
     }
   };
+
+  useEffect(() => {
+    if (!embedded || !props.exposeSave) {
+      return;
+    }
+    props.exposeSave(onSave);
+    return () => props.exposeSave?.(null);
+  }, [embedded, props.exposeSave, title, content, status, featured]);
 
   return (
     <EditorFormShell

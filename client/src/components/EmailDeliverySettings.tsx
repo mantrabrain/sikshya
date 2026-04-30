@@ -44,7 +44,7 @@ function sectionIconName(raw?: string): string {
       return 'cog';
     case 'envelope':
     case 'paper-plane':
-      return 'layers';
+      return 'mail';
     case 'edit':
       return 'plusDocument';
     default:
@@ -214,6 +214,26 @@ export function EmailDeliverySettings(props: Props) {
         >
           <div className="grid gap-6 lg:grid-cols-2">{fieldsOf('email_config').map(renderField)}</div>
         </SectionShell>
+
+        {fieldsOf('email_master_switches').length > 0 ? (
+          <SectionShell
+            title={byKey.get('email_master_switches')?.title || 'Sending rules'}
+            description={byKey.get('email_master_switches')?.description}
+            icon={byKey.get('email_master_switches')?.icon}
+          >
+            <div className="grid gap-6 lg:grid-cols-2">{fieldsOf('email_master_switches').map(renderField)}</div>
+          </SectionShell>
+        ) : null}
+
+        {fieldsOf('email_certificate_delivery').length > 0 ? (
+          <SectionShell
+            title={byKey.get('email_certificate_delivery')?.title || 'Completion certificates'}
+            description={byKey.get('email_certificate_delivery')?.description}
+            icon={byKey.get('email_certificate_delivery')?.icon}
+          >
+            <div className="grid gap-6 lg:grid-cols-2">{fieldsOf('email_certificate_delivery').map(renderField)}</div>
+          </SectionShell>
+        ) : null}
 
         <div className="relative isolate min-h-[280px] overflow-hidden rounded-2xl">
           <div

@@ -6,6 +6,7 @@ import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -33,6 +34,7 @@ type GradeScaleGetResp = { ok?: boolean; scale?: GradeScale; rows?: GradeScaleRo
 
 export function GradingPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const dialog = useSikshyaDialog();
   const featureOk = isFeatureEnabled(config, 'gradebook');
   const addon = useAddonEnabled('gradebook');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
@@ -148,12 +150,24 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
 
   const deleteScale = async () => {
     if (!enabled || activeScaleIdResolved <= 0) return;
-    const ok = window.confirm('Delete this grade scale? This cannot be undone.');
+    const ok = await dialog.confirm({
+      title: 'Delete this grade scale?',
+      message: 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
     if (!ok) return;
-    await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.gradeScale(activeScaleIdResolved));
-    setActiveScaleId(0);
-    await refetchScales();
-    await refetchScale();
+    try {
+      await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.gradeScale(activeScaleIdResolved));
+      setActiveScaleId(0);
+      await refetchScales();
+      await refetchScale();
+    } catch (e) {
+      void dialog.alert({
+        title: 'Could not delete',
+        message: e instanceof Error ? e.message : 'Delete failed.',
+      });
+    }
   };
 
   return (

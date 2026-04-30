@@ -363,43 +363,47 @@ function PaymentSettingsTab(props: {
 
 /** Sidebar order: store → join/pay → content types → people → polish → system. */
 const TAB_META: SettingsTabMeta[] = [
-  { id: 'general', label: 'General', description: 'Core plugin behavior and defaults.', icon: 'puzzle' },
+  { id: 'general', label: 'General', description: 'Core plugin behavior and defaults.', icon: 'cog' },
   {
     id: 'courses',
     label: 'Courses',
-    description: 'Course pages and discovery — reviews, categories, and search.',
+    description: 'Catalog, discovery, and course page defaults.',
     icon: 'course',
+  },
+  { id: 'lessons', label: 'Lessons', description: 'Lesson types, player, and previews.', icon: 'bookOpen' },
+  { id: 'quizzes', label: 'Quizzes', description: 'Scoring, timing, and behavior.', icon: 'questionMarkCircle' },
+  { id: 'assignments', label: 'Assignments', description: 'Submission and grading defaults.', icon: 'clipboard' },
+  { id: 'progress', label: 'Progress', description: 'Tracking rules and completion logic.', icon: 'chartPresentation' },
+  {
+    id: 'certificates',
+    label: 'Certificates',
+    description: 'Issuance rules and verification defaults.',
+    icon: 'documentText',
   },
   {
     id: 'enrollment',
     label: 'Enrollment',
-    description: 'Joining courses, checkout, buttons, completion, limits, and policies.',
-    icon: 'layers',
+    description: 'Enrollment rules, checkout buttons, limits, and policies.',
+    icon: 'userPlus',
   },
-  { id: 'payment', label: 'Payment', description: 'Gateways, currency, and checkout.', icon: 'chart' },
-  { id: 'lessons', label: 'Lessons', description: 'Lesson player, previews, and lesson progress.', icon: 'bookOpen' },
-  { id: 'quizzes', label: 'Quizzes', description: 'Scoring, timing, and quiz behavior.', icon: 'clipboard' },
-  { id: 'assignments', label: 'Assignments', description: 'Submission and grading defaults.', icon: 'badge' },
-  { id: 'progress', label: 'Progress', description: 'Quiz and assignment tracking.', icon: 'chart' },
-  {
-    id: 'certificates',
-    label: 'Certificates',
-    description: 'Issuance and automation. Edit layouts in Certificates → Templates (builder).',
-    icon: 'badge',
-  },
+  { id: 'payment', label: 'Payment', description: 'Gateways, currency, and checkout.', icon: 'creditCard' },
   { id: 'students', label: 'Students', description: 'Learner experience and access.', icon: 'users' },
-  { id: 'instructors', label: 'Instructors', description: 'Instructor permissions and workflow.', icon: 'users' },
-  { id: 'notifications', label: 'Notifications', description: 'In-app and email notifications.', icon: 'helpCircle' },
+  { id: 'instructors', label: 'Instructors', description: 'Instructor permissions and workflow.', icon: 'userCircle' },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    description: 'In-app notices, alerts, and nudges.',
+    icon: 'bell',
+  },
   {
     id: 'integrations',
     label: 'Marketing tags',
-    description:
-      'Google Analytics and Meta Pixel IDs on learner-facing pages. Webhooks, API keys, and outbound automation are under Integrations in the sidebar — not here.',
-    icon: 'puzzle',
+    description: 'Analytics and marketing pixel IDs.',
+    icon: 'tag',
   },
-  { id: 'permalinks', label: 'Permalinks', description: 'Cart, checkout, account, and content URL bases.', icon: 'tag' },
-  { id: 'security', label: 'Security', description: 'Roles, access, and data safety.', icon: 'cog' },
-  { id: 'advanced', label: 'Advanced', description: 'Developer and system options.', icon: 'cog' },
+  { id: 'permalinks', label: 'Permalinks', description: 'Cart, checkout, account, and content URLs.', icon: 'link' },
+  { id: 'security', label: 'Security', description: 'Roles, access rules, and data safety.', icon: 'lockClosed' },
+  { id: 'advanced', label: 'Advanced', description: 'Developer and system options.', icon: 'wrench' },
 ];
 
 function normalizeForDirtyCompare(v: unknown): string {
@@ -438,14 +442,18 @@ function sectionIconName(raw?: string): string {
   const fa = s.replace(/^fas\s+fa-/, '').replace(/^fa-/, '');
   switch (fa) {
     case 'link':
-      return 'tag';
+      return 'link';
     case 'folder-open':
     case 'folder':
       return 'course';
     case 'tags':
       return 'tag';
     case 'route':
-      return 'layers';
+      return 'link';
+    case 'credit-card':
+      return 'creditCard';
+    case 'shopping-cart':
+      return 'shoppingCart';
     case 'cog':
     case 'cogs':
       return 'cog';
@@ -454,11 +462,11 @@ function sectionIconName(raw?: string): string {
     case 'question-circle':
       return 'helpCircle';
     case 'bell':
-      return 'helpCircle';
+      return 'bell';
     case 'shield-alt':
-      return 'cog';
+      return 'lockClosed';
     case 'tools':
-      return 'cog';
+      return 'wrench';
     case 'eye':
       return 'bookOpen';
     default:
@@ -773,7 +781,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                           <div className="text-sm font-semibold">{t.label}</div>
                         </div>
                         <div
-                          className={`mt-0.5 text-xs leading-snug ${
+                          className={`mt-0.5 truncate text-xs leading-snug ${
                             selected ? 'text-white/80' : 'text-slate-400/90 dark:text-slate-500/80'
                           }`}
                         >
@@ -815,7 +823,6 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                       {tabMeta.label}
                     </div>
                     <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{tabMeta.label} settings</h2>
-                    <p className="mt-1 text-sm text-slate-400/90 dark:text-slate-500/80">{tabMeta.description}</p>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:min-w-[200px]">
                     <button

@@ -8,14 +8,23 @@ import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { Modal } from '../components/shared/Modal';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { BulkActionsBar } from '../components/shared/list/BulkActionsBar';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { SikshyaReactConfig, WpRestUser } from '../types';
 
 type OrderLine = { course_id: number; course_title: string; line_total: number };
+
+type OrderSubscriptionSummary = {
+  is_subscription_checkout?: boolean;
+  plan_id?: number;
+  interval_unit?: string;
+  plan_name?: string;
+};
 
 type OrderRow = {
   id: number;
@@ -31,6 +40,7 @@ type OrderRow = {
   payer_name: string;
   payer_email: string;
   lines: OrderLine[];
+  subscription?: OrderSubscriptionSummary;
   dynamic_fields?: Record<string, unknown>;
   dynamic_fields_display?: Array<{ id: string; label: string; value: string }>;
 };
@@ -67,8 +77,12 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
   const { config, title, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const { navigateView } = useAdminRouting();
+  const dialog = useSikshyaDialog();
   const [page, setPage] = useState(1);
   const [markBusyId, setMarkBusyId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkAction, setBulkAction] = useState('');
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [pickedUser, setPickedUser] = useState<WpRestUser | null>(null);
@@ -95,6 +109,53 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
   const total = data?.total ?? 0;
   const pages = data?.pages ?? 0;
   const tableMissing = Boolean(data?.table_missing);
+
+  useEffect(() => {
+    setSelectedIds([]);
+    setBulkAction('');
+  }, [page]);
+
+  const toggleAll = (checked: boolean) => {
+    setSelectedIds(checked ? rows.map((r) => r.id) : []);
+  };
+
+  const toggleOne = (id: number, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const s = new Set(prev);
+      if (checked) s.add(id);
+      else s.delete(id);
+      return Array.from(s);
+    });
+  };
+
+  const applyBulk = async () => {
+    if (bulkBusy || selectedIds.length === 0 || !bulkAction) return;
+    if (bulkAction === 'delete') {
+      const ok = await dialog.confirm({
+        title: `Delete ${selectedIds.length} order(s)?`,
+        message: 'This permanently removes the orders and their line items. This cannot be undone.',
+        confirmLabel: 'Delete',
+        variant: 'danger',
+      });
+      if (!ok) return;
+    }
+    setBulkBusy(true);
+    try {
+      if (bulkAction.startsWith('status:')) {
+        const st = bulkAction.replace(/^status:/, '');
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.ordersBulk, { action: 'status', status: st, ids: selectedIds });
+      } else if (bulkAction === 'delete') {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.ordersBulk, { action: 'delete', ids: selectedIds });
+      }
+      setSelectedIds([]);
+      setBulkAction('');
+      await refetch();
+    } catch (err) {
+      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!createOpen) {
@@ -266,9 +327,9 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               setCreateOpen(false);
               resetCreateForm();
               await refetch();
-              window.alert(res?.message || 'Order created.');
+              await dialog.alert({ title: 'Order created', message: res?.message || 'The order was created successfully.' });
             } catch (err) {
-              window.alert(getErrorSummary(err));
+              void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
             } finally {
               setCreating(false);
             }
@@ -402,7 +463,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                   setEditOpen(false);
                   await refetch();
                 } catch (err) {
-                  window.alert(getErrorSummary(err));
+                  void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
                 } finally {
                   setMarkBusyId(null);
                 }
@@ -444,10 +505,38 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
           />
         ) : (
           <>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+              <BulkActionsBar
+                selectedCount={selectedIds.length}
+                value={bulkAction}
+                onChange={setBulkAction}
+                onApply={() => void applyBulk()}
+                applyBusy={bulkBusy}
+                trashMode={false}
+                customOptions={[
+                  { value: 'delete', label: 'Delete permanently' },
+                  { value: 'status:pending', label: 'Mark pending' },
+                  { value: 'status:on-hold', label: 'Mark on-hold' },
+                  { value: 'status:paid', label: 'Mark paid (no fulfillment)' },
+                ]}
+                selectId="orders-bulk"
+              />
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {selectedIds.length > 0 ? `${selectedIds.length} selected` : ''}
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                   <tr>
+                    <th className="w-10 px-5 py-3.5">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all orders on this page"
+                        checked={rows.length > 0 && selectedIds.length === rows.length}
+                        onChange={(e) => toggleAll(e.target.checked)}
+                      />
+                    </th>
                     <th className="px-5 py-3.5">Created</th>
                     <th className="px-5 py-3.5">Customer</th>
                     <th className="px-5 py-3.5">Courses</th>
@@ -460,6 +549,14 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {rows.map((r) => (
                     <tr key={r.id} className="bg-white dark:bg-slate-900">
+                      <td className="px-5 py-3.5">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select order #${r.id}`}
+                          checked={selectedIds.includes(r.id)}
+                          onChange={(e) => toggleOne(r.id, e.target.checked)}
+                        />
+                      </td>
                       <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-400">
                         {formatPostDate(r.created_at)}
                         <div className="mt-1">
@@ -513,6 +610,18 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                             {r.gateway_intent_id}
                           </div>
                         ) : null}
+                        {r.subscription?.is_subscription_checkout ? (
+                          <div className="mt-1 inline-flex max-w-[220px] flex-col gap-0.5">
+                            <span className="w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 dark:bg-amber-950/70 dark:text-amber-50">
+                              Subscription
+                            </span>
+                            <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                              {r.subscription.plan_name ||
+                                (r.subscription.plan_id ? `Plan #${r.subscription.plan_id}` : 'Plan')}
+                              {r.subscription.interval_unit ? ` · ${r.subscription.interval_unit}` : ''}
+                            </span>
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={r.status} />
@@ -546,13 +655,35 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                                     );
                                     await refetch();
                                   } catch (err) {
-                                    window.alert(getErrorSummary(err));
+                                    void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
                                   } finally {
                                     setMarkBusyId(null);
                                   }
                                 },
                               });
                             }
+                            items.push({
+                              key: 'delete',
+                              label: 'Delete',
+                              destructive: true,
+                              onClick: async () => {
+                                const ok = await dialog.confirm({
+                                  title: `Delete order #${r.id}?`,
+                                  message: 'This permanently removes the order and its line items. This cannot be undone.',
+                                  confirmLabel: 'Delete',
+                                  variant: 'danger',
+                                });
+                                if (!ok) return;
+                                try {
+                                  await getSikshyaApi().delete<{ ok?: boolean; message?: string }>(
+                                    SIKSHYA_ENDPOINTS.admin.order(r.id)
+                                  );
+                                  await refetch();
+                                } catch (err) {
+                                  void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                                }
+                              },
+                            });
                             return <RowActionsMenu items={items} ariaLabel={`Order actions for #${r.id}`} />;
                           })()}
                         </div>

@@ -399,4 +399,22 @@ class OrderRepository
 
         return '';
     }
+
+    /**
+     * Permanently delete an order and its line items.
+     */
+    public function deleteOrder(int $order_id): bool
+    {
+        if ($order_id <= 0 || !$this->tableExists()) {
+            return false;
+        }
+
+        global $wpdb;
+
+        // Items first to avoid orphans.
+        $wpdb->delete($this->items, ['order_id' => $order_id], ['%d']);
+        $ok = $wpdb->delete($this->orders, ['id' => $order_id], ['%d']);
+
+        return $ok !== false && (int) $ok > 0;
+    }
 }

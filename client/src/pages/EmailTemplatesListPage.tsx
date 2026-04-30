@@ -7,6 +7,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { SikshyaReactConfig } from '../types';
 import type { EmailTemplateApi } from '../types/emailTemplate';
 import { ToggleSwitch } from '../components/email/EmailTemplateForms';
@@ -37,6 +38,7 @@ function categoryStyle(cat: string): string {
  */
 export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
+  const dialog = useSikshyaDialog();
   const { navigateHref } = useAdminRouting();
   const [rows, setRows] = useState<EmailTemplateApi[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +118,13 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
       return;
     }
     if (action === 'delete') {
-      const ok = window.confirm(`Delete ${ids.length} custom template(s)? System templates stay selected only if you mixed — those will be skipped.`);
+      const ok = await dialog.confirm({
+        title: `Delete ${ids.length} template(s)?`,
+        message:
+          'Only custom templates are removed. System templates cannot be deleted and will be skipped if selected.',
+        confirmLabel: 'Delete',
+        variant: 'danger',
+      });
       if (!ok) {
         return;
       }
@@ -141,7 +149,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Enable, edit, and manage transactional emails — including drip unlock (“Drip: lesson unlocked”, “Drip: course schedule unlocked”). Disabling a template stops only that email, not Content drip. From / reply / SMTP live under Email → Delivery."
+      subtitle="Enable and edit transactional messages — including drip unlock templates. Disable one template only disables that mail. Addresses, SMTP, global HTML, the LMS send-email switch, and certificate email delivery are centralized under Email → Delivery."
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           <LinkButtonSecondary href={appViewHref(config, 'email-hub', { tab: 'delivery' })}>Email delivery</LinkButtonSecondary>

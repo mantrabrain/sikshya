@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
@@ -8,10 +8,12 @@ import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { Modal } from '../components/shared/Modal';
+import { BulkActionsBar } from '../components/shared/list/BulkActionsBar';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { SikshyaReactConfig } from '../types';
 
 type PaymentRow = {
@@ -23,6 +25,7 @@ type PaymentRow = {
   payment_method: string;
   transaction_id: string;
   status: string;
+  charge_kind?: string;
   payment_date: string;
   payer_name: string;
   payer_email: string;
@@ -43,23 +46,91 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
   const { config, title, embedded } = props;
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
   const { navigateView } = useAdminRouting();
+  const dialog = useSikshyaDialog();
   const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [chargeKindFilter, setChargeKindFilter] = useState('');
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState('pending');
   const [saving, setSaving] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [bulkAction, setBulkAction] = useState('');
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, chargeKindFilter]);
 
   const loader = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), per_page: '30' });
+    if (statusFilter) {
+      q.set('status', statusFilter);
+    }
+    if (chargeKindFilter) {
+      q.set('charge_kind', chargeKindFilter);
+    }
     return getSikshyaApi().get<ListResponse>(`${SIKSHYA_ENDPOINTS.admin.payments}?${q.toString()}`);
-  }, [page]);
+  }, [page, statusFilter, chargeKindFilter]);
 
-  const { loading, data, error, refetch } = useAsyncData(loader, [page]);
+  const { loading, data, error, refetch } = useAsyncData(loader, [page, statusFilter, chargeKindFilter]);
 
   const rows = data?.payments ?? [];
   const total = data?.total ?? 0;
   const pages = data?.pages ?? 0;
   const tableMissing = Boolean(data?.table_missing);
+
+  useEffect(() => {
+    // Clear selection on page/filter changes so bulk actions never surprise the admin.
+    setSelectedIds([]);
+    setBulkAction('');
+  }, [page, statusFilter, chargeKindFilter]);
+
+  const toggleAll = (checked: boolean) => {
+    setSelectedIds(checked ? rows.map((r) => r.id) : []);
+  };
+
+  const toggleOne = (id: number, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const s = new Set(prev);
+      if (checked) s.add(id);
+      else s.delete(id);
+      return Array.from(s);
+    });
+  };
+
+  const applyBulk = async () => {
+    if (bulkBusy || selectedIds.length === 0 || !bulkAction) return;
+    if (bulkAction === 'delete') {
+      const ok = await dialog.confirm({
+        title: `Delete ${selectedIds.length} payment(s)?`,
+        message: 'This permanently removes the payment records. This cannot be undone.',
+        confirmLabel: 'Delete',
+        variant: 'danger',
+      });
+      if (!ok) return;
+    }
+    setBulkBusy(true);
+    try {
+      if (bulkAction.startsWith('status:')) {
+        const st = bulkAction.replace(/^status:/, '');
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.paymentsBulk, {
+          action: 'status',
+          status: st,
+          ids: selectedIds,
+        });
+      } else if (bulkAction === 'delete') {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.paymentsBulk, { action: 'delete', ids: selectedIds });
+      }
+      setSelectedIds([]);
+      setBulkAction('');
+      await refetch();
+    } catch (err) {
+      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   const openEdit = (r: PaymentRow) => {
     setEditId(r.id);
@@ -72,7 +143,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Recorded transactions linked to courses (when the payments table is present)"
+      subtitle="Checkout charges and automated subscription renewals (when the payments table is installed)"
       pageActions={
         <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
           Refresh
@@ -124,7 +195,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                   setEditOpen(false);
                   await refetch();
                 } catch (err) {
-                  window.alert(getErrorSummary(err));
+                  void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
                 } finally {
                   setSaving(false);
                 }
@@ -152,19 +223,78 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
       </Modal>
 
       <ListPanel>
-        {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading payments…</div>
-        ) : rows.length === 0 ? (
+        {tableMissing ? (
           <ListEmptyState
             title="No payments"
-            description="Completed purchases and gateway records will list here for auditing and support."
+            description="The payments database table is not installed yet."
           />
         ) : (
           <>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+              <BulkActionsBar
+                disabled={loading}
+                selectedCount={selectedIds.length}
+                value={bulkAction}
+                onChange={setBulkAction}
+                onApply={() => void applyBulk()}
+                applyBusy={bulkBusy}
+                trashMode={false}
+                customOptions={[
+                  { value: 'delete', label: 'Delete permanently' },
+                  { value: 'status:pending', label: 'Mark pending' },
+                  { value: 'status:completed', label: 'Mark completed' },
+                  { value: 'status:failed', label: 'Mark failed' },
+                  { value: 'status:refunded', label: 'Mark refunded' },
+                ]}
+                selectId="payments-bulk"
+              />
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {selectedIds.length > 0 ? `${selectedIds.length} selected` : ''}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-end gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Status
+                <select
+                  className="mt-1 block min-w-[9rem] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-800 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                  <option value="refunded">Refunded</option>
+                </select>
+              </label>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Charge type
+                <select
+                  className="mt-1 block min-w-[9rem] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-800 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  value={chargeKindFilter}
+                  onChange={(e) => setChargeKindFilter(e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="">All</option>
+                  <option value="checkout">Checkout</option>
+                  <option value="renewal">Renewal</option>
+                </select>
+              </label>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                   <tr>
+                    <th className="w-10 px-5 py-3.5">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all payments on this page"
+                        disabled={loading || rows.length === 0}
+                        checked={rows.length > 0 && selectedIds.length === rows.length}
+                        onChange={(e) => toggleAll(e.target.checked)}
+                      />
+                    </th>
                     <th className="px-5 py-3.5">Date</th>
                     <th className="px-5 py-3.5">Payer</th>
                     <th className="px-5 py-3.5">Course</th>
@@ -174,13 +304,63 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {rows.map((r) => (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                        Loading payments…
+                      </td>
+                    </tr>
+                  ) : rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center text-sm text-slate-600 dark:text-slate-400">
+                        {statusFilter || chargeKindFilter
+                          ? 'No records match the current filters.'
+                          : 'Completed checkouts and renewal charges will list here for auditing and support.'}
+                      </td>
+                    </tr>
+                  ) : (
+                  rows.map((r) => (
                     <tr key={r.id} className="bg-white dark:bg-slate-900">
+                      <td className="px-5 py-3.5">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select payment #${r.id}`}
+                          checked={selectedIds.includes(r.id)}
+                          onChange={(e) => toggleOne(r.id, e.target.checked)}
+                        />
+                      </td>
                       <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-400">
                         {formatPostDate(r.payment_date)}
                         <div className="mt-1 text-xs font-semibold text-brand-600 dark:text-brand-400">
-                          Payment #{r.id}
+                          <button
+                            type="button"
+                            className="text-left hover:underline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigateView('payment', { id: String(r.id) });
+                            }}
+                            title="Open payment details"
+                          >
+                            Payment #{r.id}
+                          </button>
                         </div>
+                        {r.transaction_id ? (
+                          <div className="mt-1 truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                            <button
+                              type="button"
+                              className="hover:underline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigateView('payment', { id: String(r.id) });
+                              }}
+                              title="Open payment details"
+                            >
+                              {r.transaction_id}
+                            </button>
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-5 py-3.5">
                         <a
@@ -201,6 +381,8 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                           >
                             {r.course_title || `Course #${r.course_id}`}
                           </a>
+                        ) : (r.charge_kind || '').toLowerCase() === 'renewal' ? (
+                          <span className="font-medium text-slate-700 dark:text-slate-200">Subscription renewal</span>
                         ) : (
                           '—'
                         )}
@@ -210,6 +392,11 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={r.status} />
+                        {(r.charge_kind || '').toLowerCase() === 'renewal' ? (
+                          <div className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-brand-700 dark:text-brand-300">
+                            Renewal
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <div onClick={(e) => e.stopPropagation()} className="inline-flex">
@@ -225,17 +412,39 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                                 label: 'Change status',
                                 onClick: () => openEdit(r),
                               },
+                              {
+                                key: 'delete',
+                                label: 'Delete',
+                                destructive: true,
+                                onClick: async () => {
+                                  const ok = await dialog.confirm({
+                                    title: `Delete payment #${r.id}?`,
+                                    message: 'This permanently removes the payment record. This cannot be undone.',
+                                    confirmLabel: 'Delete',
+                                    variant: 'danger',
+                                  });
+                                  if (!ok) return;
+                                  try {
+                                    await getSikshyaApi().delete<{ ok?: boolean; message?: string }>(
+                                      SIKSHYA_ENDPOINTS.admin.payment(r.id)
+                                    );
+                                    await refetch();
+                                  } catch (err) {
+                                    void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                                  }
+                                },
+                              },
                             ];
                             return <RowActionsMenu items={items} ariaLabel={`Payment actions for #${r.id}`} />;
                           })()}
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>
-            {pages > 1 ? (
+            {!loading && pages > 1 ? (
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-4 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Page {page} of {pages} · {total} total

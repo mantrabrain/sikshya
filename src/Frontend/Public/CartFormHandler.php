@@ -29,13 +29,8 @@ final class CartFormHandler
 
         if ($action === 'add' && $course_id > 0) {
             $uid = get_current_user_id();
-            /**
-             * Allow extensions to block adding a course to the cart (e.g. unmet prerequisites).
-             *
-             * @param null|\WP_Error $reject  Return WP_Error to block; message is shown via {@see CartFlashResolver}.
-             * @param int            $course_id
-             * @param int            $user_id   0 when logged out (addons typically skip gating until checkout).
-             */
+            // Allow extensions to block adding a course to the cart (e.g. unmet prerequisites).
+            // Return WP_Error to block; message is shown via {@see CartFlashResolver}.
             $reject = apply_filters('sikshya_cart_validate_add_course', null, $course_id, $uid);
             if ($reject instanceof \WP_Error) {
                 self::redirectWithTransientFlash($redirect_base, 'error', $reject->get_error_message());
@@ -76,15 +71,12 @@ final class CartFormHandler
             if (!is_user_logged_in()) {
                 self::redirectWithTransientFlash($redirect_base, 'info', __('Log in to enroll in this course.', 'sikshya'));
             }
-            $enrolled = self::enrollFreeIfZeroPrice($course_id);
+            $result = self::enrollFreeIfZeroPrice($course_id);
+            $enrolled = $result === true;
+            $err = $result instanceof \WP_Error ? $result->get_error_message() : '';
             if ($enrolled) {
                 $learn = function_exists('sikshya_course_learn_entry_url') ? sikshya_course_learn_entry_url($course_id) : '';
-                /**
-                 * Allow extensions to override where learners land after a successful free enrollment.
-                 *
-                 * @param string $url
-                 * @param int    $course_id
-                 */
+                // Allow extensions to override where learners land after a successful free enrollment.
                 $learn = (string) apply_filters('sikshya_enroll_free_redirect_url', $learn, $course_id);
                 if ($learn !== '') {
                     wp_safe_redirect($learn);
@@ -94,7 +86,9 @@ final class CartFormHandler
             self::redirectWithTransientFlash(
                 $redirect_base,
                 $enrolled ? 'success' : 'error',
-                $enrolled ? __('You are now enrolled in this course.', 'sikshya') : __('Could not complete enrollment. Please try again.', 'sikshya')
+                $enrolled
+                    ? __('You are now enrolled in this course.', 'sikshya')
+                    : ($err !== '' ? $err : __('Could not complete enrollment. Please try again.', 'sikshya'))
             );
         }
 
@@ -103,14 +97,17 @@ final class CartFormHandler
                 self::redirectWithTransientFlash($redirect_base, 'info', __('Log in to enroll in this course.', 'sikshya'));
             }
             $enrolled = function_exists('sikshya_enroll_paid_course_as_admin') && sikshya_enroll_paid_course_as_admin($course_id) > 0;
+            if (!$enrolled) {
+                // Common case: the bypass function returns 0 when the user is already enrolled (or an add-on grants access).
+                $plugin = Plugin::getInstance();
+                $courseService = $plugin->getService('course');
+                if ($courseService instanceof CourseService) {
+                    $enrolled = $courseService->isUserEnrolled(get_current_user_id(), $course_id);
+                }
+            }
             if ($enrolled) {
                 $learn = function_exists('sikshya_course_learn_entry_url') ? sikshya_course_learn_entry_url($course_id) : '';
-                /**
-                 * Allow extensions to override where admins land after an admin bypass enrollment.
-                 *
-                 * @param string $url
-                 * @param int    $course_id
-                 */
+                // Allow extensions to override where admins land after an admin bypass enrollment.
                 $learn = (string) apply_filters('sikshya_admin_enroll_bypass_redirect_url', $learn, $course_id);
                 if ($learn !== '') {
                     wp_safe_redirect($learn);
@@ -165,7 +162,12 @@ final class CartFormHandler
         return home_url('/');
     }
 
-    private static function enrollFreeIfZeroPrice(int $course_id): bool
+    /**
+     * Attempt to enroll the current user when the effective price is zero.
+     *
+     * @return bool|\WP_Error True when enrolled (or already has access), otherwise WP_Error with a user-safe message.
+     */
+    private static function enrollFreeIfZeroPrice(int $course_id)
     {
         if (!function_exists('sikshya_get_course_pricing')) {
             return false;
@@ -179,15 +181,23 @@ final class CartFormHandler
         $plugin = Plugin::getInstance();
         $courseService = $plugin->getService('course');
         if (!$courseService instanceof CourseService) {
-            return false;
+            return new \WP_Error('enroll_unavailable', __('Enrollment service unavailable. Please try again.', 'sikshya'));
+        }
+
+        // If the user already has access (including add-on granted access), treat as enrolled.
+        if ($courseService->isUserEnrolled(get_current_user_id(), $course_id)) {
+            return true;
         }
 
         try {
             $courseService->enrollUser(get_current_user_id(), $course_id, []);
 
             return true;
+        } catch (\InvalidArgumentException $e) {
+            $msg = trim((string) $e->getMessage());
+            return new \WP_Error('enroll_failed', $msg !== '' ? $msg : __('Could not complete enrollment. Please try again.', 'sikshya'));
         } catch (\Exception $e) {
-            return false;
+            return new \WP_Error('enroll_failed', __('Could not complete enrollment. Please try again.', 'sikshya'));
         }
     }
 }

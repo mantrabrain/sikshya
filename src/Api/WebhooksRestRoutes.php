@@ -86,46 +86,64 @@ class WebhooksRestRoutes
         }
 
         $event = json_decode($payload, true);
-        if (!is_array($event) || ($event['type'] ?? '') !== 'payment_intent.succeeded') {
-            return new WP_REST_Response(['ok' => true, 'ignored' => true], 200);
-        }
-
-        $pi = $event['data']['object'] ?? [];
-        if (!is_array($pi)) {
+        if (!is_array($event)) {
             return new WP_REST_Response(['ok' => true], 200);
         }
 
-        $order_id = 0;
-        if (!empty($pi['metadata']['order_id'])) {
-            $order_id = (int) $pi['metadata']['order_id'];
+        $type = (string) ($event['type'] ?? '');
+        $obj = $event['data']['object'] ?? [];
+        if (!is_array($obj)) {
+            return new WP_REST_Response(['ok' => true], 200);
         }
 
-        if ($order_id <= 0 && !empty($pi['id'])) {
-            $orders = new OrderRepository();
-            $row = $orders->findByGatewayIntent('stripe', (string) $pi['id']);
-            if ($row) {
-                $order_id = (int) $row->id;
+        // One-time payments (Payment Intent).
+        if ($type === 'payment_intent.succeeded') {
+            $pi = $obj;
+            $order_id = 0;
+            if (!empty($pi['metadata']['order_id'])) {
+                $order_id = (int) $pi['metadata']['order_id'];
             }
+
+            if ($order_id <= 0 && !empty($pi['id'])) {
+                $orders = new OrderRepository();
+                $row = $orders->findByGatewayIntent('stripe', (string) $pi['id']);
+                if ($row) {
+                    $order_id = (int) $row->id;
+                }
+            }
+
+            if ($order_id > 0) {
+                $orders = new OrderRepository();
+                $row = $orders->findById($order_id);
+                if ($row) {
+                    $pi_amount = is_array($pi) && isset($pi['amount_received']) ? (int) $pi['amount_received'] : 0;
+                    if ($pi_amount <= 0 && is_array($pi) && isset($pi['amount'])) {
+                        $pi_amount = (int) $pi['amount'];
+                    }
+                    $pi_cur = is_array($pi) && isset($pi['currency']) ? strtoupper((string) $pi['currency']) : '';
+                    $expected_minor = CheckoutService::toMinorUnits((float) $row->total, (string) $row->currency);
+                    if ($pi_cur !== '' && $pi_cur !== strtoupper((string) $row->currency)) {
+                        return new WP_REST_Response(['ok' => false, 'message' => 'Currency mismatch'], 400);
+                    }
+                    if ($pi_amount > 0 && $expected_minor > 0 && $pi_amount !== $expected_minor) {
+                        return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
+                    }
+                    $this->fulfillment()->fulfillPaidOrder($order_id);
+                }
+            }
+            return new WP_REST_Response(['ok' => true], 200);
         }
 
-        if ($order_id > 0) {
-            $orders = new OrderRepository();
-            $row = $orders->findById($order_id);
-            if ($row) {
-                $pi_amount = is_array($pi) && isset($pi['amount_received']) ? (int) $pi['amount_received'] : 0;
-                if ($pi_amount <= 0 && is_array($pi) && isset($pi['amount'])) {
-                    $pi_amount = (int) $pi['amount'];
-                }
-                $pi_cur = is_array($pi) && isset($pi['currency']) ? strtoupper((string) $pi['currency']) : '';
-                $expected_minor = CheckoutService::toMinorUnits((float) $row->total, (string) $row->currency);
-                if ($pi_cur !== '' && $pi_cur !== strtoupper((string) $row->currency)) {
-                    return new WP_REST_Response(['ok' => false, 'message' => 'Currency mismatch'], 400);
-                }
-                if ($pi_amount > 0 && $expected_minor > 0 && $pi_amount !== $expected_minor) {
-                    return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
-                }
-                $this->fulfillment()->fulfillPaidOrder($order_id);
-            }
+        // Let Pro/addons handle subscription events without embedding Pro logic in core.
+        if (in_array($type, ['checkout.session.completed', 'customer.subscription.updated', 'customer.subscription.deleted'], true)) {
+            do_action('sikshya_webhook_stripe_subscription_event', $event, $obj, $type, $this);
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Subscription renewal charges (Stripe Billing invoices). Core dispatches only; Pro records `sikshya_payments` rows.
+        if (in_array($type, ['invoice.paid', 'invoice.payment_succeeded'], true)) {
+            do_action('sikshya_webhook_stripe_invoice_payment', $event, $obj, $type, $this);
+            return new WP_REST_Response(['ok' => true], 200);
         }
 
         return new WP_REST_Response(['ok' => true], 200);
@@ -173,6 +191,12 @@ class WebhooksRestRoutes
         }
 
         $type = (string) ($json['event_type'] ?? '');
+
+        if (in_array($type, ['BILLING.SUBSCRIPTION.ACTIVATED', 'BILLING.SUBSCRIPTION.UPDATED', 'BILLING.SUBSCRIPTION.CANCELLED', 'BILLING.SUBSCRIPTION.SUSPENDED'], true)) {
+            do_action('sikshya_webhook_paypal_subscription_event', $json, $type, $this);
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
         if ($type !== 'PAYMENT.CAPTURE.COMPLETED') {
             return new WP_REST_Response(['ok' => true, 'ignored' => true], 200);
         }
@@ -281,6 +305,18 @@ class WebhooksRestRoutes
         $this->fulfillment()->fulfillPaidOrder((int) $row->id);
 
         return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    private function checkout(): CheckoutService
+    {
+        // Checkout service requires repositories; keep this lightweight for webhook processing.
+        return new CheckoutService(
+            $this->plugin,
+            new OrderRepository(),
+            $this->plugin->getService('coupons') instanceof \Sikshya\Database\Repositories\CouponRepository
+                ? $this->plugin->getService('coupons')
+                : new \Sikshya\Database\Repositories\CouponRepository()
+        );
     }
 
     private function fulfillment(): OrderFulfillmentService

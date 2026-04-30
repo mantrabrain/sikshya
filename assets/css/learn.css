@@ -163,24 +163,27 @@
   overflow-x: hidden;
 }
 
-/* Lesson / quiz: fill viewport so the main row can split into two equal-height columns */
+/* Lesson / quiz / in-course learn: fill viewport so the main row can split into two equal-height columns */
 .sikshya-learning-shell--lesson .sikshya-learning-app,
-.sikshya-learning-shell--quiz .sikshya-learning-app {
+.sikshya-learning-shell--quiz .sikshya-learning-app,
+.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learning-app {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
 }
 
 .sikshya-learning-shell--lesson .sikshya-learnLayout,
-.sikshya-learning-shell--quiz .sikshya-learnLayout {
+.sikshya-learning-shell--quiz .sikshya-learnLayout,
+.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnLayout {
   flex: 1 1 auto;
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr);
 }
 
-/* Pin the workspace row to the viewport so the curriculum sidebar does not stretch with lesson height */
+/* Pin the workspace row to the viewport so the curriculum sidebar does not stretch with content height */
 .sikshya-learning-shell--lesson .sikshya-learnLayout > .sikshya-learnMain,
-.sikshya-learning-shell--quiz .sikshya-learnLayout > .sikshya-learnMain {
+.sikshya-learning-shell--quiz .sikshya-learnLayout > .sikshya-learnMain,
+.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnLayout > .sikshya-learnMain {
   min-height: 0;
 }
 
@@ -471,7 +474,7 @@
   display: block;
 }
 
-/* Main area — lesson/quiz: two columns; hub/learn home unchanged */
+/* Main area — lesson/quiz / in-course learn: two columns; hub mode unchanged */
 .sikshya-learnMain {
   position: relative;
   min-width: 0;
@@ -479,7 +482,8 @@
 
 @media (min-width: 1024px) {
   .sikshya-learning-shell--lesson .sikshya-learnMain,
-  .sikshya-learning-shell--quiz .sikshya-learnMain {
+  .sikshya-learning-shell--quiz .sikshya-learnMain,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnMain {
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -504,7 +508,10 @@
   background: var(--sikshya-learn-surface);
   border-right: 1px solid var(--sikshya-learn-border);
   z-index: 40;
-  overflow: auto;
+  /* Sidebar itself should NOT scroll; only the outline area scrolls. */
+  overflow: hidden;
+  /* Prevent scroll-chaining from sidebar → main content. */
+  overscroll-behavior: contain;
   box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03), 6px 0 32px rgba(15, 23, 42, 0.04);
   will-change: transform;
   transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -512,7 +519,8 @@
 
 @media (min-width: 1024px) {
   .sikshya-learning-shell--lesson .sikshya-learnSidebar,
-  .sikshya-learning-shell--quiz .sikshya-learnSidebar {
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
     position: relative;
     top: auto;
     left: auto;
@@ -529,8 +537,18 @@
     transition: flex-basis 240ms cubic-bezier(0.22, 1, 0.36, 1), width 240ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  /* Course Builder default: entire sidebar column scrolls (previous behaviour). */
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]),
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]),
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .sikshya-sidebarCollapsed.sikshya-learning-shell--lesson .sikshya-learnSidebar,
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar {
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
     flex-basis: 0;
     width: 0;
     max-width: 0;
@@ -548,7 +566,8 @@
 
 @media (min-width: 1024px) {
   .sikshya-sidebarCollapsed.sikshya-learning-shell--lesson .sikshya-learnSidebar,
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar {
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
     transform: none;
   }
 }
@@ -561,8 +580,32 @@
 }
 
 @media (min-width: 1024px) {
-  .sikshya-learning-shell--lesson .sikshya-learnSidebar__inner,
-  .sikshya-learning-shell--quiz .sikshya-learnSidebar__inner {
+  /* Sidebar scroll OFF: outline + footer flow; outer column scrolls. */
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) .sikshya-learnSidebar__inner,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) .sikshya-learnSidebar__inner,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) .sikshya-learnSidebar__inner {
+    overflow: visible;
+    height: auto;
+    max-height: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) .sikshya-learnSidebar__scroll,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) .sikshya-learnSidebar__scroll,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar:not([data-sik-curriculum-scroll="1"]) .sikshya-learnSidebar__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: visible;
+    max-height: none;
+  }
+
+  /* Sidebar scroll ON (Course Builder): fixed rail, curriculum list scrolls only. */
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__inner,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__inner,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__inner {
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
@@ -572,8 +615,9 @@
     flex-direction: column;
   }
 
-  .sikshya-learning-shell--lesson .sikshya-learnSidebar__scroll,
-  .sikshya-learning-shell--quiz .sikshya-learnSidebar__scroll {
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__scroll,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__scroll,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__scroll {
     flex: 1 1 auto;
     min-height: 0;
     overflow-x: hidden;
@@ -581,6 +625,8 @@
     max-height: none;
     -webkit-overflow-scrolling: touch;
     scrollbar-gutter: stable;
+    /* Stop wheel/trackpad scroll from propagating into the right content column. */
+    overscroll-behavior: contain;
   }
 }
 
@@ -622,7 +668,8 @@
 .sikshya-learnSidebar__scroll {
   flex: 1;
   overflow: visible;
-  padding: 10px 12px calc(16px + var(--sikshya-learn-content-nav-h));
+  /* Footer widgets (Q&A, etc.) live outside the scroll area. */
+  padding: 10px 12px 16px;
 }
 
 .sikshya-learnSidebar__scroll:has(.sikshya-curriculumOutline) {
@@ -671,11 +718,11 @@
 }
 
 .sikshya-sidebarDisc[data-sik-disc-placement="sidebar"] {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: var(--sikshya-learn-sidebar-w-current);
-  z-index: 25;
+  /* Treat Q&A as a true sidebar footer (pinned by flex layout). */
+  position: static;
+  width: auto;
+  z-index: 1;
+  margin-top: auto;
 }
 
 .sikshya-sidebarDisc--inContent[data-sik-disc-placement="content"] {
@@ -2153,7 +2200,8 @@
 
 @media (min-width: 1024px) {
   .sikshya-learning-shell--lesson .sikshya-learnContentCol,
-  .sikshya-learning-shell--quiz .sikshya-learnContentCol {
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContentCol {
     min-height: 0;
     overflow: hidden;
     border-left: 1px solid var(--sikshya-learn-border);
@@ -2173,7 +2221,7 @@
   min-height: 0;
 }
 
-/* Learn hub / course home: main column is a direct child of .sikshya-learnMain (offset for fixed curriculum rail) */
+/* Legacy: main column direct under .sikshya-learnMain — pad for fixed sidebar width (unused when .sikshya-learnContentCol wraps content) */
 .sikshya-learnMain > .sikshya-learnContent {
   padding-left: calc(var(--sikshya-learn-sidebar-w-current) + max(22px, env(safe-area-inset-left)));
   transition: padding-left 240ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -2187,7 +2235,8 @@
 
 @media (min-width: 1024px) {
   .sikshya-learning-shell--lesson .sikshya-learnContentCol > .sikshya-learnContent,
-  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent {
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContentCol > .sikshya-learnContent {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -2201,7 +2250,8 @@
   }
 
   .sikshya-learning-shell--lesson .sikshya-learnContentCol > .sikshya-learnContent,
-  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent {
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContentCol > .sikshya-learnContent {
     overflow: visible;
   }
 }
@@ -4222,6 +4272,63 @@
   border-radius: var(--sikshya-learn-radius-10);
 }
 
+/*
+ * Hosted lesson player (LessonLearnContent) — iframe + height:auto + aspect-ratio often collapses
+ * to zero height inside the Learn column (flex/min-height chains). Wrap uses :has(); link-only fallbacks omit it.
+ */
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video:has(iframe),
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video:has(video) {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 1rem;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--sikshya-learn-radius-10);
+  background: #0b1220;
+  overflow: hidden;
+}
+
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video iframe,
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video video {
+  display: block;
+  border: 0;
+  border-radius: inherit;
+}
+
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video:has(iframe) iframe,
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video:has(video) video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+}
+
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video:has(iframe) :where(.wp-block-embed, .wp-block-embed__wrapper, figure) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--video :where(.wp-block-embed, figure) iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--audio:has(audio) {
+  width: 100%;
+  margin: 0 0 1rem;
+}
+
+.sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--audio audio {
+  display: block;
+  width: 100%;
+}
+
 .sikshya-learnContent .sikshya-contentPanel :where(blockquote) {
   margin: 1em 0;
   padding: 12px 16px;
@@ -4437,6 +4544,33 @@
   border: 0;
   box-shadow: none;
   border-radius: 0;
+}
+
+.sikshya-curriculumOutline__link.is-locked {
+  cursor: not-allowed;
+  opacity: 0.88;
+}
+
+.sikshya-curriculumOutline__link.is-locked .sikshya-curriculumOutline__lessonTitle {
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-curriculumOutline__link.is-locked .sikshya-curriculumOutline__itemIcon {
+  opacity: 0.6;
+}
+
+.sikshya-curriculumOutline__lock {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  margin-inline-start: auto;
+  padding-inline-start: 6px;
+  color: var(--sikshya-learn-muted);
+  display: inline-flex;
+  align-items: center;
+}
+
+.sikshya-curriculumOutline__lock svg {
+  display: block;
 }
 
 .sikshya-curriculumOutline__itemIcon {

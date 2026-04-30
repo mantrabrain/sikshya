@@ -5,6 +5,7 @@ namespace Sikshya\Frontend\Public;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\InstructorMetricsRepository;
+use Sikshya\Admin\ReactAdminConfig;
 
 /**
  * Wires the "Teaching" (instructor) account view + sidebar group on the learner
@@ -189,6 +190,24 @@ final class InstructorAccountView
         $enrollments_completed = $enroll['enrollments_completed'];
         $recent_courses = $enroll['recent_courses'];
 
+        // Prefer the Sikshya course builder for edit links (consistent instructor UX).
+        // Older metrics repos used `get_edit_post_link()` which points to WP's classic editor.
+        if (is_array($recent_courses) && current_user_can('edit_sikshya_courses')) {
+            foreach ($recent_courses as $i => $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $cid = isset($row['course_id']) ? (int) $row['course_id'] : 0;
+                if ($cid <= 0) {
+                    continue;
+                }
+                $recent_courses[$i]['edit_url'] = ReactAdminConfig::reactAppUrl(
+                    'add-course',
+                    ['course_id' => (string) $cid]
+                );
+            }
+        }
+
         $data = [
             'user_id' => $uid,
             'published_courses' => $published,
@@ -202,9 +221,7 @@ final class InstructorAccountView
         /**
          * Allow Pro / addons to add deeper instructor metrics
          * (revenue share, recent learners, gradebook health, etc.).
-         *
-         * @param array<string, mixed> $data
-         * @param int                  $uid
+         * Passed values: instructor `$data` array and instructor user id `$uid`.
          */
         $data = apply_filters('sikshya_account_instructor_data', $data, $uid);
 

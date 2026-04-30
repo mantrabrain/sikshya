@@ -83,6 +83,11 @@ class PaymentRepository
         ];
         $data = wp_parse_args($data, $defaults);
 
+        $charge_kind = sanitize_key((string) ($data['charge_kind'] ?? 'checkout'));
+        if ($charge_kind !== 'renewal') {
+            $charge_kind = 'checkout';
+        }
+
         $wpdb->insert(
             $this->table_name,
             [
@@ -93,11 +98,52 @@ class PaymentRepository
                 'payment_method' => sanitize_text_field((string) $data['payment_method']),
                 'transaction_id' => sanitize_text_field((string) $data['transaction_id']),
                 'status' => sanitize_text_field((string) $data['status']),
+                'charge_kind' => $charge_kind,
                 'payment_date' => $data['payment_date'],
                 'gateway_response' => $data['gateway_response'] !== null ? wp_json_encode($data['gateway_response']) : null,
-            ]
+            ],
+            ['%d', '%d', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s']
         );
 
         return (int) $wpdb->insert_id;
+    }
+
+    /**
+     * Idempotency: return payment row id if this gateway transaction id was already recorded.
+     */
+    public function findIdByTransactionId(string $transaction_id): ?int
+    {
+        global $wpdb;
+
+        $transaction_id = sanitize_text_field($transaction_id);
+        if ($transaction_id === '' || !$this->tableExists()) {
+            return null;
+        }
+
+        $id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$this->table_name} WHERE transaction_id = %s LIMIT 1",
+                $transaction_id
+            )
+        );
+
+        if ($id === null || $id === '') {
+            return null;
+        }
+
+        $n = (int) $id;
+        return $n > 0 ? $n : null;
+    }
+
+    public function deleteById(int $id): bool
+    {
+        if ($id <= 0 || !$this->tableExists()) {
+            return false;
+        }
+
+        global $wpdb;
+        $ok = $wpdb->delete($this->table_name, ['id' => $id], ['%d']);
+
+        return $ok !== false && (int) $ok > 0;
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
@@ -9,6 +9,7 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
 import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
 import { CourseBuilderSkeleton, SkeletonLine } from '../components/shared/Skeleton';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { renderContentEditor } from './content-editors/editors';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import {
@@ -26,6 +27,7 @@ import { DateTimePickerField } from '../components/shared/DateTimePickerField';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 import { QuillField } from '../components/shared/QuillField';
 import { term, termLower } from '../lib/terminology';
+import { navIconForCurriculumRow } from '../lib/curriculumIcons';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
 const FIELD_INPUT =
@@ -818,16 +820,19 @@ function FieldInput(props: {
     );
   }
 
-  if (t === 'user_select' && cfg.multiple) {
-    const ids = Array.isArray(value) ? (value as number[]) : [];
+  if (t === 'user_select') {
+    const isMulti = Boolean(cfg.multiple);
+    const ids = isMulti
+      ? (Array.isArray(value) ? (value as number[]) : [])
+      : (value === undefined || value === null || value === '' ? [] : [Number(value) || 0]).filter((n) => n > 0);
     return (
       <MultiUserPickerField
         id={id}
         users={users}
         value={ids}
-        onChange={(next) => onChange(next)}
+        onChange={(next) => onChange(isMulti ? next : (next[0] ?? ''))}
         placeholder="Search instructors…"
-        hint="Type to search, click to add, and use × to remove."
+        hint={isMulti ? 'Type to search, click to add, and use × to remove.' : 'Type to search and click to select.'}
       />
     );
   }
@@ -1209,21 +1214,7 @@ function curriculumOutlineItems(contents: CurriculumContentItem[]): CurriculumCo
 }
 
 function curriculumItemIcon(item: CurriculumContentItem): string {
-  if (item.type === 'lesson') {
-    const lt = String(item.meta?.lesson_type || '').toLowerCase();
-    if (lt === 'video') return 'video';
-    if (lt === 'live') return 'schedule';
-    if (lt === 'scorm') return 'layers';
-    if (lt === 'h5p') return 'puzzle';
-    return 'bookOpen';
-  }
-  const m: Record<CurriculumContentItem['type'], string> = {
-    lesson: 'bookOpen',
-    quiz: 'puzzle',
-    assignment: 'clipboard',
-    question: 'helpCircle',
-  };
-  return m[item.type] || 'plusDocument';
+  return navIconForCurriculumRow(item.type, item.meta?.lesson_type ?? '');
 }
 
 function contentTypeToPostType(t: CurriculumContentItem['type']): string {
@@ -1337,10 +1328,10 @@ function sectionIconName(sectionKey: string): string {
 function builderTabIcon(tabId: string): string {
   const m: Record<string, string> = {
     course: 'course',
-    pricing: 'chart',
+    pricing: 'creditCard',
     curriculum: 'curriculumOutline',
     settings: 'cog',
-    grading: 'badge',
+    grading: 'pencil',
   };
   return m[tabId] || 'course';
 }
@@ -1509,10 +1500,13 @@ function CourseBuilderEditor({
   const [addContentTitle, setAddContentTitle] = useState('');
   const [addContentBusy, setAddContentBusy] = useState(false);
   const [addContentError, setAddContentError] = useState<unknown>(null);
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const toast = useTopRightToast(3800);
   const [saveError, setSaveError] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
   const activeEmbeddedSaveRef = useRef<null | (() => Promise<boolean>)>(null);
+  const registerEmbeddedSave = useCallback((fn: (() => Promise<boolean>) | null) => {
+    activeEmbeddedSaveRef.current = fn;
+  }, []);
   const [openSectionKey, setOpenSectionKey] = useState<string | null>(null);
   const [chapterModalOpen, setChapterModalOpen] = useState(false);
   const [newChapterTitle, setNewChapterTitle] = useState('New chapter');
@@ -1673,14 +1667,6 @@ function CourseBuilderEditor({
     setOpenSectionKey((prev) => (prev && keys.includes(prev) ? prev : keys[0] ?? null));
   }, [activeTab, tabFields, bootstrap.data]);
 
-  useEffect(() => {
-    if (!saveSuccess) {
-      return;
-    }
-    const t = window.setTimeout(() => setSaveSuccess(null), 4500);
-    return () => window.clearTimeout(t);
-  }, [saveSuccess]);
-
   const handleFieldChange = (fid: string, v: unknown) => {
     setValues((prev) => {
       const next: Record<string, unknown> = { ...prev, [fid]: v };
@@ -1695,15 +1681,18 @@ function CourseBuilderEditor({
   };
 
   const onSave = async (status: string) => {
-    if (status === 'publish' && activeEmbeddedSaveRef.current) {
+    if (activeEmbeddedSaveRef.current) {
       const ok = await activeEmbeddedSaveRef.current();
       if (!ok) {
-        setSaveError(new Error('Could not save the open content item. Fix errors in the editor and try Publish again.'));
+        setSaveError(
+          new Error(
+            'Could not save the open lesson, quiz, assignment, chapter, or other content. Fix any errors below, save that item if needed, then try again.'
+          )
+        );
         return;
       }
     }
     setSaving(true);
-    setSaveSuccess(null);
     setSaveError(null);
     try {
       const payload: Record<string, unknown> = { ...values, course_status: status };
@@ -1729,7 +1718,12 @@ function CourseBuilderEditor({
         navigateHref(appViewHref(config, view, { course_id: String(newId) }));
         return;
       }
-      setSaveSuccess(res.message || 'Saved.');
+      const msg = res.message || 'Saved.';
+      if (status === 'publish') {
+        toast.success('Published', msg);
+      } else {
+        toast.success('Saved', msg);
+      }
       bootstrap.refetch();
     } catch (e) {
       setSaveError(e);
@@ -2086,20 +2080,6 @@ function CourseBuilderEditor({
         }}
         busy={addContentBusy}
       />
-      {saveSuccess && (
-        <div
-          className="mb-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-100"
-          role="status"
-        >
-          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-200/80 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
-            ✓
-          </span>
-          <div>
-            <p className="font-medium">Saved</p>
-            <p className="mt-0.5 text-emerald-800/90 dark:text-emerald-100/90">{saveSuccess}</p>
-          </div>
-        </div>
-      )}
       {saveError && (
         <div className="mb-4">
           <ApiErrorPanel
@@ -2111,6 +2091,8 @@ function CourseBuilderEditor({
           />
         </div>
       )}
+
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
       {bootstrap.loading && <CourseBuilderSkeleton />}
       {bootstrap.error && (
@@ -2706,9 +2688,7 @@ function CourseBuilderEditor({
                         entityLabel: 'Chapter',
                         embedded: true,
                         forcedCourseId: courseId,
-                        exposeSave: (fn) => {
-                          activeEmbeddedSaveRef.current = fn;
-                        },
+                        exposeSave: registerEmbeddedSave,
                       })}
                     </div>
                   ) : (
@@ -2720,9 +2700,7 @@ function CourseBuilderEditor({
                         backHref: builderBackHref,
                         entityLabel: entityLabelForContent(curriculumSelection.item.type),
                         embedded: true,
-                        exposeSave: (fn) => {
-                          activeEmbeddedSaveRef.current = fn;
-                        },
+                        exposeSave: registerEmbeddedSave,
                       })}
                     </div>
                   )}

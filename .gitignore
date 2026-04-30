@@ -1,2 +1,5 @@
 /node_modules/
 .DS_Store
+
+# Vite may emit this into outDir; production build removes it (see scripts/rm-admin-spa-html.mjs).
+assets/admin/react/index.html

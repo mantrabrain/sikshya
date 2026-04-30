@@ -5,8 +5,11 @@
  * @package Sikshya
  */
 
+use Sikshya\Constants\PostTypes;
+use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Frontend\Public\SingleCourseTemplateData;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
+use Sikshya\Services\Settings;
 
 sikshya_get_header();
 
@@ -275,8 +278,16 @@ while (have_posts()) :
                                     <span><?php echo esc_html(sprintf(__('Est. %s hours total', 'sikshya'), $page_model->getDurationLabel())); ?></span>
                                 <?php endif; ?>
                             </p>
+                            <button
+                                type="button"
+                                class="sikshya-btn sikshya-btn--outline sikshya-btn--sm"
+                                data-sikshya-toggle-all-chapters
+                                aria-controls="sikshya-course-curriculum-accordion"
+                            >
+                                <?php esc_html_e('Expand all', 'sikshya'); ?>
+                            </button>
                         </div>
-                        <div class="sikshya-course-lp__accordion">
+                        <div class="sikshya-course-lp__accordion" id="sikshya-course-curriculum-accordion">
                             <?php foreach ($curriculum as $block) : ?>
                                 <?php
                                 $chapter = $block['chapter'] ?? null;
@@ -317,27 +328,78 @@ while (have_posts()) :
                                                 }
                                                 $type = get_post_type($item);
                                                 $label = function_exists('sikshya_public_content_type_label') ? sikshya_public_content_type_label($type) : '';
-                                                $icon_html = function_exists('sikshya_public_content_type_icon_html') ? sikshya_public_content_type_icon_html($type) : '';
-                                                $can_open = $page_model->isEnrolled();
-                                                $item_url = get_permalink($item);
+                                                $lesson_type_for_icon = '';
+                                                if ($type === PostTypes::LESSON) {
+                                                    $lesson_type_for_icon = sanitize_key(
+                                                        (string) get_post_meta((int) $item->ID, '_sikshya_lesson_type', true)
+                                                    );
+                                                }
+                                                $icon_html = '';
+                                                if (function_exists('sikshya_curriculum_outline_row_type_icon_html')
+                                                    && function_exists('sikshya_outline_type_key_from_post_type')) {
+                                                    $icon_html = sikshya_curriculum_outline_row_type_icon_html(
+                                                        sikshya_outline_type_key_from_post_type($type),
+                                                        $lesson_type_for_icon,
+                                                        'course'
+                                                    );
+                                                } elseif (function_exists('sikshya_public_content_type_icon_html')) {
+                                                    $icon_html = sikshya_public_content_type_icon_html($type);
+                                                }
+
+                                                $item_is_previewable = Settings::isTruthy(get_post_meta((int) $item->ID, '_sikshya_is_free', true));
+                                                $can_open = $page_model->isEnrolled() || $item_is_previewable;
+
+                                                $outline_li_class = 'sikshya-course-lp__outline-item';
+                                                if (!$can_open) {
+                                                    $outline_li_class .= ' sikshya-course-lp__outline-item--locked';
+                                                }
+                                                if ($item_is_previewable) {
+                                                    $outline_li_class .= ' sikshya-course-lp__outline-item--preview';
+                                                }
+
+                                                $item_url = '';
+                                                if ($can_open) {
+                                                    if (
+                                                        in_array(
+                                                            $type,
+                                                            [PostTypes::LESSON, PostTypes::QUIZ, PostTypes::ASSIGNMENT],
+                                                            true
+                                                        )
+                                                    ) {
+                                                        $item_url = PublicPageUrls::learnContentForPost($item);
+                                                    } else {
+                                                        $plink = get_permalink($item);
+                                                        $item_url = is_string($plink) ? $plink : '';
+                                                    }
+                                                }
                                                 ?>
-                                                <li class="sikshya-course-lp__outline-item">
+                                                <li class="<?php echo esc_attr($outline_li_class); ?>">
                                                     <span class="sikshya-course-lp__outline-icon">
                                                         <?php
-                                                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed SVG markup from sikshya_public_content_type_icon_html().
+                                                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed SVG from sikshya_curriculum_outline_row_type_icon_html().
                                                         echo $icon_html;
                                                         ?>
                                                     </span>
                                                     <div class="sikshya-course-lp__outline-body">
-                                                        <?php if ($can_open && is_string($item_url) && $item_url !== '') : ?>
+                                                        <?php if ($can_open && $item_url !== '') : ?>
                                                             <a class="sikshya-course-lp__outline-link" href="<?php echo esc_url($item_url); ?>">
                                                                 <span class="sikshya-course-lp__outline-title"><?php echo esc_html($item->post_title); ?></span>
                                                                 <span class="sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
                                                             </a>
                                                         <?php else : ?>
-                                                            <span class="sikshya-course-lp__outline-locked">
-                                                                <span class="sikshya-course-lp__outline-title"><?php echo esc_html($item->post_title); ?></span>
-                                                                <span class="sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
+                                                            <span class="sikshya-course-lp__outline-locked" title="<?php echo esc_attr__('Enroll to unlock this content.', 'sikshya'); ?>">
+                                                                <span class="sikshya-course-lp__outline-locked-text">
+                                                                    <span class="sikshya-course-lp__outline-title"><?php echo esc_html($item->post_title); ?></span>
+                                                                    <span class="sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
+                                                                </span>
+                                                                <?php if (function_exists('sikshya_curriculum_lock_icon_html')) : ?>
+                                                                    <span class="sikshya-course-lp__outline-lockIcon" aria-hidden="true">
+                                                                        <?php
+                                                                        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- fixed SVG markup.
+                                                                        echo sikshya_curriculum_lock_icon_html();
+                                                                        ?>
+                                                                    </span>
+                                                                <?php endif; ?>
                                                             </span>
                                                         <?php endif; ?>
                                                     </div>
@@ -350,6 +412,54 @@ while (have_posts()) :
                                 </details>
                             <?php endforeach; ?>
                         </div>
+                        <script>
+                          (function () {
+                            var root = document.getElementById('sikshya-course-curriculum-accordion');
+                            if (!root) return;
+                            var btn = document.querySelector('[data-sikshya-toggle-all-chapters]');
+                            if (!btn) return;
+
+                            var LABEL_EXPAND = <?php echo wp_json_encode(__('Expand all', 'sikshya')); ?>;
+                            var LABEL_COLLAPSE = <?php echo wp_json_encode(__('Collapse all', 'sikshya')); ?>;
+
+                            function chapters() {
+                              return Array.prototype.slice.call(
+                                root.querySelectorAll('details.sikshya-course-lp__chapter')
+                              );
+                            }
+
+                            function isAllOpen(list) {
+                              for (var i = 0; i < list.length; i++) {
+                                if (!list[i].open) return false;
+                              }
+                              return list.length > 0;
+                            }
+
+                            function syncLabel() {
+                              var list = chapters();
+                              var allOpen = isAllOpen(list);
+                              btn.textContent = allOpen ? LABEL_COLLAPSE : LABEL_EXPAND;
+                              btn.setAttribute('aria-expanded', allOpen ? 'true' : 'false');
+                            }
+
+                            btn.addEventListener('click', function (e) {
+                              e.preventDefault();
+                              var list = chapters();
+                              var allOpen = isAllOpen(list);
+                              for (var i = 0; i < list.length; i++) {
+                                list[i].open = !allOpen;
+                              }
+                              syncLabel();
+                            });
+
+                            root.addEventListener('toggle', function (e) {
+                              if (!e || !e.target || e.target.tagName !== 'DETAILS') return;
+                              syncLabel();
+                            }, true);
+
+                            syncLabel();
+                          })();
+                        </script>
                     </section>
                 <?php endif; ?>
 

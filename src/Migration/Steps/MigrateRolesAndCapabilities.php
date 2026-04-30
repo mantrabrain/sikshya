@@ -41,29 +41,18 @@ final class MigrateRolesAndCapabilities extends AbstractStep
         $this->markRunning($state);
 
         if ($dryRun) {
-            $logger->info('[dry-run] Would invoke Installer::installRoles() to ensure roles exist.');
+            $logger->info('[dry-run] Would invoke Installer::syncSikshyaRoleCapabilities() to ensure roles exist.');
             $this->markComplete($state);
             return 0;
         }
 
-        // Installer keeps the role grants idempotent — `add_role` is a no-op
-        // on existing roles, and admin caps are added via `add_cap` which is
-        // also idempotent. We invoke the public install entry point via
-        // reflection of the private method to avoid duplicating the cap list.
-        if (class_exists(Installer::class) && method_exists(Installer::class, 'install')) {
+        if (class_exists(Installer::class)) {
             try {
-                $reflection = new \ReflectionClass(Installer::class);
-                if ($reflection->hasMethod('installRoles')) {
-                    $method = $reflection->getMethod('installRoles');
-                    $method->setAccessible(true);
-                    $method->invoke(null);
-                    $state->incrementStepCount($this->id(), 'roles_synced', 3);
-                    $logger->info('Installer::installRoles() completed.');
-                }
+                Installer::syncSikshyaRoleCapabilities();
+                $state->incrementStepCount($this->id(), 'roles_synced', 3);
+                $logger->info('Installer::syncSikshyaRoleCapabilities() completed.');
             } catch (\Throwable $e) {
-                $logger->warning('Could not invoke Installer::installRoles(): ' . $e->getMessage());
-                // Fall back to defensive add_role calls so subsequent steps
-                // depending on the roles continue to work.
+                $logger->warning('Could not invoke Installer::syncSikshyaRoleCapabilities(): ' . $e->getMessage());
                 $this->fallbackRoles();
             }
         } else {

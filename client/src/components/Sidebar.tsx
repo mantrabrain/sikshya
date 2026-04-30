@@ -32,6 +32,10 @@ function effectiveNavPage(currentPage: string): string {
   if (currentPage === 'email-template-edit' || currentPage === 'email-templates') {
     return 'email-hub';
   }
+  // Commerce → Sales hub: standalone lists + detail URLs use other view ids than `sales`.
+  if (currentPage === 'sales' || currentPage === 'orders' || currentPage === 'order' || currentPage === 'payments' || currentPage === 'payment') {
+    return 'sales';
+  }
   return currentPage;
 }
 
@@ -217,19 +221,21 @@ export function Sidebar({
   pluginUrl,
   branding,
 }: Props) {
+  // Tools lives in the top header; omit from the sidebar to reduce duplication.
+  const visibleItems = useMemo(() => items.filter((item) => item.id !== 'tools'), [items]);
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setOpen((prev) => {
       const next = { ...prev };
-      items.forEach((item) => {
+      visibleItems.forEach((item) => {
         if (item.children?.length && branchActive(item, currentPage)) {
           next[item.id] = true;
         }
       });
       return next;
     });
-  }, [currentPage, items]);
+  }, [currentPage, visibleItems]);
 
   const wpHome = `${adminUrl.replace(/\/?$/, '/')}index.php`;
   const title = branding?.pluginName?.trim() ? branding.pluginName.trim() : 'Sikshya';
@@ -340,7 +346,7 @@ export function Sidebar({
         </div>
       </div>
       <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2.5 py-4">
-        {items.map((item) => (
+        {visibleItems.map((item) => (
           <NavBlock
             key={item.id}
             item={item}

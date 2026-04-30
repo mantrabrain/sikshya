@@ -403,6 +403,27 @@ final class CheckoutService
 
         $gateway = strtolower($gateway);
 
+        // Subscription-mode checkout: allow Pro/addons to create true recurring subscriptions
+        // for gateways before core falls back to one-time payment sessions.
+        $metaDecoded = [];
+        if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+            $decoded = json_decode((string) $order->meta, true);
+            if (is_array($decoded)) {
+                $metaDecoded = $decoded;
+            }
+        }
+        $is_sub_checkout = is_array($metaDecoded)
+            && isset($metaDecoded['checkout_mode'])
+            && (string) $metaDecoded['checkout_mode'] === 'subscription'
+            && isset($metaDecoded['subscription_plan_id'])
+            && (int) $metaDecoded['subscription_plan_id'] > 0;
+        if ($is_sub_checkout) {
+            $payload = apply_filters('sikshya_checkout_start_gateway_subscription_session', null, $order, $gateway, $order_id, $this);
+            if (is_array($payload)) {
+                return $payload;
+            }
+        }
+
         if ($gateway === 'offline') {
             if (!$this->isOfflinePaymentEnabled()) {
                 throw new \RuntimeException(__('Offline payment is disabled.', 'sikshya'));
@@ -550,8 +571,33 @@ final class CheckoutService
         $user = wp_get_current_user();
         $email = ($user && $user->exists()) ? (string) $user->user_email : '';
 
+        $metaDecoded = [];
+        if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+            $decoded = json_decode((string) $order->meta, true);
+            if (is_array($decoded)) {
+                $metaDecoded = $decoded;
+            }
+        }
+        $is_sub_checkout = is_array($metaDecoded)
+            && isset($metaDecoded['checkout_mode'])
+            && (string) $metaDecoded['checkout_mode'] === 'subscription'
+            && isset($metaDecoded['subscription_plan_id'])
+            && (int) $metaDecoded['subscription_plan_id'] > 0;
+        $sub_plan_id = $is_sub_checkout ? (int) $metaDecoded['subscription_plan_id'] : 0;
+        $interval_unit = $is_sub_checkout && isset($metaDecoded['subscription_interval_unit'])
+            ? sanitize_key((string) $metaDecoded['subscription_interval_unit'])
+            : '';
+        if ($is_sub_checkout && $interval_unit === '') {
+            // Default: Pro plans use day/week/month/year; if missing, assume monthly.
+            $interval_unit = 'month';
+        }
+        $allowed_intervals = ['day', 'week', 'month', 'year'];
+        if ($is_sub_checkout && !in_array($interval_unit, $allowed_intervals, true)) {
+            $interval_unit = 'month';
+        }
+
         $body = [
-            'mode' => 'payment',
+            'mode' => $is_sub_checkout ? 'subscription' : 'payment',
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
             'client_reference_id' => (string) $order->id,
@@ -565,6 +611,11 @@ final class CheckoutService
             ),
             'line_items[0][quantity]' => '1',
         ];
+        if ($is_sub_checkout) {
+            $body['metadata[checkout_mode]'] = 'subscription';
+            $body['metadata[subscription_plan_id]'] = (string) $sub_plan_id;
+            $body['line_items[0][price_data][recurring][interval]'] = $interval_unit;
+        }
         if ($email !== '' && is_email($email)) {
             $body['customer_email'] = $email;
         }
@@ -601,6 +652,34 @@ final class CheckoutService
     }
 
     /**
+     * Retrieve a Stripe subscription object.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function retrieveStripeSubscription(string $subscription_id): ?array
+    {
+        $secret = (string) $this->settings()->getSetting('stripe_secret_key', '');
+        if ($secret === '' || $subscription_id === '') {
+            return null;
+        }
+
+        $res = wp_remote_get(
+            'https://api.stripe.com/v1/subscriptions/' . rawurlencode($subscription_id),
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $secret,
+                ],
+            ]
+        );
+        if (is_wp_error($res)) {
+            return null;
+        }
+        $json = json_decode((string) wp_remote_retrieve_body($res), true);
+        return is_array($json) ? $json : null;
+    }
+
+    /**
      * PayPal REST host: uses global {@see enable_test_mode} only.
      */
     private function paypalRestBase(): string
@@ -609,6 +688,49 @@ final class CheckoutService
         $is_test = $test === true || $test === 1 || $test === '1' || $test === 'true' || $test === 'yes' || $test === 'on';
 
         return $is_test ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
+    }
+
+    /**
+     * Public accessor for PayPal REST API base (sandbox vs live).
+     */
+    public function paypalRestBasePublic(): string
+    {
+        return $this->paypalRestBase();
+    }
+
+    /**
+     * Create a PayPal REST access token using configured credentials.
+     */
+    public function paypalAccessToken(): string
+    {
+        $client_id = (string) $this->settings()->getSetting('paypal_client_id', '');
+        $secret = (string) $this->settings()->getSetting('paypal_secret', '');
+        $base = $this->paypalRestBase();
+        if ($client_id === '' || $secret === '') {
+            throw new \RuntimeException(__('PayPal is not configured.', 'sikshya'));
+        }
+
+        $token_res = wp_remote_post(
+            $base . '/v1/oauth2/token',
+            [
+                'timeout' => 30,
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $secret),
+                ],
+                'body' => ['grant_type' => 'client_credentials'],
+            ]
+        );
+        if (is_wp_error($token_res)) {
+            throw new \RuntimeException($token_res->get_error_message());
+        }
+
+        $token_body = json_decode((string) wp_remote_retrieve_body($token_res), true);
+        $access = is_array($token_body) ? (string) ($token_body['access_token'] ?? '') : '';
+        if ($access === '') {
+            throw new \RuntimeException(__('PayPal token failed.', 'sikshya'));
+        }
+
+        return $access;
     }
 
     private function createPayPalOrder(object $order): array
@@ -645,6 +767,13 @@ final class CheckoutService
         $value = number_format((float) $order->total, 2, '.', '');
         $currency = strtoupper((string) $order->currency);
 
+        // Guests return from PayPal without a WP session. Include public_token so
+        // the checkout return page can confirm payment and redirect to receipt.
+        $publicToken = isset($order->public_token) && is_string($order->public_token) ? (string) $order->public_token : '';
+        if ($publicToken === '') {
+            $publicToken = (new \Sikshya\Database\Repositories\OrderRepository())->ensurePublicToken((int) $order->id);
+        }
+
         $payload = [
             'intent' => 'CAPTURE',
             'application_context' => [
@@ -653,6 +782,7 @@ final class CheckoutService
                     [
                         'sikshya_paypal_return' => '1',
                         'order_id' => (string) $order->id,
+                        'public_token' => $publicToken,
                     ],
                     PublicPageUrls::url('checkout')
                 ),
@@ -660,6 +790,7 @@ final class CheckoutService
                     [
                         'sikshya_paypal_cancel' => '1',
                         'order_id' => (string) $order->id,
+                        'public_token' => $publicToken,
                     ],
                     PublicPageUrls::url('checkout')
                 ),
@@ -989,6 +1120,7 @@ final class CheckoutService
             [
                 'sikshya_mollie_return' => '1',
                 'order_id' => (string) $order->id,
+                'public_token' => isset($order->public_token) ? (string) $order->public_token : '',
             ],
             PublicPageUrls::url('checkout')
         );
@@ -1057,6 +1189,19 @@ final class CheckoutService
         $secret = (string) $this->settings()->getSetting('paystack_secret_key', '');
         $user = wp_get_current_user();
         $email = ($user && $user->exists()) ? (string) $user->user_email : '';
+        if ($email === '') {
+            // Guest checkout: Paystack still needs a customer email. Use the guest email
+            // captured on the order during /checkout/session.
+            $meta = [];
+            if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+                $decoded = json_decode($order->meta, true);
+                if (is_array($decoded)) {
+                    $meta = $decoded;
+                }
+            }
+            $guest = isset($meta['guest']) && is_array($meta['guest']) ? $meta['guest'] : [];
+            $email = isset($guest['email']) ? sanitize_email((string) $guest['email']) : '';
+        }
         if ($email === '' || !is_email($email)) {
             throw new \RuntimeException(__('A valid account email is required for Paystack.', 'sikshya'));
         }
@@ -1076,6 +1221,7 @@ final class CheckoutService
             [
                 'sikshya_paystack_return' => '1',
                 'order_id' => (string) $order->id,
+                'public_token' => isset($order->public_token) ? (string) $order->public_token : '',
             ],
             PublicPageUrls::url('checkout')
         );
@@ -1143,6 +1289,8 @@ final class CheckoutService
             [
                 'sikshya_razorpay_return' => '1',
                 'order_id' => (string) $order->id,
+                // Guest checkout confirm requires the public token to authenticate the order.
+                'public_token' => isset($order->public_token) ? (string) $order->public_token : '',
             ],
             PublicPageUrls::url('checkout')
         );

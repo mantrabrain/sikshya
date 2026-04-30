@@ -260,7 +260,12 @@ final class AdminTablesRepository
     }
 
     /**
-     * @param array{per_page:int,page:int} $args
+     * @param array{
+     *   per_page:int,
+     *   page:int,
+     *   status?:string,
+     *   charge_kind?:string,
+     * } $args
      * @return array{items: array<int, array<string, mixed>>, total:int, pages:int, page:int, per_page:int, table_missing?:bool}
      */
     public function paymentsPaged(array $args): array
@@ -283,25 +288,57 @@ final class AdminTablesRepository
         $page = max(1, (int) ($args['page'] ?? 1));
         $offset = ($page - 1) * $per_page;
 
-        $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+        $status_filter = sanitize_key((string) ($args['status'] ?? ''));
+        $charge_filter = sanitize_key((string) ($args['charge_kind'] ?? ''));
+        $allowed_status = ['pending', 'completed', 'failed', 'refunded'];
+        if ($status_filter !== '' && !in_array($status_filter, $allowed_status, true)) {
+            $status_filter = '';
+        }
+        if ($charge_filter !== '' && !in_array($charge_filter, ['checkout', 'renewal'], true)) {
+            $charge_filter = '';
+        }
+
+        $where_fragments = [];
+        $prep = [];
+        if ($status_filter !== '') {
+            $where_fragments[] = 'py.status = %s';
+            $prep[] = $status_filter;
+        }
+        if ($charge_filter === 'renewal') {
+            $where_fragments[] = 'py.charge_kind = %s';
+            $prep[] = 'renewal';
+        } elseif ($charge_filter === 'checkout') {
+            $where_fragments[] = "(py.charge_kind = 'checkout' OR py.charge_kind = '' OR py.charge_kind IS NULL)";
+        }
+
+        $where_sql = $where_fragments !== [] ? 'WHERE ' . implode(' AND ', $where_fragments) : '';
+
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- WHERE built from placeholders + static fragments
+        $count_query = "SELECT COUNT(*) FROM {$table} py {$where_sql}";
+        $total = $prep === []
+            ? (int) $wpdb->get_var($count_query)
+            : (int) $wpdb->get_var($wpdb->prepare($count_query, ...$prep));
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
         $course_type = PostTypes::COURSE;
 
+        $list_prep = array_merge($prep, [$course_type, $per_page, $offset]);
         $sql = $wpdb->prepare(
-            "SELECT py.id, py.user_id, py.course_id, py.amount, py.currency, py.payment_method, py.transaction_id, py.status, py.payment_date,
+            "SELECT py.id, py.user_id, py.course_id, py.amount, py.currency, py.payment_method, py.transaction_id, py.status, py.charge_kind, py.payment_date,
                 u.display_name AS payer_name, u.user_email AS payer_email, p.post_title AS course_title
             FROM {$table} py
             LEFT JOIN {$wpdb->users} u ON py.user_id = u.ID
             LEFT JOIN {$wpdb->posts} p ON py.course_id = p.ID AND p.post_type = %s
+            {$where_sql}
             ORDER BY py.payment_date DESC
             LIMIT %d OFFSET %d",
-            $course_type,
-            $per_page,
-            $offset
+            ...$list_prep
         );
 
         $rows = $wpdb->get_results($sql);
         $items = [];
         foreach ($rows as $row) {
+            $ck = isset($row->charge_kind) ? sanitize_key((string) $row->charge_kind) : '';
             $items[] = [
                 'id' => (int) $row->id,
                 'user_id' => (int) $row->user_id,
@@ -311,6 +348,7 @@ final class AdminTablesRepository
                 'payment_method' => (string) ($row->payment_method ?? ''),
                 'transaction_id' => (string) ($row->transaction_id ?? ''),
                 'status' => (string) ($row->status ?? ''),
+                'charge_kind' => $ck === 'renewal' ? 'renewal' : 'checkout',
                 'payment_date' => (string) ($row->payment_date ?? ''),
                 'payer_name' => (string) ($row->payer_name ?? ''),
                 'payer_email' => (string) ($row->payer_email ?? ''),

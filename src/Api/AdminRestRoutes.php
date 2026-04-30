@@ -37,6 +37,7 @@ use Sikshya\Services\PermalinkService;
 use Sikshya\Services\SystemInfoService;
 use Sikshya\Services\InstructorApplicationsService;
 use Sikshya\Services\StatsUsage;
+use Sikshya\Security\AdminBackendAccess;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -258,7 +259,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getSettingsSchema'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionManageOptions'],
             ],
         ]);
 
@@ -266,7 +267,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getSettingsValues'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionManageOptions'],
                 'args' => [
                     'tab' => [
                         'required' => true,
@@ -281,7 +282,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'saveSettings'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionManageOptions'],
             ],
         ]);
 
@@ -289,7 +290,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'resetSettings'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionManageOptions'],
             ],
         ]);
 
@@ -354,7 +355,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getLicensingPayload'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionManageOptions'],
             ],
         ]);
 
@@ -362,7 +363,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getShellMeta'],
-                /** Same gate as the unified React admin screen (`edit_posts`). */
+                /** LMS staff backend (non-students). */
                 'permission_callback' => [$this, 'permissionReactApp'],
                 'args' => [
                     'view' => [
@@ -551,7 +552,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getAdminPayments'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
                 'args' => [
                     'page' => [
                         'type' => 'integer',
@@ -568,16 +569,29 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/admin/payments/bulk', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'bulkAdminPayments'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/payments/(?P<id>\d+)', [
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getAdminPayment'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
             [
                 'methods' => WP_REST_Server::EDITABLE,
                 'callback' => [$this, 'patchAdminPayment'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
+            ],
+            [
+                'methods' => WP_REST_Server::DELETABLE,
+                'callback' => [$this, 'deleteAdminPayment'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
 
@@ -614,7 +628,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getAdminOrders'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
                 'args' => [
                     'page' => [
                         'type' => 'integer',
@@ -632,7 +646,15 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'createAdminManualOrder'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
+            ],
+        ]);
+
+        register_rest_route($namespace, '/admin/orders/bulk', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'bulkAdminOrders'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
 
@@ -640,12 +662,17 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getAdminOrder'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
             [
                 'methods' => WP_REST_Server::EDITABLE,
                 'callback' => [$this, 'patchAdminOrder'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
+            ],
+            [
+                'methods' => WP_REST_Server::DELETABLE,
+                'callback' => [$this, 'deleteAdminOrder'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
 
@@ -653,7 +680,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'markAdminOrderPaid'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
 
@@ -661,12 +688,12 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getAdminCoupons'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'createAdminCoupon'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
 
@@ -674,7 +701,7 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::EDITABLE,
                 'callback' => [$this, 'patchAdminCoupon'],
-                'permission_callback' => [$this, 'permissionAdmin'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
     }
@@ -738,28 +765,17 @@ class AdminRestRoutes
 
     public function canManageCourseBuilder(): bool
     {
-        return current_user_can('manage_sikshya')
-            || current_user_can('edit_sikshya_courses');
+        return AdminBackendAccess::canAccessStaffBackend();
     }
 
     /**
-     * Logged-in admin (cookie + X-WP-Nonce) or valid JWT Bearer.
+     * LMS staff backend (cookie + nonce or JWT): matches {@see AdminBackendAccess::canAccessStaffBackend()}.
      *
      * @return bool|WP_Error
      */
-    /**
-     * Anyone who can open the Sikshya React app (`admin.php?page=sikshya`).
-     *
-     * @return bool
-     */
-    public function permissionReactApp()
+    public function permissionReactApp(WP_REST_Request $request)
     {
-        return current_user_can('edit_posts');
-    }
-
-    public function permissionAdmin(WP_REST_Request $request)
-    {
-        if ($this->canManageCourseBuilder()) {
+        if (AdminBackendAccess::canAccessStaffBackend()) {
             return true;
         }
 
@@ -778,9 +794,85 @@ class AdminRestRoutes
             return $uid;
         }
 
-        wp_set_current_user($uid);
+        wp_set_current_user((int) $uid);
 
-        return $this->canManageCourseBuilder()
+        return AdminBackendAccess::canAccessStaffBackend()
+            ? true
+            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
+    }
+
+    /**
+     * Site administrator only (payments, orders, coupons, Sikshya settings in wp-admin).
+     *
+     * @return bool|WP_Error
+     */
+    public function permissionManageOptions(WP_REST_Request $request)
+    {
+        if (AdminBackendAccess::canManageSalesAndSettings()) {
+            return true;
+        }
+
+        $jwt = JwtAuthService::bearerFromRequest($request);
+        if ($jwt === '') {
+            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
+        }
+
+        $svc = $this->plugin->getService('jwtAuth');
+        if (!$svc instanceof JwtAuthService) {
+            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
+        }
+
+        $uid = $svc->validateToken($jwt);
+        if (is_wp_error($uid)) {
+            return $uid;
+        }
+
+        wp_set_current_user((int) $uid);
+
+        return AdminBackendAccess::canManageSalesAndSettings()
+            ? true
+            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
+    }
+
+    /**
+     * Same as {@see self::permissionManageOptions()} — commerce UI is `manage_options` only.
+     *
+     * @return bool|WP_Error
+     */
+    public function permissionSalesCommerce(WP_REST_Request $request)
+    {
+        return $this->permissionManageOptions($request);
+    }
+
+    /**
+     * Logged-in staff (cookie + nonce) or valid JWT; {@see AdminBackendAccess::canAccessStaffBackend()}.
+     *
+     * @return bool|WP_Error
+     */
+    public function permissionAdmin(WP_REST_Request $request)
+    {
+        if (AdminBackendAccess::canAccessStaffBackend()) {
+            return true;
+        }
+
+        $jwt = JwtAuthService::bearerFromRequest($request);
+        if ($jwt === '') {
+            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
+        }
+
+        $svc = $this->plugin->getService('jwtAuth');
+        if (!$svc instanceof JwtAuthService) {
+            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
+        }
+
+        $uid = $svc->validateToken($jwt);
+        if (is_wp_error($uid)) {
+            return $uid;
+        }
+
+        wp_set_current_user((int) $uid);
+
+        return AdminBackendAccess::canAccessStaffBackend()
             ? true
             : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
     }
@@ -793,7 +885,7 @@ class AdminRestRoutes
      */
     public function permissionAdminOrCanEditCertificate(WP_REST_Request $request)
     {
-        if ($this->canManageCourseBuilder()) {
+        if (AdminBackendAccess::canAccessStaffBackend()) {
             return true;
         }
 
@@ -824,9 +916,9 @@ class AdminRestRoutes
             return $uid;
         }
 
-        wp_set_current_user($uid);
+        wp_set_current_user((int) $uid);
 
-        if ($this->canManageCourseBuilder()) {
+        if (AdminBackendAccess::canAccessStaffBackend()) {
             return true;
         }
 
@@ -2186,9 +2278,13 @@ class AdminRestRoutes
     public function getAdminPayments(WP_REST_Request $request): WP_REST_Response
     {
         $repo = new AdminTablesRepository();
+        $status = sanitize_key((string) ($request->get_param('status') ?? ''));
+        $charge_kind = sanitize_key((string) ($request->get_param('charge_kind') ?? ''));
         $r = $repo->paymentsPaged([
             'per_page' => max(1, min(100, absint($request->get_param('per_page') ?: 30))),
             'page' => max(1, absint($request->get_param('page') ?: 1)),
+            'status' => $status,
+            'charge_kind' => $charge_kind,
         ]);
 
         return new WP_REST_Response(
@@ -2264,10 +2360,14 @@ class AdminRestRoutes
                     'payment_method' => (string) ($row->payment_method ?? ''),
                     'transaction_id' => (string) ($row->transaction_id ?? ''),
                     'status' => (string) ($row->status ?? ''),
+                    'charge_kind' => (isset($row->charge_kind) && sanitize_key((string) $row->charge_kind) === 'renewal')
+                        ? 'renewal'
+                        : 'checkout',
                     'payment_date' => (string) ($row->payment_date ?? ''),
                     'payer_name' => $payer_name,
                     'payer_email' => $payer_email,
                     'gateway_response' => $gateway_response,
+                    'related_order_id' => self::relatedOrderIdFromPaymentGatewayResponse($gateway_response),
                 ],
             ],
             200
@@ -2345,6 +2445,166 @@ class AdminRestRoutes
             ],
             $updated ? 200 : 500
         );
+    }
+
+    public function deleteAdminPayment(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid payment id.', 'sikshya')],
+                400
+            );
+        }
+
+        $repo = new \Sikshya\Database\Repositories\PaymentRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Payments table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        $ok = $repo->deleteById($id);
+
+        return new WP_REST_Response(
+            [
+                'ok' => (bool) $ok,
+                'deleted' => $ok ? 1 : 0,
+                'message' => $ok ? __('Payment deleted.', 'sikshya') : __('Could not delete payment.', 'sikshya'),
+            ],
+            $ok ? 200 : 500
+        );
+    }
+
+    public function bulkAdminPayments(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+        $action = isset($params['action']) ? sanitize_key((string) $params['action']) : '';
+        $ids = isset($params['ids']) && is_array($params['ids']) ? array_map('absint', $params['ids']) : [];
+        $ids = array_values(array_filter($ids));
+
+        if ($action === '' || $ids === []) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'invalid_request', 'message' => __('action and ids required.', 'sikshya')], 400);
+        }
+        if (count($ids) > 100) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'too_many', 'message' => __('Too many rows in one bulk request.', 'sikshya')], 400);
+        }
+
+        $repo = new \Sikshya\Database\Repositories\PaymentRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'table_missing', 'message' => __('Payments table is not installed.', 'sikshya')], 503);
+        }
+
+        if ($action === 'delete') {
+            $deleted = 0;
+            foreach ($ids as $id) {
+                if ($repo->deleteById((int) $id)) {
+                    $deleted++;
+                }
+            }
+            return new WP_REST_Response(['ok' => true, 'deleted' => $deleted], 200);
+        }
+
+        if ($action === 'status') {
+            $status = isset($params['status']) ? sanitize_key((string) $params['status']) : '';
+            if (!in_array($status, ['pending', 'completed', 'failed', 'refunded'], true)) {
+                return new WP_REST_Response(['ok' => false, 'code' => 'invalid_status', 'message' => __('Invalid status.', 'sikshya')], 400);
+            }
+            global $wpdb;
+            $table = \Sikshya\Database\Tables\PaymentsTable::getTableName();
+            $updated = 0;
+            foreach ($ids as $id) {
+                $ok = false !== $wpdb->update($table, ['status' => $status], ['id' => (int) $id], ['%s'], ['%d']);
+                if ($ok) {
+                    $updated++;
+                }
+            }
+            return new WP_REST_Response(['ok' => true, 'updated' => $updated], 200);
+        }
+
+        return new WP_REST_Response(['ok' => false, 'code' => 'invalid_action', 'message' => __('Invalid bulk action.', 'sikshya')], 400);
+    }
+
+    public function deleteAdminOrder(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        if ($id <= 0) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'invalid_id', 'message' => __('Invalid order id.', 'sikshya')],
+                400
+            );
+        }
+
+        $repo = new \Sikshya\Database\Repositories\OrderRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'table_missing', 'message' => __('Orders table is not installed.', 'sikshya')],
+                500
+            );
+        }
+
+        $ok = $repo->deleteOrder($id);
+        return new WP_REST_Response(
+            [
+                'ok' => (bool) $ok,
+                'deleted' => $ok ? 1 : 0,
+                'message' => $ok ? __('Order deleted.', 'sikshya') : __('Could not delete order.', 'sikshya'),
+            ],
+            $ok ? 200 : 500
+        );
+    }
+
+    public function bulkAdminOrders(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+        $action = isset($params['action']) ? sanitize_key((string) $params['action']) : '';
+        $ids = isset($params['ids']) && is_array($params['ids']) ? array_map('absint', $params['ids']) : [];
+        $ids = array_values(array_filter($ids));
+
+        if ($action === '' || $ids === []) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'invalid_request', 'message' => __('action and ids required.', 'sikshya')], 400);
+        }
+        if (count($ids) > 100) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'too_many', 'message' => __('Too many rows in one bulk request.', 'sikshya')], 400);
+        }
+
+        $repo = new \Sikshya\Database\Repositories\OrderRepository();
+        if (!$repo->tableExists()) {
+            return new WP_REST_Response(['ok' => false, 'code' => 'table_missing', 'message' => __('Orders table is not installed.', 'sikshya')], 503);
+        }
+
+        if ($action === 'delete') {
+            $deleted = 0;
+            foreach ($ids as $id) {
+                if ($repo->deleteOrder((int) $id)) {
+                    $deleted++;
+                }
+            }
+            return new WP_REST_Response(['ok' => true, 'deleted' => $deleted], 200);
+        }
+
+        if ($action === 'status') {
+            $status = isset($params['status']) ? sanitize_key((string) $params['status']) : '';
+            if (!in_array($status, ['pending', 'on-hold', 'paid'], true)) {
+                return new WP_REST_Response(['ok' => false, 'code' => 'invalid_status', 'message' => __('Invalid status.', 'sikshya')], 400);
+            }
+            $updated = 0;
+            foreach ($ids as $id) {
+                if ($repo->updateOrder((int) $id, ['status' => $status])) {
+                    $updated++;
+                }
+            }
+            return new WP_REST_Response(['ok' => true, 'updated' => $updated], 200);
+        }
+
+        return new WP_REST_Response(['ok' => false, 'code' => 'invalid_action', 'message' => __('Invalid bulk action.', 'sikshya')], 400);
     }
 
     /**
@@ -2550,6 +2810,10 @@ class AdminRestRoutes
                 'lines' => $line_courses,
                 'dynamic_fields' => $dynamic_fields,
                 'dynamic_fields_display' => $dynamic_fields_display,
+                'subscription' => self::subscriptionSummaryFromMeta(
+                    $meta,
+                    (string) ($row->gateway_intent_id ?? '')
+                ),
             ];
         }
 
@@ -2712,6 +2976,7 @@ class AdminRestRoutes
                     'invoice_issued_at' => $invoice_issued_at,
                     'invoice_url' => $invoice_url,
                     'lines' => $lines,
+                    'subscription' => self::subscriptionSummaryFromMeta($meta, (string) ($row->gateway_intent_id ?? '')),
                 ],
             ],
             200
@@ -3073,5 +3338,47 @@ class AdminRestRoutes
         }
 
         return new WP_REST_Response(['ok' => true, 'id' => $id], 200);
+    }
+
+    /**
+     * Subscription checkout fingerprint from persisted order.meta (written by subscription checkout flows).
+     *
+     * Core stays table-agnostic; Pro may extend via {@see 'sikshya_admin_order_subscription_summary'}.
+     *
+     * @param array<string, mixed> $meta
+     * @return array<string, mixed>
+     */
+    private static function subscriptionSummaryFromMeta(array $meta, string $gateway_intent_id): array
+    {
+        $plan_id = isset($meta['subscription_plan_id']) ? (int) $meta['subscription_plan_id'] : 0;
+        $mode = isset($meta['checkout_mode']) ? sanitize_key((string) $meta['checkout_mode']) : '';
+        $is_subscription = ($mode === 'subscription') || $plan_id > 0;
+        $interval = isset($meta['subscription_interval_unit']) ? sanitize_key((string) $meta['subscription_interval_unit']) : '';
+
+        $base = [
+            'is_subscription_checkout' => $is_subscription,
+            'plan_id' => $plan_id,
+            'interval_unit' => $interval,
+            /** Same column as Gateway “intent” — often the provider subscription or recurring payment reference after confirm. */
+            'gateway_subscription_ref' => $gateway_intent_id,
+        ];
+
+        return apply_filters('sikshya_admin_order_subscription_summary', $base, $meta);
+    }
+
+    /**
+     * @param mixed $gateway_response Decoded gateway_response JSON from sikshya_payments row.
+     */
+    private static function relatedOrderIdFromPaymentGatewayResponse($gateway_response): int
+    {
+        if (!is_array($gateway_response)) {
+            return 0;
+        }
+        if (!isset($gateway_response['order_id'])) {
+            return 0;
+        }
+        $oid = (int) $gateway_response['order_id'];
+
+        return $oid > 0 ? $oid : 0;
     }
 }

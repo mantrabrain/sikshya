@@ -5,6 +5,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
@@ -133,6 +134,7 @@ function bootSnapshot(config: SikshyaReactConfig): Snapshot {
 
 export function ReportsPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
+  const dialog = useSikshyaDialog();
   const reportsAdvFeature = isFeatureEnabled(config, 'reports_advanced');
   const reportsAdvAddon = useAddonEnabled('reports_advanced');
   const reportsAdvMode = resolveGatedWorkspaceMode(
@@ -345,13 +347,14 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
   const resetAttemptTimer = useCallback(
     async (attemptId: number) => {
       if (!attemptId) return;
-      if (
-        !window.confirm(
-          'Reset this attempt timer? This will restart the countdown and clear any in-progress answers for this attempt.'
-        )
-      ) {
-        return;
-      }
+      const ok = await dialog.confirm({
+        title: 'Reset attempt timer?',
+        message:
+          'This will restart the countdown and clear any in-progress answers for this attempt.',
+        confirmLabel: 'Reset timer',
+        variant: 'danger',
+      });
+      if (!ok) return;
       setAttemptsBusy(true);
       try {
         await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.quizAttemptResetTimer(attemptId), {});
@@ -362,7 +365,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
         setAttemptsBusy(false);
       }
     },
-    [attemptsPage, refreshAttempts]
+    [attemptsPage, dialog, refreshAttempts]
   );
 
   useEffect(() => {

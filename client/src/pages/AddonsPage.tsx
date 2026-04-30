@@ -5,6 +5,7 @@ import { appViewHref } from '../lib/appUrl';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import type { NavItem, SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { t } from '../lib/i18n';
 
 type AddonTier = 'free' | 'starter' | 'pro' | 'scale';
 
@@ -39,32 +40,42 @@ type AddonsResponse = {
  * {@see \Sikshya\Api\AdminAddonsRestRoutes::addonImportanceOrder}.
  */
 const ADDON_IMPORTANCE_ORDER: readonly string[] = [
-  'email_advanced_customization',
+  // Commerce essentials (most used on selling sites).
   'subscriptions',
-  'content_drip',
-  'community_discussions',
-  'course_bundles',
   'coupons_advanced',
-  'multi_instructor',
-  'prerequisites',
-  'drip_notifications',
-  'reports_advanced',
-  'gradebook',
-  'certificates_advanced',
-  'activity_log',
-  'assignments_advanced',
-  'quiz_advanced',
-  'instructor_dashboard',
+  // Email + automation (commonly enabled early).
+  'email_advanced_customization',
   'email_marketing',
-  'live_classes',
-  'calendar',
-  'social_login',
-  'scorm_h5p_pro',
-  'marketplace_multivendor',
-  'white_label',
   'webhooks',
   'zapier',
   'public_api_keys',
+  // Learning experience + access rules (core LMS upgrades).
+  'prerequisites',
+  'content_drip',
+  'drip_notifications',
+  'community_discussions',
+  // Teaching operations.
+  'multi_instructor',
+  'gradebook',
+  'certificates_advanced',
+  // Assessment + assignments.
+  'quiz_advanced',
+  'assignments_advanced',
+  // Reporting + audit.
+  'reports_advanced',
+  'activity_log',
+  'calendar',
+  // Content formats / delivery.
+  'live_classes',
+  'scorm_h5p_pro',
+  // Storefront / marketplace / packaging.
+  'course_bundles',
+  'marketplace_multivendor',
+  // Identity + theming.
+  'social_login',
+  'white_label',
+  // Niche / enterprise / scale.
+  'instructor_dashboard',
   'enterprise_reports',
   'multilingual_enterprise',
   'multisite_scale',
@@ -439,7 +450,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                 onChange={(e) => setAllVisibleSelected(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800"
               />
-              Select visible
+              {t('Select visible')}
             </label>
 
             <button
@@ -448,7 +459,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
               onClick={() => void bulkUpdate('enable')}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
-              Enable selected
+              {t('Enable selected')}
             </button>
             <button
               type="button"
@@ -456,11 +467,13 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
               onClick={() => void bulkUpdate('disable')}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
-              Disable selected
+              {t('Disable selected')}
             </button>
 
             <span className="ml-1 text-sm text-slate-500 dark:text-slate-400">
-              Showing <span className="font-semibold text-slate-700 dark:text-slate-200">{rows.length}</span> add-ons
+              {t('Showing')}{' '}
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{rows.length}</span>{' '}
+              {t('add-ons')}
             </span>
           </div>
 
@@ -468,16 +481,16 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search add-ons…"
+              placeholder={t('Search add-ons…')}
               className="w-full max-w-[360px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
             <select
               value={groupFilter}
               onChange={(e) => setGroupFilter(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:w-[190px]"
-              aria-label="Filter by category"
+              aria-label={t('Filter by category')}
             >
-              <option value="all">All categories</option>
+              <option value="all">{t('All categories')}</option>
               {groups.map((g) => (
                 <option key={g} value={g}>
                   {g}
@@ -488,24 +501,24 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value as 'all' | AddonTier)}
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:w-[140px]"
-              aria-label="Filter by tier"
+              aria-label={t('Filter by tier')}
             >
-              <option value="all">All tiers</option>
-              <option value="starter">Starter</option>
-              <option value="pro">Growth</option>
-              <option value="scale">Scale</option>
+              <option value="all">{t('All tiers')}</option>
+              <option value="starter">{t('Starter')}</option>
+              <option value="pro">{t('Growth')}</option>
+              <option value="scale">{t('Scale')}</option>
             </select>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as typeof sort)}
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 sm:w-[180px]"
-              aria-label="Sort add-ons"
+              aria-label={t('Sort add-ons')}
             >
-              <option value="importance">Priority (most → least)</option>
-              <option value="name_asc">Name A → Z</option>
-              <option value="name_desc">Name Z → A</option>
-              <option value="status">Enabled first</option>
-              <option value="tier">Tier</option>
+              <option value="importance">{t('Priority (most → least)')}</option>
+              <option value="name_asc">{t('Name A → Z')}</option>
+              <option value="name_desc">{t('Name Z → A')}</option>
+              <option value="status">{t('Enabled first')}</option>
+              <option value="tier">{t('Tier')}</option>
             </select>
             <button
               type="button"
@@ -513,7 +526,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               disabled={loading}
             >
-              {loading ? 'Refreshing…' : 'Refresh'}
+              {loading ? t('Refreshing…') : t('Refresh')}
             </button>
           </div>
         </div>
@@ -521,7 +534,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
 
       {loading && !data ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
-          Loading addons…
+          {t('Loading add-ons…')}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">

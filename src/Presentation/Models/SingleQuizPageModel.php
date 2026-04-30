@@ -191,6 +191,14 @@ final class SingleQuizPageModel
         return is_array($cf) && !empty($cf['reviews']);
     }
 
+    /**
+     * Course Builder: fixed-height sidebar with scrolling outline list only.
+     */
+    public function isLearnCurriculumSidebarScrollable(): bool
+    {
+        return !empty($this->data['learn_curriculum_sidebar_scrollable']);
+    }
+
     public function getPostContentRaw(): string
     {
         $p = $this->getPost();

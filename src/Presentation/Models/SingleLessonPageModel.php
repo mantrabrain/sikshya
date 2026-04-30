@@ -8,6 +8,8 @@
 
 namespace Sikshya\Presentation\Models;
 
+use Sikshya\Frontend\Public\LessonLearnContent;
+
 // phpcs:ignore
 if (!defined('ABSPATH')) {
     exit;
@@ -174,6 +176,14 @@ final class SingleLessonPageModel
         return sanitize_key((string) ($this->vm['lesson_type'] ?? ''));
     }
 
+    /**
+     * Course Builder: fixed-height sidebar with scrolling outline list only.
+     */
+    public function isLearnCurriculumSidebarScrollable(): bool
+    {
+        return !empty($this->vm['learn_curriculum_sidebar_scrollable']);
+    }
+
     public function getLessonIconForHeader(): string
     {
         $post = $this->getLessonPost();
@@ -203,12 +213,18 @@ final class SingleLessonPageModel
 
     public function getLessonContentHtml(): string
     {
-        return (string) apply_filters('the_content', (string) $this->getLessonPost()->post_content);
+        return LessonLearnContent::composedBodyHtml(
+            $this->getLessonPost(),
+            $this->getLessonTypeKey()
+        );
     }
 
     public function hasRenderableLessonBody(): bool
     {
-        return trim((string) $this->getLessonPost()->post_content) !== '';
+        return LessonLearnContent::hasRenderableBody(
+            $this->getLessonPost(),
+            $this->getLessonTypeKey()
+        );
     }
 
     public function getDockPrevious(): ?LessonShellNavLinkModel

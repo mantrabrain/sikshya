@@ -12,6 +12,9 @@ use Sikshya\Services\Settings;
  */
 class Uninstaller
 {
+    private const OPT_ERASE_DATA = '_sikshya_erase_data_on_uninstall';
+    private const OPT_ERASE_FILES = '_sikshya_erase_files_on_uninstall';
+
     /**
      * Uninstall the plugin
      */
@@ -22,31 +25,26 @@ class Uninstaller
             return;
         }
 
-        // Get uninstall options
-        $uninstall_options = Settings::getRaw('sikshya_uninstall_options', [
-            'remove_data' => true,
-            'remove_tables' => true,
-            'remove_options' => true,
-            'remove_files' => false,
-        ]);
+        $erase_data = Settings::isTruthy(get_option(self::OPT_ERASE_DATA, '0'));
+        $erase_files = Settings::isTruthy(get_option(self::OPT_ERASE_FILES, '0'));
 
         // Remove custom post types and their data
-        if ($uninstall_options['remove_data']) {
+        if ($erase_data) {
             self::removePostTypes();
         }
 
         // Remove custom database tables
-        if ($uninstall_options['remove_tables']) {
+        if ($erase_data) {
             self::removeTables();
         }
 
         // Remove plugin options
-        if ($uninstall_options['remove_options']) {
+        if ($erase_data) {
             self::removeOptions();
         }
 
         // Remove uploaded files
-        if ($uninstall_options['remove_files']) {
+        if ($erase_data && $erase_files) {
             self::removeFiles();
         }
 
@@ -123,7 +121,6 @@ class Uninstaller
             'sikshya_version',
             'sikshya_db_version',
             'sikshya_settings',
-            'sikshya_uninstall_options',
             'sikshya_activation_time',
             'sikshya_license_key',
             'sikshya_license_status',
@@ -146,11 +143,17 @@ class Uninstaller
             delete_option($option);
         }
 
+        delete_option(self::OPT_ERASE_DATA);
+        delete_option(self::OPT_ERASE_FILES);
+
         // Remove site options for multisite
         if (is_multisite()) {
             foreach ($options as $option) {
                 delete_site_option($option);
             }
+
+            delete_site_option(self::OPT_ERASE_DATA);
+            delete_site_option(self::OPT_ERASE_FILES);
         }
     }
 
@@ -206,6 +209,7 @@ class Uninstaller
         if ($admin_role) {
             $capabilities = [
                 'manage_sikshya',
+                'sikshya_access_admin_app',
                 'edit_sikshya_courses',
                 'edit_others_sikshya_courses',
                 'publish_sikshya_courses',

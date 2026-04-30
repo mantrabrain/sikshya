@@ -6,6 +6,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { SkeletonCard } from '../components/shared/Skeleton';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -207,6 +208,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
   const [schema, setSchema] = useState<Schema>({});
   const [saving, setSaving] = useState(false);
   const toast = useTopRightToast();
+  const dialog = useSikshyaDialog();
   const [toolUserId, setToolUserId] = useState('');
   const [toolCourseId, setToolCourseId] = useState('');
   const [toolBusy, setToolBusy] = useState(false);
@@ -736,8 +738,14 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                             <ButtonSecondary
                               type="button"
                               onClick={() => {
-                                if (!confirm('Delete this rule?')) return;
                                 void (async () => {
+                                  const ok = await dialog.confirm({
+                                    title: 'Delete this rule?',
+                                    message: 'This automation rule will be permanently removed.',
+                                    confirmLabel: 'Delete',
+                                    variant: 'danger',
+                                  });
+                                  if (!ok) return;
                                   try {
                                     await getSikshyaApi().delete(`/pro/email-marketing/rules/${encodeURIComponent(String(r.id))}`);
                                     void refetchRules();

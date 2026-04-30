@@ -154,10 +154,20 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                                 <?php
                                 $pr = $line['pricing'];
                                 $eff = isset($pr['effective']) && $pr['effective'] !== null ? (float) $pr['effective'] : 0;
+                                $sub = isset($pr['subscription_display']) && is_array($pr['subscription_display']) ? $pr['subscription_display'] : null;
+                                $is_sub = is_array($sub) && !empty($sub);
+                                $is_primary = $is_sub && !empty($sub['is_primary']);
                                 if ($eff > 0) {
                                     echo wp_kses_post(sikshya_format_price($eff, $pr['currency'] ?? 'USD'));
+                                    if ($is_sub && isset($sub['interval_unit'])) {
+                                        echo ' <span class="sikshya-cart-line__price-suffix" style="font-size:12px;opacity:.8;">/ ' . esc_html((string) $sub['interval_unit']) . '</span>';
+                                    }
                                 } else {
-                                    esc_html_e('Free', 'sikshya');
+                                    if ($is_sub && !$is_primary) {
+                                        esc_html_e('Included in plan', 'sikshya');
+                                    } else {
+                                        esc_html_e('Free', 'sikshya');
+                                    }
                                 }
                                 ?>
                             </span>

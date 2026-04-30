@@ -30,8 +30,14 @@ final class OrderTemplateData
             $error = __('Missing order reference.', 'sikshya');
         } else {
             $repo = new OrderRepository();
-            // If logged in, enforce ownership. Otherwise, treat the public token as a bearer reference (guest receipt).
-            $order = $uid > 0 ? $repo->findByPublicTokenForUser($order_key, $uid) : $repo->findByPublicToken($order_key);
+            // Default: if logged in, enforce ownership. Otherwise treat the public token as a bearer reference.
+            //
+            // Admin/support users need to open receipts/invoices for customers, so allow them to bypass ownership
+            // checks when they have management capability.
+            $can_admin_view = current_user_can('manage_options') || current_user_can('manage_sikshya');
+            $order = ($uid > 0 && !$can_admin_view)
+                ? $repo->findByPublicTokenForUser($order_key, $uid)
+                : $repo->findByPublicToken($order_key);
             if (!$order) {
                 $error = __('Order not found.', 'sikshya');
             } else {

@@ -7,6 +7,8 @@ import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { Modal } from '../components/shared/Modal';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
+import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
+import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
 import type { ApiError } from '../api/http';
@@ -17,6 +19,16 @@ type OrderLine = {
   quantity: number;
   unit_price: number;
   line_total: number;
+};
+
+type OrderSubscriptionSummary = {
+  is_subscription_checkout?: boolean;
+  plan_id?: number;
+  interval_unit?: string;
+  gateway_subscription_ref?: string;
+  plan_name?: string;
+  plan_amount?: number;
+  plan_currency?: string;
 };
 
 type OrderDetails = {
@@ -34,6 +46,7 @@ type OrderDetails = {
   payer_name: string;
   payer_email: string;
   meta?: Record<string, unknown>;
+  subscription?: OrderSubscriptionSummary;
   dynamic_fields?: Record<string, unknown>;
   dynamic_fields_display?: Array<{ id: string; label: string; value: string }>;
   receipt_url?: string;
@@ -54,6 +67,7 @@ function canMarkPaid(o: OrderDetails): boolean {
 
 export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, embedded, title } = props;
+  const dialog = useSikshyaDialog();
   const { route, navigateView } = useAdminRouting();
   const orderId = useMemo(() => parseInt(route.query?.id || '0', 10) || 0, [route.query]);
   const [markBusy, setMarkBusy] = useState(false);
@@ -144,7 +158,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                       setEditOpen(false);
                       await refetch();
                     } catch (err) {
-                      window.alert(getErrorSummary(err));
+                      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
                     } finally {
                       setSaving(false);
                     }
@@ -204,7 +218,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                         );
                         await refetch();
                       } catch (err) {
-                        window.alert(getErrorSummary(err));
+                        void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
                       } finally {
                         setMarkBusy(false);
                       }
@@ -232,6 +246,16 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                     rel="noreferrer"
                   >
                     {order.invoice_number ? `Invoice ${order.invoice_number}` : 'View invoice'}
+                  </a>
+                ) : null}
+                {order.invoice_url ? (
+                  <a
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950/20 dark:text-slate-200 dark:hover:bg-slate-800"
+                    href={`${order.invoice_url}${order.invoice_url.includes('?') ? '&' : '?'}pdf=1`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Download PDF
                   </a>
                 ) : null}
               </div>
@@ -274,6 +298,62 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
               </div>
             </div>
           </div>
+
+          {order.subscription?.is_subscription_checkout ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 dark:border-amber-900/45 dark:bg-amber-950/25">
+              <div className="text-xs font-semibold uppercase tracking-wide text-amber-950 dark:text-amber-100">
+                Subscription checkout
+              </div>
+              <p className="mt-1 text-sm text-amber-950/90 dark:text-amber-50/90">
+                This order created or renewed access through a membership plan. The row in{' '}
+                <strong>Subscriptions</strong> for this learner is keyed by user + plan; gateway webhooks keep status
+                and billing period in sync when configured.
+              </p>
+              <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-amber-900/80 dark:text-amber-200/80">
+                    Plan
+                  </dt>
+                  <dd className="font-semibold text-slate-900 dark:text-white">
+                    {(order.subscription.plan_name && String(order.subscription.plan_name)) ||
+                      (order.subscription.plan_id ? `Plan #${order.subscription.plan_id}` : '—')}
+                    {order.subscription.plan_id ? (
+                      <span className="ml-1 text-xs font-normal text-slate-600 dark:text-slate-400">
+                        (ID {order.subscription.plan_id})
+                      </span>
+                    ) : null}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-amber-900/80 dark:text-amber-200/80">
+                    Billing interval
+                  </dt>
+                  <dd className="capitalize text-slate-900 dark:text-white">
+                    {(order.subscription.interval_unit && String(order.subscription.interval_unit)) || '—'}
+                  </dd>
+                </div>
+              </dl>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a
+                  className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-950 hover:bg-amber-100 dark:border-amber-800 dark:bg-slate-900 dark:text-amber-50 dark:hover:bg-slate-800"
+                  href={appViewHref(config, 'subscriptions', { tab: 'list' })}
+                >
+                  Open subscriptions list
+                </a>
+                <button
+                  type="button"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                  onClick={() => navigateView('sales', { tab: 'payments' })}
+                >
+                  Payments (same sale)
+                </button>
+              </div>
+              <p className="mt-3 text-xs text-slate-700 dark:text-slate-300">
+                Gateway intent / subscription id (above) is what your provider uses for renewals; it may differ from the
+                internal subscription row id in Sikshya.
+              </p>
+            </div>
+          ) : null}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
             <div className="text-sm font-semibold text-slate-900 dark:text-white">Items</div>
