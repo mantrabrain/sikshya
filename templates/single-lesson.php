@@ -215,6 +215,7 @@ while (have_posts()) :
                 </div>
             </aside>
 
+            <div class="sikshya-learnContentCol">
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
 
                 <?php if ($page_model->hasError()) : ?>
@@ -445,10 +446,8 @@ while (have_posts()) :
                             </div>
                         </div>
                         <?php
-                        // Discussions/Q&A now live in the Learn page left sidebar footer
-                        // (rendered by the Community Discussions Pro add-on via
-                        // `sikshya_learn_sidebar_footer`). The standalone tab here is removed
-                        // to keep a single source of truth for course conversations.
+                        // Discussions/Q&A: Community Discussions Pro renders the tabbed panel in
+                        // the left sidebar (`sikshya_learn_sidebar_footer`).
                         ?>
                         <?php if ($page_model->hasReviewsTab()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
@@ -460,6 +459,9 @@ while (have_posts()) :
                         <?php endif; ?>
         </div>
 
+                <?php endif; ?>
+            </section>
+            <?php if (!$page_model->hasError()) : ?>
                     <?php
                     $dock_prev = $page_model->getDockPrevious();
                     $dock_next = $page_model->getDockNext();
@@ -468,7 +470,7 @@ while (have_posts()) :
                     $prev_title = $dock_prev ? $dock_prev->getTitle() : '';
                     $next_title = $dock_next ? $dock_next->getTitle() : '';
                     ?>
-                    <nav class="sikshya-learnDock" aria-label="<?php esc_attr_e('Lesson navigation', 'sikshya'); ?>">
+                    <nav class="sikshya-learnContentNav" aria-label="<?php esc_attr_e('Lesson navigation', 'sikshya'); ?>">
                         <?php if ($prev_url !== '') : ?>
                             <a class="sikshya-learnDock__btn sikshya-learnDock__btn--prev" href="<?php echo esc_url($prev_url); ?>">
                                 <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -505,8 +507,8 @@ while (have_posts()) :
                             </span>
                         <?php endif; ?>
                     </nav>
-                <?php endif; ?>
-            </section>
+            <?php endif; ?>
+            </div>
         </main>
     </div>
     <footer class="sikshya-learning-footer" aria-hidden="true"></footer>

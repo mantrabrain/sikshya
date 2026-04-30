@@ -18,7 +18,8 @@
   --sikshya-learn-sidebar-w: 400px;
   --sikshya-learn-sidebar-w-current: var(--sikshya-learn-sidebar-w);
   --sikshya-learn-gutter: 16px;
-  --sikshya-learn-dock-h: 64px;
+  /* Reserved bottom space inside the right learn column (lesson/quiz nav strip) */
+  --sikshya-learn-content-nav-h: 72px;
   /* Offset for safe area; admin-bar is handled separately to avoid double-spacing */
   --sikshya-learn-top-offset: env(safe-area-inset-top, 0px);
   /* Topbar visibility multiplier (1 visible, 0 scrolled away) */
@@ -165,6 +166,21 @@
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+}
+
+/* Lesson / quiz: fill viewport so the main row can split into two equal-height columns */
+.sikshya-learning-shell--lesson .sikshya-learning-app,
+.sikshya-learning-shell--quiz .sikshya-learning-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.sikshya-learning-shell--lesson .sikshya-learnLayout,
+.sikshya-learning-shell--quiz .sikshya-learnLayout {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 /* Layout shell */
@@ -454,10 +470,21 @@
   display: block;
 }
 
-/* Main area — sidebar is fixed below top bar (full viewport height); drawer on small screens */
+/* Main area — lesson/quiz: two columns; hub/learn home unchanged */
 .sikshya-learnMain {
   position: relative;
   min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learning-shell--lesson .sikshya-learnMain,
+  .sikshya-learning-shell--quiz .sikshya-learnMain {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
 }
 
 /*
@@ -482,8 +509,46 @@
   transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+@media (min-width: 1024px) {
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar {
+    position: relative;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    flex: 0 0 var(--sikshya-learn-sidebar-w-current);
+    width: var(--sikshya-learn-sidebar-w-current);
+    max-width: var(--sikshya-learn-sidebar-w);
+    align-self: stretch;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+    transform: none !important;
+    transition: flex-basis 240ms cubic-bezier(0.22, 1, 0.36, 1), width 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--lesson .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar {
+    flex-basis: 0;
+    width: 0;
+    max-width: 0;
+    overflow: hidden;
+    border-right: 0;
+    padding: 0;
+    box-shadow: none;
+    pointer-events: none;
+  }
+}
+
 .sikshya-sidebarCollapsed .sikshya-learnSidebar {
   transform: translateX(calc(-1 * var(--sikshya-learn-sidebar-w)));
+}
+
+@media (min-width: 1024px) {
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--lesson .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar {
+    transform: none;
+  }
 }
 
 .sikshya-learnSidebar__inner {
@@ -491,6 +556,22 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar__inner,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar__inner {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .sikshya-learning-shell--lesson .sikshya-learnSidebar__scroll,
+  .sikshya-learning-shell--quiz .sikshya-learnSidebar__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
 }
 
 .sikshya-learnSidebar__head {
@@ -567,17 +648,80 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  max-height: min(56vh, 30rem);
   font-size: var(--sikshya-learn-fs-13, 13px);
+  /* Idle (collapsed) state: only the tab strip is shown; curriculum keeps its
+   * height. The sheet expands the section once the user opens a tab. */
+  flex: 0 0 auto;
+  max-height: none;
+}
+
+/* Sheet visibility is driven by the [hidden] attribute and the data-state
+ * attribute on the section, not by a class — keeps SSR + JS in sync. */
+.sikshya-sidebarDisc[data-sik-disc-open="false"] .sikshya-sidebarDisc__sheet {
+  display: none;
+}
+
+/* Open state: the section becomes a full-sidebar overlay so the panel covers
+ * the curriculum/progress widgets from the top of the sidebar to the bottom.
+ * Tabs render at the bottom (footer-deck origin) so the active tab can also
+ * act as a close affordance.
+ *
+ * .sikshya-learnSidebar already establishes a positioning context
+ * (position: relative on desktop, position: fixed on mobile), so absolute
+ * positioning here is anchored to the visible sidebar bounds. */
+.sikshya-sidebarDisc[data-sik-disc-open="true"] {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--sikshya-learn-surface);
+  flex: 1 1 auto;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Lock sidebar scrolling while the overlay is open so the panel stays glued
+ * to the visible sidebar viewport on touch/mobile (where .sikshya-learnSidebar
+ * normally has overflow:auto). */
+.sikshya-learnSidebar:has(.sikshya-sidebarDisc[data-sik-disc-open="true"]) {
+  overflow: hidden;
+}
+
+/* Reorder children when open: sheet on top, tabs pinned to the bottom. */
+.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__sheet {
+  order: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__tabs {
+  order: 2;
+  border-top: 1px solid var(--sikshya-learn-border);
+  border-bottom: 0;
+}
+
+/* Let the thread list grow to fill the overlay; the closed-state
+ * max-height of 32vh would otherwise leave dead space at the bottom. */
+.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__threadScroll {
+  max-height: none;
+  flex: 1 1 auto;
 }
 
 .sikshya-sidebarDisc__tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--sikshya-learn-border);
+  align-items: stretch;
+  /* Match the right column's Prev/Next bar so the sidebar's footer baseline
+   * lines up with .sikshya-learnContentNav across the column divider. */
+  min-height: var(--sikshya-learn-content-nav-h);
+  border-bottom: 1px solid transparent;
   flex: 0 0 auto;
   background: var(--sikshya-learn-surface-2, rgba(15, 23, 42, 0.03));
 }
+
+/* In the closed state the tabs sit flush against the sidebar edge with no
+ * divider. The open (overlay) state draws its own top border above the tabs,
+ * so we no longer need a bottom-border toggle here. */
 
 .sikshya-sidebarDisc__tab {
   flex: 1 1 50%;
@@ -585,6 +729,10 @@
   border: 0;
   margin: 0;
   padding: 10px 8px;
+  /* Center the label vertically within the 72px strip. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font: inherit;
   font-weight: 700;
   font-size: 12px;
@@ -621,6 +769,11 @@
   flex: 1 1 auto;
 }
 
+/* Honor the [hidden] attribute even though we set display:flex above. */
+.sikshya-sidebarDisc__sheet[hidden] {
+  display: none;
+}
+
 .sikshya-sidebarDisc__threadScroll {
   flex: 1 1 auto;
   min-height: 120px;
@@ -630,6 +783,13 @@
   flex-direction: column;
   gap: 10px;
   padding-right: 4px;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learning-shell--lesson .sikshya-sidebarDisc__threadScroll,
+  .sikshya-learning-shell--quiz .sikshya-sidebarDisc__threadScroll {
+    max-height: none;
+  }
 }
 
 .sikshya-sidebarDisc__threadScroll::-webkit-scrollbar {
@@ -927,20 +1087,67 @@
 /* =========================================================
  * Main content column (right of curriculum sidebar)
  * =======================================================*/
-.sikshya-learnContent {
+/* Right column: main learning area + scoped bottom navigation (lesson/quiz) */
+.sikshya-learnContentCol {
   min-width: 0;
-  padding: 0 22px calc(48px + var(--sikshya-learn-dock-h) + env(safe-area-inset-bottom, 0px));
-  padding-left: calc(var(--sikshya-learn-sidebar-w-current) + 22px);
-  padding-right: max(22px, env(safe-area-inset-right));
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   max-width: none;
   width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learning-shell--lesson .sikshya-learnContentCol,
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol {
+    min-height: 0;
+    border-left: 1px solid var(--sikshya-learn-border);
+    background: var(--sikshya-learn-bg);
+    box-shadow: inset 1px 0 0 rgba(15, 23, 42, 0.03);
+  }
+}
+
+.sikshya-learnContent {
+  min-width: 0;
+  padding: 0 22px 24px;
+  padding-right: max(22px, env(safe-area-inset-right));
+  padding-left: max(22px, env(safe-area-inset-left));
+  max-width: none;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Learn hub / course home: main column is a direct child of .sikshya-learnMain (offset for fixed curriculum rail) */
+.sikshya-learnMain > .sikshya-learnContent {
+  padding-left: calc(var(--sikshya-learn-sidebar-w-current) + max(22px, env(safe-area-inset-left)));
   transition: padding-left 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (max-width: 1023px) {
-  .sikshya-learnContent {
-    padding: 0 16px calc(40px + var(--sikshya-learn-dock-h) + env(safe-area-inset-bottom, 0px));
+  .sikshya-learnMain > .sikshya-learnContent {
     padding-left: max(16px, env(safe-area-inset-left));
+  }
+}
+
+@media (min-width: 1024px) {
+  .sikshya-learning-shell--lesson .sikshya-learnContentCol > .sikshya-learnContent,
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 1023px) {
+  .sikshya-learnContent {
+    padding: 0 16px 20px;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  .sikshya-learning-shell--lesson .sikshya-learnContentCol > .sikshya-learnContent,
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent {
+    overflow: visible;
   }
 }
 
@@ -950,7 +1157,6 @@
 .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-contentSection,
 .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContent > .sikshya-contentSection {
   width: 100%;
-  max-width: min(58rem, 100%);
   margin-inline: auto;
 }
 
@@ -959,30 +1165,25 @@
   max-width: min(40rem, 100%);
 }
 
-/* Sticky bottom navigation dock (Prev / Next) */
-.sikshya-learnDock {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 45;
-  height: var(--sikshya-learn-dock-h);
+/* Prev / Next — scoped to the right learn column only (no full-viewport footer) */
+.sikshya-learnContentNav {
+  flex: 0 0 auto;
+  z-index: 12;
+  min-height: var(--sikshya-learn-content-nav-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-left: calc(var(--sikshya-learn-sidebar-w-current) + 22px);
-  padding-right: max(22px, env(safe-area-inset-right));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: color-mix(in srgb, var(--sikshya-learn-surface) 72%, transparent);
-  backdrop-filter: saturate(1.15) blur(16px);
-  -webkit-backdrop-filter: saturate(1.15) blur(16px);
+  padding: 10px max(22px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom, 0px)) max(22px, env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--sikshya-learn-surface) 88%, transparent);
+  backdrop-filter: saturate(1.15) blur(12px);
+  -webkit-backdrop-filter: saturate(1.15) blur(12px);
   border-top: 1px solid var(--sikshya-learn-border);
-  box-shadow: 0 -1px 0 rgba(15, 23, 42, 0.03), 0 -18px 46px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 -1px 0 rgba(15, 23, 42, 0.04);
 }
 
 @media (max-width: 1023px) {
-  .sikshya-learnDock {
+  .sikshya-learnContentNav {
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
   }
@@ -1419,7 +1620,6 @@
   display: flex;
   align-items: center;
   position: sticky;
-  top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
   z-index: 44;
 }
 

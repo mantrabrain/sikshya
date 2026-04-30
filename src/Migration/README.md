@@ -14,18 +14,18 @@ migration system into a clean no-op without any other code changes.
 ## What runs when
 
 1. On `register_activation_hook`, the bootstrap calls
-   `LegacyMigrator::scheduleIfPending()`. If `LegacyDataDetector`
+  `LegacyMigrator::scheduleIfPending()`. If `LegacyDataDetector`
    reports any legacy fingerprint (options, CPTs, taxonomies, tables) we
    set the `sikshya_legacy_migration_pending` option and schedule a single
    cron event so the work starts even if the activation handler can't.
 2. On `plugins_loaded` (priority 20) `LegacyMigrator::register()` is wired,
-   which adds the cron callback and (in admin) the notice + Tools page.
+  which adds the cron callback and (in admin) the notice + Tools page.
    If no pending flag exists but the migration also isn't finished (e.g.
    the plugin was upgraded via SFTP / dropin and the activation hook never
    fired), the listener runs a transient-cached defensive detection to
    pick up legacy data anyway.
 3. The Tools page lives at `Tools` → `Sikshya Migration`
-   (`tools.php?page=sikshya-legacy-migration`). It exposes Run / Dry-run /
+  (`tools.php?page=sikshya-legacy-migration`). It exposes Run / Dry-run /
    Reset actions plus a per-step status table.
 4. WP-CLI: `wp sikshya migrate-legacy [--dry-run] [--reset] [--status] [--all]`.
 

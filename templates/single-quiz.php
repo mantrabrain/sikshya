@@ -298,6 +298,7 @@ while (have_posts()) {
                 </div>
             </aside>
 
+            <div class="sikshya-learnContentCol">
             <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
                 <?php if ($page_model->hasError()) : ?>
                     <div class="sikshya-contentSection sikshya-contentSection--centered">
@@ -743,10 +744,8 @@ while (have_posts()) {
                             </div>
                         </div>
                         <?php
-                        // Discussions/Q&A now live in the Learn page left sidebar footer
-                        // (rendered by the Community Discussions Pro add-on via
-                        // `sikshya_learn_sidebar_footer`). The standalone tab here is removed
-                        // to keep a single source of truth for course conversations.
+                        // Discussions/Q&A: Community Discussions Pro — tabbed panel in the left sidebar
+                        // (`sikshya_learn_sidebar_footer`).
                         ?>
                         <?php if ($page_model->isCourseFeatureReviews()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
@@ -755,9 +754,12 @@ while (have_posts()) {
                                     <p class="sikshya-zeroMargin"><?php esc_html_e('Reviews are enabled for this course, but the reviews UI is not available yet.', 'sikshya'); ?></p>
                                 </div>
                             </div>
-            <?php endif; ?>
+                        <?php endif; ?>
         </div>
 
+                <?php endif; ?>
+            </section>
+            <?php if (!$page_model->hasError()) : ?>
         <script>
         (function(){
           // Notes (REST): private per-user note for this content.
@@ -813,7 +815,7 @@ while (have_posts()) {
         </script>
 
                     <?php
-                    // Sticky Prev/Next: derive from curriculum blocks.
+                    // Prev/Next: derive from curriculum blocks.
                     $flat = [];
                     foreach ($page_model->getBlocks() as $block) {
                         foreach ((array) ($block['items'] ?? []) as $it) {
@@ -837,7 +839,7 @@ while (have_posts()) {
                     $prev_title = is_array($prev) ? (string) ($prev['title'] ?? '') : '';
                     $next_title = is_array($next) ? (string) ($next['title'] ?? '') : '';
                     ?>
-                    <nav class="sikshya-learnDock" aria-label="<?php esc_attr_e('Quiz navigation', 'sikshya'); ?>">
+                    <nav class="sikshya-learnContentNav" aria-label="<?php esc_attr_e('Quiz navigation', 'sikshya'); ?>">
                         <?php if ($prev_url !== '') : ?>
                             <a class="sikshya-learnDock__btn sikshya-learnDock__btn--prev" href="<?php echo esc_url($prev_url); ?>">
                                 <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
@@ -874,8 +876,8 @@ while (have_posts()) {
                             </span>
                         <?php endif; ?>
                     </nav>
-                <?php endif; ?>
-            </section>
+            <?php endif; ?>
+            </div>
         </main>
     </div>
     <footer class="sikshya-learning-footer" aria-hidden="true"></footer>

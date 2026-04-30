@@ -58,6 +58,20 @@ final class SingleQuizPageModel
         return $c instanceof \WP_Post ? $c : null;
     }
 
+    /**
+     * Course post ID for this quiz, or 0 if no course is associated.
+     *
+     * Mirrors {@see SingleLessonPageModel::getCourseId()} so templates can use
+     * a single API across lesson and quiz shells (resources, announcements,
+     * notes REST payloads, etc.).
+     */
+    public function getCourseId(): int
+    {
+        $c = $this->getCourse();
+
+        return $c instanceof \WP_Post ? (int) $c->ID : 0;
+    }
+
     public function getError(): string
     {
         return (string) ($this->data['error'] ?? '');
