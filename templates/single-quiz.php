@@ -18,6 +18,7 @@ $sheet_ver = rawurlencode((string) $plugin->version);
 $ds_href = esc_url($plugin->getAssetUrl('css/public-design-system.css')) . '?ver=' . $sheet_ver;
 $learn_href = esc_url($plugin->getAssetUrl('css/learn.css')) . '?ver=' . $sheet_ver;
 $quiz_js = esc_url($plugin->getAssetUrl('js/quiz-taker.js')) . '?ver=' . $sheet_ver;
+$discussion_fix_js = esc_url($plugin->getAssetUrl('js/quiz-discussion-fix.js')) . '?ver=' . $sheet_ver;
 
 while (have_posts()) {
     the_post();
@@ -41,6 +42,7 @@ while (have_posts()) {
     <title><?php echo esc_html($page_title); ?></title>
     <link rel="stylesheet" href="<?php echo $ds_href; ?>">
     <link rel="stylesheet" href="<?php echo $learn_href; ?>">
+    <script src="<?php echo $discussion_fix_js; ?>" defer></script>
 </head>
 <body class="sikshya-learning-shell sikshya-learning-shell--quiz">
 <div class="sikshya-learning-app">
