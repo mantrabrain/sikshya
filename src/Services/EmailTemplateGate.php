@@ -26,6 +26,7 @@ final class EmailTemplateGate
             'sikshya_drip_lesson_unlocked' => ['drip_notifications', 'drip_notifications'],
             'sikshya_drip_course_unlocked' => ['drip_notifications', 'drip_notifications'],
             'sikshya_drip_lessons_unlocked' => ['drip_notifications', 'drip_notifications'],
+            'sikshya_course_qa_question_posted' => ['community_discussions', 'community_discussions'],
         ];
 
         /**

@@ -178,6 +178,12 @@
   grid-template-rows: auto minmax(0, 1fr);
 }
 
+/* Pin the workspace row to the viewport so the curriculum sidebar does not stretch with lesson height */
+.sikshya-learning-shell--lesson .sikshya-learnLayout > .sikshya-learnMain,
+.sikshya-learning-shell--quiz .sikshya-learnLayout > .sikshya-learnMain {
+  min-height: 0;
+}
+
 /* Layout shell */
 .sikshya-learnLayout {
   display: grid;
@@ -515,8 +521,9 @@
     width: var(--sikshya-learn-sidebar-w-current);
     max-width: var(--sikshya-learn-sidebar-w);
     align-self: stretch;
+    height: 100%;
     min-height: 0;
-    height: auto;
+    max-height: 100%;
     overflow: hidden;
     transform: none !important;
     transition: flex-basis 240ms cubic-bezier(0.22, 1, 0.36, 1), width 240ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -559,7 +566,8 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
-    height: calc(100vh - var(--sikshya-learn-topbar-h) - var(--sikshya-learn-top-offset));
+    height: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
   }
@@ -568,8 +576,11 @@
   .sikshya-learning-shell--quiz .sikshya-learnSidebar__scroll {
     flex: 1 1 auto;
     min-height: 0;
+    overflow-x: hidden;
     overflow-y: auto;
-    max-height: calc(100vh - var(--sikshya-learn-topbar-h) - var(--sikshya-learn-top-offset) - var(--sikshya-learn-railhead-h) - var(--sikshya-learn-content-nav-h));
+    max-height: none;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
   }
 }
 
@@ -647,15 +658,7 @@
   flex: 0 0 auto;
 }
 
-/* Remove discussion panel from sidebar layout flow since it's now fixed */
-.sikshya-learnSidebar__inner > .sikshya-sidebarDisc {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: var(--sikshya-learn-sidebar-w-current);
-  z-index: 25;
-}
-
+/* Community discussions widgets: sidebar footer (Q&A) uses fixed docking; Discussion lives in-flow under the lesson tab panel. */
 .sikshya-sidebarDisc {
   border-top: 1px solid var(--sikshya-learn-border);
   background: var(--sikshya-learn-surface);
@@ -663,40 +666,76 @@
   flex-direction: column;
   min-height: 0;
   font-size: var(--sikshya-learn-fs-13, 13px);
-  /* Idle (collapsed) state: only the tab strip is shown; curriculum keeps its
-   * height. The sheet expands the section once the user opens a tab. */
   flex: 0 0 auto;
   max-height: none;
+}
+
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"] {
   position: fixed;
   bottom: 0;
   left: 0;
   width: var(--sikshya-learn-sidebar-w-current);
   z-index: 25;
-  /* Ensure discussion and Q&A tabs have distinct content areas */
 }
 
-.sikshya-sidebarDisc__sheet[data-discussion-panel],
-.sikshya-sidebarDisc__sheet[data-qa-panel] {
-  display: none;
+.sikshya-sidebarDisc--inContent[data-sik-disc-placement="content"] {
+  position: static;
+  left: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: 100%;
+  z-index: auto;
+  border-top: none;
+  background: transparent;
+  flex: 1 1 auto;
+  min-height: 280px;
 }
 
-/* Hide sheet and content areas by default - use higher specificity to override existing rules */
-.sikshya-sidebarDisc .sikshya-sidebarDisc__sheet {
+.sikshya-sidebarDisc--inContent.sikshya-discMessenger[data-sik-disc-placement="content"] {
+  min-height: 0;
+}
+
+.sikshya-sidebarDisc--inContent[data-sik-disc-placement="content"] .sikshya-sidebarDisc__composeDock .sikshya-sidebarDisc__compose {
+  border-top: 0;
+  padding-top: 6px;
+}
+
+/* Sidebar dock: hide sheet until Q&A footer tab opens it */
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"] .sikshya-sidebarDisc__sheet {
   display: none !important;
 }
 
-.sikshya-sidebarDisc .sikshya-sidebarDisc__contentArea {
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"] .sikshya-sidebarDisc__contentArea {
   display: none !important;
 }
 
-/* Only show sheet and content areas when a tab is active */
-.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__sheet {
+/* Open sidebar: sheet is flex transcript column (sizes with composer + footer tabs below). */
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__sheet {
   display: flex !important;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.sikshya-sidebarDisc[data-sik-disc-mode="discussion"] .sikshya-sidebarDisc__contentArea[data-discussion-panel],
-.sikshya-sidebarDisc[data-sik-disc-mode="qa"] .sikshya-sidebarDisc__contentArea[data-qa-panel] {
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-mode="discussion"] .sikshya-sidebarDisc__contentArea[data-discussion-panel],
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-mode="qa"] .sikshya-sidebarDisc__contentArea[data-qa-panel] {
+  display: flex !important;
+}
+
+/* Content tab: Discussion sheet follows [hidden]; when visible, stretch in the panel */
+.sikshya-sidebarDisc--inContent[data-sik-disc-placement="content"] .sikshya-sidebarDisc__sheet[hidden] {
+  display: none !important;
+}
+
+.sikshya-sidebarDisc--inContent[data-sik-disc-placement="content"] .sikshya-sidebarDisc__sheet:not([hidden]) {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sikshya-sidebarDisc--inContent[data-sik-disc-placement="content"] .sikshya-sidebarDisc__contentArea[data-discussion-panel] {
   display: flex !important;
 }
 
@@ -709,11 +748,33 @@
 
 .sikshya-sidebarDisc__sheet .sikshya-sidebarDisc__contentArea .sikshya-sidebarDisc__threadScroll {
   flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   min-height: 120px;
-  max-height: calc(50vh - 200px);
 }
 
+.sikshya-sidebarDisc__panelHead {
+  flex: 0 0 auto;
+  padding: 0 2px 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--sikshya-learn-border, #e2e8f0);
+}
+
+.sikshya-sidebarDisc__panelTitle {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-sidebarDisc__panelDesc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--sikshya-learn-muted, #64748b);
+}
 
 .sikshya-sidebarDisc__contentArea {
   flex: 1 1 auto;
@@ -727,22 +788,9 @@
   display: flex;
 }
 
-/* Aggressive override - ensure ALL tabs show inactive styling by default */
-.sikshya-sidebarDisc .sikshya-sidebarDisc__tab {
-  color: var(--sikshya-learn-muted, #64748b) !important;
-  border-bottom-color: transparent !important;
-  background: transparent !important;
-}
-
-/* Only show active styling when explicitly marked AND data-sik-disc-open is true */
-.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__tab.is-active {
-  color: var(--sikshya-learn-primary, #2563eb) !important;
-  border-bottom-color: var(--sikshya-learn-primary, #2563eb) !important;
-  background: var(--sikshya-learn-surface) !important;
-}
-
-/* Distinct styling for discussion compose area */
-.sikshya-sidebarDisc__compose--discussion {
+/* Discussion + Q&A compose chrome (dock / legacy markup) */
+.sikshya-sidebarDisc__compose--discussion,
+.sikshya-sidebarDisc__compose--qa {
   border-top: 1px solid var(--sikshya-learn-border);
   padding: 12px 0 0;
 }
@@ -769,32 +817,21 @@
   font-weight: 500;
 }
 
-.sikshya-sidebarDisc__composeType--qa {
-  background: var(--sikshya-learn-warning, #f59e0b);
-}
-
-/* Distinct styling for Q&A compose area */
-.sikshya-sidebarDisc__compose--qa {
-  border-top: 1px solid var(--sikshya-learn-border);
-  padding: 12px 0 0;
+.sikshya-sidebarDisc__post--discussion,
+.sikshya-sidebarDisc__post--qa {
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
 }
 
 .sikshya-sidebarDisc__post--discussion {
   background: var(--sikshya-learn-primary, #2563eb);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
 }
 
 .sikshya-sidebarDisc__post--qa {
-  background: var(--sikshya-learn-warning, #f59e0b);
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
+  background: var(--sikshya-learn-primary, #2563eb);
 }
 
 .sikshya-sidebarDisc__post--discussion:hover,
@@ -820,12 +857,12 @@
 
 /* Sheet visibility is driven by the [hidden] attribute and the data-state
  * attribute on the section, not by a class — keeps SSR + JS in sync. */
-.sikshya-sidebarDisc[data-sik-disc-open="false"] .sikshya-sidebarDisc__sheet {
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-open="false"] .sikshya-sidebarDisc__sheet {
   display: none;
 }
 
-/* Open state: start from top of sidebar while keeping tabs fixed at footer */
-.sikshya-sidebarDisc[data-sik-disc-open="true"] {
+/* Open state: sidebar column = sheet (scroll) | composer dock | footer tabs */
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] {
   position: fixed;
   top: 0;
   left: 0;
@@ -838,88 +875,150 @@
 
 /* No need to lock sidebar scrolling since we're expanding upward from footer */
 
-/* Reorder children when open: sheet on top, tabs pinned to the bottom. */
-.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__sheet {
-  order: 1;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__tabs {
-  order: 2;
-  border-top: 1px solid var(--sikshya-learn-border);
-  border-bottom: 0;
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__composeDock {
   flex: 0 0 auto;
 }
 
-/* Let the thread list grow to fill the available space in the sheet */
-.sikshya-sidebarDisc[data-sik-disc-open="true"] .sikshya-sidebarDisc__threadScroll {
-  max-height: calc(50vh - 180px);
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__tabsSection {
+  border-top: 1px solid var(--sikshya-learn-border);
+  flex: 0 0 auto;
+}
+
+/* Let the thread list grow to fill the available space in the sidebar sheet */
+.sikshya-sidebarDisc[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__threadScroll {
   flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
-.sikshya-sidebarDisc__tabs {
-  display: flex;
-  gap: 0;
-  align-items: stretch;
-  /* Match the right column's Prev/Next bar so the sidebar's footer baseline
-   * lines up with .sikshya-learnContentNav across the column divider. */
-  min-height: var(--sikshya-learn-content-nav-h);
-  border-bottom: 1px solid transparent;
+/* Sidebar Discussion / Q&A footer: same chrome as lesson player (.sikshya-tabsBar + .sikshya-tabBtn) */
+
+.sikshya-sidebarDisc__tabsSection.sikshya-tabsSection {
+  margin-top: 0;
   flex: 0 0 auto;
-  background: var(--sikshya-learn-surface-2, rgba(15, 23, 42, 0.03));
 }
 
-@media (max-width: 1023px) {
-  .sikshya-sidebarDisc {
-    width: 100%;
-    left: 0;
+.sikshya-sidebarDisc .sikshya-sidebarDisc__tabsBar.sikshya-tabsBar {
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+  gap: 0;
+  border-bottom-color: transparent;
+  background: var(--sikshya-learn-surface-2, rgba(15, 23, 42, 0.03));
+  /* Align footer strip with Prev/Next rail in main column */
+  min-height: var(--sikshya-learn-content-nav-h);
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.sikshya-sidebarDisc .sikshya-sidebarDisc__tabsBar .sikshya-tabBtn {
+  flex: 1 1 50%;
+  margin-bottom: 0;
+  border-radius: 0;
+  text-align: center;
+  justify-content: center;
+  font-size: var(--sikshya-learn-fs-12, 12px);
+}
+
+/*
+ * Discussion + Q&A unread counts — Messenger / Facebook-style red badge (pill + halo).
+ * Applies to sidebar Q&A footer tab and main “Discussion” content tab (same primitives).
+ */
+.sikshya-tabBtn--withUnreadBadge {
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+  padding-right: 28px;
+}
+
+.sikshya-tabBtn--withUnreadBadge .sikshya-tabBtn__label {
+  display: inline-block;
+}
+
+/* Slight emphasis when tab has unread and is not focused — draws the eye without noise */
+.sikshya-tabBtn--withUnreadBadge.sikshya-tabBtn--hasUnread:not(.is-active) {
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-unreadBadge {
+  --sikshya-cd-unread: #fa383e;
+  --sikshya-cd-unread-ring: var(--sikshya-learn-surface, #fff);
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--sikshya-cd-unread);
+  background: radial-gradient(circle at 30% 25%, #ff8186 0%, var(--sikshya-cd-unread) 62%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 22px;
+  letter-spacing: -0.02em;
+  text-align: center;
+  box-sizing: border-box;
+  border: 2px solid var(--sikshya-cd-unread-ring);
+  box-shadow:
+    0 0 0 1px rgba(250, 56, 62, 0.35),
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(250, 56, 62, 0.4);
+  pointer-events: none;
+  z-index: 3;
+  animation: sikshya-cd-unread-glow 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sikshya-unreadBadge {
+    animation: none;
   }
 }
 
-/* In the closed state the tabs sit flush against the sidebar edge with no
- * divider. The open (overlay) state draws its own top border above the tabs,
- * so we no longer need a bottom-border toggle here. */
-
-.sikshya-sidebarDisc__tab {
-  flex: 1 1 50%;
-  appearance: none;
-  border: 0;
-  margin: 0;
-  padding: 10px 8px;
-  /* Center the label vertically within the 72px strip. */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font: inherit;
-  font-weight: 700;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--sikshya-learn-muted, #64748b);
-  background: transparent;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
+@keyframes sikshya-cd-unread-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(250, 56, 62, 0.35),
+      0 2px 6px rgba(0, 0, 0, 0.12),
+      0 4px 12px rgba(250, 56, 62, 0.38);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(250, 56, 62, 0.5),
+      0 2px 8px rgba(0, 0, 0, 0.14),
+      0 5px 16px rgba(250, 56, 62, 0.52);
+    transform: scale(1.03);
+  }
 }
 
-.sikshya-sidebarDisc__tab:hover {
-  color: var(--sikshya-learn-text);
-  background: rgba(255, 255, 255, 0.4);
+/* Main lesson tab strip must not clip the overlapping badge */
+.sikshya-learnContent .sikshya-tabsSection .sikshya-tabsBar {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
 }
 
+.sikshya-learnContent .sikshya-tabsSection .sikshya-tabBtn--withUnreadBadge {
+  overflow: visible;
+}
 
-.sikshya-sidebarDisc__tab:focus-visible {
-  outline: 2px solid var(--sikshya-learn-primary, #2563eb);
-  outline-offset: -2px;
+@media (max-width: 1023px) {
+  .sikshya-sidebarDisc[data-sik-disc-placement="sidebar"] {
+    width: 100%;
+    left: 0;
+  }
 }
 
 .sikshya-sidebarDisc__sheet {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 12px 12px;
+  padding: 10px 12px 8px;
   min-height: 0;
   flex: 1 1 auto;
 }
@@ -927,6 +1026,40 @@
 /* Honor the [hidden] attribute even though we set display:flex above. */
 .sikshya-sidebarDisc__sheet[hidden] {
   display: none;
+}
+
+/* Compact composer bar directly above Discussion / Q&A tabs */
+.sikshya-sidebarDisc__composeDock {
+  flex: 0 0 auto;
+  background: var(--sikshya-learn-surface-2, rgba(15, 23, 42, 0.025));
+  border-top: 1px solid var(--sikshya-learn-border);
+  padding: 10px 12px 8px;
+}
+
+.sikshya-sidebarDisc__composeDock[hidden] {
+  display: none !important;
+}
+
+.sikshya-sidebarDisc__composeSlot[hidden] {
+  display: none !important;
+}
+
+.sikshya-sidebarDisc__composeSlot:not([hidden]) {
+  display: block;
+}
+
+.sikshya-sidebarDisc__composeDock .sikshya-sidebarDisc__compose {
+  border-top: 0;
+  padding-top: 0;
+  gap: 8px;
+}
+
+.sikshya-sidebarDisc__composeDock .sikshya-sidebarDisc__textarea {
+  min-height: 72px;
+}
+
+.sikshya-sidebarDisc__composeDock .sikshya-sidebarDisc__composeFoot {
+  margin-top: 2px;
 }
 
 .sikshya-sidebarDisc__threadScroll {
@@ -956,6 +1089,345 @@
   border-radius: 999px;
 }
 
+/* ------------------------------------------------------------------
+ * Messenger-style Discussion / Q&A — one scroll viewport, sticky composer
+ * ------------------------------------------------------------------*/
+
+.sikshya-discMessenger__srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sikshya-discMessenger[data-sik-disc-placement="content"] {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sikshya-learning-shell--lesson .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active,
+.sikshya-learning-shell--quiz .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: min(560px, calc(100dvh - 168px));
+  max-height: min(620px, calc(100dvh - 140px));
+  height: min(560px, calc(100dvh - 152px));
+  overflow: hidden;
+}
+
+.sikshya-learning-shell--lesson .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active .sikshya-contentPanel--plain,
+.sikshya-learning-shell--quiz .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active .sikshya-contentPanel--plain {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: 8px;
+}
+
+.sikshya-discMessenger[data-sik-disc-placement="content"] > .sikshya-discMessenger__sheet:not([hidden]) {
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--sikshya-learn-radius-12);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: var(--sikshya-learn-surface);
+  box-shadow: var(--sikshya-learn-shadow-panel);
+}
+
+.sikshya-discMessenger[data-sik-disc-placement="content"] > .sikshya-discMessenger__composeDock:not([hidden]) {
+  flex: 0 0 auto;
+  margin-top: 10px;
+  padding: 10px 4px 2px;
+  border-top: none;
+  background: transparent;
+}
+
+.sikshya-discMessenger__head.sikshya-sidebarDisc__panelHead {
+  padding: 10px 12px;
+  margin: 0;
+  flex: 0 0 auto;
+  border-bottom-color: rgba(15, 23, 42, 0.07);
+}
+
+.sikshya-discMessenger__title.sikshya-sidebarDisc__panelTitle {
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-16);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sikshya-discMessenger__subtitle {
+  margin: 6px 0 0;
+  font-size: var(--sikshya-learn-fs-12);
+  line-height: 1.4;
+  color: var(--sikshya-learn-muted);
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Transcript fills space between toolbar and composer — only this region scrolls */
+.sikshya-discMessenger__threadViewport.sikshya-sidebarDisc__threadScroll {
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+  padding-top: 4px;
+  padding-bottom: 8px;
+  padding-right: 6px;
+  padding-inline: 10px;
+  background:
+    radial-gradient(115% 70% at 12% -6%, rgba(37, 99, 235, 0.07), transparent 55%),
+    linear-gradient(180deg, var(--sikshya-learn-surface) 0%, #f3f6fd 42%, #eff2f9 100%);
+}
+
+.sikshya-discMessenger:not(.sikshya-discMessenger--qa) .sikshya-sidebarDisc__chatBubble--discussion,
+.sikshya-discMessenger.sikshya-discMessenger--qa .sikshya-sidebarDisc__chatBubble--qa {
+  border-left-width: 0;
+  border-radius: 17px;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.sikshya-discMessenger[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__contentArea[data-qa-panel] {
+  min-height: 0;
+}
+
+.sikshya-discMessenger[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__threadScroll.sikshya-discMessenger__threadViewport {
+  padding-inline: 8px;
+}
+
+.sikshya-discMessenger[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-discMessenger__composeDock:not([hidden]) {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  background: rgba(248, 250, 252, 0.98);
+}
+
+.sikshya-discMessenger form.sikshya-discMessenger__composeForm.sikshya-sidebarDisc__compose {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sikshya-discMessenger__composerWrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 6px;
+  margin: 0;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.sikshya-discMessenger__composerWrap:focus-within {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.sikshya-discMessenger__composerMeta {
+  padding: 2px 4px 0;
+  min-height: 1rem;
+}
+
+.sikshya-discMessenger__metaHint {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-discMessenger__composerInput.sikshya-sidebarDisc__textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  resize: none;
+  overflow-y: auto;
+  min-height: 44px;
+  max-height: 120px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: none;
+  background: var(--sikshya-learn-surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.sikshya-discMessenger__composerInput.sikshya-sidebarDisc__textarea:focus {
+  outline: 0;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.sikshya-discMessenger__composeDock .sikshya-sidebarDisc__textarea.sikshya-discMessenger__composerInput {
+  min-height: 44px;
+}
+
+.sikshya-discMessenger__send.sikshya-sidebarDisc__post,
+.sikshya-discMessenger__send--qa.sikshya-sidebarDisc__post--qa {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0 16px;
+  min-height: 40px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--sikshya-learn-primary);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.28);
+}
+
+.sikshya-discMessenger__send.sikshya-sidebarDisc__post:hover:not(:disabled),
+.sikshya-discMessenger__send--qa.sikshya-sidebarDisc__post--qa:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.sikshya-discMessenger__headRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sikshya-discMessenger__headActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+
+.sikshya-discMessenger__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sikshya-learn-muted, #64748b);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sikshya-discMessenger__close:hover {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-discMessenger__close:focus-visible {
+  outline: 2px solid var(--sikshya-learn-primary, #2563eb);
+  outline-offset: 2px;
+}
+
+.sikshya-discMessenger__closeIcon {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.sikshya-discMessenger__scopePill {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--sikshya-learn-primary);
+  background: var(--sikshya-learn-accent-wash);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+}
+
+.sikshya-discMessenger--qa[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] {
+  top: 0;
+  bottom: auto;
+  height: calc(100dvh - var(--sikshya-learn-top-offset) - (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
+  max-height: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.sikshya-discMessenger--qa[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] > .sikshya-sidebarDisc__sheet.sikshya-discMessenger__sheet {
+  gap: 0;
+  flex: 1 1 auto;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 0;
+  border: none;
+  background: var(--sikshya-learn-surface);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.sikshya-discMessenger--qa[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"]
+  .sikshya-sidebarDisc__panelHead.sikshya-discMessenger__head {
+  padding: 12px 12px 10px;
+  margin: 0;
+  border-bottom: 1px solid var(--sikshya-learn-border, rgba(15, 23, 42, 0.08));
+  background: var(--sikshya-learn-surface);
+}
+
+.sikshya-discMessenger--qa[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"]
+  > .sikshya-sidebarDisc__composeDock.sikshya-discMessenger__composeDock:not([hidden]) {
+  padding: 10px 12px;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0;
+  border-top: 1px solid var(--sikshya-learn-border, rgba(15, 23, 42, 0.08));
+  background: var(--sikshya-learn-surface-2, rgba(248, 250, 252, 0.95));
+}
+
+.sikshya-discMessenger--qa[data-sik-disc-placement="sidebar"][data-sik-disc-open="true"] .sikshya-sidebarDisc__tabsSection {
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  background: transparent;
+}
+
+.sikshya-discMessenger--qa[data-sik-disc-placement="sidebar"][data-sik-disc-open="false"] > .sikshya-sidebarDisc__tabsSection {
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  background: transparent;
+}
+
+@media (max-width: 479px) {
+  .sikshya-learning-shell--lesson .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active,
+  .sikshya-learning-shell--quiz .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active {
+    min-height: min(420px, calc(100dvh - 120px));
+    max-height: min(520px, calc(100dvh - 100px));
+    height: min(440px, calc(100dvh - 116px));
+  }
+
+  .sikshya-discMessenger__composerWrap {
+    gap: 6px;
+  }
+
+  .sikshya-discMessenger__send.sikshya-sidebarDisc__post {
+    padding: 0 12px;
+  }
+}
+
 .sikshya-sidebarDisc__empty {
   margin: 0;
   padding: 12px 10px;
@@ -978,12 +1450,348 @@
   border-radius: 8px;
 }
 
+/* --- Discussion / Q&A: chat-thread transcript -------------------------------- */
+.sikshya-sidebarDisc__thread {
+  display: block;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.sikshya-sidebarDisc__thread:last-child {
+  margin-bottom: 6px;
+}
+
+.sikshya-sidebarDisc__chatRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sikshya-sidebarDisc__avatar {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--sikshya-learn-primary, #2563eb) 0%, #6366f1 100%);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  user-select: none;
+}
+
+.sikshya-sidebarDisc__chatCol {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sikshya-sidebarDisc__chatBubble {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 12px 12px 12px 6px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.sikshya-sidebarDisc__chatBubble--discussion {
+  border-left: 3px solid var(--sikshya-learn-primary, #2563eb);
+}
+
+.sikshya-sidebarDisc__chatBubble--qa {
+  border-left: 3px solid rgba(37, 99, 235, 0.35);
+}
+
+.sikshya-sidebarDisc__chatHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-bottom: 8px;
+}
+
+.sikshya-sidebarDisc__chatTime {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sikshya-learn-muted, #64748b);
+  background: rgba(15, 23, 42, 0.05);
+  white-space: nowrap;
+}
+
+/* Thread rail + stacked replies */
+.sikshya-sidebarDisc__threadRail {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding-left: 4px;
+  margin-top: 2px;
+}
+
+.sikshya-sidebarDisc__railLine {
+  flex: 0 0 2px;
+  width: 2px;
+  align-self: stretch;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.6) 0%, rgba(148, 163, 184, 0.12) 100%);
+}
+
+.sikshya-sidebarDisc__repliesCol {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sikshya-sidebarDisc__repliesLabel {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sikshya-learn-muted, #94a3b8);
+}
+
+.sikshya-sidebarDisc__replyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.sikshya-sidebarDisc__replyRow--instr {
+  background: rgba(37, 99, 235, 0.04);
+  border-color: rgba(37, 99, 235, 0.12);
+}
+
+.sikshya-sidebarDisc__replyRow.is-pending {
+  opacity: 0.88;
+  border-style: dashed;
+}
+
+.sikshya-sidebarDisc__replyAvatar {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--sikshya-learn-text);
+  user-select: none;
+}
+
+.sikshya-sidebarDisc__replyRow--instr .sikshya-sidebarDisc__replyAvatar {
+  background: var(--sikshya-learn-primary, #2563eb);
+  color: #fff;
+}
+
+.sikshya-sidebarDisc__replyBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sikshya-sidebarDisc__replyTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.sikshya-sidebarDisc__replyName {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-sidebarDisc__replyTime {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sikshya-learn-muted, #94a3b8);
+}
+
+.sikshya-sidebarDisc__replyMsg {
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--sikshya-learn-text);
+}
+
+/* Footer: edit hint + actions */
+.sikshya-sidebarDisc__bubbleFoot {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sikshya-sidebarDisc__editHintWrap {
+  min-height: 0;
+}
+
+.sikshya-sidebarDisc__editHint {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sikshya-learn-muted, #64748b);
+}
+
+.sikshya-sidebarDisc__modBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.sikshya-sidebarDisc__bubbleActions {
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.sikshya-sidebarDisc__bubbleActions-inner {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sikshya-sidebarDisc__bubbleBtn {
+  appearance: none;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--sikshya-learn-text);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.sikshya-sidebarDisc__bubbleBtn:hover {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.sikshya-sidebarDisc__bubbleBtn--muted {
+  border-color: transparent;
+  background: transparent;
+  color: var(--sikshya-learn-muted, #64748b);
+}
+
+.sikshya-sidebarDisc__bubbleBtn--muted:hover {
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-sidebarDisc__bubbleBtn--danger {
+  color: #b91c1c;
+}
+
+.sikshya-sidebarDisc__bubbleBtn--danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Instructor reply composer — full-width field + send (readable on narrow sidebar) */
+.sikshya-sidebarDisc__replyStrip {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.sikshya-sidebarDisc__replyStrip .sikshya-sidebarDisc__replyTa {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  margin: 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  border: 1px solid var(--sikshya-learn-border);
+  background: var(--sikshya-learn-surface);
+  border-radius: 10px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.sikshya-sidebarDisc__replyStrip .sikshya-sidebarDisc__replyTa:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 0;
+}
+
+.sikshya-sidebarDisc__replySend {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  appearance: none;
+  border: 0;
+  background: var(--sikshya-learn-primary, #2563eb);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sikshya-sidebarDisc__replySend:hover {
+  filter: brightness(0.95);
+}
+
+/* Legacy bubble shells (still referenced for older markup in edge cases). */
 .sikshya-sidebarDisc__bubble {
   background: #fff;
   border: 1px solid var(--sikshya-learn-border, #e2e8f0);
   border-radius: 10px;
   padding: 10px 10px 8px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  border-left: 3px solid var(--sikshya-learn-primary, #2563eb);
+}
+
+.sikshya-sidebarDisc__bubble--qa {
+  border-left-color: var(--sikshya-learn-primary, #2563eb);
+}
+
+.sikshya-sidebarDisc__bubble--discussion {
+  border-left-color: var(--sikshya-learn-primary, #2563eb);
+}
+
+.sikshya-sidebarDisc__bubble--qa .sikshya-sidebarDisc__tag,
+.sikshya-sidebarDisc__chatBubble--qa .sikshya-sidebarDisc__tag {
+  color: var(--sikshya-learn-primary);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.sikshya-sidebarDisc__chatBubble--discussion .sikshya-sidebarDisc__tag {
+  color: var(--sikshya-learn-primary, #2563eb);
+  background: rgba(37, 99, 235, 0.1);
 }
 
 .sikshya-sidebarDisc__bubbleMeta {
@@ -992,6 +1800,14 @@
   align-items: center;
   gap: 6px 8px;
   margin-bottom: 8px;
+}
+
+.sikshya-sidebarDisc__time {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--sikshya-learn-muted, #64748b);
+  white-space: nowrap;
 }
 
 .sikshya-sidebarDisc__author {
@@ -1024,10 +1840,65 @@
   word-break: break-word;
 }
 
+.sikshya-sidebarDisc__editPanel {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.sikshya-sidebarDisc__editPanel[hidden] {
+  display: none !important;
+}
+
+.sikshya-sidebarDisc__editTa {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--sikshya-learn-border, #e2e8f0);
+  resize: vertical;
+  min-height: 64px;
+  box-sizing: border-box;
+  color: var(--sikshya-learn-text);
+  background: #fff;
+}
+
+.sikshya-sidebarDisc__editBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.sikshya-sidebarDisc__editSave {
+  background: var(--sikshya-learn-primary, #2563eb) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+.sikshya-sidebarDisc__editSave:hover {
+  filter: brightness(0.95);
+}
+
+.sikshya-sidebarDisc__editCancel:hover {
+  background: var(--sikshya-learn-surface-2, #f8fafc);
+}
+
+.sikshya-sidebarDisc__repliesHead {
+  margin: 10px 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sikshya-learn-muted, #64748b);
+}
+
 .sikshya-sidebarDisc__replies {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--sikshya-learn-border, #e2e8f0);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1041,15 +1912,22 @@
 }
 
 .sikshya-sidebarDisc__reply.is-pending {
-  border-left-color: #f59e0b;
+  border-left-color: rgba(100, 116, 139, 0.55);
   opacity: 0.95;
 }
 
+.sikshya-sidebarDisc__replyMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
 .sikshya-sidebarDisc__replyAuthor {
-  display: block;
   font-size: 11px;
   font-weight: 800;
-  margin-bottom: 4px;
   color: var(--sikshya-learn-muted, #64748b);
 }
 
@@ -1060,7 +1938,7 @@
   word-break: break-word;
 }
 
-.sikshya-sidebarDisc__bubbleActions {
+.sikshya-sidebarDisc__bubble .sikshya-sidebarDisc__bubbleActions {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -1087,6 +1965,14 @@
   margin-top: 10px;
   display: grid;
   gap: 6px;
+}
+
+.sikshya-sidebarDisc__replyLabel {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--sikshya-learn-muted, #64748b);
 }
 
 .sikshya-sidebarDisc__replyTa {
@@ -1121,6 +2007,7 @@
   gap: 6px;
   padding-top: 4px;
   border-top: 1px solid var(--sikshya-learn-border);
+  margin: 0;
 }
 
 .sikshya-sidebarDisc__composeLabel {
@@ -1146,8 +2033,6 @@
   font-size: 13px;
 }
 
- 
-
 .sikshya-sidebarDisc__textarea:disabled {
   background: #f1f5f9;
   color: var(--sikshya-learn-muted, #64748b);
@@ -1167,6 +2052,24 @@
   color: var(--sikshya-learn-muted, #64748b);
   flex: 1 1 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.4;
+}
+
+.sikshya-sidebarDisc__composeNote {
+  display: block;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--sikshya-learn-muted, #475569);
+  background: rgba(15, 23, 42, 0.04);
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .sikshya-sidebarDisc__post {
@@ -1252,6 +2155,7 @@
   .sikshya-learning-shell--lesson .sikshya-learnContentCol,
   .sikshya-learning-shell--quiz .sikshya-learnContentCol {
     min-height: 0;
+    overflow: hidden;
     border-left: 1px solid var(--sikshya-learn-border);
     background: var(--sikshya-learn-bg);
     box-shadow: inset 1px 0 0 rgba(15, 23, 42, 0.03);
@@ -1623,8 +2527,8 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 18px 44px rgba(15, 23, 42, 0.08);
   max-width: 560px;
   width: 100%;
-  background: rgba(245, 158, 11, 0.12); /* warning surface */
-  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .sikshya-contentPanel--notice {
@@ -1775,9 +2679,6 @@
   align-items: center;
   position: sticky;
   z-index: 44;
-}
-
-.sikshya-contentPanel--header {
   /* Bleed through column padding so header strip touches edges */
   margin-left: -22px;
   margin-right: calc(-1 * max(22px, env(safe-area-inset-right)));
@@ -1812,9 +2713,6 @@
 
 .sikshya-contentPanel--header .sikshya-learnHeader__actions {
   padding-top: 0;
-}
-
-.sikshya-contentPanel--header .sikshya-learnHeader__actions {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -2536,6 +3434,98 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.35;
+  color: var(--sikshya-learn-text);
+}
+
+/* ------------------------------------------------------------------
+ * Learn notes tab — multiple private notes per lesson/quiz (REST)
+ * ------------------------------------------------------------------ */
+.sikshya-learnNotes__hint {
+  margin: 0 0 8px;
+  font-size: var(--sikshya-learn-fs-13);
+  line-height: 1.45;
+}
+
+.sikshya-learnNotes__empty {
+  margin: 10px 0 0;
+  font-size: var(--sikshya-learn-fs-13);
+}
+
+.sikshya-learnNotes__list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sikshya-learnNotes__card {
+  padding: 12px 14px;
+  border-radius: var(--sikshya-learn-radius-8);
+  border: 1px solid var(--sikshya-learn-border);
+  background: var(--sikshya-learn-surface-2, rgba(248, 250, 252, 0.9));
+}
+
+.sikshya-learnNotes__meta {
+  margin-bottom: 8px;
+}
+
+.sikshya-learnNotes__time {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-learnNotes__body {
+  font-size: var(--sikshya-learn-fs-13);
+  line-height: 1.55;
+  color: var(--sikshya-learn-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sikshya-learnNotes__edit {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.sikshya-learnNotes__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sikshya-learnNotes__btn {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.sikshya-learnNotes__btn--muted {
+  background: transparent !important;
+}
+
+.sikshya-learnNotes__btn--danger {
+  background: transparent !important;
+  color: #b91c1c !important;
+  border-color: rgba(185, 28, 28, 0.35) !important;
+}
+
+.sikshya-learnNotes__composer {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--sikshya-learn-border);
+}
+
+.sikshya-learnNotes__composerLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 600;
   color: var(--sikshya-learn-text);
 }
 
@@ -3716,9 +4706,6 @@
   .sikshya-learning-shell,
   .sikshya-learning-shell * {
     scroll-behavior: auto !important;
-  }
-
-  .sikshya-learning-shell * {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

@@ -259,6 +259,95 @@ final class EmailNotificationService
     }
 
     /**
+     * Instructor notice after a learner posts a Community Q&A question (Growth add-on hook).
+     */
+    public function sendInstructorQaQuestionPostedEmail(int $learner_user_id, int $course_id, int $content_id, int $comment_id): bool
+    {
+        $def = EmailTemplateCatalog::get('instructor_qa_question');
+        if ($def === null) {
+            return false;
+        }
+        if (EmailTemplateGate::metadataFromCatalogDef($def)['locked']) {
+            return false;
+        }
+
+        $ctx = $this->buildMergeContextForQaQuestion($learner_user_id, $course_id, $content_id, $comment_id);
+        if ($ctx === null) {
+            return false;
+        }
+
+        $ie = isset($ctx['{{instructor_email}}']) ? trim((string) $ctx['{{instructor_email}}']) : '';
+        if ($ie === '' || !is_email($ie)) {
+            return false;
+        }
+
+        return $this->sendSystemTemplate('instructor_qa_question', $ctx);
+    }
+
+    /**
+     * Merge tags for instructor Q&A question emails.
+     *
+     * @return array<string, string>|null
+     */
+    public function buildMergeContextForQaQuestion(int $learner_user_id, int $course_id, int $content_id, int $comment_id): ?array
+    {
+        if ($course_id <= 0 || $content_id <= 0 || $comment_id <= 0) {
+            return null;
+        }
+
+        $comment = get_comment($comment_id);
+        if (!$comment instanceof \WP_Comment) {
+            return null;
+        }
+
+        $uid = $learner_user_id > 0 ? $learner_user_id : (int) $comment->user_id;
+        if ($uid > 0) {
+            $ctx = $this->buildMergeContextForCourse($uid, $course_id);
+        } else {
+            $base = $this->buildUserContext(0);
+            $name = sanitize_text_field((string) $comment->comment_author);
+            $em = sanitize_email((string) $comment->comment_author_email);
+            $base['{{student_name}}'] = $name;
+            $base['{{student_email}}'] = is_email($em) ? $em : '';
+            $base['{{learner_name}}'] = $name;
+            $base['{{learner_email}}'] = $base['{{student_email}}'];
+            $ctx = $this->applyCourseTitleUrlAndInstructor($base, $course_id);
+        }
+
+        $ct = get_the_title($content_id);
+        $ctx['{{content_title}}'] = is_string($ct) ? $ct : '';
+
+        $cp = get_permalink($content_id);
+        $cp = is_string($cp) ? $cp : '';
+
+        $ctx['{{content_url}}'] = $cp !== '' ? esc_url($cp) : esc_url(home_url('/'));
+
+        if ($cp !== '') {
+            $review_url = $cp . '#comment-' . $comment_id;
+        } else {
+            $link_fallback = get_comment_link($comment_id);
+            $review_url = is_string($link_fallback) && $link_fallback !== '' ? $link_fallback : ($ctx['{{content_url}}']);
+        }
+
+        $ctx['{{qa_review_url}}'] = esc_url(is_string($review_url) ? $review_url : home_url('/'));
+
+        $snippet = wp_strip_all_tags(wp_unslash((string) $comment->comment_content));
+        $snippet = wp_trim_words($snippet, 80, __('…', 'sikshya'));
+
+        /**
+         * Filters the plain preview text before escaping for {@see '{{qa_question_preview}}'} merge output.
+         */
+        $snippet = (string) apply_filters('sikshya_email_qa_question_preview_text', $snippet, $course_id, $content_id, $comment_id);
+
+        $ctx['{{qa_question_preview}}'] = nl2br(esc_html($snippet), false);
+
+        /**
+         * @var array<string, string> $ctx
+         */
+        return $ctx;
+    }
+
+    /**
      * Merge context for drip lesson unlock (course + lesson URLs).
      *
      * @return array<string, string>
@@ -387,6 +476,10 @@ final class EmailNotificationService
                 . '<li style="margin:0 0 8px;">' . esc_html__('Sample course B', 'sikshya') . ' — <strong>40.00 USD</strong></li>'
                 . '</ul>',
             '{{order_receipt_url}}' => esc_url(home_url('/?sikshya_order_preview=1')),
+            '{{qa_question_preview}}' => nl2br(esc_html__('Hi instructor — quick question before I start Module 3. Can you confirm if the quiz covers chapter 5 only?', 'sikshya'), false),
+            '{{qa_review_url}}' => esc_url(home_url('/learn/sample-lesson/')),
+            '{{content_title}}' => __('Sample quiz · Quick quiz 2', 'sikshya'),
+            '{{content_url}}' => esc_url(home_url('/learn/sample-lesson/')),
         ];
     }
 
@@ -511,6 +604,16 @@ final class EmailNotificationService
     private function buildCourseContext(int $user_id, int $course_id): array
     {
         $base = $this->buildUserContext($user_id);
+
+        return $this->applyCourseTitleUrlAndInstructor($base, $course_id);
+    }
+
+    /**
+     * @param array<string, string> $base Merge row with learner tags already set.
+     * @return array<string, string>
+     */
+    private function applyCourseTitleUrlAndInstructor(array $base, int $course_id): array
+    {
         $course_title = get_the_title($course_id);
         $learn_url = get_permalink($course_id);
         if (!is_string($course_title)) {
@@ -688,5 +791,43 @@ final class EmailNotificationService
           </div>';
 
         return $outer;
+    }
+
+    /**
+     * Register WordPress actions that dispatch domain events to email templates / {@see wp_mail()} flows.
+     *
+     * Kept alongside the sender so transactional behavior stays discoverable outside {@see \Sikshya\Core\Plugin}.
+     */
+    public static function registerHookListeners(self $mailer): void
+    {
+        CustomEmailTemplateHookDispatcher::register($mailer);
+
+        add_action(
+            'sikshya_course_qa_question_posted',
+            static function ($learner_user_id, $course_id, $content_id, $comment_id) use ($mailer): void {
+                $lid = absint($learner_user_id);
+                $cid = absint($course_id);
+                $xp = absint($content_id);
+                $com = absint($comment_id);
+                if ($cid <= 0 || $xp <= 0 || $com <= 0) {
+                    return;
+                }
+                $mailer->sendInstructorQaQuestionPostedEmail($lid, $cid, $xp, $com);
+            },
+            10,
+            4
+        );
+
+        add_action(
+            'sikshya_order_fulfilled',
+            static function ($order_id, $order) use ($mailer): void {
+                $oid = (int) $order_id;
+                if ($oid > 0) {
+                    $mailer->sendPaymentReceiptForOrder($oid, $order);
+                }
+            },
+            12,
+            2
+        );
     }
 }

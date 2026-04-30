@@ -147,6 +147,49 @@ final class EmailTemplateCatalog
                 ),
                 'merge_tags' => $tags_common,
             ],
+            'instructor_qa_question' => [
+                'name' => __('New Q&A question (instructor)', 'sikshya'),
+                'description' => __(
+                    'Sent when a learner posts a new question in Course Q&A (Community discussions). Customize subject and HTML here.',
+                    'sikshya'
+                ),
+                'required_addon' => 'community_discussions',
+                'required_feature' => 'community_discussions',
+                'event' => 'sikshya_course_qa_question_posted',
+                'category' => 'courses',
+                'recipient' => 'instructor',
+                'recipient_to' => '{{instructor_email}}',
+                'template_type' => 'system',
+                'default_subject' => __('💬 [{{site_name}}] New question · {{course_title}}', 'sikshya'),
+                'default_body_html' => self::layout(
+                    '💬',
+                    esc_html__('New learner question', 'sikshya'),
+                    '<p style="margin:0 0 16px;color:#475569;font-size:15px;">' . esc_html__('Hi {{instructor_name}},', 'sikshya') . '</p>'
+                    . '<p style="margin:0 0 20px;">' . esc_html__(
+                        'A learner just posted something in Q&A for one of your courses. Here is what they wrote:',
+                        'sikshya'
+                    ) . '</p>'
+                    . '<div style="margin:18px 0;padding:14px 16px;background:#fefce8;border:1px solid #fde047;border-radius:12px;color:#78350f;font-size:14px;line-height:1.55;white-space:pre-wrap;">'
+                    . '{{qa_question_preview}}</div>'
+                    . self::factTable([
+                        ['label' => esc_html__('Course', 'sikshya'), 'value' => '{{course_title}}'],
+                        ['label' => esc_html__('Lesson / quiz', 'sikshya'), 'value' => '{{content_title}}'],
+                        ['label' => esc_html__('From', 'sikshya'), 'value' => '{{student_name}} · {{student_email}}'],
+                    ])
+                    . '<p style="margin:24px 0 12px;text-align:center;">'
+                    . '<a href="{{qa_review_url}}" style="display:inline-block;padding:14px 28px;background:#0d9488;color:#ffffff;text-decoration:none;font-weight:600;border-radius:10px;">'
+                    . esc_html__('Review & reply in context →', 'sikshya')
+                    . '</a></p>'
+                    . '<p style="margin:0;font-size:13px;color:#64748b;">' . esc_html__(
+                        'If the button doesn’t work, paste this URL into your browser:',
+                        'sikshya'
+                    ) . ' <span style="word-break:break-all;">{{qa_review_url}}</span></p>'
+                ),
+                'merge_tags' => array_merge(
+                    $tags_common,
+                    ['{{qa_question_preview}}', '{{qa_review_url}}', '{{content_title}}', '{{content_url}}']
+                ),
+            ],
             'learner_course_completed' => [
                 'name' => __('Course completed', 'sikshya'),
                 'description' => __('Sent when a student completes a course.', 'sikshya'),

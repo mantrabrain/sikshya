@@ -34,6 +34,7 @@ final class CustomEmailTemplateHookDispatcher
         'sikshya_drip_lesson_unlocked' => 3,
         'sikshya_drip_course_unlocked' => 2,
         'sikshya_drip_lessons_unlocked' => 3,
+        'sikshya_course_qa_question_posted' => 4,
     ];
 
     public static function register(EmailNotificationService $mailer): void
@@ -146,6 +147,16 @@ final class CustomEmailTemplateHookDispatcher
                 $cid = isset($args[1]) ? absint($args[1]) : 0;
 
                 return ($uid > 0 && $cid > 0) ? $mailer->buildMergeContextForCourse($uid, $cid) : null;
+
+            case 'sikshya_course_qa_question_posted':
+                $learner = isset($args[0]) ? absint($args[0]) : 0;
+                $cid = isset($args[1]) ? absint($args[1]) : 0;
+                $content_id = isset($args[2]) ? absint($args[2]) : 0;
+                $com_id = isset($args[3]) ? absint($args[3]) : 0;
+
+                return ($cid > 0 && $content_id > 0 && $com_id > 0)
+                    ? $mailer->buildMergeContextForQaQuestion($learner, $cid, $content_id, $com_id)
+                    : null;
 
             case 'sikshya_certificate_issued':
                 $uid = isset($args[0]) ? absint($args[0]) : 0;

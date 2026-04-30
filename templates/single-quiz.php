@@ -18,7 +18,6 @@ $sheet_ver = rawurlencode((string) $plugin->version);
 $ds_href = esc_url($plugin->getAssetUrl('css/public-design-system.css')) . '?ver=' . $sheet_ver;
 $learn_href = esc_url($plugin->getAssetUrl('css/learn.css')) . '?ver=' . $sheet_ver;
 $quiz_js = esc_url($plugin->getAssetUrl('js/quiz-taker.js')) . '?ver=' . $sheet_ver;
-$discussion_fix_js = esc_url($plugin->getAssetUrl('js/quiz-discussion-fix.js')) . '?ver=' . $sheet_ver;
 
 while (have_posts()) {
     the_post();
@@ -42,7 +41,6 @@ while (have_posts()) {
     <title><?php echo esc_html($page_title); ?></title>
     <link rel="stylesheet" href="<?php echo $ds_href; ?>">
     <link rel="stylesheet" href="<?php echo $learn_href; ?>">
-    <script src="<?php echo $discussion_fix_js; ?>" defer></script>
 </head>
 <body class="sikshya-learning-shell sikshya-learning-shell--quiz">
 <div class="sikshya-learning-app">
@@ -592,6 +590,15 @@ while (have_posts()) {
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="notes"><?php esc_html_e('Notes', 'sikshya'); ?></button>
                             <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
+                            <?php
+                            /**
+                             * Extra tab buttons in the learner content chrome.
+                             *
+                             * @param array<string,mixed> $legacy_vm
+                             * @param mixed               $page_model
+                             */
+                            do_action('sikshya_learn_tabs_bar_append', $page_model->toLegacyViewArray(), $page_model);
+                            ?>
                             <?php if ($page_model->isCourseFeatureReviews()) : ?>
                                 <button type="button" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
                             <?php endif; ?>
@@ -689,21 +696,26 @@ while (have_posts()) {
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="notes">
-                            <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                            <div class="sikshya-contentPanel sikshya-contentPanel--plain sikshya-learnNotes" data-sikshya-notes-shell>
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('My notes', 'sikshya'); ?></h3>
-                                <label class="sikshya-screen-reader-text" for="sikshya-learn-note"><?php esc_html_e('My notes', 'sikshya'); ?></label>
-                                <textarea
-                                    id="sikshya-learn-note"
-                                    class="sikshya-quizQ__textarea"
-                                    rows="6"
-                                    placeholder="<?php echo esc_attr__('Write a private note for this quiz…', 'sikshya'); ?>"
-                                    data-sikshya-note
-                                ></textarea>
-                                <div class="sikshya-quizActions" style="margin-top:10px;">
-                                    <button type="button" class="sikshya-btn sikshya-btn--outline" data-sikshya-note-save>
-                                        <?php esc_html_e('Save note', 'sikshya'); ?>
-                                    </button>
-                                    <span class="sikshya-muted" data-sikshya-note-status style="font-size:12px;"></span>
+                                <p class="sikshya-learnNotes__hint sikshya-muted"><?php esc_html_e('Private to you — add as many short notes as you need while taking this quiz.', 'sikshya'); ?></p>
+                                <p class="sikshya-learnNotes__empty sikshya-muted" data-sikshya-notes-empty hidden><?php esc_html_e('No notes yet. Add one below.', 'sikshya'); ?></p>
+                                <ul class="sikshya-learnNotes__list" data-sikshya-notes-list></ul>
+                                <div class="sikshya-learnNotes__composer">
+                                    <label class="sikshya-learnNotes__composerLabel" for="sikshya-learn-note-new"><?php esc_html_e('New note', 'sikshya'); ?></label>
+                                    <textarea
+                                        id="sikshya-learn-note-new"
+                                        class="sikshya-quizQ__textarea sikshya-learnNotes__textarea"
+                                        rows="4"
+                                        placeholder="<?php echo esc_attr__('Capture a takeaway, bookmark, or question…', 'sikshya'); ?>"
+                                        data-sikshya-note-new
+                                    ></textarea>
+                                    <div class="sikshya-quizActions" style="margin-top:10px;">
+                                        <button type="button" class="sikshya-btn sikshya-btn--outline" data-sikshya-note-add>
+                                            <?php esc_html_e('Add note', 'sikshya'); ?>
+                                        </button>
+                                        <span class="sikshya-muted" data-sikshya-note-status style="font-size:12px;"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -746,8 +758,13 @@ while (have_posts()) {
                             </div>
                         </div>
                         <?php
-                        // Discussions/Q&A: Community Discussions Pro — tabbed panel in the left sidebar
-                        // (`sikshya_learn_sidebar_footer`).
+                        /**
+                         * Extra tab panels (`data-sikshya-panel`).
+                         *
+                         * @param array<string,mixed> $legacy_vm
+                         * @param mixed               $page_model
+                         */
+                        do_action('sikshya_learn_tab_panels_append', $page_model->toLegacyViewArray(), $page_model);
                         ?>
                         <?php if ($page_model->isCourseFeatureReviews()) : ?>
                             <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
@@ -764,53 +781,209 @@ while (have_posts()) {
             <?php if (!$page_model->hasError()) : ?>
         <script>
         (function(){
-          // Notes (REST): private per-user note for this content.
           const cfg = window.sikshyaQuizTaker || {};
-          const noteTa = document.querySelector('[data-sikshya-note]');
-          const noteSave = document.querySelector('[data-sikshya-note-save]');
+          const notesShell = document.querySelector('[data-sikshya-notes-shell]');
+          const notesList = document.querySelector('[data-sikshya-notes-list]');
+          const notesEmpty = document.querySelector('[data-sikshya-notes-empty]');
+          const noteNewTa = document.querySelector('[data-sikshya-note-new]');
+          const noteAdd = document.querySelector('[data-sikshya-note-add]');
           const noteStatus = document.querySelector('[data-sikshya-note-status]');
-          if (!noteTa || !noteSave || !cfg.restUrl || !cfg.restNonce || !cfg.quizId) return;
+          if (!notesShell || !notesList || !noteNewTa || !noteAdd || !cfg.restUrl || !cfg.restNonce || !cfg.quizId) return;
           const courseId = <?php echo wp_json_encode((int) $page_model->getCourseId(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
           const contentId = parseInt(cfg.quizId, 10) || 0;
-          let loaded = false;
-          async function loadNote(){
-            if (loaded) return;
-            loaded = true;
-            try{
-              const url = new URL(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/content-note', window.location.href);
-              url.searchParams.set('course_id', String(courseId));
-              url.searchParams.set('content_id', String(contentId));
-              const res = await fetch(url.toString(), { method:'GET', headers:{ 'X-WP-Nonce': cfg.restNonce }, credentials:'same-origin' });
-              const json = await res.json().catch(() => null);
-              if (res.ok && json && json.ok && json.data && typeof json.data.note === 'string') {
-                noteTa.value = json.data.note;
-              }
-            }catch(e){ console.error(e); }
+          const msgs = <?php echo wp_json_encode([
+              'saved' => __('Saved.', 'sikshya'),
+              'added' => __('Note added.', 'sikshya'),
+              'removed' => __('Note removed.', 'sikshya'),
+              'saving' => __('Saving…', 'sikshya'),
+              'failed' => __('Could not save. Try again.', 'sikshya'),
+              'edit' => __('Edit', 'sikshya'),
+              'save' => __('Save', 'sikshya'),
+              'cancel' => __('Cancel', 'sikshya'),
+              'delete' => __('Delete', 'sikshya'),
+          ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+          function setStatus(txt) {
+            if (noteStatus) noteStatus.textContent = txt || '';
           }
+
+          function noteUrl(noteId) {
+            const u = new URL(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/content-note', window.location.href);
+            u.searchParams.set('course_id', String(courseId));
+            u.searchParams.set('content_id', String(contentId));
+            if (noteId) u.searchParams.set('note_id', noteId);
+            return u.toString();
+          }
+
+          function formatWhen(iso) {
+            try {
+              const d = new Date(iso);
+              return isNaN(d.getTime()) ? '' : d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+            } catch (_) {
+              return '';
+            }
+          }
+
+          function renderNotes(items) {
+            notesList.innerHTML = '';
+            const arr = Array.isArray(items) ? items.slice() : [];
+            if (notesEmpty) notesEmpty.hidden = arr.length > 0;
+            arr.forEach((n) => {
+              const id = n && typeof n.id === 'string' ? n.id : '';
+              const text = n && typeof n.text === 'string' ? n.text : '';
+              if (!id || !text) return;
+              const when = formatWhen(n.created_at || '');
+              const li = document.createElement('li');
+              li.className = 'sikshya-learnNotes__item';
+              const card = document.createElement('div');
+              card.className = 'sikshya-learnNotes__card';
+              const meta = document.createElement('div');
+              meta.className = 'sikshya-learnNotes__meta';
+              const timeEl = document.createElement('time');
+              timeEl.className = 'sikshya-learnNotes__time';
+              timeEl.dateTime = n.created_at || '';
+              timeEl.textContent = when || '';
+              meta.appendChild(timeEl);
+              const body = document.createElement('div');
+              body.className = 'sikshya-learnNotes__body';
+              body.textContent = text;
+              const ta = document.createElement('textarea');
+              ta.className = 'sikshya-learnNotes__edit sikshya-quizQ__textarea';
+              ta.hidden = true;
+              ta.rows = 4;
+              ta.value = text;
+              ta.setAttribute('aria-label', <?php echo wp_json_encode(__('Note text', 'sikshya'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>);
+              const actions = document.createElement('div');
+              actions.className = 'sikshya-learnNotes__actions';
+              const editBtn = document.createElement('button');
+              editBtn.type = 'button';
+              editBtn.className = 'sikshya-btn sikshya-btn--outline sikshya-learnNotes__btn';
+              editBtn.textContent = msgs.edit;
+              const saveBtn = document.createElement('button');
+              saveBtn.type = 'button';
+              saveBtn.hidden = true;
+              saveBtn.className = 'sikshya-btn sikshya-btn--outline sikshya-learnNotes__btn';
+              saveBtn.textContent = msgs.save;
+              const cancelBtn = document.createElement('button');
+              cancelBtn.type = 'button';
+              cancelBtn.hidden = true;
+              cancelBtn.className = 'sikshya-learnNotes__btn sikshya-learnNotes__btn--muted';
+              cancelBtn.textContent = msgs.cancel;
+              const delBtn = document.createElement('button');
+              delBtn.type = 'button';
+              delBtn.className = 'sikshya-learnNotes__btn sikshya-learnNotes__btn--danger';
+              delBtn.textContent = msgs.delete;
+              actions.append(editBtn, saveBtn, cancelBtn, delBtn);
+              card.append(meta, body, ta, actions);
+              li.appendChild(card);
+              notesList.appendChild(li);
+
+              function setEditing(on) {
+                body.hidden = on;
+                ta.hidden = !on;
+                editBtn.hidden = on;
+                saveBtn.hidden = !on;
+                cancelBtn.hidden = !on;
+                if (!on) ta.value = body.textContent || '';
+                else ta.focus();
+              }
+              editBtn.addEventListener('click', () => setEditing(true));
+              cancelBtn.addEventListener('click', () => setEditing(false));
+              saveBtn.addEventListener('click', async () => {
+                saveBtn.disabled = true;
+                setStatus(msgs.saving);
+                try {
+                  const res = await fetch(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/content-note', {
+                    method: 'PUT',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.restNonce },
+                    body: JSON.stringify({
+                      course_id: Number(courseId),
+                      content_id: Number(contentId),
+                      note_id: id,
+                      text: ta.value,
+                    }),
+                  });
+                  const json = await res.json().catch(() => null);
+                  if (!res.ok || !json || json.ok !== true) throw new Error('fail');
+                  body.textContent = ta.value;
+                  setEditing(false);
+                  setStatus(msgs.saved);
+                  window.setTimeout(() => setStatus(''), 1600);
+                } catch (_) {
+                  setStatus(msgs.failed);
+                } finally {
+                  saveBtn.disabled = false;
+                }
+              });
+              delBtn.addEventListener('click', async () => {
+                if (!window.confirm(<?php echo wp_json_encode(__('Delete this note?', 'sikshya'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>)) return;
+                delBtn.disabled = true;
+                setStatus(msgs.saving);
+                try {
+                  const res = await fetch(noteUrl(id), {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: { 'X-WP-Nonce': cfg.restNonce },
+                  });
+                  const json = await res.json().catch(() => null);
+                  if (!res.ok || !json || json.ok !== true) throw new Error('fail');
+                  li.remove();
+                  const left = notesList.querySelectorAll('.sikshya-learnNotes__item').length;
+                  if (notesEmpty) notesEmpty.hidden = left > 0;
+                  setStatus(msgs.removed);
+                  window.setTimeout(() => setStatus(''), 1600);
+                } catch (_) {
+                  setStatus(msgs.failed);
+                } finally {
+                  delBtn.disabled = false;
+                }
+              });
+            });
+          }
+
+          async function loadNotes() {
+            if (!courseId || !contentId) return;
+            try {
+              const res = await fetch(noteUrl(), { method:'GET', headers:{ 'X-WP-Nonce': cfg.restNonce }, credentials:'same-origin' });
+              const json = await res.json().catch(() => null);
+              if (res.ok && json && json.ok && json.data) {
+                const items = Array.isArray(json.data.notes) ? json.data.notes : [];
+                renderNotes(items.filter((it) => it && it.id && typeof it.text === 'string'));
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
           document.addEventListener('click', (e) => {
             const t = e.target;
             if (!(t instanceof Element)) return;
-            if (t.matches('[data-sikshya-tab="notes"]')) void loadNote();
+            if (t.matches('[data-sikshya-tab="notes"]')) void loadNotes();
           });
-          noteSave.addEventListener('click', async () => {
-            noteSave.setAttribute('disabled','disabled');
-            if (noteStatus) noteStatus.textContent = 'Saving…';
-            try{
+
+          noteAdd.addEventListener('click', async () => {
+            const text = String(noteNewTa.value || '').trim();
+            if (!text) return;
+            noteAdd.disabled = true;
+            setStatus(msgs.saving);
+            try {
               const res = await fetch(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/content-note', {
                 method:'POST',
                 credentials:'same-origin',
                 headers:{ 'Content-Type':'application/json', 'X-WP-Nonce': cfg.restNonce },
-                body: JSON.stringify({ course_id: Number(courseId), content_id: Number(contentId), note: String(noteTa.value || '') }),
+                body: JSON.stringify({ course_id: Number(courseId), content_id: Number(contentId), text }),
               });
               const json = await res.json().catch(() => null);
-              if (!res.ok || !json || json.ok !== true) throw new Error((json && (json.message || json.data?.message)) || 'Failed');
-              if (noteStatus) noteStatus.textContent = 'Saved.';
-              window.setTimeout(() => { if (noteStatus) noteStatus.textContent = ''; }, 1600);
-            }catch(e){
-              if (noteStatus) noteStatus.textContent = 'Could not save.';
-              console.error(e);
-            }finally{
-              noteSave.removeAttribute('disabled');
+              if (!res.ok || !json || json.ok !== true) throw new Error('fail');
+              noteNewTa.value = '';
+              await loadNotes();
+              setStatus(msgs.added);
+              window.setTimeout(() => setStatus(''), 1600);
+            } catch (_) {
+              setStatus(msgs.failed);
+            } finally {
+              noteAdd.disabled = false;
             }
           });
         })();

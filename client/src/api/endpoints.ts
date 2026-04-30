@@ -98,7 +98,8 @@ export const SIKSHYA_ENDPOINTS = {
       course_id?: number;
       content_type?: 'lesson' | 'quiz';
       thread_type?: 'discussion' | 'qa';
-      status?: 'pending' | 'approved' | 'spam' | 'all';
+      status?: 'pending' | 'approved' | 'spam' | 'trash' | 'all';
+      attention?: 'all' | 'moderate' | 'reply' | 'answered' | 'spam';
       search?: string;
       page?: number;
       per_page?: number;
@@ -108,6 +109,7 @@ export const SIKSHYA_ENDPOINTS = {
       if (params?.content_type) q.set('content_type', params.content_type);
       if (params?.thread_type) q.set('thread_type', params.thread_type);
       if (params?.status) q.set('status', params.status);
+      if (params?.attention && params.attention !== 'all') q.set('attention', params.attention);
       if (params?.search) q.set('search', params.search);
       if (params?.page) q.set('page', String(params.page));
       if (params?.per_page) q.set('per_page', String(params.per_page));
@@ -115,10 +117,15 @@ export const SIKSHYA_ENDPOINTS = {
       return s ? `/admin/discussions?${s}` : '/admin/discussions';
     },
     discussionsSummary: '/admin/discussions/summary',
+    /** POST JSON `{ action: 'approve'|'spam'|'trash'|'delete', ids: number[] }` (max 100 ids). Pro addon. */
+    discussionsBulk: '/admin/discussions/bulk',
     discussion: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}`,
     discussionReply: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/reply`,
     discussionApprove: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/approve`,
+    /** @deprecated Prefer `discussionMarkSpam`; kept for backward compatibility (maps to spam). */
     discussionReject: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/reject`,
+    discussionMarkSpam: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/spam`,
+    discussionTrash: (id: number) => `/admin/discussions/${encodeURIComponent(String(id))}/trash`,
     /** Editable transactional email templates (system + custom). */
     emailTemplates: '/admin/email-templates',
     emailTemplate: (id: string) => `/admin/email-templates/${encodeURIComponent(id)}`,

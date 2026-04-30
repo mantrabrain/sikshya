@@ -107,4 +107,20 @@ final class InvoiceIssuanceService
 
         return $prefix . str_pad((string) $seq, 6, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Hooks into order lifecycle so invoices can be created when fulfillment runs.
+     */
+    public static function register(): void
+    {
+        add_action(
+            'sikshya_order_fulfilled',
+            static function ($order_id, $order): void {
+                $issuer = new self();
+                $issuer->maybeIssueForFulfilledOrder((int) $order_id, $order);
+            },
+            15,
+            2
+        );
+    }
 }

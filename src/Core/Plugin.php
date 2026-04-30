@@ -21,7 +21,7 @@ use Sikshya\Services\Settings;
 use Sikshya\Services\GlobalSettingsBootstrap;
 use Sikshya\Services\WpMailSmtpBridge;
 use Sikshya\Services\EmailNotificationService;
-use Sikshya\Services\CustomEmailTemplateHookDispatcher;
+use Sikshya\Services\InvoiceIssuanceService;
 use Sikshya\Addons\AddonManager;
 use Sikshya\Frontend\Public\InstructorAccountView;
 use Sikshya\Frontend\Public\InstructorApplicationView;
@@ -282,29 +282,9 @@ final class Plugin
 
         $mailer = $this->services['mailer'] ?? null;
         if ($mailer instanceof EmailNotificationService) {
-            CustomEmailTemplateHookDispatcher::register($mailer);
-            add_action(
-                'sikshya_order_fulfilled',
-                static function ($order_id, $order) use ($mailer): void {
-                    $oid = (int) $order_id;
-                    if ($oid > 0) {
-                        $mailer->sendPaymentReceiptForOrder($oid, $order);
-                    }
-                },
-                12,
-                2
-            );
+            EmailNotificationService::registerHookListeners($mailer);
         }
-
-        add_action(
-            'sikshya_order_fulfilled',
-            static function ($order_id, $order): void {
-                $issuer = new \Sikshya\Services\InvoiceIssuanceService();
-                $issuer->maybeIssueForFulfilledOrder((int) $order_id, $order);
-            },
-            15,
-            2
-        );
+        InvoiceIssuanceService::register();
 
         InstructorAccountView::init();
         InstructorApplicationView::init();
