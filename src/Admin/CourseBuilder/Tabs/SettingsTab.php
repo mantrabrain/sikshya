@@ -218,28 +218,6 @@ class SettingsTab extends AbstractTab
                     ],
                 ],
             ],
-            'learn_layout' => [
-                'section' => [
-                    'title' => __('Learn layout', 'sikshya'),
-                    'description' => __('How the curriculum outline behaves in lesson, quiz, and course Learn pages.', 'sikshya'),
-                    'icon' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M9 18h11"/>
-                    </svg>',
-                ],
-                'fields' => [
-                    'learn_curriculum_sidebar_scrollable' => [
-                        'type' => 'checkbox',
-                        'label' => __('Scroll outline inside the sidebar (recommended)', 'sikshya'),
-                        'description' => __(
-                            'On by default: the outline list scrolls inside the left rail so the page does not grow endlessly. Turn off only if you prefer the legacy whole-column scroll.',
-                            'sikshya'
-                        ),
-                        'default' => '1',
-                        'validation' => 'boolval',
-                        'sanitization' => 'boolval',
-                    ],
-                ],
-            ],
             'interaction_features' => [
                 'section' => [
                     'title' => __('Discussions & reviews', 'sikshya'),
