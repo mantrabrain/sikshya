@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Generate Sikshya (free) translation template (.pot) — same pattern as Yatra:
+# Generate Sikshya (free) translation template (.pot) — same pattern as Sikshya:
 #   1) Build admin UI (Vite → assets/admin/react/)
 #   2) Babel + @wordpress/babel-plugin-makepot on client/src → languages/sikshya-js.pot
 #   3) wp i18n make-pot (PHP + non-React assets)

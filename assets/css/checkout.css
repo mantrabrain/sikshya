@@ -2,7 +2,7 @@
  * Checkout virtual page — design system + layout with order summary sidebar.
  *
  * Depends on: public-design-system.css, frontend.css.
- * Loaded only when {@see \Sikshya\Frontend\Public\PublicPageUrls::isCurrentVirtualPage('checkout')}.
+ * Loaded only when {@see \Sikshya\Frontend\Site\PublicPageUrls::isCurrentVirtualPage('checkout')}.
  *
  * @package Sikshya
  */

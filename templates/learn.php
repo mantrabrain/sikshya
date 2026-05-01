@@ -5,7 +5,7 @@
  * @package Sikshya
  */
 
-use Sikshya\Frontend\Public\LearnTemplateData;
+use Sikshya\Frontend\Site\LearnTemplateData;
 use Sikshya\Core\Plugin;
 
 $page_model = LearnTemplateData::fromRequest();

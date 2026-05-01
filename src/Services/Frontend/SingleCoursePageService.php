@@ -2,7 +2,7 @@
 
 namespace Sikshya\Services\Frontend;
 
-use Sikshya\Frontend\Public\SingleCourseTemplateData;
+use Sikshya\Frontend\Site\SingleCourseTemplateData;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 
 /**

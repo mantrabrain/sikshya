@@ -6,7 +6,7 @@
 
 namespace Sikshya\Services\Frontend;
 
-use Sikshya\Frontend\Public\QuizTemplateData;
+use Sikshya\Frontend\Site\QuizTemplateData;
 use Sikshya\Presentation\Models\SingleQuizPageModel;
 
 if (!defined('ABSPATH')) {

@@ -8,7 +8,7 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');

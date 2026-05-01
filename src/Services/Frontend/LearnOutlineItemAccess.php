@@ -9,7 +9,7 @@
 namespace Sikshya\Services\Frontend;
 
 use Sikshya\Constants\PostTypes;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Services\Settings;
 
 // phpcs:ignore

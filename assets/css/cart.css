@@ -2,7 +2,7 @@
  * Cart virtual page — matches public design system + single-course visual language.
  *
  * Depends on: public-design-system.css, frontend.css (buttons, .sikshya-public).
- * Loaded only when {@see \Sikshya\Frontend\Public\PublicPageUrls::isCurrentVirtualPage('cart')}.
+ * Loaded only when {@see \Sikshya\Frontend\Site\PublicPageUrls::isCurrentVirtualPage('cart')}.
  *
  * @package Sikshya
  */

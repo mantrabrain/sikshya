@@ -1,6 +1,6 @@
 <?php
 /**
- * Order receipt (scoped to current user) — {@see \Sikshya\Frontend\Public\OrderTemplateData}.
+ * Order receipt (scoped to current user) — {@see \Sikshya\Frontend\Site\OrderTemplateData}.
  *
  * @package Sikshya
  */
@@ -8,7 +8,7 @@
 use Sikshya\Services\Frontend\OrderPageService;
 use Sikshya\Presentation\Models\OrderPageModel;
 use Sikshya\Core\Plugin;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 if (!empty($_GET['invoice'])) {
     $invoice_tpl = Plugin::getInstance()->getTemplatePath('order-invoice.php');

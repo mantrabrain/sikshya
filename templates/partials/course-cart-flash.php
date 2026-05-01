@@ -5,8 +5,8 @@
  * @package Sikshya
  */
 
-use Sikshya\Frontend\Public\CartFlashResolver;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\CartFlashResolver;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 if (!defined('ABSPATH')) {
     exit;

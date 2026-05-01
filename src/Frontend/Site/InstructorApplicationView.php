@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Core\Plugin;
 
@@ -10,7 +10,7 @@ use Sikshya\Core\Plugin;
  * This is intentionally frontend (account page) so sites can allow instructor
  * applications without granting wp-admin access.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class InstructorApplicationView
 {

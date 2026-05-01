@@ -4,7 +4,7 @@ namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\CertificateRepository;
 use Sikshya\Database\Repositories\OrderRepository;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 /**
  * Basic email notifications (wp_mail) with editable templates.

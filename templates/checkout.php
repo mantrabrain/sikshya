@@ -1,6 +1,6 @@
 <?php
 /**
- * Checkout — summary from {@see \Sikshya\Frontend\Public\CheckoutTemplateData}; payment via REST + checkout-page.js.
+ * Checkout — summary from {@see \Sikshya\Frontend\Site\CheckoutTemplateData}; payment via REST + checkout-page.js.
  *
  * @package Sikshya
  */
@@ -8,7 +8,7 @@
 use Sikshya\Services\Frontend\CheckoutPageService;
 use Sikshya\Presentation\Models\CheckoutPageModel;
 use Sikshya\Services\Settings;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Shortcodes\AuthShortcodes;
 
 /** @var CheckoutPageModel $page_model */
@@ -355,7 +355,7 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
 
                         <?php
                         $gw_ids = $page_model->getCheckoutGatewayIds();
-                        $gw_labels = \Sikshya\Frontend\Public\CheckoutTemplateData::gatewayCheckoutLabels();
+                        $gw_labels = \Sikshya\Frontend\Site\CheckoutTemplateData::gatewayCheckoutLabels();
                         $gw_statuses = isset($co['gateway_statuses']) && is_array($co['gateway_statuses']) ? $co['gateway_statuses'] : [];
                         $any_gw = $gw_ids !== [];
                         ?>

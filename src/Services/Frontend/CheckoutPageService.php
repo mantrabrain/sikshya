@@ -2,7 +2,7 @@
 
 namespace Sikshya\Services\Frontend;
 
-use Sikshya\Frontend\Public\CheckoutTemplateData;
+use Sikshya\Frontend\Site\CheckoutTemplateData;
 use Sikshya\Presentation\Models\CheckoutPageModel;
 
 final class CheckoutPageService

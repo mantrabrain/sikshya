@@ -1,11 +1,11 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 /**
  * Resolves cart / enrollment flash messages from the request (query args + short-lived transients).
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CartFlashResolver
 {

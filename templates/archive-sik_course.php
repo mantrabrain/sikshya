@@ -13,7 +13,7 @@ $grid_classes = 'sikshya-course-grid sikshya-course-grid--' . sanitize_html_clas
 $show_sidebar = \Sikshya\Services\CourseFrontendSettings::areCourseFiltersEnabled();
 // View is toggled client-side (localStorage) to avoid changing the URL.
 
-$ctx = \Sikshya\Frontend\Public\ArchiveContextTemplateData::fromWpQuery();
+$ctx = \Sikshya\Frontend\Site\ArchiveContextTemplateData::fromWpQuery();
 $found = (int) $ctx['found'];
 $max_pages = (int) $ctx['max_pages'];
 $paged = (int) $ctx['paged'];

@@ -6,7 +6,7 @@
 
 namespace Sikshya\Services\Frontend;
 
-use Sikshya\Frontend\Public\CoursesGridTemplateData;
+use Sikshya\Frontend\Site\CoursesGridTemplateData;
 use Sikshya\Presentation\Models\CoursesGridPageModel;
 
 if (!defined('ABSPATH')) {

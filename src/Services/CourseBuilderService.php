@@ -24,10 +24,14 @@ if (!defined('ABSPATH')) {
 
 class CourseBuilderService
 {
-    public function __construct(
-        private Plugin $plugin,
-        private CourseRepository $courses
-    ) {
+    private Plugin $plugin;
+
+    private CourseRepository $courses;
+
+    public function __construct(Plugin $plugin, CourseRepository $courses)
+    {
+        $this->plugin = $plugin;
+        $this->courses = $courses;
     }
 
     /**

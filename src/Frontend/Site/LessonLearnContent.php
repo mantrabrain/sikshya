@@ -3,10 +3,10 @@
 /**
  * Composes learner-facing lesson HTML (video/audio embeds + prose) for the Learn shell.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 // phpcs:ignore
 if (!defined('ABSPATH')) {

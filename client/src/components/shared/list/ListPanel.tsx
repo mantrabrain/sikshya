@@ -11,7 +11,7 @@ type ListPanelProps = {
 };
 
 /**
- * Single white “SaaS” panel wrapping toolbar, filters, and table (Yatra-style).
+ * Single white “SaaS” panel wrapping toolbar, filters, and table (Sikshya-style).
  */
 export function ListPanel({ children, className = '', overflow = 'hidden' }: ListPanelProps) {
   const ov = overflow === 'visible' ? 'overflow-visible' : 'overflow-hidden';

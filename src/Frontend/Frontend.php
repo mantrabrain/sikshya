@@ -6,9 +6,9 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\OrderRepository;
-use Sikshya\Frontend\Public\CartFormHandler;
-use Sikshya\Frontend\Public\CartStorage;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\CartFormHandler;
+use Sikshya\Frontend\Site\CartStorage;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
 use Sikshya\Services\Settings;
@@ -354,7 +354,7 @@ class Frontend
         // Legacy object expected by assets/js/frontend.js (snake_case + enroll AJAX nonce).
         wp_localize_script('sikshya-frontend', 'sikshya_frontend', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'login_url' => \Sikshya\Frontend\Public\PublicPageUrls::login(),
+            'login_url' => \Sikshya\Frontend\Site\PublicPageUrls::login(),
             'is_user_logged_in' => is_user_logged_in(),
             'nonce' => wp_create_nonce('sikshya_enroll_nonce'),
             'strings' => [
@@ -563,15 +563,15 @@ class Frontend
                             }
                             $pt = (string) $p->post_type;
                             if ($pt === PostTypes::LESSON) {
-                                wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::learnContentForPost($p), 302);
+                                wp_safe_redirect(\Sikshya\Frontend\Site\PublicPageUrls::learnContentForPost($p), 302);
                                 exit;
                             }
                             if ($pt === PostTypes::QUIZ) {
-                                wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::learnContentForPost($p), 302);
+                                wp_safe_redirect(\Sikshya\Frontend\Site\PublicPageUrls::learnContentForPost($p), 302);
                                 exit;
                             }
                             if ($pt === PostTypes::ASSIGNMENT) {
-                                wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::learnContentForPost($p), 302);
+                                wp_safe_redirect(\Sikshya\Frontend\Site\PublicPageUrls::learnContentForPost($p), 302);
                                 exit;
                             }
                         }

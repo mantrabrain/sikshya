@@ -1,11 +1,11 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 /**
  * Builds human-readable outline strings for sidebar curriculum rows.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CurriculumOutlineMeta
 {

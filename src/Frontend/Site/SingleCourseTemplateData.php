@@ -1,10 +1,10 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\Settings;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
@@ -13,7 +13,7 @@ use Sikshya\Services\Frontend\SingleCoursePageService;
 /**
  * View-model for {@see templates/single-course.php} (no business logic in the template file).
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class SingleCourseTemplateData
 {

@@ -2,7 +2,7 @@
  * Order / receipt virtual page — aligned with cart + checkout public UI.
  *
  * Depends on: public-design-system.css, frontend.css.
- * Loaded only when {@see \Sikshya\Frontend\Public\PublicPageUrls::isCurrentVirtualPage('order')}.
+ * Loaded only when {@see \Sikshya\Frontend\Site\PublicPageUrls::isCurrentVirtualPage('order')}.
  *
  * @package Sikshya
  */

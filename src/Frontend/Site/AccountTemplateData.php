@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
@@ -14,7 +14,7 @@ use Sikshya\Services\PublicCurriculumService;
 /**
  * Learner dashboard data for the account page.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class AccountTemplateData
 {

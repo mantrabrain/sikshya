@@ -9,7 +9,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * License + upgrade UI REST (Yatra-style); server calls live in Sikshya Pro when active.
+ * License + upgrade UI REST (Sikshya-style); server calls live in Sikshya Pro when active.
  *
  * @package Sikshya\Api
  */

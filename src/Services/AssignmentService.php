@@ -13,10 +13,16 @@ use Sikshya\Database\Repositories\CourseRepository;
  */
 final class AssignmentService
 {
+    private CourseRepository $courses;
+
+    private AssignmentSubmissionRepository $submissions;
+
     public function __construct(
-        private CourseRepository $courses = new CourseRepository(),
-        private AssignmentSubmissionRepository $submissions = new AssignmentSubmissionRepository()
+        ?CourseRepository $courses = null,
+        ?AssignmentSubmissionRepository $submissions = null
     ) {
+        $this->courses = $courses ?? new CourseRepository();
+        $this->submissions = $submissions ?? new AssignmentSubmissionRepository();
     }
 
     /**

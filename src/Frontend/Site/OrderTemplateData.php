@@ -1,13 +1,13 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Services\Settings;
 
 /**
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class OrderTemplateData
 {

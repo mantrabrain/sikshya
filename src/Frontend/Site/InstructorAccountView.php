@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Core\Plugin;
@@ -16,7 +16,7 @@ use Sikshya\Admin\ReactAdminConfig;
  * authored courses; Pro `instructor_dashboard` enriches the data via
  * {@see 'sikshya_account_instructor_data'} (revenue share, recent learners…).
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class InstructorAccountView
 {

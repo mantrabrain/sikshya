@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * Enqueue compiled block-support CSS when rendering Sikshya templates on block (FSE) themes.
- * Mirrors Yatra's {@see yatra_block_support_styles()} so layout primitives stay styled.
+ * Mirrors Sikshya's {@see sikshya_block_support_styles()} so layout primitives stay styled.
  */
 if (!function_exists('sikshya_block_support_styles')) {
     function sikshya_block_support_styles(): void
@@ -39,7 +39,7 @@ if (!function_exists('sikshya_block_support_styles')) {
  * Load the theme header for Sikshya frontend templates.
  *
  * On block (full-site editing) themes, {@see get_header()} often omits a usable document shell;
- * this mirrors Yatra's {@see yatra_get_header()} by outputting a minimal HTML scaffold, title, and
+ * this mirrors Sikshya's {@see sikshya_get_header()} by outputting a minimal HTML scaffold, title, and
  * {@see block_header_area()}. On classic themes it delegates to {@see get_header()}.
  *
  * @param string|null $header_name Optional template name passed to {@see get_header()}.
@@ -55,7 +55,7 @@ if (!function_exists('sikshya_get_header')) {
         ) {
             /*
              * FSE themes may rely on the template canvas for title tags; ensure a <title> exists
-             * and avoid duplicate core title hooks (same rationale as Yatra).
+             * and avoid duplicate core title hooks (same rationale as Sikshya).
              */
             remove_action('wp_head', '_wp_render_title_tag', 1);
             remove_action('wp_head', '_block_template_render_title_tag', 1);
@@ -1309,11 +1309,11 @@ function sikshya_render_course_card(\WP_Post $course, string $type = 'default'):
 }
 
 /**
- * Cart helpers delegate to {@see \Sikshya\Frontend\Public\CartStorage} (logic not duplicated in templates).
+ * Cart helpers delegate to {@see \Sikshya\Frontend\Site\CartStorage} (logic not duplicated in templates).
  */
 function sikshya_cart_cookie_name(): string
 {
-    return \Sikshya\Frontend\Public\CartStorage::cookieName();
+    return \Sikshya\Frontend\Site\CartStorage::cookieName();
 }
 
 /**
@@ -1321,7 +1321,7 @@ function sikshya_cart_cookie_name(): string
  */
 function sikshya_cart_get_course_ids(): array
 {
-    return \Sikshya\Frontend\Public\CartStorage::getCourseIds();
+    return \Sikshya\Frontend\Site\CartStorage::getCourseIds();
 }
 
 /**
@@ -1329,7 +1329,7 @@ function sikshya_cart_get_course_ids(): array
  */
 function sikshya_cart_set_guest_ids(array $ids): void
 {
-    \Sikshya\Frontend\Public\CartStorage::setGuestIds($ids);
+    \Sikshya\Frontend\Site\CartStorage::setGuestIds($ids);
 }
 
 /**
@@ -1337,7 +1337,7 @@ function sikshya_cart_set_guest_ids(array $ids): void
  */
 function sikshya_cart_set_user_ids(array $ids): void
 {
-    \Sikshya\Frontend\Public\CartStorage::setIds($ids);
+    \Sikshya\Frontend\Site\CartStorage::setIds($ids);
 }
 
 /**
@@ -1345,7 +1345,7 @@ function sikshya_cart_set_user_ids(array $ids): void
  */
 function sikshya_cart_add_course(int $course_id): bool
 {
-    return \Sikshya\Frontend\Public\CartStorage::addCourse($course_id);
+    return \Sikshya\Frontend\Site\CartStorage::addCourse($course_id);
 }
 
 /**
@@ -1353,12 +1353,12 @@ function sikshya_cart_add_course(int $course_id): bool
  */
 function sikshya_cart_remove_course(int $course_id): bool
 {
-    return \Sikshya\Frontend\Public\CartStorage::removeCourse($course_id);
+    return \Sikshya\Frontend\Site\CartStorage::removeCourse($course_id);
 }
 
 function sikshya_cart_clear(): void
 {
-    \Sikshya\Frontend\Public\CartStorage::clear();
+    \Sikshya\Frontend\Site\CartStorage::clear();
 }
 
 /**
@@ -1366,7 +1366,7 @@ function sikshya_cart_clear(): void
  */
 function sikshya_cart_get_bundle_id(): int
 {
-    return \Sikshya\Frontend\Public\CartStorage::getBundleId();
+    return \Sikshya\Frontend\Site\CartStorage::getBundleId();
 }
 
 /**
@@ -1374,7 +1374,7 @@ function sikshya_cart_get_bundle_id(): int
  */
 function sikshya_cart_set_bundle(array $course_ids, int $bundle_id): void
 {
-    \Sikshya\Frontend\Public\CartStorage::setBundleCart($course_ids, $bundle_id);
+    \Sikshya\Frontend\Site\CartStorage::setBundleCart($course_ids, $bundle_id);
 }
 
 /**
@@ -1382,7 +1382,7 @@ function sikshya_cart_set_bundle(array $course_ids, int $bundle_id): void
  */
 function sikshya_frontend_page_url(string $key): string
 {
-    return \Sikshya\Frontend\Public\PublicPageUrls::url($key);
+    return \Sikshya\Frontend\Site\PublicPageUrls::url($key);
 }
 
 /**
@@ -1396,8 +1396,8 @@ function sikshya_course_learn_entry_url(int $course_id): string
     if ($course_id <= 0) {
         return home_url('/');
     }
-    if (class_exists(\Sikshya\Frontend\Public\PublicPageUrls::class)) {
-        return \Sikshya\Frontend\Public\PublicPageUrls::learnForCourse($course_id);
+    if (class_exists(\Sikshya\Frontend\Site\PublicPageUrls::class)) {
+        return \Sikshya\Frontend\Site\PublicPageUrls::learnForCourse($course_id);
     }
 
     $p = get_permalink($course_id);

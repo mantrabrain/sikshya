@@ -5,7 +5,7 @@
  * @package Sikshya
  */
 
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Shortcodes\AuthShortcodes;
 
 sikshya_get_header();

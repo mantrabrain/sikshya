@@ -1,6 +1,6 @@
 /**
  * Extract translatable strings from admin UI sources (TypeScript/React).
- * Same Yatra-style merge as scripts/makepot.sh: fragment → wp i18n make-pot --merge.
+ * Same Sikshya-style merge as scripts/makepot.sh: fragment → wp i18n make-pot --merge.
  *
  * We scan client/src, not the Vite production bundle: minified output has no
  * extractable __() / _n() / _x() call sites for @wordpress/babel-plugin-makepot.

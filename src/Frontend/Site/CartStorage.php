@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 
@@ -8,7 +8,7 @@ use Sikshya\Constants\PostTypes;
  * Persists course IDs for the storefront cart (user meta + guest cookie).
  * Optional {@see self::BUNDLE_META_KEY} when the cart matches a Pro course bundle.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CartStorage
 {

@@ -195,7 +195,7 @@ final class SetupWizardController
         Settings::set('allow_usage_tracking', $allow ? '1' : '0');
 
         // Keep the telemetry scheduler in sync with the wizard consent choice.
-        // This mirrors Yatra's welcome-step behavior (enable/disable triggers immediate send + schedules).
+        // This mirrors Sikshya's welcome-step behavior (enable/disable triggers immediate send + schedules).
         if (class_exists('\\Sikshya\\Services\\StatsUsage')) {
             $u = \Sikshya\Services\StatsUsage::instance();
             if ($allow) {

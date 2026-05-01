@@ -2,7 +2,7 @@
 
 namespace Sikshya\Shortcodes;
 
-use Sikshya\Frontend\Public\CartStorage;
+use Sikshya\Frontend\Site\CartStorage;
 use Sikshya\Services\PermalinkService;
 use WP_Error;
 

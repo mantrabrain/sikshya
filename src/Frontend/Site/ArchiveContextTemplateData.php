@@ -1,13 +1,13 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 /**
  * Shared view-model for archive/taxonomy templates.
  *
  * Templates stay markup-only; anything derived from $wp_query or pagination lives here.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class ArchiveContextTemplateData
 {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart template (lines from {@see \Sikshya\Frontend\Public\CartTemplateData}).
+ * Cart template (lines from {@see \Sikshya\Frontend\Site\CartTemplateData}).
  *
  * @package Sikshya
  */

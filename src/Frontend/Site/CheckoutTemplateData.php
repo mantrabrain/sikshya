@@ -1,13 +1,13 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Licensing\Pro;
 use Sikshya\Services\Settings;
 
 /**
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CheckoutTemplateData
 {

@@ -2014,7 +2014,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Offer card payments', 'sikshya'),
                         'description' => __(
-                            'Reserved for future use. Actual card acceptance is controlled by each gateway (e.g. Stripe, PayPal). Yatra does not use this toggle.',
+                            'Reserved for future use. Actual card acceptance is controlled by each gateway (e.g. Stripe, PayPal). Sikshya does not use this toggle.',
                             'sikshya'
                         ),
                         'default' => true
@@ -2024,7 +2024,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Offer bank transfer', 'sikshya'),
                         'description' => __(
-                            'Reserved for future use. Use “Enable Bank Transfer at checkout (Pro)” and Bank transfer instructions instead. Yatra does not use this toggle.',
+                            'Reserved for future use. Use “Enable Bank Transfer at checkout (Pro)” and Bank transfer instructions instead. Sikshya does not use this toggle.',
                             'sikshya'
                         ),
                         'default' => false
@@ -2034,7 +2034,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Offer digital wallets', 'sikshya'),
                         'description' => __(
-                            'Reserved for future use. Wallet support depends on the gateway you enable. Yatra does not use this toggle.',
+                            'Reserved for future use. Wallet support depends on the gateway you enable. Sikshya does not use this toggle.',
                             'sikshya'
                         ),
                         'default' => false
@@ -2044,7 +2044,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Offer cryptocurrency', 'sikshya'),
                         'description' => __(
-                            'Reserved for future use. Yatra does not use this toggle.',
+                            'Reserved for future use. Sikshya does not use this toggle.',
                             'sikshya'
                         ),
                         'default' => false

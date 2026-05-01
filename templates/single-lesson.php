@@ -5,8 +5,8 @@
  * @package Sikshya
  */
 
-use Sikshya\Frontend\Public\LessonLearnContent;
-use Sikshya\Frontend\Public\LessonTemplateData;
+use Sikshya\Frontend\Site\LessonLearnContent;
+use Sikshya\Frontend\Site\LessonTemplateData;
 use Sikshya\Core\Plugin;
 use Sikshya\Presentation\Models\SingleLessonPageModel;
 

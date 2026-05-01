@@ -1,12 +1,12 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\ProgressRepository;
 use Sikshya\Services\CourseService;
 use Sikshya\Database\Repositories\QuizAttemptRepository;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Presentation\Models\SingleQuizPageModel;
 use Sikshya\Services\Frontend\LearnOutlineItemAccess;
@@ -15,7 +15,7 @@ use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Services\Settings;
 
 /**
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class QuizTemplateData
 {

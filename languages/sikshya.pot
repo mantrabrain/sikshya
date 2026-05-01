@@ -159,7 +159,7 @@ msgid "Sikshya LMS v%s | <a href=\"%s\" target=\"_blank\">Documentation</a> | <a
 msgstr ""
 
 #: src/Admin/Admin.php:1198
-#: src/Frontend/Public/InstructorAccountView.php:167
+#: src/Frontend/Site/InstructorAccountView.php:167
 #: templates/partials/account-view-instructor.php:81
 msgid "Published courses"
 msgstr ""
@@ -641,42 +641,42 @@ msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:201
 #: src/Admin/Settings/SettingsManager.php:1058
-#: src/Frontend/Public/SingleCourseTemplateData.php:415
+#: src/Frontend/Site/SingleCourseTemplateData.php:415
 msgid "English"
 msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:202
 #: src/Admin/Settings/SettingsManager.php:1059
-#: src/Frontend/Public/SingleCourseTemplateData.php:416
+#: src/Frontend/Site/SingleCourseTemplateData.php:416
 msgid "Spanish"
 msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:203
 #: src/Admin/Settings/SettingsManager.php:1060
-#: src/Frontend/Public/SingleCourseTemplateData.php:417
+#: src/Frontend/Site/SingleCourseTemplateData.php:417
 msgid "French"
 msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:204
 #: src/Admin/Settings/SettingsManager.php:1061
-#: src/Frontend/Public/SingleCourseTemplateData.php:418
+#: src/Frontend/Site/SingleCourseTemplateData.php:418
 msgid "German"
 msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:205
 #: src/Admin/Settings/SettingsManager.php:1062
-#: src/Frontend/Public/SingleCourseTemplateData.php:419
+#: src/Frontend/Site/SingleCourseTemplateData.php:419
 msgid "Italian"
 msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:206
 #: src/Admin/Settings/SettingsManager.php:1063
-#: src/Frontend/Public/SingleCourseTemplateData.php:420
+#: src/Frontend/Site/SingleCourseTemplateData.php:420
 msgid "Portuguese"
 msgstr ""
 
 #: src/Admin/CourseBuilder/Tabs/CourseInfoTab.php:207
-#: src/Frontend/Public/SingleCourseTemplateData.php:421
+#: src/Frontend/Site/SingleCourseTemplateData.php:421
 msgid "Other"
 msgstr ""
 
@@ -1646,7 +1646,7 @@ msgid "Free"
 msgstr ""
 
 #: src/Admin/ListTable/CoursesListTable.php:91
-#: src/Frontend/Public/OrderTemplateData.php:73
+#: src/Frontend/Site/OrderTemplateData.php:73
 #: templates/courses/index.php:115
 #: templates/partials/course-archive-sidebar.php:103
 msgid "Paid"
@@ -2868,13 +2868,13 @@ msgstr ""
 
 #: src/Admin/Settings/SettingsManager.php:1545
 #: src/Commerce/PaymentGatewayRegistry.php:31
-#: src/Frontend/Public/OrderTemplateData.php:88
+#: src/Frontend/Site/OrderTemplateData.php:88
 msgid "Offline / manual"
 msgstr ""
 
 #: src/Admin/Settings/SettingsManager.php:1546
 #: src/Commerce/PaymentGatewayRegistry.php:42
-#: src/Frontend/Public/OrderTemplateData.php:90
+#: src/Frontend/Site/OrderTemplateData.php:90
 msgid "PayPal"
 msgstr ""
 
@@ -4297,7 +4297,7 @@ msgid "Could not revoke."
 msgstr ""
 
 #: src/Api/AdminRestRoutes.php:1976
-#: src/Frontend/Public/OrderTemplateData.php:37
+#: src/Frontend/Site/OrderTemplateData.php:37
 #: templates/order.php:63
 msgid "Order not found."
 msgstr ""
@@ -4410,7 +4410,7 @@ msgstr ""
 #: src/Api/LearnerRestRoutes.php:211
 #: src/Api/LearnerRestRoutes.php:353
 #: src/Frontend/Controllers/EnrollmentController.php:208
-#: src/Frontend/Public/QuizTemplateData.php:57
+#: src/Frontend/Site/QuizTemplateData.php:57
 #: src/Services/AssignmentService.php:48
 #: src/Services/Frontend/LearnPageService.php:64
 #: src/Services/Frontend/LessonPageService.php:51
@@ -4688,7 +4688,7 @@ msgid "Accept PayPal and card payments (requires Client ID and Secret)."
 msgstr ""
 
 #: src/Commerce/PaymentGatewayRegistry.php:55
-#: src/Frontend/Public/OrderTemplateData.php:89
+#: src/Frontend/Site/OrderTemplateData.php:89
 msgid "Stripe"
 msgstr ""
 
@@ -5262,126 +5262,126 @@ msgstr ""
 msgid "Could not submit the quiz. Please try again."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:40
+#: src/Frontend/Site/CartFlashResolver.php:40
 msgid "Course added to your cart."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:41
+#: src/Frontend/Site/CartFlashResolver.php:41
 msgid "This course is already in your cart."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:42
+#: src/Frontend/Site/CartFlashResolver.php:42
 msgid "Course removed from your cart."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:43
+#: src/Frontend/Site/CartFlashResolver.php:43
 msgid "Your cart was cleared."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:44
+#: src/Frontend/Site/CartFlashResolver.php:44
 msgid "You are now enrolled in this course."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:45
+#: src/Frontend/Site/CartFlashResolver.php:45
 msgid "Could not complete enrollment. Please try again."
 msgstr ""
 
-#: src/Frontend/Public/CartFlashResolver.php:46
+#: src/Frontend/Site/CartFlashResolver.php:46
 msgid "Log in to enroll in this course."
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:123
+#: src/Frontend/Site/CheckoutTemplateData.php:123
 msgid "Offline payment"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:124
+#: src/Frontend/Site/CheckoutTemplateData.php:124
 msgid "Pay with PayPal"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:125
+#: src/Frontend/Site/CheckoutTemplateData.php:125
 msgid "Pay with card (Stripe)"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:126
+#: src/Frontend/Site/CheckoutTemplateData.php:126
 msgid "Pay with Razorpay"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:127
+#: src/Frontend/Site/CheckoutTemplateData.php:127
 msgid "Pay with Mollie"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:128
+#: src/Frontend/Site/CheckoutTemplateData.php:128
 msgid "Pay with Paystack"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:129
+#: src/Frontend/Site/CheckoutTemplateData.php:129
 msgid "Pay with Square"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:130
+#: src/Frontend/Site/CheckoutTemplateData.php:130
 msgid "Pay with Authorize.Net"
 msgstr ""
 
-#: src/Frontend/Public/CheckoutTemplateData.php:131
+#: src/Frontend/Site/CheckoutTemplateData.php:131
 msgid "Bank transfer"
 msgstr ""
 
 #. translators: %d: minutes
-#: src/Frontend/Public/CurriculumOutlineMeta.php:44
-#: src/Frontend/Public/CurriculumOutlineMeta.php:52
+#: src/Frontend/Site/CurriculumOutlineMeta.php:44
+#: src/Frontend/Site/CurriculumOutlineMeta.php:52
 #, php-format
 msgid "%dmin"
 msgstr ""
 
 #. translators: %d: question count
-#: src/Frontend/Public/CurriculumOutlineMeta.php:58
+#: src/Frontend/Site/CurriculumOutlineMeta.php:58
 #, php-format
 msgid "%d qs"
 msgstr ""
 
 #. translators: %d: assignment points
-#: src/Frontend/Public/CurriculumOutlineMeta.php:65
-#: src/Frontend/Public/CurriculumOutlineMeta.php:178
+#: src/Frontend/Site/CurriculumOutlineMeta.php:65
+#: src/Frontend/Site/CurriculumOutlineMeta.php:178
 #, php-format
 msgid "%d pts"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:93
+#: src/Frontend/Site/CurriculumOutlineMeta.php:93
 #: src/PostTypes/PostTypeManager.php:1029
 msgid "Video"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:94
-#: src/Frontend/Public/CurriculumOutlineMeta.php:168
+#: src/Frontend/Site/CurriculumOutlineMeta.php:94
+#: src/Frontend/Site/CurriculumOutlineMeta.php:168
 #: src/PostTypes/PostTypeManager.php:1030
 msgid "Text"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:95
+#: src/Frontend/Site/CurriculumOutlineMeta.php:95
 #: src/PostTypes/PostTypeManager.php:1031
 msgid "Audio"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:96
+#: src/Frontend/Site/CurriculumOutlineMeta.php:96
 #: src/PostTypes/PostTypeManager.php:1032
 msgid "Document"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:97
+#: src/Frontend/Site/CurriculumOutlineMeta.php:97
 msgid "Live class"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:98
+#: src/Frontend/Site/CurriculumOutlineMeta.php:98
 msgid "SCORM"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:99
+#: src/Frontend/Site/CurriculumOutlineMeta.php:99
 msgid "H5P"
 msgstr ""
 
 #. translators: %d: duration in minutes
 #. translators: 1: minutes
-#: src/Frontend/Public/CurriculumOutlineMeta.php:128
+#: src/Frontend/Site/CurriculumOutlineMeta.php:128
 #: templates/partials/learn-curriculum-outline.php:80
 #: templates/single-quiz.php:273
 #, php-format
@@ -5391,7 +5391,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of questions
-#: src/Frontend/Public/CurriculumOutlineMeta.php:146
+#: src/Frontend/Site/CurriculumOutlineMeta.php:146
 #, php-format
 msgid "%d question"
 msgid_plural "%d questions"
@@ -5399,116 +5399,116 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: time limit in minutes
-#: src/Frontend/Public/CurriculumOutlineMeta.php:150
+#: src/Frontend/Site/CurriculumOutlineMeta.php:150
 #, php-format
 msgid "%d min limit"
 msgstr ""
 
 #. translators: %s: passing score percentage
-#: src/Frontend/Public/CurriculumOutlineMeta.php:154
+#: src/Frontend/Site/CurriculumOutlineMeta.php:154
 #, php-format
 msgid "Pass %s%%"
 msgstr ""
 
-#: src/Frontend/Public/CurriculumOutlineMeta.php:167
+#: src/Frontend/Site/CurriculumOutlineMeta.php:167
 msgid "File upload"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:118
+#: src/Frontend/Site/InstructorAccountView.php:118
 #: templates/partials/account-view-instructor.php:31
 msgid "Teaching"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:121
+#: src/Frontend/Site/InstructorAccountView.php:121
 #: src/Presentation/Models/AccountPageModel.php:60
 msgid "Instructor overview"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:128
+#: src/Frontend/Site/InstructorAccountView.php:128
 msgid "Manage my courses"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:136
+#: src/Frontend/Site/InstructorAccountView.php:136
 msgid "Add new course"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:159
-#: src/Frontend/Public/InstructorAccountView.php:161
+#: src/Frontend/Site/InstructorAccountView.php:159
+#: src/Frontend/Site/InstructorAccountView.php:161
 msgid "Teaching summary"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:163
+#: src/Frontend/Site/InstructorAccountView.php:163
 msgid "Open instructor view"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:168
+#: src/Frontend/Site/InstructorAccountView.php:168
 msgid "Enrollments on my courses"
 msgstr ""
 
-#: src/Frontend/Public/InstructorAccountView.php:169
+#: src/Frontend/Site/InstructorAccountView.php:169
 #: templates/partials/account-view-instructor.php:91
 msgid "Completions"
 msgstr ""
 
-#: src/Frontend/Public/OrderTemplateData.php:30
+#: src/Frontend/Site/OrderTemplateData.php:30
 msgid "Missing order reference."
 msgstr ""
 
-#: src/Frontend/Public/OrderTemplateData.php:32
+#: src/Frontend/Site/OrderTemplateData.php:32
 msgid "Please log in to view your order."
 msgstr ""
 
-#: src/Frontend/Public/OrderTemplateData.php:74
+#: src/Frontend/Site/OrderTemplateData.php:74
 msgid "Pending payment"
 msgstr ""
 
-#: src/Frontend/Public/OrderTemplateData.php:75
+#: src/Frontend/Site/OrderTemplateData.php:75
 msgid "On hold"
 msgstr ""
 
-#: src/Frontend/Public/OrderTemplateData.php:84
+#: src/Frontend/Site/OrderTemplateData.php:84
 msgid "—"
 msgstr ""
 
-#: src/Frontend/Public/QuizTemplateData.php:43
+#: src/Frontend/Site/QuizTemplateData.php:43
 msgid "This quiz is not linked to a course."
 msgstr ""
 
-#: src/Frontend/Public/QuizTemplateData.php:56
+#: src/Frontend/Site/QuizTemplateData.php:56
 msgid "Please log in to access this quiz."
 msgstr ""
 
-#: src/Frontend/Public/QuizTemplateData.php:72
+#: src/Frontend/Site/QuizTemplateData.php:72
 #: src/Services/Frontend/LessonPageService.php:66
 msgid "This content is not available yet."
 msgstr ""
 
-#: src/Frontend/Public/QuizTemplateData.php:102
+#: src/Frontend/Site/QuizTemplateData.php:102
 #: templates/single-quiz.php:295
 msgid "You have reached the maximum number of attempts for this quiz."
 msgstr ""
 
-#: src/Frontend/Public/SingleCourseTemplateData.php:192
+#: src/Frontend/Site/SingleCourseTemplateData.php:192
 msgid "30-day money-back guarantee"
 msgstr ""
 
 #. translators: %s: formatted hours, e.g. 12.5
-#: src/Frontend/Public/SingleCourseTemplateData.php:475
+#: src/Frontend/Site/SingleCourseTemplateData.php:475
 #, php-format
 msgid "%s hours on-demand video"
 msgstr ""
 
 #. translators: %s: number of curriculum items
-#: src/Frontend/Public/SingleCourseTemplateData.php:481
+#: src/Frontend/Site/SingleCourseTemplateData.php:481
 #, php-format
 msgid "%s lessons & activities"
 msgstr ""
 
-#: src/Frontend/Public/SingleCourseTemplateData.php:486
+#: src/Frontend/Site/SingleCourseTemplateData.php:486
 msgid "Full lifetime access"
 msgstr ""
 
-#: src/Frontend/Public/SingleCourseTemplateData.php:487
+#: src/Frontend/Site/SingleCourseTemplateData.php:487
 msgid "Access on mobile and desktop"
 msgstr ""
 

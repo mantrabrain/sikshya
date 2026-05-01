@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
@@ -8,7 +8,7 @@ use Sikshya\Constants\Taxonomies;
 /**
  * View-model for the legacy `templates/courses-grid.php` browse layout.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CoursesGridTemplateData
 {

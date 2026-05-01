@@ -3,10 +3,10 @@
 /**
  * @deprecated Use {@see \Sikshya\Services\Frontend\LessonPageService::forPost()} and {@see \Sikshya\Presentation\Models\SingleLessonPageModel}.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Presentation\Models\SingleLessonPageModel;
 use Sikshya\Services\Frontend\LessonPageService;

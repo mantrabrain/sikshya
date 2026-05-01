@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 /**
  * Prompts learners to rate a course after completion.
@@ -8,7 +8,7 @@ namespace Sikshya\Frontend\Public;
  * Free plugin provides the prompt + links; Pro course_reviews add-on can hook
  * into the deep link query args to prefill the rating UX.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CourseRatingPrompt
 {

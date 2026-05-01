@@ -7,8 +7,8 @@
 namespace Sikshya\Services\Frontend;
 
 use Sikshya\Core\Plugin;
-use Sikshya\Frontend\Public\AccountTemplateData;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\AccountTemplateData;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Presentation\Models\AccountPageModel;
 use Sikshya\Services\PermalinkService;
 

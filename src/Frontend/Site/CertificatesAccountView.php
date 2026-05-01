@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Services\LearnerCertificateService;
@@ -8,7 +8,7 @@ use Sikshya\Services\LearnerCertificateService;
 /**
  * Learner account: Certificates view + sidebar link.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CertificatesAccountView
 {

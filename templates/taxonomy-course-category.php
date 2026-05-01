@@ -9,7 +9,7 @@ use Sikshya\Constants\PostTypes;
 
 sikshya_get_header();
 
-$ctx = \Sikshya\Frontend\Public\ArchiveContextTemplateData::fromWpQuery();
+$ctx = \Sikshya\Frontend\Site\ArchiveContextTemplateData::fromWpQuery();
 $found = (int) $ctx['found'];
 $max_pages = (int) $ctx['max_pages'];
 $paged = (int) $ctx['paged'];

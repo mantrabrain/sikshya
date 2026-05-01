@@ -39,7 +39,7 @@ class EnrollmentController
 
         if (!$user_id) {
             $req = (string) (is_string($_SERVER['REQUEST_URI'] ?? null) ? $_SERVER['REQUEST_URI'] : home_url('/'));
-            wp_safe_redirect(\Sikshya\Frontend\Public\PublicPageUrls::login($req));
+            wp_safe_redirect(\Sikshya\Frontend\Site\PublicPageUrls::login($req));
             exit;
         }
 

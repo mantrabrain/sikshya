@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Database\Repositories\InstructorMetricsRepository;
 
@@ -15,7 +15,7 @@ use Sikshya\Database\Repositories\InstructorMetricsRepository;
  * Result is cached in a transient (5 minutes) keyed by user id, since this is
  * called on every account page render.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class InstructorContext
 {

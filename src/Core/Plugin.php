@@ -24,8 +24,8 @@ use Sikshya\Services\WpMailSmtpBridge;
 use Sikshya\Services\EmailNotificationService;
 use Sikshya\Services\InvoiceIssuanceService;
 use Sikshya\Addons\AddonManager;
-use Sikshya\Frontend\Public\InstructorAccountView;
-use Sikshya\Frontend\Public\InstructorApplicationView;
+use Sikshya\Frontend\Site\InstructorAccountView;
+use Sikshya\Frontend\Site\InstructorApplicationView;
 use Sikshya\Shortcodes\CoursesShortcode;
 use Sikshya\Shortcodes\AuthShortcodes;
 
@@ -286,8 +286,8 @@ final class Plugin
 
         InstructorAccountView::init();
         InstructorApplicationView::init();
-        \Sikshya\Frontend\Public\CertificatesAccountView::init();
-        \Sikshya\Frontend\Public\CourseRatingPrompt::init();
+        \Sikshya\Frontend\Site\CertificatesAccountView::init();
+        \Sikshya\Frontend\Site\CourseRatingPrompt::init();
         CoursesShortcode::init();
         AuthShortcodes::init();
 

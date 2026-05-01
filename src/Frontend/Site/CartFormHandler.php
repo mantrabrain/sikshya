@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Services\CourseService;
@@ -8,7 +8,7 @@ use Sikshya\Services\CourseService;
 /**
  * POST handler for cart and free enrollment actions (no logic in templates).
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class CartFormHandler
 {

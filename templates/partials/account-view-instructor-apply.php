@@ -64,6 +64,6 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 <div class="sik-acc-panel__head">
                     <h2 class="sik-acc-panel__title"><?php esc_html_e('Application details', 'sikshya'); ?></h2>
                 </div>
-                <?php echo \Sikshya\Frontend\Public\InstructorApplicationView::renderFormHtml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <?php echo \Sikshya\Frontend\Site\InstructorApplicationView::renderFormHtml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             </section>
 

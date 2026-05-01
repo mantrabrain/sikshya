@@ -8,7 +8,7 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 ?>
             <section class="sik-acc-panel" aria-label="<?php esc_attr_e('Orders', 'sikshya'); ?>">

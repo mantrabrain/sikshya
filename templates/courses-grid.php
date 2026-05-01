@@ -2,7 +2,7 @@
 /**
  * Template for displaying courses in a grid layout
  *
- * Data is prepared in {@see \Sikshya\Frontend\Public\CoursesGridTemplateData}; this file is markup-only.
+ * Data is prepared in {@see \Sikshya\Frontend\Site\CoursesGridTemplateData}; this file is markup-only.
  *
  * @package Sikshya
  * @since 1.0.0

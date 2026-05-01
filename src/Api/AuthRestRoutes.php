@@ -9,7 +9,7 @@
 namespace Sikshya\Api;
 
 use Sikshya\Core\Plugin;
-use Sikshya\Frontend\Public\CartStorage;
+use Sikshya\Frontend\Site\CartStorage;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

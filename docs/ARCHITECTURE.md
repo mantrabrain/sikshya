@@ -52,7 +52,7 @@ Legacy code may still use `*TemplateData` arrays; new work should return **model
 
 ## i18n (POT) — PHP + TypeScript admin UI
 
-- Same pattern as **Yatra**: **WP-CLI** `i18n make-pot` for PHP (`src`, `includes`, `templates`, `assets`, excluding the React sources in `client/` and the built bundle under `assets/admin/react/`). If a `languages/sikshya-js.pot` fragment exists, a second `make-pot … --merge=…` merges it in, then the fragment is removed.
+- Same pattern as **Sikshya**: **WP-CLI** `i18n make-pot` for PHP (`src`, `includes`, `templates`, `assets`, excluding the React sources in `client/` and the built bundle under `assets/admin/react/`). If a `languages/sikshya-js.pot` fragment exists, a second `make-pot … --merge=…` merges it in, then the fragment is removed.
 - **JS/TS strings:** `@wordpress/babel-plugin-makepot` runs over **`client/src`** (`.ts`/`.tsx`), not the Vite production bundle — minified bundles do not preserve extractable `__()` / `_n()` / `_x()` sites. Use `@wordpress/i18n` in admin code when you add translatable UI copy; until then Babel may produce no `-js.pot` file (merge is skipped; that is expected).
 - **One `package.json` at the plugin root** (`npm ci`, `npm run build`, `npm run dev`); Vite/Tailwind/PostCSS/TS config live next to it. App sources live in **`client/src/`**; output is `assets/admin/react/`.
 - Local: `npm ci` at the plugin root, then `composer run makepot:full` / `npm run makepot`. CI runs `.github/workflows/i18n.yml`.

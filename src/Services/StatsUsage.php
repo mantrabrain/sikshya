@@ -9,7 +9,7 @@ use WP_Error;
 /**
  * Sikshya usage telemetry (opt-in, privacy-safe).
  *
- * Mirrors the Yatra opt-in pattern:
+ * Mirrors the Sikshya opt-in pattern:
  * - Admin-controlled consent flag
  * - Instance id
  * - Weekly cron + admin fallback send

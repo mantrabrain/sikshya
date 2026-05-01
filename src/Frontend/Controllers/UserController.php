@@ -3,7 +3,7 @@
 namespace Sikshya\Frontend\Controllers;
 
 use Sikshya\Core\Plugin;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 /**
  * Frontend User Controller

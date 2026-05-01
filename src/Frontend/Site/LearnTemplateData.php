@@ -3,10 +3,10 @@
 /**
  * @deprecated 2.x Use {@see \Sikshya\Services\Frontend\LearnPageService::fromRequest()} and {@see \Sikshya\Presentation\Models\LearnPageModel}.
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Presentation\Models\LearnPageModel;
 use Sikshya\Services\Frontend\LearnPageService;

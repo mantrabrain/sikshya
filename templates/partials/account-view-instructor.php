@@ -2,7 +2,7 @@
 /**
  * Account: instructor (teaching) overview.
  *
- * Shown to users that {@see Sikshya\Frontend\Public\InstructorContext::isInstructor()} reports as instructors.
+ * Shown to users that {@see Sikshya\Frontend\Site\InstructorContext::isInstructor()} reports as instructors.
  *
  * @package Sikshya
  *
@@ -10,7 +10,7 @@
  * @var \Sikshya\Presentation\Models\AccountPageModel $page_model
  */
 
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 $inst = $page_model->getInstructorVm();
 $published = (int) ($inst['published_courses'] ?? 0);

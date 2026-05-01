@@ -3,7 +3,7 @@
 namespace Sikshya\Services;
 
 use Sikshya\Database\Repositories\InstructorApplicationsRepository;
-use Sikshya\Frontend\Public\InstructorContext;
+use Sikshya\Frontend\Site\InstructorContext;
 
 /**
  * Approve / reject instructor applications stored in user meta.

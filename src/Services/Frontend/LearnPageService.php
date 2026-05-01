@@ -10,8 +10,8 @@ use Sikshya\Services\CourseService;
 use Sikshya\Presentation\Models\LearnPageModel;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Services\Settings;
-use Sikshya\Frontend\Public\CurriculumOutlineMeta;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\CurriculumOutlineMeta;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 /**
  * Application service: learn hub / course curriculum / bundle views.

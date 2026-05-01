@@ -1,6 +1,6 @@
 <?php
 
-namespace Sikshya\Frontend\Public;
+namespace Sikshya\Frontend\Site;
 
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
@@ -9,7 +9,7 @@ use Sikshya\Constants\PostTypes;
 /**
  * Resolves Sikshya frontend virtual page URLs (cart, checkout, learn, …).
  *
- * @package Sikshya\Frontend\Public
+ * @package Sikshya\Frontend\Site
  */
 final class PublicPageUrls
 {

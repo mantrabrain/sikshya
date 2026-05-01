@@ -8,7 +8,7 @@
 
 namespace Sikshya\Presentation\Models;
 
-use Sikshya\Frontend\Public\LessonLearnContent;
+use Sikshya\Frontend\Site\LessonLearnContent;
 
 // phpcs:ignore
 if (!defined('ABSPATH')) {

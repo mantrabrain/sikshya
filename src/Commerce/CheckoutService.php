@@ -6,7 +6,7 @@ use Sikshya\Admin\Settings\SettingsManager;
 use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Licensing\Pro;
 use Sikshya\Services\Settings;
 
@@ -853,7 +853,7 @@ final class CheckoutService
     }
 
     /**
-     * PayPal Standard (email-only) redirect, mirroring Yatra "Simple mode".
+     * PayPal Standard (email-only) redirect, mirroring Sikshya "Simple mode".
      *
      * This flow completes via PayPal IPN callback to `/sikshya/v1/webhooks/paypal-ipn`.
      *
@@ -877,13 +877,13 @@ final class CheckoutService
         }
 
         // After payment, PayPal returns here (we do NOT auto-confirm in-browser; IPN is source of truth).
-        $returnUrl = \Sikshya\Frontend\Public\PublicPageUrls::orderView((string) ($order->public_token ?? ''));
+        $returnUrl = \Sikshya\Frontend\Site\PublicPageUrls::orderView((string) ($order->public_token ?? ''));
         $cancelUrl = add_query_arg(
             [
                 'sikshya_paypal_cancel' => '1',
                 'order_id' => (string) $order->id,
             ],
-            \Sikshya\Frontend\Public\PublicPageUrls::url('checkout')
+            \Sikshya\Frontend\Site\PublicPageUrls::url('checkout')
         );
 
         $params = [

@@ -1,13 +1,13 @@
 <?php
 /**
- * Single course — Udemy-style landing layout; data from {@see \Sikshya\Frontend\Public\SingleCourseTemplateData}.
+ * Single course — Udemy-style landing layout; data from {@see \Sikshya\Frontend\Site\SingleCourseTemplateData}.
  *
  * @package Sikshya
  */
 
 use Sikshya\Constants\PostTypes;
-use Sikshya\Frontend\Public\PublicPageUrls;
-use Sikshya\Frontend\Public\SingleCourseTemplateData;
+use Sikshya\Frontend\Site\PublicPageUrls;
+use Sikshya\Frontend\Site\SingleCourseTemplateData;
 use Sikshya\Presentation\Models\SingleCoursePageModel;
 use Sikshya\Services\Settings;
 

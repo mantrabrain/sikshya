@@ -4,7 +4,7 @@ namespace Sikshya\Services;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Constants\PostTypes;
-use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 /**
  * Frontend Asset Management Service
