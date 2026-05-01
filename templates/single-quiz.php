@@ -1117,8 +1117,9 @@ while (have_posts()) {
     io.observe(topbar);
   }
 
-  const tabs = document.querySelectorAll('[data-sikshya-tab]');
-  const panels = document.querySelectorAll('[data-sikshya-panel]');
+  const mainTabsSection = document.querySelector('.sikshya-learnContent > .sikshya-tabsSection');
+  const tabs = mainTabsSection ? mainTabsSection.querySelectorAll('[data-sikshya-tab]') : [];
+  const panels = mainTabsSection ? mainTabsSection.querySelectorAll('[data-sikshya-panel]') : [];
   tabs.forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-sikshya-tab');

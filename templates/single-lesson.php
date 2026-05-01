@@ -632,9 +632,10 @@ while (have_posts()) :
     root.classList.remove(collapsedClass);
   });
 
-  // Tabs
-  const tabs = document.querySelectorAll('[data-sikshya-tab]');
-  const panels = document.querySelectorAll('[data-sikshya-panel]');
+  // Tabs (scope to main content strip only — avoids clashing with Pro sidebar / other UI using the same hooks)
+  const mainTabsSection = document.querySelector('.sikshya-learnContent > .sikshya-tabsSection');
+  const tabs = mainTabsSection ? mainTabsSection.querySelectorAll('[data-sikshya-tab]') : [];
+  const panels = mainTabsSection ? mainTabsSection.querySelectorAll('[data-sikshya-panel]') : [];
   tabs.forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-sikshya-tab');

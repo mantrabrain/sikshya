@@ -51,6 +51,7 @@ export function DateTimePickerField(props: Props) {
     description,
     disabled = false,
     className = '',
+    container = 'label',
     placeholder = props.kind === 'date' ? 'Select a date…' : 'Select date & time…',
   } = props;
 

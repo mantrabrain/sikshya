@@ -13,6 +13,75 @@
 		return window.sikshyaQuizTaker || {};
 	}
 
+	/**
+	 * Build a learner REST URL for both pretty permalinks (/wp-json/...) and plain
+	 * (`index.php?rest_route=/...`). Naive string concat breaks GET when the second
+	 * `?quiz_id=` is merged into the same string as `rest_route` — use searchParams.
+	 *
+	 * @param {string} restUrl Base from `rest_url( 'sikshya/v1/' )` (trailing slash optional).
+	 * @param {string} relativePath e.g. `me/quiz-attempt` (no leading slash).
+	 * @param {Record<string, string|number>|null|undefined} query Optional query args (e.g. quiz_id).
+	 * @returns {string}
+	 */
+	function buildSikshyaRestEndpointUrl(restUrl, relativePath, query) {
+		var path = String(relativePath || '').replace(/^\/+|\/+$/g, '');
+		var base = String(restUrl || '').trim();
+		var origin = '';
+		try {
+			origin = window.location.origin;
+		} catch (e0) {
+			origin = '';
+		}
+
+		function applyQuery(u, q) {
+			if (!q) {
+				return;
+			}
+			for (var key in q) {
+				if (!Object.prototype.hasOwnProperty.call(q, key)) {
+					continue;
+				}
+				var v = q[key];
+				if (v === undefined || v === null) {
+					continue;
+				}
+				u.searchParams.set(key, String(v));
+			}
+		}
+
+		try {
+			var u = base.indexOf('http') === 0 ? new URL(base) : new URL(base, origin || undefined);
+			if (u.searchParams.has('rest_route')) {
+				var rr = String(u.searchParams.get('rest_route') || '').replace(/\/+$/, '');
+				u.searchParams.set('rest_route', rr + '/' + path);
+				applyQuery(u, query);
+				return u.toString();
+			}
+			u.pathname = (String(u.pathname).replace(/\/+$/, '/') + path).replace(/\/+/g, '/');
+			applyQuery(u, query);
+			return u.toString();
+		} catch (e1) {
+			var fallback = base.replace(/\/?$/, '/') + path;
+			if (query) {
+				var parts = [];
+				for (var k in query) {
+					if (!Object.prototype.hasOwnProperty.call(query, k)) {
+						continue;
+					}
+					var v2 = query[k];
+					if (v2 === undefined || v2 === null) {
+						continue;
+					}
+					parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(String(v2)));
+				}
+				if (parts.length) {
+					fallback += (fallback.indexOf('?') !== -1 ? '&' : '?') + parts.join('&');
+				}
+			}
+			return fallback;
+		}
+	}
+
 	function moveLi(ol, li, dir) {
 		var items = Array.prototype.slice.call(ol.children);
 		var idx = items.indexOf(li);
@@ -344,7 +413,7 @@
 			attempt_id: attemptId || 0,
 		};
 
-		fetch(cfg.restUrl + 'me/quiz-submit', {
+		fetch(buildSikshyaRestEndpointUrl(cfg.restUrl, 'me/quiz-submit'), {
 			method: 'POST',
 			credentials: 'same-origin',
 			headers: {
@@ -498,7 +567,7 @@
 				return Promise.resolve({ ok: true, json: { ok: true, data: { attempt: cfg.attempt, durationSeconds: cfg.durationSeconds || 0, serverTime: cfg.serverTime } } });
 			}
 			if (!cfg.restUrl || !cfg.restNonce || !cfg.quizId) return Promise.resolve(null);
-			var url = String(cfg.restUrl).replace(/\/?$/, '/') + 'me/quiz-attempt?quiz_id=' + encodeURIComponent(String(cfg.quizId));
+			var url = buildSikshyaRestEndpointUrl(cfg.restUrl, 'me/quiz-attempt', { quiz_id: cfg.quizId });
 			return fetch(url, { method: 'GET', credentials: 'same-origin', headers: { 'X-WP-Nonce': cfg.restNonce } })
 				.then(function (r) {
 					return r.json().then(function (j) {
@@ -510,7 +579,7 @@
 
 		function startAttemptOnServer() {
 			if (!cfg.restUrl || !cfg.restNonce || !cfg.quizId) return Promise.resolve(null);
-			return fetch(String(cfg.restUrl).replace(/\/?$/, '/') + 'me/quiz-attempt', {
+			return fetch(buildSikshyaRestEndpointUrl(cfg.restUrl, 'me/quiz-attempt'), {
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.restNonce },

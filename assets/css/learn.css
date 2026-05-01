@@ -1055,10 +1055,33 @@
   }
 }
 
-/* Main lesson tab strip must not clip the overlapping badge */
+/*
+ * Main column tab strip: stay above scrolled lesson body AND above the sticky lesson
+ * rail header (.sikshya-contentPanel--header, z-index 44); otherwise taps hit the rail
+ * and tabs feel dead (often noticed after taller panels like Announcements).
+ */
+.sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection .sikshya-tabsBar,
+.sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection .sikshya-tabsBar {
+  position: sticky;
+  top: var(--sikshya-learn-railhead-h);
+  overflow: visible;
+  background-color: var(--sikshya-learn-surface);
+  margin-bottom: 0;
+  border-bottom-color: var(--sikshya-learn-border);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 1023px) {
+
+  /* Match sticky lesson header offset (rail sits under compact top bar on small viewports). */
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection .sikshya-tabsBar,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection .sikshya-tabsBar {
+    top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)) + var(--sikshya-learn-railhead-h));
+  }
+}
+
+/* Sidebar / compact discussion tabs reuse .sikshya-tabsBar but are not direct children — keep unobtrusive layering */
 .sikshya-learnContent .sikshya-tabsSection .sikshya-tabsBar {
-  position: relative;
-  z-index: 1;
   overflow: visible;
 }
 

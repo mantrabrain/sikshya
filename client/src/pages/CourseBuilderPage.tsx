@@ -996,6 +996,17 @@ function FieldInput(props: {
                           onChange(next);
                         }}
                       />
+                    ) : st === 'date' ? (
+                      <DateTimePickerField
+                        kind="date"
+                        container="div"
+                        value={typeof sv === 'string' ? sv : ''}
+                        onChange={(v) => {
+                          const next = [...(rows.length ? rows : [{}])];
+                          next[idx] = { ...next[idx], [sk]: v };
+                          onChange(next);
+                        }}
+                      />
                     ) : (
                       <input
                         type={st === 'url' ? 'url' : 'text'}
