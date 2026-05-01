@@ -366,35 +366,133 @@
 .sikshya-checkout-guest {
   display: flex;
   flex-direction: column;
-  gap: var(--sikshya-spacing-4);
+  gap: var(--sikshya-spacing-5);
 }
 
 .sikshya-checkout-billing {
   display: flex;
   flex-direction: column;
-  gap: var(--sikshya-spacing-4);
+  gap: var(--sikshya-spacing-5);
   margin-top: var(--sikshya-spacing-6);
   padding-top: var(--sikshya-spacing-6);
   border-top: 1px solid var(--sik-f-border);
 }
 
 .sikshya-checkout-billing__title {
-  margin: 0 0 var(--sikshya-spacing-4);
-  font-size: var(--sikshya-font-size-base);
-  font-weight: 600;
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
   color: var(--sik-f-text-heading);
 }
 
 .sikshya-checkout-form-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--sikshya-spacing-4);
+  gap: var(--sikshya-spacing-5);
 }
 
 @media (min-width: 520px) {
   .sikshya-checkout-form-grid {
     grid-template-columns: 1fr 1fr;
+    gap: var(--sikshya-spacing-5);
   }
+}
+
+/* Dynamic checkout fields (Pro add-on — markup from checkout-page.js) */
+.sikshya-checkout-df {
+  margin-top: var(--sikshya-spacing-6);
+  padding-top: var(--sikshya-spacing-6);
+  border-top: 1px solid var(--sik-f-border);
+}
+
+.sikshya-checkout-df__title {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-df__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sikshya-spacing-5);
+}
+
+@media (min-width: 520px) {
+  .sikshya-checkout-df__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sikshya-spacing-5);
+  }
+}
+
+.sikshya-checkout-df__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.sikshya-checkout-df__field--full {
+  grid-column: 1 / -1;
+}
+
+.sikshya-checkout-df__help {
+  margin: 0;
+  font-size: var(--sikshya-font-size-xs);
+  line-height: 1.5;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-checkout-df__checkbox {
+  display: flex;
+  gap: var(--sikshya-spacing-3);
+  align-items: flex-start;
+  margin: 0;
+  cursor: pointer;
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-df__checkbox-input {
+  margin-top: 0.2rem;
+  flex: 0 0 auto;
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--sikshya-primary);
+}
+
+.sikshya-checkout-df__checkbox-text .sikshya-checkout-field__required {
+  font-weight: 700;
+}
+
+.sikshya-checkout-df__radio-stack {
+  display: grid;
+  gap: var(--sikshya-spacing-3);
+}
+
+.sikshya-checkout-df__radio-row {
+  display: flex;
+  gap: var(--sikshya-spacing-3);
+  align-items: flex-start;
+  margin: 0;
+  cursor: pointer;
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-df__radio-row input {
+  margin-top: 0.2rem;
+  flex: 0 0 auto;
+  accent-color: var(--sikshya-primary);
 }
 
 .sikshya-checkout-field {
@@ -412,26 +510,50 @@
 .sikshya-checkout-field__label {
   font-size: var(--sikshya-font-size-sm);
   font-weight: 600;
+  line-height: 1.35;
   color: var(--sik-f-text-heading);
 }
 
-.sikshya-checkout-field__control {
+.sikshya-checkout-field__required {
+  color: var(--sikshya-primary);
+  font-weight: 700;
+}
+
+.sikshya-checkout-field__control,
+.sikshya-checkout-page__main .sikshya-input.sikshya-checkout-field__control {
   width: 100%;
-  min-height: 2.75rem;
-  padding: 0 var(--sikshya-spacing-3);
+  max-width: 100%;
+  min-height: 3rem;
+  padding: 0.625rem 0.875rem;
   border: 1px solid var(--sik-f-border);
   border-radius: var(--sikshya-radius-lg);
   background: var(--sik-f-surface);
   color: var(--sik-f-text);
   font-size: var(--sikshya-font-size-sm);
+  line-height: 1.45;
   box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sikshya-checkout-field__control--textarea {
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+select.sikshya-checkout-field__control {
+  cursor: pointer;
+  padding-right: 2rem;
 }
 
 .sikshya-checkout-field__control:focus {
   outline: none;
   border-color: var(--sikshya-primary);
   box-shadow: 0 0 0 1px var(--sikshya-primary-light);
+}
+
+.sikshya-checkout-field__control::placeholder {
+  color: var(--sik-f-text-muted);
+  opacity: 0.85;
 }
 
 .sikshya-checkout-page__gateway-btn[disabled] {

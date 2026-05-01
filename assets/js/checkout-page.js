@@ -130,9 +130,9 @@
     }
 
     var html = '';
-    html += '<div class="sikshya-checkout-df" style="margin-top:0.25rem;">';
-    html += '<h3 style="margin:0 0 0.5rem;font-size:0.95rem;">' + t('additionalInfo', 'Additional information') + '</h3>';
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">';
+    html += '<div class="sikshya-checkout-df">';
+    html += '<h3 class="sikshya-checkout-df__title">' + t('additionalInfo', 'Additional information') + '</h3>';
+    html += '<div class="sikshya-checkout-df__grid">';
     dfSchema.forEach(function (f) {
       var id = dfSlug(f && f.id ? f.id : '');
       if (!id) return;
@@ -148,35 +148,50 @@
       var width = String((f && f.width) || '');
       var span2 = width === 'full' || type === 'textarea' || type === 'checkbox';
 
-      html += '<div data-df-field="' + id + '" style="' + (span2 ? 'grid-column:1 / -1;' : '') + (visible ? '' : 'display:none;') + '">';
+      var fieldClass = 'sikshya-checkout-df__field';
+      if (span2) {
+        fieldClass += ' sikshya-checkout-df__field--full';
+      }
+      html += '<div data-df-field="' + id + '" class="' + fieldClass + '"' + (visible ? '' : ' style="display:none;"') + '>';
+
+      var reqStar = required
+        ? ' <span class="sikshya-checkout-field__required" aria-hidden="true">*</span>'
+        : '';
+
       if (type === 'checkbox') {
-        html += '<label style="display:flex;gap:0.5rem;align-items:flex-start;font-weight:600;margin:0;">';
+        html += '<label class="sikshya-checkout-df__checkbox" for="sikshya-df-' + id + '">';
         html +=
-          '<input type="checkbox" id="sikshya-df-' +
+          '<input type="checkbox" class="sikshya-checkout-df__checkbox-input" id="sikshya-df-' +
           id +
           '" data-df-input="' +
           id +
           '" ' +
           (val === '1' ? 'checked' : '') +
-          ' />' +
-          '<span>' +
-          label +
-          (required ? ' *' : '') +
-          '</span>';
+          ' />';
+        html += '<span class="sikshya-checkout-df__checkbox-text">' + label + reqStar + '</span>';
         html += '</label>';
       } else {
-        html += '<label style="display:block;font-weight:600;margin:0 0 0.25rem;" for="sikshya-df-' + id + '">' + label + (required ? ' *' : '') + '</label>';
+        html +=
+          '<label class="sikshya-checkout-field__label" for="sikshya-df-' + id + '">' +
+          label +
+          reqStar +
+          '</label>';
         if (type === 'textarea') {
           html +=
             '<textarea id="sikshya-df-' +
             id +
             '" data-df-input="' +
             id +
-            '" rows="3" class="sikshya-input" style="width:100%;">' +
+            '" rows="4" class="sikshya-input sikshya-checkout-field__control sikshya-checkout-field__control--textarea">' +
             (val || '') +
             '</textarea>';
         } else if (type === 'country') {
-          html += '<select id="sikshya-df-' + id + '" data-df-input="' + id + '" class="sikshya-input" style="width:100%;">';
+          html +=
+            '<select id="sikshya-df-' +
+            id +
+            '" data-df-input="' +
+            id +
+            '" class="sikshya-input sikshya-checkout-field__control">';
           html += '<option value="">' + t('chooseCountry', 'Choose country…') + '</option>';
           try {
             Object.keys(dfCountries || {}).forEach(function (code) {
@@ -193,7 +208,12 @@
         } else if (type === 'select' || type === 'radio') {
           var opts = Array.isArray(f && f.options ? f.options : null) ? f.options : [];
           if (type === 'select') {
-            html += '<select id="sikshya-df-' + id + '" data-df-input="' + id + '" class="sikshya-input" style="width:100%;">';
+            html +=
+              '<select id="sikshya-df-' +
+              id +
+              '" data-df-input="' +
+              id +
+              '" class="sikshya-input sikshya-checkout-field__control">';
             html += '<option value="">' + t('chooseOne', 'Choose…') + '</option>';
             opts.forEach(function (o) {
               var ov = o && o.value !== undefined ? String(o.value) : '';
@@ -202,15 +222,15 @@
             });
             html += '</select>';
           } else {
-            html += '<div style="display:grid;gap:0.5rem;">';
+            html += '<div class="sikshya-checkout-df__radio-stack" role="radiogroup">';
             opts.forEach(function (o, idx) {
               var ov = o && o.value !== undefined ? String(o.value) : '';
               var ol = o && o.label !== undefined ? String(o.label) : ov;
               var rid = 'sikshya-df-' + id + '-' + idx;
               html +=
-                '<label for="' +
+                '<label class="sikshya-checkout-df__radio-row" for="' +
                 rid +
-                '" style="display:flex;gap:0.5rem;align-items:flex-start;margin:0;">' +
+                '">' +
                 '<input type="radio" name="sikshya-df-radio-' +
                 id +
                 '" id="' +
@@ -238,7 +258,7 @@
             id +
             '" type="' +
             inputType +
-            '" class="sikshya-input" style="width:100%;" placeholder="' +
+            '" class="sikshya-input sikshya-checkout-field__control" placeholder="' +
             (ph || '').replace(/"/g, '&quot;') +
             '" value="' +
             (val || '').replace(/"/g, '&quot;') +
@@ -246,7 +266,7 @@
         }
       }
       if (help) {
-        html += '<div style="margin-top:0.25rem;font-size:12px;opacity:0.8;">' + help + '</div>';
+        html += '<p class="sikshya-checkout-df__help">' + help + '</p>';
       }
       html += '</div>';
     });
