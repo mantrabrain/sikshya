@@ -9,6 +9,11 @@ export const SIKSHYA_ENDPOINTS = {
       `/course-builder/bootstrap?course_id=${encodeURIComponent(String(courseId))}`,
     /** Directly set _sikshya_course_type meta (avoids fragile WP REST meta PATCH). */
     setType: '/course-builder/set-type',
+    /**
+     * Draft course via wp_insert_post (replaces Core REST POST /wp/v2/sik_course from the new-course modal;
+     * avoids a WordPress core REST create_item + slug bug for non-hierarchical CPTs).
+     */
+    createDraft: '/course-builder/create-draft',
   },
   admin: {
     courseChapters: (courseId: number) =>

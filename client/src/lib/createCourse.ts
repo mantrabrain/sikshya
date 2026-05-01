@@ -1,4 +1,4 @@
-import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
+import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import type { WpPost } from '../types';
 
 export type CreateDraftCourseOptions = {
@@ -9,8 +9,8 @@ export type CreateDraftCourseOptions = {
 };
 
 /**
- * Create an empty `sik_course` post in draft via WordPress REST API,
- * then (for bundles) reliably set the course type via the Sikshya set-type endpoint.
+ * Create an empty `sik_course` draft via Sikshya REST (`course-builder/create-draft` → wp_insert_post),
+ * then (for bundles) set course type via the Sikshya set-type endpoint.
  */
 export async function createDraftCourse(title: string, options: CreateDraftCourseOptions = {}): Promise<number> {
   const trimmed = title.trim();
@@ -20,15 +20,16 @@ export async function createDraftCourse(title: string, options: CreateDraftCours
 
   const body: Record<string, string> = {
     title: trimmed,
-    status: 'draft',
-    content: '',
   };
   const slug = options.slug?.trim();
   if (slug) {
     body.slug = slug;
   }
 
-  const post = await getWpApi().post<WpPost>('/sik_course', body);
+  const post = await getSikshyaApi().post<WpPost & { success?: boolean }>(
+    SIKSHYA_ENDPOINTS.courseBuilder.createDraft,
+    body
+  );
 
   const id = post?.id;
   if (typeof id !== 'number' || id <= 0) {

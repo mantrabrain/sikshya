@@ -8,6 +8,8 @@ type BaseProps = {
   description?: string;
   disabled?: boolean;
   className?: string;
+  /** Use `div` when this field sits inside another label (e.g. course builder repeaters). */
+  container?: 'label' | 'div';
 };
 
 type DateOnlyProps = BaseProps & {
@@ -63,8 +65,10 @@ export function DateTimePickerField(props: Props) {
     }
   };
 
+  const Shell = container === 'div' ? 'div' : 'label';
+
   return (
-    <label className={`block text-sm ${className}`}>
+    <Shell className={`block text-sm ${className}`}>
       {label ? <span className="text-slate-600 dark:text-slate-400">{label}</span> : null}
       {description ? <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{description}</span> : null}
       <div className="mt-1 w-full">
@@ -82,7 +86,7 @@ export function DateTimePickerField(props: Props) {
           popperPlacement="bottom-start"
         />
       </div>
-    </label>
+    </Shell>
   );
 }
 

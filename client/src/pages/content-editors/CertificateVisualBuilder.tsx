@@ -185,7 +185,7 @@ function paletteItemIcon(item: PaletteItemDef): string {
       return 'schedule';
     }
     if (l.includes('verification') || l.includes('certificate') || l.includes('grade') || l.includes('point')) {
-      return 'licenseKey';
+      return 'key';
     }
     return 'tag';
   }

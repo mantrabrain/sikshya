@@ -129,6 +129,14 @@ class AdminRestRoutes
             ],
         ]);
 
+        register_rest_route($namespace, '/course-builder/create-draft', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'createCourseDraft'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/course-chapters', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -1345,6 +1353,51 @@ class AdminRestRoutes
                 'is_bundle' => $type === 'bundle',
             ],
         ], 200);
+    }
+
+    /**
+     * Create an empty draft course (React “New course” modal).
+     *
+     * Uses wp_insert_post instead of Core REST POST /wp/v2/sik_course to avoid WP REST bug on draft + slug.
+     */
+    public function createCourseDraft(WP_REST_Request $request): WP_REST_Response
+    {
+        $body = $this->jsonBody($request);
+        $title = isset($body['title']) ? sanitize_text_field((string) $body['title']) : '';
+        if ($title === '') {
+            return new WP_REST_Response(['success' => false, 'message' => __('Please enter a course title.', 'sikshya')], 400);
+        }
+
+        $slug = isset($body['slug']) ? (string) $body['slug'] : '';
+
+        $repo = $this->plugin->getService('courseRepository');
+        if (!$repo instanceof \Sikshya\Database\Repositories\CourseRepository) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
+        }
+
+        $inserted = $repo->insertDraftFromModal($title, $slug);
+        if (is_wp_error($inserted)) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'message' => $inserted->get_error_message() ?: __('Failed to create course.', 'sikshya'),
+                ],
+                400
+            );
+        }
+
+        $id = (int) $inserted;
+        if ($id <= 0) {
+            return new WP_REST_Response(['success' => false, 'message' => __('Failed to create course.', 'sikshya')], 500);
+        }
+
+        return new WP_REST_Response(
+            [
+                'id' => $id,
+                'success' => true,
+            ],
+            201
+        );
     }
 
     public function createContent(WP_REST_Request $request): WP_REST_Response

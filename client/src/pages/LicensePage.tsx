@@ -289,7 +289,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
         <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-3 border-b border-slate-200/80 px-6 py-4 dark:border-slate-800">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-              <NavIcon name="licenseKey" className="h-5 w-5" />
+              <NavIcon name="key" className="h-5 w-5" />
             </span>
             <h1 className="text-lg font-semibold text-slate-900 dark:text-white">License</h1>
           </div>
@@ -359,7 +359,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 px-6 py-4 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
-              <NavIcon name="licenseKey" className="h-5 w-5" />
+              <NavIcon name="key" className="h-5 w-5" />
             </span>
             <div>
               <h1 className="text-lg font-semibold text-slate-900 dark:text-white">License management</h1>

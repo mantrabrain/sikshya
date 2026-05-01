@@ -118,6 +118,30 @@ class CourseRepository implements RepositoryInterface
     }
 
     /**
+     * Create a draft course directly via wp_insert_post (React “New course” modal).
+     *
+     * Avoids POST /wp/v2/sik_course — WordPress core REST create_item() has a long-standing bug
+     * when combining draft status + explicit slug (reads `$prepared_post->id` vs `ID`).
+     *
+     * @return int|\WP_Error Post ID or error.
+     */
+    public function insertDraftFromModal(string $title, string $slug = '')
+    {
+        $postarr = [
+            'post_title' => sanitize_text_field($title),
+            'post_content' => '',
+            'post_type' => PostTypes::COURSE,
+            'post_status' => 'draft',
+        ];
+        $slug = trim($slug);
+        if ($slug !== '') {
+            $postarr['post_name'] = sanitize_title($slug);
+        }
+
+        return wp_insert_post($postarr, true);
+    }
+
+    /**
      * Update only post_status for an existing course row.
      */
     public function updatePostStatus(int $id, string $post_status): bool

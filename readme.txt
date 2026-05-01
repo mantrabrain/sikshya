@@ -1,7 +1,7 @@
 === Sikshya LMS — Build & Sell Online Courses ===
 Contributors: mantrabrain
 Donate link: https://mantrabrain.com/
-Tags: lms, elearning, education, courses, learning management system
+Tags: lms, online courses, elearning, education, quizzes
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
@@ -9,13 +9,15 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Build, sell, and deliver online courses on WordPress: modern course builder, lessons, quizzes, certificates, checkout, and learner dashboards—without a maze of add-ons.
+Build and sell online courses on WordPress with one plugin: a visual course builder, lessons, quizzes, certificates, checkout, and learner dashboards—without stacking five separate tools.
 
 == Description ==
 
-**Sikshya LMS** is a WordPress learning management system built for **fast activation**: publish a curriculum, enroll learners, collect payment where needed, and prove outcomes with quizzes and completion certificates. The free core is intentionally strong so you can run a real training business before you ever upgrade.
+**Sikshya LMS** is a **WordPress LMS** (learning management system) for creators who want students to enroll, learn, and pay—without leaving your site. The free version is built so you can launch a real course catalog, take payments when you are ready, and grow into **Sikshya Pro** only when you need automation and advanced add-ons.
 
-Use Sikshya for coaching programs, professional training, internal enablement, or the first phase of a course marketplace—while keeping content, users, and revenue on infrastructure you control.
+**In plain English:** you create courses in the WordPress admin; learners open your course pages on the front of your site, track progress in their account, and complete quizzes or assignments you publish.
+
+Use Sikshya for coaching, professional training, customer education, internal onboarding, or the start of a course marketplace—with full control of content, branding, and revenue.
 
 ### Get started
 
@@ -31,12 +33,19 @@ Use Sikshya for coaching programs, professional training, internal enablement, o
 
 Join the community for release notes, setup tips, and peer discussion with other course creators on WordPress.
 
+### New to WordPress LMS plugins?
+
+* **No code required** to publish lessons and quizzes—you work inside Sikshya’s admin screens like other WordPress plugins.
+* **Your theme** controls fonts and many layout basics; Sikshya adds course templates and learner views so selling and learning stay consistent.
+* **Start small:** create one course, one short lesson, and one quiz; invite a test student account before you invite paying customers.
+* **Payments are optional:** offer free courses first, then connect Stripe or PayPal when you sell.
+
 ### Why choose Sikshya?
 
 * **Creator-first workflow** — A fast admin experience (React-powered shell) so you spend time teaching, not hunting through scattered WordPress screens.
 * **Commerce that belongs in the free core** — Paid courses, coupons, orders, and mainstream gateways are part of the baseline story—not an afterthought locked behind “contact sales.”
 * **Sensible defaults** — Fewer knobs on day one; advanced automation, marketplace, and reporting unlock with **Sikshya Pro** when you are ready to scale.
-* **WordPress-native** — Courses, lessons, quizzes, and questions follow familiar CPT + capabilities patterns, with REST-oriented services where documented—so agencies and developers can extend predictably.
+* **WordPress-native** — Courses, lessons, quizzes, and questions follow familiar custom post types and capabilities, with REST-oriented services where documented—so agencies and developers can extend predictably.
 
 ### Who is Sikshya for?
 
@@ -260,12 +269,18 @@ If optional diagnostic or telemetry features are introduced in a future release,
 
 1. Install **Sikshya LMS** from **Plugins → Add New** (search “Sikshya”) or upload the `sikshya` folder to `wp-content/plugins/`.
 2. Activate the plugin.
-3. Open **Sikshya** in the admin menu and complete setup: required pages, permalinks, branding basics, and email sender settings.
-4. Configure **Payments** (Stripe/PayPal) using test credentials first; confirm a test order before switching live.
-5. Create a course, add curriculum, publish, and visit the public course URL to verify your theme layout.
+3. Open **Sikshya** in the WordPress admin menu and walk through setup: required pages, permalink structure (pretty URLs recommended), basic branding, and email sender settings.
+4. Under **Payments**, add **Stripe** and/or **PayPal** using **test** keys first; run a small test purchase before switching to live keys.
+5. Create your first course, add at least one lesson and (optionally) a quiz, publish, then open the public course URL in a private browser window to see what learners see.
 6. Optional: join the [Sikshya LMS Facebook Community](https://www.facebook.com/groups/sikshyalms/) for tips from other site owners.
 
+**Tip:** If anything looks wrong on the front of your site, temporarily switch to a default WordPress theme (Twenty Twenty-Five, etc.) to tell Sikshya styling apart from theme conflicts.
+
 == Frequently Asked Questions ==
+
+= What is an LMS (in one sentence)? =
+
+A **learning management system** is software that hosts your lessons, tracks who finished what, and often handles enrollment or payment—so you are not emailing PDFs and spreadsheets by hand.
 
 = Is Sikshya LMS free? =
 
@@ -311,14 +326,18 @@ Email the WordPress Plugins Team at plugins@wordpress.org with details (do not p
 
 **Sikshya** (this plugin) is the free foundation. **Sikshya Pro** is a separate commercial add-on that unlocks advanced features and service levels.
 
+= Will this hurt my site’s SEO? =
+
+Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerpts, and internal links from your homepage or blog—same good habits as any WordPress site. Pair with your preferred SEO plugin for meta titles and sitemaps.
+
 == Screenshots ==
 
-1. Sikshya admin UI — fast navigation between courses, learners, and commerce tools.
-2. Course listing admin UI.
-3. Course Builder Page
-4. Settings page
-5. Course Listing
-6. Learn Page UI
+1. Sikshya admin dashboard — quick access to courses, learners, and commerce from one React-powered shell.
+2. Course list in the admin — search, filter, and manage all courses from a single screen.
+3. Course Builder — edit curriculum, settings, and content in one structured workspace.
+4. Global Settings — payments, emails, labels, and LMS-wide behavior in one place.
+5. Public course catalog — how courses appear to visitors when using your theme and Sikshya templates.
+6. Learn experience — lesson view with curriculum sidebar and progress-friendly layout for enrolled students.
 
 == Changelog ==
 

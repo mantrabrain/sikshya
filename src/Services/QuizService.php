@@ -87,7 +87,7 @@ final class QuizService
             return 0;
         }
 
-        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        $course_id = LessonCourseLink::resolvedCourseIdForQuiz($quiz_id);
         $attempt_number = $this->countCompletedAttempts($quiz_id, $user_id) + 1;
         return (new QuizAttemptRepository())->createAttempt([
             'user_id' => $user_id,

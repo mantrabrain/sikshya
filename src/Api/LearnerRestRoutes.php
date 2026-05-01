@@ -12,6 +12,7 @@ use Sikshya\Services\CertificateIssuanceService;
 use Sikshya\Services\CourseCompletionEvaluator;
 use Sikshya\Services\CourseService;
 use Sikshya\Services\LearnerCurriculumHelper;
+use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\AssignmentService;
 use Sikshya\Services\Settings;
 use WP_REST_Request;
@@ -310,7 +311,7 @@ class LearnerRestRoutes
         }
 
         $uid = get_current_user_id();
-        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        $course_id = LessonCourseLink::resolvedCourseIdForQuiz($quiz_id);
         if ($course_id <= 0) {
             return $this->error('quiz_no_course', __('Quiz is not linked to a course.', 'sikshya'), 400);
         }
@@ -477,7 +478,7 @@ class LearnerRestRoutes
         }
 
         $uid = get_current_user_id();
-        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        $course_id = LessonCourseLink::resolvedCourseIdForQuiz($quiz_id);
         if ($course_id <= 0) {
             return $this->error('quiz_no_course', __('Quiz is not linked to a course.', 'sikshya'), 400);
         }
@@ -535,7 +536,7 @@ class LearnerRestRoutes
         }
 
         $uid = get_current_user_id();
-        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        $course_id = LessonCourseLink::resolvedCourseIdForQuiz($quiz_id);
         if ($course_id <= 0) {
             return $this->error('quiz_no_course', __('Quiz is not linked to a course.', 'sikshya'), 400);
         }

@@ -129,7 +129,7 @@ class Frontend
                     }
                 } elseif ($pt === PostTypes::QUIZ) {
                     $label = __('Edit quiz', 'sikshya');
-                    $cid = (int) get_post_meta($post_id, '_sikshya_quiz_course', true);
+                    $cid = \Sikshya\Services\LessonCourseLink::resolvedCourseIdForQuiz($post_id);
                     if ($cid > 0) {
                         $href = ReactAdminConfig::reactAppUrl('add-course', [
                             'course_id' => (string) $cid,
@@ -138,7 +138,7 @@ class Frontend
                     }
                 } elseif ($pt === PostTypes::ASSIGNMENT) {
                     $label = __('Edit assignment', 'sikshya');
-                    $cid = (int) get_post_meta($post_id, '_sikshya_assignment_course', true);
+                    $cid = \Sikshya\Services\LessonCourseLink::resolvedCourseIdForAssignment($post_id);
                     if ($cid > 0) {
                         $href = ReactAdminConfig::reactAppUrl('add-course', [
                             'course_id' => (string) $cid,

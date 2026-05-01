@@ -1256,6 +1256,19 @@ function sikshya_format_course_duration_display($raw): string
 }
 
 /**
+ * Sanitize rich text stored in meta (e.g. course announcements) for output in Learn templates.
+ *
+ * @param string $html Raw HTML from trusted editor or repeater fields.
+ * @return string HTML safe for echoing after this function (uses {@see wp_kses_post()}).
+ */
+if (!function_exists('sikshya_render_rich_text')) {
+    function sikshya_render_rich_text(string $html): string
+    {
+        return wp_kses_post($html);
+    }
+}
+
+/**
  * Render a reusable template partial from the plugin.
  *
  * @param string $relative Relative path inside plugin root (e.g. 'templates/partials/course-card.php').

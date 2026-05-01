@@ -124,12 +124,12 @@ final class GlobalSettingsBootstrap
             if ($post->post_type === PostTypes::CHAPTER) {
                 $course_id = (int) $post->post_parent;
             } else {
-                $course_id = LessonCourseLink::resolvedCourseIdForLesson($post_id);
-                if ($course_id <= 0) {
-                    $course_id = (int) get_post_meta($post_id, '_sikshya_quiz_course', true);
-                }
-                if ($course_id <= 0) {
-                    $course_id = (int) get_post_meta($post_id, '_sikshya_assignment_course', true);
+                if ($post->post_type === PostTypes::LESSON) {
+                    $course_id = LessonCourseLink::resolvedCourseIdForLesson($post_id);
+                } elseif ($post->post_type === PostTypes::QUIZ) {
+                    $course_id = LessonCourseLink::resolvedCourseIdForQuiz($post_id);
+                } elseif ($post->post_type === PostTypes::ASSIGNMENT) {
+                    $course_id = LessonCourseLink::resolvedCourseIdForAssignment($post_id);
                 }
             }
         }

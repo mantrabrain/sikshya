@@ -22,7 +22,7 @@ final class LessonPageService
     public static function forPost(\WP_Post $post): SingleLessonPageModel
     {
         $lesson_id = (int) $post->ID;
-        $course_id = self::lessonCourseId($lesson_id);
+        $course_id = self::lessonCourseId($post);
         $uid       = get_current_user_id();
 
         $error    = '';
@@ -34,7 +34,9 @@ final class LessonPageService
         $show_progress = Settings::isTruthy(Settings::get('students_can_see_progress', true));
 
         if ($course_id <= 0) {
-            $error = __('This lesson is not linked to a course.', 'sikshya');
+            $error = $post->post_type === PostTypes::ASSIGNMENT
+                ? __('This assignment is not linked to a course.', 'sikshya')
+                : __('This lesson is not linked to a course.', 'sikshya');
         } else {
             $courses  = new CourseService();
             $enrolled = $uid > 0 && $courses->isUserEnrolled($uid, $course_id);
@@ -229,9 +231,22 @@ final class LessonPageService
         return null;
     }
 
-    private static function lessonCourseId(int $lesson_id): int
+    /**
+     * Resolve parent course for the Learn shell. Assignments use {@see LessonCourseLink::resolvedCourseIdForAssignment()}
+     * because {@see LessonCourseLink::resolvedCourseIdForLesson()} only accepts lesson posts.
+     */
+    private static function lessonCourseId(\WP_Post $post): int
     {
-        return LessonCourseLink::resolvedCourseIdForLesson($lesson_id);
+        $id = (int) $post->ID;
+        if ($post->post_type === PostTypes::ASSIGNMENT) {
+            return LessonCourseLink::resolvedCourseIdForAssignment($id);
+        }
+
+        if ($post->post_type === PostTypes::LESSON) {
+            return LessonCourseLink::resolvedCourseIdForLesson($id);
+        }
+
+        return 0;
     }
 
     /**

@@ -43,7 +43,7 @@ final class AssignmentService
             return ['success' => false, 'message' => __('Invalid assignment.', 'sikshya')];
         }
 
-        $course_id = (int) get_post_meta($assignment_id, '_sikshya_assignment_course', true);
+        $course_id = LessonCourseLink::resolvedCourseIdForAssignment($assignment_id);
         if ($course_id <= 0 || !$this->courses->findById($course_id)) {
             return ['success' => false, 'message' => __('Assignment is not linked to a valid course.', 'sikshya')];
         }

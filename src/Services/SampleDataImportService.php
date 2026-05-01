@@ -524,6 +524,15 @@ final class SampleDataImportService
 
         $pid = (int) $created['data']['content_id'];
 
+        // Link to course before applying pack `meta` so `_sikshya_*_course` cannot be missing on the frontend.
+        if ($contentType === 'lesson') {
+            LessonCourseLink::persistLessonCourseId($pid, $courseId);
+        } elseif ($contentType === 'quiz') {
+            update_post_meta($pid, '_sikshya_quiz_course', $courseId);
+        } elseif ($contentType === 'assignment') {
+            update_post_meta($pid, '_sikshya_assignment_course', $courseId);
+        }
+
         if ($contentType === 'lesson') {
             ++$counts['lessons'];
 
@@ -566,7 +575,6 @@ final class SampleDataImportService
             }
         } elseif ($contentType === 'assignment') {
             ++$counts['assignments'];
-            update_post_meta($pid, '_sikshya_assignment_course', $courseId);
         }
 
         static $skippedPackMetaLead = ['_sikshya_lesson_course', '_sikshya_quiz_course', '_sikshya_assignment_course'];
@@ -584,14 +592,6 @@ final class SampleDataImportService
         }
 
         $this->curriculum->linkContentToChapter($pid, $chapterId);
-
-        if ($contentType === 'lesson') {
-            LessonCourseLink::persistLessonCourseId($pid, $courseId);
-        } elseif ($contentType === 'quiz') {
-            update_post_meta($pid, '_sikshya_quiz_course', $courseId);
-        } elseif ($contentType === 'assignment') {
-            update_post_meta($pid, '_sikshya_assignment_course', $courseId);
-        }
     }
 
     /**

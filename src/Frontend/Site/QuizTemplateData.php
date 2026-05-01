@@ -12,6 +12,7 @@ use Sikshya\Presentation\Models\SingleQuizPageModel;
 use Sikshya\Services\Frontend\LearnOutlineItemAccess;
 use Sikshya\Services\Frontend\LessonPageService;
 use Sikshya\Services\Frontend\QuizPageService;
+use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\Settings;
 
 /**
@@ -27,7 +28,7 @@ final class QuizTemplateData
     public static function legacyArrayForPost(\WP_Post $post): array
     {
         $quiz_id = (int) $post->ID;
-        $course_id = (int) get_post_meta($quiz_id, '_sikshya_quiz_course', true);
+        $course_id = LessonCourseLink::resolvedCourseIdForQuiz($quiz_id);
         $uid = get_current_user_id();
 
         $error = '';

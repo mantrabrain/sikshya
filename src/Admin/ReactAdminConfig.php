@@ -477,7 +477,7 @@ final class ReactAdminConfig
             $items[] = [
                 'id' => 'license',
                 'label' => __('License', 'sikshya'),
-                'icon' => 'licenseKey',
+                'icon' => 'key',
                 'href' => self::reactAppUrl('license'),
             ];
         }
