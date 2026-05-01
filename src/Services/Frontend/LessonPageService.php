@@ -8,6 +8,7 @@ use Sikshya\Services\CourseService;
 use Sikshya\Frontend\Site\CurriculumOutlineMeta;
 use Sikshya\Frontend\Site\PublicPageUrls;
 use Sikshya\Presentation\Models\SingleLessonPageModel;
+use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Services\Settings;
 
@@ -230,12 +231,7 @@ final class LessonPageService
 
     private static function lessonCourseId(int $lesson_id): int
     {
-        $a = (int) get_post_meta($lesson_id, '_sikshya_lesson_course', true);
-        if ($a > 0) {
-            return $a;
-        }
-
-        return (int) get_post_meta($lesson_id, 'sikshya_lesson_course', true);
+        return LessonCourseLink::resolvedCourseIdForLesson($lesson_id);
     }
 
     /**

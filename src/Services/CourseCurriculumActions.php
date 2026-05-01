@@ -28,6 +28,7 @@ final class CourseCurriculumActions
         $duration = sanitize_text_field($params['duration'] ?? '');
         $content_type = sanitize_text_field($params['type'] ?? 'lesson');
         $lesson_type = sanitize_text_field($params['lesson_type'] ?? '');
+        $slug_in = sanitize_title((string) ($params['slug'] ?? ''));
 
         if ($title === '') {
             return ['success' => false, 'message' => __('Content title is required', 'sikshya')];
@@ -51,14 +52,17 @@ final class CourseCurriculumActions
                 break;
         }
 
-        $content_id = wp_insert_post(
-            [
-                'post_title' => $title,
-                'post_content' => $description,
-                'post_type' => $post_type,
-                'post_status' => 'publish',
-            ]
-        );
+        $post_in = [
+            'post_title' => $title,
+            'post_content' => $description,
+            'post_type' => $post_type,
+            'post_status' => 'publish',
+        ];
+        if ($slug_in !== '') {
+            $post_in['post_name'] = $slug_in;
+        }
+
+        $content_id = wp_insert_post($post_in);
 
         if (is_wp_error($content_id)) {
             return [

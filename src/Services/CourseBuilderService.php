@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Course builder domain service: validation + orchestration. Persistence uses repositories.
+ * Course builder domain service: orchestration (no blanket pre-save validation). Persistence uses repositories.
  *
  * Layering:
  * - Repositories: CourseRepository, PostMetaRepository (meta via tabs).
- * - This service: validateAllTabs + create/update course post + saveAllTabs.
+ * - This service: create/update course post + saveAllTabs (tabs validate own shape on save; no global gate).
  * - REST AdminRestRoutes + CourseCurriculumActions (HTTP only).
  *
  * @package Sikshya\Services
@@ -63,17 +63,6 @@ class CourseBuilderService
                 'success' => false,
                 'message' => __('Failed to initialize course builder.', 'sikshya'),
                 'code' => 'init_failed',
-            ];
-        }
-
-        $errors = $manager->validateAllTabs($data);
-        if (!empty($errors)) {
-            return [
-                'success' => false,
-                'message' => __('Validation failed', 'sikshya'),
-                'errors' => $errors,
-                'field_errors' => self::flattenFieldErrors($errors),
-                'code' => 'validation_failed',
             ];
         }
 

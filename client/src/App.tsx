@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { getConfig } from './config/env';
 import { AppShell } from './components/AppShell';
 import { SikshyaDialogProvider } from './components/shared/SikshyaDialogContext';
-import { ShellStateProvider } from './context/ShellStateContext';
+import { ShellStateProvider, useShellState } from './context/ShellStateContext';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
 import { applyAdminBrandThemeToRoot, clearAdminBrandThemeFromRoot } from './lib/adminBrandTokens';
 import { term } from './lib/terminology';
@@ -111,11 +111,15 @@ const ToolsHubPage = lazy(() => hubPages().then((m) => ({ default: m.ToolsHubPag
 function AdminRouteFallback() {
   return (
     <div
-      className="flex min-h-[40vh] items-center justify-center p-8 text-sm text-slate-500 dark:text-slate-400"
+      className="flex min-h-[55vh] w-full flex-col items-center justify-center gap-3 bg-slate-50 p-8 text-sm text-slate-600 dark:bg-slate-950 dark:text-slate-400 sm:min-h-[65vh]"
       aria-busy="true"
       aria-live="polite"
     >
-      Loading…
+      <span
+        className="h-10 w-10 shrink-0 animate-spin rounded-full border-2 border-solid border-slate-200 border-t-brand-600 dark:border-slate-600 dark:border-t-brand-400"
+        aria-hidden
+      />
+      <span className="font-medium">Loading…</span>
     </div>
   );
 }
@@ -149,9 +153,10 @@ function prefetchAdminChunks(): void {
 function RoutedApp() {
   const baseConfig = getConfig();
   const { route } = useAdminRouting();
+  const { navigation } = useShellState();
   const pageKey =
     typeof route.page === 'string' && route.page.trim() !== '' ? route.page.trim() : 'dashboard';
-  const config = { ...baseConfig, page: pageKey, query: route.query ?? {} };
+  const config = { ...baseConfig, page: pageKey, query: route.query ?? {}, navigation };
   const page = config.page;
   const q = (config.query || {}) as Record<string, unknown>;
   const isCertificateBuilder = page === 'edit-content' && String(q.post_type || '').trim() === 'sikshya_certificate';

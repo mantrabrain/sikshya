@@ -78,7 +78,9 @@ export function TopRightToast(props: { toast: ToastState | null; onDismiss: () =
           </span>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold">{toast.title}</div>
-            {toast.message ? <div className="mt-0.5 text-xs leading-snug opacity-90">{toast.message}</div> : null}
+            {toast.message ? (
+              <div className="mt-0.5 whitespace-pre-line text-xs leading-snug opacity-90">{toast.message}</div>
+            ) : null}
           </div>
           <button
             type="button"

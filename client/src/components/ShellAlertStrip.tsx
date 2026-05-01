@@ -1,3 +1,4 @@
+import { useAdminRouting, isSikshyaReactAdminHref } from '../lib/adminRouting';
 import type { ShellAlert } from '../types';
 
 const variantBar: Record<ShellAlert['variant'], string> = {
@@ -8,6 +9,8 @@ const variantBar: Record<ShellAlert['variant'], string> = {
 };
 
 export function ShellAlertStrip({ alerts }: { alerts: ShellAlert[] }) {
+  const { navigateHref } = useAdminRouting();
+
   if (!alerts.length) return null;
 
   return (
@@ -37,6 +40,12 @@ export function ShellAlertStrip({ alerts }: { alerts: ShellAlert[] }) {
                     href={act.href}
                     target={act.external ? '_blank' : undefined}
                     rel={act.external ? 'noopener noreferrer' : undefined}
+                    onClick={(e) => {
+                      if (act.external) return;
+                      if (!isSikshyaReactAdminHref(act.href)) return;
+                      e.preventDefault();
+                      navigateHref(act.href);
+                    }}
                     className="text-xs font-semibold underline decoration-current/40 underline-offset-2 hover:decoration-current"
                   >
                     {act.label}

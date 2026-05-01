@@ -44,6 +44,8 @@ class Api
      */
     public function registerRoutes(): void
     {
+        $this->registerWpCoreRestCreateWorkaround();
+
         $namespace = 'sikshya/v1';
 
         /*
@@ -634,5 +636,38 @@ class Api
     public function canManagePayments()
     {
         return current_user_can('manage_sikshya') || current_user_can('manage_options');
+    }
+
+    /**
+     * WordPress core REST {@see \WP_REST_Posts_Controller::create_item()} passes
+     * `$prepared_post->id` (lowercase) and `$prepared_post->post_parent` into
+     * `wp_unique_post_slug()`, but {@see \WP_REST_Posts_Controller::prepare_item_for_database()}
+     * only sets `ID` (uppercase) and may omit `parent`. The update path uses `ID` and defaults
+     * the parent. We cannot ship a durable fix inside `wp-includes`; `rest_pre_insert_*` is the
+     * supported extension point until core aligns `create_item` with `update_item`.
+     */
+    private function registerWpCoreRestCreateWorkaround(): void
+    {
+        foreach (\Sikshya\Constants\PostTypes::getAll() as $post_type) {
+            add_filter(
+                'rest_pre_insert_' . $post_type,
+                static function ($prepared_post, $request) {
+                    unset($request);
+                    if (!$prepared_post instanceof \stdClass) {
+                        return $prepared_post;
+                    }
+                    if (!isset($prepared_post->id)) {
+                        $prepared_post->id = isset($prepared_post->ID) ? (int) $prepared_post->ID : 0;
+                    }
+                    if (!isset($prepared_post->post_parent)) {
+                        $prepared_post->post_parent = 0;
+                    }
+
+                    return $prepared_post;
+                },
+                9999,
+                2
+            );
+        }
     }
 }

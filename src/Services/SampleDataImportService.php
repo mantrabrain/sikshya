@@ -148,11 +148,11 @@ final class SampleDataImportService
                     continue;
                 }
 
-                foreach ($contents as $item) {
+                foreach ($contents as $contentIndex => $item) {
                     if (!is_array($item)) {
                         continue;
                     }
-                    $this->importContentItem($courseId, $chapterId, $item, $counts);
+                    $this->importContentItem($courseId, $chapterId, $order, (int) $contentIndex, $item, $counts);
                 }
             }
 
@@ -203,6 +203,10 @@ final class SampleDataImportService
             'post_type' => PostTypes::COURSE,
             'post_status' => sanitize_key((string) ($def['status'] ?? 'publish')) ?: 'publish',
         ];
+        $courseSlug = sanitize_title((string) ($def['slug'] ?? ''));
+        if ($courseSlug !== '') {
+            $post['post_name'] = $courseSlug;
+        }
         if ($excerpt !== '') {
             $post['post_excerpt'] = $excerpt;
         }
@@ -432,11 +436,54 @@ final class SampleDataImportService
     }
 
     /**
+     * When the pack omits `slug`, build a stable, unique slug from course/chapter position
+     * so Learn URLs never collide (duplicate title slugs confuse `get_page_by_path` and
+     * can interact badly with canonical redirects).
+     */
+    private function buildFallbackContentSlug(
+        int $courseId,
+        int $chapterOrder,
+        int $contentIndex,
+        string $contentType,
+        string $title
+    ): string {
+        $type = sanitize_key($contentType) !== '' ? sanitize_key($contentType) : 'content';
+        $titleSlice = function_exists('mb_substr') ? mb_substr($title, 0, 72) : substr($title, 0, 72);
+        $snippet = sanitize_title((string) $titleSlice);
+        if ($snippet === '') {
+            $snippet = $type;
+        }
+
+        $base = sprintf(
+            's-%d-ch%d-u%d-%s',
+            max(1, $courseId),
+            max(1, $chapterOrder),
+            max(1, $contentIndex + 1),
+            $type
+        );
+
+        $candidate = $base . '-' . $snippet;
+        if (strlen($candidate) > 180) {
+            $candidate = $base . '-' . substr($snippet, 0, 40);
+        }
+
+        $out = sanitize_title($candidate);
+
+        return $out !== '' ? $out : sanitize_title($base);
+    }
+
+    /**
      * @param array<string, mixed>   $item
      * @param array<string, int>     $counts
      */
-    private function importContentItem(int $courseId, int $chapterId, array $item, array &$counts): void
-    {
+    private function importContentItem(
+        int $courseId,
+        int $chapterId,
+        int $chapterOrder,
+        int $contentIndex,
+        array $item,
+        array &$counts
+    ): void {
         $type = sanitize_key((string) ($item['type'] ?? 'lesson'));
         $map = [
             'lesson' => 'lesson',
@@ -445,11 +492,23 @@ final class SampleDataImportService
         ];
         $contentType = $map[$type] ?? 'lesson';
 
+        $slugPacked = sanitize_title((string) ($item['slug'] ?? ''));
+        if ($slugPacked === '') {
+            $slugPacked = $this->buildFallbackContentSlug(
+                $courseId,
+                $chapterOrder,
+                $contentIndex,
+                $contentType,
+                (string) ($item['title'] ?? '')
+            );
+        }
+
         $createParams = [
             'title' => (string) ($item['title'] ?? __('Content', 'sikshya')),
             'description' => (string) ($item['content'] ?? ''),
             'type' => $contentType,
             'lesson_type' => sanitize_key((string) ($item['lesson_type'] ?? 'text')),
+            'slug' => $slugPacked,
         ];
 
         $durationRaw = $item['duration'] ?? $item['duration_minutes'] ?? null;
@@ -467,7 +526,6 @@ final class SampleDataImportService
 
         if ($contentType === 'lesson') {
             ++$counts['lessons'];
-            update_post_meta($pid, '_sikshya_lesson_course', $courseId);
 
             if (($createParams['lesson_type'] ?? '') === 'video') {
                 $videoUrl = (string) ($item['video_url'] ?? $item['video'] ?? '');
@@ -511,16 +569,29 @@ final class SampleDataImportService
             update_post_meta($pid, '_sikshya_assignment_course', $courseId);
         }
 
+        static $skippedPackMetaLead = ['_sikshya_lesson_course', '_sikshya_quiz_course', '_sikshya_assignment_course'];
+
         $itemMeta = $item['meta'] ?? [];
         if (is_array($itemMeta)) {
             foreach ($itemMeta as $mk => $mv) {
                 if (is_string($mk) && $mk !== '' && $mk[0] === '_') {
+                    if (in_array($mk, $skippedPackMetaLead, true)) {
+                        continue;
+                    }
                     update_post_meta($pid, $mk, $mv);
                 }
             }
         }
 
         $this->curriculum->linkContentToChapter($pid, $chapterId);
+
+        if ($contentType === 'lesson') {
+            LessonCourseLink::persistLessonCourseId($pid, $courseId);
+        } elseif ($contentType === 'quiz') {
+            update_post_meta($pid, '_sikshya_quiz_course', $courseId);
+        } elseif ($contentType === 'assignment') {
+            update_post_meta($pid, '_sikshya_assignment_course', $courseId);
+        }
     }
 
     /**

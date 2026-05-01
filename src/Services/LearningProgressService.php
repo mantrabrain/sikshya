@@ -135,11 +135,6 @@ final class LearningProgressService
 
     private function lessonCourseId(int $lesson_id): int
     {
-        $a = (int) get_post_meta($lesson_id, '_sikshya_lesson_course', true);
-        if ($a > 0) {
-            return $a;
-        }
-
-        return (int) get_post_meta($lesson_id, 'sikshya_lesson_course', true);
+        return LessonCourseLink::resolvedCourseIdForLesson($lesson_id);
     }
 }

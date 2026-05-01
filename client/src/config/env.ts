@@ -47,7 +47,7 @@ function coerceUser(raw: unknown): SikshyaReactConfig['user'] {
  * PHP `wp_json_encode` turns sequential arrays into JSON arrays, but associative arrays
  * become objects. The sidebar expects an array; normalize so `.map` never runs on a plain object.
  */
-function normalizeNavigation(raw: unknown): NavItem[] {
+export function normalizeNavigation(raw: unknown): NavItem[] {
   if (Array.isArray(raw)) {
     return raw as NavItem[];
   }

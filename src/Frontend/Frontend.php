@@ -9,6 +9,7 @@ use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Site\CartFormHandler;
 use Sikshya\Frontend\Site\CartStorage;
 use Sikshya\Frontend\Site\PublicPageUrls;
+use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
 use Sikshya\Services\Settings;
@@ -119,7 +120,7 @@ class Frontend
                 } elseif ($pt === PostTypes::LESSON) {
                     $label = __('Edit lesson', 'sikshya');
                     // New admin UI: edit within course builder curriculum tab.
-                    $cid = (int) get_post_meta($post_id, '_sikshya_lesson_course', true);
+                    $cid = LessonCourseLink::resolvedCourseIdForLesson($post_id);
                     if ($cid > 0) {
                         $href = ReactAdminConfig::reactAppUrl('add-course', [
                             'course_id' => (string) $cid,

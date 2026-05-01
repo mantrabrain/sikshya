@@ -79,6 +79,9 @@ class CurriculumService
         $this->meta->update($chapter_id, '_sikshya_contents', $chapter_contents);
 
         $course_id = (int) get_post_field('post_parent', $chapter_id);
+        if ($course_id <= 0) {
+            $course_id = (int) get_post_meta($chapter_id, '_sikshya_chapter_course_id', true);
+        }
         if ($course_id > 0) {
             $course_chapters = $this->meta->get($course_id, '_sikshya_chapters', true);
             if (!is_array($course_chapters)) {
@@ -91,9 +94,7 @@ class CurriculumService
 
             // Ensure newly-created content is linked back to its course (Learn templates rely on this meta).
             if ((string) $content_post->post_type === PostTypes::LESSON) {
-                update_post_meta($content_id, '_sikshya_lesson_course', $course_id);
-                // Back-compat for older readers (non-prefixed).
-                update_post_meta($content_id, 'sikshya_lesson_course', $course_id);
+                LessonCourseLink::persistLessonCourseId($content_id, $course_id);
             } elseif ((string) $content_post->post_type === PostTypes::QUIZ) {
                 update_post_meta($content_id, '_sikshya_quiz_course', $course_id);
             } elseif ((string) $content_post->post_type === PostTypes::ASSIGNMENT) {

@@ -447,7 +447,9 @@ export function LessonEditor(props: ContentEditorProps) {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <h2 className="truncate text-lg font-semibold text-slate-900 dark:text-white">{title?.trim() ? title : 'Lesson'}</h2>
-          <p className={HINT}>Lessons are the ordered steps in your course. Pick a kind below — text, video, live class, SCORM, or H5P — and only that kind's fields show up.</p>
+          <p className={HINT}>
+            Lessons are the ordered curriculum steps. SCORM packages and H5P content attach here as one playable activity per lesson (course settings only tune defaults across those lessons).
+          </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
               <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>

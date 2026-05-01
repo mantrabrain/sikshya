@@ -32,6 +32,22 @@ function isSikshyaAdminUrl(url: URL): boolean {
   return url.searchParams.get('page') === 'sikshya';
 }
 
+/**
+ * Whether `href` points at this site's Sikshya React shell (SPA in-app navigation).
+ * Used by shell notices so links work even if the delegated document listener misses the click.
+ */
+export function isSikshyaReactAdminHref(href: string): boolean {
+  const h = href.trim();
+  if (!h || h.startsWith('#')) return false;
+  try {
+    const url = new URL(href, window.location.href);
+    if (!isSameOrigin(url)) return false;
+    return isSikshyaAdminUrl(url);
+  } catch {
+    return false;
+  }
+}
+
 function baseRouteFields(baseConfig: SikshyaReactConfig | null | undefined): { page: string; query: Record<string, string> } {
   const rawPage = baseConfig?.page;
   const page = typeof rawPage === 'string' && rawPage.trim() !== '' ? rawPage.trim() : 'dashboard';

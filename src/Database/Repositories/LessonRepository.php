@@ -3,6 +3,7 @@
 namespace Sikshya\Database\Repositories;
 
 use Sikshya\Constants\PostTypes;
+use Sikshya\Services\LessonCourseLink;
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use WP_Query;
 
@@ -223,9 +224,9 @@ class LessonRepository implements RepositoryInterface
 
     private function setMetaFields(int $post_id, array $data): void
     {
-        // Course ID
+        // Course ID (canonical keys for Learn + legacy list tables).
         if (isset($data['course_id'])) {
-            update_post_meta($post_id, '_sikshya_course_id', intval($data['course_id']));
+            LessonCourseLink::persistLessonCourseId($post_id, max(0, (int) $data['course_id']));
         }
 
         // Lesson type

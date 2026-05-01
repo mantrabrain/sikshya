@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
-import { getApiErrorToastTitle, getErrorSummary, preferToastForApiError } from '../api/errors';
+import {
+  getApiErrorToastTitle,
+  getErrorSummary,
+  getToastMessageForApiFailure,
+  preferToastForApiError,
+} from '../api/errors';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
@@ -1517,8 +1522,7 @@ function CourseBuilderEditor({
   const [addContentError, setAddContentError] = useState<unknown>(null);
   /** When true, outline uses page scroll; when false, outline scrolls inside the curriculum column. */
   const [curriculumOutlineFullHeight, setCurriculumOutlineFullHeight] = useState(readCurriculumOutlineFullHeightPref);
-  const toast = useTopRightToast(3800);
-  const [saveError, setSaveError] = useState<unknown>(null);
+  const toast = useTopRightToast(5200);
   const [saving, setSaving] = useState(false);
   const activeEmbeddedSaveRef = useRef<null | (() => Promise<boolean>)>(null);
   const registerEmbeddedSave = useCallback((fn: (() => Promise<boolean>) | null) => {
@@ -1715,16 +1719,14 @@ function CourseBuilderEditor({
     if (activeEmbeddedSaveRef.current) {
       const ok = await activeEmbeddedSaveRef.current();
       if (!ok) {
-        setSaveError(
-          new Error(
-            'Could not save the open lesson, quiz, assignment, chapter, or other content. Fix any errors below, save that item if needed, then try again.'
-          )
+        toast.error(
+          'Could not save',
+          'Save or close the embedded lesson, quiz, assignment, or chapter editor first — fix any errors there, save the item, then try again.'
         );
         return;
       }
     }
     setSaving(true);
-    setSaveError(null);
     try {
       const payload: Record<string, unknown> = { ...values, course_status: status };
       if (!payload.slug && payload.title) {
@@ -1738,10 +1740,9 @@ function CourseBuilderEditor({
         field_errors?: Record<string, string>;
       }>(SIKSHYA_ENDPOINTS.courseBuilder.save, payload);
       if (!res.success) {
-        const fe = res.field_errors
-          ? Object.values(res.field_errors).join(' ')
-          : JSON.stringify(res.errors || {});
-        throw new Error(res.message || fe || 'Save failed');
+        const fe = res.field_errors ? Object.values(res.field_errors).filter(Boolean).join('\n') : '';
+        toast.error(res.message || 'Could not save', fe || undefined);
+        return;
       }
       const newId = res.data?.course_id;
       if (newId && newId !== courseId) {
@@ -1757,7 +1758,7 @@ function CourseBuilderEditor({
       }
       bootstrap.refetch();
     } catch (e) {
-      setSaveError(e);
+      toast.error(getApiErrorToastTitle(e), getToastMessageForApiFailure(e));
     } finally {
       setSaving(false);
     }
@@ -2121,18 +2122,6 @@ function CourseBuilderEditor({
         }}
         busy={addContentBusy}
       />
-      {saveError && (
-        <div className="mb-4">
-          <ApiErrorPanel
-            error={saveError}
-            title={`Could not save this ${termLower(config, 'course')}`}
-            onRetry={() => {
-              setSaveError(null);
-            }}
-          />
-        </div>
-      )}
-
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
       {bootstrap.loading && <CourseBuilderSkeleton />}

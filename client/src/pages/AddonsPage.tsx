@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useShellState } from '../context/ShellStateContext';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
@@ -194,6 +195,7 @@ function AddonDescriptionWithHelp(props: { addonId: string; label: string; descr
 
 export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
+  const { refreshShell } = useShellState();
   const [data, setData] = useState<AddonsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -300,6 +302,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       const path = addon.enabled ? SIKSHYA_ENDPOINTS.admin.addonsDisable(addon.id) : SIKSHYA_ENDPOINTS.admin.addonsEnable(addon.id);
       const res = await getSikshyaApi().post<AddonsResponse>(path, {});
       setData(res);
+      await refreshShell();
       if (addon.enabled) {
         toast.success('Disabled', `${addon.label} disabled.`);
       } else {
@@ -353,6 +356,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       }
       setSelected({});
       if (updated > 0) {
+        await refreshShell();
         toast.success(mode === 'enable' ? 'Enabled' : 'Disabled', `${updated} add-on(s) updated.`);
       } else {
         toast.info('No changes', 'Nothing to update for the selected add-ons.');

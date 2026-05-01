@@ -336,11 +336,6 @@ export function Sidebar({
               >
                 v{proPluginVersion}
               </span>
-              {!proLicensed ? (
-                <span className="max-w-[5.5rem] truncate text-[9px] font-normal normal-case tracking-normal text-amber-700/80 dark:text-amber-200/75">
-                  inactive
-                </span>
-              ) : null}
             </span>
           ) : null}
         </div>

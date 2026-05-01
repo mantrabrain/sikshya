@@ -595,6 +595,13 @@ while (have_posts()) :
     </div>
     <footer class="sikshya-learning-footer" aria-hidden="true"></footer>
 </div>
+    <?php
+    /**
+     * Footer hook for lesson shell scripts (no wp_footer()). Used by Sikshya Pro SCORM/H5P
+     * player and other add-ons that need to print after lesson markup.
+     */
+    do_action('sikshya_lesson_shell_footer', $page_model);
+    ?>
 </body>
 </html>
 

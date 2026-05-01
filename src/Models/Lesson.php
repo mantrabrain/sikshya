@@ -2,6 +2,7 @@
 
 namespace Sikshya\Models;
 
+use Sikshya\Services\LessonCourseLink;
 use WP_Post;
 
 /**
@@ -156,8 +157,7 @@ class Lesson
      */
     public function getCourse(int $lesson_id): int
     {
-        $course = $this->getMeta($lesson_id, '_sikshya_lesson_course', true);
-        return (int) ($course ?: 0);
+        return LessonCourseLink::resolvedCourseIdForLesson($lesson_id);
     }
 
     /**
@@ -169,7 +169,9 @@ class Lesson
      */
     public function setCourse(int $lesson_id, int $course_id)
     {
-        return $this->setMeta($lesson_id, '_sikshya_lesson_course', $course_id);
+        LessonCourseLink::persistLessonCourseId($lesson_id, max(0, $course_id));
+
+        return true;
     }
 
     /**

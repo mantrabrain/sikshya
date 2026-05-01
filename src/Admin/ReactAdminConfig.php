@@ -17,9 +17,9 @@ use Sikshya\Services\Settings;
 final class ReactAdminConfig
 {
     /**
-     * Volatile shell payload (alerts, licensing, Pro version flags) for REST refresh without full reload.
+     * Volatile shell payload (alerts, licensing, sidebar navigation, Pro version flags) for REST refresh without full reload.
      *
-     * @return array{shellAlerts: array<int, array<string, mixed>>, licensing: array<string, mixed>, proVersion: string, proPluginVersion: string}
+     * @return array{shellAlerts: array<int, array<string, mixed>>, licensing: array<string, mixed>, navigation: array<int, array<string, mixed>>, proVersion: string, proPluginVersion: string}
      */
     public static function shellBootstrap(string $pageKey): array
     {
@@ -29,6 +29,7 @@ final class ReactAdminConfig
         return [
             'shellAlerts' => apply_filters('sikshya_react_shell_alerts', [], $pageKey),
             'licensing' => TierCapabilities::getClientPayload(),
+            'navigation' => self::navigationItems(),
             'proVersion' => $pro_version,
             'proPluginVersion' => $pro_plugin_version,
         ];

@@ -1,6 +1,9 @@
 /**
  * Merges two 10×10 long-form courses into sample-data/sample-lms.json (in place).
  * Run: node scripts/merge-long-sample-courses.mjs
+ *
+ * After merge, regenerate unique course/content slugs so Learn URLs stay unambiguous:
+ *   node scripts/add-sample-pack-slugs.mjs
  */
 import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';

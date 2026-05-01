@@ -75,16 +75,54 @@ export function isPlanFeatureRequiredError(error: unknown): boolean {
 }
 
 /**
+ * Collect user-facing strings from validation-shaped REST bodies (`field_errors` or tab `errors` maps).
+ */
+export function collectFieldErrorMessages(body: unknown): string[] {
+  if (!body || typeof body !== 'object') {
+    return [];
+  }
+  const b = body as { field_errors?: unknown; errors?: unknown };
+  if (b.field_errors && typeof b.field_errors === 'object' && !Array.isArray(b.field_errors)) {
+    return Object.values(b.field_errors).filter((v): v is string => typeof v === 'string' && v.trim() !== '');
+  }
+  if (b.errors && typeof b.errors === 'object' && !Array.isArray(b.errors)) {
+    const out: string[] = [];
+    for (const tab of Object.values(b.errors as Record<string, unknown>)) {
+      if (!tab || typeof tab !== 'object' || Array.isArray(tab)) {
+        continue;
+      }
+      for (const v of Object.values(tab)) {
+        if (typeof v === 'string' && v.trim() !== '') {
+          out.push(v);
+        }
+      }
+    }
+    return out;
+  }
+  return [];
+}
+
+/**
+ * Short message for toasts: validation lines or {@link getErrorSummary}.
+ */
+export function getToastMessageForApiFailure(error: unknown): string {
+  if (error instanceof ApiError && error.body) {
+    const lines = collectFieldErrorMessages(error.body);
+    if (lines.length) {
+      return lines.join('\n');
+    }
+  }
+  return getErrorSummary(error);
+}
+
+/**
  * Use a short toast instead of the large {@link ApiErrorPanel}.
- * Keep the full support panel for server errors (5xx) and validation-style 422 responses.
+ * Keep the full support panel for server errors (5xx) only.
  */
 export function preferToastForApiError(error: unknown): boolean {
   if (error instanceof ApiError) {
     const { status } = error;
     if (status >= 500) {
-      return false;
-    }
-    if (status === 422) {
       return false;
     }
     return true;

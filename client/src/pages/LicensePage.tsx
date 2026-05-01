@@ -156,15 +156,19 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
         license_key: key,
       });
       pushDebug('activate', res);
-      if (res.status === 'valid' || res.status === 'active') {
+      const activated =
+        res.status === 'valid' ||
+        res.status === 'active' ||
+        res.is_license_active === true;
+      if (activated) {
         setData((prev) => ({ ...(prev || ({} as LicenseBootstrap)), ...res }));
         if (res.license_info?.key) setLicenseKey(res.license_info.key);
         await load();
-        await refreshShell();
         showToast('success', res.notice || 'License activated.');
       } else {
         showToast('error', res.notice || 'Activation did not complete.');
       }
+      await refreshShell();
     } catch (err) {
       const body = err instanceof ApiError ? err.body : null;
       pushDebug('activate', body, err);

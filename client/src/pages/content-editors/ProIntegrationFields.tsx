@@ -358,6 +358,10 @@ function formatSize(bytes: number): string {
  * SCORM lesson attach wizard — rendered when the active lesson kind is "scorm".
  * Gated by the `scorm_h5p_pro` addon. Lets the instructor pick a managed package
  * from the library, or fall back to an external launch URL.
+ *
+ * Model (aligned with typical LMS activity placement): one Sikshya **lesson** = one SCORM
+ * launch on Learn. A zip may contain many internal SCOs; that sequencing stays inside
+ * the runtime. Course settings only provide defaults across all interactive lessons.
  */
 export function ProLessonScormBlock(props: {
   values: ProLessonValues;
@@ -428,12 +432,12 @@ export function ProLessonScormBlock(props: {
     <ProCard
       title="SCORM package"
       badge="Pro"
-      description="Pick a SCORM 1.2 / 2004 package from the library, or attach an external launch URL. Learner attempts and resume bookmarks are tracked automatically."
+      description="This lesson step loads one SCORM player (packages attach per lesson — same mental model as a Moodle SCORM activity or Canvas placement). Course-wide defaults for attempts and completion live under Course builder → Interactive content. One zip can contain multiple SCOs; navigation between them stays inside the package."
     >
       <div>
         <label className={LABEL}>Managed package</label>
         <p className={HINT}>
-          Upload zipped packages on the SCORM / H5P workspace, then attach them here. Manifest is parsed for the entry file; attempts are recorded against the package.
+          Upload zipped packages on the SCORM / H5P workspace, then attach here. Multiple curriculum lessons may reuse the same library package (lesson attempts are tracked per learner per lesson).
         </p>
         <div className="space-y-2">
           <input
@@ -524,6 +528,8 @@ export function ProLessonScormBlock(props: {
  * H5P lesson attach wizard — rendered when the active lesson kind is "h5p".
  * Gated by the `scorm_h5p_pro` addon. Surfaces the H5P content picker when the
  * H5P plugin is installed; otherwise falls back to a sanitized iframe embed.
+ *
+ * Like SCORM: one lesson row = one H5P playback context on Learn; course tab sets defaults.
  */
 export function ProLessonH5pBlock(props: {
   values: ProLessonValues;
@@ -598,7 +604,7 @@ export function ProLessonH5pBlock(props: {
       badge="Pro"
       description={
         available
-          ? 'Pick H5P content from the active plugin or paste a sanitized iframe fallback for external H5P hosts.'
+          ? 'Embed one H5P interaction on this lesson (per-step placement). Use Course builder → Interactive content for defaults; results link to this lesson in reports.'
           : 'Install and activate the H5P plugin to enable the picker, or paste an iframe fallback below.'
       }
     >

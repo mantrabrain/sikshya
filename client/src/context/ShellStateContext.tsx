@@ -1,12 +1,13 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
-import { getConfig, normalizeLicensing, normalizeShellAlerts } from '../config/env';
+import { getConfig, normalizeLicensing, normalizeNavigation, normalizeShellAlerts } from '../config/env';
 import { useAdminRouting } from '../lib/adminRouting';
-import type { ShellAlert, SikshyaLicensing } from '../types';
+import type { NavItem, ShellAlert, SikshyaLicensing } from '../types';
 
 type ShellMetaResponse = {
   shellAlerts?: unknown;
   licensing?: unknown;
+  navigation?: unknown;
   proVersion?: unknown;
   proPluginVersion?: unknown;
 };
@@ -14,6 +15,8 @@ type ShellMetaResponse = {
 type ShellStateValue = {
   shellAlerts: ShellAlert[];
   licensing: SikshyaLicensing | undefined;
+  /** Sidebar tree (badges reflect add-on + tier state; refresh after license / add-on changes). */
+  navigation: NavItem[];
   /** Pro add-on semver whenever the Pro plugin is loaded. */
   proPluginVersion: string;
   refreshShell: () => Promise<void>;
@@ -31,6 +34,7 @@ export function useShellState(): ShellStateValue {
     return {
       shellAlerts: normalizeShellAlerts(c.shellAlerts ?? []),
       licensing: normalizeLicensing(c.licensing),
+      navigation: normalizeNavigation(c.navigation),
       proPluginVersion:
         typeof c.proPluginVersion === 'string' && c.proPluginVersion.trim() !== '' ? c.proPluginVersion.trim() : '',
       refreshShell: async () => {
@@ -49,12 +53,14 @@ export function ShellStateProvider({ children }: { children: ReactNode }) {
     return {
       shellAlerts: c.shellAlerts ?? [],
       licensing: c.licensing,
+      navigation: normalizeNavigation(c.navigation),
       proPluginVersion: typeof c.proPluginVersion === 'string' && c.proPluginVersion.trim() !== '' ? c.proPluginVersion.trim() : '',
     };
   }, []);
 
   const [shellAlerts, setShellAlerts] = useState<ShellAlert[]>(initial.shellAlerts);
   const [licensing, setLicensing] = useState<SikshyaLicensing | undefined>(initial.licensing);
+  const [navigation, setNavigation] = useState<NavItem[]>(initial.navigation);
   const [proPluginVersion, setProPluginVersion] = useState(initial.proPluginVersion);
 
   const refreshShell = useCallback(async () => {
@@ -70,9 +76,13 @@ export function ShellStateProvider({ children }: { children: ReactNode }) {
         typeof res.proPluginVersion === 'string' && res.proPluginVersion.trim() !== ''
           ? res.proPluginVersion.trim()
           : '';
+      const nextNav = normalizeNavigation(res.navigation);
 
       setShellAlerts(nextAlerts);
       setLicensing(nextLic);
+      if (nextNav.length) {
+        setNavigation(nextNav);
+      }
       setProPluginVersion(nextPluginPv);
 
       if (typeof window !== 'undefined' && window.sikshyaReact) {
@@ -81,6 +91,7 @@ export function ShellStateProvider({ children }: { children: ReactNode }) {
           licensing: res.licensing ?? window.sikshyaReact.licensing,
           proVersion: nextPv,
           proPluginVersion: nextPluginPv,
+          ...(nextNav.length ? { navigation: nextNav } : {}),
         });
       }
     } catch {
@@ -92,10 +103,11 @@ export function ShellStateProvider({ children }: { children: ReactNode }) {
     () => ({
       shellAlerts,
       licensing,
+      navigation,
       proPluginVersion,
       refreshShell,
     }),
-    [shellAlerts, licensing, proPluginVersion, refreshShell]
+    [shellAlerts, licensing, navigation, proPluginVersion, refreshShell]
   );
 
   return <ShellStateContext.Provider value={value}>{children}</ShellStateContext.Provider>;
