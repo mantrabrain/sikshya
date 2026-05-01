@@ -17,12 +17,15 @@ if (!defined('ABSPATH')) {
 
 final class SingleLessonPageModel
 {
+    /** @var array<string, mixed> */
+    private array $vm;
+
     /**
      * @param array<string, mixed> $vm
      */
-    private function __construct(
-        private array $vm
-    ) {
+    private function __construct(array $vm)
+    {
+        $this->vm = $vm;
     }
 
     /**

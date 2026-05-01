@@ -20,11 +20,20 @@ if (!defined('ABSPATH')) {
 
 final class SampleDataImportService
 {
+    private SampleDataPackRepository $packRepository;
+
+    private CurriculumService $curriculum;
+
+    private CourseCurriculumActions $actions;
+
     public function __construct(
-        private SampleDataPackRepository $packRepository,
-        private CurriculumService $curriculum,
-        private CourseCurriculumActions $actions
+        SampleDataPackRepository $packRepository,
+        CurriculumService $curriculum,
+        CourseCurriculumActions $actions
     ) {
+        $this->packRepository = $packRepository;
+        $this->curriculum = $curriculum;
+        $this->actions = $actions;
     }
 
     /**
@@ -153,6 +162,17 @@ final class SampleDataImportService
             }
 
             $this->invalidateCourseCurriculumCache($courseId, $chapterIds);
+        }
+
+        if ($counts['courses'] === 0) {
+            return [
+                'success' => false,
+                'message' => __(
+                    'Sample data could not be imported: no courses were created. Check file permissions, JSON pack format, and that curriculum actions are available.',
+                    'sikshya'
+                ),
+                'counts' => $counts,
+            ];
         }
 
         return [

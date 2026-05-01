@@ -1,4 +1,4 @@
-name: Yatra CI
+name: Sikshya CI
 
 on:
   push:
@@ -287,8 +287,8 @@ jobs:
         run: |
           ERRORS="" 
           
-          if [ ! -f "yatra.php" ]; then
-            ERRORS="${ERRORS}Main plugin file yatra.php not found\n"
+          if [ ! -f "sikshya.php" ]; then
+            ERRORS="${ERRORS}Main plugin file sikshya.php not found\n"
           fi
           
           required_dirs=("app" "assets" "templates" "includes")
@@ -298,8 +298,8 @@ jobs:
             fi
           done
           
-          if ! grep -q "Plugin Name:" yatra.php 2>/dev/null; then
-            ERRORS="${ERRORS}Plugin header not found in yatra.php\n"
+          if ! grep -q "Plugin Name:" sikshya.php 2>/dev/null; then
+            ERRORS="${ERRORS}Plugin header not found in sikshya.php\n"
           fi
           
           if [ ! -f "composer.json" ]; then
@@ -444,7 +444,7 @@ jobs:
           
           # Legacy PHP API usage (matrix includes 7.4 and 8.x)
           if [ "${{ matrix.php }}" = "7.4" ] || [ "${{ matrix.php }}" = "8.0" ] || [ "${{ matrix.php }}" = "8.1" ] || [ "${{ matrix.php }}" = "8.2" ] || [ "${{ matrix.php }}" = "8.3" ] || [ "${{ matrix.php }}" = "8.4" ]; then
-            DEPRECATED=$(grep -rn "create_function\(\|each(\|money_format(\|ezmlm_hash(" app includes templates --include="*.php" 2>/dev/null || true)
+            DEPRECATED=$(grep -rn "create_function\(\|each(\|money_format(\|ezmlm_hash(" src includes templates --include="*.php" 2>/dev/null || true)
             if [ -n "$DEPRECATED" ]; then
               echo "⚠️ Deprecated PHP APIs found:" | tee -a php${{ matrix.php }}-compat.txt
               echo "$DEPRECATED" | tee -a php${{ matrix.php }}-compat.txt
@@ -462,7 +462,7 @@ jobs:
           
           # PHP 8.1+ deprecations
           if [ "${{ matrix.php }}" = "8.1" ] || [ "${{ matrix.php }}" = "8.2" ] || [ "${{ matrix.php }}" = "8.3" ] || [ "${{ matrix.php }}" = "8.4" ]; then
-            DEPRECATED_81=$(grep -rn "utf8_encode(\|utf8_decode(" app includes templates --include="*.php" 2>/dev/null || true)
+            DEPRECATED_81=$(grep -rn "utf8_encode(\|utf8_decode(" src includes templates --include="*.php" 2>/dev/null || true)
             if [ -n "$DEPRECATED_81" ]; then
               echo "⚠️ PHP 8.1+ deprecated functions found:" | tee -a php${{ matrix.php }}-compat.txt
               echo "$DEPRECATED_81" | tee -a php${{ matrix.php }}-compat.txt
@@ -478,13 +478,14 @@ jobs:
             vendor/bin/phpcs \
               -d memory_limit=512M \
               --standard=phpcs.xml \
+              --runtime-set testVersion ${{ matrix.php }} \
               --report=full \
               --report-json=phpcs-report.json \
               -q > phpcs-output.txt 2>&1 || true
             
             # Show raw PHPCS output for detailed analysis
             if [ -f "phpcs-output.txt" ]; then
-              echo "=== RAW PHPCS REPORT FOR PHP ${{ matrix.php }} ===" | tee -a php${{ matrix.php }}-compat.txt
+              echo "=== RAW PHPCS REPORT FOR PHP ${{ matrix.php }} (testVersion=${{ matrix.php }}) ===" | tee -a php${{ matrix.php }}-compat.txt
               cat phpcs-output.txt | tee -a php${{ matrix.php }}-compat.txt
               echo "=== END PHPCS REPORT ===" | tee -a php${{ matrix.php }}-compat.txt
               echo "PHPCS analysis completed for PHP ${{ matrix.php }}" | tee -a php${{ matrix.php }}-compat.txt
@@ -494,6 +495,26 @@ jobs:
           else
             echo "PHPCS binary not found for PHP ${{ matrix.php }}" | tee -a php${{ matrix.php }}-compat.txt
           fi
+
+      - name: PHPCS report in job summary (paste-friendly)
+        if: always()
+        run: |
+          {
+            echo "### PHPCS PHPCompatibility (matrix PHP ${{ matrix.php }}, testVersion=${{ matrix.php }})"
+            echo ""
+            if [ -f phpcs-output.txt ] && [ -s phpcs-output.txt ]; then
+              BYTES=$(wc -c < phpcs-output.txt | tr -d ' ')
+              if [ "${BYTES:-0}" -gt 96000 ]; then
+                echo "_Output truncated (~96KB); download artifact **php${{ matrix.php }}-compatibility** → phpcs-output.txt for full log._"
+                echo ""
+                tail -c 96000 phpcs-output.txt
+              else
+                cat phpcs-output.txt
+              fi
+            else
+              echo "_No PHPCS output (empty run or PHPCS missing)._"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
           
       - name: Upload PHP ${{ matrix.php }} Compatibility Report
         if: always()
@@ -573,9 +594,9 @@ jobs:
           fi
           
           # Check for proper text domain usage (plain __() only — not esc_html__, esc_attr__, etc.)
-          TEXT_DOMAIN_ISSUES=$(grep -rPn '(?<![A-Za-z0-9_])__\(' . --include="*.php" --exclude-dir=vendor --exclude-dir=node_modules 2>/dev/null | grep -v "'yatra'" | grep -v '"yatra"' | head -50 || true)
+          TEXT_DOMAIN_ISSUES=$(grep -rPn '(?<![A-Za-z0-9_])__\(' . --include="*.php" --exclude-dir=vendor --exclude-dir=node_modules 2>/dev/null | grep -v "'sikshya'" | grep -v '"sikshya"' | head -50 || true)
           if [ -n "$TEXT_DOMAIN_ISSUES" ]; then
-            ERRORS="${ERRORS}Translation functions possibly missing 'yatra' text domain:\n${TEXT_DOMAIN_ISSUES}\n\n"
+            ERRORS="${ERRORS}Translation functions possibly missing 'sikshya' text domain:\n${TEXT_DOMAIN_ISSUES}\n\n"
           fi
           
           if [ -n "$ERRORS" ]; then
@@ -689,7 +710,7 @@ jobs:
           
       - name: Compile Comprehensive AI Error Report
         run: |
-          echo "## 🚀 Yatra CI Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Sikshya CI Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # Job Status Overview
@@ -728,7 +749,7 @@ jobs:
           # ============================================================
           echo "## 📋 COMPLETE ERROR REPORT — Copy everything below this line to AI" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "I need help fixing the following CI errors in my WordPress plugin called **Yatra** (a travel booking plugin). The plugin targets PHP 7.4+ (CI also runs 8.x), plus TypeScript, React, TailwindCSS, and Vite. Please provide specific code fixes for each error below." >> $GITHUB_STEP_SUMMARY
+          echo "I need help fixing the following CI errors in my WordPress plugin called **Sikshya** (a travel booking plugin). The plugin targets PHP 7.4+ (CI also runs 8.x), plus TypeScript, React, TailwindCSS, and Vite. Please provide specific code fixes for each error below." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           # List all downloaded artifacts for debugging

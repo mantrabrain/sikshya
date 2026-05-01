@@ -18,9 +18,12 @@ if (!defined('ABSPATH')) {
 
 final class SampleDataPackRepository implements RepositoryInterface
 {
-    public function __construct(
-        private ?string $pluginFilePath = null
-    ) {
+    /** @var string|null */
+    private $pluginFilePath;
+
+    public function __construct(?string $pluginFilePath = null)
+    {
+        $this->pluginFilePath = $pluginFilePath;
     }
 
     /**

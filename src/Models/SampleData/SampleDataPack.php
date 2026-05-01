@@ -17,17 +17,34 @@ final class SampleDataPack
 {
     public const SUPPORTED_VERSIONS = [1, 2];
 
+    private int $version;
+
+    private string $label;
+
+    private string $description;
+
+    /** @var list<array<string, mixed>> */
+    private array $courseCategories;
+
+    /** @var list<array<string, mixed>> */
+    private array $courses;
+
     /**
      * @param list<array<string, mixed>> $courseCategories
      * @param list<array<string, mixed>>  $courses
      */
     private function __construct(
-        private int $version,
-        private string $label,
-        private string $description,
-        private array $courseCategories,
-        private array $courses
+        int $version,
+        string $label,
+        string $description,
+        array $courseCategories,
+        array $courses
     ) {
+        $this->version = $version;
+        $this->label = $label;
+        $this->description = $description;
+        $this->courseCategories = $courseCategories;
+        $this->courses = $courses;
     }
 
     public function getVersion(): int

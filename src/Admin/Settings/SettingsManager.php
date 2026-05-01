@@ -140,6 +140,28 @@ class SettingsManager
     }
 
     /**
+     * Registered setting keys for a tab (used by tab save + JSON import whitelist).
+     *
+     * @return string[]
+     */
+    private function collectFieldKeysForTab(string $tab): array
+    {
+        $tab_settings = $this->getTabSettings($tab);
+        $field_names = [];
+        foreach ($tab_settings as $section) {
+            if (isset($section['fields']) && is_array($section['fields'])) {
+                foreach ($section['fields'] as $field) {
+                    if (isset($field['key'])) {
+                        $field_names[] = (string) $field['key'];
+                    }
+                }
+            }
+        }
+
+        return $field_names;
+    }
+
+    /**
      * Get settings for a specific tab
      *
      * @param string $tab
@@ -240,17 +262,7 @@ class SettingsManager
             return false;
         }
 
-        // Extract field names from the settings configuration
-        $field_names = [];
-        foreach ($tab_settings as $section) {
-            if (isset($section['fields']) && is_array($section['fields'])) {
-                foreach ($section['fields'] as $field) {
-                    if (isset($field['key'])) {
-                        $field_names[] = $field['key'];
-                    }
-                }
-            }
-        }
+        $field_names = $this->collectFieldKeysForTab($tab);
 
         // Filter data to only include fields that are in the configuration
         $settings_to_save = [];
@@ -634,31 +646,86 @@ class SettingsManager
     }
 
     /**
-     * Import settings
+     * Import settings from a Tools / REST JSON export.
      *
-     * @param array $data
-     * @param bool $overwrite
-     * @return bool
+     * Only keys that exist on the tab schema are applied (same surface as {@see saveTabSettings}).
+     * Unknown tabs or arbitrary keys are ignored so imports cannot create stray `_sikshya_*` options.
+     *
+     * @param array<string, mixed> $data Tab slug => key => value (same shape as {@see exportAllSettings}).
+     * @param bool                 $overwrite When true, overwrite non-empty values too.
+     * @return bool True when nothing failed; false when every attempted write failed or the payload was unusable.
      */
     public function importSettings(array $data, bool $overwrite = false): bool
     {
+        if ($data === []) {
+            return false;
+        }
+
+        $all_tabs = $this->getAllSettings();
         $success = true;
+        $expected_writes = 0;
+        $applied_writes = 0;
 
         foreach ($data as $tab => $tab_data) {
             if (!is_array($tab_data)) {
                 continue;
             }
-            if ($tab === 'assignments' && isset($tab_data['max_file_size']) && !isset($tab_data['assignment_max_file_size'])) {
+
+            $tab_key = sanitize_key((string) $tab);
+            if ($tab_key === '' || !array_key_exists($tab_key, $all_tabs)) {
+                continue;
+            }
+
+            if ($tab_key === 'assignments' && isset($tab_data['max_file_size']) && !isset($tab_data['assignment_max_file_size'])) {
                 $tab_data['assignment_max_file_size'] = $tab_data['max_file_size'];
                 unset($tab_data['max_file_size']);
             }
+
+            $field_names = $this->collectFieldKeysForTab($tab_key);
+            if ($field_names === []) {
+                continue;
+            }
+
+            $filtered = [];
             foreach ($tab_data as $key => $value) {
+                $key_str = is_string($key) ? sanitize_key($key) : '';
+                if ($key_str === '' || !in_array($key_str, $field_names, true)) {
+                    continue;
+                }
+                $filtered[$key_str] = $value;
+            }
+
+            $to_save = [];
+            foreach ($filtered as $key => $value) {
                 if ($overwrite || $this->getSetting($key) === '') {
-                    if (!$this->saveSetting($key, $value)) {
-                        $success = false;
-                    }
+                    $to_save[$key] = $value;
                 }
             }
+
+            $to_save = $this->stripLockedFieldsOnSave($tab_key, $to_save);
+            $expected_writes += count($to_save);
+
+            $tab_save_ok = true;
+            foreach ($to_save as $key => $value) {
+                if ($this->saveSetting($key, $value)) {
+                    ++$applied_writes;
+                } else {
+                    $tab_save_ok = false;
+                    $success = false;
+                }
+            }
+
+            if ($tab_save_ok && $tab_key === 'general' && $to_save !== []) {
+                $this->syncWordPressMirrorsFromGeneralTab($to_save);
+            }
+
+            if ($tab_save_ok && $tab_key === 'permalinks' && $to_save !== []) {
+                flush_rewrite_rules(false);
+            }
+        }
+
+        if ($expected_writes > 0 && $applied_writes === 0) {
+            return false;
         }
 
         return $success;

@@ -61,6 +61,7 @@ trap 'rm -rf "${STAGE_PARENT}"; rm -f "${EXCLUDE_FILE}"' EXIT
 
 cat >"${EXCLUDE_FILE}" <<'EOF'
 build/
+builder/
 .wordpress-org/
 .git/
 .github/

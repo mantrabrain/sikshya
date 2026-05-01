@@ -21,12 +21,15 @@ final class LearnPageModel
     /** @var list<RecommendedCourseModel> */
     private array $recommended = [];
 
+    /** @var array<string, mixed> */
+    private array $vm;
+
     /**
      * @param array<string, mixed> $vm
      */
-    private function __construct(
-        private array $vm
-    ) {
+    private function __construct(array $vm)
+    {
+        $this->vm = $vm;
         foreach ((array) ($this->vm['hub_courses'] ?? []) as $row) {
             if (is_array($row)) {
                 $this->hubRows[] = HubCourseRowModel::fromServiceRow($row);

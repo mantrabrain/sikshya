@@ -13,10 +13,14 @@ if (!defined('ABSPATH')) {
 
 final class LessonShellRestModel
 {
-    public function __construct(
-        private string $url,
-        private string $nonce
-    ) {
+    private string $url;
+
+    private string $nonce;
+
+    public function __construct(string $url, string $nonce)
+    {
+        $this->url = $url;
+        $this->nonce = $nonce;
     }
 
     /**

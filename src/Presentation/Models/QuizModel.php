@@ -15,16 +15,32 @@ if (!defined('ABSPATH')) {
 
 final class QuizModel
 {
+    private int $id;
+
+    private string $title;
+
+    /** @var list<QuestionModel> */
+    private array $questions;
+
+    private float $passingScore;
+
+    private int $timeLimitMinutes;
+
     /**
      * @param list<QuestionModel> $questions
      */
     public function __construct(
-        private int $id,
-        private string $title,
-        private array $questions = [],
-        private float $passingScore = 0.0,
-        private int $timeLimitMinutes = 0
+        int $id,
+        string $title,
+        array $questions = [],
+        float $passingScore = 0.0,
+        int $timeLimitMinutes = 0
     ) {
+        $this->id = $id;
+        $this->title = $title;
+        $this->questions = $questions;
+        $this->passingScore = $passingScore;
+        $this->timeLimitMinutes = $timeLimitMinutes;
     }
 
     public function getId(): int

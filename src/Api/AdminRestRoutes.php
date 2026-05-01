@@ -1898,6 +1898,7 @@ class AdminRestRoutes
             $out[] = [
                 'post_type' => $post->post_type,
                 'id' => $post->ID,
+                'post_parent' => (int) $post->post_parent,
                 'title' => $post->post_title,
                 'slug' => $post->post_name,
                 'status' => $post->post_status,

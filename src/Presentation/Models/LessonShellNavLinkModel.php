@@ -13,10 +13,14 @@ if (!defined('ABSPATH')) {
 
 final class LessonShellNavLinkModel
 {
-    public function __construct(
-        private string $title,
-        private string $url
-    ) {
+    private string $title;
+
+    private string $url;
+
+    public function __construct(string $title, string $url)
+    {
+        $this->title = $title;
+        $this->url = $url;
     }
 
     public function getTitle(): string

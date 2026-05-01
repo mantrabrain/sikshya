@@ -149,6 +149,29 @@ final class MigrationState
     }
 
     /**
+     * True if any migration step (other than roles/capabilities bootstrap) recorded work.
+     *
+     * Used to avoid showing "migration completed" for false-positive runs that only executed
+     * the defensive roles step (e.g. table-name overlap on fresh installs before detector fix).
+     */
+    public function hadRealMigrationWorkBeyondRoles(): bool
+    {
+        foreach ($this->steps() as $stepId => $payload) {
+            if ($stepId === 'roles_and_capabilities') {
+                continue;
+            }
+            $counts = isset($payload['counts']) && is_array($payload['counts']) ? $payload['counts'] : [];
+            foreach ($counts as $n) {
+                if ((int) $n > 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array

@@ -12,13 +12,18 @@ if (!defined('ABSPATH')) {
 
 final class CoursesGridPageModel
 {
+    private \WP_Query $coursesQuery;
+
+    /** @var array<int, \WP_Term> */
+    private array $filterCategories;
+
     /**
      * @param array<int, \WP_Term> $filterCategories
      */
-    public function __construct(
-        private \WP_Query $coursesQuery,
-        private array $filterCategories
-    ) {
+    public function __construct(\WP_Query $coursesQuery, array $filterCategories)
+    {
+        $this->coursesQuery = $coursesQuery;
+        $this->filterCategories = $filterCategories;
     }
 
     /**

@@ -15,10 +15,14 @@ if (!defined('ABSPATH')) {
 
 final class CourseModel
 {
-    private function __construct(
-        private int $id,
-        private \WP_Post $post
-    ) {
+    private int $id;
+
+    private \WP_Post $post;
+
+    private function __construct(int $id, \WP_Post $post)
+    {
+        $this->id = $id;
+        $this->post = $post;
     }
 
     public static function fromPost(\WP_Post $post): self

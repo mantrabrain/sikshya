@@ -21,12 +21,24 @@ if (!defined('ABSPATH')) {
 
 class CurriculumService
 {
+    private Plugin $plugin;
+
+    private PostMetaRepository $meta;
+
+    private CourseRepository $courses;
+
+    private ContentPostRepository $content_posts;
+
     public function __construct(
-        private Plugin $plugin,
-        private PostMetaRepository $meta,
-        private CourseRepository $courses,
-        private ContentPostRepository $content_posts
+        Plugin $plugin,
+        PostMetaRepository $meta,
+        CourseRepository $courses,
+        ContentPostRepository $content_posts
     ) {
+        $this->plugin = $plugin;
+        $this->meta = $meta;
+        $this->courses = $courses;
+        $this->content_posts = $content_posts;
     }
 
     private function curriculumActions(): ?CourseCurriculumActions

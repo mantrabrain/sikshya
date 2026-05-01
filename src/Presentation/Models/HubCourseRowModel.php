@@ -15,14 +15,32 @@ if (!defined('ABSPATH')) {
 
 final class HubCourseRowModel
 {
+    private ?\WP_Post $course;
+
+    private int $progress;
+
+    private string $continueUrl;
+
+    private string $courseUrl;
+
+    private string $thumb;
+
+    private bool $enrolled;
+
     private function __construct(
-        private ?\WP_Post $course,
-        private int $progress,
-        private string $continueUrl,
-        private string $courseUrl,
-        private string $thumb,
-        private bool $enrolled
+        ?\WP_Post $course,
+        int $progress,
+        string $continueUrl,
+        string $courseUrl,
+        string $thumb,
+        bool $enrolled
     ) {
+        $this->course = $course;
+        $this->progress = $progress;
+        $this->continueUrl = $continueUrl;
+        $this->courseUrl = $courseUrl;
+        $this->thumb = $thumb;
+        $this->enrolled = $enrolled;
     }
 
     /**

@@ -73,11 +73,17 @@ final class CheckoutService
         return round(((float) $minor) / max(1, $factor), 2);
     }
 
-    public function __construct(
-        private Plugin $plugin,
-        private OrderRepository $orders,
-        private CouponRepository $coupons
-    ) {
+    private Plugin $plugin;
+
+    private OrderRepository $orders;
+
+    private CouponRepository $coupons;
+
+    public function __construct(Plugin $plugin, OrderRepository $orders, CouponRepository $coupons)
+    {
+        $this->plugin = $plugin;
+        $this->orders = $orders;
+        $this->coupons = $coupons;
     }
 
     private function settings(): SettingsManager

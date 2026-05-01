@@ -13,13 +13,28 @@ if (!defined('ABSPATH')) {
 
 final class LearnPageUrlsModel
 {
+    private string $account;
+
+    private string $course;
+
+    private string $learn;
+
+    private string $coursesArchive;
+
+    private string $login;
+
     public function __construct(
-        private string $account = '',
-        private string $course = '',
-        private string $learn = '',
-        private string $coursesArchive = '',
-        private string $login = ''
+        string $account = '',
+        string $course = '',
+        string $learn = '',
+        string $coursesArchive = '',
+        string $login = ''
     ) {
+        $this->account = $account;
+        $this->course = $course;
+        $this->learn = $learn;
+        $this->coursesArchive = $coursesArchive;
+        $this->login = $login;
     }
 
     /**

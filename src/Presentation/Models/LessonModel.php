@@ -16,14 +16,32 @@ if (!defined('ABSPATH')) {
 
 final class LessonModel
 {
+    private int $id;
+
+    private string $title;
+
+    private string $contentHtml;
+
+    private string $type;
+
+    private string $videoUrl;
+
+    private int $courseId;
+
     public function __construct(
-        private int $id,
-        private string $title,
-        private string $contentHtml = '',
-        private string $type = 'text',
-        private string $videoUrl = '',
-        private int $courseId = 0
+        int $id,
+        string $title,
+        string $contentHtml = '',
+        string $type = 'text',
+        string $videoUrl = '',
+        int $courseId = 0
     ) {
+        $this->id = $id;
+        $this->title = $title;
+        $this->contentHtml = $contentHtml;
+        $this->type = $type;
+        $this->videoUrl = $videoUrl;
+        $this->courseId = $courseId;
     }
 
     public function getId(): int

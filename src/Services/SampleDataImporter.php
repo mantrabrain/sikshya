@@ -41,9 +41,6 @@ class SampleDataImporter
     }
 
     /**
-     * @return array<string, mixed>|null
-     */
-    /**
      * @return array<string, mixed>|null Normalized service payload (version, categories, courses, label, description).
      */
     public static function loadJsonFile(string $absolutePath): ?array

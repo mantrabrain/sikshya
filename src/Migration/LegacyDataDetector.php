@@ -149,11 +149,13 @@ final class LegacyDataDetector
             }
         }
 
-        // Structural signals only: legacy CPTs/taxonomies/tables. Options above are
-        // informational (shared names with current Sikshya; see class docblock).
+        // Structural signals for scheduling migration: legacy CPTs and/or legacy taxonomies only.
+        // Table suffixes match tables the *current* Sikshya also creates on activation, so their
+        // mere presence must NOT set has_legacy_data — otherwise fresh installs run a no-op
+        // migration and show "Legacy data migration completed successfully" forever.
+        // Table list above remains on the Tools fingerprint for support/debugging.
         $found['has_legacy_data'] = !empty($found['post_types'])
-            || !empty($found['taxonomies'])
-            || !empty($found['tables']);
+            || !empty($found['taxonomies']);
 
         return $found;
     }

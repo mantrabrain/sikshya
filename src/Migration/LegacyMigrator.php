@@ -61,7 +61,7 @@ final class LegacyMigrator
      * during defensive detection so we don't run a fingerprint scan on every
      * single admin page load forever.
      */
-    private const DETECTION_TRANSIENT = 'sikshya_legacy_migration_detected';
+    private const DETECTION_TRANSIENT = 'sikshya_legacy_migration_detected_v2';
 
     /** TTL in seconds for the detection transient (1 hour). */
     private const DETECTION_TRANSIENT_TTL = 3600;

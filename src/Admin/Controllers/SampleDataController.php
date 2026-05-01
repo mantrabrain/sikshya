@@ -21,9 +21,11 @@ if (!defined('ABSPATH')) {
 
 final class SampleDataController
 {
-    public function __construct(
-        private Plugin $plugin
-    ) {
+    private Plugin $plugin;
+
+    public function __construct(Plugin $plugin)
+    {
+        $this->plugin = $plugin;
     }
 
     /**

@@ -15,11 +15,17 @@ if (!defined('ABSPATH')) {
 
 final class RecommendedCourseModel
 {
-    private function __construct(
-        private \WP_Post $course,
-        private string $courseUrl,
-        private string $thumb
-    ) {
+    private \WP_Post $course;
+
+    private string $courseUrl;
+
+    private string $thumb;
+
+    private function __construct(\WP_Post $course, string $courseUrl, string $thumb)
+    {
+        $this->course = $course;
+        $this->courseUrl = $courseUrl;
+        $this->thumb = $thumb;
     }
 
     /**

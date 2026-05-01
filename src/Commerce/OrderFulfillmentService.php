@@ -14,11 +14,20 @@ use Sikshya\Services\Settings;
  */
 final class OrderFulfillmentService
 {
+    private OrderRepository $orders;
+
+    private PaymentRepository $payments;
+
+    private CourseService $courseService;
+
     public function __construct(
-        private OrderRepository $orders,
-        private PaymentRepository $payments,
-        private CourseService $courseService
+        OrderRepository $orders,
+        PaymentRepository $payments,
+        CourseService $courseService
     ) {
+        $this->orders = $orders;
+        $this->payments = $payments;
+        $this->courseService = $courseService;
     }
 
     /**

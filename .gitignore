@@ -1,5 +1,14 @@
 /node_modules/
 .DS_Store
 
+# Release artifacts (bash build.sh).
+/build/
+
+# Optional local builder / scratch output (never commit).
+/builder/
+
+# Local one-shot compatibility reports (composer run compat:report).
+/compat-report/
+
 # Vite may emit this into outDir; production build removes it (see scripts/rm-admin-spa-html.mjs).
 assets/admin/react/index.html

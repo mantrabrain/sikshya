@@ -13,20 +13,46 @@ if (!defined('ABSPATH')) {
 
 final class AccountPageModel
 {
+    /** @var array<string, mixed> */
+    private array $legacy;
+
+    private AccountUrlsModel $urls;
+
+    private string $view;
+
+    /** @var array{title:string,subtitle:string} */
+    private array $headline;
+
+    private string $pageTitle;
+
+    private string $greeting;
+
+    private string $todayLine;
+
+    private string $initial;
+
     /**
      * @param array<string, mixed> $legacy
      * @param array{title:string,subtitle:string} $headline
      */
     private function __construct(
-        private array $legacy,
-        private AccountUrlsModel $urls,
-        private string $view,
-        private array $headline,
-        private string $pageTitle,
-        private string $greeting,
-        private string $todayLine,
-        private string $initial
+        array $legacy,
+        AccountUrlsModel $urls,
+        string $view,
+        array $headline,
+        string $pageTitle,
+        string $greeting,
+        string $todayLine,
+        string $initial
     ) {
+        $this->legacy = $legacy;
+        $this->urls = $urls;
+        $this->view = $view;
+        $this->headline = $headline;
+        $this->pageTitle = $pageTitle;
+        $this->greeting = $greeting;
+        $this->todayLine = $todayLine;
+        $this->initial = $initial;
     }
 
     /**

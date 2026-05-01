@@ -27,6 +27,9 @@ final class LegacyMigrationAdminNotice
     public const PAGE_SLUG = 'sikshya-legacy-migration';
     private const DISMISSED_OPTION = 'sikshya_legacy_migration_notice_dismissed';
 
+    /** One-time: clears mistaken "completed" banner after table-only false-positive migrations. */
+    private const SPUROUS_NOTICE_FLAG = 'sikshya_legacy_spurious_completion_notice_cleared';
+
     private static bool $registered = false;
 
     public static function register(): void
@@ -37,6 +40,7 @@ final class LegacyMigrationAdminNotice
         self::$registered = true;
 
         add_action('admin_menu', [self::class, 'registerToolsPage']);
+        add_action('admin_init', [self::class, 'maybeAutoDismissSpuriousCompletionNotice'], 5);
         add_action('admin_notices', [self::class, 'renderNotice']);
         add_action('admin_post_sikshya_legacy_migration_run', [self::class, 'handleRun']);
         add_action('admin_post_sikshya_legacy_migration_dry_run', [self::class, 'handleDryRun']);
@@ -53,6 +57,36 @@ final class LegacyMigrationAdminNotice
             self::PAGE_SLUG,
             [self::class, 'renderToolsPage']
         );
+    }
+
+    /**
+     * If migration is "finished" but no real legacy steps ran (only roles bootstrap), treat as a
+     * no-op and dismiss the success notice once — fixes fresh installs that matched legacy tables only.
+     */
+    public static function maybeAutoDismissSpuriousCompletionNotice(): void
+    {
+        if (get_option(self::SPUROUS_NOTICE_FLAG, '') === '1') {
+            return;
+        }
+
+        $state = LegacyMigrator::status();
+        if (!$state->isFinished() || LegacyMigrator::isPending()) {
+            update_option(self::SPUROUS_NOTICE_FLAG, '1', false);
+            return;
+        }
+
+        if (get_option(self::DISMISSED_OPTION, '') === '1') {
+            update_option(self::SPUROUS_NOTICE_FLAG, '1', false);
+            return;
+        }
+
+        if ($state->hadRealMigrationWorkBeyondRoles()) {
+            update_option(self::SPUROUS_NOTICE_FLAG, '1', false);
+            return;
+        }
+
+        update_option(self::DISMISSED_OPTION, '1', false);
+        update_option(self::SPUROUS_NOTICE_FLAG, '1', false);
     }
 
     public static function renderNotice(): void
@@ -215,6 +249,7 @@ final class LegacyMigrationAdminNotice
         self::guardAction();
         LegacyMigrator::reset();
         delete_option(self::DISMISSED_OPTION);
+        delete_option(self::SPUROUS_NOTICE_FLAG);
         self::redirectBack('migration_reset', 'success');
     }
 
