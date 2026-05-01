@@ -979,6 +979,7 @@ class ComposerStaticInit39a8fa1a73a1db2c426ff4ed0eb6619d
         'Sikshya\\Frontend\\Site\\CartStorage' => __DIR__ . '/../..' . '/src/Frontend/Site/CartStorage.php',
         'Sikshya\\Frontend\\Site\\CartTemplateData' => __DIR__ . '/../..' . '/src/Frontend/Site/CartTemplateData.php',
         'Sikshya\\Frontend\\Site\\CertificatesAccountView' => __DIR__ . '/../..' . '/src/Frontend/Site/CertificatesAccountView.php',
+        'Sikshya\\Frontend\\Site\\CheckoutDynamicFieldsView' => __DIR__ . '/../..' . '/src/Frontend/Site/CheckoutDynamicFieldsView.php',
         'Sikshya\\Frontend\\Site\\CheckoutTemplateData' => __DIR__ . '/../..' . '/src/Frontend/Site/CheckoutTemplateData.php',
         'Sikshya\\Frontend\\Site\\CourseRatingPrompt' => __DIR__ . '/../..' . '/src/Frontend/Site/CourseRatingPrompt.php',
         'Sikshya\\Frontend\\Site\\CoursesGridTemplateData' => __DIR__ . '/../..' . '/src/Frontend/Site/CoursesGridTemplateData.php',

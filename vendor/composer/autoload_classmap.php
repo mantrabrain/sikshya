@@ -820,6 +820,7 @@ return array(
     'Sikshya\\Frontend\\Site\\CartStorage' => $baseDir . '/src/Frontend/Site/CartStorage.php',
     'Sikshya\\Frontend\\Site\\CartTemplateData' => $baseDir . '/src/Frontend/Site/CartTemplateData.php',
     'Sikshya\\Frontend\\Site\\CertificatesAccountView' => $baseDir . '/src/Frontend/Site/CertificatesAccountView.php',
+    'Sikshya\\Frontend\\Site\\CheckoutDynamicFieldsView' => $baseDir . '/src/Frontend/Site/CheckoutDynamicFieldsView.php',
     'Sikshya\\Frontend\\Site\\CheckoutTemplateData' => $baseDir . '/src/Frontend/Site/CheckoutTemplateData.php',
     'Sikshya\\Frontend\\Site\\CourseRatingPrompt' => $baseDir . '/src/Frontend/Site/CourseRatingPrompt.php',
     'Sikshya\\Frontend\\Site\\CoursesGridTemplateData' => $baseDir . '/src/Frontend/Site/CoursesGridTemplateData.php',
