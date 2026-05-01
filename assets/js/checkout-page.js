@@ -122,11 +122,70 @@
     }
   }
 
+  function dfBindDynamicFields(host) {
+    if (!host) return;
+    try {
+      host.querySelectorAll('[data-df-input]').forEach(function (el) {
+        var id = el.getAttribute('data-df-input') || '';
+        var isCheckbox = el.type === 'checkbox';
+        var isRadio = el.type === 'radio';
+        var handler = function () {
+          if (isCheckbox) {
+            dfSetVal(id, el.checked ? '1' : '0');
+          } else if (isRadio) {
+            if (el.checked) dfSetVal(id, el.value || '');
+          } else {
+            dfSetVal(id, el.value || '');
+          }
+          dfApplyVisibility(host);
+        };
+        el.addEventListener('change', handler);
+        el.addEventListener('input', handler);
+      });
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function dfSyncValuesFromHost(host) {
+    if (!host) return;
+    try {
+      host.querySelectorAll('[data-df-input]').forEach(function (el) {
+        var id = el.getAttribute('data-df-input') || '';
+        if (!id) return;
+        if (el.type === 'radio') {
+          if (!el.checked) return;
+          dfSetVal(id, el.value || '');
+          return;
+        }
+        if (el.type === 'checkbox') {
+          dfSetVal(id, el.checked ? '1' : '0');
+          return;
+        }
+        dfSetVal(id, el.value || '');
+      });
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
   function dfRenderInto(host) {
     if (!host) return;
     if (!dfEnabled || !dfSchema.length) {
       host.innerHTML = '';
       return;
+    }
+
+    // Dynamic fields HTML is generated server-side (PHP); bind events only.
+    try {
+      if (host.querySelector('.sikshya-checkout-df')) {
+        dfBindDynamicFields(host);
+        dfSyncValuesFromHost(host);
+        dfApplyVisibility(host);
+        return;
+      }
+    } catch (e0) {
+      /* fall through to client render */
     }
 
     var html = '';
@@ -274,29 +333,7 @@
 
     host.innerHTML = html;
 
-    // Bind input listeners to keep dfValues updated and re-apply visibility.
-    try {
-      host.querySelectorAll('[data-df-input]').forEach(function (el) {
-        var id = el.getAttribute('data-df-input') || '';
-        var isCheckbox = el.type === 'checkbox';
-        var isRadio = el.type === 'radio';
-        var handler = function () {
-          if (isCheckbox) {
-            dfSetVal(id, el.checked ? '1' : '0');
-          } else if (isRadio) {
-            if (el.checked) dfSetVal(id, el.value || '');
-          } else {
-            dfSetVal(id, el.value || '');
-          }
-          dfApplyVisibility(host);
-        };
-        el.addEventListener('change', handler);
-        el.addEventListener('input', handler);
-      });
-    } catch (e) {
-      /* ignore */
-    }
-
+    dfBindDynamicFields(host);
     dfApplyVisibility(host);
   }
 

@@ -322,7 +322,7 @@ Email the WordPress Plugins Team at plugins@wordpress.org with details (do not p
 
 == Changelog ==
 
-= 1.0.0 =
+= 1.0.0 - 2026-04-30 =
 * Initial public release.
 * Core course, lesson, quiz, and question model with builder-oriented admin UI.
 * Student and instructor roles with capability-safe management surfaces.
@@ -331,8 +331,9 @@ Email the WordPress Plugins Team at plugins@wordpress.org with details (do not p
 * REST-aligned services where documented for integrations.
 * Default certificate presets (Regalia & Vertex) ship without QR blocks; QR-style verification remains documented as a Pro-oriented enhancement.
 * Requires PHP 7.4+ and WordPress 6.0+; tested on current stable WordPress releases.
+* Checkout (with Sikshya Pro Dynamic Checkout Fields): optional server-rendered dynamic field markup—JavaScript attaches listeners and visibility without rebuilding the form in the browser; includes `CheckoutDynamicFieldsView` and refactored checkout helpers (`dfBindDynamicFields`, `dfSyncValuesFromHost`).
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-First stable release. Back up your site before production rollout; confirm permalinks, required pages, and payment keys after activation.
+= 1.0.0 - 2026-04-30 =
+First stable release. Back up your site before production rollout; confirm permalinks, required pages, and payment keys after activation. Clear page caches if checkout forms are cached at the edge.
