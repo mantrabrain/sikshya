@@ -8,6 +8,14 @@ body.sikshya-setup-wizard-body {
   background: rgb(248 250 252) !important; /* slate-50 */
 }
 
+/* Wizard shares `sikshya-react-shell` (react-shell.css sets overflow:hidden on body).
+   Tall steps (e.g. Finish) must scroll so footer actions stay reachable. */
+body.sikshya-setup-wizard-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 body.sikshya-setup-wizard-body #wpwrap,
 body.sikshya-setup-wizard-body #wpcontent,
 body.sikshya-setup-wizard-body #wpbody,

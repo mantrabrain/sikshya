@@ -41,7 +41,11 @@ final class LegacyDataDetector
     ];
 
     /**
-     * `wp_options` keys whose presence is treated as a positive fingerprint.
+     * `wp_options` keys listed for the Tools migration screen only.
+     *
+     * These overlap with the modern Sikshya rewrite (same option names), so they
+     * must NOT alone trigger {@see hasLegacyData()} — otherwise fresh installs
+     * fire a no-op migration and show the “migration completed” admin notice.
      *
      * @var string[]
      */
@@ -145,8 +149,9 @@ final class LegacyDataDetector
             }
         }
 
-        $found['has_legacy_data'] = !empty($found['options'])
-            || !empty($found['post_types'])
+        // Structural signals only: legacy CPTs/taxonomies/tables. Options above are
+        // informational (shared names with current Sikshya; see class docblock).
+        $found['has_legacy_data'] = !empty($found['post_types'])
             || !empty($found['taxonomies'])
             || !empty($found['tables']);
 
