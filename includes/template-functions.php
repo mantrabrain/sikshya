@@ -1130,7 +1130,7 @@ function sikshya_parse_price_meta($raw): ?float
     }
 
     // Remove thousand separators; keep last decimal separator when plausible.
-    if (str_contains($clean, ',') && str_contains($clean, '.')) {
+    if (strpos($clean, ',') !== false && strpos($clean, '.') !== false) {
         $clean = str_replace(',', '', $clean);
     } else {
         if (substr_count($clean, ',') === 1 && preg_match('/,\d{1,2}$/', $clean)) {

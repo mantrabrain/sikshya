@@ -1,30 +1,20 @@
-# Yatra ships a main `ci.yml` (PHP + TS quality). Sikshya free uses a lighter gate here;
-# translations are enforced separately in `i18n.yml` (Yatra only documents `npm run makepot`).
-
 name: Sikshya CI
 
 on:
   push:
-    branches: [ main, master, development, develop ]
+    branches: [main, master, development, develop]
   pull_request:
-    branches: [ main, master, development, develop ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: sikshya-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main, master, development, develop]
 
 jobs:
-  php-syntax:
-    name: PHP syntax (${{ matrix.php }})
+  php:
+    name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ["7.4", "8.2"]
+        php: ['7.4', '8.0', '8.1', '8.2']
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,30 +22,45 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "${{ matrix.php }}"
+          php-version: ${{ matrix.php }}
+          extensions: dom, mbstring, xml, ctype, iconv, json
           coverage: none
 
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-sikshya-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-sikshya-
-
-      - name: Validate Composer
-        run: composer validate --strict
-
-      - name: Install Composer dependencies
+      - name: Composer install
         run: composer install --prefer-dist --no-progress --optimize-autoloader
 
-      - name: PHP lint (syntax only)
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: PHP syntax check (exclude vendor)
         run: |
-          set -euo pipefail
-          find . -type f -name '*.php' \
-            ! -path './vendor/*' ! -path './node_modules/*' \
-            -print0 | xargs -0 -n1 php -l >/dev/null
+          set -e
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find . -type f -name '*.php' ! -path './vendor/*' ! -path './node_modules/*' -print0)
+
+      - name: Composer audit
+        run: composer audit || true
+
+  build-admin:
+    name: Admin assets build
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: development
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Production build (Vite)
+        run: npm run build

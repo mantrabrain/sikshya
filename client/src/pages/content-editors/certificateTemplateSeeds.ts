@@ -181,11 +181,6 @@ export const REGALIA_HERITAGE_LAYOUT: CertLayoutFile = {
       },
     },
     {
-      id: 'ht_qr',
-      type: 'qr',
-      props: { x: 73, y: 68, w: 16, h: 16, z: 4 },
-    },
-    {
       id: 'ht_org',
       type: 'merge_field',
       props: {
@@ -409,11 +404,6 @@ export const VERTEX_MODERN_LAYOUT: CertLayoutFile = {
         fontFamily: 'mono',
         lineHeight: 1.25,
       },
-    },
-    {
-      id: 'vx_qr',
-      type: 'qr',
-      props: { x: 71, y: 72, w: 16, h: 16, z: 4 },
     },
   ],
 };

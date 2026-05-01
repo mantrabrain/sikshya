@@ -25,7 +25,7 @@ final class CertificateTemplateDefaults
      */
     public const TEMPLATE_ART_VERSION_OPTION = 'sikshya_certificate_template_art_version';
 
-    public const CURRENT_TEMPLATE_ART_VERSION = 3;
+    public const CURRENT_TEMPLATE_ART_VERSION = 4;
 
     /**
      * Mirrors {@see CERT_LAYOUT_VERSION} in the React certificate builder.
@@ -78,6 +78,19 @@ final class CertificateTemplateDefaults
             self::overwriteTemplatePost($modern_id, $vertex);
         } elseif ($vertex_existing === 0) {
             self::insertTemplatePost($vertex);
+        }
+
+        // Re-apply current definitions to the protected default presets when art bumps
+        // (e.g. layout tweaks) without creating duplicate posts.
+        foreach ($defs as $def) {
+            $pid = self::findPublishedIdByDefaultKey((string) $def['key']);
+            if ($pid <= 0) {
+                continue;
+            }
+            if (get_post_meta($pid, '_sikshya_certificate_default', true) !== '1') {
+                continue;
+            }
+            self::overwriteTemplatePost($pid, $def);
         }
 
         // Remove any extra legacy duplicates (rare half-seeded installs).
@@ -241,9 +254,6 @@ final class CertificateTemplateDefaults
             . self::cb(29, 70, 42, 6, 2, 'merge_field', 'certificate_number')
             . self::mergeInner('certificate_number', 'center', 11, '#57534e', '600', 'sans', 1.3, 0.04)
             . '</div>'
-            . self::cb(73, 68, 16, 16, 4, 'qr', '')
-            . self::qrInner()
-            . '</div>'
             . self::cb(12, 80, 76, 4, 1, 'merge_field', 'site_name')
             . self::mergeInner('site_name', 'center', 12, '#92400e', '700', 'sans', 1.2, 0.04)
             . '</div>'
@@ -311,9 +321,6 @@ final class CertificateTemplateDefaults
             . '</div>'
             . self::cb(44, 74, 30, 4, 2, 'merge_field', 'verification_code')
             . self::mergeInner('verification_code', 'center', 11, '#64748b', '500', 'mono', 1.25, 0)
-            . '</div>'
-            . self::cb(71, 72, 16, 16, 4, 'qr', '')
-            . self::qrInner()
             . '</div>'
             . '</div>';
 
@@ -389,11 +396,6 @@ final class CertificateTemplateDefaults
 
         return '<div style="display:flex;align-items:center;height:100%;width:100%;"><hr style="border:none;border-top:'
             . $t . 'px solid ' . $hex . ';margin:0;width:100%;" /></div>';
-    }
-
-    private static function qrInner(): string
-    {
-        return '<div class="sikshya-cert-qr" style="display:flex;align-items:center;justify-content:center;height:100%;width:100%;">{{qr_image}}</div>';
     }
 
     private static function fontStack(string $id): string
@@ -503,7 +505,6 @@ final class CertificateTemplateDefaults
             ['id' => 'ht_ins', 'type' => 'merge_field', 'props' => ['x' => 53, 'y' => 54, 'w' => 35, 'h' => 5, 'z' => 2, 'field' => 'instructor_name', 'align' => 'right', 'fontSize' => 14, 'color' => '#44403c', 'fontWeight' => '600', 'fontFamily' => 'sans', 'lineHeight' => 1.2]],
             ['id' => 'ht_code', 'type' => 'merge_field', 'props' => ['x' => 12, 'y' => 70, 'w' => 42, 'h' => 6, 'z' => 2, 'field' => 'verification_code', 'align' => 'left', 'fontSize' => 11, 'color' => '#57534e', 'fontWeight' => '500', 'fontFamily' => 'mono', 'lineHeight' => 1.3]],
             ['id' => 'ht_serial', 'type' => 'merge_field', 'props' => ['x' => 29, 'y' => 70, 'w' => 42, 'h' => 6, 'z' => 2, 'field' => 'certificate_number', 'align' => 'center', 'fontSize' => 11, 'color' => '#57534e', 'fontWeight' => '600', 'fontFamily' => 'sans', 'lineHeight' => 1.3, 'letterSpacing' => 0.04]],
-            ['id' => 'ht_qr', 'type' => 'qr', 'props' => ['x' => 73, 'y' => 68, 'w' => 16, 'h' => 16, 'z' => 4]],
             ['id' => 'ht_org', 'type' => 'merge_field', 'props' => ['x' => 12, 'y' => 80, 'w' => 76, 'h' => 4, 'z' => 1, 'field' => 'site_name', 'align' => 'center', 'fontSize' => 12, 'color' => '#92400e', 'fontWeight' => '700', 'fontFamily' => 'sans', 'lineHeight' => 1.2, 'letterSpacing' => 0.04]],
         ];
 
@@ -525,7 +526,6 @@ final class CertificateTemplateDefaults
             ['id' => 'vx_course', 'type' => 'merge_field', 'props' => ['x' => 22, 'y' => 60.5, 'w' => 72, 'h' => 9, 'z' => 5, 'field' => 'course_name', 'align' => 'left', 'fontSize' => 26, 'color' => '#0d9488', 'fontWeight' => '700', 'fontFamily' => 'sans', 'lineHeight' => 1.12, 'letterSpacing' => -0.02]],
             ['id' => 'vx_ins', 'type' => 'merge_field', 'props' => ['x' => 22, 'y' => 74, 'w' => 30, 'h' => 4, 'z' => 2, 'field' => 'instructor_name', 'align' => 'left', 'fontSize' => 12, 'color' => '#475569', 'fontWeight' => '600', 'fontFamily' => 'sans', 'lineHeight' => 1.25]],
             ['id' => 'vx_cod', 'type' => 'merge_field', 'props' => ['x' => 44, 'y' => 74, 'w' => 30, 'h' => 4, 'z' => 2, 'field' => 'verification_code', 'align' => 'center', 'fontSize' => 11, 'color' => '#64748b', 'fontWeight' => '500', 'fontFamily' => 'mono', 'lineHeight' => 1.25]],
-            ['id' => 'vx_qr', 'type' => 'qr', 'props' => ['x' => 71, 'y' => 72, 'w' => 16, 'h' => 16, 'z' => 4]],
         ];
 
         return wp_json_encode(['version' => self::LAYOUT_VERSION, 'blocks' => $blocks], JSON_UNESCAPED_UNICODE);

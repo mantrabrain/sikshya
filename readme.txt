@@ -305,7 +305,7 @@ Use [Contact support](https://mantrabrain.com/contact/) for account or technical
 
 = How do I report a security vulnerability? =
 
-Please follow the responsible disclosure process published on the vendor site (do not post exploit details in public reviews or forums).
+Email the WordPress Plugins Team at plugins@wordpress.org with details (do not post exploit steps in public reviews). You may also use the vendor contact page on the product site for coordinated disclosure.
 
 = How does Sikshya relate to Sikshya Pro? =
 
@@ -314,7 +314,7 @@ Please follow the responsible disclosure process published on the vendor site (d
 == Screenshots ==
 
 1. Sikshya admin UI — fast navigation between courses, learners, and commerce tools.
-2. Course Lising admin UI.
+2. Course listing admin UI.
 3. Course Builder Page
 4. Settings page
 5. Course Listing
@@ -329,6 +329,8 @@ Please follow the responsible disclosure process published on the vendor site (d
 * Baseline commerce: Stripe/PayPal-oriented checkout, coupons, orders.
 * Learner templates, account views, and progress-oriented flows.
 * REST-aligned services where documented for integrations.
+* Default certificate presets (Regalia & Vertex) ship without QR blocks; QR-style verification remains documented as a Pro-oriented enhancement.
+* Requires PHP 7.4+ and WordPress 6.0+; tested on current stable WordPress releases.
 
 == Upgrade Notice ==
 

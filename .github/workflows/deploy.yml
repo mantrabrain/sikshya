@@ -1,59 +1,25 @@
 name: Deploy to WordPress.org
-
-# Mirrors the Yatra pattern: build production assets/zip the same way as `build.sh`,
-# deploy to WordPress.org SVN, then attach the built zip to the GitHub Release.
-
 on:
   release:
     types: [published]
-
-permissions:
-  contents: write
-
 jobs:
-  deploy:
-    name: New release (SVN + GitHub assets)
+  tag:
+    name: Deploy to WordPress.org
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Install system packages
-        run: sudo apt-get update && sudo apt-get install -y subversion rsync zip
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "7.4"
-          coverage: none
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install Composer dependencies (production)
-        run: composer install --no-dev --optimize-autoloader --no-interaction
-
-      - name: Build admin UI
-        run: npm ci && npm run build
-
-      - name: Create distributable zip (same as local ./build.sh)
-        run: bash ./build.sh
-
-      - name: WordPress.org plugin deploy
+      - name: WordPress Plugin Deploy
         id: deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
-          # We already build `build/sikshya-*.zip` with build.sh; avoid a second, divergent zip.
-          generate-zip: false
+          generate-zip: true
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-
-      - name: Upload release zip to GitHub Release
+      - name: Upload Released Assets
         uses: softprops/action-gh-release@v1
-        with:
-          files: build/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ${{github.workspace}}/${{ github.event.repository.name }}.zip

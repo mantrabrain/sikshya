@@ -932,7 +932,7 @@ final class CheckoutService
         $minor = self::toMinorUnits($amount, $currency);
 
         $existing = isset($order->gateway_intent_id) ? (string) $order->gateway_intent_id : '';
-        if (is_string($existing) && str_starts_with($existing, 'pi_')) {
+        if (is_string($existing) && strncmp($existing, 'pi_', 3) === 0) {
             $pi = $this->retrieveStripePaymentIntent($existing);
             $status = is_array($pi) ? (string) ($pi['status'] ?? '') : '';
             $piAmt = is_array($pi) ? (int) ($pi['amount'] ?? 0) : 0;
