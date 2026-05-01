@@ -4,7 +4,7 @@ on:
     types: [published]
 jobs:
   tag:
-    name: Deploy to WordPress.org
+    name: New Released For WordPress.org
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
