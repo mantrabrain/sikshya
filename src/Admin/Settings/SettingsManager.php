@@ -1171,7 +1171,7 @@ class SettingsManager
                         'label' => __('How categories appear on the site', 'sikshya'),
                         'description' => __('Pick list, grid, or a compact dropdown—whatever fits your theme best.', 'sikshya'),
                         'select_placeholder' => __('Choose one…', 'sikshya'),
-                        'default' => 'list',
+                        'default' => 'dropdown',
                         'options' => [
                             'list' => __('List View', 'sikshya'),
                             'grid' => __('Grid View', 'sikshya'),
@@ -1313,7 +1313,7 @@ class SettingsManager
                             'When enabled, site managers can use “Enroll without purchase” on paid courses (testing or demos). Keep off on public sites unless needed.',
                             'sikshya'
                         ),
-                        'default' => false,
+                        'default' => true,
                     ],
                     [
                         'key' => 'enable_guest_checkout',
@@ -1639,7 +1639,7 @@ class SettingsManager
                             'Shows PayPal on checkout when enabled and configured. Choose “Simple” (email + IPN) or “Advanced” (REST API capture).',
                             'sikshya'
                         ),
-                        'default' => true,
+                        'default' => false,
                     ],
                     [
                         'key' => 'enable_stripe_payment',

@@ -1708,7 +1708,7 @@ function sikshya_current_user_can_admin_enroll_without_purchase(): bool
     if (!class_exists('\Sikshya\Services\Settings')) {
         return false;
     }
-    $on = \Sikshya\Services\Settings::get('allow_admin_enroll_without_purchase', '');
+    $on = \Sikshya\Services\Settings::get('allow_admin_enroll_without_purchase', '1');
     if (!\Sikshya\Services\Settings::isTruthy($on)) {
         return false;
     }

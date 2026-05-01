@@ -69,9 +69,9 @@ final class CourseFrontendSettings
      */
     public static function categoryDisplay(): string
     {
-        $v = sanitize_key((string) Settings::get('category_display', 'list'));
+        $v = sanitize_key((string) Settings::get('category_display', 'dropdown'));
         $allowed = ['list', 'grid', 'dropdown'];
 
-        return in_array($v, $allowed, true) ? $v : 'list';
+        return in_array($v, $allowed, true) ? $v : 'dropdown';
     }
 }

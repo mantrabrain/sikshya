@@ -29,7 +29,8 @@ final class CheckoutTemplateData
                 $out[$id] = true;
                 continue;
             }
-            $default = $id === 'offline' || $id === 'paypal' ? '1' : '0';
+            // Fresh installs: only offline defaults on; PayPal and others stay off until explicitly enabled.
+            $default = $id === 'offline' ? '1' : '0';
             $out[$id] = self::isTruthyGatewayOption(Settings::get($enabled_key, $default));
         }
         return $out;
@@ -52,7 +53,7 @@ final class CheckoutTemplateData
         };
 
         $enable_offline = Settings::get('enable_offline_payment', '1');
-        $enable_paypal = Settings::get('enable_paypal_payment', '1');
+        $enable_paypal = Settings::get('enable_paypal_payment', '0');
         $enable_stripe = Settings::get('enable_stripe_payment', '0');
 
         $stripe = Pro::isActive()

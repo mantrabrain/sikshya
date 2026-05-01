@@ -335,7 +335,7 @@ final class CheckoutService
 
     public function isPayPalEnabled(): bool
     {
-        return $this->isTruthySetting($this->settings()->getSetting('enable_paypal_payment', '1'));
+        return $this->isTruthySetting($this->settings()->getSetting('enable_paypal_payment', '0'));
     }
 
     public function isStripeEnabled(): bool
