@@ -34,11 +34,6 @@
             "Sikshya\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Sikshya\\Tests\\": "tests/"
-        }
-    },
     "scripts": {
         "test": "phpunit",
         "test:coverage": "phpunit --coverage-html coverage",

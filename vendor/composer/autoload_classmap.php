@@ -1360,7 +1360,7 @@ return array(
     'PHPUnit\\Framework\\MockObject\\Verifiable' => $vendorDir . '/phpunit/phpunit/src/Framework/MockObject/Verifiable.php',
     'PHPUnit\\Framework\\NoChildTestSuiteException' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/NoChildTestSuiteException.php',
     'PHPUnit\\Framework\\OutputError' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/OutputError.php',
-    'PHPUnit\\Framework\\PHPTAssertionFailedError' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/PHPTAssertionFailedError.php',
+    'PHPUnit\\Framework\\PHPTAssertionFailedError' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/PhptAssertionFailedError.php',
     'PHPUnit\\Framework\\Reorderable' => $vendorDir . '/phpunit/phpunit/src/Framework/Reorderable.php',
     'PHPUnit\\Framework\\RiskyTestError' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/RiskyTestError.php',
     'PHPUnit\\Framework\\SelfDescribing' => $vendorDir . '/phpunit/phpunit/src/Framework/SelfDescribing.php',
