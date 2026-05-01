@@ -170,6 +170,16 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  /* Lock the shell to one viewport so the curriculum rail cannot stretch with page-length content */
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+/* Logged-in WP admin bar sits above the shell — shorten the workspace so nothing clips under it */
+.admin-bar.sikshya-learning-shell--lesson .sikshya-learning-app,
+.admin-bar.sikshya-learning-shell--quiz .sikshya-learning-app,
+.admin-bar.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learning-app {
+  max-height: calc(100dvh - 32px);
 }
 
 .sikshya-learning-shell--lesson .sikshya-learnLayout,
@@ -618,7 +628,7 @@
   .sikshya-learning-shell--lesson .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__scroll,
   .sikshya-learning-shell--quiz .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__scroll,
   .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar[data-sik-curriculum-scroll="1"] .sikshya-learnSidebar__scroll {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
