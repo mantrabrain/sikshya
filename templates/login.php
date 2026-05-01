@@ -6,6 +6,7 @@
  */
 
 use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Shortcodes\AuthShortcodes;
 
 sikshya_get_header();
 
@@ -26,28 +27,20 @@ if ($redirect_to === '') {
 ?>
 
 <div class="sikshya-public sikshya-login-page sik-f-scope">
-    <div class="sikshya-login-page__wrap" style="max-width:560px;margin:0 auto;padding:40px 16px;">
-        <h1 style="margin:0 0 10px;font-size:26px;font-weight:700;">
-            <?php esc_html_e('Log in', 'sikshya'); ?>
-        </h1>
-        <p style="margin:0 0 22px;color:#64748b;">
-            <?php esc_html_e('Log in to continue to checkout or access your learning.', 'sikshya'); ?>
-        </p>
+    <div class="sikshya-login-page__shell">
+        <div class="sikshya-login-page__inner">
+            <h1 class="sikshya-login-page__title">
+                <?php esc_html_e('Log in', 'sikshya'); ?>
+            </h1>
+            <p class="sikshya-login-page__lead">
+                <?php esc_html_e('Log in to continue to checkout or access your learning.', 'sikshya'); ?>
+            </p>
 
-        <div class="sikshya-login-page__card" style="background:#fff;border:1px solid rgba(226,232,240,1);border-radius:14px;padding:18px 18px 6px;">
-            <?php
-            echo wp_login_form(
-                [
-                    'echo' => false,
-                    'redirect' => $redirect_to,
-                    'remember' => true,
-                    'label_username' => __('Email or username', 'sikshya'),
-                    'label_password' => __('Password', 'sikshya'),
-                    'label_remember' => __('Remember me', 'sikshya'),
-                    'label_log_in' => __('Log in', 'sikshya'),
-                ]
-            );
-            ?>
+            <div class="sikshya-login-page__card">
+                <?php
+                echo AuthShortcodes::renderLogin(['redirect_to' => $redirect_to]);
+                ?>
+            </div>
         </div>
     </div>
 </div>

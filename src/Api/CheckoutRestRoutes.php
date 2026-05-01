@@ -350,6 +350,11 @@ class CheckoutRestRoutes
         // Billing details are optional and can be collected via Dynamic Fields (Growth).
         $billing = isset($params['billing']) && is_array($params['billing']) ? $params['billing'] : [];
         $dynamic_fields = isset($params['dynamic_fields']) && is_array($params['dynamic_fields']) ? $params['dynamic_fields'] : [];
+        $country_raw = isset($billing['country']) ? sanitize_text_field((string) $billing['country']) : '';
+        $country_iso = function_exists('sikshya_normalize_billing_country_to_iso')
+            ? sikshya_normalize_billing_country_to_iso($country_raw)
+            : $country_raw;
+
         $billing_clean = [
             'phone' => isset($billing['phone']) ? sanitize_text_field((string) $billing['phone']) : '',
             'address_1' => isset($billing['address_1']) ? sanitize_text_field((string) $billing['address_1']) : '',
@@ -357,7 +362,7 @@ class CheckoutRestRoutes
             'city' => isset($billing['city']) ? sanitize_text_field((string) $billing['city']) : '',
             'state' => isset($billing['state']) ? sanitize_text_field((string) $billing['state']) : '',
             'postcode' => isset($billing['postcode']) ? sanitize_text_field((string) $billing['postcode']) : '',
-            'country' => isset($billing['country']) ? sanitize_text_field((string) $billing['country']) : '',
+            'country' => $country_iso,
         ];
         if ($is_guest) {
             if (!\Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('enable_guest_checkout', true))) {
@@ -424,6 +429,18 @@ class CheckoutRestRoutes
                 if (array_filter($billing_clean, static fn($v): bool => (string) $v !== '') !== []) {
                     $existing['billing'] = $billing_clean;
                 }
+                $repo->updateOrder((int) $order['order_id'], ['meta' => $existing]);
+            } elseif (array_filter($billing_clean, static fn($v): bool => (string) $v !== '') !== []) {
+                $repo = new OrderRepository();
+                $row = $repo->findById((int) $order['order_id']);
+                $existing = [];
+                if ($row && isset($row->meta) && is_string($row->meta) && $row->meta !== '') {
+                    $decoded = json_decode($row->meta, true);
+                    if (is_array($decoded)) {
+                        $existing = $decoded;
+                    }
+                }
+                $existing['billing'] = $billing_clean;
                 $repo->updateOrder((int) $order['order_id'], ['meta' => $existing]);
             }
 
@@ -1116,6 +1133,7 @@ class CheckoutRestRoutes
         (new OrderRepository())->updateOrder($order_id, ['user_id' => $uid]);
         wp_set_current_user($uid);
         wp_set_auth_cookie($uid, true, is_ssl());
+        CartStorage::adoptGuestCartForUser($uid);
 
         return $uid;
     }

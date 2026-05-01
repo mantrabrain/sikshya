@@ -7,7 +7,7 @@ import { NavIcon } from '../components/NavIcon';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled } from '../lib/licensing';
-import { courseMetaString, coursePriceLabel, embeddedAuthorName } from '../lib/courseListMeta';
+import { courseMetaString, coursePriceLabel, embeddedAuthorName, formatCourseDurationListCell } from '../lib/courseListMeta';
 import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { embeddedTermNames } from '../lib/wpPostTerms';
 import { formatPostDate } from '../lib/formatPostDate';
@@ -157,7 +157,10 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
         header: 'Duration',
         defaultHidden: true,
         cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-400',
-        render: (r) => courseMetaString(r, '_sikshya_course_duration', '_sikshya_duration', 'sikshya_course_duration'),
+        render: (r) =>
+          formatCourseDurationListCell(
+            courseMetaString(r, '_sikshya_course_duration', '_sikshya_duration', 'sikshya_course_duration')
+          ),
       },
       {
         id: 'level',

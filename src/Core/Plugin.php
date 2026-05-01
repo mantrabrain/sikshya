@@ -26,7 +26,6 @@ use Sikshya\Services\InvoiceIssuanceService;
 use Sikshya\Addons\AddonManager;
 use Sikshya\Frontend\Public\InstructorAccountView;
 use Sikshya\Frontend\Public\InstructorApplicationView;
-use Sikshya\Shortcodes\InstructorRegistrationShortcode;
 use Sikshya\Shortcodes\CoursesShortcode;
 use Sikshya\Shortcodes\AuthShortcodes;
 
@@ -289,7 +288,6 @@ final class Plugin
         InstructorApplicationView::init();
         \Sikshya\Frontend\Public\CertificatesAccountView::init();
         \Sikshya\Frontend\Public\CourseRatingPrompt::init();
-        InstructorRegistrationShortcode::init();
         CoursesShortcode::init();
         AuthShortcodes::init();
 

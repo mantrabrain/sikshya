@@ -963,6 +963,73 @@ function sikshya_get_country_choices(): array
 }
 
 /**
+ * Map saved billing country (ISO 3166-1 alpha-2 or legacy full name) to a valid choice code.
+ *
+ * @param array<string, string>|null $choices Optional preloaded map from {@see sikshya_get_country_choices()}.
+ */
+function sikshya_normalize_billing_country_to_iso(string $raw, ?array $choices = null): string
+{
+    $raw = trim($raw);
+    if ($raw === '') {
+        return '';
+    }
+    if (!is_array($choices) || $choices === []) {
+        $choices = function_exists('sikshya_get_country_choices') ? sikshya_get_country_choices() : [];
+    }
+    if ($choices === []) {
+        return '';
+    }
+    $code = strtoupper($raw);
+    if (strlen($code) === 2) {
+        foreach ($choices as $iso => $label) {
+            if (strtoupper((string) $iso) === $code) {
+                return strtoupper((string) $iso);
+            }
+        }
+    }
+    foreach ($choices as $iso => $label) {
+        $iso = (string) $iso;
+        if ($iso !== '' && strcasecmp((string) $label, $raw) === 0) {
+            return strtoupper($iso);
+        }
+    }
+
+    return '';
+}
+
+/**
+ * Output a billing country select (option values are ISO 3166-1 alpha-2).
+ *
+ * @param string $element_id   HTML id for the control.
+ * @param string $stored_value Raw meta value (ISO code or legacy label).
+ */
+function sikshya_render_billing_country_select(string $element_id, string $stored_value = ''): void
+{
+    if (!function_exists('sikshya_get_country_choices')) {
+        return;
+    }
+    $choices = sikshya_get_country_choices();
+    if ($choices === []) {
+        return;
+    }
+    $selected = sikshya_normalize_billing_country_to_iso($stored_value, $choices);
+    $id = esc_attr($element_id);
+    echo '<select id="' . $id . '" class="sikshya-input sikshya-checkout-field__control" autocomplete="country" data-sikshya-billing="country">';
+    echo '<option value="">' . esc_html__('Choose country…', 'sikshya') . '</option>';
+    foreach ($choices as $iso => $name) {
+        $iso = (string) $iso;
+        if ($iso === '') {
+            continue;
+        }
+        $iso_key = strtoupper($iso);
+        $iso_esc = esc_attr($iso_key);
+        $sel = ($selected !== '' && $iso_key === $selected) ? ' selected="selected"' : '';
+        echo '<option value="' . $iso_esc . '"' . $sel . '>' . esc_html((string) $name) . '</option>';
+    }
+    echo '</select>';
+}
+
+/**
  * Store currency code from Sikshya settings (Payment tab — stored as `_sikshya_currency`).
  *
  * @return string ISO code.

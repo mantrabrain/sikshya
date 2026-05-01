@@ -18,6 +18,136 @@ final class CartStorage
 
     private const BUNDLE_COOKIE = 'sikshya_bundle_cart_v1';
 
+    private static bool $hooks_registered = false;
+
+    public static function registerHooks(): void
+    {
+        if (self::$hooks_registered) {
+            return;
+        }
+        self::$hooks_registered = true;
+
+        add_action('wp_login', [self::class, 'onWpLogin'], 10, 2);
+    }
+
+    /**
+     * Merge guest cookie cart into the logged-in account (registration + sign-in).
+     *
+     * @param string        $user_login Unused; required for wp_login signature.
+     * @param \WP_User|null $user       Authenticated user.
+     */
+    public static function onWpLogin(string $user_login, $user): void
+    {
+        if (!$user instanceof \WP_User) {
+            return;
+        }
+        self::adoptGuestCartForUser((int) $user->ID);
+    }
+
+    /**
+     * Copy browser guest-cart cookies into user meta, merge with any saved cart, then clear cookies.
+     */
+    public static function adoptGuestCartForUser(int $user_id): void
+    {
+        if ($user_id <= 0) {
+            return;
+        }
+
+        $guest_ids = self::guestCourseIdsFromCookie();
+        $guest_bundle = self::guestBundleIdFromCookie();
+
+        if ($guest_ids === [] && $guest_bundle <= 0) {
+            return;
+        }
+
+        $existing = [];
+        $raw = get_user_meta($user_id, self::USER_META, true);
+        if (is_array($raw)) {
+            foreach ($raw as $id) {
+                $id = (int) $id;
+                if ($id > 0) {
+                    $existing[] = $id;
+                }
+            }
+        }
+
+        $merged = array_values(array_unique(array_merge($existing, $guest_ids)));
+
+        update_user_meta($user_id, self::USER_META, $merged);
+
+        $had_guest_courses = $guest_ids !== [];
+
+        if ($guest_bundle > 0 && $had_guest_courses) {
+            update_user_meta($user_id, self::BUNDLE_META, $guest_bundle);
+        } elseif ($had_guest_courses && $guest_bundle <= 0) {
+            delete_user_meta($user_id, self::BUNDLE_META);
+        }
+
+        self::clearGuestCartCookies();
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private static function guestCourseIdsFromCookie(): array
+    {
+        if (empty($_COOKIE[self::cookieName()])) {
+            return [];
+        }
+
+        $ids = [];
+        $parts = explode(',', sanitize_text_field(wp_unslash((string) $_COOKIE[self::cookieName()])));
+        foreach ($parts as $p) {
+            $id = (int) $p;
+            if ($id > 0) {
+                $ids[] = $id;
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    private static function guestBundleIdFromCookie(): int
+    {
+        if (empty($_COOKIE[self::BUNDLE_COOKIE])) {
+            return 0;
+        }
+
+        return max(0, (int) sanitize_text_field(wp_unslash((string) $_COOKIE[self::BUNDLE_COOKIE])));
+    }
+
+    private static function clearGuestCartCookies(): void
+    {
+        $secure = is_ssl();
+        $path = COOKIEPATH ?: '/';
+        $domain = (string) COOKIE_DOMAIN;
+        $past = time() - 3600;
+
+        if (PHP_VERSION_ID >= 70300) {
+            setcookie(self::cookieName(), '', [
+                'expires' => $past,
+                'path' => $path,
+                'domain' => $domain !== '' ? $domain : '',
+                'secure' => $secure,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+            setcookie(self::BUNDLE_COOKIE, '', [
+                'expires' => $past,
+                'path' => $path,
+                'domain' => $domain !== '' ? $domain : '',
+                'secure' => $secure,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        } else {
+            setcookie(self::cookieName(), '', $past, $path, $domain, $secure, true);
+            setcookie(self::BUNDLE_COOKIE, '', $past, $path, $domain, $secure, true);
+        }
+
+        unset($_COOKIE[self::cookieName()], $_COOKIE[self::BUNDLE_COOKIE]);
+    }
+
     public static function cookieName(): string
     {
         return 'sikshya_cart_v1';

@@ -13,24 +13,8 @@
 
 .sikshya-cart-page.sik-f-scope.sikshya-public {
   padding-top: 0;
-  background-color: var(--sikshya-white);
+  background-color: transparent;
   min-height: 100%;
-}
-
-.sikshya-cart-page__masthead {
-  background: var(--sik-f-surface-muted);
-  border-bottom: 1px solid var(--sik-f-border);
-  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
-  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
-}
-
-.sikshya-cart-page__masthead-inner {
-  width: 100%;
-  max-width: 70rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
 }
 
 .sikshya-cart-page__breadcrumb {
@@ -100,11 +84,11 @@
 
 .sikshya-cart-page__body {
   width: 100%;
-  max-width: 70rem;
+  max-width: var(--sikshya-public-content-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-left: var(--sikshya-public-content-padding-inline);
+  padding-right: var(--sikshya-public-content-padding-inline);
   padding-bottom: var(--sikshya-spacing-16);
 }
 
@@ -386,6 +370,84 @@
   background: var(--sik-f-surface);
   box-shadow: var(--sik-f-shadow-panel);
   padding: var(--sikshya-spacing-5);
+}
+
+/* -------------------------------------------------------------------------
+   Coupon + quoted totals (cart-page.js)
+   ------------------------------------------------------------------------- */
+
+.sikshya-cart-page__coupon {
+  margin: 0 0 var(--sikshya-spacing-5);
+  padding-bottom: var(--sikshya-spacing-5);
+  border-bottom: 1px solid var(--sik-f-border);
+}
+
+.sikshya-cart-page__coupon-label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--sikshya-font-size-sm);
+  color: var(--sik-f-text-heading);
+  margin-bottom: var(--sikshya-spacing-2);
+}
+
+.sikshya-cart-page__coupon-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-2);
+  align-items: stretch;
+}
+
+.sikshya-cart-page__coupon-input {
+  flex: 1 1 10rem;
+  min-width: 0;
+}
+
+.sikshya-cart-page__coupon-apply {
+  flex: 0 0 auto;
+}
+
+.sikshya-cart-page__coupon-message {
+  margin: var(--sikshya-spacing-2) 0 0;
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.45;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-cart-page__coupon-message--error {
+  color: var(--sikshya-error);
+  font-weight: 600;
+}
+
+.sikshya-cart-page__discount,
+.sikshya-cart-page__total-line {
+  margin: 0 0 var(--sikshya-spacing-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-cart-page__discount strong,
+.sikshya-cart-page__total-line strong {
+  font-weight: 600;
+  color: var(--sik-f-text-muted);
+  font-size: var(--sikshya-font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sikshya-cart-page__discount span,
+.sikshya-cart-page__total-line span {
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-cart-page__discount span {
+  color: var(--sikshya-success, #15803d);
+  font-size: var(--sikshya-font-size-base);
 }
 
 .sikshya-cart-page__summary-note {

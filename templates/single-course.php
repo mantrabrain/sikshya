@@ -77,8 +77,15 @@ while (have_posts()) :
             </nav>
 
             <?php if (is_array($cart_flash) && !empty($cart_flash['message'])) : ?>
+                <?php
+                $sik_cart_show_link = !empty($cart_flash['show_view_cart']);
+                $sik_cart_url = PublicPageUrls::url('cart');
+                ?>
                 <div class="sikshya-cart-flash sikshya-cart-flash--<?php echo esc_attr((string) ($cart_flash['type'] ?? 'info')); ?>" role="status">
-                    <?php echo esc_html((string) $cart_flash['message']); ?>
+                    <span class="sikshya-cart-flash__msg"><?php echo esc_html((string) $cart_flash['message']); ?></span>
+                    <?php if ($sik_cart_show_link && is_string($sik_cart_url) && $sik_cart_url !== '') : ?>
+                        <a class="sikshya-cart-flash__action" href="<?php echo esc_url($sik_cart_url); ?>"><?php esc_html_e('View cart', 'sikshya'); ?></a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 

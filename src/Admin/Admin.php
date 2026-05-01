@@ -49,6 +49,26 @@ class Admin
     }
 
     /**
+     * Hide the Setup Wizard entry under the Sikshya top-level menu while keeping it registered.
+     *
+     * Calling {@see remove_submenu_page()} removes the item from `$submenu`, which breaks
+     * {@see get_admin_page_parent()} for `admin.php?page=sikshya-setup`. Core then fails
+     * {@see user_can_access_admin_page()} (wrong hook / empty parent) and shows
+     * “Sorry, you are not allowed to access this page.” for direct wizard URLs.
+     */
+    public static function hideSetupWizardSubmenuLink(): void
+    {
+        if (!is_admin()) {
+            return;
+        }
+        echo '<style id="sikshya-hide-setup-wizard-menu-item">
+            #adminmenu #toplevel_page_sikshya .wp-submenu li:has(a[href*="page=sikshya-setup"]) {
+                display: none !important;
+            }
+        </style>';
+    }
+
+    /**
      * Plugin instance
      *
      * @var Plugin
@@ -116,6 +136,7 @@ class Admin
         add_action('admin_enqueue_scripts', [self::class, 'dequeueWordPressUiOnSikshyaApp'], 10000);
         add_action('admin_head', [self::class, 'printSikshyaReactShellHead'], 1);
         add_action('admin_head', [self::class, 'printSikshyaAdminMenuIconCss'], 2);
+        add_action('admin_head', [self::class, 'hideSetupWizardSubmenuLink'], 3);
 
         // Remove all other admin notices on Sikshya pages
         add_action('admin_head', [$this, 'removeOtherNoticesOnSikshyaPages']);
@@ -163,11 +184,10 @@ class Admin
         );
 
         /*
-         * Setup wizard: keep it registered so WordPress can resolve the URL, but hide it
-         * from the left admin menu so “Sikshya LMS” has no visible submenu items.
-         *
-         * Do NOT pass `null` as parent slug — WP core calls `strpos()`/`str_replace()` on it,
-         * which triggers PHP 8.1+ deprecations. Register under Sikshya, then remove it.
+         * Setup wizard: registered under Sikshya so `page=sikshya-setup` resolves and core access
+         * checks see a parent (`get_admin_page_parent()` reads `$submenu`). Do not call
+         * `remove_submenu_page()` — it drops the submenu row and breaks direct wizard URLs.
+         * The link is hidden via {@see hideSetupWizardSubmenuLink()}.
          */
         add_submenu_page(
             AdminPages::DASHBOARD,
@@ -177,7 +197,6 @@ class Admin
             SetupWizardController::MENU_SLUG,
             [$this->controllers['setup_wizard'], 'renderWizard']
         );
-        remove_submenu_page(AdminPages::DASHBOARD, SetupWizardController::MENU_SLUG);
     }
 
     /**

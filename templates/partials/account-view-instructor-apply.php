@@ -13,8 +13,6 @@ $app = is_array($acc['instructor_application'] ?? null) ? (array) $acc['instruct
 $status = (string) ($app['status'] ?? '');
 $submitted_at = (string) ($app['submitted_at'] ?? '');
 
-$shortcode = do_shortcode('[sikshya_instructor_registration]');
-
 $label_instructor = function_exists('sikshya_label') ? sikshya_label('instructor', __('Instructor', 'sikshya'), 'frontend') : __('Instructor', 'sikshya');
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
@@ -62,7 +60,10 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 </section>
             <?php endif; ?>
 
-            <section class="sik-acc-panel sik-acc-apply-body">
-                <?php echo $shortcode; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <section class="sik-acc-panel">
+                <div class="sik-acc-panel__head">
+                    <h2 class="sik-acc-panel__title"><?php esc_html_e('Application details', 'sikshya'); ?></h2>
+                </div>
+                <?php echo \Sikshya\Frontend\Public\InstructorApplicationView::renderFormHtml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
             </section>
 

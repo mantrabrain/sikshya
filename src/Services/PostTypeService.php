@@ -423,7 +423,8 @@ class PostTypeService
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'supports' => ['title', 'editor', 'thumbnail', 'custom-fields', 'revisions'],
+            // Excerpt = “Short summary” in the Lesson Content editor; required for wp/v2/sik_lesson excerpt REST saves.
+            'supports' => ['title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
 

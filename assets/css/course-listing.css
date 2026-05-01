@@ -6,7 +6,7 @@
 /* Archive wrapper */
 .sikshya-archive-courses {
   padding: var(--sikshya-spacing-12) 0 var(--sikshya-spacing-16);
-  background: var(--sikshya-gray-50);
+  background: transparent;
 }
 
 .sikshya-archive-courses__header {

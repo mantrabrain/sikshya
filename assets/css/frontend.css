@@ -8,13 +8,77 @@
   font-family: var(--sikshya-font-family);
   line-height: 1.6;
   color: var(--sikshya-gray-700);
-  background-color: var(--sikshya-gray-50);
+  /* Outer catalog shell: transparent so theme background shows (sections set their own surfaces). */
+  background-color: transparent;
 }
 
 .sikshya-container {
-  max-width: 1200px;
+  max-width: var(--sikshya-public-content-max-width);
   margin: 0 auto;
-  padding: 0 var(--sikshya-spacing-4);
+  padding: 0 var(--sikshya-public-content-padding-inline);
+}
+
+/* Cart / enrollment flash (archives, cart, checkout, course page) */
+.sikshya-cart-flash {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  margin-bottom: var(--sikshya-spacing-4);
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-lg);
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.sikshya-cart-flash__msg {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sikshya-cart-flash__action {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.sikshya-cart-flash__action:hover,
+.sikshya-cart-flash__action:focus-visible {
+  text-decoration: underline;
+}
+
+.sikshya-cart-flash--success .sikshya-cart-flash__action {
+  color: #047857;
+}
+
+.sikshya-cart-flash--info .sikshya-cart-flash__action {
+  color: #1d4ed8;
+}
+
+.sikshya-cart-flash--error .sikshya-cart-flash__action {
+  color: #b91c1c;
+}
+
+.sikshya-cart-flash--success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.sikshya-cart-flash--info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.sikshya-cart-flash--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
 }
 
 /* Learn UI manages its own full-bleed shell (learn.css) */
@@ -25,13 +89,41 @@
 /* Standardize public page width (exclude Learn + Account) */
 .sikshya-public:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-container,
 body:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .sikshya-container {
-  max-width: 1200px;
+  max-width: var(--sikshya-public-content-max-width);
 }
 
-/* Full-width preset (Settings → Single course page layout) on catalog + legacy catalog page. */
+/* Full-width preset (Settings → Single course page layout) on catalog + commerce rails + login shell. */
 body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public .sikshya-container,
-body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-course-catalog .sikshya-container {
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-course-catalog .sikshya-container,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-cart-page__masthead-inner,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-cart-page__body,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-checkout-page__masthead-inner,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-checkout-page__body,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-order-page__masthead-inner,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-order-page__body,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-login-page__shell {
   max-width: none;
+}
+
+/* Shared masthead band + content rail (cart / checkout / order — single source) */
+.sikshya-cart-page__masthead,
+.sikshya-checkout-page__masthead,
+.sikshya-order-page__masthead {
+  background: var(--sik-f-surface-muted);
+  border-bottom: 1px solid var(--sik-f-border);
+  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
+}
+
+.sikshya-cart-page__masthead-inner,
+.sikshya-checkout-page__masthead-inner,
+.sikshya-order-page__masthead-inner {
+  width: 100%;
+  max-width: var(--sikshya-public-content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--sikshya-public-content-padding-inline);
+  padding-right: var(--sikshya-public-content-padding-inline);
 }
 
 /* Hero Section */
@@ -742,6 +834,168 @@ body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-
 .sikshya-inline-form {
   display: inline;
 }
+
+/* Login virtual page */
+.sikshya-public.sikshya-login-page {
+  padding-top: 0;
+  background: transparent;
+}
+
+.sikshya-login-page__shell {
+  width: 100%;
+  max-width: var(--sikshya-public-content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding: clamp(var(--sikshya-spacing-12), 6vw, var(--sikshya-spacing-20)) var(--sikshya-public-content-padding-inline);
+  box-sizing: border-box;
+}
+
+.sikshya-login-page__inner {
+  max-width: 26rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sikshya-login-page__title {
+  margin: 0 0 var(--sikshya-spacing-2);
+  font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-login-page__lead {
+  margin: 0 0 var(--sikshya-spacing-8);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.6;
+  color: var(--sik-f-text-muted);
+}
+
+.sikshya-login-page__card {
+  background: var(--sik-f-surface);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sik-f-radius-panel);
+  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-8));
+  box-shadow: var(--sik-f-shadow-panel);
+}
+
+/* Auth forms (login page + checkout embed) */
+.sikshya-notice {
+  margin: 0 0 var(--sikshya-spacing-5);
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-lg);
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.5;
+}
+
+.sikshya-notice--error {
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  background: rgba(254, 242, 242, 0.95);
+  color: #9f1239;
+}
+
+.sikshya-notice--success {
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: rgba(240, 253, 244, 0.95);
+  color: #166534;
+}
+
+.sikshya-auth__messages {
+  margin: 0 0 var(--sikshya-spacing-4);
+}
+
+.sikshya-auth__messages[hidden] {
+  display: none !important;
+}
+
+.sikshya-auth__form--busy {
+  pointer-events: none;
+  opacity: 0.72;
+}
+
+.sikshya-auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-5);
+}
+
+.sikshya-auth__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+}
+
+.sikshya-auth__label {
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-auth__control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 var(--sikshya-spacing-3);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-lg);
+  background: var(--sik-f-surface);
+  color: var(--sik-f-text);
+  font-size: var(--sikshya-font-size-sm);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sikshya-auth__control:focus {
+  outline: none;
+  border-color: var(--sikshya-primary);
+  box-shadow: 0 0 0 1px var(--sikshya-primary-light);
+}
+
+.sikshya-auth__row--split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-3);
+  font-size: var(--sikshya-font-size-sm);
+}
+
+.sikshya-auth__remember {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sikshya-spacing-2);
+  cursor: pointer;
+  color: var(--sik-f-text-muted);
+  user-select: none;
+}
+
+.sikshya-auth__remember input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--sikshya-primary);
+}
+
+.sikshya-auth__link {
+  color: var(--sikshya-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sikshya-auth__link:hover,
+.sikshya-auth__link:focus-visible {
+  text-decoration: underline;
+}
+
+.sikshya-auth__actions {
+  margin-top: var(--sikshya-spacing-1);
+}
+
+.sikshya-auth__submit {
+  width: 100%;
+  min-height: 2.875rem;
+  font-weight: 600;
+}
+
 /* Print Styles */
 @media print {
   .sikshya-sidebar,

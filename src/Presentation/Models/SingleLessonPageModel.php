@@ -219,6 +219,25 @@ final class SingleLessonPageModel
         );
     }
 
+    /**
+     * Primary lesson media (hosted video/audio embed) for placement above the Learn tabs.
+     */
+    public function getLessonPrimaryMediaHtml(): string
+    {
+        return LessonLearnContent::primaryMediaHtml(
+            $this->getLessonPost(),
+            $this->getLessonTypeKey()
+        );
+    }
+
+    /**
+     * Filtered lesson body prose only (primary media excluded — use {@see getLessonPrimaryMediaHtml()}).
+     */
+    public function getLessonPostContentHtml(): string
+    {
+        return LessonLearnContent::filteredPostContentHtml($this->getLessonPost());
+    }
+
     public function hasRenderableLessonBody(): bool
     {
         return LessonLearnContent::hasRenderableBody(

@@ -33,6 +33,55 @@ function wpMessage(body: unknown): string | null {
   return null;
 }
 
+/** WP REST `code` from error JSON body, when present. */
+export function getWpRestErrorCode(error: unknown): string | null {
+  if (!(error instanceof ApiError)) {
+    return null;
+  }
+  const b = error.body;
+  if (!b || typeof b !== 'object') {
+    return null;
+  }
+  const c = (b as { code?: string }).code;
+  return typeof c === 'string' && c.length ? c : null;
+}
+
+/**
+ * Use a short toast instead of the large {@link ApiErrorPanel}.
+ * Keep the full support panel for server errors (5xx) and validation-style 422 responses.
+ */
+export function preferToastForApiError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    const { status } = error;
+    if (status >= 500) {
+      return false;
+    }
+    if (status === 422) {
+      return false;
+    }
+    return true;
+  }
+  if (error instanceof TypeError) {
+    return true;
+  }
+  if (error instanceof Error) {
+    const m = error.message.toLowerCase();
+    return m.includes('failed to fetch') || m.includes('networkerror') || m.includes('load failed');
+  }
+  return true;
+}
+
+/** Short toast title for auth/session failures. */
+export function getApiErrorToastTitle(error: unknown): string {
+  if (error instanceof ApiError) {
+    const code = getWpRestErrorCode(error);
+    if (error.status === 401 || error.status === 403 || code === 'rest_cookie_invalid_nonce') {
+      return 'Session expired';
+    }
+  }
+  return 'Request failed';
+}
+
 /** Short line for inline UI. */
 export function getErrorSummary(error: unknown): string {
   if (error instanceof ApiError) {

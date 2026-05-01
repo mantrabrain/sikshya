@@ -86,9 +86,7 @@ final class LearnPageService
             'error'       => $error,
             'show_progress' => $show_progress,
             'course_thumb'=> $course_post ? get_the_post_thumbnail_url($course_post->ID, 'large') : '',
-            'learn_curriculum_sidebar_scrollable' => $course_id > 0 && Settings::isTruthy(
-                get_post_meta($course_id, '_sikshya_learn_curriculum_sidebar_scrollable', true)
-            ),
+            'learn_curriculum_sidebar_scrollable' => LessonPageService::isLearnCurriculumSidebarScrollableForCourse($course_id),
             'urls'        => [
                 'account' => PublicPageUrls::url('account'),
                 'course'  => $course_post ? (get_permalink($course_post) ?: '') : '',

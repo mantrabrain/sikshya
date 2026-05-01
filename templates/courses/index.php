@@ -16,7 +16,7 @@ $label_instructors = function_exists('sikshya_label_plural') ? sikshya_label_plu
 $label_students = function_exists('sikshya_label_plural') ? sikshya_label_plural('student', 'students', __('Students', 'sikshya'), 'frontend') : __('Students', 'sikshya');
 ?>
 
-<div class="sikshya-course-catalog">
+<div class="sikshya-public sikshya-course-catalog">
     <!-- Hero Section -->
     <section class="sikshya-hero">
         <div class="sikshya-container">

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
+import { getApiErrorToastTitle, getErrorSummary, preferToastForApiError } from '../api/errors';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
@@ -97,6 +98,20 @@ type CurriculumSelection =
   | { kind: 'content'; chapterId: number; item: CurriculumContentItem };
 
 const CURRICULUM_DRAG_MIME = 'application/x-sikshya-curriculum-v1';
+
+/** Persisted UI: curriculum outline fills page vs. fixed panel with its own scrollbar. */
+const CURRICULUM_OUTLINE_FULL_HEIGHT_KEY = 'sikshya_course_builder_curriculum_outline_full_height';
+
+function readCurriculumOutlineFullHeightPref(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(CURRICULUM_OUTLINE_FULL_HEIGHT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 type CurriculumDragPayload =
   | { t: 'chapter'; chapterId: number }
@@ -1500,6 +1515,8 @@ function CourseBuilderEditor({
   const [addContentTitle, setAddContentTitle] = useState('');
   const [addContentBusy, setAddContentBusy] = useState(false);
   const [addContentError, setAddContentError] = useState<unknown>(null);
+  /** When true, outline uses page scroll; when false, outline scrolls inside the curriculum column. */
+  const [curriculumOutlineFullHeight, setCurriculumOutlineFullHeight] = useState(readCurriculumOutlineFullHeightPref);
   const toast = useTopRightToast(3800);
   const [saveError, setSaveError] = useState<unknown>(null);
   const [saving, setSaving] = useState(false);
@@ -1512,6 +1529,15 @@ function CourseBuilderEditor({
   const [newChapterTitle, setNewChapterTitle] = useState('New chapter');
   const [chapterModalBusy, setChapterModalBusy] = useState(false);
   const bootOnceRef = useRef(false);
+
+  const setCurriculumOutlineFullHeightPersisted = useCallback((next: boolean) => {
+    setCurriculumOutlineFullHeight(next);
+    try {
+      window.localStorage.setItem(CURRICULUM_OUTLINE_FULL_HEIGHT_KEY, next ? '1' : '0');
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, []);
 
   useEffect(() => {
     bootOnceRef.current = false;
@@ -1583,7 +1609,12 @@ function CourseBuilderEditor({
       })
       .catch((e) => {
         if (!cancelled) {
-          setCurriculumError(e);
+          if (preferToastForApiError(e)) {
+            setCurriculumError(null);
+            toast.error(getApiErrorToastTitle(e), getErrorSummary(e));
+          } else {
+            setCurriculumError(e);
+          }
           setCurriculumTree([]);
         }
       })
@@ -1948,7 +1979,12 @@ function CourseBuilderEditor({
       setChapterModalOpen(false);
       setNewChapterTitle('New chapter');
     } catch (e) {
-      setChapterActionError(e);
+      if (preferToastForApiError(e)) {
+        setChapterActionError(null);
+        toast.error(getApiErrorToastTitle(e), getErrorSummary(e));
+      } else {
+        setChapterActionError(e);
+      }
     } finally {
       setChapterModalBusy(false);
     }
@@ -2014,7 +2050,12 @@ function CourseBuilderEditor({
       setAddContentOpen(false);
       setAddContentTitle('');
     } catch (e) {
-      setAddContentError(e);
+      if (preferToastForApiError(e)) {
+        setAddContentError(null);
+        toast.error(getApiErrorToastTitle(e), getErrorSummary(e));
+      } else {
+        setAddContentError(e);
+      }
     } finally {
       setAddContentBusy(false);
     }
@@ -2176,7 +2217,15 @@ function CourseBuilderEditor({
             } grid-cols-1 divide-y divide-slate-200 dark:divide-slate-800 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:divide-x lg:divide-y-0`}
           >
             {/* Left: curriculum outline OR in-page section nav */}
-            <aside className="order-2 flex min-h-0 flex-col bg-slate-50/50 text-slate-900 dark:bg-slate-950/40 dark:text-slate-100 lg:sticky lg:top-4 lg:order-none lg:self-start lg:shrink-0">
+            <aside
+              className={`order-2 flex min-h-0 flex-col bg-slate-50/50 text-slate-900 dark:bg-slate-950/40 dark:text-slate-100 lg:order-none lg:shrink-0 ${
+                activeTab === 'curriculum'
+                  ? curriculumOutlineFullHeight
+                    ? 'lg:relative lg:self-start'
+                    : 'lg:sticky lg:top-4 lg:max-h-[calc(100vh-4.5rem)] lg:self-start'
+                  : 'lg:sticky lg:top-4 lg:self-start'
+              }`}
+            >
               {activeTab === 'curriculum' ? (
                 <>
                   <div className="border-b border-slate-200/70 px-4 pb-3 pt-4 dark:border-slate-800">
@@ -2189,8 +2238,40 @@ function CourseBuilderEditor({
                         published
                       </div>
                     </div>
+                    <div className="mt-3 rounded-xl border border-slate-200/80 bg-white/70 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900/55">
+                      <label
+                        htmlFor="sikshya-cb-curriculum-outline-full-height"
+                        className="flex cursor-pointer items-center gap-2.5"
+                      >
+                        <input
+                          id="sikshya-cb-curriculum-outline-full-height"
+                          type="checkbox"
+                          checked={curriculumOutlineFullHeight}
+                          onChange={(e) => setCurriculumOutlineFullHeightPersisted(e.target.checked)}
+                          className="h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:focus:ring-brand-400/25"
+                        />
+                        <span className="min-w-0 text-xs font-semibold leading-snug text-slate-800 dark:text-slate-100">
+                          {curriculumOutlineFullHeight
+                            ? 'Outline: page scroll'
+                            : 'Outline: panel scroll'}
+                        </span>
+                      </label>
+                    </div>
                   </div>
-                  <div className="flex-1 px-4 pb-4">
+                  <div
+                    className={
+                      curriculumOutlineFullHeight ? 'flex-1 px-4 pb-4' : 'flex min-h-0 flex-1 flex-col px-4 pb-4'
+                    }
+                  >
+                    <div
+                      className={
+                        curriculumOutlineFullHeight
+                          ? ''
+                          : 'min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain pr-0.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:thin]'
+                      }
+                      role={curriculumOutlineFullHeight ? undefined : 'region'}
+                      aria-label={curriculumOutlineFullHeight ? undefined : 'Scrollable course outline'}
+                    >
                     {curriculumError && (
                       <div className="mb-3">
                         <ApiErrorPanel
@@ -2642,6 +2723,7 @@ function CourseBuilderEditor({
                       >
                         + Add chapter
                       </ButtonPrimary>
+                    </div>
                     </div>
                   </div>
                 </>

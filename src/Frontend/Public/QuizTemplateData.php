@@ -10,6 +10,7 @@ use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PublicCurriculumService;
 use Sikshya\Presentation\Models\SingleQuizPageModel;
 use Sikshya\Services\Frontend\LearnOutlineItemAccess;
+use Sikshya\Services\Frontend\LessonPageService;
 use Sikshya\Services\Frontend\QuizPageService;
 use Sikshya\Services\Settings;
 
@@ -135,9 +136,7 @@ final class QuizTemplateData
                 'show_progress' => $track_progress && $show_progress,
                 'course_features' => $course_features,
                 'is_preview' => $is_preview,
-                'learn_curriculum_sidebar_scrollable' => $course_id > 0 && Settings::isTruthy(
-                    get_post_meta($course_id, '_sikshya_learn_curriculum_sidebar_scrollable', true)
-                ),
+                'learn_curriculum_sidebar_scrollable' => LessonPageService::isLearnCurriculumSidebarScrollableForCourse($course_id),
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
                     'login' => PublicPageUrls::login(get_permalink($post) ?: ''),

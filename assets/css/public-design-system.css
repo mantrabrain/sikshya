@@ -86,6 +86,10 @@
   --sikshya-z-popover: 1060;
   --sikshya-z-tooltip: 1070;
 
+  /* Public LMS pages (excludes learn shell + account shell) — one content width */
+  --sikshya-public-content-max-width: 1350px;
+  --sikshya-public-content-padding-inline: var(--sikshya-spacing-4);
+
   /* Semantic aliases (use in new components) */
   --sik-f-surface: var(--sikshya-white);
   --sik-f-surface-muted: var(--sikshya-gray-50);

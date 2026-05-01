@@ -9,6 +9,7 @@
 namespace Sikshya\Api;
 
 use Sikshya\Core\Plugin;
+use Sikshya\Frontend\Public\CartStorage;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -230,6 +231,7 @@ class AuthRestRoutes
 
         wp_set_current_user((int) $user_id);
         wp_set_auth_cookie((int) $user_id, true, is_ssl());
+        CartStorage::adoptGuestCartForUser((int) $user_id);
         $user = get_userdata((int) $user_id);
 
         return new WP_REST_Response(

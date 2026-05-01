@@ -7,11 +7,15 @@
 
 use Sikshya\Services\Frontend\CartPageService;
 use Sikshya\Presentation\Models\CartPageModel;
+use Sikshya\Services\Settings;
 
 /** @var CartPageModel $page_model */
 $page_model = CartPageService::build();
 $cart = $page_model->toLegacyViewArray();
 $u = $page_model->getUrls();
+$coupons_enabled = Settings::isTruthy(Settings::get('enable_coupons', false));
+$guest_enabled_cart = Settings::isTruthy(Settings::get('enable_guest_checkout', true));
+$cart_show_coupon = $coupons_enabled && (is_user_logged_in() || $guest_enabled_cart);
 
 sikshya_get_header();
 
@@ -194,10 +198,31 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                  */
                 do_action('sikshya_cart_summary_before', $cart);
                 ?>
+                <?php if ($cart_show_coupon) : ?>
+                <div class="sikshya-cart-page__coupon" id="sikshya-cart-coupon-wrap">
+                    <span class="sikshya-cart-page__coupon-label"><?php esc_html_e('Discount code', 'sikshya'); ?></span>
+                    <div class="sikshya-cart-page__coupon-row">
+                        <label class="sikshya-screen-reader-text" for="sikshya-cart-coupon"><?php esc_html_e('Coupon code', 'sikshya'); ?></label>
+                        <input type="text" id="sikshya-cart-coupon" class="sikshya-input sikshya-cart-page__coupon-input" autocomplete="off" placeholder="<?php esc_attr_e('Enter code', 'sikshya'); ?>" />
+                        <button type="button" class="sikshya-btn sikshya-btn--ghost sikshya-cart-page__coupon-apply" id="sikshya-cart-apply-coupon"><?php esc_html_e('Apply', 'sikshya'); ?></button>
+                    </div>
+                    <p class="sikshya-cart-page__coupon-message" id="sikshya-cart-coupon-message" hidden></p>
+                </div>
+                <?php endif; ?>
                 <p class="sikshya-cart-subtotal">
                     <strong><?php esc_html_e('Subtotal', 'sikshya'); ?></strong>
-                    <span><?php echo esc_html(number_format_i18n($page_model->getSubtotalHint(), 2) . ' ' . $page_model->getCurrency()); ?></span>
+                    <span id="sikshya-cart-subtotal-display"><?php echo esc_html(number_format_i18n($page_model->getSubtotalHint(), 2) . ' ' . $page_model->getCurrency()); ?></span>
                 </p>
+                <?php if ($cart_show_coupon) : ?>
+                <p class="sikshya-cart-page__discount" id="sikshya-cart-discount-row" hidden>
+                    <strong><?php esc_html_e('Discount', 'sikshya'); ?></strong>
+                    <span id="sikshya-cart-discount-display"></span>
+                </p>
+                <p class="sikshya-cart-page__total-line">
+                    <strong><?php esc_html_e('Total', 'sikshya'); ?></strong>
+                    <span id="sikshya-cart-total-display"><?php echo esc_html(number_format_i18n($page_model->getSubtotalHint(), 2) . ' ' . $page_model->getCurrency()); ?></span>
+                </p>
+                <?php endif; ?>
 
                 <p class="sikshya-cart-page__summary-note">
                     <?php

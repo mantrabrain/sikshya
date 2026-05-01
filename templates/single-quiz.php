@@ -1015,41 +1015,63 @@ while (have_posts()) {
                     $next_title = is_array($next) ? (string) ($next['title'] ?? '') : '';
                     ?>
                     <nav class="sikshya-learnContentNav" aria-label="<?php esc_attr_e('Quiz navigation', 'sikshya'); ?>">
-                        <?php if ($prev_url !== '') : ?>
-                            <a class="sikshya-learnDock__btn sikshya-learnDock__btn--prev" href="<?php echo esc_url($prev_url); ?>">
-                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-                                <span class="sikshya-learnDock__meta">
-                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Previous', 'sikshya'); ?></span>
-                                    <span class="sikshya-learnDock__title"><?php echo esc_html($prev_title); ?></span>
+                        <div class="sikshya-learnContentNav__side sikshya-learnContentNav__side--prev">
+                            <?php if ($prev_url !== '') : ?>
+                                <a class="sikshya-learnDock__btn sikshya-learnDock__btn--prev" href="<?php echo esc_url($prev_url); ?>">
+                                    <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                    <span class="sikshya-learnDock__meta">
+                                        <span class="sikshya-learnDock__kicker"><?php esc_html_e('Previous', 'sikshya'); ?></span>
+                                        <span class="sikshya-learnDock__title"><?php echo esc_html($prev_title); ?></span>
+                                    </span>
+                                </a>
+                            <?php else : ?>
+                                <span class="sikshya-learnDock__btn is-disabled" aria-disabled="true">
+                                    <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                    <span class="sikshya-learnDock__meta">
+                                        <span class="sikshya-learnDock__kicker"><?php esc_html_e('Previous', 'sikshya'); ?></span>
+                                        <span class="sikshya-learnDock__title"><?php esc_html_e('Start', 'sikshya'); ?></span>
+                                    </span>
                                 </span>
-                            </a>
-                        <?php else : ?>
-                            <span class="sikshya-learnDock__btn is-disabled" aria-disabled="true">
-                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-left'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-                                <span class="sikshya-learnDock__meta">
-                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Previous', 'sikshya'); ?></span>
-                                    <span class="sikshya-learnDock__title"><?php esc_html_e('Start', 'sikshya'); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="sikshya-learnContentNav__center">
+                            <?php
+                            ob_start();
+                            /**
+                             * Center slot in the fixed quiz footer (e.g. Discussion / Q&A launcher from Pro add-ons).
+                             *
+                             * @param array<string, mixed>                              $legacy_vm  Back-compat view array.
+                             * @param \Sikshya\Presentation\Models\SingleQuizPageModel $page_model
+                             */
+                            do_action('sikshya_learn_content_nav_center', $page_model->toLegacyViewArray(), $page_model);
+                            $learn_nav_center = (string) ob_get_clean();
+                            if (trim($learn_nav_center) === '') {
+                                echo '<span class="sikshya-learnContentNav__spacer" aria-hidden="true"></span>';
+                            } else {
+                                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- add-on HTML.
+                                echo $learn_nav_center;
+                            }
+                            ?>
+                        </div>
+                        <div class="sikshya-learnContentNav__side sikshya-learnContentNav__side--next">
+                            <?php if ($next_url !== '') : ?>
+                                <a class="sikshya-learnDock__btn sikshya-learnDock__btn--next" href="<?php echo esc_url($next_url); ?>">
+                                    <span class="sikshya-learnDock__meta">
+                                        <span class="sikshya-learnDock__kicker"><?php esc_html_e('Next', 'sikshya'); ?></span>
+                                        <span class="sikshya-learnDock__title"><?php echo esc_html($next_title); ?></span>
+                                    </span>
+                                    <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-right'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+                                </a>
+                            <?php else : ?>
+                                <span class="sikshya-learnDock__btn sikshya-learnDock__btn--next is-disabled" aria-disabled="true">
+                                    <span class="sikshya-learnDock__meta">
+                                        <span class="sikshya-learnDock__kicker"><?php esc_html_e('Next', 'sikshya'); ?></span>
+                                        <span class="sikshya-learnDock__title"><?php esc_html_e('End', 'sikshya'); ?></span>
+                                    </span>
+                                    <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-right'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
                                 </span>
-                            </span>
-                        <?php endif; ?>
-
-                        <?php if ($next_url !== '') : ?>
-                            <a class="sikshya-learnDock__btn sikshya-learnDock__btn--next" href="<?php echo esc_url($next_url); ?>">
-                                <span class="sikshya-learnDock__meta">
-                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Next', 'sikshya'); ?></span>
-                                    <span class="sikshya-learnDock__title"><?php echo esc_html($next_title); ?></span>
-                                </span>
-                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-right'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-                            </a>
-                        <?php else : ?>
-                            <span class="sikshya-learnDock__btn sikshya-learnDock__btn--next is-disabled" aria-disabled="true">
-                                <span class="sikshya-learnDock__meta">
-                                    <span class="sikshya-learnDock__kicker"><?php esc_html_e('Next', 'sikshya'); ?></span>
-                                    <span class="sikshya-learnDock__title"><?php esc_html_e('End', 'sikshya'); ?></span>
-                                </span>
-                                <span class="sikshya-learnDock__icon" aria-hidden="true"><?php echo sikshya_learn_icon('chevron-right'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-                            </span>
-                        <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </nav>
             <?php endif; ?>
             </div>

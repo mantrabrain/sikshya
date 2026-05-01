@@ -158,6 +158,10 @@ final class CheckoutService
         $coupon_id = null;
         $coupon_code = trim($coupon_code);
 
+        if ($coupon_code !== '' && !Settings::isTruthy($this->settings()->getSetting('enable_coupons', false))) {
+            $coupon_code = '';
+        }
+
         if ($coupon_code !== '') {
             $coupon = $this->coupons->findActiveByCode($coupon_code);
             if ($coupon) {

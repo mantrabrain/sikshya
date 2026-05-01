@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getWpApi } from '../../api';
+import { ApiError, getApiErrorToastTitle, getErrorSummary, preferToastForApiError } from '../../api/errors';
 import { NavIcon } from '../../components/NavIcon';
 import { TopRightToast, useTopRightToast } from '../../components/shared/TopRightToast';
 import { appViewHref } from '../../lib/appUrl';
@@ -34,6 +35,7 @@ import {
   readMeta,
   titleFromPost,
   useWpContentPost,
+  wpRestExcerptPayload,
 } from './useWpContentPost';
 import {
   PRO_ASSIGNMENT_DEFAULTS,
@@ -186,16 +188,45 @@ type EditorShellProps = {
 
 function EditorFormShell({ loading, saving, error, onRetry, saveMsg, children }: EditorShellProps) {
   const toast = useTopRightToast(3800);
+  const toastErrorSigRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!saveMsg) return;
     toast.success('Saved', saveMsg);
-  }, [saveMsg]);
+  }, [saveMsg, toast]);
+
+  useEffect(() => {
+    if (!error) {
+      toastErrorSigRef.current = null;
+      return;
+    }
+    if (!preferToastForApiError(error)) {
+      return;
+    }
+    const summary = getErrorSummary(error);
+    const sig =
+      error instanceof ApiError
+        ? `${error.method}:${error.status}:${error.url}:${summary}`
+        : `e:${summary}`;
+    if (toastErrorSigRef.current === sig) {
+      return;
+    }
+    toastErrorSigRef.current = sig;
+    toast.show({
+      open: true,
+      kind: 'error',
+      title: getApiErrorToastTitle(error),
+      message: summary,
+      ttlMs: 10000,
+    });
+  }, [error, toast]);
+
+  const showErrorPanel = Boolean(error) && !preferToastForApiError(error);
 
   return (
     <>
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
-      {error ? (
+      {showErrorPanel ? (
         <div className="mb-4">
           <ApiErrorPanel error={error} title="Request failed" onRetry={onRetry} />
         </div>
@@ -341,7 +372,7 @@ export function LessonEditor(props: ContentEditorProps) {
       title,
       content,
       status,
-      excerpt,
+      excerpt: wpRestExcerptPayload(excerpt),
       featured_media: featured > 0 ? featured : 0,
       meta: {
         _sikshya_lesson_duration: duration,

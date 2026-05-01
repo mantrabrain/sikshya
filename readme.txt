@@ -99,24 +99,72 @@ Sell access without duct-taping five plugins together for a basic launch: config
 
 ### Shortcodes
 
-Use these shortcodes to embed Sikshya LMS components on any page/post.
+Sikshya registers the shortcodes below. Paste them into any page, post, or widget that runs WordPress shortcodes (Shortcode block, Classic editor, or a theme template that calls `do_shortcode`). Attribute names are lowercase unless noted.
 
-* **Courses list**: `[sikshya_courses]`
-  * **What it does**: Lists published courses using the same card layout as the course catalog.
-  * **Attributes**:
-    * `per_page` (default `9`, max `50`)
-    * `columns` (optional; `3` uses a fixed 3-column layout, other values use an auto grid)
-    * `view` (`grid` or `list`, default `grid`)
-    * `category` (course category slug)
-    * `tag` (course tag slug)
-    * `search` (search term)
-    * `orderby` (`date`, `title`, or `price`, default `date`)
-    * `order` (`asc` or `desc`, default `desc`)
-    * `pagination` (`1` or `0`, default `1`)
-  * **Example**: `[sikshya_courses per_page="12" view="grid" orderby="date" order="desc" pagination="1"]`
+**Quick reference**
 
-* **Instructor application / registration form**: `[sikshya_instructor_registration]`
-  * **What it does**: Shows a secure “apply to become an instructor” form for logged-in users. Guests will see a login prompt.
+* `[sikshya_courses]` — Grid or list of published courses (same card UI as the catalog).
+* `[sikshya_login]` — Sign-in form (Sikshya auth handler; errors stay on the same page).
+* `[sikshya_registration]` — Create a Sikshya student account; optional instructor intent submits a pending teaching application.
+
+**`[sikshya_courses]`**
+
+**What it does:** Queries published courses and renders them with the same course card partial used on archives and the catalog.
+
+**Attributes** (all optional except where a default is listed):
+
+* `per_page` — Number of courses per page. Default `9`. Minimum `1`, maximum `50`.
+* `columns` — Layout hint. `3` forces a three-column grid; other positive values (up to `6`) adjust the auto grid; `0` or omitted uses the default auto layout.
+* `view` — `grid` or `list`. Default `grid`.
+* `category` — Filter by **course category** taxonomy slug (not the numeric ID).
+* `tag` — Filter by **course tag** taxonomy slug.
+* `search` — Free-text search string (same idea as the catalog search).
+* `orderby` — `date`, `title`, or `price`. Default `date`.
+* `order` — `asc` or `desc`. Default `desc`.
+* `pagination` — `1` (show paging) or `0` (single page). Default `1`. When enabled, page links use the query argument **`sikshya_courses_page`** so paging does not clash with the main query.
+
+**Examples**
+
+`[sikshya_courses]`
+
+`[sikshya_courses per_page="12" view="grid" category="web-design" orderby="price" order="asc" pagination="1"]`
+
+`[sikshya_courses view="list" search="wordpress" pagination="0"]`
+
+**`[sikshya_login]`**
+
+**What it does:** Renders an email-or-username + password form that authenticates through Sikshya’s `admin-post` handler (`wp_signon`). Failed logins show a notice on the **same URL** (no redirect to `wp-login.php`). Used on the virtual login page and inside checkout.
+
+**Attributes:**
+
+* `redirect_to` — Absolute or relative URL after **successful** login. Validated with `wp_validate_redirect`. If empty, the handler falls back to the HTTP referer, then the site home URL.
+
+**Examples**
+
+`[sikshya_login]`
+
+`[sikshya_login redirect_to="/my-account/"]`
+
+`[sikshya_login redirect_to="https://example.com/checkout/"]`
+
+**`[sikshya_registration]`**
+
+**What it does:** Renders a registration form (display name optional, email, password). Creates a WordPress user with the **Sikshya student** role, then triggers the same **new-user email notifications WordPress sends after core registration** (`wp_send_new_user_notifications`, admin + user). Intended for checkout (“Create account”) and custom landing pages.
+
+**Attributes:**
+
+* `type` — `student` or `instructor`. Default `student`. **`instructor` does not assign the instructor role:** the account is a student and a **pending instructor application** is recorded (same meta as the account “Apply to teach” flow). An administrator approves applications in the dashboard; only then is the `sikshya_instructor` role added.
+* `redirect_to` — Same behavior as `[sikshya_login]` after successful registration.
+
+**Developers:** Filter `sikshya_send_new_user_notifications` (bool, user ID) to disable core emails if you replace them with your own.
+
+**Examples**
+
+`[sikshya_registration]`
+
+`[sikshya_registration type="student"]`
+
+`[sikshya_registration type="instructor" redirect_to="/courses/"]`
 
 ### Upgrade to Sikshya Pro
 
@@ -265,14 +313,12 @@ Please follow the responsible disclosure process published on the vendor site (d
 
 == Screenshots ==
 
-1. Sikshya admin shell — fast navigation between courses, learners, and commerce tools.
-2. Course builder — curriculum outline, lessons, and structured metadata.
-3. Course catalog — discovery, filters, and archive layout aligned to your theme.
-4. Single course page — outcomes, curriculum preview, and enrollment call-to-action.
-5. Lesson experience — navigation, completion, and media-friendly layouts.
-6. Quiz taking — attempts, scoring, and learner feedback aligned to quiz settings.
-7. Student dashboard — enrollments, progress, and resume learning.
-8. Checkout & orders — purchase path, coupons, and operational order detail.
+1. Sikshya admin UI — fast navigation between courses, learners, and commerce tools.
+2. Course Lising admin UI.
+3. Course Builder Page
+4. Settings page
+5. Course Listing
+6. Learn Page UI
 
 == Changelog ==
 

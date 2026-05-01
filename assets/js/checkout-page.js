@@ -352,7 +352,7 @@
       }
     }
     if (firstMissing) {
-      setStatus(t('missingRequired', 'Please complete all required fields to continue.'));
+      showError(t('missingRequired', 'Please complete all required fields to continue.'));
       try {
         var el = host.querySelector('[data-df-input="' + firstMissing + '"]');
         if (el && el.focus) el.focus();
@@ -396,14 +396,42 @@
       });
     });
 
-    // Default tab: guest checkout (if present) else login.
+    // Default tab: guest checkout (if present) else login — unless URL requests auth flash tab first.
     var hasGuestPanel = false;
     panels.forEach(function (p) {
       if ((p.getAttribute('data-sikshya-auth-panel') || '') === 'guest') {
         hasGuestPanel = true;
       }
     });
-    setActive(hasGuestPanel ? 'guest' : 'login');
+
+    var flashScope = '';
+    try {
+      var u0 = new URL(window.location.href);
+      flashScope = u0.searchParams.get('sikshya_auth_scope') || '';
+    } catch (e0) {
+      flashScope = '';
+    }
+
+    if (flashScope === 'login' || flashScope === 'register') {
+      setActive(flashScope);
+    } else {
+      setActive(hasGuestPanel ? 'guest' : 'login');
+    }
+
+    // Strip ?sikshya_auth_*= from address bar after choosing tab (message is already in the HTML).
+    try {
+      var u = new URL(window.location.href);
+      var scope = u.searchParams.get('sikshya_auth_scope') || '';
+      if (scope && u.searchParams.get('sikshya_auth_message')) {
+        u.searchParams.delete('sikshya_auth_scope');
+        u.searchParams.delete('sikshya_auth_message');
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', u.pathname + u.search + u.hash);
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
   })();
 
   function getGuestEmail() {
@@ -418,12 +446,12 @@
   function requireGuestEmailOrShowError() {
     if (isLoggedIn) return true;
     if (!guestEnabled) {
-      showError('Please sign in to continue checkout.');
+      showError(t('signInToCheckout', 'Please sign in to continue checkout.'));
       return false;
     }
     var email = getGuestEmail();
     if (!email || email.indexOf('@') === -1) {
-      showError('Please enter a valid email to continue.');
+      showError(t('guestEmailInvalid', 'Please enter a valid email address to continue.'));
       if (guestEmailEl && guestEmailEl.focus) guestEmailEl.focus();
       return false;
     }
@@ -557,14 +585,14 @@
 
   function fetchQuote(couponCode, onDone) {
     if (!courseIds.length) {
-      setStatus(t('noCourses', 'No courses in checkout.'));
+      showError(t('noCourses', 'No courses in checkout.'));
       if (onDone) {
         onDone();
       }
       return;
     }
     if (!isLoggedIn && !guestEnabled) {
-      showError('Please sign in to continue checkout.');
+      showError(t('signInToCheckout', 'Please sign in to continue checkout.'));
       if (onDone) onDone();
       return;
     }
@@ -591,6 +619,16 @@
           return;
         }
         applyTotalsFromQuote(json.data || {});
+        try {
+          var persisted = typeof couponCode === 'string' ? couponCode.trim() : '';
+          if (persisted) {
+            window.sessionStorage.setItem('sikshya_checkout_coupon', persisted);
+          } else {
+            window.sessionStorage.removeItem('sikshya_checkout_coupon');
+          }
+        } catch (e) {
+          /* ignore */
+        }
         setStatus('');
         if (onDone) {
           onDone();
@@ -604,7 +642,9 @@
       });
   }
 
-  if (applyBtn && isLoggedIn) {
+  var canUseCouponUi = isLoggedIn || guestEnabled;
+
+  if (applyBtn && canUseCouponUi) {
     applyBtn.addEventListener('click', function () {
       applyBtn.disabled = true;
       fetchQuote(getCouponCode(), function () {
@@ -613,7 +653,7 @@
     });
   }
 
-  if (couponInput && applyBtn && isLoggedIn) {
+  if (couponInput && applyBtn && canUseCouponUi) {
     couponInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -624,9 +664,51 @@
     });
   }
 
+  try {
+    var savedCoupon = window.sessionStorage.getItem('sikshya_checkout_coupon');
+    if (couponInput && savedCoupon && canUseCouponUi && !String(couponInput.value || '').trim()) {
+      couponInput.value = savedCoupon;
+      fetchQuote(savedCoupon, function () {});
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
+  function collectBillingFromDom() {
+    var out = {
+      phone: '',
+      address_1: '',
+      address_2: '',
+      city: '',
+      state: '',
+      postcode: '',
+      country: '',
+    };
+    try {
+      var scope = root || document;
+      function pick(sel) {
+        var el = scope.querySelector(sel);
+        if (!el) {
+          return '';
+        }
+        return String(el.value || '').trim();
+      }
+      out.phone = pick('#sikshya-checkout-billing-phone');
+      out.address_1 = pick('#sikshya-checkout-billing-address-1');
+      out.address_2 = pick('#sikshya-checkout-billing-address-2');
+      out.city = pick('#sikshya-checkout-billing-city');
+      out.state = pick('#sikshya-checkout-billing-state');
+      out.postcode = pick('#sikshya-checkout-billing-postcode');
+      out.country = pick('#sikshya-checkout-billing-country');
+    } catch (e) {
+      /* ignore */
+    }
+    return out;
+  }
+
   function startGateway(gateway) {
     if (!courseIds.length) {
-      setStatus(t('noCourses', 'No courses in checkout.'));
+      showError(t('noCourses', 'No courses in checkout.'));
       return;
     }
     if (!requireGuestEmailOrShowError()) {
@@ -641,6 +723,7 @@
     setStatus(t('startingCheckout', 'Starting checkout…'));
     var marketingOptInEl = document.getElementById('sikshya-checkout-marketing-opt-in');
     var marketingOptIn = marketingOptInEl ? Boolean(marketingOptInEl.checked) : null;
+    var billingPayload = isLoggedIn ? collectBillingFromDom() : {};
     fetch(restUrl + 'checkout/session', {
       method: 'POST',
       credentials: getCheckoutFetchOptions('POST').credentials,
@@ -653,6 +736,7 @@
         guest_email: !isLoggedIn ? getGuestEmail() : '',
         guest_name: !isLoggedIn ? getGuestName() : '',
         dynamic_fields: dfHost ? dfCollectVisibleValues(dfHost) : {},
+        billing: billingPayload,
       }),
     })
       .then(function (r) {

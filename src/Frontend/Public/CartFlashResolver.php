@@ -10,7 +10,7 @@ namespace Sikshya\Frontend\Public;
 final class CartFlashResolver
 {
     /**
-     * @return array{type: string, message: string}|null
+     * @return array{type: string, message: string, show_view_cart?: bool}|null
      */
     public static function fromRequest(): ?array
     {
@@ -22,11 +22,15 @@ final class CartFlashResolver
                 delete_transient($key);
                 if (is_array($data) && !empty($data['message']) && is_string($data['message'])) {
                     $type = isset($data['type']) && is_string($data['type']) ? $data['type'] : 'info';
-
-                    return [
+                    $out = [
                         'type' => $type,
                         'message' => $data['message'],
                     ];
+                    if (!empty($data['show_view_cart'])) {
+                        $out['show_view_cart'] = true;
+                    }
+
+                    return $out;
                 }
             }
         }
@@ -37,8 +41,16 @@ final class CartFlashResolver
 
         $code = sanitize_key(wp_unslash((string) $_GET['sikshya_cart']));
         $map = [
-            'added' => ['type' => 'success', 'message' => __('Course added to your cart.', 'sikshya')],
-            'exists' => ['type' => 'info', 'message' => __('This course is already in your cart.', 'sikshya')],
+            'added' => [
+                'type' => 'success',
+                'message' => __('Course added to your cart.', 'sikshya'),
+                'show_view_cart' => true,
+            ],
+            'exists' => [
+                'type' => 'info',
+                'message' => __('This course is already in your cart.', 'sikshya'),
+                'show_view_cart' => true,
+            ],
             'removed' => ['type' => 'success', 'message' => __('Course removed from your cart.', 'sikshya')],
             'cleared' => ['type' => 'success', 'message' => __('Your cart was cleared.', 'sikshya')],
             'enrolled' => ['type' => 'success', 'message' => __('You are now enrolled in this course.', 'sikshya')],

@@ -108,9 +108,7 @@ final class LessonPageService
                 'current_completed' => $current_completed,
                 'course_features' => $course_features,
                 'lesson_type' => $lesson_type,
-                'learn_curriculum_sidebar_scrollable' => $course_id > 0 && Settings::isTruthy(
-                    get_post_meta($course_id, '_sikshya_learn_curriculum_sidebar_scrollable', true)
-                ),
+                'learn_curriculum_sidebar_scrollable' => self::isLearnCurriculumSidebarScrollableForCourse($course_id),
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
                     'login' => PublicPageUrls::login(get_permalink($post) ?: ''),
@@ -157,6 +155,23 @@ final class LessonPageService
     {
         $is_free = get_post_meta($lesson_id, '_sikshya_is_free', true);
         return Settings::isTruthy($is_free);
+    }
+
+    /**
+     * Learn shell: keep the curriculum rail a fixed height and scroll the outline list (default).
+     * Per-course opt-out when `_sikshya_learn_curriculum_sidebar_scrollable` is explicitly saved off.
+     */
+    public static function isLearnCurriculumSidebarScrollableForCourse(int $course_id): bool
+    {
+        if ($course_id <= 0) {
+            return true;
+        }
+        $raw = get_post_meta($course_id, '_sikshya_learn_curriculum_sidebar_scrollable', true);
+        if ($raw === '' || $raw === null || false === $raw) {
+            return true;
+        }
+
+        return Settings::isTruthy($raw);
     }
 
     /**

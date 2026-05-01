@@ -85,12 +85,28 @@ final class LessonLearnContent
      *
      * @param string $lesson_type_key Sanitized {@see _sikshya_lesson_type} value.
      */
+    /**
+     * Video/audio embed markup only (no filtered post_content).
+     *
+     * @param string $lesson_type_key Sanitized {@see _sikshya_lesson_type} value.
+     */
+    public static function primaryMediaHtml(\WP_Post $lesson_post, string $lesson_type_key): string
+    {
+        return self::primaryMediaMarkup((int) $lesson_post->ID, $lesson_type_key);
+    }
+
+    /**
+     * Lesson prose HTML after running post_content through {@see 'the_content'}.
+     */
+    public static function filteredPostContentHtml(\WP_Post $lesson_post): string
+    {
+        return (string) apply_filters('the_content', (string) $lesson_post->post_content);
+    }
+
     public static function composedBodyHtml(\WP_Post $lesson_post, string $lesson_type_key): string
     {
-        $prefix = self::primaryMediaMarkup((int) $lesson_post->ID, $lesson_type_key);
-        $body   = (string) apply_filters('the_content', (string) $lesson_post->post_content);
-
-        return $prefix . $body;
+        return self::primaryMediaHtml($lesson_post, $lesson_type_key)
+            . self::filteredPostContentHtml($lesson_post);
     }
 
     /**
@@ -248,7 +264,7 @@ final class LessonLearnContent
     private static function youtubeOrVimeoEmbedUrl(string $url): string
     {
         if (
-            preg_match('#youtube\.com/shorts/([^/?&#]+)#i', $url, $m)
+            preg_match('~youtube\.com/shorts/([^/?&#]+)~i', $url, $m)
             || preg_match('/youtu\.be\/([^?&]+)/', $url, $m)
             || preg_match('/[?&]v=([^&]+)/', $url, $m)
             || preg_match('/youtube\.com\/embed\/([^?&]+)/', $url, $m)

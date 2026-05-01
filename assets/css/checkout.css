@@ -9,24 +9,8 @@
 
 .sikshya-checkout-page.sik-f-scope.sikshya-public {
   padding-top: 0;
-  background-color: var(--sikshya-white);
+  background-color: transparent;
   min-height: 100%;
-}
-
-.sikshya-checkout-page__masthead {
-  background: var(--sik-f-surface-muted);
-  border-bottom: 1px solid var(--sik-f-border);
-  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
-  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
-}
-
-.sikshya-checkout-page__masthead-inner {
-  width: 100%;
-  max-width: 70rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
 }
 
 .sikshya-checkout-page__breadcrumb {
@@ -96,11 +80,11 @@
 
 .sikshya-checkout-page__body {
   width: 100%;
-  max-width: 70rem;
+  max-width: var(--sikshya-public-content-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-left: var(--sikshya-public-content-padding-inline);
+  padding-right: var(--sikshya-public-content-padding-inline);
   padding-bottom: var(--sikshya-spacing-16);
 }
 
@@ -362,6 +346,94 @@
   margin: 0;
 }
 
+/* Guest / billing fields + embedded auth */
+.sikshya-checkout-auth__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sikshya-spacing-2);
+  margin-bottom: var(--sikshya-spacing-4);
+}
+
+.sikshya-checkout-auth__panel {
+  margin-top: var(--sikshya-spacing-2);
+}
+
+.sikshya-checkout-auth__panel--login .sikshya-auth--login,
+.sikshya-checkout-auth__panel--register .sikshya-auth--register {
+  margin-top: 0;
+}
+
+.sikshya-checkout-guest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-4);
+}
+
+.sikshya-checkout-billing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-4);
+  margin-top: var(--sikshya-spacing-6);
+  padding-top: var(--sikshya-spacing-6);
+  border-top: 1px solid var(--sik-f-border);
+}
+
+.sikshya-checkout-billing__title {
+  margin: 0 0 var(--sikshya-spacing-4);
+  font-size: var(--sikshya-font-size-base);
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sikshya-spacing-4);
+}
+
+@media (min-width: 520px) {
+  .sikshya-checkout-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sikshya-checkout-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.sikshya-checkout-field--full {
+  grid-column: 1 / -1;
+}
+
+.sikshya-checkout-field__label {
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sik-f-text-heading);
+}
+
+.sikshya-checkout-field__control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 var(--sikshya-spacing-3);
+  border: 1px solid var(--sik-f-border);
+  border-radius: var(--sikshya-radius-lg);
+  background: var(--sik-f-surface);
+  color: var(--sik-f-text);
+  font-size: var(--sikshya-font-size-sm);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sikshya-checkout-field__control:focus {
+  outline: none;
+  border-color: var(--sikshya-primary);
+  box-shadow: 0 0 0 1px var(--sikshya-primary-light);
+}
+
 .sikshya-checkout-page__gateway-btn[disabled] {
   cursor: not-allowed;
   opacity: 0.6;
@@ -479,12 +551,30 @@
   border-radius: var(--sikshya-radius-lg);
 }
 
+.sikshya-checkout-page__primary-action {
+  margin-top: var(--sikshya-spacing-4);
+}
+
+.sikshya-checkout-page__primary-action .sikshya-btn {
+  width: 100%;
+  min-height: 2.875rem;
+  font-weight: 600;
+}
+
 .sikshya-checkout-status {
   margin: var(--sikshya-spacing-5) 0 0;
   min-height: 1.25rem;
   font-size: var(--sikshya-font-size-sm);
   font-weight: 500;
   color: var(--sik-f-text);
+}
+
+.sikshya-checkout-status:not(:empty) {
+  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
+  border-radius: var(--sikshya-radius-lg);
+  border: 1px solid var(--sik-f-border);
+  background: var(--sik-f-surface-muted);
+  color: var(--sik-f-text-heading);
 }
 
 /* Order summary (sidebar) */

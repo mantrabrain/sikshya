@@ -229,12 +229,12 @@ class SettingsTab extends AbstractTab
                 'fields' => [
                     'learn_curriculum_sidebar_scrollable' => [
                         'type' => 'checkbox',
-                        'label' => __('Scrollable curriculum sidebar', 'sikshya'),
+                        'label' => __('Scroll outline inside the sidebar (recommended)', 'sikshya'),
                         'description' => __(
-                            'When checked, the sidebar stays a fixed height and only the outline list scrolls (best for very long curricula). When unchecked, the whole sidebar scrolls together — the previous default.',
+                            'On by default: the outline list scrolls inside the left rail so the page does not grow endlessly. Turn off only if you prefer the legacy whole-column scroll.',
                             'sikshya'
                         ),
-                        'default' => '0',
+                        'default' => '1',
                         'validation' => 'boolval',
                         'sanitization' => 'boolval',
                     ],

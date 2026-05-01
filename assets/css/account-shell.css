@@ -1942,6 +1942,82 @@ a.sik-acc-cal__title:hover {
   padding: 1rem 1.15rem 1.25rem;
 }
 
+/* Instructor apply — form uses account field grid + primary button (not storefront sikshya-*). */
+.sik-acc-instructor-form {
+  min-width: 0;
+}
+
+.sik-acc-instructor-form__alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem 1.15rem 0.15rem;
+}
+
+.sik-acc-callout {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-weight: 500;
+  border-radius: var(--sik-acc-radius-sm);
+  border: 1px solid var(--sik-acc-border);
+  background: #f8fafc;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-callout--info {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(239, 246, 255, 0.95);
+  color: #1e3a8a;
+}
+
+.sik-acc-callout--warning {
+  border-color: rgba(217, 119, 6, 0.35);
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.sik-acc-callout--success {
+  border-color: rgba(5, 150, 105, 0.3);
+  background: var(--sik-acc-success-bg);
+  color: #065f46;
+}
+
+.sik-acc-form-grid--instructor-apply {
+  padding-top: 0.65rem;
+  padding-bottom: 0.35rem;
+}
+
+.sik-acc-form-actions--instructor-apply {
+  padding-top: 0.35rem;
+  padding-bottom: 1.25rem;
+  border-top: 1px solid var(--sik-acc-border);
+  margin-top: 0.15rem;
+}
+
+.sik-acc-btn--lg {
+  min-height: 2.65rem;
+  padding: 0.55rem 1.35rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: var(--sik-acc-radius-sm);
+}
+
+.sik-acc-instructor-form--guest {
+  padding: 1rem 1.15rem 1.25rem;
+}
+
+.sik-acc-instructor-form__guest-text {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+  color: var(--sik-acc-muted);
+}
+
+.sik-acc-instructor-form__guest-actions {
+  margin: 0;
+}
+
 .sik-acc-metrics--panel {
   padding: 0.95rem 1.15rem 1.15rem;
 }

@@ -43,17 +43,23 @@ final class CartFormHandler
             if ($to_checkout) {
                 $checkout = PublicPageUrls::url('checkout');
                 if (is_string($checkout) && $checkout !== '') {
+                    // Buy now: land on checkout — avoid “added to cart” copy and skip “View cart” here.
+                    $msg = $changed
+                        ? __('Ready for checkout. Complete your purchase below.', 'sikshya')
+                        : __('This course is already in your cart. You can finish checkout below.', 'sikshya');
                     self::redirectWithTransientFlash(
                         $checkout,
                         $changed ? 'success' : 'info',
-                        $changed ? __('Course added to your cart.', 'sikshya') : __('This course is already in your cart.', 'sikshya')
+                        $msg,
+                        ['show_view_cart' => false]
                     );
                 }
             }
             self::redirectWithTransientFlash(
                 $redirect_base,
                 $changed ? 'success' : 'info',
-                $changed ? __('Course added to your cart.', 'sikshya') : __('This course is already in your cart.', 'sikshya')
+                $changed ? __('Course added to your cart.', 'sikshya') : __('This course is already in your cart.', 'sikshya'),
+                ['show_view_cart' => true]
             );
         }
 
@@ -128,15 +134,18 @@ final class CartFormHandler
     /**
      * @return never
      */
-    private static function redirectWithTransientFlash(string $redirect_base, string $type, string $message): void
+    private static function redirectWithTransientFlash(string $redirect_base, string $type, string $message, array $extra = []): void
     {
         $token = wp_generate_password(16, false, false);
         set_transient(
             'sikshya_cart_flash_' . $token,
-            [
-                'type' => $type,
-                'message' => $message,
-            ],
+            array_merge(
+                [
+                    'type' => $type,
+                    'message' => $message,
+                ],
+                $extra
+            ),
             120
         );
         wp_safe_redirect(add_query_arg(['sikshya_cart_flash' => $token], $redirect_base));

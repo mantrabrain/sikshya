@@ -12,17 +12,17 @@
 
 .sikshya-single-course.sikshya-course-lp.sik-f-scope.sikshya-public {
   padding-top: 0;
-  background-color: var(--sikshya-white);
+  background-color: transparent;
   min-height: 100%;
 }
 
 .sikshya-container--course {
   width: 100%;
-  max-width: 70rem;
+  max-width: var(--sikshya-public-content-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-left: var(--sikshya-public-content-padding-inline);
+  padding-right: var(--sikshya-public-content-padding-inline);
 }
 
 /* -------------------------------------------------------------------------
@@ -37,7 +37,7 @@
 }
 
 .sikshya-course-lp__masthead-inner {
-  max-width: 70rem;
+  max-width: var(--sikshya-public-content-max-width);
 }
 
 .sikshya-course-lp__breadcrumb {
@@ -118,28 +118,6 @@
 
 .sikshya-course-lp .sikshya-cart-flash {
   margin-bottom: var(--sikshya-spacing-5);
-  padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
-  border-radius: var(--sikshya-radius-lg);
-  font-size: var(--sikshya-font-size-sm);
-  font-weight: 500;
-}
-
-.sikshya-cart-flash--success {
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
-}
-
-.sikshya-cart-flash--info {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-}
-
-.sikshya-cart-flash--error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
 }
 
 /* -------------------------------------------------------------------------

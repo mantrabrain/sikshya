@@ -32,6 +32,14 @@ export function excerptFromPost(p: WpPostRest): string {
   return p.excerpt?.raw ?? stripTags(p.excerpt?.rendered || '') ?? '';
 }
 
+/**
+ * WordPress `wp/v2/*` post endpoints expect excerpt in edit context as `{ raw: string }`.
+ * Sending a top-level string is ignored by schema validation, so short summaries never persist.
+ */
+export function wpRestExcerptPayload(plain: string): { raw: string } {
+  return { raw: plain };
+}
+
 /** Read meta whether REST uses leading underscore or not. */
 export function readMeta(meta: Record<string, unknown> | undefined, dbKey: string): unknown {
   if (!meta) {

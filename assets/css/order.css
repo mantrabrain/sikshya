@@ -9,24 +9,8 @@
 
 .sikshya-order-page.sik-f-scope.sikshya-public {
   padding-top: 0;
-  background-color: var(--sikshya-white);
+  background-color: transparent;
   min-height: 100%;
-}
-
-.sikshya-order-page__masthead {
-  background: var(--sik-f-surface-muted);
-  border-bottom: 1px solid var(--sik-f-border);
-  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
-  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
-}
-
-.sikshya-order-page__masthead-inner {
-  width: 100%;
-  max-width: 70rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
 }
 
 .sikshya-order-page__breadcrumb {
@@ -80,11 +64,11 @@
 
 .sikshya-order-page__body {
   width: 100%;
-  max-width: 70rem;
+  max-width: var(--sikshya-public-content-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
-  padding-right: clamp(var(--sikshya-spacing-4), 4vw, var(--sikshya-spacing-8));
+  padding-left: var(--sikshya-public-content-padding-inline);
+  padding-right: var(--sikshya-public-content-padding-inline);
   padding-bottom: var(--sikshya-spacing-16);
 }
 

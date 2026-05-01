@@ -7,6 +7,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Public\CartFormHandler;
+use Sikshya\Frontend\Public\CartStorage;
 use Sikshya\Frontend\Public\PublicPageUrls;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
@@ -81,6 +82,7 @@ class Frontend
         add_action('wp_footer', [$this, 'addFrontendFooter']);
         add_action('admin_bar_menu', [$this, 'addSikshyaAdminBarLinks'], 80);
         // Run on init (before template output) so redirects/cookies are not broken by theme notices.
+        add_action('init', [CartStorage::class, 'registerHooks'], 12);
         add_action('init', [CartFormHandler::class, 'maybeHandle'], 20);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
         add_action('wp', [$this, 'initFrontend']);
@@ -275,6 +277,31 @@ class Frontend
                 ['sikshya-public-ds', 'sikshya-frontend'],
                 $this->plugin->version
             );
+            wp_enqueue_script(
+                'sikshya-cart-page',
+                $this->plugin->getAssetUrl('js/cart-page.js'),
+                [],
+                $this->plugin->version,
+                true
+            );
+            wp_localize_script(
+                'sikshya-cart-page',
+                'sikshyaCartConfig',
+                [
+                    'restUrl' => esc_url_raw(rest_url('sikshya/v1/')),
+                    'restNonce' => is_user_logged_in() ? wp_create_nonce('wp_rest') : '',
+                    'guestNonce' => wp_create_nonce('sikshya_guest_checkout'),
+                    'isLoggedIn' => is_user_logged_in(),
+                    'guestEnabled' => Settings::isTruthy(Settings::get('enable_guest_checkout', true)),
+                    'i18n' => [
+                        'updatingTotals' => __('Updating totals…', 'sikshya'),
+                        'quoteFailed' => __('Could not update totals.', 'sikshya'),
+                        'networkError' => __('Network error. Please try again.', 'sikshya'),
+                        'signInToQuote' => __('Please sign in to apply a discount code.', 'sikshya'),
+                        'cartCouponSaved' => __('Totals updated. This code will appear on checkout.', 'sikshya'),
+                    ],
+                ]
+            );
         }
 
         if (PublicPageUrls::isCurrentVirtualPage('checkout')) {
@@ -402,6 +429,10 @@ class Frontend
                 [
                     'i18n' => [
                         'noCourses' => __('No courses in checkout.', 'sikshya'),
+                        'signInToCheckout' => __('Please sign in to continue checkout.', 'sikshya'),
+                        'guestEmailInvalid' => __('Please enter a valid email address to continue.', 'sikshya'),
+                        'missingRequired' => __('Please complete all required fields to continue.', 'sikshya'),
+                        'confirmFailed' => __('Could not confirm payment.', 'sikshya'),
                         'startingCheckout' => __('Starting checkout…', 'sikshya'),
                         'checkoutFailed' => __('Checkout failed.', 'sikshya'),
                         'quoteFailed' => __('Could not update totals.', 'sikshya'),

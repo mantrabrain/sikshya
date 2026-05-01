@@ -2173,6 +2173,30 @@
   .sikshya-outlineOpen .sikshya-learnSidebar {
     transform: translateX(0);
   }
+
+  /* Long curricula: scroll outline inside the drawer instead of stretching the page */
+  .sikshya-outlineOpen.sikshya-learning-shell--lesson .sikshya-learnSidebar .sikshya-learnSidebar__inner,
+  .sikshya-outlineOpen.sikshya-learning-shell--quiz .sikshya-learnSidebar .sikshya-learnSidebar__inner,
+  .sikshya-outlineOpen.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar .sikshya-learnSidebar__inner {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sikshya-outlineOpen.sikshya-learning-shell--lesson .sikshya-learnSidebar .sikshya-learnSidebar__scroll,
+  .sikshya-outlineOpen.sikshya-learning-shell--quiz .sikshya-learnSidebar .sikshya-learnSidebar__scroll,
+  .sikshya-outlineOpen.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar .sikshya-learnSidebar__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -2279,8 +2303,8 @@
   z-index: 30;
   min-height: var(--sikshya-learn-content-nav-h);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: stretch;
+  justify-content: stretch;
   gap: 12px;
   padding: 10px max(22px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom, 0px)) max(22px, env(safe-area-inset-left));
   background: color-mix(in srgb, var(--sikshya-learn-surface) 88%, transparent);
@@ -2288,6 +2312,50 @@
   -webkit-backdrop-filter: saturate(1.15) blur(12px);
   border-top: 1px solid var(--sikshya-learn-border);
   box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.sikshya-learnContentNav__side {
+  flex: 0 1 min(44%, 520px);
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+}
+
+.sikshya-learnContentNav__side--prev {
+  justify-content: flex-start;
+}
+
+.sikshya-learnContentNav__side--next {
+  justify-content: flex-end;
+}
+
+.sikshya-learnContentNav__center {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  align-self: stretch;
+}
+
+/* Pro add-ons: keep controls natural height; spacer fills the bar instead */
+.sikshya-learnContentNav__center > *:not(.sikshya-learnContentNav__spacer) {
+  align-self: center;
+}
+
+/* Non-interactive reserve when Pro Discussion/Q&A center control is absent */
+.sikshya-learnContentNav__spacer {
+  display: block;
+  width: min(40%, 300px);
+  max-width: 100%;
+  align-self: stretch;
+  min-height: calc(var(--sikshya-learn-content-nav-h) - 24px);
+  border-radius: var(--sikshya-learn-radius-12);
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  pointer-events: none;
+  flex: 0 0 auto;
 }
 
 @media (max-width: 1023px) {
@@ -2728,6 +2796,8 @@
   display: flex;
   align-items: center;
   position: sticky;
+  /* Scrollport is `.sikshya-learnContent` on desktop (overflow-y: auto); `top` must be non-auto for sticky to engage. */
+  top: 0;
   z-index: 44;
   /* Bleed through column padding so header strip touches edges */
   margin-left: -22px;
@@ -2735,10 +2805,22 @@
   backdrop-filter: saturate(1.05) blur(6px);
 }
 
+/* Hub (and any view where the main column does not create its own scrollport): stick under the Learn top bar. */
+.sikshya-learning-shell--hub .sikshya-learnContent .sikshya-contentPanel--header {
+  top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
+}
+
 @media (max-width: 1023px) {
   .sikshya-contentPanel--header {
     margin-left: -16px;
     margin-right: -16px;
+  }
+
+  /* Document-level scroll: offset by sticky top bar so the header does not slide under it. */
+  .sikshya-learning-shell--lesson .sikshya-learnContent .sikshya-contentPanel--header,
+  .sikshya-learning-shell--quiz .sikshya-learnContent .sikshya-contentPanel--header,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContent .sikshya-contentPanel--header {
+    top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
   }
 }
 

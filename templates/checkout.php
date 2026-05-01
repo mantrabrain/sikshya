@@ -8,11 +8,17 @@
 use Sikshya\Services\Frontend\CheckoutPageService;
 use Sikshya\Presentation\Models\CheckoutPageModel;
 use Sikshya\Services\Settings;
+use Sikshya\Frontend\Public\PublicPageUrls;
+use Sikshya\Shortcodes\AuthShortcodes;
 
 /** @var CheckoutPageModel $page_model */
 $page_model = CheckoutPageService::build();
 $co = $page_model->toLegacyViewArray();
 $u = $page_model->getUrls();
+$auth_redirect_to = $u->getCheckoutUrl();
+if ($auth_redirect_to === '') {
+    $auth_redirect_to = PublicPageUrls::url('checkout');
+}
 $vw = $page_model->getViewer();
 $fmt_subtotal = number_format_i18n($page_model->getSubtotalHint(), 2) . ' ' . $page_model->getCurrency();
 $fmt_total = $fmt_subtotal;
@@ -21,6 +27,7 @@ sikshya_get_header();
 
 $is_logged_in = is_user_logged_in();
 $guest_enabled = Settings::isTruthy(Settings::get('enable_guest_checkout', true));
+$coupons_enabled = Settings::isTruthy(Settings::get('enable_coupons', false));
 
 $uid = $is_logged_in ? (int) get_current_user_id() : 0;
 $prefill = [
@@ -149,7 +156,7 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
         <?php else : ?>
             <div class="sikshya-checkout-page__layout">
                 <main class="sikshya-checkout-page__main" id="sikshya-checkout-main">
-                    <div id="sikshya-checkout-errors" class="sikshya-checkout-errors" hidden></div>
+                    <div id="sikshya-checkout-errors" class="sikshya-checkout-errors" hidden role="alert" aria-live="assertive"></div>
                     <section class="sikshya-checkout-page__panel sikshya-checkout-page__panel--account" aria-labelledby="sikshya-checkout-account-heading">
                         <?php if (!$is_logged_in) : ?>
                             <?php if ($guest_enabled) : ?>
@@ -168,11 +175,18 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                                     </div>
 
                                     <div class="sikshya-checkout-auth__panel" data-sikshya-auth-panel="guest">
-                                        <div class="sikshya-checkout-guest" id="sikshya-checkout-guest" style="margin-top:0.75rem;">
-                                            <p style="margin:0 0 0.75rem;">
-                                                <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('Email', 'sikshya'); ?></label>
-                                                <input id="sikshya-checkout-guest-email" type="email" class="sikshya-input" autocomplete="email" required style="width:100%;" />
-                                            </p>
+                                        <div class="sikshya-checkout-guest" id="sikshya-checkout-guest">
+                                            <div class="sikshya-checkout-field">
+                                                <label class="sikshya-checkout-field__label" for="sikshya-checkout-guest-email"><?php esc_html_e('Email', 'sikshya'); ?></label>
+                                                <input
+                                                    id="sikshya-checkout-guest-email"
+                                                    type="email"
+                                                    class="sikshya-input sikshya-checkout-field__control"
+                                                    autocomplete="email"
+                                                    required
+                                                    placeholder="<?php esc_attr_e('you@example.com', 'sikshya'); ?>"
+                                                />
+                                            </div>
                                             <?php
                                             /**
                                              * Render extra checkout fields for guest checkout (Dynamic Fields add-on).
@@ -193,8 +207,8 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                                         </div>
                                     </div>
 
-                                    <div class="sikshya-checkout-auth__panel" data-sikshya-auth-panel="login" hidden style="margin-top:0.75rem;">
-                                        <?php echo do_shortcode('[sikshya_login redirect_to="' . esc_attr(get_permalink()) . '"]'); ?>
+                                    <div class="sikshya-checkout-auth__panel sikshya-checkout-auth__panel--login" data-sikshya-auth-panel="login" hidden>
+                                        <?php echo AuthShortcodes::renderLogin(['redirect_to' => $auth_redirect_to]); ?>
                                     </div>
                                 </div>
                             <?php else : ?>
@@ -211,11 +225,11 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                                             <?php esc_html_e('Create account', 'sikshya'); ?>
                                         </button>
                                     </div>
-                                    <div class="sikshya-checkout-auth__panel" data-sikshya-auth-panel="login">
-                                        <?php echo do_shortcode('[sikshya_login redirect_to="' . esc_attr(get_permalink()) . '"]'); ?>
+                                    <div class="sikshya-checkout-auth__panel sikshya-checkout-auth__panel--login" data-sikshya-auth-panel="login">
+                                        <?php echo AuthShortcodes::renderLogin(['redirect_to' => $auth_redirect_to]); ?>
                                     </div>
-                                    <div class="sikshya-checkout-auth__panel" data-sikshya-auth-panel="register" hidden>
-                                        <?php echo do_shortcode('[sikshya_registration type="student" redirect_to="' . esc_attr(get_permalink()) . '"]'); ?>
+                                    <div class="sikshya-checkout-auth__panel sikshya-checkout-auth__panel--register" data-sikshya-auth-panel="register" hidden>
+                                        <?php echo AuthShortcodes::renderRegistration(['type' => 'student', 'redirect_to' => $auth_redirect_to]); ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -247,40 +261,48 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                                 <?php esc_html_e('For card or PayPal, details are entered on the secure gateway screen. For offline payment, you will see bank or invoice instructions on your order page after you place the order.', 'sikshya'); ?>
                             </p>
 
-                            <div class="sikshya-checkout-billing" style="margin-top:1rem;">
-                                <h3 style="margin:0 0 0.5rem;font-size:0.95rem;"><?php esc_html_e('Billing details', 'sikshya'); ?></h3>
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                                    <p style="margin:0;">
-                                        <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('Phone', 'sikshya'); ?></label>
-                                        <input id="sikshya-checkout-billing-phone" type="tel" class="sikshya-input" autocomplete="tel" style="width:100%;" value="<?php echo esc_attr($prefill['phone']); ?>" />
-                                    </p>
-                                    <p style="margin:0;">
-                                        <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('Country', 'sikshya'); ?></label>
-                                        <input id="sikshya-checkout-billing-country" type="text" class="sikshya-input" autocomplete="country-name" style="width:100%;" value="<?php echo esc_attr($prefill['country']); ?>" />
-                                    </p>
+                            <div class="sikshya-checkout-billing">
+                                <h3 class="sikshya-checkout-billing__title"><?php esc_html_e('Billing details', 'sikshya'); ?></h3>
+                                <div class="sikshya-checkout-form-grid">
+                                    <div class="sikshya-checkout-field">
+                                        <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-phone"><?php esc_html_e('Phone', 'sikshya'); ?></label>
+                                        <input id="sikshya-checkout-billing-phone" type="tel" class="sikshya-input sikshya-checkout-field__control" autocomplete="tel" value="<?php echo esc_attr($prefill['phone']); ?>" placeholder="<?php esc_attr_e('+1 555 000 0000', 'sikshya'); ?>" />
+                                    </div>
+                                    <div class="sikshya-checkout-field">
+                                        <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-country"><?php esc_html_e('Country', 'sikshya'); ?></label>
+                                        <?php
+                                        if (function_exists('sikshya_render_billing_country_select')) {
+                                            sikshya_render_billing_country_select('sikshya-checkout-billing-country', (string) ($prefill['country'] ?? ''));
+                                        } else {
+                                            ?>
+                                        <input id="sikshya-checkout-billing-country" type="text" class="sikshya-input sikshya-checkout-field__control" autocomplete="country-name" value="<?php echo esc_attr($prefill['country']); ?>" placeholder="<?php esc_attr_e('e.g. United States', 'sikshya'); ?>" />
+                                            <?php
+                                        }
+                                        ?>
+                                    </div>
                                 </div>
-                                <p style="margin:0.75rem 0 0.75rem;">
-                                    <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('Address line 1', 'sikshya'); ?></label>
-                                    <input id="sikshya-checkout-billing-address-1" type="text" class="sikshya-input" autocomplete="address-line1" style="width:100%;" value="<?php echo esc_attr($prefill['address_1']); ?>" />
-                                </p>
-                                <p style="margin:0 0 0.75rem;">
-                                    <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('Address line 2 (optional)', 'sikshya'); ?></label>
-                                    <input id="sikshya-checkout-billing-address-2" type="text" class="sikshya-input" autocomplete="address-line2" style="width:100%;" value="<?php echo esc_attr($prefill['address_2']); ?>" />
-                                </p>
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-                                    <p style="margin:0;">
-                                        <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('City', 'sikshya'); ?></label>
-                                        <input id="sikshya-checkout-billing-city" type="text" class="sikshya-input" autocomplete="address-level2" style="width:100%;" value="<?php echo esc_attr($prefill['city']); ?>" />
-                                    </p>
-                                    <p style="margin:0;">
-                                        <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('Postal code (optional)', 'sikshya'); ?></label>
-                                        <input id="sikshya-checkout-billing-postcode" type="text" class="sikshya-input" autocomplete="postal-code" style="width:100%;" value="<?php echo esc_attr($prefill['postcode']); ?>" />
-                                    </p>
+                                <div class="sikshya-checkout-field sikshya-checkout-field--full">
+                                    <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-address-1"><?php esc_html_e('Address line 1', 'sikshya'); ?></label>
+                                    <input id="sikshya-checkout-billing-address-1" type="text" class="sikshya-input sikshya-checkout-field__control" autocomplete="address-line1" value="<?php echo esc_attr($prefill['address_1']); ?>" placeholder="<?php esc_attr_e('Street address, P.O. box', 'sikshya'); ?>" />
                                 </div>
-                                <p style="margin:0.75rem 0 0;">
-                                    <label style="display:block;font-weight:600;margin:0 0 0.25rem;"><?php esc_html_e('State / Province (optional)', 'sikshya'); ?></label>
-                                    <input id="sikshya-checkout-billing-state" type="text" class="sikshya-input" autocomplete="address-level1" style="width:100%;" value="<?php echo esc_attr($prefill['state']); ?>" />
-                                </p>
+                                <div class="sikshya-checkout-field sikshya-checkout-field--full">
+                                    <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-address-2"><?php esc_html_e('Address line 2 (optional)', 'sikshya'); ?></label>
+                                    <input id="sikshya-checkout-billing-address-2" type="text" class="sikshya-input sikshya-checkout-field__control" autocomplete="address-line2" value="<?php echo esc_attr($prefill['address_2']); ?>" placeholder="<?php esc_attr_e('Apartment, suite, unit (optional)', 'sikshya'); ?>" />
+                                </div>
+                                <div class="sikshya-checkout-form-grid">
+                                    <div class="sikshya-checkout-field">
+                                        <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-city"><?php esc_html_e('City', 'sikshya'); ?></label>
+                                        <input id="sikshya-checkout-billing-city" type="text" class="sikshya-input sikshya-checkout-field__control" autocomplete="address-level2" value="<?php echo esc_attr($prefill['city']); ?>" placeholder="<?php esc_attr_e('City', 'sikshya'); ?>" />
+                                    </div>
+                                    <div class="sikshya-checkout-field">
+                                        <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-postcode"><?php esc_html_e('Postal code (optional)', 'sikshya'); ?></label>
+                                        <input id="sikshya-checkout-billing-postcode" type="text" class="sikshya-input sikshya-checkout-field__control" autocomplete="postal-code" value="<?php echo esc_attr($prefill['postcode']); ?>" placeholder="<?php esc_attr_e('ZIP or postal code', 'sikshya'); ?>" />
+                                    </div>
+                                </div>
+                                <div class="sikshya-checkout-field sikshya-checkout-field--full">
+                                    <label class="sikshya-checkout-field__label" for="sikshya-checkout-billing-state"><?php esc_html_e('State / Province (optional)', 'sikshya'); ?></label>
+                                    <input id="sikshya-checkout-billing-state" type="text" class="sikshya-input sikshya-checkout-field__control" autocomplete="address-level1" value="<?php echo esc_attr($prefill['state']); ?>" placeholder="<?php esc_attr_e('State, region, or province', 'sikshya'); ?>" />
+                                </div>
                             </div>
                             <?php
                             /**
@@ -302,7 +324,7 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                         <?php endif; ?>
                     </section>
 
-                    <?php if ($is_logged_in) : ?>
+                    <?php if ($coupons_enabled && ($is_logged_in || $guest_enabled)) : ?>
                     <section class="sikshya-checkout-page__panel" aria-labelledby="sikshya-checkout-coupon-heading">
                         <h2 id="sikshya-checkout-coupon-heading" class="sikshya-checkout-page__panel-title"><?php esc_html_e('Discount code', 'sikshya'); ?></h2>
                         <p class="sikshya-checkout-page__panel-intro"><?php esc_html_e('Optional. Apply a code to update your totals before paying.', 'sikshya'); ?></p>
@@ -463,7 +485,7 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
                             $first_gid = sanitize_key((string) ($gw_ids[0] ?? ''));
                             $first_label = $gw_labels[$first_gid] ?? __('Continue', 'sikshya');
                             ?>
-                            <div class="sikshya-checkout-page__primary-action" style="margin-top:0.75rem;">
+                            <div class="sikshya-checkout-page__primary-action">
                                 <button
                                     type="button"
                                     class="sikshya-btn sikshya-btn--primary"

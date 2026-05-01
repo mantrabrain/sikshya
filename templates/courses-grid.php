@@ -23,6 +23,7 @@ $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('C
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
 ?>
 
+<div class="sikshya-public sikshya-courses-browse">
 <div class="sikshya-container">
     
     <!-- Header -->
@@ -131,5 +132,6 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
     <?php endif; ?>
     
     <?php wp_reset_postdata(); ?>
-    
+
+</div>
 </div>
