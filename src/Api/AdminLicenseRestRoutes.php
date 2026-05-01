@@ -2,14 +2,14 @@
 
 namespace Sikshya\Api;
 
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 /**
- * License + upgrade UI REST (Sikshya-style); server calls live in Sikshya Pro when active.
+ * License + upgrade UI REST. Commercial add-on supplies license operations via filters.
  *
  * @package Sikshya\Api
  */
@@ -91,62 +91,54 @@ final class AdminLicenseRestRoutes
         $payload = self::base_payload();
         $payload['license_info'] = null;
 
-        if (class_exists('\SikshyaPro\Licensing\License')) {
-            $lic = new \SikshyaPro\Licensing\License();
-            $payload['license_info'] = $lic->get_license_info();
-        }
+        /** @var array<string, mixed> $payload */
+        $payload = apply_filters('sikshya_rest_admin_license_payload', $payload, $request);
 
-        $payload['commercial_plan_summary'] = self::build_commercial_plan_summary($payload['license_info']);
+        $lic_info = null;
+        if (isset($payload['license_info']) && is_array($payload['license_info'])) {
+            $lic_info = $payload['license_info'];
+        }
+        $payload['commercial_plan_summary'] = self::build_commercial_plan_summary($lic_info);
 
         return new WP_REST_Response($payload, 200);
     }
 
     public static function activate(WP_REST_Request $request): WP_REST_Response
     {
-        if (!class_exists('\SikshyaPro\Licensing\License')) {
-            return self::need_pro_response();
+        $out = apply_filters('sikshya_rest_admin_license_activate', null, $request);
+        if (!is_array($out)) {
+            return self::need_extension_response();
         }
-
-        $key = (string) $request->get_param('license_key');
-        $lic = new \SikshyaPro\Licensing\License();
-        $out = $lic->activate($key);
 
         return new WP_REST_Response(self::normalize_response($out), self::status_code($out));
     }
 
     public static function save(WP_REST_Request $request): WP_REST_Response
     {
-        if (!class_exists('\SikshyaPro\Licensing\License')) {
-            return self::need_pro_response();
+        $out = apply_filters('sikshya_rest_admin_license_save', null, $request);
+        if (!is_array($out)) {
+            return self::need_extension_response();
         }
-
-        $key = (string) $request->get_param('license_key');
-        $lic = new \SikshyaPro\Licensing\License();
-        $out = $lic->save_key_only($key);
 
         return new WP_REST_Response(self::normalize_response($out), 200);
     }
 
     public static function deactivate(WP_REST_Request $request): WP_REST_Response
     {
-        if (!class_exists('\SikshyaPro\Licensing\License')) {
-            return self::need_pro_response();
+        $out = apply_filters('sikshya_rest_admin_license_deactivate', null, $request);
+        if (!is_array($out)) {
+            return self::need_extension_response();
         }
-
-        $lic = new \SikshyaPro\Licensing\License();
-        $out = $lic->deactivate();
 
         return new WP_REST_Response(self::normalize_response($out), self::status_code($out));
     }
 
     public static function check(WP_REST_Request $request): WP_REST_Response
     {
-        if (!class_exists('\SikshyaPro\Licensing\License')) {
-            return self::need_pro_response();
+        $out = apply_filters('sikshya_rest_admin_license_check', null, $request);
+        if (!is_array($out)) {
+            return self::need_extension_response();
         }
-
-        $lic = new \SikshyaPro\Licensing\License();
-        $out = $lic->check_status();
 
         return new WP_REST_Response(self::normalize_response($out), self::status_code($out));
     }
@@ -156,17 +148,15 @@ final class AdminLicenseRestRoutes
      */
     private static function base_payload(): array
     {
-        $lic = Pro::getClientPayload();
+        $lic = TierCapabilities::getClientPayload();
 
         return [
             /** Paid tier unlocked (active/valid license or dev filter). */
             'is_license_active' => (bool) ($lic['isProActive'] ?? false),
             /**
-             * Pro add-on PHP is loaded (class exists) or core constants are defined.
-             * Do not rely on `is_plugin_active( plugin_basename() )` alone — it can disagree
-             * with the active plugin list on some hosts (symlinks, case paths) while Pro is running.
+             * Commercial add-on PHP is loaded (filter) — kept as `pro_plugin_active` for admin shell compatibility.
              */
-            'pro_plugin_active' => self::is_pro_plugin_runtime_active(),
+            'pro_plugin_active' => self::is_extension_runtime_active(),
             'upgrade_url' => (string) ($lic['upgradeUrl'] ?? 'https://mantrabrain.com/plugins/sikshya/#pricing'),
             'site_tier' => (string) ($lic['siteTier'] ?? 'free'),
             'site_tier_label' => (string) ($lic['siteTierLabel'] ?? ''),
@@ -174,29 +164,14 @@ final class AdminLicenseRestRoutes
     }
 
     /**
-     * Whether Sikshya Pro is present in this request (plugin loaded).
+     * Whether the optional commercial add-on is loaded for this request.
      */
-    private static function is_pro_plugin_runtime_active(): bool
+    private static function is_extension_runtime_active(): bool
     {
-        if (class_exists('\SikshyaPro\Licensing\License', false)) {
-            return true;
-        }
-
-        if (defined('SIKSHYA_PRO_VERSION')) {
-            return true;
-        }
-
-        if (!defined('SIKSHYA_PRO_FILE') || !function_exists('is_plugin_active')) {
-            return false;
-        }
-
-        $basename = plugin_basename((string) constant('SIKSHYA_PRO_FILE'));
-
-        if ($basename !== '' && is_plugin_active($basename)) {
-            return true;
-        }
-
-        return $basename !== '' && function_exists('is_plugin_active_for_network') && is_plugin_active_for_network($basename);
+        /**
+         * @param bool $loaded Default false.
+         */
+        return (bool) apply_filters('sikshya_commercial_extension_loaded', false);
     }
 
     /**
@@ -206,11 +181,11 @@ final class AdminLicenseRestRoutes
      */
     private static function build_commercial_plan_summary(?array $license_info): string
     {
-        if (!Pro::isActive()) {
+        if (!TierCapabilities::isActive()) {
             return '';
         }
 
-        $tier_label = Pro::siteTierLabel();
+        $tier_label = TierCapabilities::siteTierLabel();
         $sr = is_array($license_info) && isset($license_info['server_response']) && is_array($license_info['server_response'])
             ? $license_info['server_response']
             : [];
@@ -264,14 +239,14 @@ final class AdminLicenseRestRoutes
         return in_array($st, ['error', 'invalid', 'failed'], true) ? 400 : 200;
     }
 
-    private static function need_pro_response(): WP_REST_Response
+    private static function need_extension_response(): WP_REST_Response
     {
         return new WP_REST_Response(
             array_merge(
                 self::base_payload(),
                 [
                     'status' => 'error',
-                    'notice' => __('Install and activate the Sikshya Pro plugin to manage your license.', 'sikshya'),
+                    'notice' => __('Install and activate the commercial Sikshya add-on to manage your license.', 'sikshya'),
                 ]
             ),
             400

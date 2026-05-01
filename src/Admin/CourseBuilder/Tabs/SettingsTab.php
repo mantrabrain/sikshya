@@ -12,7 +12,7 @@ namespace Sikshya\Admin\CourseBuilder\Tabs;
 use Sikshya\Admin\CourseBuilder\Core\AbstractTab;
 use Sikshya\Addons\Addons;
 use Sikshya\Constants\PostTypes;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\CertificateIssuanceService;
 
 // Prevent direct access
@@ -295,7 +295,7 @@ class SettingsTab extends AbstractTab
 
         // Reviews are provided by the Pro `course_reviews` add-on. Hide the toggle when
         // the feature is not licensed or the add-on is disabled.
-        $reviews_available = Pro::feature('course_reviews') && Addons::isEnabled('course_reviews');
+        $reviews_available = TierCapabilities::feature('course_reviews') && Addons::isEnabled('course_reviews');
         if (!$reviews_available) {
             if (isset($fields['interaction_features']['fields']['enable_reviews'])) {
                 unset($fields['interaction_features']['fields']['enable_reviews']);

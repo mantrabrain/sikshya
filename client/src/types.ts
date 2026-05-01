@@ -22,14 +22,14 @@ export type ShellAlert = {
   actions?: Array<{ label: string; href: string; external?: boolean }>;
 };
 
-/** Injected by PHP (`Pro::getClientPayload`) for upsell and per-feature UI locks. */
+/** Injected by PHP (`TierCapabilities::getClientPayload`) for upsell and per-feature UI locks. */
 export type SikshyaLicensing = {
   isProActive: boolean;
-  /** True when the Sikshya Pro plugin file is loaded (may still be unlicensed). */
+  /** True when the commercial add-on is loaded (may still be unlicensed). */
   proPluginInstalled?: boolean;
-  /** Mirrors PHP {@see \Sikshya\Licensing\Pro::siteTier()}. */
+  /** Mirrors PHP {@see \Sikshya\Licensing\TierCapabilities::siteTier()}. */
   siteTier: 'free' | 'starter' | 'growth' | 'scale';
-  /** Mirrors PHP {@see \Sikshya\Licensing\Pro::siteTierLabel()}. */
+  /** Mirrors PHP {@see \Sikshya\Licensing\TierCapabilities::siteTierLabel()}. */
   siteTierLabel?: string;
   upgradeUrl: string;
   featureStates: Record<string, boolean>;
@@ -58,9 +58,9 @@ export type SikshyaReactConfig = {
   page: string;
   /** Sikshya (free) plugin version. */
   version: string;
-  /** Sikshya Pro add-on version when Pro is licensed (injected by PHP). */
+  /** Commercial add-on version when a paid plan is active (injected by PHP; key name legacy). */
   proVersion?: string;
-  /** Installed Sikshya Pro add-on semver when the Pro plugin is loaded (even if not yet licensed). */
+  /** Installed commercial add-on semver when the add-on is loaded (even if not yet licensed; key name legacy). */
   proPluginVersion?: string;
   restUrl: string;
   /** WordPress core REST base (`wp/v2`) — respects plain permalinks. */
@@ -86,7 +86,7 @@ export type SikshyaReactConfig = {
   licensing?: SikshyaLicensing;
   /** Global banner row(s) under the top bar — not WordPress admin_notices. */
   shellAlerts?: ShellAlert[];
-  /** Optional branding overrides from the Pro White label addon. */
+  /** Optional branding overrides from the White label add-on (commercial). */
   branding?: {
     pluginName?: string;
     logoUrl?: string;
@@ -107,7 +107,7 @@ export type SikshyaReactConfig = {
   terminology?: Record<string, string>;
   /** Storefront offline / manual payment gateway (Settings → Payment). */
   offlineCheckoutEnabled?: boolean;
-  /** Injected by Sikshya Pro Multi-instructor add-on (when loaded). */
+  /** Injected by the Multi-instructor add-on when loaded (commercial). */
   multiInstructor?: {
     canManageLedger: boolean;
   };

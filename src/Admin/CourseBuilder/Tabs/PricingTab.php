@@ -130,7 +130,7 @@ class PricingTab extends AbstractTab
                     'type' => 'number',
                     'label' => __('Membership plan', 'sikshya'),
                     'description' => __(
-                        'For “Subscription only” courses: pick the plan that unlocks access. Sikshya Pro creates an active subscription when checkout is paid.',
+                        'For “Subscription only” courses: pick the plan that unlocks access. The subscriptions add-on (commercial) creates an active subscription when checkout is paid.',
                         'sikshya'
                     ),
                     'select_placeholder' => __('Select a plan…', 'sikshya'),
@@ -299,7 +299,7 @@ class PricingTab extends AbstractTab
             $pid = isset($data['required_plan_id']) ? (int) $data['required_plan_id'] : 0;
             if ($pid <= 0) {
                 $errors['required_plan_id'] = __(
-                    'Choose a membership plan (create plans under Sikshya Pro → Subscriptions).',
+                    'Choose a membership plan (create plans under Subscriptions in the admin when the commercial add-on is active).',
                     'sikshya'
                 );
             }

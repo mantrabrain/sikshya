@@ -556,9 +556,10 @@
     overscroll-behavior: contain;
   }
 
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--lesson .sikshya-learnSidebar,
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar,
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
+  /* Collapse class is on `<html>`; shell variant is on `<body>` — use descendants, not a compound selector. */
+  .sikshya-sidebarCollapsed .sikshya-learning-shell--lesson .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed .sikshya-learning-shell--quiz .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
     flex-basis: 0;
     width: 0;
     max-width: 0;
@@ -575,9 +576,10 @@
 }
 
 @media (min-width: 1024px) {
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--lesson .sikshya-learnSidebar,
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--quiz .sikshya-learnSidebar,
-  .sikshya-sidebarCollapsed.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
+  /* Collapse class is on `<html>`; shell variant is on `<body>` — use descendants, not a compound selector. */
+  .sikshya-sidebarCollapsed .sikshya-learning-shell--lesson .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed .sikshya-learning-shell--quiz .sikshya-learnSidebar,
+  .sikshya-sidebarCollapsed .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar {
     transform: none;
   }
 }
@@ -2184,11 +2186,16 @@
     transform: translateX(0);
   }
 
-  /* Long curricula: scroll outline inside the drawer instead of stretching the page */
-  .sikshya-outlineOpen.sikshya-learning-shell--lesson .sikshya-learnSidebar .sikshya-learnSidebar__inner,
-  .sikshya-outlineOpen.sikshya-learning-shell--quiz .sikshya-learnSidebar .sikshya-learnSidebar__inner,
-  .sikshya-outlineOpen.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar .sikshya-learnSidebar__inner {
-    flex: 1 1 auto;
+  /*
+   * Long curricula: scroll outline inside the drawer.
+   * `sikshya-outlineOpen` is toggled on `<html>` (`document.documentElement`); shell `--lesson|--quiz|--learn`
+   * lives on `<body>`. A compound `.outlineOpen.shell--lesson` never matched, so scrolling never activated.
+   */
+  .sikshya-outlineOpen .sikshya-learning-shell--lesson .sikshya-learnSidebar .sikshya-learnSidebar__inner,
+  .sikshya-outlineOpen .sikshya-learning-shell--quiz .sikshya-learnSidebar .sikshya-learnSidebar__inner,
+  .sikshya-outlineOpen .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar .sikshya-learnSidebar__inner {
+    /* basis 0 so this column shrinks inside the fixed drawer; auto basis lets content dictate height and disables scrolling */
+    flex: 1 1 0;
     min-height: 0;
     max-height: 100%;
     overflow: hidden;
@@ -2196,16 +2203,18 @@
     flex-direction: column;
   }
 
-  .sikshya-outlineOpen.sikshya-learning-shell--lesson .sikshya-learnSidebar .sikshya-learnSidebar__scroll,
-  .sikshya-outlineOpen.sikshya-learning-shell--quiz .sikshya-learnSidebar .sikshya-learnSidebar__scroll,
-  .sikshya-outlineOpen.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar .sikshya-learnSidebar__scroll {
-    flex: 1 1 auto;
+  .sikshya-outlineOpen .sikshya-learning-shell--lesson .sikshya-learnSidebar .sikshya-learnSidebar__scroll,
+  .sikshya-outlineOpen .sikshya-learning-shell--quiz .sikshya-learnSidebar .sikshya-learnSidebar__scroll,
+  .sikshya-outlineOpen .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnSidebar .sikshya-learnSidebar__scroll {
+    flex: 1 1 0;
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    touch-action: pan-y;
   }
 }
 
@@ -4419,6 +4428,29 @@
 .sikshya-learnContent .sikshya-contentPanel .sikshya-lesson-embed--audio audio {
   display: block;
   width: 100%;
+}
+
+/*
+ * SCORM/H5P player (Pro) — mounted via `sikshya_lesson_above_tabs`; keep iframe from collapsing in flex layouts.
+ */
+/* Align with hosted video strip — player.css defaults add vertical margin. */
+.sikshya-learnContent .sikshya-contentSection--lessonInteractive .sik-player {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.sikshya-learnContent .sikshya-contentSection--lessonInteractive .sik-player__frame {
+  min-height: min(72vh, 560px);
+}
+
+.sikshya-learnContent .sikshya-contentSection--lessonInteractive .sik-player__iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  border: 0;
+  border-radius: var(--sikshya-learn-radius-10);
+  background: var(--sikshya-learn-surface);
 }
 
 .sikshya-learnContent .sikshya-contentPanel :where(blockquote) {

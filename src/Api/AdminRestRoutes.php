@@ -31,7 +31,7 @@ use Sikshya\Services\CurriculumService;
 use Sikshya\Admin\Controllers\SampleDataController;
 use Sikshya\Addons\Addons;
 use Sikshya\Admin\Settings\SettingsManager;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\SystemInfoService;
@@ -1984,7 +1984,7 @@ class AdminRestRoutes
      */
     public function getLicensingPayload(): WP_REST_Response
     {
-        return new WP_REST_Response(Pro::getClientPayload(), 200);
+        return new WP_REST_Response(TierCapabilities::getClientPayload(), 200);
     }
 
     /**

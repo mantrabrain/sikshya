@@ -5,14 +5,14 @@ WordPress REST base: **`/wp-json/sikshya/v1/`** (namespace `sikshya/v1`).
 - **Auth (admin):** cookie session + `X-WP-Nonce` (e.g. `wp.apiFetch` / React admin).
 - **Auth (headless):** `Authorization: Bearer <jwt>` from `POST /sikshya/v1/auth/login` where applicable.
 
-## Gating (Pro + Addons)
+## Gating (commercial add-on + Addons)
 
-Routes registered by **`sikshya-pro`** are **always present** when the Pro plugin is loaded. Access is denied with **HTTP 403** instead of omitting the route (avoids ambiguous **404** for API clients).
+Routes registered by **`sikshya-pro`** are **always present** when the commercial add-on is loaded. Access is denied with **HTTP 403** instead of omitting the route (avoids ambiguous **404** for API clients).
 
 | Error code (`code` in JSON) | When |
 |-----------------------------|------|
 | `rest_forbidden` | Logged-in user lacks capability (`manage_sikshya`, `edit_sikshya_courses`, `manage_options`, etc.). |
-| `sikshya_pro_required` | Plan does not include the catalog feature (`Pro::feature( $id )` is false). |
+| `sikshya_plan_feature_required` | Plan does not include the catalog feature (`TierCapabilities::feature( $id )` is false). Legacy integrations may still check `sikshya_pro_required`; responses may also include `legacy_error_code` / `data.legacy_error_code`. |
 | `sikshya_addon_disabled` | Plan includes the feature, but the module is **off** in **Addons** (`Addons::isEnabled( $id )` is false). |
 
 React admin paths are centralized in `client/src/api/endpoints.ts` (`SIKSHYA_ENDPOINTS`).

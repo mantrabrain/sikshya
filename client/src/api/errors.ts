@@ -46,6 +46,34 @@ export function getWpRestErrorCode(error: unknown): string | null {
   return typeof c === 'string' && c.length ? c : null;
 }
 
+/** Current REST code when a catalog feature is not on the active plan. */
+export const SIKSHYA_PLAN_FEATURE_REQUIRED = 'sikshya_plan_feature_required' as const;
+
+/** @deprecated Recognize for backward compatibility with older integrations. */
+export const SIKSHYA_PLAN_FEATURE_REQUIRED_LEGACY = 'sikshya_pro_required' as const;
+
+/**
+ * True when the API indicates the site plan does not include the requested feature
+ * (403 plan gate). Recognizes both {@link SIKSHYA_PLAN_FEATURE_REQUIRED} and the legacy code.
+ */
+export function isPlanFeatureRequiredError(error: unknown): boolean {
+  const code = getWpRestErrorCode(error);
+  if (code === SIKSHYA_PLAN_FEATURE_REQUIRED || code === SIKSHYA_PLAN_FEATURE_REQUIRED_LEGACY) {
+    return true;
+  }
+  if (!(error instanceof ApiError) || !error.body || typeof error.body !== 'object') {
+    return false;
+  }
+  const body = error.body as {
+    legacy_error_code?: string;
+    data?: { legacy_error_code?: string };
+  };
+  if (body.legacy_error_code === SIKSHYA_PLAN_FEATURE_REQUIRED_LEGACY) {
+    return true;
+  }
+  return body.data?.legacy_error_code === SIKSHYA_PLAN_FEATURE_REQUIRED_LEGACY;
+}
+
 /**
  * Use a short toast instead of the large {@link ApiErrorPanel}.
  * Keep the full support panel for server errors (5xx) and validation-style 422 responses.

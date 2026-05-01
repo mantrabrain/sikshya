@@ -2,12 +2,13 @@
 
 namespace Sikshya\Services;
 
-use PHPMailer\PHPMailer\PHPMailer;
 use Sikshya\Addons\Addons;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 
 /**
- * Optional SMTP transport for wp_mail (Growth+ when {@see FeatureRegistry} email_advanced_customization is licensed).
+ * Optional SMTP transport for wp_mail (commercial tier when email_advanced_customization is licensed).
+ *
+ * Uses the PHPMailer instance WordPress provides on {@see 'phpmailer_init'} — no extra Composer package.
  *
  * @package Sikshya\Services
  */
@@ -19,15 +20,15 @@ final class WpMailSmtpBridge
     }
 
     /**
-     * @param PHPMailer $phpmailer
+     * @param \PHPMailer\PHPMailer\PHPMailer $phpmailer
      */
     public static function configure($phpmailer): void
     {
-        if (!$phpmailer instanceof PHPMailer) {
+        if (!is_object($phpmailer) || !method_exists($phpmailer, 'isSMTP')) {
             return;
         }
 
-        if (!Pro::feature('email_advanced_customization') || !Addons::isEnabled('email_advanced_customization')) {
+        if (!TierCapabilities::feature('email_advanced_customization') || !Addons::isEnabled('email_advanced_customization')) {
             return;
         }
 
@@ -50,9 +51,9 @@ final class WpMailSmtpBridge
 
         $enc = strtolower((string) Settings::get('smtp_encryption', 'tls'));
         if ($enc === 'ssl') {
-            $phpmailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $phpmailer->SMTPSecure = 'ssl';
         } elseif ($enc === 'tls') {
-            $phpmailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $phpmailer->SMTPSecure = 'tls';
         } else {
             $phpmailer->SMTPSecure = '';
         }

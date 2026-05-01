@@ -7,7 +7,7 @@ use Sikshya\Core\Plugin;
 use Sikshya\Database\Repositories\CouponRepository;
 use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Site\PublicPageUrls;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 
 /**
@@ -340,12 +340,12 @@ final class CheckoutService
 
     public function isStripeEnabled(): bool
     {
-        return Pro::isActive() && $this->isTruthySetting($this->settings()->getSetting('enable_stripe_payment', '0'));
+        return TierCapabilities::isActive() && $this->isTruthySetting($this->settings()->getSetting('enable_stripe_payment', '0'));
     }
 
     public function isBankTransferEnabled(): bool
     {
-        if (!Pro::isActive()) {
+        if (!TierCapabilities::isActive()) {
             return false;
         }
 
@@ -355,7 +355,7 @@ final class CheckoutService
 
     public function isMollieEnabled(): bool
     {
-        if (!Pro::isActive()) {
+        if (!TierCapabilities::isActive()) {
             return false;
         }
 
@@ -365,7 +365,7 @@ final class CheckoutService
 
     public function isPaystackEnabled(): bool
     {
-        if (!Pro::isActive()) {
+        if (!TierCapabilities::isActive()) {
             return false;
         }
 
@@ -376,7 +376,7 @@ final class CheckoutService
 
     public function isRazorpayEnabled(): bool
     {
-        if (!Pro::isActive()) {
+        if (!TierCapabilities::isActive()) {
             return false;
         }
 

@@ -6,7 +6,7 @@ use Sikshya\Addons\Addons;
 use Sikshya\Addons\AddonInterface;
 use Sikshya\Addons\AddonManager;
 use Sikshya\Core\Plugin;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -80,7 +80,7 @@ final class AdminAddonsRestRoutes
         $license_ok = true;
         if ($tier === 'starter' || $tier === 'pro' || $tier === 'scale') {
             // FeatureRegistry + Pro filters are the canonical license gate.
-            $license_ok = Pro::feature($id);
+            $license_ok = TierCapabilities::feature($id);
         }
 
         return [
@@ -120,7 +120,7 @@ final class AdminAddonsRestRoutes
                 'success' => true,
                 'enabled' => Addons::enabledIds(),
                 'addons' => $items,
-                'licensing' => Pro::getClientPayload(),
+                'licensing' => TierCapabilities::getClientPayload(),
             ],
             200
         );
@@ -145,12 +145,13 @@ final class AdminAddonsRestRoutes
 
         $addon = $reg[$id];
         $tier = $addon->tier();
-        if (($tier === 'starter' || $tier === 'pro' || $tier === 'scale') && !Pro::feature($id)) {
+        if (($tier === 'starter' || $tier === 'pro' || $tier === 'scale') && !TierCapabilities::feature($id)) {
             return new WP_REST_Response(
                 [
                     'success' => false,
                     'message' => 'License required',
-                    'code' => 'sikshya_pro_required',
+                    'code' => 'sikshya_plan_feature_required',
+                    'legacy_error_code' => 'sikshya_pro_required',
                     'feature' => $id,
                 ],
                 403
@@ -166,15 +167,16 @@ final class AdminAddonsRestRoutes
 
             $depAddon = $reg[$dep];
             $depTier = $depAddon->tier();
-            if (($depTier === 'starter' || $depTier === 'pro' || $depTier === 'scale') && !Pro::feature($dep)) {
+            if (($depTier === 'starter' || $depTier === 'pro' || $depTier === 'scale') && !TierCapabilities::feature($dep)) {
                 return new WP_REST_Response(
-                    [
-                        'success' => false,
-                        'message' => __('A required add-on needs an active license.', 'sikshya'),
-                        'code' => 'sikshya_pro_required',
-                        'feature' => $dep,
-                        'required_by' => $id,
-                    ],
+                [
+                    'success' => false,
+                    'message' => __('A required add-on needs an active license.', 'sikshya'),
+                    'code' => 'sikshya_plan_feature_required',
+                    'legacy_error_code' => 'sikshya_pro_required',
+                    'feature' => $dep,
+                    'required_by' => $id,
+                ],
                     403
                 );
             }

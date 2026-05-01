@@ -203,9 +203,8 @@ final class SingleCourseTemplateData
             ],
         ];
 
-        // `reviews_vm` is populated by the `course_reviews` Pro addon when active
-        // (see SikshyaPro\Frontend\ProReviewTemplateHooks). Default keeps the
-        // template silent when the addon is disabled.
+        // `reviews_vm` is populated by the optional course-reviews module when active
+        // (commercial add-on registers hooks). Default keeps the template silent when disabled.
         $data['reviews_vm'] = ['enabled' => false];
         $data['rest'] = [
             'url' => esc_url_raw(rest_url('sikshya/v1/')),

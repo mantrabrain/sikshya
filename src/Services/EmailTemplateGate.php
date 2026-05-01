@@ -4,7 +4,7 @@ namespace Sikshya\Services;
 
 use Sikshya\Addons\Addons;
 use Sikshya\Licensing\FeatureRegistry;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 
 /**
  * Add-on / plan gates for transactional email templates (match {@see SettingsManager} semantics).
@@ -50,7 +50,7 @@ final class EmailTemplateGate
         if ($required_addon !== '' && !Addons::isEnabled($required_addon)) {
             return false;
         }
-        if ($required_feature !== '' && !Pro::feature($required_feature)) {
+        if ($required_feature !== '' && !TierCapabilities::feature($required_feature)) {
             return false;
         }
 
@@ -248,10 +248,10 @@ final class EmailTemplateGate
         $plan_label = $labels['required_plan_label'];
 
         if ($addon !== '' && !Addons::isEnabled($addon)) {
-            if ($feature !== '' && !Pro::feature($feature)) {
+            if ($feature !== '' && !TierCapabilities::feature($feature)) {
                 return sprintf(
                     /* translators: 1: plan label, 2: addon label */
-                    __('Requires Sikshya Pro (%1$s+) and the add-on “%2$s” to be enabled.', 'sikshya'),
+                    __('Requires a paid plan (%1$s+) and the add-on “%2$s” to be enabled.', 'sikshya'),
                     $plan_label !== '' ? $plan_label : __('Pro', 'sikshya'),
                     $addon_label
                 );
@@ -263,14 +263,14 @@ final class EmailTemplateGate
                 $addon_label
             );
         }
-        if ($feature !== '' && !Pro::feature($feature)) {
+        if ($feature !== '' && !TierCapabilities::feature($feature)) {
             return $plan_label !== ''
                 ? sprintf(
                     /* translators: %s: plan label */
-                    __('Available on Sikshya Pro (%s+) plans.', 'sikshya'),
+                    __('Available on paid Sikshya plans (%s+).', 'sikshya'),
                     $plan_label
                 )
-                : __('Available on a higher Sikshya Pro plan.', 'sikshya');
+                : __('Available on a higher paid plan.', 'sikshya');
         }
 
         return '';

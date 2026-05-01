@@ -1,4 +1,4 @@
-=== Sikshya LMS — WordPress LMS for Courses, Quizzes & eLearning ===
+=== Sikshya LMS — Build & Sell Online Courses ===
 Contributors: mantrabrain
 Donate link: https://mantrabrain.com/
 Tags: lms, elearning, education, courses, learning management system

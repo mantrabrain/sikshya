@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Product feature catalog — tiers map to EDD plans: Free, Starter, Growth (pro band), Scale.
+ * Product feature catalog — tiers: free, starter, growth, scale (paid store plans).
  *
  * @package Sikshya\Licensing
  */
@@ -136,7 +136,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Settings to connect Sikshya to your email provider (for example SendGrid, Mailgun, Amazon SES, or your host’s outgoing mail). You can also add a simple header and footer so every enrollment or completion message matches your brand. Use Email → Delivery for setup and a test send; transactional wording lives under Email → Templates.\n\nTurn it on when: Mail from your site often lands in junk folders, or you want parents, students, or buyers to see a professional message with your name and colors.\n\nTurn it off when: Another tool already sends every email for your site, or you have not set up an email provider yet and want to keep things simple until you do.\n\nPlan: Growth or higher with Sikshya Pro. After enabling, open Sikshya → Email in your WordPress dashboard to finish setup.",
+                    "What you get: Settings to connect Sikshya to your email provider (for example SendGrid, Mailgun, Amazon SES, or your host’s outgoing mail). You can also add a simple header and footer so every enrollment or completion message matches your brand. Use Email → Delivery for setup and a test send; transactional wording lives under Email → Templates.\n\nTurn it on when: Mail from your site often lands in junk folders, or you want parents, students, or buyers to see a professional message with your name and colors.\n\nTurn it off when: Another tool already sends every email for your site, or you have not set up an email provider yet and want to keep things simple until you do.\n\nPlan: Growth tier or higher (paid plans). After enabling, open Sikshya → Email in your WordPress dashboard to finish setup.",
                     'sikshya'
                 ),
             ],
@@ -156,7 +156,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: You choose when each lesson or quiz unlocks. Until then, learners see it as locked. Common choices are “X days after they join” or “on this calendar date.”\n\nTurn it on when: You teach in order, run groups that move together, or want to space content so people are not overwhelmed.\n\nTurn it off when: Everyone should browse every lesson right away, like a simple video library with no schedule.\n\nPlan: Starter or higher with Sikshya Pro. Pairs well with the Drip notifications add-on and the drip templates on Email templates if you want optional unlock emails.",
+                    "What you get: You choose when each lesson or quiz unlocks. Until then, learners see it as locked. Common choices are “X days after they join” or “on this calendar date.”\n\nTurn it on when: You teach in order, run groups that move together, or want to space content so people are not overwhelmed.\n\nTurn it off when: Everyone should browse every lesson right away, like a simple video library with no schedule.\n\nPlan: Starter tier or higher (paid plans). Pairs well with the Drip notifications add-on and the drip templates on Email templates if you want optional unlock emails.",
                     'sikshya'
                 ),
             ],
@@ -169,7 +169,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A ratings + review block on each course's landing page (average star, breakdown, and approved reviews). Enrolled learners can submit a 1–5 star rating with an optional written review, edit their own, or delete it. You moderate everything from a dedicated Reviews page in the admin — approve, unpublish, or delete — and decide whether reviews auto-publish or wait for your OK.\n\nTurn it on when: You want learners to help sell your courses with honest feedback, and you want the data (averages, counts) reflected in your catalog cards.\n\nTurn it off when: Your teaching model doesn't fit public reviews (e.g. private coaching, compliance training) or you gather feedback through a separate tool.\n\nPlan: Starter or higher with Sikshya Pro.",
+                    "What you get: A ratings + review block on each course's landing page (average star, breakdown, and approved reviews). Enrolled learners can submit a 1–5 star rating with an optional written review, edit their own, or delete it. You moderate everything from a dedicated Reviews page in the admin — approve, unpublish, or delete — and decide whether reviews auto-publish or wait for your OK.\n\nTurn it on when: You want learners to help sell your courses with honest feedback, and you want the data (averages, counts) reflected in your catalog cards.\n\nTurn it off when: Your teaching model doesn't fit public reviews (e.g. private coaching, compliance training) or you gather feedback through a separate tool.\n\nPlan: Starter tier or higher (paid plans).",
                     'sikshya'
                 ),
             ],
@@ -182,7 +182,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Discussion/Q&A tabs inside learning pages, posting and threaded replies, and instructor response controls. This is intended for cohort and instructor-led experiences where questions are answered in context.\n\nPlan: Growth or higher with Sikshya Pro.",
+                    "What you get: Discussion/Q&A tabs inside learning pages, posting and threaded replies, and instructor response controls. This is intended for cohort and instructor-led experiences where questions are answered in context.\n\nPlan: Growth tier or higher (paid plans).",
                     'sikshya'
                 ),
             ],
@@ -195,11 +195,11 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: In the course builder you can say which lessons or whole courses must be completed first. Sikshya then keeps the next steps closed until those are done.\n\nTurn it on when: You need a clear path—compliance training, leveled skills, or “must finish the basics before the exam.”\n\nTurn it off when: Students pick their own path and nothing must come first.\n\nPlan: Starter or higher with Sikshya Pro. You set prerequisites inside each course or lesson in the builder—no code required.",
+                    "What you get: In the course builder you can say which lessons or whole courses must be completed first. Sikshya then keeps the next steps closed until those are done.\n\nTurn it on when: You need a clear path—compliance training, leveled skills, or “must finish the basics before the exam.”\n\nTurn it off when: Students pick their own path and nothing must come first.\n\nPlan: Starter tier or higher (paid plans). You set prerequisites inside each course or lesson in the builder—no code required.",
                     'sikshya'
                 ),
             ],
-            // —— GROWTH (EDD Growth yearly / lifetime; full “Pro” catalog) ——
+            // —— GROWTH (EDD Growth yearly / lifetime; growth-tier catalog) ——
             'multi_instructor' => [
                 'label' => __('Multi-instructor & co-authors', 'sikshya'),
                 'tier' => 'pro',
@@ -209,7 +209,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Pick teachers in the course builder, tune optional revenue weights, and use Course staff in the dashboard for fine control. When orders complete, Sikshya writes ledger rows using normalized splits so totals never exceed the line item. Global switches control where the team appears (single course, cards, learn screen); each course can hide the public team or turn off revenue recording for that course.\n\nTurn it on when: You run a training business with co-teachers, guest experts, or revenue partners.\n\nTurn it off when: You alone author and sell every course.\n\nPlan: Growth or higher with Sikshya Pro. Configure global behavior under Add-ons → Multi-instructor; staff and percentages under Course staff.",
+                    "What you get: Pick teachers in the course builder, tune optional revenue weights, and use Course staff in the dashboard for fine control. When orders complete, Sikshya writes ledger rows using normalized splits so totals never exceed the line item. Global switches control where the team appears (single course, cards, learn screen); each course can hide the public team or turn off revenue recording for that course.\n\nTurn it on when: You run a training business with co-teachers, guest experts, or revenue partners.\n\nTurn it off when: You alone author and sell every course.\n\nPlan: Growth tier or higher (paid plans). Configure global behavior under Add-ons → Multi-instructor; staff and percentages under Course staff.",
                     'sikshya'
                 ),
             ],
@@ -222,7 +222,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A safe summary your site can show to logged-in teachers—typically how many enrollments sit on courses they authored. Your designer or developer connects this to a “My teaching” page if you want one.\n\nTurn it on when: You want coaches or staff to see their reach without seeing everyone else’s data or full site reports.\n\nTurn it off when: Teachers never log in to numbers and you handle reporting yourself.\n\nPlan: Starter or higher with Sikshya Pro. This does not replace Sikshya’s main Reports area in the dashboard—it only feeds simple teacher-facing totals.",
+                    "What you get: A safe summary your site can show to logged-in teachers—typically how many enrollments sit on courses they authored. Your designer or developer connects this to a “My teaching” page if you want one.\n\nTurn it on when: You want coaches or staff to see their reach without seeing everyone else’s data or full site reports.\n\nTurn it off when: Teachers never log in to numbers and you handle reporting yourself.\n\nPlan: Starter tier or higher (paid plans). This does not replace Sikshya’s main Reports area in the dashboard—it only feeds simple teacher-facing totals.",
                     'sikshya'
                 ),
             ],
@@ -235,7 +235,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Beyond the usual on-screen charts, you can download structured data about who joined what, progress, and related totals for planning or sharing offline.\n\nTurn it on when: Someone needs to filter, pivot, or archive numbers outside the website—common for finance, grants, or yearly reviews.\n\nTurn it off when: You never leave the admin dashboard for data and want to keep exports turned off until you need them.\n\nPlan: Growth or higher with Sikshya Pro. Works together with the visual reports page; it adds “take this away as a file” power.",
+                    "What you get: Beyond the usual on-screen charts, you can download structured data about who joined what, progress, and related totals for planning or sharing offline.\n\nTurn it on when: Someone needs to filter, pivot, or archive numbers outside the website—common for finance, grants, or yearly reviews.\n\nTurn it off when: You never leave the admin dashboard for data and want to keep exports turned off until you need them.\n\nPlan: Growth tier or higher (paid plans). Works together with the visual reports page; it adds “take this away as a file” power.",
                     'sikshya'
                 ),
             ],
@@ -248,7 +248,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Combines quiz results and graded assignments into clear rows per student and course, so you see overall performance instead of clicking each activity.\n\nTurn it on when: You run classes with real grading, report cards, or pass/fail lists.\n\nTurn it off when: You only offer videos and quizzes for fun with no formal grades.\n\nPlan: Growth or higher with Sikshya Pro. You need quizzes and/or assignments in use for meaningful rows to appear.",
+                    "What you get: Combines quiz results and graded assignments into clear rows per student and course, so you see overall performance instead of clicking each activity.\n\nTurn it on when: You run classes with real grading, report cards, or pass/fail lists.\n\nTurn it off when: You only offer videos and quizzes for fun with no formal grades.\n\nPlan: Growth tier or higher (paid plans). You need quizzes and/or assignments in use for meaningful rows to appear.",
                     'sikshya'
                 ),
             ],
@@ -261,7 +261,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A timeline-style record inside Sikshya when learners enroll, complete steps, submit work, finish quizzes, or check out. Staff can look up one person and see the story in order.\n\nTurn it on when: Parents call, auditors ask, or you settle “I never got access” questions with facts.\n\nTurn it off when: You are tiny, rarely need proof, and prefer storing as little activity data as your policy allows.\n\nPlan: Growth or higher with Sikshya Pro. Follow your privacy rules for how long to keep learner data.",
+                    "What you get: A timeline-style record inside Sikshya when learners enroll, complete steps, submit work, finish quizzes, or check out. Staff can look up one person and see the story in order.\n\nTurn it on when: Parents call, auditors ask, or you settle “I never got access” questions with facts.\n\nTurn it off when: You are tiny, rarely need proof, and prefer storing as little activity data as your policy allows.\n\nPlan: Growth tier or higher (paid plans). Follow your privacy rules for how long to keep learner data.",
                     'sikshya'
                 ),
             ],
@@ -274,7 +274,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Learners can share a link that proves the certificate is genuine. You can style the design more deeply, and optional QR codes can point to that proof page. Names and dates fill in automatically from Sikshya.\n\nTurn it on when: HR teams, regulators, or students need trustworthy proof—not just a screenshot.\n\nTurn it off when: You only email a simple PDF and nobody checks authenticity online.\n\nPlan: Growth or higher with Sikshya Pro. Builds on basic certificates; configure looks under Sikshya’s certificate settings.",
+                    "What you get: Learners can share a link that proves the certificate is genuine. You can style the design more deeply, and optional QR codes can point to that proof page. Names and dates fill in automatically from Sikshya.\n\nTurn it on when: HR teams, regulators, or students need trustworthy proof—not just a screenshot.\n\nTurn it off when: You only email a simple PDF and nobody checks authenticity online.\n\nPlan: Growth tier or higher (paid plans). Builds on basic certificates; configure looks under Sikshya’s certificate settings.",
                     'sikshya'
                 ),
             ],
@@ -287,7 +287,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "Not the same as Professional email delivery: SMTP and branded HTML wrappers are the separate “Professional email delivery & branded templates” add-on under Communication.\n\nWhat you get: Sikshya can track subscription-style plans and who is currently paid up, then open or close course access based on that status. Your payment provider still handles charging cards—you connect the pieces in settings.\n\nTurn it on when: You want predictable monthly or yearly income, “all you can learn” passes, or coaching billed on a schedule.\n\nTurn it off when: Every sale is a single payment and you never want renewal logic.\n\nPlan: Growth or higher with Sikshya Pro. Set up payment methods under Sikshya’s payment or commerce settings first.",
+                    "Not the same as Professional email delivery: SMTP and branded HTML wrappers are the separate “Professional email delivery & branded templates” add-on under Communication.\n\nWhat you get: Sikshya can track subscription-style plans and who is currently paid up, then open or close course access based on that status. Your payment provider still handles charging cards—you connect the pieces in settings.\n\nTurn it on when: You want predictable monthly or yearly income, “all you can learn” passes, or coaching billed on a schedule.\n\nTurn it off when: Every sale is a single payment and you never want renewal logic.\n\nPlan: Growth tier or higher (paid plans). Set up payment methods under Sikshya’s payment or commerce settings first.",
                     'sikshya'
                 ),
             ],
@@ -300,7 +300,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: You define bundle names, prices, and which courses belong in each pack. Your storefront or theme uses that information so shoppers can add the whole pack at once.\n\nTurn it on when: You promote value packs, diplomas made of several courses, or holiday specials.\n\nTurn it off when: Bundles would confuse your catalog or you never discount groups of courses.\n\nPlan: Growth or higher with Sikshya Pro. You may still need your theme to display bundle tiles the way you want on the public site.",
+                    "What you get: You define bundle names, prices, and which courses belong in each pack. Your storefront or theme uses that information so shoppers can add the whole pack at once.\n\nTurn it on when: You promote value packs, diplomas made of several courses, or holiday specials.\n\nTurn it off when: Bundles would confuse your catalog or you never discount groups of courses.\n\nPlan: Growth tier or higher (paid plans). You may still need your theme to display bundle tiles the way you want on the public site.",
                     'sikshya'
                 ),
             ],
@@ -313,7 +313,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Extra coupon rules such as a minimum order size and which courses a code may apply to. Checkout can refuse a code that does not match your rules.\n\nTurn it on when: You need to stop tiny orders from using big discounts or limit a code to one product line.\n\nTurn it off when: Straightforward “10% off” style codes are all you use.\n\nPlan: Growth or higher with Sikshya Pro. Advanced rules may be edited from developer tools or future admin screens—ask your host or partner if you need help.",
+                    "What you get: Extra coupon rules such as a minimum order size and which courses a code may apply to. Checkout can refuse a code that does not match your rules.\n\nTurn it on when: You need to stop tiny orders from using big discounts or limit a code to one product line.\n\nTurn it off when: Straightforward “10% off” style codes are all you use.\n\nPlan: Growth tier or higher (paid plans). Advanced rules may be edited from developer tools or future admin screens—ask your host or partner if you need help.",
                     'sikshya'
                 ),
             ],
@@ -326,7 +326,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A drag-and-drop style builder for extra checkout questions (text, dropdowns, checkboxes) with simple rules like “show this when Plan = Business”. Answers save to each order and can optionally be stored on the user for faster repeat checkout.\n\nTurn it on when: You sell to businesses, need compliance questions, or want structured lead info at purchase time.\n\nTurn it off when: You only need email + billing address.\n\nPlan: Growth or higher with Sikshya Pro.",
+                    "What you get: A drag-and-drop style builder for extra checkout questions (text, dropdowns, checkboxes) with simple rules like “show this when Plan = Business”. Answers save to each order and can optionally be stored on the user for faster repeat checkout.\n\nTurn it on when: You sell to businesses, need compliance questions, or want structured lead info at purchase time.\n\nTurn it off when: You only need email + billing address.\n\nPlan: Growth tier or higher (paid plans).",
                     'sikshya'
                 ),
             ],
@@ -339,7 +339,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Space to describe how work will be scored, plus controls for which file endings learners may submit.\n\nTurn it on when: You teach academically or in companies that require written criteria and strict hand-in formats.\n\nTurn it off when: Casual homework without formal rubrics is enough.\n\nPlan: Growth or higher with Sikshya Pro. Make sure your course theme shows the rubric to students if they should read it before submitting.",
+                    "What you get: Space to describe how work will be scored, plus controls for which file endings learners may submit.\n\nTurn it on when: You teach academically or in companies that require written criteria and strict hand-in formats.\n\nTurn it off when: Casual homework without formal rubrics is enough.\n\nPlan: Growth tier or higher (paid plans). Make sure your course theme shows the rubric to students if they should read it before submitting.",
                     'sikshya'
                 ),
             ],
@@ -352,7 +352,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: You can label and group questions (for example “Week 2 — hard”) and pull from those groups when you build a new test—similar to organizing files in folders.\n\nTurn it on when: Your question list is large or many courses share the same bank.\n\nTurn it off when: You only ever write a handful of unique questions per quiz.\n\nPlan: Growth or higher with Sikshya Pro. You manage groups inside the same place you edit questions today.",
+                    "What you get: You can label and group questions (for example “Week 2 — hard”) and pull from those groups when you build a new test—similar to organizing files in folders.\n\nTurn it on when: Your question list is large or many courses share the same bank.\n\nTurn it off when: You only ever write a handful of unique questions per quiz.\n\nPlan: Growth tier or higher (paid plans). You manage groups inside the same place you edit questions today.",
                     'sikshya'
                 ),
             ],
@@ -365,7 +365,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Fields on a lesson for the meeting URL and which tool you use. Your theme can show a “Join live class” button next to that lesson.\n\nTurn it on when: Learners should never hunt through email for the right link.\n\nTurn it off when: You never schedule live calls.\n\nPlan: Growth or higher with Sikshya Pro. You still create the actual meeting in Zoom or Google Meet—Sikshya only stores the link students should use.",
+                    "What you get: Fields on a lesson for the meeting URL and which tool you use. Your theme can show a “Join live class” button next to that lesson.\n\nTurn it on when: Learners should never hunt through email for the right link.\n\nTurn it off when: You never schedule live calls.\n\nPlan: Growth tier or higher (paid plans). You still create the actual meeting in Zoom or Google Meet—Sikshya only stores the link students should use.",
                     'sikshya'
                 ),
             ],
@@ -378,7 +378,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A place to paste the keys Google or Facebook gives you after you register your site with them. Sikshya stores those safely and can show “Continue with Google” style choices on your login page.\n\nTurn it on when: You want fewer abandoned signups and your organization allows social sign-in.\n\nTurn it off when: Privacy rules require traditional accounts only.\n\nPlan: Growth or higher with Sikshya Pro. Completing the sign-in flow sometimes needs help from your theme or a small extra plugin—your developer can wire the buttons if needed.",
+                    "What you get: A place to paste the keys Google or Facebook gives you after you register your site with them. Sikshya stores those safely and can show “Continue with Google” style choices on your login page.\n\nTurn it on when: You want fewer abandoned signups and your organization allows social sign-in.\n\nTurn it off when: Privacy rules require traditional accounts only.\n\nPlan: Growth tier or higher (paid plans). Completing the sign-in flow sometimes needs help from your theme or a small extra plugin—your developer can wire the buttons if needed.",
                     'sikshya'
                 ),
             ],
@@ -391,7 +391,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: When scheduled content becomes available, Sikshya can email the learner using the templates in Email templates. Turn each template on or off there—disabling a template does not turn off Content drip, only that message.\n\nTurn the add-on on when: You use timed releases and want optional unlock notices.\n\nTurn the add-on off when: You never want drip-related mail at all.\n\nPlan: Starter or higher with Sikshya Pro. Works best when Content drip is already enabled.",
+                    "What you get: When scheduled content becomes available, Sikshya can email the learner using the templates in Email templates. Turn each template on or off there—disabling a template does not turn off Content drip, only that message.\n\nTurn the add-on on when: You use timed releases and want optional unlock notices.\n\nTurn the add-on off when: You never want drip-related mail at all.\n\nPlan: Starter tier or higher (paid plans). Works best when Content drip is already enabled.",
                     'sikshya'
                 ),
             ],
@@ -404,12 +404,12 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Logged-in students see a “Your schedule” section on My account → Overview with their items sorted by date. Developers can read the same list from the Sikshya REST API (learner calendar endpoint) to build a full calendar widget if you want.\n\nTurn it on when: Learners should see when lessons open or work is due without opening every course.\n\nTurn it off when: You have no drip rules, no assignment due dates, and no need for a schedule list.\n\nPlan: Starter or higher with Sikshya Pro. Lesson unlock dates require the Content drip add-on and drip rules saved for those lessons.",
+                    "What you get: Logged-in students see a “Your schedule” section on My account → Overview with their items sorted by date. Developers can read the same list from the Sikshya REST API (learner calendar endpoint) to build a full calendar widget if you want.\n\nTurn it on when: Learners should see when lessons open or work is due without opening every course.\n\nTurn it off when: You have no drip rules, no assignment due dates, and no need for a schedule list.\n\nPlan: Starter tier or higher (paid plans). Lesson unlock dates require the Content drip add-on and drip rules saved for those lessons.",
                     'sikshya'
                 ),
             ],
             'scorm_h5p_pro' => [
-                'label' => __('SCORM / H5P (Pro tier)', 'sikshya'),
+                'label' => __('SCORM / H5P (Growth tier)', 'sikshya'),
                 'tier' => 'pro',
                 'group' => 'integrations',
                 'description' => __(
@@ -417,7 +417,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Fields to paste a launch link or embed code so learners open vendor-built training inside your course path.\n\nTurn it on when: You invested in ready-made interactive modules and want them inside Sikshya navigation.\n\nTurn it off when: You only host your own videos and never upload outside packages.\n\nPlan: Growth or higher with Sikshya Pro. Large SCORM files sometimes need your host to allow bigger uploads or special players—your IT person can confirm.",
+                    "What you get: Fields to paste a launch link or embed code so learners open vendor-built training inside your course path.\n\nTurn it on when: You invested in ready-made interactive modules and want them inside Sikshya navigation.\n\nTurn it off when: You only host your own videos and never upload outside packages.\n\nPlan: Growth tier or higher (paid plans). Large SCORM files sometimes need your host to allow bigger uploads or special players—your IT person can confirm.",
                     'sikshya'
                 ),
             ],
@@ -431,7 +431,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Behind the scenes, Sikshya tracks who should be paid and how much the site earns on each order when multiple vendors list courses.\n\nTurn it on when: You run something like a mini Udemy with many instructors and split payouts.\n\nTurn it off when: You alone sell courses—extra tracking adds no value.\n\nPlan: Scale with Sikshya Pro. You still decide how vendors join and how you pay them outside the software.",
+                    "What you get: Behind the scenes, Sikshya tracks who should be paid and how much the site earns on each order when multiple vendors list courses.\n\nTurn it on when: You run something like a mini Udemy with many instructors and split payouts.\n\nTurn it off when: You alone sell courses—extra tracking adds no value.\n\nPlan: Scale tier (paid plans). You still decide how vendors join and how you pay them outside the software.",
                     'sikshya'
                 ),
             ],
@@ -444,7 +444,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Options to change footer text, accent colors on the login screen, and other small touches so “Sikshya” can fade behind your logo in the admin area.\n\nTurn it on when: Agencies deliver sites to customers who should not see third-party product names.\n\nTurn it off when: Your internal team prefers seeing the original product name for support chats.\n\nPlan: Scale with Sikshya Pro. This does not rename WordPress itself—only Sikshya-specific spots.",
+                    "What you get: Options to change footer text, accent colors on the login screen, and other small touches so “Sikshya” can fade behind your logo in the admin area.\n\nTurn it on when: Agencies deliver sites to customers who should not see third-party product names.\n\nTurn it off when: Your internal team prefers seeing the original product name for support chats.\n\nPlan: Scale tier (paid plans). This does not rename WordPress itself—only Sikshya-specific spots.",
                     'sikshya'
                 ),
             ],
@@ -457,7 +457,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A webhook registry and a reliable dispatcher. Sikshya POSTs event payloads to your configured URLs.\n\nTurn it on when: You connect to your own backend, data warehouse, or internal tools.\n\nTurn it off when: You don’t have a receiver endpoint—unused hooks add no value.\n\nPlan: Scale with Sikshya Pro.",
+                    "What you get: A webhook registry and a reliable dispatcher. Sikshya POSTs event payloads to your configured URLs.\n\nTurn it on when: You connect to your own backend, data warehouse, or internal tools.\n\nTurn it off when: You don’t have a receiver endpoint—unused hooks add no value.\n\nPlan: Scale tier (paid plans).",
                     'sikshya'
                 ),
             ],
@@ -470,7 +470,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: A Zapier-friendly setup on top of Sikshya’s webhook events. Paste Zapier hook URLs, choose events, and Sikshya will deliver signed JSON payloads.\n\nPlan: Scale with Sikshya Pro.",
+                    "What you get: A Zapier-friendly setup on top of Sikshya’s webhook events. Paste Zapier hook URLs, choose events, and Sikshya will deliver signed JSON payloads.\n\nPlan: Scale tier (paid plans).",
                     'sikshya'
                 ),
             ],
@@ -483,7 +483,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Native list sync for Mailchimp and MailerLite based on enrollment and completion events.\n\nPlan: Scale with Sikshya Pro.",
+                    "What you get: Native list sync for Mailchimp and MailerLite based on enrollment and completion events.\n\nPlan: Scale tier (paid plans).",
                     'sikshya'
                 ),
             ],
@@ -496,7 +496,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: You generate named keys; Sikshya stores them safely. Apps send the key along with requests so only your software can read course data you allow.\n\nTurn it on when: You ship a learner app, headless storefront, or partner integration.\n\nTurn it off when: Nobody should programmatically reach your data—keys are as sensitive as passwords.\n\nPlan: Scale with Sikshya Pro. Revoke any key that might be exposed.",
+                    "What you get: You generate named keys; Sikshya stores them safely. Apps send the key along with requests so only your software can read course data you allow.\n\nTurn it on when: You ship a learner app, headless storefront, or partner integration.\n\nTurn it off when: Nobody should programmatically reach your data—keys are as sensitive as passwords.\n\nPlan: Scale tier (paid plans). Revoke any key that might be exposed.",
                     'sikshya'
                 ),
             ],
@@ -505,11 +505,11 @@ final class FeatureRegistry
                 'tier' => 'scale',
                 'group' => 'platform',
                 'description' => __(
-                    "Adds a network-wide help screen explaining how Sikshya Pro licensing applies to each subsite.\n\nTurn on only for WordPress “multisite” networks with many campuses under one install.\n\nTurn off on normal single sites—it does nothing there.",
+                    "Adds a network-wide help screen explaining how commercial licensing applies to each subsite.\n\nTurn on only for WordPress “multisite” networks with many campuses under one install.\n\nTurn off on normal single sites—it does nothing there.",
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: Super-admins see guidance for which plan covers which site in a multisite network.\n\nTurn it on when: IT runs many sites from one WordPress dashboard.\n\nTurn it off when: You have a standard single website—there is no network menu to attach to.\n\nPlan: Scale with Sikshya Pro and a WordPress multisite installation.",
+                    "What you get: Super-admins see guidance for which plan covers which site in a multisite network.\n\nTurn it on when: IT runs many sites from one WordPress dashboard.\n\nTurn it off when: You have a standard single website—there is no network menu to attach to.\n\nPlan: Scale tier (paid plans) and a WordPress multisite installation.",
                     'sikshya'
                 ),
             ],
@@ -522,7 +522,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: On a weekly rhythm, Sikshya sends a plain-language summary to your chosen inbox so directors can skim health at a glance.\n\nTurn it on when: Busy executives want email updates instead of logging in.\n\nTurn it off when: Automated mail is blocked by your host or you rely on another reporting tool.\n\nPlan: Scale with Sikshya Pro. Pair with Advanced analytics if you need downloadable detail too.",
+                    "What you get: On a weekly rhythm, Sikshya sends a plain-language summary to your chosen inbox so directors can skim health at a glance.\n\nTurn it on when: Busy executives want email updates instead of logging in.\n\nTurn it off when: Automated mail is blocked by your host or you rely on another reporting tool.\n\nPlan: Scale tier (paid plans). Pair with Advanced analytics if you need downloadable detail too.",
                     'sikshya'
                 ),
             ],
@@ -535,7 +535,7 @@ final class FeatureRegistry
                     'sikshya'
                 ),
                 'detail_description' => __(
-                    "What you get: When a translation plugin such as WPML is active, Sikshya registers its user-facing text so translators can localize it like the rest of your theme.\n\nTurn it on when: Corporate or government training must meet language requirements.\n\nTurn it off when: Everyone reads one language and you do not use a translation suite.\n\nPlan: Scale with Sikshya Pro plus your chosen translation plugin—Sikshya does not replace that plugin.",
+                    "What you get: When a translation plugin such as WPML is active, Sikshya registers its user-facing text so translators can localize it like the rest of your theme.\n\nTurn it on when: Corporate or government training must meet language requirements.\n\nTurn it off when: Everyone reads one language and you do not use a translation suite.\n\nPlan: Scale tier (paid plans), plus your chosen translation plugin—Sikshya does not replace that plugin.",
                     'sikshya'
                 ),
             ],

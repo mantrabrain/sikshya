@@ -5,7 +5,7 @@ namespace Sikshya\Admin\Settings;
 use Sikshya\Addons\Addons;
 use Sikshya\Core\Plugin;
 use Sikshya\Licensing\FeatureRegistry;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 use Sikshya\Services\PermalinkService;
 
@@ -400,7 +400,7 @@ class SettingsManager
         if ($addon !== '' && !Addons::isEnabled($addon)) {
             return false;
         }
-        if ($feature !== '' && !Pro::feature($feature)) {
+        if ($feature !== '' && !TierCapabilities::feature($feature)) {
             return false;
         }
         return true;
@@ -558,10 +558,10 @@ class SettingsManager
         $plan_label = $labels['required_plan_label'];
 
         if ($addon !== '' && !Addons::isEnabled($addon)) {
-            if ($feature !== '' && !Pro::feature($feature)) {
+            if ($feature !== '' && !TierCapabilities::feature($feature)) {
                 return sprintf(
                     /* translators: 1: plan label, 2: addon label */
-                    __('Requires Sikshya Pro (%1$s+) and the addon “%2$s” to be enabled.', 'sikshya'),
+                    __('Requires a paid plan (%1$s+) and the add-on “%2$s” to be enabled.', 'sikshya'),
                     $plan_label !== '' ? $plan_label : __('Pro', 'sikshya'),
                     $addon_label
                 );
@@ -572,14 +572,14 @@ class SettingsManager
                 $addon_label
             );
         }
-        if ($feature !== '' && !Pro::feature($feature)) {
+        if ($feature !== '' && !TierCapabilities::feature($feature)) {
             return $plan_label !== ''
                 ? sprintf(
                     /* translators: %s: plan label */
-                    __('Available on Sikshya Pro (%s+) plans.', 'sikshya'),
+                    __('Available on paid Sikshya plans (%s+).', 'sikshya'),
                     $plan_label
                 )
-                : __('Available on a higher Sikshya Pro plan.', 'sikshya');
+                : __('Available on a higher paid plan.', 'sikshya');
         }
 
         return '';
@@ -1584,7 +1584,7 @@ class SettingsManager
                 'title' => __('Payment Gateways', 'sikshya'),
                 'icon' => 'fas fa-credit-card',
                 'description' => __(
-                    'Choose how students pay. Turn each method on below and paste keys from your payment provider’s dashboard. Pro features need Sikshya Pro.',
+                    'Choose how students pay. Turn each method on below and paste keys from your payment provider’s dashboard. Extra gateways need the commercial add-on and an eligible plan.',
                     'sikshya'
                 ),
                 'fields' => [
@@ -1601,13 +1601,13 @@ class SettingsManager
                             '' => __('Select Gateway', 'sikshya'),
                             'offline' => __('Offline / manual', 'sikshya'),
                             'paypal' => __('PayPal', 'sikshya'),
-                            'stripe' => __('Stripe (Pro)', 'sikshya'),
-                            'razorpay' => __('Razorpay (Pro)', 'sikshya'),
-                            'mollie' => __('Mollie (Pro)', 'sikshya'),
-                            'paystack' => __('Paystack (Pro)', 'sikshya'),
-                            'square' => __('Square (Pro)', 'sikshya'),
-                            'authorize_net' => __('Authorize.Net (Pro)', 'sikshya'),
-                            'bank_transfer' => __('Bank transfer (Pro)', 'sikshya'),
+                            'stripe' => __('Stripe (add-on)', 'sikshya'),
+                            'razorpay' => __('Razorpay (add-on)', 'sikshya'),
+                            'mollie' => __('Mollie (add-on)', 'sikshya'),
+                            'paystack' => __('Paystack (add-on)', 'sikshya'),
+                            'square' => __('Square (add-on)', 'sikshya'),
+                            'authorize_net' => __('Authorize.Net (add-on)', 'sikshya'),
+                            'bank_transfer' => __('Bank transfer (add-on)', 'sikshya'),
                         ]
                     ],
                     [
@@ -1644,9 +1644,9 @@ class SettingsManager
                     [
                         'key' => 'enable_stripe_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Stripe at checkout (Pro)', 'sikshya'),
+                        'label' => __('Enable Stripe at checkout (add-on)', 'sikshya'),
                         'description' => __(
-                            'Shows Stripe on checkout when Pro is active, enabled, and API keys are added below.',
+                            'Shows Stripe on checkout when the commercial add-on is active, this is enabled, and API keys are added below.',
                             'sikshya'
                         ),
                         'default' => false,
@@ -1654,43 +1654,43 @@ class SettingsManager
                     [
                         'key' => 'enable_razorpay_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Razorpay at checkout (Pro)', 'sikshya'),
-                        'description' => __('Requires Sikshya Pro. Add your Razorpay API keys below to accept payments.', 'sikshya'),
+                        'label' => __('Enable Razorpay at checkout (add-on)', 'sikshya'),
+                        'description' => __('Requires the commercial add-on and plan. Add your Razorpay API keys below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_mollie_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Mollie at checkout (Pro)', 'sikshya'),
-                        'description' => __('Requires Sikshya Pro. Add your Mollie API key below to accept payments.', 'sikshya'),
+                        'label' => __('Enable Mollie at checkout (add-on)', 'sikshya'),
+                        'description' => __('Requires the commercial add-on and plan. Add your Mollie API key below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_paystack_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Paystack at checkout (Pro)', 'sikshya'),
-                        'description' => __('Requires Sikshya Pro. Add your Paystack API keys below to accept payments.', 'sikshya'),
+                        'label' => __('Enable Paystack at checkout (add-on)', 'sikshya'),
+                        'description' => __('Requires the commercial add-on and plan. Add your Paystack API keys below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_square_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Square at checkout (Pro)', 'sikshya'),
-                        'description' => __('Requires Sikshya Pro. Add your Square credentials below to accept payments.', 'sikshya'),
+                        'label' => __('Enable Square at checkout (add-on)', 'sikshya'),
+                        'description' => __('Requires the commercial add-on and plan. Add your Square credentials below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_authorize_net_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Authorize.Net at checkout (Pro)', 'sikshya'),
-                        'description' => __('Requires Sikshya Pro. Add your Authorize.Net API credentials below to accept payments.', 'sikshya'),
+                        'label' => __('Enable Authorize.Net at checkout (add-on)', 'sikshya'),
+                        'description' => __('Requires the commercial add-on and plan. Add your Authorize.Net API credentials below to accept payments.', 'sikshya'),
                         'default' => false,
                     ],
                     [
                         'key' => 'enable_bank_transfer_payment',
                         'type' => 'checkbox',
-                        'label' => __('Enable Bank Transfer at checkout (Pro)', 'sikshya'),
-                        'description' => __('Requires Sikshya Pro. Show structured bank transfer details after checkout.', 'sikshya'),
+                        'label' => __('Enable Bank Transfer at checkout (add-on)', 'sikshya'),
+                        'description' => __('Requires the commercial add-on and plan. Show structured bank transfer details after checkout.', 'sikshya'),
                         'default' => false,
                     ],
                     [
@@ -2091,7 +2091,7 @@ class SettingsManager
                         'type' => 'checkbox',
                         'label' => __('Offer bank transfer', 'sikshya'),
                         'description' => __(
-                            'Reserved for future use. Use “Enable Bank Transfer at checkout (Pro)” and Bank transfer instructions instead. Sikshya does not use this toggle.',
+                            'Reserved for future use. Use “Enable Bank Transfer at checkout (add-on)” and Bank transfer instructions instead. Sikshya does not use this toggle.',
                             'sikshya'
                         ),
                         'default' => false

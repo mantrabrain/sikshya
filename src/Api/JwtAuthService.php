@@ -1,7 +1,9 @@
 <?php
 
 /**
- * HS256 JWT for mobile / external API clients (Firebase JWT).
+ * HS256 JWT for mobile / external API clients.
+ *
+ * Uses the `firebase/php-jwt` Composer package (namespace Firebase\JWT — not Google Firebase).
  *
  * @package Sikshya\Api
  */

@@ -2,7 +2,7 @@
 
 namespace Sikshya\Commerce;
 
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 
 /**
  * Payment gateway registry (extensible via filters).
@@ -206,7 +206,7 @@ final class PaymentGatewayRegistry
     public static function clientPayload(): array
     {
         $out = [];
-        $proActive = Pro::isActive();
+        $proActive = TierCapabilities::isActive();
         $icons = self::iconMap();
         $base = defined('SIKSHYA_PLUGIN_URL') ? (string) constant('SIKSHYA_PLUGIN_URL') : '';
         foreach (self::all() as $g) {

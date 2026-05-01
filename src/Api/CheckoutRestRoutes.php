@@ -102,13 +102,12 @@ class CheckoutRestRoutes
         }
 
         $coupon = isset($params['coupon_code']) ? trim(sanitize_text_field((string) $params['coupon_code'])) : '';
-        $bundle_id = (int) CartStorage::getBundleId();
-        if (class_exists(\SikshyaPro\Services\BundleCatalogService::class)) {
-            $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $bundle_id, $course_ids);
-        } elseif ($bundle_id > 0) {
+        $raw_bundle = (int) CartStorage::getBundleId();
+        if (!(bool) apply_filters('sikshya_checkout_bundle_cart_supported', false) && $raw_bundle > 0) {
             CartStorage::setBundleIdOnly(0);
-            $bundle_id = 0;
+            $raw_bundle = 0;
         }
+        $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $raw_bundle, $course_ids);
 
         $guest_email = isset($params['guest_email']) ? sanitize_email((string) $params['guest_email']) : '';
         $guest_name = isset($params['guest_name']) ? sanitize_text_field((string) $params['guest_name']) : '';
@@ -325,13 +324,12 @@ class CheckoutRestRoutes
         $gateway = isset($params['gateway']) ? sanitize_key((string) $params['gateway']) : '';
         $coupon = isset($params['coupon_code']) ? trim(sanitize_text_field((string) $params['coupon_code'])) : '';
 
-        $bundle_id = (int) CartStorage::getBundleId();
-        if (class_exists(\SikshyaPro\Services\BundleCatalogService::class)) {
-            $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $bundle_id, $course_ids);
-        } elseif ($bundle_id > 0) {
+        $raw_bundle = (int) CartStorage::getBundleId();
+        if (!(bool) apply_filters('sikshya_checkout_bundle_cart_supported', false) && $raw_bundle > 0) {
             CartStorage::setBundleIdOnly(0);
-            $bundle_id = 0;
+            $raw_bundle = 0;
         }
+        $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $raw_bundle, $course_ids);
 
         $has_courses = $course_ids !== [] || $course_id > 0;
         $configured = CheckoutTemplateData::gatewaysConfigured();
@@ -574,13 +572,12 @@ class CheckoutRestRoutes
 
         $uid = get_current_user_id();
 
-        $bundle_id = (int) CartStorage::getBundleId();
-        if (class_exists(\SikshyaPro\Services\BundleCatalogService::class)) {
-            $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $bundle_id, $course_ids);
-        } elseif ($bundle_id > 0) {
+        $raw_bundle = (int) CartStorage::getBundleId();
+        if (!(bool) apply_filters('sikshya_checkout_bundle_cart_supported', false) && $raw_bundle > 0) {
             CartStorage::setBundleIdOnly(0);
-            $bundle_id = 0;
+            $raw_bundle = 0;
         }
+        $bundle_id = (int) apply_filters('sikshya_checkout_resolve_bundle_id', $raw_bundle, $course_ids);
 
         try {
             $quote = $this->checkoutService()->quoteTotalsForCourses($uid, $course_ids, $coupon, $bundle_id);

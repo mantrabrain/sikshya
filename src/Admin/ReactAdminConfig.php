@@ -7,7 +7,7 @@ use Sikshya\Security\AdminBackendAccess;
 use Sikshya\Constants\AdminPages;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Addons\Addons;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\Settings;
 
@@ -23,12 +23,12 @@ final class ReactAdminConfig
      */
     public static function shellBootstrap(string $pageKey): array
     {
-        $pro_plugin_version = defined('SIKSHYA_PRO_VERSION') ? (string) constant('SIKSHYA_PRO_VERSION') : '';
-        $pro_version = ($pro_plugin_version !== '' && Pro::isActive()) ? $pro_plugin_version : '';
+        $pro_plugin_version = (string) apply_filters('sikshya_commercial_extension_version', '');
+        $pro_version = ($pro_plugin_version !== '' && TierCapabilities::isActive()) ? $pro_plugin_version : '';
 
         return [
             'shellAlerts' => apply_filters('sikshya_react_shell_alerts', [], $pageKey),
-            'licensing' => Pro::getClientPayload(),
+            'licensing' => TierCapabilities::getClientPayload(),
             'proVersion' => $pro_version,
             'proPluginVersion' => $pro_plugin_version,
         ];
@@ -255,7 +255,7 @@ final class ReactAdminConfig
             ], 'course_reviews'),
         ];
 
-        if (Pro::feature('community_discussions') && Addons::isEnabled('community_discussions')) {
+        if (TierCapabilities::feature('community_discussions') && Addons::isEnabled('community_discussions')) {
             $course_children[] = [
                 'id' => 'discussions',
                 'label' => __('Discussions & Q&A', 'sikshya'),
@@ -512,7 +512,7 @@ final class ReactAdminConfig
      */
     private static function withNavGate(array $row, string $feature_id): array
     {
-        if (! Pro::feature($feature_id)) {
+        if (! TierCapabilities::feature($feature_id)) {
             $row['badge'] = 'upgrade';
         } elseif (! Addons::isEnabled($feature_id)) {
             $row['badge'] = 'off';
@@ -529,9 +529,9 @@ final class ReactAdminConfig
      */
     private static function withIntegrationsNavBadge(array $row): array
     {
-        $webhooks_ok = Pro::feature('webhooks');
-        $zapier_ok = Pro::feature('zapier');
-        $keys_ok = Pro::feature('public_api_keys');
+        $webhooks_ok = TierCapabilities::feature('webhooks');
+        $zapier_ok = TierCapabilities::feature('zapier');
+        $keys_ok = TierCapabilities::feature('public_api_keys');
         if ((! $webhooks_ok && ! $zapier_ok) || ! $keys_ok) {
             $row['badge'] = 'upgrade';
         } elseif (
@@ -554,10 +554,10 @@ final class ReactAdminConfig
      */
     private static function withIntegrationsHubNavBadge(array $row): array
     {
-        $webhooks_ok = Pro::feature('webhooks');
-        $zapier_ok = Pro::feature('zapier');
-        $keys_ok = Pro::feature('public_api_keys');
-        $mkt_ok = Pro::feature('email_marketing');
+        $webhooks_ok = TierCapabilities::feature('webhooks');
+        $zapier_ok = TierCapabilities::feature('zapier');
+        $keys_ok = TierCapabilities::feature('public_api_keys');
+        $mkt_ok = TierCapabilities::feature('email_marketing');
 
         if (! $webhooks_ok && ! $zapier_ok && ! $keys_ok && ! $mkt_ok) {
             $row['badge'] = 'upgrade';
@@ -594,8 +594,8 @@ final class ReactAdminConfig
      */
     private static function withBrandingHubNavBadge(array $row): array
     {
-        $wl_ok = Pro::feature('white_label');
-        $sl_ok = Pro::feature('social_login');
+        $wl_ok = TierCapabilities::feature('white_label');
+        $sl_ok = TierCapabilities::feature('social_login');
         if (! $wl_ok && ! $sl_ok) {
             $row['badge'] = 'upgrade';
 
@@ -625,8 +625,8 @@ final class ReactAdminConfig
      */
     private static function withLearningRulesNavBadge(array $row): array
     {
-        $drip_ok = Pro::feature('content_drip');
-        $prereq_ok = Pro::feature('prerequisites');
+        $drip_ok = TierCapabilities::feature('content_drip');
+        $prereq_ok = TierCapabilities::feature('prerequisites');
         if (! $drip_ok && ! $prereq_ok) {
             $row['badge'] = 'upgrade';
 

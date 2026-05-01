@@ -46,8 +46,12 @@ final class CertificatePublic
 
     public static function templateRedirect(): void
     {
-        // If Pro advanced certificates are active, let Pro handle public rendering.
-        if (defined('SIKSHYA_PRO_VERSION') && class_exists('\\SikshyaPro\\Addons\\CertificatesAdvanced\\Services\\AdvancedCertificatePublic')) {
+        /**
+         * Commercial add-on may register a truthy filter to take over certificate URLs.
+         *
+         * @param bool $skip Skip core certificate rendering.
+         */
+        if (apply_filters('sikshya_certificate_public_skip_core_handler', false)) {
             return;
         }
 

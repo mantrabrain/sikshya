@@ -4,7 +4,7 @@ namespace Sikshya\Addons;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Licensing\FeatureRegistry;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 
 // Prevent direct access.
 if (!defined('ABSPATH')) {
@@ -32,7 +32,7 @@ final class AddonManager
             $addons[$id] = new FeatureAddon($id, $def);
         }
 
-        // Allow external plugins (Sikshya Pro, extension packs) to register/override addons.
+        // Allow external plugins (commercial add-on, extension packs) to register/override addons.
         $addons = apply_filters('sikshya_addons_registry', $addons);
 
         // Normalize/clean.
@@ -75,7 +75,7 @@ final class AddonManager
                     continue;
                 }
                 $depTier = $registry[$dep]->tier();
-                if (($depTier === 'starter' || $depTier === 'pro' || $depTier === 'scale') && !Pro::feature($dep)) {
+                if (($depTier === 'starter' || $depTier === 'pro' || $depTier === 'scale') && !TierCapabilities::feature($dep)) {
                     continue;
                 }
                 if (!Addons::isEnabled($dep)) {

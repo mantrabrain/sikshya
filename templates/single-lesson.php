@@ -328,6 +328,33 @@ while (have_posts()) :
                     endif;
                     ?>
 
+                    <?php
+                    /**
+                     * Full-width player slot above Overview / Resources tabs (same band as hosted video).
+                     * Sikshya Pro registers SCORM + H5P interactive shells here — see
+                     * `SikshyaPro\Addons\ScormH5pPro\Frontend\InteractivePlayerPresentation`.
+                     *
+                     * @param array<string, mixed>               $legacy_vm  Legacy lesson view data.
+                     * @param \Sikshya\Presentation\Models\SingleLessonPageModel $page_model Typed model.
+                     */
+                    ob_start();
+                    do_action('sikshya_lesson_above_tabs', $legacy_vm, $page_model);
+                    $lesson_above_tabs_html = trim((string) ob_get_clean());
+                    if ($lesson_above_tabs_html !== '') :
+                        ?>
+                    <div class="sikshya-contentSection sikshya-contentSection--lessonPlayer sikshya-contentSection--lessonInteractive">
+                        <div class="sikshya-contentPanel sikshya-contentPanel--plain">
+                            <?php
+                            // Pro-registered hooks output controlled markup (player shell + data-config).
+                            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                            echo $lesson_above_tabs_html;
+                            ?>
+                        </div>
+                    </div>
+                        <?php
+                    endif;
+                    ?>
+
                     <div class="sikshya-tabsSection" aria-label="<?php esc_attr_e('Tabs', 'sikshya'); ?>">
                         <div class="sikshya-tabsBar" role="tablist">
                             <button type="button" class="sikshya-tabBtn is-active" data-sikshya-tab="overview"><?php esc_html_e('Overview', 'sikshya'); ?></button>

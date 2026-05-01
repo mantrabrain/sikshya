@@ -312,8 +312,9 @@ export function LessonEditor(props: ContentEditorProps) {
   const scormAddon = useAddonEnabled('scorm_h5p_pro');
   const liveReady = Boolean(liveAddon.enabled && liveAddon.licenseOk);
   const scormReady = Boolean(scormAddon.enabled && scormAddon.licenseOk);
-  const liveOffered = Boolean(liveAddon.licenseOk);
-  const scormOffered = Boolean(scormAddon.licenseOk);
+  const liveOffered = Boolean(liveAddon.loading) || liveAddon.licenseOk === true;
+  // While the Addons catalog is still loading, licenseOk is null — don't hide Pro lesson kinds (users thought SCORM/H5P were "missing").
+  const scormOffered = Boolean(scormAddon.loading) || scormAddon.licenseOk === true;
 
   useEffect(() => {
     if (editor.isNew) {
@@ -570,7 +571,7 @@ export function LessonEditor(props: ContentEditorProps) {
                     : lessonType === 'live'
                     ? 'Briefing for the session'
                     : lessonType === 'scorm' || lessonType === 'h5p'
-                    ? 'Notes shown alongside the activity'
+                    ? 'Notes below the SCORM/H5P player'
                     : 'Lesson content'}
                 </label>
                 <p className={HINT}>
@@ -579,7 +580,7 @@ export function LessonEditor(props: ContentEditorProps) {
                     : lessonType === 'live'
                     ? 'Agenda, prep work, joining instructions — shown above the “Join live class” button.'
                     : lessonType === 'scorm' || lessonType === 'h5p'
-                    ? 'Optional context shown below the embedded activity.'
+                    ? 'Optional context in the Overview tab under the player (the package runs full-width above tabs, like video).'
                     : 'Main instructional content (HTML supported).'}
                 </p>
                 <QuillField
@@ -589,7 +590,7 @@ export function LessonEditor(props: ContentEditorProps) {
                       : lessonType === 'live'
                         ? 'Briefing for the session'
                         : lessonType === 'scorm' || lessonType === 'h5p'
-                          ? 'Notes shown alongside the activity'
+                          ? 'Notes below the SCORM/H5P player'
                           : 'Lesson content'
                   }
                   value={content}

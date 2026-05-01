@@ -4,7 +4,7 @@ namespace Sikshya\Quiz;
 
 use Sikshya\Addons\Addons;
 use Sikshya\Constants\PostTypes;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use WP_Error;
 use WP_REST_Request;
 
@@ -71,11 +71,11 @@ final class QuestionTypeGuard
         }
 
         // Requires Pro license feature + Addons toggle.
-        if (!Pro::feature('quiz_advanced')) {
-            return Pro::restFeatureRequired('quiz_advanced');
+        if (!TierCapabilities::feature('quiz_advanced')) {
+            return TierCapabilities::restFeatureRequired('quiz_advanced');
         }
         if (!Addons::isEnabled('quiz_advanced')) {
-            return Pro::restAddonDisabled('quiz_advanced');
+            return TierCapabilities::restAddonDisabled('quiz_advanced');
         }
 
         return $prepared_post;

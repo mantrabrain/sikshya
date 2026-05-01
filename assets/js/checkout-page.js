@@ -1036,7 +1036,7 @@
   // Handle PayPal redirect return by capturing + enrolling, then redirecting to receipt.
   confirmReturnIfNeeded();
 
-  // Pro-only gateway confirm flows (Stripe / Mollie / Paystack / Razorpay) are registered by Sikshya Pro.
+  // Extra gateway confirm flows (Stripe / Mollie / Paystack / Razorpay) are registered by the commercial add-on when active.
   // Core exposes a tiny runtime API so Pro can show status/errors and redirect on success.
   try {
     window.sikshyaCheckoutRuntime = window.sikshyaCheckoutRuntime || {

@@ -3,7 +3,7 @@
 namespace Sikshya\Frontend\Site;
 
 use Sikshya\Commerce\PaymentGatewayRegistry;
-use Sikshya\Licensing\Pro;
+use Sikshya\Licensing\TierCapabilities;
 use Sikshya\Services\Settings;
 
 /**
@@ -56,7 +56,7 @@ final class CheckoutTemplateData
         $enable_paypal = Settings::get('enable_paypal_payment', '0');
         $enable_stripe = Settings::get('enable_stripe_payment', '0');
 
-        $stripe = Pro::isActive()
+        $stripe = TierCapabilities::isActive()
             && $isWired('stripe', true)
             && self::isTruthyGatewayOption($enable_stripe)
             && (string) Settings::get('stripe_secret_key', '') !== '';
@@ -74,38 +74,38 @@ final class CheckoutTemplateData
             && ($paypal_email_ok || ($paypal_mode === 'advanced' && $paypal_rest_ok));
 
         // Pro gateways (configured + enabled) — actual session handling lives in Pro.
-        $razorpay = Pro::isActive()
+        $razorpay = TierCapabilities::isActive()
             && $isWired('razorpay', true)
             && self::isTruthyGatewayOption(Settings::get('enable_razorpay_payment', '0'))
             && (string) Settings::get('razorpay_key_id', '') !== ''
             && (string) Settings::get('razorpay_key_secret', '') !== '';
 
-        $mollie = Pro::isActive()
+        $mollie = TierCapabilities::isActive()
             && $isWired('mollie', true)
             && self::isTruthyGatewayOption(Settings::get('enable_mollie_payment', '0'))
             && (string) Settings::get('mollie_api_key', '') !== '';
 
-        $paystack = Pro::isActive()
+        $paystack = TierCapabilities::isActive()
             && $isWired('paystack', true)
             && self::isTruthyGatewayOption(Settings::get('enable_paystack_payment', '0'))
             && (string) Settings::get('paystack_public_key', '') !== ''
             && (string) Settings::get('paystack_secret_key', '') !== '';
 
-        $square = Pro::isActive()
+        $square = TierCapabilities::isActive()
             && $isWired('square', false)
             && self::isTruthyGatewayOption(Settings::get('enable_square_payment', '0'))
             && (string) Settings::get('square_application_id', '') !== ''
             && (string) Settings::get('square_access_token', '') !== ''
             && (string) Settings::get('square_location_id', '') !== '';
 
-        $authorize_net = Pro::isActive()
+        $authorize_net = TierCapabilities::isActive()
             && $isWired('authorize_net', false)
             && self::isTruthyGatewayOption(Settings::get('enable_authorize_net_payment', '0'))
             && (string) Settings::get('authorize_net_login_id', '') !== ''
             && (string) Settings::get('authorize_net_public_client_key', '') !== ''
             && (string) Settings::get('authorize_net_transaction_key', '') !== '';
 
-        $bank_transfer = Pro::isActive()
+        $bank_transfer = TierCapabilities::isActive()
             && $isWired('bank_transfer', true)
             && self::isTruthyGatewayOption(Settings::get('enable_bank_transfer_payment', '0'))
             && (
@@ -224,7 +224,7 @@ final class CheckoutTemplateData
             $d = array_key_exists($id, $wired_defaults) ? (bool) $wired_defaults[$id] : true;
             return (bool) apply_filters('sikshya_payment_gateway_wired', $d, $id);
         };
-        $pro_active = Pro::isActive();
+        $pro_active = TierCapabilities::isActive();
         $tiers = [];
         foreach (PaymentGatewayRegistry::all() as $g) {
             $id = isset($g['id']) ? sanitize_key((string) $g['id']) : '';
@@ -247,7 +247,7 @@ final class CheckoutTemplateData
                 'configured' => !empty($configured[$gid]),
                 'wired' => $is_wired($gid),
                 'locked' => $is_pro_gateway && !$pro_active,
-                'locked_reason' => $is_pro_gateway && !$pro_active ? __('Requires Sikshya Pro.', 'sikshya') : '',
+                'locked_reason' => $is_pro_gateway && !$pro_active ? __('Requires the commercial add-on and plan.', 'sikshya') : '',
             ];
         }
 

@@ -66,11 +66,11 @@ export const SIKSHYA_ENDPOINTS = {
     /** Issued learner certificates. */
     issuedCertificates: '/admin/issued-certificates',
     issuedCertificatesRevoke: '/admin/issued-certificates/revoke',
-    /** Feature catalog + Pro gates (same payload as `config.licensing`). */
+    /** Feature catalog + plan gates (same payload as `config.licensing`). */
     licensing: '/admin/licensing',
-    /** Shell alerts + licensing + Pro version flags (refresh after licence changes). */
+    /** Shell alerts + licensing + commercial add-on version flags (refresh after licence changes). */
     shellMeta: (view: string) => `/admin/shell-meta?view=${encodeURIComponent(view)}`,
-    /** Sikshya Pro license key (requires Pro plugin + `manage_options`). */
+    /** Commercial license key (requires commercial add-on + `manage_options`). */
     license: '/admin/license',
     licenseActivate: '/admin/license/activate',
     licenseSave: '/admin/license/save',
@@ -137,7 +137,7 @@ export const SIKSHYA_ENDPOINTS = {
     /** Manually trigger usage tracking send (admin test button). */
     usageTrackingSendNow: '/admin/usage-tracking/send-now',
   },
-  /** Registered by `sikshya-pro`; 403 when plan lacks feature (`sikshya_pro_required`) or addon off (`sikshya_addon_disabled`). */
+  /** Registered by `sikshya-pro`; 403 when plan lacks feature (`sikshya_plan_feature_required`; legacy `sikshya_pro_required`) or addon off (`sikshya_addon_disabled`). Prefer `isPlanFeatureRequiredError()` in `api/errors.ts`. */
   pro: {
     dripRules: '/pro/drip-rules',
     dripRule: (id: number) => `/pro/drip-rules/${encodeURIComponent(String(id))}`,
