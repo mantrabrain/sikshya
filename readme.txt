@@ -233,7 +233,7 @@ Below is the full commercial add-on line-up from the Sikshya feature registry. *
 
 * **[Social login](https://mantrabrain.com/plugins/sikshya#pricing)** — Let learners sign in with Google-style providers when policy allows fewer passwords-only accounts.
 
-* **[SCORM / H5P (Pro tier)](https://mantrabrain.com/plugins/sikshya#pricing)** — Embed packaged SCORM or H5P experiences inside Sikshya lessons—bridge vendor-built interactives inside your Sikshya path.
+* **[SCORM / H5P](https://mantrabrain.com/plugins/sikshya#pricing)** — Embed packaged SCORM or H5P experiences inside Sikshya lessons—bridge vendor-built interactives inside your Sikshya path.
 
 #### Scale-band add-ons
 

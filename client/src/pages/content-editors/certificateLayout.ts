@@ -519,6 +519,19 @@ export function getCertificatePageBackgroundStyle(opts: {
   };
 }
 
+/**
+ * Value persisted in post meta after {@see PostTypeManager} sanitize_callback
+ * (sanitize_key + whitelist). Used when comparing REST save responses to avoid false
+ * "could not save" toasts — UI uses camelCase ids; DB stores lowercase slugs.
+ */
+export function certificatePagePatternStoredValue(uiOrStored: string): string {
+  const raw = String(uiOrStored ?? 'none').trim();
+  // Mirrors WP `sanitize_key()` for ASCII ids: lowercase, strip non [a-z0-9_-].
+  const s = raw.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  const allowed = ['none', 'dots', 'microdots', 'lines', 'grid', 'diagonals', 'papergrain'] as const;
+  return (allowed as readonly string[]).includes(s) ? s : 'none';
+}
+
 function normalizePagePattern(id: string): string {
   const s = String(id || 'none');
   // Back-compat: PHP sanitizer uses sanitize_key() which lowercases pattern ids.

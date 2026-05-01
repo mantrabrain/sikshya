@@ -19,6 +19,7 @@ import { GatedFeatureWorkspace } from '../../components/GatedFeatureWorkspace';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../../lib/licensing';
 import { CertificateVisualBuilder } from './CertificateVisualBuilder';
 import {
+  certificatePagePatternStoredValue,
   DEFAULT_CERTIFICATE_PAGE_FINISH,
   type CertificatePageFinish,
   defaultCertificateLayout,
@@ -2908,6 +2909,14 @@ export function CertificateEditor(props: ContentEditorProps) {
             const parsed = parseLayoutFromMeta(got);
             const gotBlocks = Array.isArray(parsed?.blocks) ? parsed.blocks.length : 0;
             if (expectedBlockCount > 0 && gotBlocks !== expectedBlockCount) {
+              mismatchedKeys.push(k);
+            }
+            continue;
+          }
+
+          if (k === '_sikshya_certificate_page_pattern') {
+            // PHP stores sanitize_key() slugs (lowercase); UI uses camelCase (e.g. microDots → microdots).
+            if (certificatePagePatternStoredValue(String(exp ?? '')) !== certificatePagePatternStoredValue(String(got ?? ''))) {
               mismatchedKeys.push(k);
             }
             continue;
