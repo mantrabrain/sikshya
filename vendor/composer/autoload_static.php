@@ -408,6 +408,7 @@ class ComposerStaticInit47b632aee622770d1fef198fea2ecc44
         'Sikshya\\Services\\LearnerEnrollmentService' => __DIR__ . '/../..' . '/src/Services/LearnerEnrollmentService.php',
         'Sikshya\\Services\\LearnerQuizStatsStub' => __DIR__ . '/../..' . '/src/Services/LearnerQuizStatsStub.php',
         'Sikshya\\Services\\LearningProgressService' => __DIR__ . '/../..' . '/src/Services/LearningProgressService.php',
+        'Sikshya\\Services\\LessonCourseLink' => __DIR__ . '/../..' . '/src/Services/LessonCourseLink.php',
         'Sikshya\\Services\\LessonService' => __DIR__ . '/../..' . '/src/Services/LessonService.php',
         'Sikshya\\Services\\LogService' => __DIR__ . '/../..' . '/src/Services/LogService.php',
         'Sikshya\\Services\\PermalinkService' => __DIR__ . '/../..' . '/src/Services/PermalinkService.php',

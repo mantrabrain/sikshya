@@ -377,6 +377,7 @@ return array(
     'Sikshya\\Services\\LearnerEnrollmentService' => $baseDir . '/src/Services/LearnerEnrollmentService.php',
     'Sikshya\\Services\\LearnerQuizStatsStub' => $baseDir . '/src/Services/LearnerQuizStatsStub.php',
     'Sikshya\\Services\\LearningProgressService' => $baseDir . '/src/Services/LearningProgressService.php',
+    'Sikshya\\Services\\LessonCourseLink' => $baseDir . '/src/Services/LessonCourseLink.php',
     'Sikshya\\Services\\LessonService' => $baseDir . '/src/Services/LessonService.php',
     'Sikshya\\Services\\LogService' => $baseDir . '/src/Services/LogService.php',
     'Sikshya\\Services\\PermalinkService' => $baseDir . '/src/Services/PermalinkService.php',
