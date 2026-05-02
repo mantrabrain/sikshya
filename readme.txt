@@ -344,7 +344,7 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 == Changelog ==
 
 = 1.0.0.1 - 2026-05-02 =
-* Certificate builder: fixes for issues in the admin certificate designer (layout, editing, and related flows).
+* Certificate : fixes for issues in the admin certificate designer (layout, editing, and related flows).
 * Build: refreshed compiled admin React assets from the latest sources.
 
 = 1.0.0 - 2026-04-30 =
