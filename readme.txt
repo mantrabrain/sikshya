@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, education, quizzes
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,8 @@ Build and sell online courses on WordPress with one plugin: a visual course buil
 Use Sikshya for coaching, professional training, customer education, internal onboarding, or the start of a course marketplace—with full control of content, branding, and revenue.
 
 ### Get started
+
+👉 [Try Sikshya LMS Free](https://try.new/plugins/sikshya/)
 
 👉 [Sikshya LMS — product & pricing](https://mantrabrain.com/plugins/sikshya/?utm_source=wporg&utm_medium=readme&utm_campaign=home)
 
@@ -341,6 +343,10 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 
 == Changelog ==
 
+= 1.0.0.1 - 2026-05-02 =
+* Certificate builder: fixes for issues in the admin certificate designer (layout, editing, and related flows).
+* Build: refreshed compiled admin React assets from the latest sources.
+
 = 1.0.0 - 2026-04-30 =
 * Initial public release.
 * Core course, lesson, quiz, and question model with builder-oriented admin UI.
@@ -353,6 +359,9 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 * Checkout (with Sikshya Pro Dynamic Checkout Fields): optional server-rendered dynamic field markup—JavaScript attaches listeners and visibility without rebuilding the form in the browser; includes `CheckoutDynamicFieldsView` and refactored checkout helpers (`dfBindDynamicFields`, `dfSyncValuesFromHost`).
 
 == Upgrade Notice ==
+
+= 1.0.0.1 - 2026-05-02 =
+Maintenance release: certificate builder fixes and updated admin build assets. Safe to apply on top of 1.0.0; clear any full-page caches if your host caches admin scripts.
 
 = 1.0.0 - 2026-04-30 =
 First stable release. Back up your site before production rollout; confirm permalinks, required pages, and payment keys after activation. Clear page caches if checkout forms are cached at the edge.
