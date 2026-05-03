@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "build:admin": "npm run build",
     "makepot": "bash scripts/makepot.sh",
-    "i18n": "npm run makepot"
+    "i18n": "npm run makepot",
+    "type-check": "tsc",
+    "lint": "eslint .",
+    "format:check": "prettier -c \"**/*.{js,ts,tsx}\""
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
