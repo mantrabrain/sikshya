@@ -1,7 +1,7 @@
 === Sikshya LMS — Build & Sell Online Courses ===
 Contributors: mantrabrain
 Donate link: https://mantrabrain.com/
-Tags: lms, online courses, elearning, education, quizzes
+Tags: course, education, elearning, learning management system, lms
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
