@@ -75,6 +75,10 @@ export const SIKSHYA_ENDPOINTS = {
     licensing: '/admin/licensing',
     /** Shell alerts + licensing + commercial add-on version flags (refresh after licence changes). */
     shellMeta: (view: string) => `/admin/shell-meta?view=${encodeURIComponent(view)}`,
+    /** In-app marketing notices (review + upgrade); same rules as classic `admin_notices`. */
+    notices: '/admin/notices',
+    noticesDismiss: (id: string) =>
+      `/admin/notices/${encodeURIComponent(id)}/dismiss`,
     /** Commercial license key (requires commercial add-on + `manage_options`). */
     license: '/admin/license',
     licenseActivate: '/admin/license/activate',

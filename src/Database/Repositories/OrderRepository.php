@@ -243,6 +243,20 @@ class OrderRepository
     }
 
     /**
+     * Total rows in the orders table (all statuses). Used for admin marketing notices.
+     */
+    public function countAll(): int
+    {
+        if (!$this->tableExists()) {
+            return 0;
+        }
+
+        global $wpdb;
+
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->orders}");
+    }
+
+    /**
      * Paid orders for this user (status {@see OrderFulfillmentService} sets to `paid`).
      */
     public function countPaidOrdersForUser(int $user_id): int

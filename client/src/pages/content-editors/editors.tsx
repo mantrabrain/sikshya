@@ -184,10 +184,15 @@ type EditorShellProps = {
   error: unknown;
   onRetry: () => void;
   saveMsg: string | null;
+  /**
+   * When true, skip the default `space-y-8` wrapper so full-height workspaces
+   * (e.g. certificate builder) receive a bounded flex column from the parent.
+   */
+  flush?: boolean;
   children: React.ReactNode;
 };
 
-function EditorFormShell({ loading, saving, error, onRetry, saveMsg, children }: EditorShellProps) {
+function EditorFormShell({ loading, saving, error, onRetry, saveMsg, flush, children }: EditorShellProps) {
   const toast = useTopRightToast(3800);
   const toastErrorSigRef = useRef<string | null>(null);
 
@@ -236,6 +241,8 @@ function EditorFormShell({ loading, saving, error, onRetry, saveMsg, children }:
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
           Loading…
         </div>
+      ) : flush ? (
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
       ) : (
         <div className="space-y-8">{children}</div>
       )}
@@ -777,6 +784,7 @@ export function QuizEditor(props: ContentEditorProps) {
   const [questionError, setQuestionError] = useState<unknown>(null);
   const [questionRefresh, setQuestionRefresh] = useState(0);
   const [addQuestionOpen, setAddQuestionOpen] = useState(false);
+  const [addQuestionEditId, setAddQuestionEditId] = useState<number | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [featured, setFeatured] = useState(0);
   const [editorTab, setEditorTab] = useState<'content' | 'settings' | 'questions'>('content');
@@ -884,6 +892,15 @@ export function QuizEditor(props: ContentEditorProps) {
   }, [editorTab, questionSearch, questionRefresh]);
 
   const openAddQuestion = () => {
+    setAddQuestionEditId(null);
+    setAddQuestionOpen(true);
+  };
+
+  const openEditQuestionInModal = (questionId: number) => {
+    if (!questionId) {
+      return;
+    }
+    setAddQuestionEditId(questionId);
     setAddQuestionOpen(true);
   };
 
@@ -1227,15 +1244,14 @@ export function QuizEditor(props: ContentEditorProps) {
                                 <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">
                                   {row?.title || `Question #${qid}`}
                                 </span>
-                                <a
-                                  href={appViewHref(config, 'edit-content', { post_type: 'sik_question', post_id: String(qid) })}
-                                  target="_blank"
-                                  rel="noreferrer noopener"
+                                <button
+                                  type="button"
                                   className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                                  title="Edit this question in a new tab"
+                                  title="Edit this question in the same form as New question"
+                                  onClick={() => openEditQuestionInModal(qid)}
                                 >
                                   Edit
-                                </a>
+                                </button>
                                 <button
                                   type="button"
                                   className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:text-red-400 dark:hover:bg-red-950/30"
@@ -1268,17 +1284,26 @@ export function QuizEditor(props: ContentEditorProps) {
       <AddQuestionAuthoringModal
         config={config}
         open={addQuestionOpen}
-        onClose={() => setAddQuestionOpen(false)}
+        onClose={() => {
+          setAddQuestionOpen(false);
+          setAddQuestionEditId(null);
+        }}
+        editQuestionId={addQuestionEditId}
+        onUpdated={() => setQuestionRefresh((n) => n + 1)}
         onCreated={(id) => {
           if (!id) return;
           setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
           setQuestionRefresh((n) => n + 1);
         }}
-        onPickExisting={(id) => {
-          if (!id) return;
-          setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
-          setAddQuestionOpen(false);
-        }}
+        onPickExisting={
+          addQuestionEditId
+            ? undefined
+            : (id) => {
+                if (!id) return;
+                setQuizQuestionIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+                setAddQuestionOpen(false);
+              }
+        }
         pickExistingLabel="Add to quiz"
       />
       {embedded ? (
@@ -3094,14 +3119,15 @@ export function CertificateEditor(props: ContentEditorProps) {
 
   return (
     <EditorFormShell
-      loading={editor.loading}
+      loading={false}
       saving={editor.saving}
       error={editor.error}
       onRetry={() => void editor.load()}
       saveMsg={null}
+      flush
     >
       <section
-        className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-100 dark:bg-slate-950"
+        className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-slate-100 dark:bg-slate-950"
         aria-label="Certificate editor"
       >
         <TopRightToast toast={toast.toast} onDismiss={toast.clear} />

@@ -9,7 +9,9 @@
 
 namespace Sikshya\Admin\CourseBuilder\Tabs;
 
+use Sikshya\Addons\Addons;
 use Sikshya\Admin\CourseBuilder\Core\AbstractTab;
+use Sikshya\Licensing\TierCapabilities;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -75,6 +77,14 @@ class PricingTab extends AbstractTab
      */
     public function getFields(): array
     {
+        $course_pay_options = [
+            'free' => __('Free Course', 'sikshya'),
+            'paid' => __('Paid Course', 'sikshya'),
+        ];
+        if (self::subscriptionCoursePaymentAvailable()) {
+            $course_pay_options['subscription'] = __('Subscription Only', 'sikshya');
+        }
+
         $fields = [
             'pricing' => [
                 'section' => [
@@ -89,11 +99,7 @@ class PricingTab extends AbstractTab
                 'type' => 'select',
                 'label' => __('How people pay', 'sikshya'),
                 'select_placeholder' => __('Choose one…', 'sikshya'),
-                'options' => [
-                    'free' => __('Free Course', 'sikshya'),
-                    'paid' => __('Paid Course', 'sikshya'),
-                    'subscription' => __('Subscription Only', 'sikshya'),
-                ],
+                'options' => $course_pay_options,
                 'default' => 'paid',
                         'validation' => 'required',
                         'sanitization' => 'sanitize_text_field',
@@ -284,6 +290,14 @@ class PricingTab extends AbstractTab
     }
 
     /**
+     * Subscription pricing requires a commercial plan that unlocks the feature and the Subscriptions add-on.
+     */
+    private static function subscriptionCoursePaymentAvailable(): bool
+    {
+        return TierCapabilities::feature('subscriptions') && Addons::isEnabled('subscriptions');
+    }
+
+    /**
      * Validate pricing fields; price is required only for paid / subscription courses.
      *
      * @param array $data Flat form data.
@@ -295,7 +309,12 @@ class PricingTab extends AbstractTab
 
         $type = isset($data['course_type']) ? sanitize_text_field(wp_unslash((string) $data['course_type'])) : 'paid';
 
-        if ($type === 'subscription') {
+        if ($type === 'subscription' && !self::subscriptionCoursePaymentAvailable()) {
+            $errors['course_type'] = __(
+                'Subscription pricing requires Sikshya Pro (licensed) and the Subscriptions add-on enabled under Sikshya → Add-ons.',
+                'sikshya'
+            );
+        } elseif ($type === 'subscription') {
             $pid = isset($data['required_plan_id']) ? (int) $data['required_plan_id'] : 0;
             if ($pid <= 0) {
                 $errors['required_plan_id'] = __(

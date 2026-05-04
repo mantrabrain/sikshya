@@ -45,6 +45,109 @@ body.admin-bar:not(.sikshya-react-shell) #sikshya-admin-root {
   min-height: calc(100vh - 62px);
 }
 
+/**
+ * Certificate visual builder: fill WP admin content (no AppShell).
+ * Size `#sikshya-admin-root` when the builder is mounted, then absolutely fill it so
+ * nested flex/`h-full` chains do not leave a white strip under the workspace.
+ */
+#sikshya-admin-root:has(.sikshya-cert-builder-viewport) {
+  position: relative;
+  box-sizing: border-box;
+  height: calc(100vh - 32px);
+  max-height: calc(100vh - 32px);
+  min-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+body.admin-bar:not(.sikshya-react-shell) #sikshya-admin-root:has(.sikshya-cert-builder-viewport) {
+  height: calc(100vh - 62px);
+  max-height: calc(100vh - 62px);
+  min-height: calc(100vh - 62px);
+}
+
+.sikshya-cert-builder-viewport {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#sikshya-admin-root:has(.sikshya-cert-builder-viewport) .sikshya-cert-builder-viewport {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  max-height: none;
+}
+
+/**
+ * Single Sikshya admin splash: same markup/classes for PHP pre-React boot and React Suspense.
+ * (Avoid a second, different “Loading…” UI when lazy route chunks load.)
+ */
+@keyframes sikshya-admin-boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sikshya-admin-boot-spinner {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  animation: sikshya-admin-boot-spin 0.75s linear infinite;
+}
+
+.dark .sikshya-admin-boot-spinner {
+  border-color: #334155;
+  border-top-color: #60a5fa;
+}
+
+.sikshya-admin-boot-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  box-sizing: border-box;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dark .sikshya-admin-boot-loader:not(.sikshya-admin-boot-loader--in-shell) {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+body.sikshya-react-shell .sikshya-admin-boot-loader:not(.sikshya-admin-boot-loader--in-shell) {
+  min-height: 100vh;
+}
+
+body:not(.sikshya-react-shell) .sikshya-admin-boot-loader:not(.sikshya-admin-boot-loader--in-shell) {
+  min-height: calc(100vh - 32px);
+}
+
+body.admin-bar:not(.sikshya-react-shell) .sikshya-admin-boot-loader:not(.sikshya-admin-boot-loader--in-shell) {
+  min-height: calc(100vh - 46px);
+}
+
+/** Lazy-route Suspense fallback inside AppShell `<main>` — same spinner, no second visual system. */
+.sikshya-admin-boot-loader.sikshya-admin-boot-loader--in-shell {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: min(70vh, 40rem);
+  background: transparent;
+  color: inherit;
+}
+
 /* Settings page: restyle legacy WP markup to match Sikshya admin UI. */
 .settings-legacy-html {
   font-size: 14px;

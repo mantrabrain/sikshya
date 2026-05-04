@@ -14,8 +14,15 @@ import {
   PRO_QUESTION_DEFAULTS,
   ProQuestionFields,
   buildProQuestionMeta,
+  readProQuestionFromMeta,
   type ProQuestionValues,
 } from '../../pages/content-editors/ProIntegrationFields';
+import {
+  contentFromPost,
+  readMeta,
+  titleFromPost,
+  type WpPostRest,
+} from '../../pages/content-editors/useWpContentPost';
 
 export type QuestionType =
   | 'true_false'
@@ -93,6 +100,144 @@ const LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const HINT = 'mt-1 text-xs text-slate-500 dark:text-slate-400';
 
 const DEFAULT_MCQ_OPTIONS = ['', '', '', ''];
+
+function metaStringArray(raw: unknown): string[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.map((x) => String(x));
+}
+
+function parseQuestionCorrectJson(raw: string): unknown {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Populate modal form state from a `sik_question` REST record (same rules as full-page QuestionEditor).
+ */
+function hydrateAuthoringFormFromQuestionPost(
+  p: WpPostRest,
+  setters: {
+    setTitle: (v: string) => void;
+    setContent: (v: string) => void;
+    setStatus: (v: string) => void;
+    setFeatured: (v: number) => void;
+    setQType: (v: string) => void;
+    setPoints: (v: number) => void;
+    setOptions: (v: string[]) => void;
+    setCorrectAnswer: (v: string) => void;
+    setMultiCorrect: (v: number[]) => void;
+    setMatchLeft: (v: string[]) => void;
+    setMatchRight: (v: string[]) => void;
+    setMatchMap: (v: number[]) => void;
+    setOrderItems: (v: string[]) => void;
+    setOrderPerm: (v: number[]) => void;
+    setProQuestionValues: (v: ProQuestionValues) => void;
+  }
+): void {
+  const {
+    setTitle,
+    setContent,
+    setStatus,
+    setFeatured,
+    setQType,
+    setPoints,
+    setOptions,
+    setCorrectAnswer,
+    setMultiCorrect,
+    setMatchLeft,
+    setMatchRight,
+    setMatchMap,
+    setOrderItems,
+    setOrderPerm,
+    setProQuestionValues,
+  } = setters;
+  setTitle(titleFromPost(p));
+  setContent(contentFromPost(p));
+  setStatus(p.status || 'draft');
+  setFeatured(typeof p.featured_media === 'number' ? p.featured_media : 0);
+  const m = p.meta as Record<string, unknown> | undefined;
+  const t = String(readMeta(m, '_sikshya_question_type') ?? '');
+  setQType(t);
+  setPoints(Number(readMeta(m, '_sikshya_question_points') ?? 1));
+  setProQuestionValues(readProQuestionFromMeta(m));
+  const loadedOpts = metaStringArray(readMeta(m, '_sikshya_question_options'));
+  const rawCorrect = String(readMeta(m, '_sikshya_question_correct_answer') ?? '');
+
+  if (t === 'matching') {
+    setOptions([]);
+    const parsed = parseQuestionCorrectJson(rawCorrect) as {
+      matching?: { left?: string[]; right?: string[]; map?: number[] };
+    } | null;
+    const mm = parsed && typeof parsed === 'object' && parsed !== null ? parsed.matching : undefined;
+    if (mm && Array.isArray(mm.left) && Array.isArray(mm.right)) {
+      setMatchLeft(mm.left.map(String));
+      setMatchRight(mm.right.map(String));
+      const n = mm.left.length;
+      const map =
+        Array.isArray(mm.map) && mm.map.length === n ? mm.map.map((x) => Number(x)) : mm.left.map((_, i) => i);
+      setMatchMap(map);
+    } else {
+      setMatchLeft(['', '']);
+      setMatchRight(['', '']);
+      setMatchMap([0, 0]);
+    }
+    setCorrectAnswer('');
+    setMultiCorrect([]);
+    return;
+  }
+
+  if (t === 'ordering') {
+    const items = loadedOpts.length >= 2 ? loadedOpts : ['Item 1', 'Item 2', 'Item 3'];
+    setOrderItems(items);
+    const permRaw = parseQuestionCorrectJson(rawCorrect);
+    if (Array.isArray(permRaw) && permRaw.length === items.length && permRaw.every((x) => typeof x === 'number')) {
+      setOrderPerm(permRaw as number[]);
+    } else {
+      setOrderPerm(items.map((_, i) => i));
+    }
+    setOptions(items);
+    setCorrectAnswer('');
+    setMultiCorrect([]);
+    return;
+  }
+
+  if (t === 'multiple_response') {
+    setOptions(loadedOpts.length >= 2 ? loadedOpts : [...DEFAULT_MCQ_OPTIONS]);
+    const parsed = parseQuestionCorrectJson(rawCorrect);
+    setMultiCorrect(
+      Array.isArray(parsed) ? parsed.map((x) => Number(x)).filter((n) => Number.isInteger(n) && n >= 0) : [],
+    );
+    setCorrectAnswer('');
+    setMatchLeft(['', '']);
+    setMatchRight(['', '']);
+    setMatchMap([0, 0]);
+    return;
+  }
+
+  if (t === 'true_false') {
+    setOptions(['True', 'False']);
+    setCorrectAnswer(rawCorrect === 'false' ? 'false' : 'true');
+    setMultiCorrect([]);
+    setMatchLeft(['', '']);
+    setMatchRight(['', '']);
+    setMatchMap([0, 0]);
+    return;
+  }
+
+  setOptions(loadedOpts.length >= 2 ? loadedOpts : [...DEFAULT_MCQ_OPTIONS]);
+  setCorrectAnswer(rawCorrect);
+  setMultiCorrect([]);
+  setMatchLeft(['', '']);
+  setMatchRight(['', '']);
+  setMatchMap([0, 0]);
+  setOrderItems(['Item 1', 'Item 2', 'Item 3']);
+  setOrderPerm([0, 1, 2]);
+}
 
 function useAttachmentPreviewUrl(attachmentId: number): string {
   const [url, setUrl] = useState('');
@@ -240,6 +385,10 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onCreated: (questionId: number) => void;
+  /** When set, modal loads this question and saves via REST update instead of create. */
+  editQuestionId?: number | null;
+  /** Called after a successful save in edit mode (e.g. refresh titles in the parent list). */
+  onUpdated?: (questionId: number) => void;
   onPickExisting?: (questionId: number) => void;
   pickExistingLabel?: string;
 };
@@ -248,7 +397,10 @@ type Props = {
  * Full “Content library → New question” authoring experience inside a modal (same fields as QuestionEditor).
  */
 export function AddQuestionAuthoringModal(props: Props) {
-  const { config, open, onClose, onCreated, onPickExisting, pickExistingLabel = 'Add to quiz' } = props;
+  const { config, open, onClose, onCreated, editQuestionId, onUpdated, onPickExisting, pickExistingLabel = 'Add to quiz' } =
+    props;
+
+  const isEditMode = Boolean(editQuestionId && editQuestionId > 0);
 
   const advFeatureOk = isFeatureEnabled(config, 'quiz_advanced');
   const advAddon = useAddonEnabled('quiz_advanced');
@@ -268,6 +420,9 @@ export function AddQuestionAuthoringModal(props: Props) {
   }, [canUseAdvancedTypes]);
 
   const [busy, setBusy] = useState(false);
+  const [postLoading, setPostLoading] = useState(false);
+  const [loadRetry, setLoadRetry] = useState(0);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [error, setError] = useState<unknown>(null);
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
 
@@ -296,10 +451,19 @@ export function AddQuestionAuthoringModal(props: Props) {
 
   useEffect(() => {
     if (!open) {
+      setPostLoading(false);
+      setLoadError(null);
+      setLoadRetry(0);
       return;
     }
     setError(null);
+    setLoadError(null);
     setEditorTab('content');
+    setTypeMenuPos(null);
+    setLibrarySearch('');
+    setLibraryRows([]);
+    setLibraryError(null);
+    setLibrarySelected([]);
     setTitle('');
     setContent('');
     setStatus('draft');
@@ -315,12 +479,58 @@ export function AddQuestionAuthoringModal(props: Props) {
     setOrderPerm([0, 1, 2]);
     setFeatured(0);
     setProQuestionValues(PRO_QUESTION_DEFAULTS);
-    setTypeMenuPos(null);
-    setLibrarySearch('');
-    setLibraryRows([]);
-    setLibraryError(null);
-    setLibrarySelected([]);
-  }, [open]);
+    if (isEditMode) {
+      setPostLoading(true);
+    } else {
+      setPostLoading(false);
+    }
+  }, [open, isEditMode]);
+
+  useEffect(() => {
+    if (!open || !isEditMode || !editQuestionId || editQuestionId <= 0) {
+      return;
+    }
+    let cancelled = false;
+    setPostLoading(true);
+    setLoadError(null);
+    void getWpApi()
+      .get<WpPostRest>(`/sik_question/${editQuestionId}?context=edit`)
+      .then((p) => {
+        if (cancelled || !p) {
+          return;
+        }
+        hydrateAuthoringFormFromQuestionPost(p, {
+          setTitle,
+          setContent,
+          setStatus,
+          setFeatured,
+          setQType,
+          setPoints,
+          setOptions,
+          setCorrectAnswer,
+          setMultiCorrect,
+          setMatchLeft,
+          setMatchRight,
+          setMatchMap,
+          setOrderItems,
+          setOrderPerm,
+          setProQuestionValues,
+        });
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setLoadError(e);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setPostLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, isEditMode, editQuestionId, loadRetry]);
 
   useEffect(() => {
     if (!open) {
@@ -427,13 +637,16 @@ export function AddQuestionAuthoringModal(props: Props) {
     setTypeMenuPos({ top: rect.bottom + 8, left: Math.min(rect.left, window.innerWidth - 320) });
   };
 
-  const submitCreate = () => {
+  const submitPrimary = () => {
     const stem = title.trim();
     if (!stem || !qType) {
       return;
     }
     if (isLockedType(qType as QuestionType)) {
       setError(new Error('This question type requires the Advanced Quiz add-on.'));
+      return;
+    }
+    if (isEditMode && (!editQuestionId || editQuestionId <= 0)) {
       return;
     }
     setBusy(true);
@@ -455,6 +668,21 @@ export function AddQuestionAuthoringModal(props: Props) {
       orderPerm,
       proQuestionValues,
     });
+    if (isEditMode && editQuestionId && editQuestionId > 0) {
+      void getWpApi()
+        .put<WpPostRest>(`/sik_question/${editQuestionId}?context=edit`, body)
+        .then(() => {
+          onUpdated?.(editQuestionId);
+          onClose();
+        })
+        .catch((e) => {
+          setError(e);
+        })
+        .finally(() => {
+          setBusy(false);
+        });
+      return;
+    }
     void getWpApi()
       .post<{ id: number }>(`/sik_question`, body)
       .then((created) => {
@@ -472,7 +700,9 @@ export function AddQuestionAuthoringModal(props: Props) {
       });
   };
 
-  const canSubmit = Boolean(title.trim() && qType && !busy);
+  const canSubmit = Boolean(
+    title.trim() && qType && !busy && !(isEditMode && postLoading) && !(isEditMode && loadError)
+  );
   const canBulkAdd = Boolean(!busy && onPickExisting && librarySelected.length > 0);
 
   return (
@@ -484,8 +714,12 @@ export function AddQuestionAuthoringModal(props: Props) {
             onClose();
           }
         }}
-        title="New question"
-        description="Same authoring flow as Content library → Questions. Add to this quiz when you are ready."
+        title={isEditMode ? 'Edit question' : 'New question'}
+        description={
+          isEditMode
+            ? 'Update this question in your library. Changes apply everywhere this question is used.'
+            : 'Same authoring flow as Content library → Questions. Add to this quiz when you are ready.'
+        }
         size="xl"
         footer={
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -513,19 +747,39 @@ export function AddQuestionAuthoringModal(props: Props) {
                 Add selected
               </button>
             ) : null}
-            <ButtonPrimary type="button" disabled={!canSubmit} onClick={submitCreate}>
-              {busy ? 'Creating…' : 'Create and add to quiz'}
+            <ButtonPrimary type="button" disabled={!canSubmit} onClick={submitPrimary}>
+              {busy ? (isEditMode ? 'Saving…' : 'Creating…') : isEditMode ? 'Save changes' : 'Create and add to quiz'}
             </ButtonPrimary>
           </div>
         }
       >
         <div className="space-y-4">
+          {loadError && isEditMode ? (
+            <ApiErrorPanel
+              error={loadError}
+              title="Could not load question"
+              onRetry={() => {
+                setLoadError(null);
+                setLoadRetry((n) => n + 1);
+              }}
+            />
+          ) : null}
           {error ? (
-            <ApiErrorPanel error={error} title="Could not create question" onRetry={() => setError(null)} />
+            <ApiErrorPanel
+              error={error}
+              title={isEditMode ? 'Could not save question' : 'Could not create question'}
+              onRetry={() => setError(null)}
+            />
           ) : null}
 
+          {postLoading && isEditMode && !loadError ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">Loading question…</p>
+          ) : null}
+
+          {!(isEditMode && (postLoading || loadError)) ? (
+            <>
           <HorizontalEditorTabs
-            ariaLabel="New question sections"
+            ariaLabel={isEditMode ? 'Edit question sections' : 'New question sections'}
             tabs={[
               { id: 'content', label: 'Content', icon: 'plusDocument' },
               { id: 'settings', label: 'Settings', icon: 'cog' },
@@ -1111,14 +1365,21 @@ export function AddQuestionAuthoringModal(props: Props) {
                 </div>
               )}
           </div>
+            </>
+          ) : null}
         </div>
       </Modal>
+      {/* Type picker renders outside Modal’s portal — z-index must exceed {@link Modal} shell (z-[100090]). */}
       {typeMenuPos ? (
-        <div className="fixed inset-0 z-[110]" onMouseDown={() => setTypeMenuPos(null)} aria-hidden />
+        <div
+          className="fixed inset-0 z-[100200]"
+          onMouseDown={() => setTypeMenuPos(null)}
+          aria-hidden
+        />
       ) : null}
       {typeMenuPos ? (
         <div
-          className="fixed z-[120] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+          className="fixed z-[100210] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
           style={{ top: typeMenuPos.top, left: typeMenuPos.left }}
           role="listbox"
           aria-label="Question type"

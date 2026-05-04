@@ -81,7 +81,7 @@ export function ContentPostEditorPage(props: { embedded?: boolean; config: Siksh
 
   if (isCertificateEditor) {
     return (
-      <>
+      <div className="sikshya-cert-builder-viewport">
         {renderContentEditor(postType, {
           config,
           postType,
@@ -90,7 +90,7 @@ export function ContentPostEditorPage(props: { embedded?: boolean; config: Siksh
           entityLabel,
           onSavedNewId,
         })}
-      </>
+      </div>
     );
   }
 

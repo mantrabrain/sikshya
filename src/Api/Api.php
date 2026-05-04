@@ -448,6 +448,7 @@ class Api
         $admin_rest->register();
 
         AdminLicenseRestRoutes::register();
+        AdminMarketingNoticeRestRoutes::register();
 
         $email_templates_rest = new AdminEmailTemplateRestRoutes($this->plugin);
         $email_templates_rest->register();

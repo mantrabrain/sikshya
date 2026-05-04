@@ -1,0 +1,102 @@
+/* Sikshya admin marketing notices — aligned with Yatra `assets/admin/css/notices.css` (prefixed). */
+
+.sikshya-notice-card.notice {
+  border: 1px solid #e5e7eb;
+  border-left-width: 4px;
+  border-radius: 10px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.sikshya-notice-card .notice-dismiss {
+  top: 10px;
+  right: 10px;
+}
+
+.sikshya-notice-card__wrap {
+  padding: 14px 16px;
+}
+
+.sikshya-notice-card__row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.sikshya-notice-card__left {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.sikshya-notice-card__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.sikshya-notice-card__title {
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.sikshya-notice-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sikshya-notice-card__message {
+  margin: 6px 0 0;
+  color: #374151;
+  line-height: 1.45;
+}
+
+.sikshya-notice-card__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: 12px;
+}
+
+.sikshya-notice-card__cta.button {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.sikshya-notice-card--review {
+  border-left-color: #2563eb;
+  background: #ffffff;
+}
+
+.sikshya-notice-card--review .sikshya-notice-card__icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.sikshya-notice-card--review .sikshya-notice-card__row {
+  align-items: center;
+}
+
+.sikshya-notice-card--review .sikshya-notice-card__actions {
+  align-self: center;
+}
+
+.sikshya-notice-card--review .sikshya-notice-card__cta.button {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}

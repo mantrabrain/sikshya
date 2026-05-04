@@ -71,6 +71,10 @@ const INSPECTOR_CARD =
 const COLOR_INPUT =
   'mt-1.5 h-10 w-full max-w-[5.5rem] cursor-pointer rounded-md border border-slate-200 bg-white p-0.5 dark:border-slate-600 dark:bg-slate-800';
 
+/** Visible, stable scrollbars on long template / theme / inspector panels (WebKit + Firefox). */
+const CERT_BUILDER_SCROLL =
+  'overscroll-contain [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/80 [&::-webkit-scrollbar-track]:bg-transparent dark:[&::-webkit-scrollbar-thumb]:bg-slate-600/70';
+
 const CANVAS_ID = 'sikshya-cert-canvas-root';
 const CERT_LEFT_TAB_PANEL_ID = 'sikshya-cert-left-tab-panel';
 
@@ -208,7 +212,7 @@ function PaletteItem(props: PaletteItemDef) {
       <button
         type="button"
         title={`${label} — drag to the canvas`}
-        className="group flex h-full w-full min-h-[5.25rem] flex-col items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-white px-2 py-2.5 text-center shadow-sm transition hover:border-slate-300 hover:bg-slate-50/90 hover:shadow dark:border-slate-600 dark:bg-slate-800/60 dark:hover:border-slate-500 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 active:cursor-grabbing"
+        className="group flex h-full w-full min-h-[5.25rem] min-w-0 flex-col items-center justify-center gap-2 rounded-lg border border-slate-200/90 bg-white px-1.5 py-2.5 text-center shadow-sm transition hover:border-slate-300 hover:bg-slate-50/90 hover:shadow dark:border-slate-600 dark:bg-slate-800/60 dark:hover:border-slate-500 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 active:cursor-grabbing"
         aria-label={`Drag ${label} to the certificate canvas`}
         {...listeners}
         {...attributes}
@@ -216,7 +220,7 @@ function PaletteItem(props: PaletteItemDef) {
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-slate-200/90 group-hover:text-slate-800 dark:bg-slate-700/80 dark:text-slate-200 dark:group-hover:bg-slate-600/90 dark:group-hover:text-slate-50">
           <NavIcon name={icon} className="h-6 w-6" />
         </span>
-        <span className="w-full min-w-0 break-words text-center text-xs font-medium leading-snug text-slate-800 dark:text-slate-100">
+        <span className="w-full min-w-0 hyphens-auto break-words text-center text-xs font-medium leading-snug text-slate-800 dark:text-slate-100">
           {label}
         </span>
       </button>
@@ -2051,13 +2055,13 @@ export function CertificateVisualBuilder(props: Props) {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-      <div className="flex h-full min-h-0 w-full flex-col">
-        <div className="grid h-full max-h-full min-h-0 w-full flex-1 grid-cols-[minmax(0,22.5rem)_minmax(0,1fr)_minmax(0,19rem)] gap-0 overflow-hidden 2xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)_minmax(0,21rem)]">
+      <div className="flex min-h-0 w-full flex-1 flex-col">
+        <div className="grid min-h-0 w-full flex-1 grid-cols-[minmax(0,23.5rem)_minmax(0,1fr)_minmax(0,19rem)] gap-0 overflow-hidden 2xl:grid-cols-[minmax(0,25rem)_minmax(0,1fr)_minmax(0,21rem)]">
         <aside
-          className={`flex h-full max-h-full min-h-0 flex-row overflow-hidden border-r border-slate-200/90 dark:border-slate-800 ${PANEL_CARD}`}
+          className={`flex h-full max-h-full min-h-0 min-w-0 flex-row overflow-hidden border-r border-slate-200/90 dark:border-slate-800 ${PANEL_CARD}`}
         >
           <div
-            className="flex h-full min-h-0 w-[4.25rem] shrink-0 flex-col items-stretch gap-1 overflow-y-auto overscroll-contain border-r border-slate-200/90 bg-slate-100 py-2.5 dark:border-slate-800 dark:bg-slate-900/60"
+            className={`flex h-full min-h-0 w-[5.25rem] shrink-0 flex-col items-stretch gap-1 overflow-y-auto border-r border-slate-200/90 bg-slate-100 py-2.5 dark:border-slate-800 dark:bg-slate-900/60 ${CERT_BUILDER_SCROLL}`}
             role="tablist"
             aria-label="Builder panels"
           >
@@ -2081,7 +2085,7 @@ export function CertificateVisualBuilder(props: Props) {
                   onClick={() => setLeftTab(t.id)}
                   aria-selected={active}
                   aria-controls={CERT_LEFT_TAB_PANEL_ID}
-                  className={`mx-1.5 flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-[10px] font-semibold leading-tight transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/55 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-100 dark:focus-visible:ring-offset-slate-900 ${
+                  className={`mx-1 flex w-full min-w-0 max-w-full flex-col items-center gap-1 rounded-lg px-0.5 py-2 text-[9px] font-semibold leading-[1.15] tracking-tight transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/55 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-100 dark:focus-visible:ring-offset-slate-900 ${
                     'bottom' in t && t.bottom ? 'mt-auto' : ''
                   } ${
                     active
@@ -2089,10 +2093,12 @@ export function CertificateVisualBuilder(props: Props) {
                       : 'text-slate-500 hover:bg-white/80 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/80 dark:hover:text-slate-200'
                   }`}
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-200/60 text-slate-600 dark:bg-slate-700/70 dark:text-slate-300">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-200/60 text-slate-600 dark:bg-slate-700/70 dark:text-slate-300">
                     <NavIcon name={t.icon} className="h-5 w-5" />
                   </span>
-                  <span className="max-w-[3.5rem] text-center">{t.label}</span>
+                  <span className="w-full max-w-full hyphens-auto break-words text-center text-balance">
+                    {t.label}
+                  </span>
                 </button>
               );
             })}
@@ -2102,7 +2108,7 @@ export function CertificateVisualBuilder(props: Props) {
             role="tabpanel"
             tabIndex={-1}
             aria-labelledby={`sikshya-cert-tab-${leftTab}`}
-            className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3.5 py-3.5 outline-none"
+            className={`min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3.5 py-3.5 outline-none ${CERT_BUILDER_SCROLL}`}
           >
             {leftTab === 'templates' ? (
               <div className="space-y-5">
@@ -2118,18 +2124,18 @@ export function CertificateVisualBuilder(props: Props) {
                   placeholder="Search templates…"
                   aria-label="Search templates"
                 />
-                <div className="grid gap-2.5">
+                <div className="grid min-w-0 gap-2.5">
                   {filteredTemplates.map((t) => {
                     const isPortrait = t.page?.orientation === 'portrait';
                     return (
                       <button
                         key={t.id}
                         type="button"
-                        className="group flex w-full items-center gap-3 rounded-lg border border-slate-200/90 bg-white p-3 text-left shadow-sm transition hover:border-slate-300 hover:bg-slate-50/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/45 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+                        className="group flex w-full min-w-0 max-w-full flex-col items-stretch gap-2 overflow-hidden rounded-lg border border-slate-200/90 bg-white p-2.5 text-left shadow-sm transition hover:border-slate-300 hover:bg-slate-50/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/45 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800 sm:flex-row sm:items-center sm:gap-3 sm:p-3"
                         onClick={() => applyTemplate(t.id)}
                       >
                         <span
-                          className="relative shrink-0 overflow-hidden rounded-md border border-slate-200/80 shadow-inner dark:border-slate-700"
+                          className="relative mx-auto shrink-0 overflow-hidden rounded-md border border-slate-200/80 shadow-inner dark:border-slate-700 sm:mx-0"
                           style={{
                             width: isPortrait ? 38 : 58,
                             height: isPortrait ? 54 : 40,
@@ -2200,9 +2206,11 @@ export function CertificateVisualBuilder(props: Props) {
                             }}
                           />
                         </span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-medium text-slate-900 dark:text-white">{t.name}</span>
-                          <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400">
+                        <span className="min-w-0 flex-1 text-center sm:text-left">
+                          <span className="block break-words text-sm font-medium leading-snug text-slate-900 dark:text-white">
+                            {t.name}
+                          </span>
+                          <span className="mt-0.5 block break-words text-xs leading-snug text-slate-500 dark:text-slate-400">
                             {t.description}
                           </span>
                         </span>
@@ -2232,9 +2240,9 @@ export function CertificateVisualBuilder(props: Props) {
                   <h3 className={PANEL_TITLE}>Elements</h3>
                   <p className={PANEL_LEDE}>Drag a tile to the canvas, or use quick add for the same block.</p>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className={`mb-2.5 ${SECTION_LABEL}`}>Library</p>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid min-w-0 grid-cols-2 gap-2.5">
                     {PALETTE_ITEMS.map((item) => (
                       <PaletteItem key={`${item.type}-${item.label}`} {...item} />
                     ))}
@@ -2242,17 +2250,17 @@ export function CertificateVisualBuilder(props: Props) {
                 </div>
                 <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/40">
                   <p className={`mb-2.5 ${SECTION_LABEL}`}>Quick add</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid min-w-0 grid-cols-2 gap-2">
                     {PALETTE_ITEMS.map((item) => (
                       <button
                         key={`q-${item.type}-${item.label}`}
                         type="button"
-                        className="min-h-[2.75rem] rounded-md border border-slate-200/90 bg-white px-2 py-2 text-center text-xs font-medium leading-snug text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 focus-visible:ring-offset-1 focus-visible:ring-offset-white active:bg-slate-100 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+                        className="min-h-[2.75rem] min-w-0 rounded-md border border-slate-200/90 bg-white px-1.5 py-2 text-center text-[11px] font-medium leading-snug text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 focus-visible:ring-offset-1 focus-visible:ring-offset-white active:bg-slate-100 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
                         onClick={() => addBlockQuick(item)}
                         title={`Add ${item.label}`}
                         aria-label={`Quick add ${item.label}`}
                       >
-                        {item.label}
+                        <span className="block hyphens-auto break-words">{item.label}</span>
                       </button>
                     ))}
                   </div>
@@ -2532,7 +2540,7 @@ export function CertificateVisualBuilder(props: Props) {
         </aside>
 
         <main className="flex h-full max-h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-slate-200/80 bg-slate-100/80 dark:border-slate-800 dark:bg-slate-950/50">
-          <div className="min-h-0 flex-1 overflow-auto overscroll-contain p-3 sm:p-4 xl:p-5">
+          <div className={`min-h-0 flex-1 overflow-auto p-3 sm:p-4 xl:p-5 ${CERT_BUILDER_SCROLL}`}>
             <CanvasDropArea
               hasBlocks={blocks.length > 0}
               orientation={orientation}
@@ -2558,7 +2566,7 @@ export function CertificateVisualBuilder(props: Props) {
           </div>
         </main>
 
-        <aside className="flex h-full max-h-full min-h-0 flex-col overflow-hidden border-l border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <aside className="flex h-full max-h-full min-h-0 min-w-0 flex-col overflow-hidden border-l border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="shrink-0 border-b border-slate-200/90 px-4 pb-3 pt-4 dark:border-slate-800">
             <h3 className={PANEL_TITLE}>{selected ? 'Properties' : 'Inspector'}</h3>
             <p className={PANEL_LEDE}>
@@ -2567,7 +2575,7 @@ export function CertificateVisualBuilder(props: Props) {
                 : 'Select a block on the sheet to edit content and layout.'}
             </p>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-2">
+          <div className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-2 ${CERT_BUILDER_SCROLL}`}>
             <Inspector selected={selected} onUpdateBlock={updateBlock} onRemoveBlock={removeBlock} />
           </div>
         </aside>

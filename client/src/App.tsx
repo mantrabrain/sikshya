@@ -108,18 +108,17 @@ const ReportsHubPage = lazy(() => hubPages().then((m) => ({ default: m.ReportsHu
 const SalesHubPage = lazy(() => hubPages().then((m) => ({ default: m.SalesHubPage })));
 const ToolsHubPage = lazy(() => hubPages().then((m) => ({ default: m.ToolsHubPage })));
 
+/** Same splash as PHP `ReactAdminView` boot markup — one loader for pre-React + lazy chunks. */
 function AdminRouteFallback() {
   return (
     <div
-      className="flex min-h-[55vh] w-full flex-col items-center justify-center gap-3 bg-slate-50 p-8 text-sm text-slate-600 dark:bg-slate-950 dark:text-slate-400 sm:min-h-[65vh]"
+      className="sikshya-admin-boot-loader sikshya-admin-boot-loader--in-shell"
+      role="status"
       aria-busy="true"
       aria-live="polite"
     >
-      <span
-        className="h-10 w-10 shrink-0 animate-spin rounded-full border-2 border-solid border-slate-200 border-t-brand-600 dark:border-slate-600 dark:border-t-brand-400"
-        aria-hidden
-      />
-      <span className="font-medium">Loading…</span>
+      <span className="sikshya-admin-boot-spinner" aria-hidden />
+      <span className="screen-reader-text">Loading Sikshya…</span>
     </div>
   );
 }
@@ -448,8 +447,9 @@ function RoutedApp() {
 
   // Certificate builder is a full-screen workspace with its own header/actions.
   // Do not wrap it in the admin shell (no sidebar, no top bar).
+  // No Suspense fallback: PHP skips the Sikshya boot loader for this route; hosts often show their own loader first.
   if (isCertificateBuilder) {
-    return <Suspense fallback={<AdminRouteFallback />}>{routes}</Suspense>;
+    return <Suspense fallback={null}>{routes}</Suspense>;
   }
 
   return (

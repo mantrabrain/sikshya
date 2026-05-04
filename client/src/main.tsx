@@ -96,6 +96,16 @@ const rootEl = document.getElementById('sikshya-admin-root');
 const w = window as unknown as { __sikshyaAdminMounted?: boolean };
 if (rootEl && !w.__sikshyaAdminMounted) {
   w.__sikshyaAdminMounted = true;
+
+  // Certificate builder: never show the global Sikshya boot spinner/bar (PHP may still emit it on edge URLs).
+  const cfg = typeof window !== 'undefined' ? window.sikshyaReact : undefined;
+  const q = cfg?.query && typeof cfg.query === 'object' && !Array.isArray(cfg.query) ? (cfg.query as Record<string, string>) : {};
+  const isCertificateBuilder =
+    String(cfg?.page || '').trim() === 'edit-content' && String(q.post_type || '').trim() === 'sikshya_certificate';
+  if (isCertificateBuilder) {
+    rootEl.querySelector('.sikshya-admin-boot-loader')?.remove();
+  }
+
   createRoot(rootEl).render(
     <StrictMode>
       <App />

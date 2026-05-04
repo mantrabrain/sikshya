@@ -122,7 +122,15 @@ class AdminRestRoutes
                         'required' => true,
                         'sanitize_callback' => 'sanitize_key',
                         'validate_callback' => static function ($v): bool {
-                            return in_array((string) $v, ['free', 'paid', 'subscription', 'bundle'], true);
+                            $t = (string) $v;
+                            if (in_array($t, ['free', 'paid', 'bundle'], true)) {
+                                return true;
+                            }
+                            if ($t === 'subscription') {
+                                return TierCapabilities::feature('subscriptions') && Addons::isEnabled('subscriptions');
+                            }
+
+                            return false;
                         },
                     ],
                 ],
@@ -1335,6 +1343,16 @@ class AdminRestRoutes
         $post = get_post($course_id);
         if (!$post || $post->post_type !== \Sikshya\Constants\PostTypes::COURSE) {
             return new WP_REST_Response(['success' => false, 'message' => __('Course not found.', 'sikshya')], 404);
+        }
+
+        if ($type === 'subscription' && (!TierCapabilities::feature('subscriptions') || !Addons::isEnabled('subscriptions'))) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'message' => __('Subscription courses require Sikshya Pro (licensed) and the Subscriptions add-on.', 'sikshya'),
+                ],
+                400
+            );
         }
 
         update_post_meta($course_id, '_sikshya_course_type', $type);

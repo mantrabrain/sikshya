@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useShellState } from '../context/ShellStateContext';
+import { InlineNotices } from './notices/InlineNotices';
 import { ShellAlertStrip } from './ShellAlertStrip';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
@@ -55,20 +56,20 @@ export function AppShell({
   const [isDark, setIsDark] = useState(false);
   const safeUser: SikshyaShellUser = user || { name: 'Admin', avatarUrl: '' };
 
-  useEffect(() => {
-    const root = document.documentElement;
-    const stored = localStorage.getItem(THEME_KEY);
-    const prefersDark =
-      stored === 'dark' ||
-      (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (prefersDark) {
-      root.classList.add('dark');
-      setIsDark(true);
-    } else {
-      root.classList.remove('dark');
-      setIsDark(false);
-    }
-  }, []);
+	useEffect(() => {
+		const root = document.documentElement;
+		const stored = localStorage.getItem(THEME_KEY);
+		// Default to light. Only use dark when the user has chosen it (top bar toggle persists `dark` / `light`).
+		// We intentionally do not follow `prefers-color-scheme`, so OS dark mode does not override the default.
+		const useDark = stored === 'dark';
+		if (useDark) {
+			root.classList.add('dark');
+			setIsDark(true);
+		} else {
+			root.classList.remove('dark');
+			setIsDark(false);
+		}
+	}, []);
 
   const onToggleDark = () => {
     setIsDark((d) => {
@@ -118,6 +119,7 @@ export function AppShell({
           }
         >
           <ShellAlertStrip alerts={shellAlerts} />
+          <InlineNotices />
           {pageActions ? (
             <div className="mb-6 flex flex-wrap items-center justify-end gap-2">{pageActions}</div>
           ) : null}

@@ -19,7 +19,9 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Admin\ReactAdminView;
 use Sikshya\Security\AdminBackendAccess;
 use Sikshya\Services\Settings;
+use Sikshya\Admin\ProUpgradeAdminNudge;
 use Sikshya\Admin\SetupWizardController;
+use Sikshya\Services\AdminMarketingNoticeService;
 
 /**
  * Admin Management Class
@@ -118,6 +120,8 @@ class Admin
     private function initHooks(): void
     {
         add_action('admin_menu', [$this, 'addAdminMenus']);
+        ProUpgradeAdminNudge::register();
+        AdminMarketingNoticeService::init();
         add_action('admin_init', [$this, 'initAdmin']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectLegacyWizardAdminUrl'], 0);
