@@ -1441,7 +1441,7 @@ class SettingsManager
                         'default' => 'all_lessons',
                         'options' => [
                             'all_lessons' => __('All lessons completed', 'sikshya'),
-                            'all_lessons_quizzes' => __('All lessons and quizzes', 'sikshya'),
+                            'all_lessons_quizzes' => __('All lessons, quizzes, and assignments', 'sikshya'),
                             'percentage' => __('Percentage based', 'sikshya'),
                             'manual' => __('Manual completion', 'sikshya'),
                         ],

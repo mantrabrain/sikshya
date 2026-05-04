@@ -666,6 +666,17 @@ class LearnerRestRoutes
             return $this->error('assignment_submit_failed', (string) ($result['message'] ?? __('Could not submit assignment.', 'sikshya')), 400);
         }
 
+        $cid = 0;
+        if (isset($result['submission']) && is_array($result['submission'])) {
+            $cid = (int) ($result['submission']['course_id'] ?? 0);
+        }
+        if ($cid <= 0) {
+            $cid = (int) LessonCourseLink::resolvedCourseIdForAssignment($assignment_id);
+        }
+        if ($cid > 0) {
+            $this->syncEnrollmentProgress(get_current_user_id(), $cid);
+        }
+
         return new WP_REST_Response(['ok' => true, 'data' => $result['submission']], 200);
     }
 

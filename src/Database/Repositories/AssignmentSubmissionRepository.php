@@ -55,6 +55,30 @@ final class AssignmentSubmissionRepository
     }
 
     /**
+     * All submissions for one assignment (instructors / gradebook / reporting).
+     *
+     * @return array<int, object>
+     */
+    public function findByAssignment(int $assignment_id, int $limit = 500, int $offset = 0): array
+    {
+        if ($assignment_id <= 0) {
+            return [];
+        }
+        global $wpdb;
+        $limit = max(1, min(1000, $limit));
+        $offset = max(0, $offset);
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$this->table_name} WHERE assignment_id = %d ORDER BY submitted_at DESC LIMIT %d OFFSET %d",
+                $assignment_id,
+                $limit,
+                $offset
+            )
+        );
+    }
+
+    /**
      * @return array<int, object>
      */
     public function findByUserAndCourse(int $user_id, int $course_id, int $limit = 50, int $offset = 0): array

@@ -180,6 +180,23 @@ final class SingleLessonPageModel
     }
 
     /**
+     * Assignment-only: meta + submission snapshot for Learn UI. Null for lessons/quizzes.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getAssignmentLearnPayload(): ?array
+    {
+        $a = $this->vm['assignment_learn'] ?? null;
+
+        return is_array($a) ? $a : null;
+    }
+
+    public function isAssignmentPost(): bool
+    {
+        return $this->getLessonPost()->post_type === \Sikshya\Constants\PostTypes::ASSIGNMENT;
+    }
+
+    /**
      * Course Builder: fixed-height sidebar with scrolling outline list only.
      */
     public function isLearnCurriculumSidebarScrollable(): bool

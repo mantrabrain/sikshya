@@ -28,12 +28,14 @@ final class CourseCompletionEvaluator
 
         if ($criteria === 'all_lessons_quizzes') {
             $quizzes = LearnerCurriculumHelper::quizIdsForCourse($course_id);
-            $total = count($lessons) + count($quizzes);
+            $assignments = LearnerCurriculumHelper::assignmentIdsForCourse($course_id);
+            $total = count($lessons) + count($quizzes) + count($assignments);
             if ($total <= 0) {
                 return 0.0;
             }
             $done = $progress->countCompletedLessons($user_id, $course_id);
             $done += $progress->countCompletedQuizzesAmong($user_id, $course_id, $quizzes);
+            $done += $progress->countCompletedAssignmentsAmong($user_id, $course_id, $assignments);
 
             return round(100 * $done / $total, 2);
         }

@@ -5,6 +5,7 @@ namespace Sikshya\Services;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\AssignmentSubmissionRepository;
 use Sikshya\Database\Repositories\CourseRepository;
+use Sikshya\Database\Repositories\ProgressRepository;
 
 /**
  * Basic assignment flow (submit, list, feedback).
@@ -17,12 +18,16 @@ final class AssignmentService
 
     private AssignmentSubmissionRepository $submissions;
 
+    private ProgressRepository $progress;
+
     public function __construct(
         ?CourseRepository $courses = null,
-        ?AssignmentSubmissionRepository $submissions = null
+        ?AssignmentSubmissionRepository $submissions = null,
+        ?ProgressRepository $progress = null
     ) {
         $this->courses = $courses ?? new CourseRepository();
         $this->submissions = $submissions ?? new AssignmentSubmissionRepository();
+        $this->progress = $progress ?? new ProgressRepository();
     }
 
     /**
@@ -54,6 +59,35 @@ final class AssignmentService
             return ['success' => false, 'message' => __('You are not enrolled in this course.', 'sikshya')];
         }
 
+        $existing = $this->submissions->findByAssignmentAndUser($assignment_id, $user_id);
+        if ($existing && (string) ($existing->status ?? '') === 'graded') {
+            $allow_resubmit = (string) get_post_meta($assignment_id, '_sikshya_assignment_allow_resubmit', true) === '1';
+            if (!$allow_resubmit) {
+                return [
+                    'success' => false,
+                    'message' => __(
+                        'This assignment is already graded. Resubmissions are not allowed unless your instructor enables them.',
+                        'sikshya'
+                    ),
+                ];
+            }
+        }
+
+        if ($this->submissionViolatesDueDate($assignment_id, $existing)) {
+            return [
+                'success' => false,
+                'message' => __('This assignment is past its due date.', 'sikshya'),
+            ];
+        }
+
+        $subtype = $this->normalizedAssignmentSubtype($assignment_id);
+        $incoming_files = $this->countIncomingAttachmentFiles($attachments);
+
+        $v = $this->validateSubmissionPayload($assignment_id, $subtype, $content, $incoming_files);
+        if (!$v['ok']) {
+            return ['success' => false, 'message' => (string) $v['message']];
+        }
+
         // Extension point: Pro addons (e.g. assignments_advanced) can validate the submission
         // against rubric/file-extension/late rules and short-circuit with `['ok' => false, ...]`.
         $pre = apply_filters(
@@ -71,21 +105,29 @@ final class AssignmentService
             ];
         }
 
-        $existing = $this->submissions->findByAssignmentAndUser($assignment_id, $user_id);
-        if ($existing && (string) ($existing->status ?? '') === 'graded') {
-            $allow_resubmit = (string) get_post_meta($assignment_id, '_sikshya_assignment_allow_resubmit', true) === '1';
-            if (!$allow_resubmit) {
-                return [
-                    'success' => false,
-                    'message' => __(
-                        'This assignment is already graded. Resubmissions are not allowed unless your instructor enables them.',
-                        'sikshya'
-                    ),
-                ];
-            }
+        $attachment_ids = $this->handleAttachments($user_id, $attachments);
+
+        $v2 = $this->validateUploadedAttachments($assignment_id, $attachment_ids);
+        if (!$v2['ok']) {
+            $this->deleteAttachments($attachment_ids);
+
+            return ['success' => false, 'message' => (string) $v2['message']];
         }
 
-        $attachment_ids = $this->handleAttachments($user_id, $attachments);
+        $min_files = max(0, (int) get_post_meta($assignment_id, '_sikshya_assignment_min_files', true));
+        if ($subtype === 'file_upload' && $min_files > 0 && count($attachment_ids) < $min_files) {
+            $this->deleteAttachments($attachment_ids);
+
+            return [
+                'success' => false,
+                'message' => sprintf(
+                    /* translators: %d: minimum files */
+                    __('One or more uploads failed. Please try again and upload at least %d file(s).', 'sikshya'),
+                    $min_files
+                ),
+            ];
+        }
+
         $sid = $this->submissions->upsertSubmission(
             [
                 'assignment_id' => $assignment_id,
@@ -98,11 +140,15 @@ final class AssignmentService
             ]
         );
 
+        $this->progress->markAssignmentComplete($user_id, $course_id, $assignment_id);
+
         do_action('sikshya_assignment_submitted', $sid, $assignment_id, $course_id, $user_id);
+
+        $row = $this->submissions->findByAssignmentAndUser($assignment_id, $user_id);
 
         return [
             'success' => true,
-            'submission' => [
+            'submission' => $row ? $this->formatSubmission($row) : [
                 'id' => $sid,
                 'assignment_id' => $assignment_id,
                 'course_id' => $course_id,
@@ -133,14 +179,26 @@ final class AssignmentService
             ]
         );
 
+        $now = (int) current_time('timestamp');
         $out = [];
         foreach ($posts as $p) {
-            $submission = $this->submissions->findByAssignmentAndUser((int) $p->ID, $user_id);
+            $pid = (int) $p->ID;
+            $submission = $this->submissions->findByAssignmentAndUser($pid, $user_id);
+            $due_raw = (string) get_post_meta($pid, '_sikshya_assignment_due_date', true);
+            $due_ts = $due_raw !== '' ? strtotime($due_raw) : 0;
+            $stype = sanitize_key((string) get_post_meta($pid, '_sikshya_assignment_type', true));
+
             $out[] = [
-                'id' => (int) $p->ID,
+                'id' => $pid,
                 'title' => get_the_title($p),
-                'due_date' => (string) get_post_meta($p->ID, '_sikshya_assignment_due_date', true),
-                'points' => (int) get_post_meta($p->ID, '_sikshya_assignment_points', true),
+                'due_date' => $due_raw,
+                'due_formatted' => $due_ts > 0
+                    ? (string) wp_date(get_option('date_format') . ' ' . get_option('time_format'), $due_ts)
+                    : '',
+                'is_overdue' => $due_ts > 0 && $now > $due_ts,
+                'points' => (int) get_post_meta($pid, '_sikshya_assignment_points', true),
+                'submission_type' => $stype,
+                'submission_type_label' => $this->publicSubmissionTypeLabel($stype),
                 'submission' => $submission ? $this->formatSubmission($submission) : null,
             ];
         }
@@ -154,7 +212,200 @@ final class AssignmentService
     public function getAssignmentFeedback(int $assignment_id, int $user_id): ?array
     {
         $row = $this->submissions->findByAssignmentAndUser(absint($assignment_id), absint($user_id));
+
         return $row ? $this->formatSubmission($row) : null;
+    }
+
+    private function publicSubmissionTypeLabel(string $stype): string
+    {
+        $labels = [
+            'file' => __('File upload', 'sikshya'),
+            'file_upload' => __('File upload', 'sikshya'),
+            'text' => __('Essay', 'sikshya'),
+            'essay' => __('Essay', 'sikshya'),
+            'url_submission' => __('URL', 'sikshya'),
+        ];
+
+        return $stype !== '' && isset($labels[$stype]) ? $labels[$stype] : '';
+    }
+
+    private function normalizedAssignmentSubtype(int $assignment_id): string
+    {
+        $raw = sanitize_key((string) get_post_meta($assignment_id, '_sikshya_assignment_type', true));
+        if ($raw === '') {
+            return 'essay';
+        }
+        if (in_array($raw, ['file', 'file_upload'], true)) {
+            return 'file_upload';
+        }
+        if (in_array($raw, ['text', 'essay'], true)) {
+            return 'essay';
+        }
+        if ($raw === 'url_submission') {
+            return 'url_submission';
+        }
+
+        return 'essay';
+    }
+
+    /**
+     * @param array<string, mixed> $attachments
+     */
+    private function countIncomingAttachmentFiles(array $attachments): int
+    {
+        if (!isset($attachments['name'])) {
+            return 0;
+        }
+        if (is_string($attachments['name']) && $attachments['name'] !== '') {
+            return 1;
+        }
+        if (is_array($attachments['name'])) {
+            $n = 0;
+            foreach ($attachments['name'] as $name) {
+                if (is_string($name) && $name !== '') {
+                    ++$n;
+                }
+            }
+
+            return $n;
+        }
+
+        return 0;
+    }
+
+    /**
+     * @return array{ok: bool, message: string}
+     */
+    private function validateSubmissionPayload(int $assignment_id, string $subtype, string $content, int $incoming_files): array
+    {
+        $plain = trim(wp_strip_all_tags($content));
+        $require_text = (string) get_post_meta($assignment_id, '_sikshya_require_text', true) === '1';
+        $min_files = max(0, (int) get_post_meta($assignment_id, '_sikshya_assignment_min_files', true));
+        $max_files = max(0, (int) get_post_meta($assignment_id, '_sikshya_assignment_max_files', true));
+
+        if ($max_files > 0 && $incoming_files > $max_files) {
+            return [
+                'ok' => false,
+                'message' => sprintf(
+                    /* translators: %d: maximum files */
+                    __('You can upload at most %d file(s) for this assignment.', 'sikshya'),
+                    $max_files
+                ),
+            ];
+        }
+
+        if ($min_files > 0 && $incoming_files < $min_files) {
+            return [
+                'ok' => false,
+                'message' => sprintf(
+                    /* translators: %d: minimum files */
+                    __('Please upload at least %d file(s).', 'sikshya'),
+                    $min_files
+                ),
+            ];
+        }
+
+        if ($subtype === 'essay') {
+            if ($plain === '' && $incoming_files <= 0) {
+                return ['ok' => false, 'message' => __('Please enter your response before submitting.', 'sikshya')];
+            }
+        } elseif ($subtype === 'file_upload') {
+            if ($incoming_files <= 0) {
+                return ['ok' => false, 'message' => __('Please choose at least one file to upload.', 'sikshya')];
+            }
+            if ($require_text && $plain === '') {
+                return ['ok' => false, 'message' => __('Please add a short note or description with your upload.', 'sikshya')];
+            }
+        } elseif ($subtype === 'url_submission') {
+            if ($plain === '' || !filter_var($plain, FILTER_VALIDATE_URL)) {
+                return ['ok' => false, 'message' => __('Please submit a valid URL.', 'sikshya')];
+            }
+        }
+
+        return ['ok' => true, 'message' => ''];
+    }
+
+    /**
+     * @param array<int> $attachment_ids
+     * @return array{ok: bool, message: string}
+     */
+    private function validateUploadedAttachments(int $assignment_id, array $attachment_ids): array
+    {
+        $allowed = (string) get_post_meta($assignment_id, '_sikshya_allowed_file_extensions', true);
+        $allowed = trim(strtolower($allowed));
+        if ($allowed === '' || $attachment_ids === []) {
+            return ['ok' => true, 'message' => ''];
+        }
+
+        $allowed_list = array_filter(array_map('trim', explode(',', $allowed)));
+        if ($allowed_list === []) {
+            return ['ok' => true, 'message' => ''];
+        }
+
+        foreach ($attachment_ids as $fid) {
+            $path = get_attached_file($fid);
+            if (!$path || !is_string($path)) {
+                continue;
+            }
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            if ($ext === '' || !in_array($ext, $allowed_list, true)) {
+                return [
+                    'ok' => false,
+                    'message' => sprintf(
+                        /* translators: %s: comma-separated list of allowed extensions */
+                        __('One or more files use a type that is not allowed. Allowed: %s', 'sikshya'),
+                        implode(', ', $allowed_list)
+                    ),
+                ];
+            }
+        }
+
+        return ['ok' => true, 'message' => ''];
+    }
+
+    /**
+     * @param array<int> $ids
+     */
+    private function deleteAttachments(array $ids): void
+    {
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                wp_delete_attachment($id, true);
+            }
+        }
+    }
+
+    /**
+     * @param object|null $existing
+     */
+    private function submissionViolatesDueDate(int $assignment_id, $existing): bool
+    {
+        $allow_late = (string) get_post_meta($assignment_id, '_sikshya_allow_late', true) === '1';
+        if ($allow_late) {
+            return false;
+        }
+
+        $due_raw = (string) get_post_meta($assignment_id, '_sikshya_assignment_due_date', true);
+        $due_ts = $due_raw !== '' ? strtotime($due_raw) : 0;
+        if ($due_ts <= 0) {
+            return false;
+        }
+
+        $now = (int) current_time('timestamp');
+        if ($now <= $due_ts) {
+            return false;
+        }
+
+        if (
+            $existing
+            && (string) ($existing->status ?? '') === 'graded'
+            && (string) get_post_meta($assignment_id, '_sikshya_assignment_allow_resubmit', true) === '1'
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -271,4 +522,3 @@ final class AssignmentService
         ];
     }
 }
-

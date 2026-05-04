@@ -61,8 +61,16 @@ final class CurriculumOutlineMeta
                 return '';
             case 'assignment':
                 $pts = (int) get_post_meta($post->ID, '_sikshya_assignment_points', true);
+                if ($pts > 0) {
+                    return (string) sprintf(__('%d pts', 'sikshya'), $pts);
+                }
+                $due_raw = (string) get_post_meta($post->ID, '_sikshya_assignment_due_date', true);
+                $due_ts = $due_raw !== '' ? strtotime($due_raw) : 0;
+                if ($due_ts > 0) {
+                    return (string) wp_date('M j', $due_ts);
+                }
 
-                return $pts > 0 ? (string) sprintf(__('%d pts', 'sikshya'), $pts) : '';
+                return '';
             default:
                 return '';
         }
@@ -165,7 +173,10 @@ final class CurriculumOutlineMeta
 
         $type_labels = [
             'file' => __('File upload', 'sikshya'),
+            'file_upload' => __('File upload', 'sikshya'),
             'text' => __('Text', 'sikshya'),
+            'essay' => __('Essay', 'sikshya'),
+            'url_submission' => __('URL', 'sikshya'),
         ];
         $type_label = $atype !== '' && isset($type_labels[$atype]) ? $type_labels[$atype] : '';
 
@@ -176,6 +187,16 @@ final class CurriculumOutlineMeta
         if ($points > 0) {
             /* translators: %d: assignment points */
             $parts[] = sprintf(__('%d pts', 'sikshya'), $points);
+        }
+
+        $due_raw = (string) get_post_meta($pid, '_sikshya_assignment_due_date', true);
+        $due_ts = $due_raw !== '' ? strtotime($due_raw) : 0;
+        if ($due_ts > 0) {
+            $parts[] = sprintf(
+                /* translators: %s: formatted due date/time */
+                __('Due %s', 'sikshya'),
+                wp_date(get_option('date_format') . ' ' . get_option('time_format'), $due_ts)
+            );
         }
 
         return implode(' · ', $parts);

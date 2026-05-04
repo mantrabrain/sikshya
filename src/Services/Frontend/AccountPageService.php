@@ -41,7 +41,7 @@ final class AccountPageService
             }
         }
 
-        $rawView = sanitize_key((string) get_query_var(PermalinkService::ACCOUNT_VIEW_VAR));
+        $rawView = PublicPageUrls::requestAccountViewRaw();
         if ($rawView !== '' && !in_array($rawView, PublicPageUrls::allowedAccountViews(), true)) {
             wp_safe_redirect(PublicPageUrls::accountViewUrl('dashboard'));
             exit;

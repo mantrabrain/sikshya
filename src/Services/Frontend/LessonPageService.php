@@ -4,6 +4,7 @@ namespace Sikshya\Services\Frontend;
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Database\Repositories\ProgressRepository;
+use Sikshya\Services\AssignmentService;
 use Sikshya\Services\CourseService;
 use Sikshya\Frontend\Site\CurriculumOutlineMeta;
 use Sikshya\Frontend\Site\PublicPageUrls;
@@ -54,11 +55,12 @@ final class LessonPageService
                     : __('You are not enrolled in this course.', 'sikshya');
             } else {
                 if ($error === '' && $enrolled && !$is_preview) {
+                    $access_type = $post->post_type === PostTypes::ASSIGNMENT ? 'assignment' : 'lesson';
                     $access = apply_filters(
                         'sikshya_access_check',
                         ['ok' => true, 'message' => ''],
                         [
-                            'type' => 'lesson',
+                            'type' => $access_type,
                             'user_id' => $uid,
                             'course_id' => $course_id,
                             'content_id' => $lesson_id,
@@ -92,6 +94,8 @@ final class LessonPageService
 
         $lesson_type = sanitize_key((string) get_post_meta($lesson_id, '_sikshya_lesson_type', true));
 
+        $assignment_learn = self::buildAssignmentLearnPayload($post, $course_id, $uid, $enrolled, $is_preview);
+
         $vm = apply_filters(
             'sikshya_lesson_template_data',
             [
@@ -111,6 +115,7 @@ final class LessonPageService
                 'current_completed' => $current_completed,
                 'course_features' => $course_features,
                 'lesson_type' => $lesson_type,
+                'assignment_learn' => $assignment_learn,
                 'learn_curriculum_sidebar_scrollable' => self::isLearnCurriculumSidebarScrollableForCourse($course_id),
                 'urls' => [
                     'courses' => get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'),
@@ -128,6 +133,100 @@ final class LessonPageService
         );
 
         return SingleLessonPageModel::fromViewData(is_array($vm) ? $vm : []);
+    }
+
+    /**
+     * Learner-facing assignment meta + submission snapshot for the Learn shell (null when not an assignment).
+     *
+     * @return array<string, mixed>|null
+     */
+    private static function buildAssignmentLearnPayload(
+        \WP_Post $post,
+        int $course_id,
+        int $user_id,
+        bool $enrolled,
+        bool $is_preview
+    ): ?array {
+        if ($post->post_type !== PostTypes::ASSIGNMENT) {
+            return null;
+        }
+
+        $aid = (int) $post->ID;
+        $due_raw = (string) get_post_meta($aid, '_sikshya_assignment_due_date', true);
+        $points = (int) get_post_meta($aid, '_sikshya_assignment_points', true);
+        $stype = sanitize_key((string) get_post_meta($aid, '_sikshya_assignment_type', true));
+        $allow_late = (string) get_post_meta($aid, '_sikshya_allow_late', true) === '1';
+
+        $due_ts = $due_raw !== '' ? strtotime($due_raw) : 0;
+        $now = (int) current_time('timestamp');
+        $is_past_due = $due_ts > 0 && $now > $due_ts;
+
+        $submission = null;
+        if ($enrolled && !$is_preview && $user_id > 0) {
+            $svc = new AssignmentService();
+            $submission = $svc->getAssignmentFeedback($aid, $user_id);
+        }
+
+        $graded = is_array($submission) && (($submission['status'] ?? '') === 'graded');
+        $allow_resubmit = is_array($submission) && !empty($submission['allow_resubmit']);
+        $past_due_blocks = $is_past_due && !$allow_late && !($graded && $allow_resubmit);
+
+        $can_submit = $enrolled && !$is_preview && !$past_due_blocks
+            && (!$graded || $allow_resubmit);
+
+        return [
+            'assignment_id' => $aid,
+            'points' => $points,
+            'due_raw' => $due_raw,
+            'due_formatted' => $due_ts > 0
+                ? (string) wp_date(get_option('date_format') . ' ' . get_option('time_format'), $due_ts)
+                : '',
+            'submission_type' => $stype,
+            'submission_type_label' => self::assignmentSubmissionTypeLabel($stype),
+            'submission_subtype' => self::assignmentSubmissionSubtypeNormalized($stype),
+            'min_files' => max(0, (int) get_post_meta($aid, '_sikshya_assignment_min_files', true)),
+            'max_files' => max(0, (int) get_post_meta($aid, '_sikshya_assignment_max_files', true)),
+            'require_text' => (string) get_post_meta($aid, '_sikshya_require_text', true) === '1',
+            'allow_late' => $allow_late,
+            'is_past_due' => $is_past_due,
+            'can_submit' => $can_submit,
+            'submission' => $submission,
+        ];
+    }
+
+    /**
+     * Canonical subtype for Learn UI + validation (matches {@see AssignmentService} rules).
+     */
+    private static function assignmentSubmissionSubtypeNormalized(string $raw): string
+    {
+        $raw = sanitize_key($raw);
+        if ($raw === '') {
+            return 'essay';
+        }
+        if (in_array($raw, ['file', 'file_upload'], true)) {
+            return 'file_upload';
+        }
+        if (in_array($raw, ['text', 'essay'], true)) {
+            return 'essay';
+        }
+        if ($raw === 'url_submission') {
+            return 'url_submission';
+        }
+
+        return 'essay';
+    }
+
+    private static function assignmentSubmissionTypeLabel(string $stype): string
+    {
+        $labels = [
+            'file' => __('File upload', 'sikshya'),
+            'file_upload' => __('File upload', 'sikshya'),
+            'text' => __('Essay', 'sikshya'),
+            'essay' => __('Essay', 'sikshya'),
+            'url_submission' => __('URL', 'sikshya'),
+        ];
+
+        return $stype !== '' && isset($labels[$stype]) ? $labels[$stype] : '';
     }
 
     /**
@@ -368,6 +467,10 @@ final class LessonPageService
 
         if ($p->post_type === PostTypes::QUIZ) {
             return $progress->hasQuizCompletion($user_id, $course_id, (int) $p->ID);
+        }
+
+        if ($p->post_type === PostTypes::ASSIGNMENT) {
+            return $progress->hasLessonCompletion($user_id, $course_id, (int) $p->ID);
         }
 
         return false;

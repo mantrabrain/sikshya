@@ -4,6 +4,7 @@ namespace Sikshya\Database\Repositories;
 
 use Sikshya\Database\Repositories\Contracts\RepositoryInterface;
 use Sikshya\Database\Tables\ProgressTable;
+use Sikshya\Services\LearnerCurriculumHelper;
 
 class ProgressRepository implements RepositoryInterface
 {
@@ -302,6 +303,46 @@ class ProgressRepository implements RepositoryInterface
     }
 
     /**
+     * Mark an assignment as curriculum-complete for progress UI.
+     *
+     * Uses the same `lesson_id` progress column as lessons (distinct post IDs prevent collisions).
+     *
+     * @param int $user_id       User ID.
+     * @param int $course_id     Course ID.
+     * @param int $assignment_id Assignment post ID.
+     */
+    public function markAssignmentComplete(int $user_id, int $course_id, int $assignment_id): bool
+    {
+        if ($this->hasLessonCompletion($user_id, $course_id, $assignment_id)) {
+            return true;
+        }
+
+        $progress_data = [
+            'user_id' => $user_id,
+            'course_id' => $course_id,
+            'lesson_id' => $assignment_id,
+            'quiz_id' => null,
+            'status' => 'completed',
+            'percentage' => 100.00,
+            'completed_date' => current_time('mysql'),
+        ];
+
+        $ok = $this->create($progress_data) > 0;
+        if ($ok) {
+            /**
+             * Fires when an assignment counts as completed in course progress (typically after submit).
+             *
+             * @param int $user_id       User ID.
+             * @param int $course_id     Course ID.
+             * @param int $assignment_id Assignment post ID.
+             */
+            do_action('sikshya_assignment_completed', $user_id, $course_id, $assignment_id);
+        }
+
+        return $ok;
+    }
+
+    /**
      * Whether the learner has a completed progress row for this lesson (lesson rows use quiz_id NULL).
      */
     public function hasLessonCompletion(int $user_id, int $course_id, int $lesson_id): bool
@@ -345,22 +386,51 @@ class ProgressRepository implements RepositoryInterface
     }
 
     /**
-     * Count distinct lessons marked completed for a course.
+     * Count distinct curriculum lessons marked completed for a course.
+     *
+     * Restricts to lesson IDs from the course outline so assignment rows (also stored in `lesson_id`)
+     * are not counted as lessons.
      */
     public function countCompletedLessons(int $user_id, int $course_id): int
     {
+        $lesson_ids = LearnerCurriculumHelper::lessonIdsForCourse($course_id);
+
+        return $this->countLessonColumnCompletionsAmongIds($user_id, $course_id, $lesson_ids);
+    }
+
+    /**
+     * How many curriculum assignments in $assignment_ids are marked complete for this learner.
+     *
+     * @param array<int, int> $assignment_ids
+     */
+    public function countCompletedAssignmentsAmong(int $user_id, int $course_id, array $assignment_ids): int
+    {
+        return $this->countLessonColumnCompletionsAmongIds($user_id, $course_id, $assignment_ids);
+    }
+
+    /**
+     * Completed progress rows where `lesson_id` is in $ids (lesson or assignment posts).
+     *
+     * @param array<int, int> $ids
+     */
+    private function countLessonColumnCompletionsAmongIds(int $user_id, int $course_id, array $ids): int
+    {
         global $wpdb;
 
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(DISTINCT lesson_id) FROM {$this->table_name}
-                WHERE user_id = %d AND course_id = %d AND lesson_id IS NOT NULL
-                AND quiz_id IS NULL AND status = %s",
-                $user_id,
-                $course_id,
-                'completed'
-            )
-        );
+        $ids = array_values(array_unique(array_filter(array_map('absint', $ids))));
+        if ($ids === []) {
+            return 0;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+        $sql = "SELECT COUNT(DISTINCT lesson_id) FROM {$this->table_name}
+            WHERE user_id = %d AND course_id = %d AND lesson_id IS NOT NULL
+            AND quiz_id IS NULL AND status = %s
+            AND lesson_id IN ({$placeholders})";
+
+        $args = array_merge([$user_id, $course_id, 'completed'], $ids);
+
+        return (int) $wpdb->get_var($wpdb->prepare($sql, ...$args));
     }
 
     /**

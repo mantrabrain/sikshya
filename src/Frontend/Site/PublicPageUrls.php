@@ -37,12 +37,26 @@ final class PublicPageUrls
     }
 
     /**
+     * Raw account section slug from the request (pretty path, plain query var, or legacy `tab`).
+     *
+     * Legacy `?tab=profile` on `/account/` is supported alongside {@see PermalinkService::ACCOUNT_VIEW_VAR}.
+     */
+    public static function requestAccountViewRaw(): string
+    {
+        $raw = (string) get_query_var(PermalinkService::ACCOUNT_VIEW_VAR);
+        if ($raw === '' && isset($_GET['tab'])) {
+            $raw = (string) wp_unslash($_GET['tab']);
+        }
+
+        return sanitize_key($raw);
+    }
+
+    /**
      * Current account sub-view (defaults to dashboard).
      */
     public static function currentAccountView(): string
     {
-        $raw = (string) get_query_var(PermalinkService::ACCOUNT_VIEW_VAR);
-        $v   = sanitize_key($raw);
+        $v = self::requestAccountViewRaw();
 
         return in_array($v, self::allowedAccountViews(), true) ? $v : 'dashboard';
     }

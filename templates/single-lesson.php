@@ -278,7 +278,7 @@ while (have_posts()) :
                                         </div>
                                     </div>
                                     <div class="sikshya-learnHeader__actions">
-                                        <?php if ($page_model->isEnrolled() && !$page_model->isPreview()) : ?>
+                                        <?php if ($page_model->isEnrolled() && !$page_model->isPreview() && !$page_model->isAssignmentPost()) : ?>
                                             <?php
                                             $is_done = $page_model->isCurrentCompleted();
                                             $done_tip = __('Completed — this lesson is already marked complete in your progress.', 'sikshya');
@@ -382,12 +382,15 @@ while (have_posts()) :
                                 ?>
                                 <?php if ($page_model->hasRenderableLessonBody()) : ?>
                                     <?php echo LessonLearnContent::ksesLessonBody($page_model->getLessonPostContentHtml()); ?>
-                                <?php else : ?>
+                                <?php elseif (!$page_model->isAssignmentPost()) : ?>
                                     <p class="sikshya-zeroMargin"><?php esc_html_e('This lesson does not have content yet.', 'sikshya'); ?></p>
                                 <?php endif; ?>
                                 <?php
                                 do_action('sikshya_lesson_after_content', $legacy_vm, $page_model);
                                 ?>
+                                <?php if ($page_model->getAssignmentLearnPayload()) : ?>
+                                    <?php require __DIR__ . '/partials/learn-assignment-panel.php'; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="sikshya-tabPanel" data-sikshya-panel="resources">
@@ -961,6 +964,149 @@ while (have_posts()) :
         noteAdd.disabled = false;
       }
     });
+  }
+
+  // Assignment: drag-drop file zone + multipart REST submit
+  const asgRemoveLbl = <?php echo wp_json_encode(__('Remove', 'sikshya'), JSON_UNESCAPED_UNICODE); ?>;
+  const asgTooManyMsg = <?php echo wp_json_encode(__('Too many files for this assignment.', 'sikshya'), JSON_UNESCAPED_UNICODE); ?>;
+
+  function initAssignmentDropzones() {
+    document.querySelectorAll('[data-sikshya-dropzone]').forEach((dz) => {
+      const input = dz.querySelector('input[type="file"]');
+      const list = dz.querySelector('[data-sikshya-dropzone-list]');
+      if (!input || !list) return;
+      const maxAttr = dz.getAttribute('data-sikshya-max-files');
+      const maxN = maxAttr ? parseInt(maxAttr, 10) : 0;
+      const form = dz.closest('form');
+      const statusEl = form ? form.querySelector('[data-sikshya-assignment-status]') : null;
+
+      function capAndApply(filesArr) {
+        let next = filesArr.slice();
+        if (maxN > 0 && next.length > maxN) {
+          if (statusEl) statusEl.textContent = asgTooManyMsg;
+          next = next.slice(0, maxN);
+        }
+        const dt = new DataTransfer();
+        next.forEach((f) => {
+          try {
+            dt.items.add(f);
+          } catch (e) {
+            /* ignore invalid file entries */
+          }
+        });
+        input.files = dt.files;
+        renderList();
+        if (statusEl && statusEl.textContent === asgTooManyMsg) {
+          window.setTimeout(() => {
+            if (statusEl.textContent === asgTooManyMsg) statusEl.textContent = '';
+          }, 4000);
+        }
+      }
+
+      function renderList() {
+        const files = input.files;
+        list.innerHTML = '';
+        if (!files || !files.length) {
+          list.hidden = true;
+          return;
+        }
+        list.hidden = false;
+        for (let i = 0; i < files.length; i++) {
+          const li = document.createElement('li');
+          const name = document.createElement('span');
+          name.textContent = files[i].name;
+          const rm = document.createElement('button');
+          rm.type = 'button';
+          rm.className = 'sikshya-assignmentDropzone__remove';
+          rm.textContent = asgRemoveLbl;
+          rm.setAttribute('data-remove-index', String(i));
+          li.appendChild(name);
+          li.appendChild(rm);
+          list.appendChild(li);
+        }
+      }
+
+      list.addEventListener('click', (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest('[data-remove-index]') : null;
+        if (!btn) return;
+        const idx = parseInt(btn.getAttribute('data-remove-index') || '0', 10);
+        const cur = Array.from(input.files || []);
+        if (idx < 0 || idx >= cur.length) return;
+        cur.splice(idx, 1);
+        capAndApply(cur);
+      });
+
+      ['dragenter', 'dragover'].forEach((ev) => {
+        dz.addEventListener(ev, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (ev === 'dragover' && e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+          dz.classList.add('is-dragover');
+        });
+      });
+      ['dragleave', 'dragend'].forEach((ev) => {
+        dz.addEventListener(ev, (e) => {
+          e.preventDefault();
+          dz.classList.remove('is-dragover');
+        });
+      });
+      dz.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dz.classList.remove('is-dragover');
+        const dropped = Array.from((e.dataTransfer && e.dataTransfer.files) || []);
+        if (!dropped.length) return;
+        const existing = Array.from(input.files || []);
+        capAndApply(existing.concat(dropped));
+      });
+
+      input.addEventListener('change', () => {
+        capAndApply(Array.from(input.files || []));
+      });
+    });
+  }
+
+  const bootEl = document.getElementById('sikshya-assignment-boot');
+  const asgForm = document.querySelector('[data-sikshya-assignment-form]');
+  if (bootEl && asgForm && bootEl.textContent) {
+    let boot = null;
+    try {
+      boot = JSON.parse(bootEl.textContent);
+    } catch (e) {
+      boot = null;
+    }
+    if (boot && boot.rest && boot.nonce) {
+      initAssignmentDropzones();
+      const statusEl = asgForm.querySelector('[data-sikshya-assignment-status]');
+      asgForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (statusEl) statusEl.textContent = '';
+        const submitBtn = asgForm.querySelector('[data-sikshya-assignment-submit]');
+        const prev = submitBtn ? submitBtn.textContent || '' : '';
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          const fd = new FormData(asgForm);
+          const res = await fetch(boot.rest.replace(/\/?$/, '/') + 'me/assignment-submit', {
+            method: 'POST',
+            headers: { 'X-WP-Nonce': boot.nonce },
+            credentials: 'same-origin',
+            body: fd,
+          });
+          const json = await res.json().catch(() => null);
+          if (!res.ok || !json || json.ok !== true) {
+            const msg = (json && (json.message || (json.data && json.data.message))) || <?php echo wp_json_encode(__('Could not submit. Try again.', 'sikshya'), JSON_UNESCAPED_UNICODE); ?>;
+            throw new Error(msg);
+          }
+          window.location.reload();
+        } catch (err) {
+          if (statusEl) statusEl.textContent = (err && err.message) ? err.message : <?php echo wp_json_encode(__('Could not submit.', 'sikshya'), JSON_UNESCAPED_UNICODE); ?>;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = prev;
+          }
+        }
+      });
+    }
   }
 })();
 </script>
