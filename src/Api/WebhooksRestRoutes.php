@@ -128,7 +128,11 @@ class WebhooksRestRoutes
                     if ($pi_amount > 0 && $expected_minor > 0 && $pi_amount !== $expected_minor) {
                         return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
                     }
-                    $this->fulfillment()->fulfillPaidOrder($order_id);
+                    if (!$this->fulfillment()->fulfillPaidOrder($order_id)) {
+                        error_log(sprintf('Sikshya: fulfillPaidOrder failed for order %d (Stripe payment_intent.succeeded).', $order_id));
+
+                        return new WP_REST_Response(['ok' => false, 'message' => 'Fulfillment failed'], 500);
+                    }
                 }
             }
             return new WP_REST_Response(['ok' => true], 200);
@@ -227,7 +231,12 @@ class WebhooksRestRoutes
             if (is_float($amt) && $amt >= 0 && abs($amt - (float) $row->total) > 0.009) {
                 return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
             }
-            $this->fulfillment()->fulfillPaidOrder((int) $row->id);
+            $oid = (int) $row->id;
+            if (!$this->fulfillment()->fulfillPaidOrder($oid)) {
+                error_log(sprintf('Sikshya: fulfillPaidOrder failed for order %d (PayPal webhook).', $oid));
+
+                return new WP_REST_Response(['ok' => false, 'message' => 'Fulfillment failed'], 500);
+            }
         }
 
         return new WP_REST_Response(['ok' => true], 200);
@@ -302,7 +311,12 @@ class WebhooksRestRoutes
             return new WP_REST_Response(['ok' => false, 'message' => 'Amount mismatch'], 400);
         }
 
-        $this->fulfillment()->fulfillPaidOrder((int) $row->id);
+        $oid = (int) $row->id;
+        if (!$this->fulfillment()->fulfillPaidOrder($oid)) {
+            error_log(sprintf('Sikshya: fulfillPaidOrder failed for order %d (PayPal IPN).', $oid));
+
+            return new WP_REST_Response(['ok' => false, 'message' => 'Fulfillment failed'], 500);
+        }
 
         return new WP_REST_Response(['ok' => true], 200);
     }

@@ -5,7 +5,7 @@ Tags: course, education, elearning, learning management system, lms
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0.1
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,8 @@ Build and sell online courses on WordPress with one plugin: a visual course buil
 Use Sikshya for coaching, professional training, customer education, internal onboarding, or the start of a course marketplace—with full control of content, branding, and revenue.
 
 ### Get started
+
+👉 [Watch the overview on YouTube](https://youtu.be/CF1p9slkQrg) — see Sikshya LMS in action before you install.
 
 👉 [Try Sikshya LMS Free](https://try.new/plugins/sikshya/)
 
@@ -343,6 +345,12 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 
 == Changelog ==
 
+= 1.0.1 - 2026-05-04 =
+* Admin (React shell): Grading & submissions and gradebook screens — toolbar layout fixes so Course, Search, and Status filters align cleanly; contextual helper copy moved below the filter row; clearer sidebar icons for Gradebook and related entries.
+* Marketing: Pro upgrade notice now uses “up to 50% off” instead of “50%+ OFF” for clearer, defensible wording (classic admin notice + in-app strip).
+* Public: course category index and taxonomy routing improvements for a better category archive experience.
+* Build: refreshed compiled admin JavaScript/CSS from current sources.
+
 = 1.0.0.1 - 2026-05-02 =
 * Certificate : fixes for issues in the admin certificate designer (layout, editing, and related flows).
 * Build: refreshed compiled admin React assets from the latest sources.
@@ -359,6 +367,9 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 * Checkout (with Sikshya Pro Dynamic Checkout Fields): optional server-rendered dynamic field markup—JavaScript attaches listeners and visibility without rebuilding the form in the browser; includes `CheckoutDynamicFieldsView` and refactored checkout helpers (`dfBindDynamicFields`, `dfSyncValuesFromHost`).
 
 == Upgrade Notice ==
+
+= 1.0.1 - 2026-05-04 =
+Maintenance and UX release: admin grading filters, marketing copy clarity, course category browsing, and updated admin assets. Safe to apply over 1.0.0.x; clear page caches if your host caches admin or theme assets.
 
 = 1.0.0.1 - 2026-05-02 =
 Maintenance release: certificate builder fixes and updated admin build assets. Safe to apply on top of 1.0.0; clear any full-page caches if your host caches admin scripts.

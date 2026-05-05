@@ -3208,7 +3208,20 @@ class AdminRestRoutes
             }
 
             $fulfill = new OrderFulfillmentService($repo, new PaymentRepository(), $course);
-            $fulfill->fulfillPaidOrder($order_id);
+            if (!$fulfill->fulfillPaidOrder($order_id)) {
+                return new WP_REST_Response(
+                    [
+                        'ok' => false,
+                        'order_id' => $order_id,
+                        'code' => 'fulfillment_failed',
+                        'message' => __(
+                            'Order was created but could not be marked paid: fulfillment failed. Check course line items and guest data.',
+                            'sikshya'
+                        ),
+                    ],
+                    422
+                );
+            }
         }
 
         return new WP_REST_Response(
@@ -3270,7 +3283,19 @@ class AdminRestRoutes
         }
 
         $fulfill = new OrderFulfillmentService($repo, new PaymentRepository(), $course);
-        $fulfill->fulfillPaidOrder($id);
+        if (!$fulfill->fulfillPaidOrder($id)) {
+            return new WP_REST_Response(
+                [
+                    'ok' => false,
+                    'code' => 'fulfillment_failed',
+                    'message' => __(
+                        'Could not mark order paid: fulfillment failed. Check that the order has course line items and valid learner data.',
+                        'sikshya'
+                    ),
+                ],
+                422
+            );
+        }
 
         return new WP_REST_Response(
             ['ok' => true, 'message' => __('Order marked paid and enrollments created.', 'sikshya')],

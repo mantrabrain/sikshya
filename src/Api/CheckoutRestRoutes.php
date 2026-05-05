@@ -497,19 +497,27 @@ class CheckoutRestRoutes
             if ($gateway === 'offline') {
                 $oid = (int) $order['order_id'];
                 $total = (float) $order['total'];
+                $repo = new OrderRepository();
                 if ($checkout->isOfflineAutoFulfillEnabled() || $total <= 0.00001) {
-                    $this->fulfillmentService()->fulfillPaidOrder($oid);
+                    $fulfilled = $this->fulfillmentService()->fulfillPaidOrder($oid);
+                    if (!$fulfilled) {
+                        $repo->updateOrder($oid, ['status' => 'on-hold']);
+                    }
                 } else {
-                    (new OrderRepository())->updateOrder($oid, ['status' => 'on-hold']);
+                    $repo->updateOrder($oid, ['status' => 'on-hold']);
                 }
                 $gateway_payload['redirect_url'] = PublicPageUrls::orderView((string) ($order['public_token'] ?? ''));
             } elseif ($gateway === 'bank_transfer') {
                 $oid = (int) $order['order_id'];
                 $total = (float) $order['total'];
+                $repo = new OrderRepository();
                 if ($total <= 0.00001) {
-                    $this->fulfillmentService()->fulfillPaidOrder($oid);
+                    $fulfilled = $this->fulfillmentService()->fulfillPaidOrder($oid);
+                    if (!$fulfilled) {
+                        $repo->updateOrder($oid, ['status' => 'on-hold']);
+                    }
                 } else {
-                    (new OrderRepository())->updateOrder($oid, ['status' => 'on-hold']);
+                    $repo->updateOrder($oid, ['status' => 'on-hold']);
                 }
                 $gateway_payload['redirect_url'] = PublicPageUrls::orderView((string) ($order['public_token'] ?? ''));
             } elseif ($gateway === 'paypal') {
@@ -1009,23 +1017,32 @@ class CheckoutRestRoutes
             // Ignore persistence failures; fulfillment can proceed.
         }
 
-        // Payment verified. For guest orders, create/link a student account now.
-        if ($is_guest && (int) ($order->user_id ?? 0) <= 0) {
-            $new_uid = $this->ensureGuestOrderUser($order_id, $order);
-            if ($new_uid <= 0) {
-                return new WP_REST_Response(
-                    [
-                        'ok' => false,
-                        'code' => 'account_required',
-                        'message' => __('An account is required for this email. Please sign in to continue.', 'sikshya'),
-                    ],
-                    409
-                );
-            }
-        }
+        // Guest account creation / linking (including existing-email attach) runs inside OrderFulfillmentService.
 
         $fulfill = $this->fulfillmentService();
-        $fulfill->fulfillPaidOrder($order_id);
+        if (!$fulfill->fulfillPaidOrder($order_id)) {
+            return new WP_REST_Response(
+                [
+                    'ok' => false,
+                    'code' => 'fulfillment_failed',
+                    'message' => __(
+                        'Payment was recorded but enrollment could not be completed. Please contact support.',
+                        'sikshya'
+                    ),
+                ],
+                422
+            );
+        }
+
+        if ($is_guest) {
+            $fresh = $orders->findById($order_id);
+            $linked = $fresh && (int) ($fresh->user_id ?? 0) > 0 ? (int) $fresh->user_id : 0;
+            if ($linked > 0) {
+                wp_set_current_user($linked);
+                wp_set_auth_cookie($linked, true, is_ssl());
+                CartStorage::adoptGuestCartForUser($linked);
+            }
+        }
 
         $public_token = '';
         if (isset($order->public_token) && is_string($order->public_token)) {
@@ -1045,94 +1062,6 @@ class CheckoutRestRoutes
             ],
             200
         );
-    }
-
-    /**
-     * Ensure a guest order is linked to a real WP user.
-     *
-     * @param object $order
-     */
-    private function ensureGuestOrderUser(int $order_id, object $order): int
-    {
-        $meta = [];
-        if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
-            $decoded = json_decode($order->meta, true);
-            if (is_array($decoded)) {
-                $meta = $decoded;
-            }
-        }
-
-        $guest = isset($meta['guest']) && is_array($meta['guest']) ? $meta['guest'] : [];
-        $email = isset($guest['email']) ? sanitize_email((string) $guest['email']) : '';
-        $name = isset($guest['name']) ? sanitize_text_field((string) $guest['name']) : '';
-        $billing = isset($meta['billing']) && is_array($meta['billing']) ? $meta['billing'] : [];
-        if ($email === '' || !is_email($email)) {
-            return 0;
-        }
-
-        $existing = (int) email_exists($email);
-        if ($existing > 0) {
-            // Never auto-link guest orders to an existing account — require the user to sign in.
-            return 0;
-        } else {
-            $base = sanitize_user((string) preg_replace('/@.*/', '', $email), true);
-            if ($base === '') {
-                $base = 'student';
-            }
-            $username = $base;
-            $i = 1;
-            while (username_exists($username)) {
-                $i++;
-                $username = $base . $i;
-                if ($i > 50) {
-                    $username = $base . wp_rand(1000, 999999);
-                    break;
-                }
-            }
-            $password = wp_generate_password(20, true, true);
-            $new_id = wp_create_user($username, $password, $email);
-            if (is_wp_error($new_id) || (int) $new_id <= 0) {
-                return 0;
-            }
-            $uid = (int) $new_id;
-            $u = get_userdata($uid);
-            if ($u) {
-                $u->set_role('sikshya_student');
-            }
-            if ($name !== '') {
-                wp_update_user(['ID' => $uid, 'display_name' => $name]);
-            }
-            wp_new_user_notification($uid, null, 'user');
-        }
-
-        // Persist billing fields for future purchases (works for new or existing users).
-        if ($uid > 0 && is_array($billing)) {
-            $map = [
-                'phone' => '_sikshya_billing_phone',
-                'address_1' => '_sikshya_billing_address_1',
-                'address_2' => '_sikshya_billing_address_2',
-                'city' => '_sikshya_billing_city',
-                'state' => '_sikshya_billing_state',
-                'postcode' => '_sikshya_billing_postcode',
-                'country' => '_sikshya_billing_country',
-            ];
-            foreach ($map as $k => $metaKey) {
-                if (!array_key_exists($k, $billing)) {
-                    continue;
-                }
-                $val = sanitize_text_field((string) $billing[$k]);
-                if ($val !== '') {
-                    update_user_meta($uid, $metaKey, $val);
-                }
-            }
-        }
-
-        (new OrderRepository())->updateOrder($order_id, ['user_id' => $uid]);
-        wp_set_current_user($uid);
-        wp_set_auth_cookie($uid, true, is_ssl());
-        CartStorage::adoptGuestCartForUser($uid);
-
-        return $uid;
     }
 
     private function checkoutService(): CheckoutService

@@ -45,6 +45,17 @@ final class OrderFulfillmentService
         }
 
         $items = $this->orders->getItems($order_id);
+        $has_line = false;
+        foreach ($items as $row) {
+            if ((int) ($row->course_id ?? 0) > 0) {
+                $has_line = true;
+                break;
+            }
+        }
+        if (!$has_line) {
+            return false;
+        }
+
         $user_id = (int) $order->user_id;
         if ($user_id <= 0) {
             // Guest checkout: ensure an actual WP user exists before fulfilling.
@@ -120,7 +131,8 @@ final class OrderFulfillmentService
          *
          * Pro / Scale modules may attach revenue share, commissions, etc.
          */
-        do_action('sikshya_order_fulfilled', $order_id, $order);
+        $order_for_hook = $this->orders->findById($order_id) ?: $order;
+        do_action('sikshya_order_fulfilled', $order_id, $order_for_hook);
 
         return true;
     }
@@ -153,10 +165,17 @@ final class OrderFulfillmentService
             return 0;
         }
 
-        // Never auto-link to an existing account — require sign-in for that email.
+        /**
+         * Guest email already registered: attach this order to that user.
+         * Guest checkout session rejects this email up front so learners sign in; orders that still need
+         * linking (admin, imports, gateways) must not deadlock here.
+         */
         $existing = (int) email_exists($email);
         if ($existing > 0) {
-            return 0;
+            $this->orders->updateOrder($order_id, ['user_id' => $existing]);
+            $this->persistGuestBillingUserMeta($existing, $order);
+
+            return $existing;
         }
 
         $base = sanitize_user((string) preg_replace('/@.*/', '', $email), true);
@@ -192,7 +211,52 @@ final class OrderFulfillmentService
 
         // Link order to the new student user so enrollments and receipts work.
         $this->orders->updateOrder($order_id, ['user_id' => $uid]);
+        $this->persistGuestBillingUserMeta($uid, $order);
 
         return $uid;
+    }
+
+    /**
+     * Copy checkout billing snapshot from order meta onto the learner user record.
+     *
+     * @param object $order Order row including meta JSON.
+     */
+    private function persistGuestBillingUserMeta(int $user_id, object $order): void
+    {
+        if ($user_id <= 0) {
+            return;
+        }
+
+        $meta = [];
+        if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+            $decoded = json_decode($order->meta, true);
+            if (is_array($decoded)) {
+                $meta = $decoded;
+            }
+        }
+
+        $billing = isset($meta['billing']) && is_array($meta['billing']) ? $meta['billing'] : [];
+        if ($billing === []) {
+            return;
+        }
+
+        $map = [
+            'phone' => '_sikshya_billing_phone',
+            'address_1' => '_sikshya_billing_address_1',
+            'address_2' => '_sikshya_billing_address_2',
+            'city' => '_sikshya_billing_city',
+            'state' => '_sikshya_billing_state',
+            'postcode' => '_sikshya_billing_postcode',
+            'country' => '_sikshya_billing_country',
+        ];
+        foreach ($map as $k => $meta_key) {
+            if (!array_key_exists($k, $billing)) {
+                continue;
+            }
+            $val = sanitize_text_field((string) $billing[$k]);
+            if ($val !== '') {
+                update_user_meta($user_id, $meta_key, $val);
+            }
+        }
     }
 }
