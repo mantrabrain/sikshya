@@ -427,10 +427,7 @@ $card_label = sprintf(
 
         <aside class="sikshya-course-card-aside" aria-label="<?php echo esc_attr(sprintf(__('%s details', 'sikshya'), $label_course)); ?>">
             <ul class="sikshya-course-aside-list">
-                <li class="sikshya-aside-item sikshya-course-aside-rating" aria-label="<?php esc_attr_e('Rating', 'sikshya'); ?>">
-                    <span class="sikshya-aside-item__icon" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    </span>
+                <li class="sikshya-aside-item sikshya-aside-item--no-leading-icon sikshya-course-aside-rating" aria-label="<?php esc_attr_e('Rating', 'sikshya'); ?>">
                     <span class="sikshya-aside-item__text">
                         <span class="sikshya-course-card-rating sikshya-course-card-rating--aside" role="img" aria-label="<?php echo esc_attr(sprintf(__('%s out of 5 stars', 'sikshya'), number_format_i18n($rating_avg, 1))); ?>">
                             <span class="sikshya-rating-stars" aria-hidden="true">
@@ -462,7 +459,7 @@ $card_label = sprintf(
                 <?php if (!empty($course_difficulty)) : ?>
                     <li class="sikshya-aside-item sikshya-course-aside-level" aria-label="<?php esc_attr_e('Level', 'sikshya'); ?>">
                         <span class="sikshya-aside-item__icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 20h2v-8H4v8zm4 0h2V8H8v12zm4 0h2V4h-2v16zm4 0h2v-6h-2v6z"/></svg>
                         </span>
                         <span class="sikshya-aside-item__text sikshya-meta-chip sikshya-meta-chip--muted"><?php echo esc_html(ucfirst((string) $course_difficulty)); ?></span>
                     </li>

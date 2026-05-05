@@ -6,9 +6,11 @@ import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
+import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
+import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { NavItem, SikshyaReactConfig } from '../types';
 
@@ -86,6 +88,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
     { label: 'F', min_percent: 0, max_percent: 59.99, points: 0, color: '#ef4444', sort_order: 50 },
   ]);
   const [savingScale, setSavingScale] = useState(false);
+  const [filterCourseId, setFilterCourseId] = useState(0);
 
   const openCreateScale = () => {
     setScaleModalMode('create');
@@ -175,7 +178,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Configure grading scales (letters, points/GPA) and reuse them across courses."
+      subtitle="Letter scales are site-wide. Optionally pick a course to open its builder tab for per-course weights, scale mapping, and visibility."
       pageActions={
         enabled ? (
           <div className="flex gap-2">
@@ -207,6 +210,30 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
           <ApiErrorPanel error={scaleListError} title="Could not load grade scales" onRetry={() => refetchScales()} />
         ) : (
           <ListPanel className="p-5">
+            <div className="mb-5 flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-900/35">
+              <div className="min-w-[min(100%,280px)] max-w-md flex-1">
+                <SingleCoursePicker
+                  value={filterCourseId}
+                  onChange={setFilterCourseId}
+                  placeholder="All courses (optional filter)"
+                  hint="Does not change the scales list—use it to jump to one course’s Grading settings in the builder."
+                  className="w-full"
+                />
+              </div>
+              <ButtonSecondary
+                type="button"
+                disabled={filterCourseId <= 0}
+                onClick={() => {
+                  if (filterCourseId > 0) {
+                    window.location.href = appViewHref(config, 'add-course', {
+                      course_id: String(filterCourseId),
+                    });
+                  }
+                }}
+              >
+                Open course grading
+              </ButtonSecondary>
+            </div>
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
               <div className="lg:col-span-1">
                 <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">

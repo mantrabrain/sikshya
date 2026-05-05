@@ -79,6 +79,9 @@ const PrerequisitesPage = lazy(() =>
   import('./pages/PrerequisitesPage').then((m) => ({ default: m.PrerequisitesPage }))
 );
 const ReviewsPage = lazy(() => import('./pages/ReviewsPage').then((m) => ({ default: m.ReviewsPage })));
+const ReviewDetailPage = lazy(() =>
+  import('./pages/ReviewDetailPage').then((m) => ({ default: m.ReviewDetailPage }))
+);
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const SocialLoginPage = lazy(() =>
   import('./pages/SocialLoginPage').then((m) => ({ default: m.SocialLoginPage }))
@@ -276,10 +279,16 @@ function RoutedApp() {
       return <CouponsPage embedded config={config} title="Coupons" />;
     case 'reviews':
       return <ReviewsPage embedded config={config} title="Course reviews" />;
+    case 'review':
+      return <ReviewDetailPage embedded config={config} title="Review details" />;
     case 'discussions':
       return <DiscussionsPage embedded config={config} title="Discussions & Q&A" />;
     case 'gradebook':
-      return <GradebookPage embedded config={config} title="Gradebook" />;
+      return <GradebookPage embedded config={config} title="Gradebook" uiMode="default" />;
+    case 'assignment-submissions':
+      return (
+        <GradebookPage embedded config={config} title="Assignment submissions" uiMode="submissions" />
+      );
     case 'grading':
       return <GradingPage embedded config={config} title="Grading" />;
     case 'activity-log':

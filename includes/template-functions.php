@@ -1287,6 +1287,42 @@ function sikshya_render_template_partial(string $relative, array $vars = []): vo
 }
 
 /**
+ * Featured image URL for a course category (term meta `category_image`).
+ *
+ * @param int|\WP_Term $term Term ID or term object.
+ */
+function sikshya_course_category_featured_image_url($term, string $size = 'medium'): string
+{
+    $tid = 0;
+    if ($term instanceof \WP_Term) {
+        $tid = (int) $term->term_id;
+    } elseif (is_numeric($term)) {
+        $tid = (int) $term;
+    }
+    if ($tid <= 0) {
+        return '';
+    }
+    $raw = get_term_meta($tid, 'category_image', true);
+    $aid = (int) $raw;
+    if ($aid <= 0) {
+        return '';
+    }
+    $url = wp_get_attachment_image_url($aid, $size);
+    if (is_string($url) && $url !== '') {
+        return $url;
+    }
+    foreach (['thumbnail', 'large', 'full'] as $fallback) {
+        $u = wp_get_attachment_image_url($aid, $fallback);
+        if (is_string($u) && $u !== '') {
+            return $u;
+        }
+    }
+    $direct = wp_get_attachment_url($aid);
+
+    return is_string($direct) ? $direct : '';
+}
+
+/**
  * Echo a course card (used on catalog, featured, and popular sections).
  *
  * @param \WP_Post $course Course post object.

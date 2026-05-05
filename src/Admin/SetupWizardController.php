@@ -142,7 +142,7 @@ final class SetupWizardController
         $map = [
             'permalink_cart' => 'cart',
             'permalink_checkout' => 'checkout',
-            'permalink_account' => 'account',
+            'permalink_account' => 'my-learning',
             'permalink_learn' => 'learn',
             'permalink_order' => 'order',
         ];

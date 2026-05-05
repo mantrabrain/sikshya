@@ -7,12 +7,14 @@ import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
+import { useAdminRouting } from '../lib/adminRouting';
 import { formatPostDate } from '../lib/formatPostDate';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type ReviewRow = {
   id: number;
@@ -70,6 +72,7 @@ function StarDisplay({ value }: { value: number }) {
 export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const { confirm } = useSikshyaDialog();
+  const { navigateView } = useAdminRouting();
 
   const featureOk = isFeatureEnabled(config, 'course_reviews');
   const addon = useAddonEnabled('course_reviews');
@@ -81,7 +84,6 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
   const [searchInput, setSearchInput] = useState('');
   const [page, setPage] = useState(1);
   const [rowBusyId, setRowBusyId] = useState<number | null>(null);
-  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
 
   const loader = useCallback(async () => {
     if (!gateOpen) {
@@ -115,77 +117,103 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
           : `All (${counts.total})`,
   }));
 
-  const approve = async (id: number) => {
-    setRowBusyId(id);
-    try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewApprove(id), {});
-      refetch();
-    } finally {
-      setRowBusyId(null);
-    }
-  };
+  const approve = useCallback(
+    async (id: number) => {
+      setRowBusyId(id);
+      try {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewApprove(id), {});
+        refetch();
+      } finally {
+        setRowBusyId(null);
+      }
+    },
+    [refetch]
+  );
 
-  const reject = async (id: number) => {
-    setRowBusyId(id);
-    try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewReject(id), {});
-      refetch();
-    } finally {
-      setRowBusyId(null);
-    }
-  };
+  const reject = useCallback(
+    async (id: number) => {
+      setRowBusyId(id);
+      try {
+        await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewReject(id), {});
+        refetch();
+      } finally {
+        setRowBusyId(null);
+      }
+    },
+    [refetch]
+  );
 
-  const saveReply = async (id: number) => {
-    const text = (replyDrafts[id] ?? '').trim();
-    if (!text) return;
-    setRowBusyId(id);
-    try {
-      await getSikshyaApi().post(SIKSHYA_ENDPOINTS.admin.reviewReply(id), { reply_text: text });
-      refetch();
-    } finally {
-      setRowBusyId(null);
-    }
-  };
-
-  const removeReply = async (id: number) => {
-    const ok = await confirm({
-      title: 'Remove reply?',
-      message: 'This removes the public instructor/admin reply from the course page.',
-      variant: 'danger',
-      confirmLabel: 'Remove',
-    });
-    if (!ok) return;
-    setRowBusyId(id);
-    try {
-      await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.reviewReply(id));
-      refetch();
-    } finally {
-      setRowBusyId(null);
-    }
-  };
-
-  const remove = async (id: number) => {
-    const ok = await confirm({
-      title: 'Delete review?',
-      message: 'This review will be permanently removed and the course rating recalculated.',
-      variant: 'danger',
-      confirmLabel: 'Delete',
-    });
-    if (!ok) return;
-    setRowBusyId(id);
-    try {
-      await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.reviewDelete(id));
-      refetch();
-    } finally {
-      setRowBusyId(null);
-    }
-  };
+  const remove = useCallback(
+    async (id: number) => {
+      const ok = await confirm({
+        title: 'Delete review?',
+        message: 'This review will be permanently removed and the course rating recalculated.',
+        variant: 'danger',
+        confirmLabel: 'Delete',
+      });
+      if (!ok) return;
+      setRowBusyId(id);
+      try {
+        await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.reviewDelete(id));
+        refetch();
+      } finally {
+        setRowBusyId(null);
+      }
+    },
+    [confirm, refetch]
+  );
 
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
     setSearch(searchInput.trim());
   };
+
+  const actionsForRow = useCallback(
+    (r: ReviewRow): RowActionItem[] => {
+      const busy = rowBusyId === r.id;
+      const items: RowActionItem[] = [
+        {
+          key: 'detail',
+          label: 'View details',
+          disabled: busy,
+          onClick: () => navigateView('review', { id: String(r.id) }),
+        },
+      ];
+      if (r.view_url) {
+        items.push({
+          key: 'course',
+          label: 'Open course page',
+          href: r.view_url,
+          external: true,
+        });
+      }
+      if (r.is_approved) {
+        items.push({
+          key: 'unpublish',
+          label: 'Unpublish',
+          disabled: busy,
+          onClick: () => void reject(r.id),
+        });
+      } else {
+        items.push({
+          key: 'approve',
+          label: 'Approve',
+          disabled: busy,
+          onClick: () => void approve(r.id),
+        });
+      }
+      items.push({
+        key: 'delete',
+        label: 'Delete',
+        danger: true,
+        disabled: busy,
+        onClick: () => void remove(r.id),
+      });
+      return items;
+    },
+    [navigateView, approve, reject, remove, rowBusyId]
+  );
 
   return (
     <EmbeddableShell
@@ -323,39 +351,13 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
                       ) : (
                         <span className="text-xs italic text-slate-400">(rating only)</span>
                       )}
-                      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="text-xs font-semibold text-slate-600 dark:text-slate-300">Official reply</div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
-                            Reports: {Number(r.reported_count ?? 0).toLocaleString()}
-                          </div>
-                        </div>
-                        <textarea
-                          rows={2}
-                          value={replyDrafts[r.id] ?? r.reply_text ?? ''}
-                          onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                          placeholder="Write a short reply (shown publicly under the review)…"
-                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                        />
-                        <div className="mt-2 flex items-center justify-end gap-2">
-                          {r.reply_text ? (
-                            <button
-                              type="button"
-                              className="text-xs font-semibold text-slate-600 hover:text-slate-800 disabled:opacity-50 dark:text-slate-300 dark:hover:text-white"
-                              disabled={rowBusyId === r.id}
-                              onClick={() => void removeReply(r.id)}
-                            >
-                              Remove reply
-                            </button>
-                          ) : null}
-                          <ButtonPrimary
-                            type="button"
-                            disabled={rowBusyId === r.id || ((replyDrafts[r.id] ?? r.reply_text ?? '').trim() === '')}
-                            onClick={() => void saveReply(r.id)}
-                          >
-                            Save reply
-                          </ButtonPrimary>
-                        </div>
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                        {Number(r.reported_count ?? 0) > 0 ? (
+                          <span>Reports: {Number(r.reported_count).toLocaleString()}</span>
+                        ) : null}
+                        {r.reply_text ? (
+                          <span className="font-medium text-slate-600 dark:text-slate-300">Has official reply</span>
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
@@ -370,35 +372,7 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
                       )}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 text-right">
-                      <div className="inline-flex items-center gap-3 text-sm font-medium">
-                        {r.is_approved ? (
-                          <button
-                            type="button"
-                            disabled={rowBusyId === r.id}
-                            onClick={() => reject(r.id)}
-                            className="text-amber-700 hover:text-amber-900 disabled:opacity-50 dark:text-amber-300"
-                          >
-                            Unpublish
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            disabled={rowBusyId === r.id}
-                            onClick={() => approve(r.id)}
-                            className="text-emerald-700 hover:text-emerald-900 disabled:opacity-50 dark:text-emerald-300"
-                          >
-                            Approve
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          disabled={rowBusyId === r.id}
-                          onClick={() => remove(r.id)}
-                          className="text-red-600 hover:text-red-800 disabled:opacity-50 dark:text-red-400"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      <RowActionsMenu items={actionsForRow(r)} ariaLabel={`Actions for review ${r.id}`} />
                     </td>
                   </tr>
                 ))}

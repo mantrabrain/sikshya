@@ -103,6 +103,7 @@ final class ReactAdminConfig
                 'name' => $user->display_name ?: $user->user_login,
                 'email' => $email_raw,
                 'avatarUrl' => esc_url_raw($avatar_url),
+                'nicename' => (string) $user->user_nicename,
                 'profileUrl' => esc_url_raw(admin_url('profile.php')),
                 'logoutUrl' => esc_url_raw(wp_logout_url(admin_url())),
             ],
@@ -328,23 +329,54 @@ final class ReactAdminConfig
             ];
         }
 
-        // Grading is used frequently by instructors and belongs near People/Reports,
-        // not buried under Settings.
+        // Grading & submissions: assignments are graded from the gradebook grid — surface that
+        // workflow beside reporting instead of hiding it under Reports → Gradebook only.
+        $grading_group_children = [
+            self::withNavGate(
+                [
+                    'id' => 'assignment-submissions',
+                    'label' => __('Assignment submissions', 'sikshya'),
+                    'icon' => 'clipboard',
+                    'href' => self::reactAppUrl('assignment-submissions'),
+                    'cap' => 'sikshya_staff',
+                ],
+                'gradebook'
+            ),
+            self::withNavGate(
+                [
+                    'id' => 'gradebook',
+                    'label' => __('Gradebook', 'sikshya'),
+                    'icon' => 'table',
+                    'href' => self::reactAppUrl('gradebook'),
+                    'cap' => 'sikshya_staff',
+                ],
+                'gradebook'
+            ),
+        ];
+
         if (current_user_can('manage_options')) {
-            $items[] = self::withNavGate(
+            $grading_group_children[] = self::withNavGate(
                 [
                     'id' => 'grading',
-                    'label' => __('Grading', 'sikshya'),
-                    'icon' => 'pencil',
+                    'label' => __('Letter grades & scales', 'sikshya'),
+                    'icon' => 'bookOpen',
                     'href' => self::reactAppUrl('grading'),
                 ],
                 'gradebook'
             );
         }
 
-        // Reports: Calendar moves into the Reports hub as a tab; Activity log moves to
-        // Tools (it's an audit trail, not a report). Gradebook keeps its own entry —
-        // grading is a different daily job from "view metrics".
+        $grading_group_children = self::filterNavChildren($grading_group_children);
+        if ($grading_group_children !== []) {
+            $items[] = [
+                'id' => 'grading-group',
+                'label' => __('Grading & submissions', 'sikshya'),
+                'icon' => 'clipboardList',
+                'children' => $grading_group_children,
+            ];
+        }
+
+        // Reports: metrics & charts — grading lives under Grading & submissions.
         $reports_children = [
             [
                 'id' => 'reports',
@@ -353,21 +385,8 @@ final class ReactAdminConfig
                 'href' => self::reactAppUrl('reports'),
                 'cap' => 'sikshya_staff',
             ],
-            [
-                'id' => 'gradebook',
-                'label' => __('Gradebook', 'sikshya'),
-                'icon' => 'chartPresentation',
-                'href' => self::reactAppUrl('gradebook'),
-                'cap' => 'sikshya_staff',
-            ],
         ];
 
-        foreach ($reports_children as $i => $row) {
-            $id = isset($row['id']) ? (string) $row['id'] : '';
-            if ($id === 'gradebook') {
-                $reports_children[ $i ] = self::withNavGate($row, 'gradebook');
-            }
-        }
         $reports_children = self::filterNavChildren($reports_children);
         if ($reports_children !== []) {
             $items[] = [

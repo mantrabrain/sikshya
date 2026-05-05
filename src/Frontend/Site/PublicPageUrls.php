@@ -93,6 +93,29 @@ final class PublicPageUrls
         return (string) get_query_var(PermalinkService::QUERY_VAR) === $key;
     }
 
+    /**
+     * Course category index: /{course-category-base}/ or ?sikshya_course_category_root=1 (plain permalinks).
+     */
+    public static function isCourseCategoryRootRequest(): bool
+    {
+        return (string) get_query_var(PermalinkService::COURSE_CATEGORY_ROOT_VAR) === '1';
+    }
+
+    /**
+     * Pretty: /course-category/ — lists all terms. Plain: home + query var.
+     */
+    public static function courseCategoryIndexUrl(): string
+    {
+        $p = PermalinkService::get();
+        $slug = PermalinkService::sanitizeSlug($p['rewrite_tax_course_category'] ?? 'course-category');
+
+        if (PermalinkService::isPlainPermalinks()) {
+            return add_query_arg(PermalinkService::COURSE_CATEGORY_ROOT_VAR, '1', home_url('/'));
+        }
+
+        return user_trailingslashit(home_url('/' . $slug . '/'));
+    }
+
     public static function url(string $key): string
     {
         return PermalinkService::virtualPageUrl($key);

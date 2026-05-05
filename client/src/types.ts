@@ -50,6 +50,8 @@ export type SikshyaShellUser = {
   /** Gravatar (or fallback) URL from PHP. */
   avatarUrl: string;
   email?: string;
+  /** WordPress user nicename (used for instructor profile URLs). */
+  nicename?: string;
   profileUrl?: string;
   logoutUrl?: string;
 };

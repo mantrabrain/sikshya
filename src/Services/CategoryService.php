@@ -115,15 +115,17 @@ class CategoryService
             return ServiceResult::failure(__('Failed to retrieve category data', 'sikshya'), null, 'term_load');
         }
 
+        $saved_image = (int) $this->taxonomy->getTermMeta($category->term_id, 'category_image', true);
+
         return ServiceResult::success(
             [
                 'category' => [
-                    'id' => $category->term_id,
+                    'id' => (int) $category->term_id,
                     'name' => $category->name,
                     'slug' => $category->slug,
                     'description' => $category->description,
-                    'parent' => $category->parent,
-                    'image_id' => $this->taxonomy->getTermMeta($category->term_id, 'category_image', true),
+                    'parent' => (int) $category->parent,
+                    'image_id' => $saved_image > 0 ? $saved_image : 0,
                 ],
             ],
             __('Category saved successfully', 'sikshya')

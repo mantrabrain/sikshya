@@ -180,24 +180,24 @@ final class AdminMarketingNoticeService
                 echo '<div style="display: flex; align-items: flex-start; gap: 15px;">';
                 echo '<div style="flex: 1;">';
 
-                echo '<h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 17px; font-weight: 600;">🚀 ' . esc_html__('Upgrade to Sikshya Pro — save 50%+!', 'sikshya') . '</h3>';
+                echo '<h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 17px; font-weight: 600;">🚀 ' . esc_html__('Upgrade to Sikshya Pro — up to 50% off!', 'sikshya') . '</h3>';
 
                 echo '<p style="margin: 0 0 12px 0; font-size: 14px; line-height: 1.5; color: #495057;">';
                 echo wp_kses_post(
                     sprintf(
                         /* translators: %d: number of orders in the store. */
-                        __('You’ve recorded <strong style="color: #ff9500;">%d</strong> order(s)! Get <strong style="color: #ff9500;">50%%+ OFF</strong> on Sikshya Pro. Unlock premium payment tools, advanced modules, automation, and priority support.', 'sikshya'),
+                        __('You’ve recorded <strong style="color: #ff9500;">%d</strong> order(s)! Get <strong style="color: #ff9500;">up to 50%% off</strong> on Sikshya Pro. Unlock premium payment tools, advanced modules, automation, and priority support.', 'sikshya'),
                         (int) $orderCount
                     )
                 );
                 echo '</p>';
 
                 echo '<div style="background: rgba(255, 149, 0, 0.08); padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 3px solid #ff9500;">';
-                echo '<p style="margin: 0; font-size: 13px; color: #495057; font-weight: 600;">🎉 <strong>' . esc_html__('Special Offer:', 'sikshya') . '</strong> ' . esc_html__('Save 50%+ on your Pro upgrade with premium features and priority support!', 'sikshya') . '</p>';
+                echo '<p style="margin: 0; font-size: 13px; color: #495057; font-weight: 600;">🎉 <strong>' . esc_html__('Special Offer:', 'sikshya') . '</strong> ' . esc_html__('Save up to 50% on your Pro upgrade with premium features and priority support!', 'sikshya') . '</p>';
                 echo '</div>';
 
                 echo '<div style="display: flex; align-items: center; gap: 12px;">';
-                echo '<a href="' . esc_url($ctaUrl) . '"' . $ctaAttrs . ' class="button button-primary" style="background-color: #ff9500; border-color: #ff9500; color: white; padding: 6px 14px; font-weight: 600; font-size: 13px; border-radius: 4px; text-decoration: none; box-shadow: 0 1px 4px rgba(255, 149, 0, 0.25); transition: all 0.3s ease;">⚡ ' . esc_html__('Save 50%+ — Upgrade to Pro', 'sikshya') . '</a>';
+                echo '<a href="' . esc_url($ctaUrl) . '"' . $ctaAttrs . ' class="button button-primary" style="background-color: #ff9500; border-color: #ff9500; color: white; padding: 6px 14px; font-weight: 600; font-size: 13px; border-radius: 4px; text-decoration: none; box-shadow: 0 1px 4px rgba(255, 149, 0, 0.25); transition: all 0.3s ease;">⚡ ' . esc_html__('Save up to 50% — Upgrade to Pro', 'sikshya') . '</a>';
                 echo '<a href="#" id="sikshya-promotion-dismiss" data-sikshya-notice-dismiss="1" style="color: #6c757d; text-decoration: none; font-size: 13px; transition: color 0.3s ease;">' . esc_html__('Maybe later', 'sikshya') . '</a>';
                 echo '</div>';
 

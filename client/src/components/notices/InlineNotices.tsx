@@ -155,18 +155,18 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
       </button>
       <div className="p-4 pr-10">
         <h3 className="m-0 text-[17px] font-semibold text-[#2c3e50] dark:text-slate-100">
-          🚀 Upgrade to Sikshya Pro — save 50%+!
+          🚀 Upgrade to Sikshya Pro — up to 50% off!
         </h3>
         <p className="mt-2 m-0 text-sm leading-relaxed text-[#495057] dark:text-slate-300">
           You’ve recorded <strong className="text-[#ff9500]">{orderCount}</strong> order(s)! Get{' '}
-          <strong className="text-[#ff9500]">50%+ OFF</strong> on Sikshya Pro. Unlock premium payment tools, advanced
+          <strong className="text-[#ff9500]">up to 50% off</strong> on Sikshya Pro. Unlock premium payment tools, advanced
           modules, automation, and priority support.
         </p>
         <div
           className="mt-3 rounded border-l-[3px] border-[#ff9500] p-2.5 text-[13px] font-semibold text-[#495057] dark:text-slate-200"
           style={{ background: 'rgba(255, 149, 0, 0.08)' }}
         >
-          🎉 <strong>Special Offer:</strong> Save 50%+ on your Pro upgrade with premium features and priority support!
+          🎉 <strong>Special Offer:</strong> Save up to 50% on your Pro upgrade with premium features and priority support!
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <a
@@ -175,7 +175,7 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
             rel="noopener noreferrer"
             className="inline-flex items-center rounded bg-[#ff9500] px-3.5 py-1.5 text-[13px] font-semibold text-white shadow hover:opacity-95"
           >
-            ⚡ Save 50%+ — {ctaLabel}
+            ⚡ Save up to 50% — {ctaLabel}
           </a>
           <button
             type="button"

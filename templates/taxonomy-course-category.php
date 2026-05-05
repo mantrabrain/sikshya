@@ -6,6 +6,7 @@
  */
 
 use Sikshya\Constants\PostTypes;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 sikshya_get_header();
 
@@ -16,6 +17,11 @@ $paged = (int) $ctx['paged'];
 
 $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+
+$queried = get_queried_object();
+$category_cover = ($queried instanceof \WP_Term && function_exists('sikshya_course_category_featured_image_url'))
+    ? sikshya_course_category_featured_image_url($queried, 'large')
+    : '';
 ?>
 
 <div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--category">
@@ -25,11 +31,11 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
             <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
                 <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
                 <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
+                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(PublicPageUrls::courseCategoryIndexUrl()); ?>">
                     <?php
                     echo esc_html(sprintf(
                         /* translators: %s: plural label (e.g. Courses) */
-                        __('%s Categories', 'sikshya'),
+                        __('%s categories', 'sikshya'),
                         $label_courses
                     ));
                     ?>
@@ -37,6 +43,20 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
                 <span class="sikshya-taxonomy-courses__crumb sikshya-taxonomy-courses__crumb--current"><?php single_term_title(); ?></span>
             </nav>
+
+            <?php if ($category_cover !== '') : ?>
+                <div class="sikshya-taxonomy-courses__cover">
+                    <img
+                        src="<?php echo esc_url($category_cover); ?>"
+                        alt=""
+                        class="sikshya-taxonomy-courses__cover-img"
+                        loading="lazy"
+                        decoding="async"
+                        width="1200"
+                        height="480"
+                    />
+                </div>
+            <?php endif; ?>
 
             <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
 

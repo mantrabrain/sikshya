@@ -427,6 +427,8 @@ class Admin
             'orders',
             'coupons',
             'gradebook',
+            'grading',
+            'assignment-submissions',
             'discussions',
             'activity-log',
             'content-drip',

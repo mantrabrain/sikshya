@@ -1,6 +1,7 @@
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import type { SettingsField } from '../types/settingsSchema';
 import { DynamicFieldsBuilder } from '../components/settings/DynamicFieldsBuilder';
+import { PERMALINK_SETTINGS_PREVIEW_KEYS, previewUrlForPermalinkField } from '../lib/permalinks';
 
 export function fieldToStringValue(v: unknown): string {
   if (v === null || v === undefined) return '';
@@ -354,11 +355,25 @@ export function renderSettingsField(
               : type === 'datetime-local'
                 ? 'datetime-local'
                 : 'text';
+    const permalinkPreview =
+      inputType === 'text' && PERMALINK_SETTINGS_PREVIEW_KEYS.has(k) ? previewUrlForPermalinkField(k, draft) : null;
     body = (
       <div>
-        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
-          {label}
-        </label>
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <label className="block min-w-0 flex-1 text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor={k}>
+            {label}
+          </label>
+          {permalinkPreview ? (
+            <a
+              href={permalinkPreview}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 text-xs font-semibold text-brand-600 underline decoration-brand-300 underline-offset-2 hover:text-brand-700 dark:text-brand-400 dark:decoration-brand-700 dark:hover:text-brand-300"
+            >
+              Open
+            </a>
+          ) : null}
+        </div>
         {desc ? (
           <p className="mt-1.5 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{renderDescription(desc)}</p>
         ) : null}

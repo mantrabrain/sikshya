@@ -2021,3 +2021,63 @@ a.sik-acc-cal__title:hover {
 .sik-acc-metrics--panel {
   padding: 0.95rem 1.15rem 1.15rem;
 }
+
+/* -------------------------------------------------------------------------
+   Learner CSV self-export (Advanced analytics — account + learn shell)
+   ------------------------------------------------------------------------- */
+.sikshya-learner-export-wrap {
+  margin-top: 1.25rem;
+}
+
+.sik-acc-export-actions {
+  padding: 0.85rem 1.15rem 1.1rem;
+  border-top: 1px solid var(--sik-acc-border);
+}
+
+.sikshya-learner-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.sikshya-learner-export .sik-acc-btn {
+  flex: 1 1 auto;
+  min-width: min(100%, 11rem);
+  justify-content: center;
+}
+
+@media (min-width: 520px) {
+  .sikshya-learner-export .sik-acc-btn {
+    flex: 0 1 auto;
+    min-width: 12rem;
+  }
+}
+
+.sikshya-learnExport {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sik-acc-border);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.sikshya-learnExport__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sik-acc-text);
+}
+
+.sikshya-learnExport__hint {
+  margin: 0 0 0.75rem;
+  color: var(--sik-acc-muted);
+}
+
+.sikshya-learnExport__actions {
+  margin: 0;
+}
+
+.sikshya-learnExport__actions .sikshya-learner-export {
+  margin: 0;
+}

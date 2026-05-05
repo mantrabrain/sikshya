@@ -100,6 +100,92 @@
   max-width: 70ch;
 }
 
+/* Single category archive — featured image from term meta */
+.sikshya-taxonomy-courses__cover {
+  margin-bottom: var(--sikshya-spacing-6);
+  overflow: hidden;
+  border-radius: var(--sikshya-radius-lg);
+  border: 1px solid var(--sikshya-gray-200);
+  background: var(--sikshya-gray-100);
+}
+
+.sikshya-taxonomy-courses__cover-img {
+  display: block;
+  width: 100%;
+  max-height: min(42vh, 420px);
+  height: auto;
+  object-fit: cover;
+}
+
+/* Course category index (/course-category/) */
+.sikshya-course-category-index__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sikshya-spacing-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sikshya-course-category-index__item {
+  margin: 0;
+}
+
+.sikshya-course-category-index__thumb {
+  display: block;
+  aspect-ratio: 16 / 9;
+  margin: calc(-1 * var(--sikshya-spacing-5)) calc(-1 * var(--sikshya-spacing-5)) var(--sikshya-spacing-3);
+  overflow: hidden;
+  border-radius: var(--sikshya-radius-lg) var(--sikshya-radius-lg) 0 0;
+  background: var(--sikshya-gray-100);
+}
+
+.sikshya-course-category-index__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sikshya-course-category-index__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sikshya-spacing-2);
+  height: 100%;
+  padding: var(--sikshya-spacing-5);
+  border-radius: var(--sikshya-radius-lg);
+  border: 1px solid var(--sikshya-gray-200);
+  background: var(--sikshya-white);
+  color: var(--sikshya-gray-900);
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+}
+
+.sikshya-course-category-index__card:hover {
+  border-color: var(--sikshya-primary);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.sikshya-course-category-index__name {
+  font-size: var(--sikshya-font-size-lg);
+  font-weight: 700;
+  color: var(--sikshya-primary);
+}
+
+.sikshya-course-category-index__desc {
+  font-size: var(--sikshya-font-size-sm);
+  line-height: 1.5;
+  color: var(--sikshya-gray-600);
+}
+
+.sikshya-course-category-index__count {
+  margin-top: auto;
+  font-size: var(--sikshya-font-size-sm);
+  font-weight: 600;
+  color: var(--sikshya-gray-700);
+}
+
 .sikshya-archive-courses__empty {
   padding: var(--sikshya-spacing-12) var(--sikshya-spacing-4);
   text-align: center;
@@ -325,7 +411,7 @@
 
 .sikshya-course-grid--list .sikshya-course-card {
   display: grid;
-  grid-template-columns: minmax(200px, 260px) minmax(260px, 1fr) minmax(176px, 208px);
+  grid-template-columns: minmax(200px, 260px) minmax(260px, 1fr) minmax(220px, 280px);
   grid-template-areas: "image primary aside";
   align-items: stretch;
   column-gap: var(--sikshya-spacing-5);
@@ -749,6 +835,11 @@
 .sikshya-course-grid--list .sikshya-aside-item {
   padding: 5px 0;
   border-bottom: 0;
+}
+
+/* List aside: rating row uses ★ in .sikshya-rating-stars — no extra outline star icon */
+.sikshya-course-grid--list .sikshya-aside-item--no-leading-icon .sikshya-aside-item__text {
+  padding-left: calc(18px + var(--sikshya-spacing-2));
 }
 
 .sikshya-course-grid--list .sikshya-aside-item__icon {

@@ -5,6 +5,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { ListPaginationBar } from '../components/shared/list/ListPaginationBar';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
@@ -115,6 +116,30 @@ type DrillAssignment = {
   };
 };
 
+type SubmissionQueueRow = {
+  id: number;
+  assignment_id: number;
+  assignment_title?: string;
+  course_id: number;
+  course_title?: string;
+  user_id: number;
+  user_name?: string;
+  user_email?: string;
+  status: string;
+  grade: number | null;
+  submitted_at: string;
+  graded_at: string | null;
+};
+
+type SubmissionsIdxResp = {
+  ok?: boolean;
+  rows?: SubmissionQueueRow[];
+  page?: number;
+  per_page?: number;
+  total?: number;
+  total_pages?: number;
+};
+
 function parseStoredRubricScores(
   raw: string | null | undefined,
   criteria?: Array<{ index: number }>,
@@ -142,8 +167,14 @@ function formatPct(n: number | null | undefined): string {
   return Number(n).toFixed(2);
 }
 
-export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
-  const { config, title } = props;
+export function GradebookPage(props: {
+  embedded?: boolean;
+  config: SikshyaReactConfig;
+  title: string;
+  /** Sidebar “Assignment submissions” — emphasizes course grid → assignment cells for grading. */
+  uiMode?: 'default' | 'submissions';
+}) {
+  const { config, title, uiMode = 'default' } = props;
   const featureOk = isFeatureEnabled(config, 'gradebook');
   const addon = useAddonEnabled('gradebook');
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
@@ -152,8 +183,28 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
   const [courseId, setCourseId] = useState<number>(0);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [submissionPage, setSubmissionPage] = useState(1);
+  const [submissionStatus, setSubmissionStatus] = useState('');
   const [view, setView] = useState<'summary' | 'grid'>('summary');
   const [workspaceTab, setWorkspaceTab] = useState<'grades' | 'settings'>('grades');
+
+  useEffect(() => {
+    if (uiMode !== 'submissions') {
+      return;
+    }
+    const cid = Number(config.query?.course_id ?? 0);
+    if (Number.isFinite(cid) && cid > 0) {
+      setCourseId(cid);
+      setPage(1);
+      setSubmissionPage(1);
+    }
+  }, [uiMode, config.query?.course_id]);
+
+  useEffect(() => {
+    if (uiMode === 'submissions') {
+      setSubmissionPage(1);
+    }
+  }, [uiMode, courseId, search, submissionStatus]);
 
   const loader = useCallback(async () => {
     if (!enabled) {
@@ -191,11 +242,47 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
   const gridState = useAsyncData(gridLoader, [courseId, enabled, page, search, view]);
   const grid = gridState.data;
 
+  const submissionsLoader = useCallback(async () => {
+    if (!enabled || uiMode !== 'submissions') {
+      return {
+        ok: true,
+        rows: [] as SubmissionQueueRow[],
+        page: 1,
+        per_page: 25,
+        total: 0,
+        total_pages: 0,
+      };
+    }
+    return getSikshyaApi().get<SubmissionsIdxResp>(
+      SIKSHYA_ENDPOINTS.pro.gradebookAssignmentSubmissions({
+        course_id: courseId > 0 ? courseId : undefined,
+        search: search.trim() || undefined,
+        status: submissionStatus || undefined,
+        page: submissionPage,
+        per_page: 25,
+      })
+    );
+  }, [courseId, enabled, submissionPage, submissionStatus, search, uiMode]);
+
+  const submissionsState = useAsyncData(submissionsLoader, [
+    courseId,
+    enabled,
+    submissionPage,
+    submissionStatus,
+    search,
+    uiMode,
+  ]);
+  const submissionRows = submissionsState.data?.rows ?? [];
+
   const [drillOpen, setDrillOpen] = useState(false);
   const [drillBusy, setDrillBusy] = useState(false);
   const [drillErr, setDrillErr] = useState<unknown>(null);
   const [drillData, setDrillData] = useState<DrillQuiz | DrillAssignment | null>(null);
-  const [drillCtx, setDrillCtx] = useState<{ user: GridRow['user']; item: GridItem } | null>(null);
+  const [drillCtx, setDrillCtx] = useState<{
+    user: GridRow['user'];
+    item: GridItem;
+    courseId: number;
+  } | null>(null);
   const [gradeInput, setGradeInput] = useState('');
   const [feedbackInput, setFeedbackInput] = useState('');
   const [rubricScoreInputs, setRubricScoreInputs] = useState<Record<number, string>>({});
@@ -203,8 +290,9 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
   const [gradeSaving, setGradeSaving] = useState(false);
 
   const loadDrilldown = useCallback(
-    async (u: GridRow['user'], item: GridItem) => {
-      if (!enabled || courseId <= 0) {
+    async (u: GridRow['user'], item: GridItem, explicitCourseId?: number) => {
+      const cid = explicitCourseId ?? courseId;
+      if (!enabled || cid <= 0) {
         return;
       }
       setDrillBusy(true);
@@ -217,7 +305,7 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
       try {
         const d = await getSikshyaApi().get<DrillQuiz | DrillAssignment>(
           SIKSHYA_ENDPOINTS.pro.gradebookDrilldown({
-            course_id: courseId,
+            course_id: cid,
             user_id: u.id,
             item_type: item.type,
             item_id: item.id,
@@ -252,13 +340,14 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
     [courseId, enabled]
   );
 
-  const openDrill = (u: GridRow['user'], item: GridItem) => {
-    if (!enabled || courseId <= 0) {
+  const openDrill = (u: GridRow['user'], item: GridItem, explicitCourseId?: number) => {
+    const cid = explicitCourseId ?? courseId;
+    if (!enabled || cid <= 0) {
       return;
     }
-    setDrillCtx({ user: u, item });
+    setDrillCtx({ user: u, item, courseId: cid });
     setDrillOpen(true);
-    void loadDrilldown(u, item);
+    void loadDrilldown(u, item, cid);
   };
 
   const closeDrill = useCallback(() => {
@@ -273,9 +362,10 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
     const trimmed = gradeInput.trim();
     if (trimmed !== '' && !Number.isFinite(Number(trimmed))) return;
     const criteria = da.rubric_criteria ?? [];
+    const gradeCourseId = drillCtx?.courseId ?? courseId;
     const body: Record<string, unknown> = {
       submission_id: submissionId,
-      course_id: courseId,
+      course_id: gradeCourseId,
       grade: trimmed === '' ? null : Number(trimmed),
       feedback: feedbackInput.trim(),
       status: 'graded',
@@ -299,6 +389,9 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
       closeDrill();
       await refetch();
       gridState.refetch();
+      if (uiMode === 'submissions') {
+        await submissionsState.refetch();
+      }
     } finally {
       setGradeSaving(false);
     }
@@ -454,12 +547,17 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
     return `Course mix: quizzes ${Number.isFinite(a) ? a : '—'}% · assignments ${Number.isFinite(b) ? b : '—'}%`;
   }, [wq, wa]);
 
+  const shellSubtitle =
+    uiMode === 'submissions'
+      ? 'Every submission from your courses (newest first). Use optional filters, then open a row to grade. Use the course grid below when you prefer columns per assignment.'
+      : 'Weighted quiz and assignment scores per learner and course—summary list, course grid, CSV export, and staff overrides.';
+
   return (
     <EmbeddableShell
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Weighted quiz and assignment scores per learner and course—summary list, course grid, CSV export, and staff overrides."
+      subtitle={shellSubtitle}
       pageActions={
         enabled ? (
           <div className="flex flex-wrap gap-2">
@@ -483,8 +581,12 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
         mode={mode}
         featureId="gradebook"
         config={config}
-        featureTitle="Gradebook"
-        featureDescription="See each learner’s combined quiz and assignment performance, open a per-course grid to drill into items, export CSVs for records, and set final-grade overrides when needed."
+        featureTitle={uiMode === 'submissions' ? 'Assignment submissions' : 'Gradebook'}
+        featureDescription={
+          uiMode === 'submissions'
+            ? 'Work through learner uploads in one list, or narrow by course. The summary and grid below still give full gradebook tools and CSV export.'
+            : 'See each learner’s combined quiz and assignment performance, open a per-course grid to drill into items, export CSVs for records, and set final-grade overrides when needed.'
+        }
         previewVariant="table"
         addonEnableTitle="Gradebook is not enabled"
         addonEnableDescription="Enable the Gradebook add-on to load grade REST routes, the admin gradebook screen, and optional learner-facing grade snippets on My account."
@@ -528,7 +630,7 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
             addonId="gradebook"
             subtitle="CSV export defaults and the default page size for the course grid."
             featureTitle="Gradebook settings"
-            featureDescription="These options apply site-wide. Instructors still manage weights and scales from each course (Grading tab) and from Grading in the sidebar."
+            featureDescription="These options apply site-wide. Instructors still manage weights and scales from each course (Grading tab) and from Letter grades & scales under Grading & submissions."
             relatedCoreSettingsTab="progress"
             relatedCoreSettingsLabel="Progress"
             nextSteps={[
@@ -553,27 +655,185 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
           <ApiErrorPanel error={error} title="Could not load gradebook" onRetry={() => refetch()} />
         ) : (
           <>
-            <ListPanel className="relative z-20 p-5" overflow="visible">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div className="w-full min-w-0 max-w-md shrink-0 sm:max-w-lg">
-                  <SingleCoursePicker
-                    value={courseId}
-                    onChange={(id) => {
-                      setCourseId(id);
-                      setPage(1);
-                      if (id <= 0) {
-                        setView('summary');
-                      }
-                    }}
-                    placeholder="All courses"
-                    hint="Optional: filter the summary and CSV export. Choose a course to unlock the course grid (one column per quiz and assignment)."
-                    className="w-full max-w-full"
-                  />
+            {enabled && uiMode === 'submissions' && workspaceTab === 'grades' ? (
+              <ListPanel className="mb-4 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4 dark:border-slate-700">
+                  <div>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Submission queue</h2>
+                    <p className="mt-1 max-w-2xl text-xs text-slate-500 dark:text-slate-400">
+                      Newest first across all courses you can grade. Use the filters in the next panel to match the
+                      gradebook summary tools below.
+                    </p>
+                  </div>
                 </div>
-                <div className="w-full sm:w-[320px]">
-                  <label className="block text-sm text-slate-600 dark:text-slate-400">
-                    Search
+                {submissionsState.error ? (
+                  <ApiErrorPanel
+                    error={submissionsState.error}
+                    title="Could not load submissions"
+                    onRetry={() => void submissionsState.refetch()}
+                  />
+                ) : submissionsState.loading ? (
+                  <div className="py-10 text-center text-sm text-slate-500">Loading submissions…</div>
+                ) : submissionRows.length === 0 ? (
+                  <ListEmptyState
+                    title="No submissions to show"
+                    description="Try clearing the course filter or status filter, or check back after learners submit work."
+                  />
+                ) : (
+                  <>
+                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                      <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
+                        <thead className="bg-slate-50/90 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
+                          <tr>
+                            <th className="px-4 py-3">Submitted</th>
+                            <th className="px-4 py-3">Learner</th>
+                            <th className="px-4 py-3">Course</th>
+                            <th className="px-4 py-3">Assignment</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3">Grade</th>
+                            <th className="px-4 py-3 text-right"> </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
+                          {submissionRows.map((r) => (
+                            <tr key={r.id}>
+                              <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-600 dark:text-slate-400">
+                                {r.submitted_at || '—'}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="font-medium text-slate-900 dark:text-white">
+                                  {r.user_name || `User #${r.user_id}`}
+                                </div>
+                                {r.user_email ? (
+                                  <div className="text-xs text-slate-500 dark:text-slate-400">{r.user_email}</div>
+                                ) : null}
+                              </td>
+                              <td className="max-w-[200px] px-4 py-3 text-sm">
+                                <div className="truncate font-medium text-slate-800 dark:text-slate-100">
+                                  {r.course_title || `Course #${r.course_id}`}
+                                </div>
+                              </td>
+                              <td className="max-w-[220px] px-4 py-3 text-sm">
+                                <div className="truncate text-slate-800 dark:text-slate-200">
+                                  {r.assignment_title || `Assignment #${r.assignment_id}`}
+                                </div>
+                              </td>
+                              <td className="whitespace-nowrap px-4 py-3 text-xs uppercase text-slate-600 dark:text-slate-400">
+                                {r.status || '—'}
+                              </td>
+                              <td className="whitespace-nowrap px-4 py-3 tabular-nums text-slate-800 dark:text-slate-100">
+                                {r.grade != null && !Number.isNaN(Number(r.grade)) ? Number(r.grade).toFixed(2) : '—'}
+                              </td>
+                              <td className="whitespace-nowrap px-4 py-3 text-right">
+                                <ButtonPrimary
+                                  type="button"
+                                  className="!px-3 !py-1.5 !text-xs"
+                                  onClick={() =>
+                                    openDrill(
+                                      {
+                                        id: r.user_id,
+                                        name: r.user_name || `User #${r.user_id}`,
+                                        email: r.user_email || '',
+                                      },
+                                      {
+                                        type: 'assignment',
+                                        id: r.assignment_id,
+                                        title: r.assignment_title || `Assignment #${r.assignment_id}`,
+                                        weight: 0,
+                                      },
+                                      r.course_id
+                                    )
+                                  }
+                                >
+                                  Grade
+                                </ButtonPrimary>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <ListPaginationBar
+                      page={submissionPage}
+                      totalPages={submissionsState.data?.total_pages ?? null}
+                      total={submissionsState.data?.total ?? null}
+                      perPage={submissionsState.data?.per_page ?? 25}
+                      onPageChange={setSubmissionPage}
+                      disabled={submissionsState.loading}
+                    />
+                  </>
+                )}
+              </ListPanel>
+            ) : null}
+
+            {enabled && uiMode === 'submissions' && workspaceTab === 'grades' ? (
+              <details className="mb-4 rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-sm text-slate-700 open:bg-white dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">
+                <summary className="cursor-pointer select-none font-medium text-slate-900 dark:text-white">
+                  Quick tips: grading assignments
+                </summary>
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                  <li>
+                    The <strong className="font-semibold text-slate-800 dark:text-slate-200">submission list</strong>{' '}
+                    shows every upload by default; use course and status filters to narrow it.
+                  </li>
+                  <li>
+                    Click <strong className="font-semibold text-slate-800 dark:text-slate-200">Grade</strong> on a row to
+                    open the same panel as the course grid.
+                  </li>
+                  <li>
+                    The <strong className="font-semibold text-slate-800 dark:text-slate-200">Course grid</strong> further
+                    below is best when you want columns per assignment—select a course first.
+                  </li>
+                </ol>
+              </details>
+            ) : null}
+
+            <ListPanel className="relative z-20 p-5" overflow="visible">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between xl:gap-6">
+                <div
+                  className={`grid min-w-0 flex-1 grid-cols-1 gap-3 sm:gap-4 ${
+                    uiMode === 'submissions'
+                      ? 'sm:grid-cols-2 lg:grid-cols-12 lg:items-end'
+                      : 'sm:grid-cols-2 lg:grid-cols-12 lg:items-end'
+                  }`}
+                >
+                  <div
+                    className={
+                      uiMode === 'submissions'
+                        ? 'min-w-0 sm:col-span-2 lg:col-span-5'
+                        : 'min-w-0 sm:col-span-2 lg:col-span-6'
+                    }
+                  >
+                    <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Course</p>
+                    <div className="mt-1">
+                      <SingleCoursePicker
+                        value={courseId}
+                        onChange={(id) => {
+                          setCourseId(id);
+                          setPage(1);
+                          if (id <= 0) {
+                            setView('summary');
+                          }
+                        }}
+                        placeholder="All courses"
+                        className="w-full max-w-full"
+                        reserveHintSpace={false}
+                        density="compact"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className={
+                      uiMode === 'submissions'
+                        ? 'min-w-0 sm:col-span-1 lg:col-span-4'
+                        : 'min-w-0 sm:col-span-2 lg:col-span-6'
+                    }
+                  >
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="sikshya-gb-search">
+                      Search
+                    </label>
                     <input
+                      id="sikshya-gb-search"
                       type="search"
                       value={search}
                       onChange={(e) => {
@@ -581,44 +841,70 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
                         setPage(1);
                       }}
                       placeholder="Learner, email, course…"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
                     />
-                  </label>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  <button
-                    type="button"
-                    className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-                      view === 'summary'
-                        ? 'bg-brand-600 text-white'
-                        : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
-                    }`}
-                    onClick={() => setView('summary')}
-                  >
-                    Summary
-                  </button>
-                  <button
-                    type="button"
-                    className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
-                      view === 'grid'
-                        ? 'bg-brand-600 text-white'
-                        : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
-                    }`}
-                    onClick={() => setView('grid')}
-                    disabled={courseId <= 0}
-                    title={courseId <= 0 ? 'Pick a course to open the grid.' : 'Course-centric grid'}
-                  >
-                    Course grid
-                  </button>
-                </div>
-                {view === 'grid' && courseId > 0 ? (
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Click a cell to view attempts / submissions and grade assignments.
                   </div>
-                ) : null}
+                  {uiMode === 'submissions' ? (
+                    <div className="min-w-0 sm:col-span-1 lg:col-span-3">
+                      <label
+                        className="block text-sm font-medium text-slate-700 dark:text-slate-300"
+                        htmlFor="sikshya-submission-status"
+                      >
+                        Status
+                      </label>
+                      <select
+                        id="sikshya-submission-status"
+                        value={submissionStatus}
+                        onChange={(e) => setSubmissionStatus(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                      >
+                        <option value="">All statuses</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="graded">Graded</option>
+                        <option value="draft">Draft</option>
+                      </select>
+                    </div>
+                  ) : null}
+                </div>
+                <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end xl:flex-col xl:items-end 2xl:flex-row 2xl:items-end">
+                  <div className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:w-auto">
+                    <button
+                      type="button"
+                      className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                        view === 'summary'
+                          ? 'bg-brand-600 text-white'
+                          : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                      }`}
+                      onClick={() => setView('summary')}
+                    >
+                      Summary
+                    </button>
+                    <button
+                      type="button"
+                      className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                        view === 'grid'
+                          ? 'bg-brand-600 text-white'
+                          : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                      }`}
+                      onClick={() => setView('grid')}
+                      disabled={courseId <= 0}
+                      title={courseId <= 0 ? 'Pick a course to open the grid.' : 'Course-centric grid'}
+                    >
+                      Course grid
+                    </button>
+                  </div>
+                  {view === 'grid' && courseId > 0 ? (
+                    <p className="max-w-xs text-right text-xs text-slate-500 dark:text-slate-400 xl:max-w-[14rem]">
+                      Click a cell to view attempts / grade.
+                    </p>
+                  ) : null}
+                </div>
               </div>
+              <p className="mt-3 text-xs leading-snug text-slate-500 dark:text-slate-400">
+                {uiMode === 'submissions'
+                  ? 'Optional: limit the submission list, summary, and export to one course. Choose a course to enable the course grid (one column per quiz or assignment).'
+                  : 'Optional: filter the summary and CSV export. Choose a course to unlock the course grid.'}
+              </p>
             </ListPanel>
             {view === 'summary' ? (
               <ListPanel>
@@ -1006,7 +1292,9 @@ export function GradebookPage(props: { embedded?: boolean; config: SikshyaReactC
                 <ApiErrorPanel
                   error={drillErr}
                   title="Could not load details"
-                  onRetry={drillCtx ? () => void loadDrilldown(drillCtx.user, drillCtx.item) : undefined}
+                  onRetry={
+                    drillCtx ? () => void loadDrilldown(drillCtx.user, drillCtx.item, drillCtx.courseId) : undefined
+                  }
                 />
               ) : !drillData ? (
                 <p className="text-sm text-slate-500">No data.</p>

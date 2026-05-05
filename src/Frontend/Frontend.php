@@ -9,6 +9,7 @@ use Sikshya\Database\Repositories\OrderRepository;
 use Sikshya\Frontend\Site\CartFormHandler;
 use Sikshya\Frontend\Site\CartStorage;
 use Sikshya\Frontend\Site\PublicPageUrls;
+use Sikshya\Services\CourseFrontendSettings;
 use Sikshya\Services\LessonCourseLink;
 use Sikshya\Services\PermalinkService;
 use Sikshya\Services\LearnPublicIdService;
@@ -85,9 +86,12 @@ class Frontend
         // Run on init (before template output) so redirects/cookies are not broken by theme notices.
         add_action('init', [CartStorage::class, 'registerHooks'], 12);
         add_action('init', [CartFormHandler::class, 'maybeHandle'], 20);
+        // Before other plugins that hook template_redirect and match the same path (e.g. Yatra `/account/`).
+        add_action('template_redirect', [$this, 'maybeServeVirtualAccountEarly'], 0);
         add_action('template_redirect', [$this, 'handleTemplateRedirect']);
         add_action('wp', [$this, 'initFrontend']);
         add_filter('template_include', [$this, 'loadCustomTemplates'], 99);
+        add_filter('document_title_parts', [$this, 'filterDocumentTitleCourseCategoryRoot'], 20);
         add_action('wp_body_open', [$this, 'addBodyClasses']);
     }
 
@@ -537,6 +541,13 @@ class Frontend
      */
     public function handleTemplateRedirect(): void
     {
+        if (PublicPageUrls::isCourseCategoryRootRequest()) {
+            if (!CourseFrontendSettings::areCategoriesEnabled()) {
+                wp_safe_redirect(get_post_type_archive_link(PostTypes::COURSE) ?: home_url('/'), 302);
+                exit;
+            }
+        }
+
         // Learn player routes: /learn/{type}/{slug} (no theme header/footer).
         if (PublicPageUrls::isCurrentVirtualPage('learn')) {
             $type = (string) get_query_var(PermalinkService::LEARN_TYPE_VAR);
@@ -701,10 +712,46 @@ class Frontend
     }
 
     /**
+     * Output the Sikshya learner account template at priority 0 so path-based routers in other plugins
+     * (notably Yatra, which defaults to `/account/` and exits in template_redirect) cannot preempt it
+     * when WordPress has already resolved {@see PermalinkService::QUERY_VAR}=account.
+     */
+    public function maybeServeVirtualAccountEarly(): void
+    {
+        if (is_admin() || wp_doing_ajax() || wp_doing_cron()) {
+            return;
+        }
+        if (function_exists('wp_is_json_request') && wp_is_json_request()) {
+            return;
+        }
+        if (is_feed() || is_embed() || is_trackback()) {
+            return;
+        }
+        if (!PublicPageUrls::isCurrentVirtualPage('account')) {
+            return;
+        }
+
+        $path = $this->plugin->getTemplatePath('account.php');
+        if ($path === '' || !is_readable($path)) {
+            return;
+        }
+
+        include $path;
+        exit;
+    }
+
+    /**
      * Load custom templates
      */
     public function loadCustomTemplates(string $template): string
     {
+        if (PublicPageUrls::isCourseCategoryRootRequest() && CourseFrontendSettings::areCategoriesEnabled()) {
+            $custom_template = $this->plugin->getTemplatePath('taxonomy-course-category-root.php');
+            if ($custom_template !== '' && is_readable($custom_template)) {
+                return $custom_template;
+            }
+        }
+
         // Load custom templates for Sikshya post types
         if (is_singular(PostTypes::COURSE)) {
             $custom_template = $this->plugin->getTemplatePath('single-course.php');
@@ -777,6 +824,30 @@ class Frontend
     }
 
     /**
+     * Browser tab title for /course-category/ (category index).
+     *
+     * @param array<string, string> $parts
+     * @return array<string, string>
+     */
+    public function filterDocumentTitleCourseCategoryRoot(array $parts): array
+    {
+        if (!PublicPageUrls::isCourseCategoryRootRequest() || !CourseFrontendSettings::areCategoriesEnabled()) {
+            return $parts;
+        }
+
+        $label_courses = function_exists('sikshya_label_plural')
+            ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend')
+            : __('Courses', 'sikshya');
+        $parts['title'] = sprintf(
+            /* translators: %s: plural course label (e.g. Courses) */
+            __('%s categories', 'sikshya'),
+            $label_courses
+        );
+
+        return $parts;
+    }
+
+    /**
      * Add body classes
      */
     public function addBodyClasses(): void
@@ -805,6 +876,10 @@ class Frontend
 
         if (is_post_type_archive(PostTypes::COURSE)) {
             $classes[] = 'sikshya-course-archive';
+        }
+
+        if (PublicPageUrls::isCourseCategoryRootRequest() && CourseFrontendSettings::areCategoriesEnabled()) {
+            $classes[] = 'sikshya-course-category-index';
         }
 
         foreach (['cart' => 'sikshya-cart-page', 'checkout' => 'sikshya-checkout-page', 'order' => 'sikshya-order-page', 'account' => 'sikshya-account-page', 'learn' => 'sikshya-learn-page', 'login' => 'sikshya-login-page'] as $k => $class) {

@@ -11,6 +11,7 @@ import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from '../components/shared/l
 import { ButtonPrimary } from '../components/shared/buttons';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { QuillField } from '../components/shared/QuillField';
 import type { Column } from '../components/shared/DataTable';
@@ -42,6 +43,7 @@ type WpMediaFrame = {
 export function CourseCategoriesPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string; subtitle: string }) {
   const { config, title, subtitle } = props;
   const { confirm, alert: alertDialog } = useSikshyaDialog();
+  const toast = useTopRightToast(4200);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [name, setName] = useState('');
@@ -54,7 +56,6 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
   const [loadingCategory, setLoadingCategory] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [saveOk, setSaveOk] = useState<string | null>(null);
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 320);
@@ -90,7 +91,6 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
     setImageId(0);
     setImagePreview(null);
     setFormError(null);
-    setSaveOk(null);
   }, []);
 
   useEffect(() => {
@@ -161,7 +161,6 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
     e.preventDefault();
     setSaving(true);
     setFormError(null);
-    setSaveOk(null);
     try {
       const body: Record<string, string | number> = {
         name: name.trim(),
@@ -180,13 +179,19 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
       if (!res.success) {
         throw new Error(res.message || 'Save failed');
       }
-      setSaveOk(selectedId === null ? 'Category created.' : 'Category updated.');
-      bumpList();
+      const notice = (res.message || '').trim();
       if (selectedId === null) {
+        toast.success('Category created', notice || 'The category was saved.');
+        bumpList();
         startNew();
+      } else {
+        toast.success('Category updated', notice || 'Your changes were saved.');
+        bumpList();
       }
     } catch (err) {
-      setFormError(getErrorSummary(err));
+      const msg = getErrorSummary(err);
+      setFormError(msg);
+      toast.error('Could not save category', msg);
     } finally {
       setSaving(false);
     }
@@ -239,7 +244,6 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
               type="button"
               onClick={() => {
                 setSelectedId(t.id);
-                setSaveOk(null);
               }}
               className={`text-left font-semibold ${
                 selectedId === t.id
@@ -258,7 +262,6 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                   label: 'Edit in form',
                   onClick: () => {
                     setSelectedId(t.id);
-                    setSaveOk(null);
                   },
                 },
                 {
@@ -282,6 +285,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                           startNew();
                         }
                         bumpList();
+                        toast.success('Category deleted', 'The category was removed.');
                       } catch (e) {
                         await alertDialog({
                           title: 'Could not delete category',
@@ -329,6 +333,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
 
   return (
     <EmbeddableShell embedded={props.embedded} config={config} title={title} subtitle={subtitle}>
+      <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <div className="grid gap-6 lg:grid-cols-[minmax(300px,380px)_1fr] lg:items-start">
         <aside className="lg:sticky lg:top-6">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -476,11 +481,6 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                 {formError ? (
                   <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
                     {formError}
-                  </div>
-                ) : null}
-                {saveOk ? (
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-100">
-                    {saveOk}
                   </div>
                 ) : null}
 

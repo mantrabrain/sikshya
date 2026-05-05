@@ -13,8 +13,10 @@ export function SingleCoursePicker(props: {
   hint?: string;
   className?: string;
   perPage?: number;
+  reserveHintSpace?: boolean;
+  density?: 'comfortable' | 'compact';
 }) {
-  const { value, onChange, label, placeholder, hint, className, perPage } = props;
+  const { value, onChange, label, placeholder, hint, className, perPage, reserveHintSpace, density } = props;
 
   return (
     <div className={className}>
@@ -35,6 +37,8 @@ export function SingleCoursePicker(props: {
         hint={hint}
         title="Select a course"
         perPage={perPage ?? 20}
+        reserveHintSpace={reserveHintSpace}
+        density={density}
       />
     </div>
   );

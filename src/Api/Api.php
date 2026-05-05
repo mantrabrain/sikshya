@@ -124,13 +124,19 @@ class Api
             \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
             'sikshya_category_image_id',
             [
-                'get_callback' => static function (array $term): int {
-                    $id = isset($term['id']) ? (int) $term['id'] : 0;
-                    if ($id <= 0) {
+                'get_callback' => static function ($term): int {
+                    $tid = 0;
+                    if (is_array($term)) {
+                        $tid = isset($term['id']) ? (int) $term['id'] : 0;
+                    } elseif (is_object($term) && isset($term->term_id)) {
+                        $tid = (int) $term->term_id;
+                    }
+                    if ($tid <= 0) {
                         return 0;
                     }
-                    $raw = get_term_meta($id, 'category_image', true);
+                    $raw = get_term_meta($tid, 'category_image', true);
                     $img = (int) $raw;
+
                     return $img > 0 ? $img : 0;
                 },
                 'schema' => [
@@ -144,21 +150,33 @@ class Api
             \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
             'sikshya_category_image_url',
             [
-                'get_callback' => static function (array $term): string {
-                    $id = isset($term['id']) ? (int) $term['id'] : 0;
-                    if ($id <= 0) {
+                'get_callback' => static function ($term): string {
+                    $tid = 0;
+                    if (is_array($term)) {
+                        $tid = isset($term['id']) ? (int) $term['id'] : 0;
+                    } elseif (is_object($term) && isset($term->term_id)) {
+                        $tid = (int) $term->term_id;
+                    }
+                    if ($tid <= 0) {
                         return '';
                     }
-                    $raw = get_term_meta($id, 'category_image', true);
+                    $raw = get_term_meta($tid, 'category_image', true);
                     $img = (int) $raw;
                     if ($img <= 0) {
                         return '';
                     }
-                    $url = wp_get_attachment_image_url($img, 'thumbnail');
-                    return is_string($url) ? $url : '';
+                    foreach (['medium', 'thumbnail', 'large'] as $size) {
+                        $url = wp_get_attachment_image_url($img, $size);
+                        if (is_string($url) && $url !== '') {
+                            return $url;
+                        }
+                    }
+                    $full = wp_get_attachment_url($img);
+
+                    return is_string($full) ? $full : '';
                 },
                 'schema' => [
-                    'description' => 'Course category featured image URL (thumbnail).',
+                    'description' => 'Course category featured image URL (prefers medium, then thumbnail).',
                     'type' => 'string',
                     'format' => 'uri',
                     'context' => ['view', 'edit'],

@@ -28,6 +28,13 @@ type Props = {
   maxSelection?: number;
   /** Extra classes on the wrapper (e.g. max width in toolbars). */
   className?: string;
+  /**
+   * When false and `hint` is empty, do not render the hint row (toolbar fields stay one line).
+   * Default true keeps legacy alignment grids that rely on reserved hint space.
+   */
+  reserveHintSpace?: boolean;
+  /** Comfortable = default padding; compact matches adjacent text inputs in filter rows. */
+  density?: 'comfortable' | 'compact';
 };
 
 function uniqSorted(ids: number[]) {
@@ -51,6 +58,8 @@ export function MultiCoursePicker({
   readOnly = false,
   maxSelection,
   className = '',
+  reserveHintSpace = true,
+  density = 'comfortable',
 }: Props) {
   const selected = useMemo(() => uniqSorted(value || []), [value]);
   const [open, setOpen] = useState(false);
@@ -210,6 +219,8 @@ export function MultiCoursePicker({
 
   const max = maxSelection !== undefined && maxSelection > 0 ? maxSelection : undefined;
   const primaryLabel = confirmLabel ?? (max === 1 ? 'Select course' : 'Select courses');
+  const padY = density === 'compact' ? 'py-2' : 'py-3';
+  const showChips = selected.length > 0 && max !== 1;
 
   return (
     <div className={`space-y-2 ${className}`.trim()}>
@@ -217,7 +228,7 @@ export function MultiCoursePicker({
         type="button"
         disabled={readOnly}
         onClick={() => setOpen(true)}
-        className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm shadow-sm ${
+        className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 ${padY} text-left text-sm shadow-sm ${
           readOnly
             ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400'
             : 'border-slate-200 bg-white text-slate-900 hover:border-brand-300 dark:border-slate-700 dark:bg-slate-950 dark:text-white'
@@ -230,9 +241,9 @@ export function MultiCoursePicker({
         <span className="text-xs text-slate-400">▾</span>
       </button>
 
-      <FieldHint>{hint}</FieldHint>
+      {reserveHintSpace || (hint !== undefined && hint !== '') ? <FieldHint>{hint}</FieldHint> : null}
 
-      {selected.length > 0 ? (
+      {showChips ? (
         <ul className="flex flex-wrap gap-2">
           {selected.map((id) => (
             <li

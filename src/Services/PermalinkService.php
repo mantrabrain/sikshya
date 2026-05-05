@@ -13,6 +13,10 @@ namespace Sikshya\Services;
 final class PermalinkService
 {
     public const QUERY_VAR = 'sikshya_page';
+    /**
+     * Pretty URL: /{course-category-base}/ → lists all course category terms (virtual route).
+     */
+    public const COURSE_CATEGORY_ROOT_VAR = 'sikshya_course_category_root';
     public const INSTRUCTOR_VAR = 'sikshya_instructor';
     /** Sub-view for the virtual account page (dashboard, learning, payments, …). */
     public const ACCOUNT_VIEW_VAR = 'sikshya_account_view';
@@ -30,7 +34,8 @@ final class PermalinkService
         return [
             'permalink_cart' => 'cart',
             'permalink_checkout' => 'checkout',
-            'permalink_account' => 'account',
+            // Avoid `/account/` collisions with Yatra (same default); existing installs keep saved slug.
+            'permalink_account' => 'my-learning',
             'permalink_learn' => 'learn',
             'permalink_login' => 'login',
             'permalink_order' => 'order',
@@ -99,6 +104,8 @@ final class PermalinkService
     public static function boot(): void
     {
         add_filter('query_vars', [ self::class, 'filterQueryVars' ]);
+        // Run before the main query is built so virtual routes win over duplicate WP Pages.
+        add_filter('request', [ self::class, 'filterRequestResolveAccountVirtualPage' ], 0, 1);
         add_action('init', [ self::class, 'registerRewriteRules' ], 20);
         add_filter('pre_handle_404', [ self::class, 'filterPreHandle404' ], 10, 2);
 
@@ -167,6 +174,7 @@ final class PermalinkService
     public static function filterQueryVars(array $vars): array
     {
         $vars[] = self::QUERY_VAR;
+        $vars[] = self::COURSE_CATEGORY_ROOT_VAR;
         $vars[] = self::INSTRUCTOR_VAR;
         $vars[] = self::ACCOUNT_VIEW_VAR;
         $vars[] = self::LEARN_TYPE_VAR;
@@ -174,6 +182,50 @@ final class PermalinkService
         $vars[] = self::LEARN_PUBLIC_ID_VAR;
 
         return $vars;
+    }
+
+    /**
+     * If a published WordPress Page uses the same slug as the configured Sikshya account URL,
+     * core can match that page and render an empty theme template — a blank
+     * screen when the page has no blocks. Remap the request to Sikshya's virtual account route.
+     *
+     * @param array<string, mixed> $query_vars Public query variables for the main request.
+     * @return array<string, mixed>
+     */
+    public static function filterRequestResolveAccountVirtualPage(array $query_vars): array
+    {
+        if (!empty($query_vars[self::QUERY_VAR])) {
+            return $query_vars;
+        }
+
+        $p = self::get();
+        $account_slug = self::sanitizeSlug($p['permalink_account'] ?? self::defaults()['permalink_account']);
+        if ($account_slug === '') {
+            return $query_vars;
+        }
+
+        $pagename = isset($query_vars['pagename']) ? (string) $query_vars['pagename'] : '';
+        if ($pagename !== '' && $pagename === $account_slug) {
+            return self::stripConflictingPageVarsAndSetVirtualAccount($query_vars);
+        }
+
+        return $query_vars;
+    }
+
+    /**
+     * @param array<string, mixed> $query_vars
+     * @return array<string, mixed>
+     */
+    private static function stripConflictingPageVarsAndSetVirtualAccount(array $query_vars): array
+    {
+        foreach (['pagename', 'page', 'page_id', 'attachment', 'error'] as $k) {
+            if (array_key_exists($k, $query_vars)) {
+                unset($query_vars[$k]);
+            }
+        }
+        $query_vars[self::QUERY_VAR] = 'account';
+
+        return $query_vars;
     }
 
     /**
@@ -196,8 +248,8 @@ final class PermalinkService
 
         $p = self::get();
 
-        // Account: subpaths first (/account/learning/), then base (/account/).
-        $account_slug = self::sanitizeSlug($p['permalink_account'] ?? 'account');
+        // Account: subpaths first (/my-learning/learning/), then base (/my-learning/).
+        $account_slug = self::sanitizeSlug($p['permalink_account'] ?? self::defaults()['permalink_account']);
         $account_re   = preg_quote($account_slug, '/');
         add_rewrite_rule(
             '^' . $account_re . '/([^/]+)/?$',
@@ -252,6 +304,15 @@ final class PermalinkService
             'index.php?' . self::INSTRUCTOR_VAR . '=$matches[1]',
             'top'
         );
+
+        // Course category taxonomy base alone (e.g. /course-category/) — term archives use /base/term-slug/.
+        $cat_base = self::sanitizeSlug($p['rewrite_tax_course_category'] ?? self::defaults()['rewrite_tax_course_category']);
+        $cat_re   = preg_quote($cat_base, '/');
+        add_rewrite_rule(
+            '^' . $cat_re . '/?$',
+            'index.php?' . self::COURSE_CATEGORY_ROOT_VAR . '=1',
+            'top'
+        );
     }
 
     /**
@@ -265,6 +326,10 @@ final class PermalinkService
         }
         $instructor = $wp_query->get(self::INSTRUCTOR_VAR);
         if (!empty($instructor)) {
+            return true;
+        }
+
+        if ((string) $wp_query->get(self::COURSE_CATEGORY_ROOT_VAR) === '1') {
             return true;
         }
 

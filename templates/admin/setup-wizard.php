@@ -423,7 +423,7 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
                     </div>
                     <div class="sikshya-setup__field">
                         <label for="permalink_account"><?php esc_html_e('Student account', 'sikshya'); ?></label>
-                        <input id="permalink_account" name="permalink_account" type="text" value="<?php echo esc_attr($permalinks['permalink_account'] ?? 'account'); ?>" autocomplete="off" />
+                        <input id="permalink_account" name="permalink_account" type="text" value="<?php echo esc_attr($permalinks['permalink_account'] ?? 'my-learning'); ?>" autocomplete="off" />
                     </div>
                     <div class="sikshya-setup__field">
                         <label for="permalink_learn"><?php esc_html_e('Learning area', 'sikshya'); ?></label>

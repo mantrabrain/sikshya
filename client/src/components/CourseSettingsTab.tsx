@@ -55,7 +55,8 @@ function SectionShell(props: {
 }
 
 const SUB_TABS: Array<{ id: 'discovery'; label: string; icon: string; keys: string[] }> = [
-  { id: 'discovery', label: 'Discovery', icon: 'tag', keys: ['course_reviews', 'course_tax', 'course_search'] },
+  /** Categories → search → reviews reads top-to-bottom like the public catalog flow. */
+  { id: 'discovery', label: 'Discovery', icon: 'tag', keys: ['course_tax', 'course_search', 'course_reviews'] },
 ];
 
 export function CourseSettingsTab(props: Props) {

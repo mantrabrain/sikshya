@@ -100,6 +100,8 @@ export const SIKSHYA_ENDPOINTS = {
       const s = q.toString();
       return s ? `/admin/reviews?${s}` : '/admin/reviews';
     },
+    /** Single review for admin detail (GET). Same path as delete (DELETE). */
+    review: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}`,
     reviewApprove: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}/approve`,
     reviewReject: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}/reject`,
     reviewDelete: (id: number) => `/admin/reviews/${encodeURIComponent(String(id))}`,
@@ -169,6 +171,22 @@ export const SIKSHYA_ENDPOINTS = {
       `/pro/gradebook/learner?user_id=${encodeURIComponent(String(params.user_id))}&course_id=${encodeURIComponent(String(params.course_id))}`,
     gradebookOverride: '/pro/gradebook/override',
     gradebookGrid: (courseId: number) => `/pro/gradebook/grid?course_id=${encodeURIComponent(String(courseId))}`,
+    gradebookAssignmentSubmissions: (params?: {
+      course_id?: number;
+      search?: string;
+      status?: string;
+      page?: number;
+      per_page?: number;
+    }) => {
+      const q = new URLSearchParams();
+      if (params?.course_id && params.course_id > 0) q.set('course_id', String(params.course_id));
+      if (params?.search) q.set('search', params.search);
+      if (params?.status) q.set('status', params.status);
+      if (params?.page) q.set('page', String(params.page));
+      if (params?.per_page) q.set('per_page', String(params.per_page));
+      const s = q.toString();
+      return s ? `/pro/gradebook/assignment-submissions?${s}` : '/pro/gradebook/assignment-submissions';
+    },
     gradebookDrilldown: (params: { course_id: number; user_id: number; item_type: 'quiz' | 'assignment'; item_id: number }) =>
       `/pro/gradebook/drilldown?course_id=${encodeURIComponent(String(params.course_id))}&user_id=${encodeURIComponent(String(params.user_id))}&item_type=${encodeURIComponent(params.item_type)}&item_id=${encodeURIComponent(String(params.item_id))}`,
     gradebookAssignmentGrade: '/pro/gradebook/assignment-grade',
