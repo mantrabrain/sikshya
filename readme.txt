@@ -5,7 +5,7 @@ Tags: course, education, elearning, learning management system, lms
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,21 +21,20 @@ Use Sikshya for coaching, professional training, customer education, internal on
 
 ### Get started
 
-👉 [Watch the overview on YouTube](https://youtu.be/CF1p9slkQrg) — see Sikshya LMS in action before you install.
 
 👉 [Try Sikshya LMS Free](https://try.new/plugins/sikshya/)
+
+👉 [Try Sikshya LMS Pro](https://try.mantrabrain.com/try-sikshya-pro/)
 
 👉 [Sikshya LMS — product & pricing](https://mantrabrain.com/plugins/sikshya/?utm_source=wporg&utm_medium=readme&utm_campaign=home)
 
 👉 [Sikshya Pro](https://mantrabrain.com/plugins/sikshya/?utm_source=wporg&utm_medium=readme&utm_campaign=pro)
 
-👉 [Documentation](https://mantrabrain.com/plugins/sikshya/)
-
-👉 [Contact support](https://mantrabrain.com/contact/)
-
 👉 [Sikshya LMS Facebook Community](https://www.facebook.com/groups/sikshyalms/)
 
 Join the community for release notes, setup tips, and peer discussion with other course creators on WordPress.
+
+[youtube https://youtu.be/CF1p9slkQrg]
 
 ### New to WordPress LMS plugins?
 
@@ -345,7 +344,7 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 
 == Changelog ==
 
-= 1.0.1 - 2026-05-04 =
+= 1.0.2 - 2026-05-04 =
 * Admin (React shell): Grading & submissions and gradebook screens — toolbar layout fixes so Course, Search, and Status filters align cleanly; contextual helper copy moved below the filter row; clearer sidebar icons for Gradebook and related entries.
 * Marketing: Pro upgrade notice now uses “up to 50% off” instead of “50%+ OFF” for clearer, defensible wording (classic admin notice + in-app strip).
 * Public: course category index and taxonomy routing improvements for a better category archive experience.
