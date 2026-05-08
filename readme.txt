@@ -1,26 +1,31 @@
-=== Sikshya LMS — Build & Sell Online Courses ===
+=== Sikshya LMS – LMS Course Builder, Online Courses & eLearning ===
 Contributors: mantrabrain
 Donate link: https://mantrabrain.com/
-Tags: course, education, elearning, learning management system, lms
+Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Build and sell online courses on WordPress with one plugin: a visual course builder, lessons, quizzes, certificates, checkout, and learner dashboards—without stacking five separate tools.
+WordPress LMS plugin with course builder: create and sell online courses, quizzes, certificates, Stripe/PayPal, learner dashboards—one cohesive stack.
 
 == Description ==
 
-**Sikshya LMS** is a **WordPress LMS** (learning management system) for creators who want students to enroll, learn, and pay—without leaving your site. The free version is built so you can launch a real course catalog, take payments when you are ready, and grow into **Sikshya Pro** only when you need automation and advanced add-ons.
+Sikshya LMS — WordPress learning management plugin for online courses, quizzes, Stripe/PayPal checkout, certificates, and learner dashboards on your domain.
 
-**In plain English:** you create courses in the WordPress admin; learners open your course pages on the front of your site, track progress in their account, and complete quizzes or assignments you publish.
+**Sikshya LMS** is a **WordPress LMS** (learning management system) for educators and creators who want students to enroll, learn, and pay without leaving the site. It installs like other WordPress plugins: you control hosting, data, and branding. The free core lets you launch a real course catalog, sell when you are ready, and upgrade to **Sikshya Pro** when you need automation and advanced add-ons.
 
-Use Sikshya for coaching, professional training, customer education, internal onboarding, or the start of a course marketplace—with full control of content, branding, and revenue.
+### At a glance
 
-### Get started
+* **Sell** — Free or paid online courses with Stripe and PayPal, coupons, and orders in the free core.
+* **Teach** — Visual course builder, structured curriculum, lessons, quizzes, assignments, and certificates.
+* **Support learners** — Dashboards, progress, wishlist, and role-aware flows for instructors and staff.
 
+### Quick links
+
+👉 [Documentation](https://docs.mantrabrain.com/sikshya-wordpress-plugin/?utm_source=wporg&utm_medium=readme&utm_campaign=documentation)
 
 👉 [Try Sikshya LMS Free](https://try.new/plugins/sikshya/)
 
@@ -32,9 +37,17 @@ Use Sikshya for coaching, professional training, customer education, internal on
 
 👉 [Sikshya LMS Facebook Community](https://www.facebook.com/groups/sikshyalms/)
 
-Join the community for release notes, setup tips, and peer discussion with other course creators on WordPress.
+Join the community for release notes, setup tips, and peer discussion with other WordPress course creators.
 
 [youtube https://youtu.be/CF1p9slkQrg]
+
+### Self-hosted WordPress LMS — curriculum, quizzes, checkout, and certificates
+
+Install Sikshya on **your** WordPress site to keep ownership of course content, learner records, and payments—without renting a separate SaaS LMS just to deliver training.
+
+**In plain English:** you create courses in the WordPress admin; learners open your course pages on the front of your site, track progress in their account, and complete quizzes or assignments you publish.
+
+Use Sikshya for coaching, professional training, customer education, internal onboarding, or the start of a course marketplace—with full control of content, branding, and revenue.
 
 ### New to WordPress LMS plugins?
 
@@ -107,7 +120,7 @@ Sell access without duct-taping five plugins together for a basic launch: config
 
 * **Themes** — Built to cooperate with well-coded WordPress themes; use a default theme briefly if you need to isolate CSS conflicts.
 * **Multisite** — Network-enabled; validate roles, capabilities, and data boundaries per site before production.
-* **Developers** — Hooks and filters around enrollments, lesson completion, and quiz outcomes; REST coverage is documented alongside the product page.
+* **Developers** — Hooks and filters around enrollments, lesson completion, and quiz outcomes; REST coverage is summarized on the product site and expanded in [Sikshya documentation](https://docs.mantrabrain.com/sikshya-wordpress-plugin/?utm_source=wporg&utm_medium=readme&utm_campaign=documentation).
 
 ### Shortcodes
 
@@ -204,7 +217,7 @@ Below is the full commercial add-on line-up from the Sikshya feature registry. *
 
 * **[Calendar](https://mantrabrain.com/plugins/sikshya#pricing)** — Shows learners a dated schedule—enrollments, upcoming drip unlocks, assignment due dates—on My account plus REST data for custom UIs. Handy when deadlines and releases should appear in one place.
 
-#### Growth / Pro-band add-ons
+#### Growth-band add-ons
 
 * **[Professional email delivery & branded templates](https://mantrabrain.com/plugins/sikshya#pricing)** — Route Sikshya emails through a proper ESP (SendGrid-style setup) and wrap messages with your branding. Improve deliverability versus generic PHP mail.
 
@@ -266,16 +279,20 @@ Features you enable may connect to services **you** configure. Examples:
 * **PayPal** — [User agreement](https://www.paypal.com/us/legalhub/paypal/useragreement-full) · [Privacy](https://www.paypal.com/us/legalhub/paypal/privacy-full)
 * **Embedded or linked video** — YouTube, Vimeo, or other hosts may apply their own embed terms, cookies, or analytics; see each provider’s policies.
 
-If optional diagnostic or telemetry features are introduced in a future release, they will be disclosed in the changelog, documented on the product site, and gated behind explicit consent where required.
+**Optional usage insights (opt-in):** Sikshya may include optional, aggregated usage insights to help prioritize improvements. It stays **off** unless you enable it, is designed **not** to collect learner personally identifiable information, and is described in full (what is sent, where it goes, and how to disable) in the [Sikshya documentation—privacy & usage](https://docs.mantrabrain.com/sikshya-wordpress-plugin/?utm_source=wporg&utm_medium=readme&utm_campaign=privacy).
+
+Other optional connections added in future releases will be listed in the changelog and documented on Mantrabrain / Sikshya docs when applicable.
 
 == Installation ==
 
-1. Install **Sikshya LMS** from **Plugins → Add New** (search “Sikshya”) or upload the `sikshya` folder to `wp-content/plugins/`.
+1. Install **Sikshya LMS** from **Plugins → Add New** (search “Sikshya” or “Sikshya LMS”) or upload the `sikshya` folder to `wp-content/plugins/`.
 2. Activate the plugin.
 3. Open **Sikshya** in the WordPress admin menu and walk through setup: required pages, permalink structure (pretty URLs recommended), basic branding, and email sender settings.
 4. Under **Payments**, add **Stripe** and/or **PayPal** using **test** keys first; run a small test purchase before switching to live keys.
 5. Create your first course, add at least one lesson and (optionally) a quiz, publish, then open the public course URL in a private browser window to see what learners see.
-6. Optional: join the [Sikshya LMS Facebook Community](https://www.facebook.com/groups/sikshyalms/) for tips from other site owners.
+6. Optional: read the [step-by-step Sikshya documentation](https://docs.mantrabrain.com/sikshya-wordpress-plugin/?utm_source=wporg&utm_medium=readme&utm_campaign=documentation) on Mantrabrain for installation detail and privacy controls.
+
+7. Optional: join the [Sikshya LMS Facebook Community](https://www.facebook.com/groups/sikshyalms/) for tips from other site owners.
 
 **Tip:** If anything looks wrong on the front of your site, temporarily switch to a default WordPress theme (Twenty Twenty-Five, etc.) to tell Sikshya styling apart from theme conflicts.
 
@@ -297,6 +314,10 @@ No for day-to-day course building. Developers can still extend Sikshya using Wor
 
 It is designed for broad theme compatibility. If layouts clash, test with a default WordPress theme to separate theme CSS from LMS templates.
 
+= Does Sikshya work with the block editor? =
+
+Yes. In the WordPress block editor, use Shortcode blocks for `[sikshya_courses]`, `[sikshya_login]`, and `[sikshya_registration]`; Sikshya course pages and learner templates work alongside block-based pages and standard WordPress themes.
+
 = How do I sell courses? =
 
 Create a paid course, set the price, connect **Stripe** and/or **PayPal** under Sikshya payment settings, and run a test transaction before accepting live payments.
@@ -313,6 +334,14 @@ Recurring subscriptions and advanced membership rules are part of the **Sikshya 
 
 Yes, the plugin is flagged for network use. Always verify instructor/student capabilities and data isolation per subsite in staging.
 
+= Where is Sikshya LMS documentation? =
+
+Official guides live on Mantrabrain: [Sikshya LMS documentation](https://docs.mantrabrain.com/sikshya-wordpress-plugin/?utm_source=wporg&utm_medium=readme&utm_campaign=documentation) covers installation, privacy & optional usage tracking, and links to deeper help as the knowledge base grows.
+
+= Is Sikshya a self-hosted LMS? =
+
+Yes. Sikshya runs entirely inside your own WordPress installation (self-hosted). You are not required to use a separate hosted LMS service to deliver courses, track progress, or process payments you configure (for example Stripe or PayPal).
+
 = Can I translate Sikshya? =
 
 Yes. Strings use the `sikshya` text domain and are compatible with Loco Translate, WPML, TranslatePress, and similar workflows.
@@ -323,7 +352,7 @@ Use [Contact support](https://mantrabrain.com/contact/) for account or technical
 
 = How do I report a security vulnerability? =
 
-Email the WordPress Plugins Team at plugins@wordpress.org with details (do not post exploit steps in public reviews). You may also use the vendor contact page on the product site for coordinated disclosure.
+Email  at mantrabrain@gmail.com with details (do not post exploit steps in public reviews). You may also use the vendor contact page on the product site for coordinated disclosure.
 
 = How does Sikshya relate to Sikshya Pro? =
 
@@ -335,14 +364,19 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 
 == Screenshots ==
 
-1. Sikshya admin dashboard — quick access to courses, learners, and commerce from one React-powered shell.
-2. Course list in the admin — search, filter, and manage all courses from a single screen.
-3. Course Builder — edit curriculum, settings, and content in one structured workspace.
-4. Global Settings — payments, emails, labels, and LMS-wide behavior in one place.
-5. Public course catalog — how courses appear to visitors when using your theme and Sikshya templates.
-6. Learn experience — lesson view with curriculum sidebar and progress-friendly layout for enrolled students.
+1. LMS admin dashboard — Sikshya shell with quick access to courses, learners, and commerce (React-powered).
+2. Course management — search, filter, and edit all online courses from one admin screen.
+3. Course Builder — curriculum, settings, and lesson content in one structured workspace.
+4. Global Settings — payments (Stripe/PayPal), emails, labels, and LMS-wide behavior in one place.
+5. Public course catalog — browse and filter courses; blends with your theme and Sikshya templates.
+6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.3 - 2026-05-08 =
+* Readme: WordPress.org listing refresh—SEO-oriented short description and tags; Quick links (documentation on Mantrabrain, demos, pricing, community); structured sections (At a glance, self-hosted LMS, FAQs including block editor and optional usage insights); third-party services and privacy disclosure aligned with docs.
+* Readme: plugin listing title aligned with WordPress plugin directory expectations; screenshot captions tuned for LMS and checkout keywords; Installation and security reporting guidance clarified.
+* Plugin metadata: version bump; default documentation URLs in Plugin API / admin bootstrap now point to `https://docs.mantrabrain.com/sikshya-wordpress-plugin/`.
 
 = 1.0.2 - 2026-05-04 =
 * Admin (React shell): Grading & submissions and gradebook screens — toolbar layout fixes so Course, Search, and Status filters align cleanly; contextual helper copy moved below the filter row; clearer sidebar icons for Gradebook and related entries.
@@ -351,7 +385,7 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 * Build: refreshed compiled admin JavaScript/CSS from current sources.
 
 = 1.0.0.1 - 2026-05-02 =
-* Certificate : fixes for issues in the admin certificate designer (layout, editing, and related flows).
+* Certificate: fixes for issues in the admin certificate designer (layout, editing, and related flows).
 * Build: refreshed compiled admin React assets from the latest sources.
 
 = 1.0.0 - 2026-04-30 =
@@ -367,8 +401,11 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 
 == Upgrade Notice ==
 
-= 1.0.1 - 2026-05-04 =
-Maintenance and UX release: admin grading filters, marketing copy clarity, course category browsing, and updated admin assets. Safe to apply over 1.0.0.x; clear page caches if your host caches admin or theme assets.
+= 1.0.3 - 2026-05-08 =
+Documentation and WordPress.org readme update: improved plugin directory copy, Mantrabrain documentation links, expanded FAQ, and privacy/third-party transparency. No breaking runtime changes expected; clear any full-page caches after update if your host caches plugin metadata.
+
+= 1.0.2 - 2026-05-04 =
+Maintenance and UX release: admin grading and gradebook toolbar layout, clearer Pro upgrade wording, course category archives, and refreshed admin assets. Safe to apply over 1.0.0.x; clear page caches if your host caches admin or theme assets.
 
 = 1.0.0.1 - 2026-05-02 =
 Maintenance release: certificate builder fixes and updated admin build assets. Safe to apply on top of 1.0.0; clear any full-page caches if your host caches admin scripts.

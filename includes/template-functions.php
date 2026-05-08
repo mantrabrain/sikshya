@@ -147,7 +147,7 @@ function sikshya_brand_profile(string $context = 'frontend'): array
         'adminFooterHtml' => '',
         'terminology' => [],
         'links' => [
-            'documentationUrl' => 'https://docs.sikshya.com',
+            'documentationUrl' => 'https://docs.mantrabrain.com/sikshya-wordpress-plugin/',
             'supportUrl' => 'https://support.sikshya.com',
             'upgradeUrl' => 'https://sikshya.com/pricing/',
         ],
@@ -183,7 +183,7 @@ function sikshya_brand_name(string $context = 'frontend'): string
 function sikshya_brand_links(): array
 {
     $base = [
-        'documentationUrl' => 'https://docs.sikshya.com',
+        'documentationUrl' => 'https://docs.mantrabrain.com/sikshya-wordpress-plugin/',
         'supportUrl' => 'https://support.sikshya.com',
         'upgradeUrl' => 'https://sikshya.com/pricing/',
     ];

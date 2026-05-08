@@ -975,7 +975,7 @@ class Admin
 
         echo '<div class="sikshya-admin-footer">';
         $links = function_exists('sikshya_brand_links') ? sikshya_brand_links() : [];
-        $docs = isset($links['documentationUrl']) ? esc_url((string) $links['documentationUrl']) : 'https://docs.sikshya.com';
+        $docs = isset($links['documentationUrl']) ? esc_url((string) $links['documentationUrl']) : 'https://docs.mantrabrain.com/sikshya-wordpress-plugin/';
         $support = isset($links['supportUrl']) ? esc_url((string) $links['supportUrl']) : 'https://support.sikshya.com';
         $brand = function_exists('sikshya_brand_name') ? sikshya_brand_name('admin') : __('Sikshya LMS', 'sikshya');
 
