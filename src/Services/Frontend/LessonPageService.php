@@ -49,39 +49,40 @@ final class LessonPageService
                 $is_preview = self::canPreviewContent($course_id, $raw, $lesson_id);
             }
 
+            // Always show curriculum for non-enrolled visitors (locks on paid items); main body uses $error/$is_preview.
+            $outline_preview_mode = !$enrolled;
+
             if (!$enrolled && !$is_preview) {
                 $error = $uid <= 0
                     ? __('Please log in to access this lesson.', 'sikshya')
                     : __('You are not enrolled in this course.', 'sikshya');
-            } else {
-                if ($error === '' && $enrolled && !$is_preview) {
-                    $access_type = $post->post_type === PostTypes::ASSIGNMENT ? 'assignment' : 'lesson';
-                    $access = apply_filters(
-                        'sikshya_access_check',
-                        ['ok' => true, 'message' => ''],
-                        [
-                            'type' => $access_type,
-                            'user_id' => $uid,
-                            'course_id' => $course_id,
-                            'content_id' => $lesson_id,
-                        ]
-                    );
-                    if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
-                        $msg = isset($access['message']) ? (string) $access['message'] : '';
-                        $error = $msg !== '' ? $msg : __('This content is not available yet.', 'sikshya');
-                    }
-                }
-
-                $blocks = self::enrichBlocks(
-                    $uid,
-                    $course_id,
-                    $raw,
-                    $lesson_id,
-                    $track_progress && $show_progress,
-                    $enrolled,
-                    $is_preview
+            } elseif ($error === '' && $enrolled && !$is_preview) {
+                $access_type = $post->post_type === PostTypes::ASSIGNMENT ? 'assignment' : 'lesson';
+                $access = apply_filters(
+                    'sikshya_access_check',
+                    ['ok' => true, 'message' => ''],
+                    [
+                        'type' => $access_type,
+                        'user_id' => $uid,
+                        'course_id' => $course_id,
+                        'content_id' => $lesson_id,
+                    ]
                 );
+                if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
+                    $msg = isset($access['message']) ? (string) $access['message'] : '';
+                    $error = $msg !== '' ? $msg : __('This content is not available yet.', 'sikshya');
+                }
             }
+
+            $blocks = self::enrichBlocks(
+                $uid,
+                $course_id,
+                $raw,
+                $lesson_id,
+                $track_progress && $show_progress,
+                $enrolled,
+                $outline_preview_mode
+            );
         }
 
         $course_post = $course_id > 0 ? get_post($course_id) : null;

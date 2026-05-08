@@ -51,11 +51,17 @@ final class LearnOutlineItemAccess
 
         if ($is_preview_mode) {
             $preview_allowed = $is_free;
+            $lock_reason = '';
+            if (!$preview_allowed) {
+                $lock_reason = get_current_user_id() <= 0
+                    ? __('Log in or enroll to unlock this content.', 'sikshya')
+                    : __('Enroll to unlock this content.', 'sikshya');
+            }
 
             return [
                 'permalink' => $preview_allowed ? self::learnPermalinkFor($p, $type_key) : $course_url,
                 'locked' => !$preview_allowed,
-                'lock_reason' => !$preview_allowed ? __('Enroll to unlock this content.', 'sikshya') : '',
+                'lock_reason' => $lock_reason,
                 'preview_allowed' => $preview_allowed,
             ];
         }

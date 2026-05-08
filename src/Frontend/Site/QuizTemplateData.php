@@ -54,38 +54,38 @@ final class QuizTemplateData
                 $is_preview = self::canPreviewQuiz($course_id, $quiz_id);
             }
 
+            $outline_preview_mode = !$enrolled;
+
             if (!$enrolled && !$is_preview) {
                 $error = $uid <= 0
                     ? __('Please log in to access this quiz.', 'sikshya')
                     : __('You are not enrolled in this course.', 'sikshya');
-            } else {
-                if ($error === '' && $enrolled && !$is_preview) {
-                    $access = apply_filters(
-                        'sikshya_access_check',
-                        ['ok' => true, 'message' => ''],
-                        [
-                            'type' => 'quiz',
-                            'user_id' => $uid,
-                            'course_id' => $course_id,
-                            'content_id' => $quiz_id,
-                        ]
-                    );
-                    if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
-                        $msg = isset($access['message']) ? (string) $access['message'] : '';
-                        $error = $msg !== '' ? $msg : __('This content is not available yet.', 'sikshya');
-                    }
-                }
-
-                $blocks = self::enrichBlocks(
-                    $uid,
-                    $course_id,
-                    $raw,
-                    $quiz_id,
-                    $track_progress && $show_progress,
-                    $enrolled,
-                    $is_preview
+            } elseif ($error === '' && $enrolled && !$is_preview) {
+                $access = apply_filters(
+                    'sikshya_access_check',
+                    ['ok' => true, 'message' => ''],
+                    [
+                        'type' => 'quiz',
+                        'user_id' => $uid,
+                        'course_id' => $course_id,
+                        'content_id' => $quiz_id,
+                    ]
                 );
+                if (is_array($access) && isset($access['ok']) && $access['ok'] === false) {
+                    $msg = isset($access['message']) ? (string) $access['message'] : '';
+                    $error = $msg !== '' ? $msg : __('This content is not available yet.', 'sikshya');
+                }
             }
+
+            $blocks = self::enrichBlocks(
+                $uid,
+                $course_id,
+                $raw,
+                $quiz_id,
+                $track_progress && $show_progress,
+                $enrolled,
+                $outline_preview_mode
+            );
         }
 
         $attempts_used = 0;

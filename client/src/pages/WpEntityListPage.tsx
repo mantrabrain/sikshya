@@ -19,6 +19,10 @@ import {
 import { CreateCertificateModal } from '../components/shared/CreateCertificateModal';
 import { term } from '../lib/terminology';
 import { navIconForCurriculumRow } from '../lib/curriculumIcons';
+import {
+  contentLibraryChapterLearnFallback,
+  contentLibraryLearnViewFallback,
+} from '../lib/learnContentViewUrl';
 
 /** Map a picker selection to the WordPress post type the new item lives under. */
 function postTypeForPickerType(t: ContentPickerType): 'sik_lesson' | 'sik_quiz' | 'sik_assignment' {
@@ -422,13 +426,27 @@ export function WpEntityListPage(props: {
       },
       // Certificate templates should “View” as a public hash link (preview hash stored in meta).
       buildViewHref: (r: WpPost) => {
-        if (!isCertificateList) {
-          return r.link;
+        if (isCertificateList) {
+          const href = String(r.sikshya_certificate_preview_url || '').trim();
+          // If the REST field isn't present for some reason, fall back to the standard permalink.
+          return href || r.link || null;
         }
-        const href = String(r.sikshya_certificate_preview_url || '').trim();
-        // If the REST field isn't present for some reason, fall back to the standard permalink.
-        // Returning `null` would hide View entirely.
-        return href || r.link || null;
+        // Prefer server-computed URL; client rebuild matches {@see PublicPageUrls::learnContent()} (incl. public-id segment).
+        const learn = String(r.sikshya_learn_view_url || '').trim();
+        if (learn) {
+          return learn;
+        }
+        const lessonish = contentLibraryLearnViewFallback(config, restBase, r);
+        if (lessonish) {
+          return lessonish;
+        }
+        if (restBase === 'sik_chapter') {
+          const chapterLearn = contentLibraryChapterLearnFallback(config, r);
+          if (chapterLearn) {
+            return chapterLearn;
+          }
+        }
+        return r.link;
       },
     }),
     [config, restBase, isCertificateList]
@@ -496,7 +514,7 @@ export function WpEntityListPage(props: {
           embed: '1',
           // Ensure featured media is available for thumbnail column.
           fields:
-            'id,title,slug,status,link,meta,featured_media,sikshya_preview_link,sikshya_certificate_preview_url,_embedded.wp:featuredmedia,_embedded.wp:term,_embedded.author,date,modified,excerpt,author',
+            'id,title,slug,status,link,meta,featured_media,sikshya_preview_link,sikshya_learn_view_url,sikshya_certificate_preview_url,_embedded.wp:featuredmedia,_embedded.wp:term,_embedded.author,date,modified,excerpt,author',
         }}
         postRowActions={postRowActions}
         columns={columns}

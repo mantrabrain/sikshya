@@ -34,13 +34,24 @@ final class LearnPageService
         $hub_courses = [];
         $hub_recommended = [];
 
-        if ($uid <= 0) {
+        if ($course_id <= 0) {
+            if ($uid <= 0) {
+                $error = __('Please log in to access your learning.', 'sikshya');
+            } else {
+                // Learn hub (/learn/ without course_id): show enrolled courses + continue actions.
+                $mode = 'hub';
+                $hub_courses = self::buildHubCourses($uid);
+                $hub_recommended = self::buildRecommendedCourses();
+            }
+        } elseif ($uid <= 0) {
+            // Guest on a specific course/bundle URL: show access message in the main panel but still
+            // render the curriculum outline with locks (free/preview items stay unlocked).
             $error = __('Please log in to access your learning.', 'sikshya');
-        } elseif ($course_id <= 0) {
-            // Learn hub (/learn/ without course_id): show enrolled courses + continue actions.
-            $mode = 'hub';
-            $hub_courses = self::buildHubCourses($uid);
-            $hub_recommended = self::buildRecommendedCourses();
+            if (sanitize_key((string) get_post_meta($course_id, '_sikshya_course_type', true)) !== 'bundle') {
+                $raw = PublicCurriculumService::getCourseCurriculum($course_id);
+                $blocks = self::enrichBlocksPreview($raw, $course_id);
+                $is_preview = self::canPreviewCourse($course_id);
+            }
         } elseif (sanitize_key((string) get_post_meta($course_id, '_sikshya_course_type', true)) === 'bundle') {
             // Bundle learn page: progress dashboard across all courses in the bundle.
             $mode = 'bundle';
@@ -59,9 +70,8 @@ final class LearnPageService
 
             if (!$enrolled) {
                 $is_preview = self::canPreviewCourse($course_id);
-                if ($is_preview) {
-                    $blocks = self::enrichBlocksPreview($raw, $course_id);
-                } else {
+                $blocks = self::enrichBlocksPreview($raw, $course_id);
+                if (!$is_preview) {
                     $error = __('You are not enrolled in this course.', 'sikshya');
                 }
             } else {

@@ -306,6 +306,10 @@ class PostTypeService
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_duration');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_type');
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_video_url');
+        // Stable Learn URL segment ({@see LearnPublicIdService}); exposed so admin lists can rebuild canonical /learn URLs.
+        $str_meta(PostTypes::LESSON, '_sikshya_learn_public_id');
+        $str_meta(PostTypes::QUIZ, '_sikshya_learn_public_id');
+        $str_meta(PostTypes::ASSIGNMENT, '_sikshya_learn_public_id');
         // Lesson: free preview toggle (used by frontend preview rules + lesson editor).
         $str_meta(PostTypes::LESSON, '_sikshya_is_free');
 

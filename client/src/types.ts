@@ -82,6 +82,8 @@ export type SikshyaReactConfig = {
   permalinks?: Record<string, string>;
   /** True when WordPress permalink structure is empty (plain permalinks). */
   plainPermalinks?: boolean;
+  /** Settings → Learn permalinks: include stable public-id segment before the slug (`/learn/quiz/a1B2/{slug}/`). */
+  learnUsesPublicId?: boolean;
   /** CPT keys needed for building example URLs. */
   postTypes?: { course?: string; lesson?: string; quiz?: string; assignment?: string };
   user: SikshyaShellUser;
@@ -186,6 +188,11 @@ export type WpPost = {
    * published posts (use `link` instead) and for users without edit-post capability.
    */
   sikshya_preview_link?: string;
+  /**
+   * Sikshya REST: canonical Learn player URL for published lesson/quiz/assignment;
+   * chapter → learn hub with `course_id`; question → first quiz that references it.
+   */
+  sikshya_learn_view_url?: string;
   /** Sikshya REST field for course lists (bundle vs regular). */
   sikshya_course_type?: string;
   /** Sikshya REST fields: mirrored meta for collection responses (see `Api::registerRoutes`). */

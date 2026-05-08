@@ -548,6 +548,24 @@ class Frontend
             }
         }
 
+        // Published assignments use the Learn player (`/learn/assignment/{slug}/`). CPT permalinks
+        // (`…/assignments/{slug}/`) have no dedicated template — the theme would show a bare post shell.
+        if (
+            !is_admin()
+            && !(function_exists('wp_doing_ajax') && wp_doing_ajax())
+            && !(function_exists('wp_is_json_request') && wp_is_json_request())
+            && is_singular(PostTypes::ASSIGNMENT)
+        ) {
+            $post = get_queried_object();
+            if ($post instanceof \WP_Post && $post->post_status === 'publish' && !is_preview()) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only route branching.
+                if (!isset($_GET['preview'])) {
+                    wp_safe_redirect(PublicPageUrls::learnContentForPost($post), 301);
+                    exit;
+                }
+            }
+        }
+
         // Learn player routes: /learn/{type}/{slug} (no theme header/footer).
         if (PublicPageUrls::isCurrentVirtualPage('learn')) {
             $type = (string) get_query_var(PermalinkService::LEARN_TYPE_VAR);

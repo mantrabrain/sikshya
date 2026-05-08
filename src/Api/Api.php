@@ -238,6 +238,127 @@ class Api
             );
         }
 
+        /*
+         * Canonical Learn player URLs for Content library row actions (lesson / quiz / assignment).
+         * Matches {@see PublicPageUrls::learnContentForPost()} incl. optional public ids + plain permalinks.
+         * Empty when not publish — drafts use `sikshya_preview_link` (“Preview”).
+         */
+        $learn_view_schema = [
+            'description' => 'Published-content URL inside the Sikshya Learn shell (lesson/quiz/assignment player).',
+            'type' => 'string',
+            'format' => 'uri',
+            'context' => ['view', 'edit'],
+            'readonly' => true,
+        ];
+
+        $learn_view_content_callback = static function (array $obj): string {
+            $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+            if ($id <= 0) {
+                return '';
+            }
+            $post = get_post($id);
+            if (!$post instanceof \WP_Post || $post->post_status !== 'publish') {
+                return '';
+            }
+            $allowed = [
+                \Sikshya\Constants\PostTypes::LESSON,
+                \Sikshya\Constants\PostTypes::QUIZ,
+                \Sikshya\Constants\PostTypes::ASSIGNMENT,
+            ];
+            if (!in_array($post->post_type, $allowed, true)) {
+                return '';
+            }
+
+            return esc_url_raw(\Sikshya\Frontend\Site\PublicPageUrls::learnContentForPost($post));
+        };
+
+        foreach (
+            [
+                \Sikshya\Constants\PostTypes::LESSON,
+                \Sikshya\Constants\PostTypes::QUIZ,
+                \Sikshya\Constants\PostTypes::ASSIGNMENT,
+            ] as $learn_pt
+        ) {
+            register_rest_field(
+                $learn_pt,
+                'sikshya_learn_view_url',
+                [
+                    'get_callback' => $learn_view_content_callback,
+                    'schema' => $learn_view_schema,
+                ]
+            );
+        }
+
+        /*
+         * Chapters are not Learn routes — link to Learn for the owning course (?course_id=) so admins
+         * land in the learner shell for that catalog item.
+         */
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::CHAPTER,
+            'sikshya_learn_view_url',
+            [
+                'get_callback' => static function (array $obj): string {
+                    $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+                    if ($id <= 0) {
+                        return '';
+                    }
+                    $post = get_post($id);
+                    if (!$post instanceof \WP_Post || $post->post_status !== 'publish') {
+                        return '';
+                    }
+                    $course_id = (int) get_post_meta($id, '_sikshya_chapter_course_id', true);
+                    if ($course_id <= 0) {
+                        return '';
+                    }
+
+                    return esc_url_raw(\Sikshya\Frontend\Site\PublicPageUrls::learnForCourse($course_id));
+                },
+                'schema' => [
+                    'description' => 'Learn hub URL scoped to this chapter\'s course (redirects learners into outline).',
+                    'type' => 'string',
+                    'format' => 'uri',
+                    'context' => ['view', 'edit'],
+                    'readonly' => true,
+                ],
+            ]
+        );
+
+        /*
+         * Question CPT has no standalone Learn URL; open the first published quiz that references it (if any).
+         */
+        register_rest_field(
+            \Sikshya\Constants\PostTypes::QUESTION,
+            'sikshya_learn_view_url',
+            [
+                'get_callback' => static function (array $obj): string {
+                    $id = isset($obj['id']) ? (int) $obj['id'] : 0;
+                    if ($id <= 0) {
+                        return '';
+                    }
+                    $post = get_post($id);
+                    if (!$post instanceof \WP_Post || $post->post_type !== \Sikshya\Constants\PostTypes::QUESTION || $post->post_status !== 'publish') {
+                        return '';
+                    }
+                    $quiz_id = \Sikshya\Services\QuizQuestionInverseLookup::firstPublishedQuizIdForQuestion($id);
+                    if ($quiz_id <= 0) {
+                        return '';
+                    }
+                    $quiz = get_post($quiz_id);
+
+                    return $quiz instanceof \WP_Post && $quiz->post_status === 'publish'
+                        ? esc_url_raw(\Sikshya\Frontend\Site\PublicPageUrls::learnContentForPost($quiz))
+                        : '';
+                },
+                'schema' => [
+                    'description' => 'Learn URL for a quiz that references this question (questions are surfaced inside quizzes).',
+                    'type' => 'string',
+                    'format' => 'uri',
+                    'context' => ['view', 'edit'],
+                    'readonly' => true,
+                ],
+            ]
+        );
+
         // Certificate template public preview URL (base + hash).
         // Hash is auto-generated server-side and stored in meta (so we can resolve preview by hash
         // without scanning templates). Admin UI should never need a manual "save once".

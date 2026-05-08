@@ -93,6 +93,8 @@ final class ReactAdminConfig
             // Frontend permalink bases (must mirror global Sikshya permalink settings).
             'permalinks' => PermalinkService::get(),
             'plainPermalinks' => PermalinkService::isPlainPermalinks(),
+            /** When true, Learn player URLs include {@see LearnPublicIdService} segment (`/learn/quiz/{id}/{slug}/`). */
+            'learnUsesPublicId' => PermalinkService::learnUsePublicId(),
             'postTypes' => [
                 'course' => PostTypes::COURSE,
                 'lesson' => PostTypes::LESSON,
