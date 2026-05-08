@@ -12,7 +12,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type GradeScale = {
   id: number;

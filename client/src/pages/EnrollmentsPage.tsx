@@ -13,7 +13,7 @@ import { formatPostDate } from '../lib/formatPostDate';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { term, termLower } from '../lib/terminology';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type EnrollmentRow = {
   id: number;

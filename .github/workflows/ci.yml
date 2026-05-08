@@ -593,10 +593,9 @@ jobs:
             ERRORS="${ERRORS}Custom functions with wp_ prefix found (should use unique prefix):\n${WP_FUNCS}\n\n"
           fi
           
-          # Check for proper text domain usage (plain __() only — not esc_html__, esc_attr__, etc.)
-          TEXT_DOMAIN_ISSUES=$(grep -rPn '(?<![A-Za-z0-9_])__\(' . --include="*.php" --exclude-dir=vendor --exclude-dir=node_modules 2>/dev/null | grep -v "'sikshya'" | grep -v '"sikshya"' | head -50 || true)
-          if [ -n "$TEXT_DOMAIN_ISSUES" ]; then
-            ERRORS="${ERRORS}Translation functions possibly missing 'sikshya' text domain:\n${TEXT_DOMAIN_ISSUES}\n\n"
+          # Check gettext calls have enough args (covers multiline __("…", 'sikshya') — per-line grep false-flags those).
+          if ! php scripts/check-i18n-textdomain.php; then
+            ERRORS="${ERRORS}Gettext calls missing required arguments. Run locally: php scripts/check-i18n-textdomain.php\n\n"
           fi
           
           if [ -n "$ERRORS" ]; then

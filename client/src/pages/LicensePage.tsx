@@ -6,7 +6,7 @@ import { ButtonPrimary } from '../components/shared/buttons';
 import { NavIcon } from '../components/NavIcon';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useShellState } from '../context/ShellStateContext';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type LicenseInfo = {

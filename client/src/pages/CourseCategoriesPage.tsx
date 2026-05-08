@@ -17,7 +17,7 @@ import { QuillField } from '../components/shared/QuillField';
 import type { Column } from '../components/shared/DataTable';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useWpTermCollection } from '../hooks/useWpTermCollection';
-import type { NavItem, SikshyaReactConfig, WpTerm } from '../types';
+import type { SikshyaReactConfig, WpTerm } from '../types';
 
 const TAXONOMY = 'sikshya_course_category';
 

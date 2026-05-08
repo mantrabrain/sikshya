@@ -11,7 +11,7 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
-import type { ApiError } from '../api/http';
+import type { ApiError } from '../api/errors';
 
 type OrderLine = {
   course_id: number;

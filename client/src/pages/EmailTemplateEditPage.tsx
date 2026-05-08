@@ -6,7 +6,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 import type { EmailTemplateApi } from '../types/emailTemplate';
 import { EmailTemplateCreateForm, EmailTemplateEditorPanel } from '../components/email/EmailTemplateForms';
 import { SIKSHYA_ADMIN_PAGE_FULL_WIDTH } from '../constants/shellLayout';

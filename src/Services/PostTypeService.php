@@ -475,7 +475,8 @@ class PostTypeService
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'supports' => ['title', 'editor', 'custom-fields', 'revisions'],
+            // `thumbnail` required so REST `featured_media` updates persist (React editors).
+            'supports' => ['title', 'editor', 'thumbnail', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
 
@@ -526,7 +527,8 @@ class PostTypeService
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
-            'supports' => ['title', 'editor', 'custom-fields', 'revisions'],
+            // `thumbnail` required so REST `featured_media` updates persist (assignment editor cover image).
+            'supports' => ['title', 'editor', 'thumbnail', 'custom-fields', 'revisions'],
             'show_in_rest' => true,
         ];
 
@@ -600,7 +602,8 @@ class PostTypeService
             'show_in_menu' => false,
             'show_in_admin_bar' => false,
             'hierarchical' => false,
-            'supports' => ['title', 'editor', 'custom-fields'],
+            // `thumbnail` required so REST `featured_media` updates persist (question editor).
+            'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
             'has_archive' => false,
             'rewrite' => false,
             'capability_type' => 'post',
@@ -647,7 +650,8 @@ class PostTypeService
             'show_in_menu' => false,
             'show_in_admin_bar' => false,
             'hierarchical' => true,
-            'supports' => ['title', 'editor', 'custom-fields'],
+            // `thumbnail` required so REST `featured_media` updates persist (chapter editor).
+            'supports' => ['title', 'editor', 'thumbnail', 'custom-fields'],
             'has_archive' => false,
             'rewrite' => false,
             'capability_type' => 'post',

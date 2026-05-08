@@ -163,10 +163,6 @@ export function AddContentTypePickerModal(props: Props) {
     ? CONTENT_PICKER_TYPES.filter((opt) => allowedTypes.includes(opt.type))
     : CONTENT_PICKER_TYPES;
 
-  const lesson = config ? term(config, 'lesson') : 'Lesson';
-  const quiz = config ? term(config, 'quiz') : 'Quiz';
-  const assignment = config ? term(config, 'assignment') : 'Assignment';
-
   const lockedReason = (opt: PickerOpt): { locked: boolean; badge?: 'Pro' | 'Off' | 'Upgrade'; hint?: string } => {
     if (!opt.addonId) return { locked: false };
     const st = opt.addonId === 'live_classes' ? liveAddon : scormAddon;

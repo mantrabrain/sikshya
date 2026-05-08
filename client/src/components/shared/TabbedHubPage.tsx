@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { HorizontalEditorTabs } from './HorizontalEditorTabs';
 import { useAdminRouting } from '../../lib/adminRouting';
 import { EmbeddableShell } from './EmbeddableShell';
-import type { NavItem, SikshyaReactConfig } from '../../types';
+import type { SikshyaReactConfig } from '../../types';
 
 export type HubTab = {
   /** URL slug for the tab (`?tab=…`). */

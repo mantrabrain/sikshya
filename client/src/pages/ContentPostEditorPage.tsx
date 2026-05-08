@@ -3,7 +3,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 import { renderContentEditor } from './content-editors/editors';
 
 /**

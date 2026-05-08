@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
@@ -10,13 +9,12 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAdminRouting } from '../lib/adminRouting';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 import type { SettingsField, SettingsSection } from '../types/settingsSchema';
 import { CourseSettingsTab } from '../components/CourseSettingsTab';
 import { EnrollmentSettingsTab } from '../components/EnrollmentSettingsTab';
 import { isTruthyCheckboxValue, renderSettingsField } from './settingsRenderField';
 import { normalizeTabSections } from './settingsTabUtils';
-import { appViewHref } from '../lib/appUrl';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type SettingsSchema = Record<string, SettingsSection[]>;

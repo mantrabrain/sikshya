@@ -192,7 +192,7 @@ type EditorShellProps = {
   children: React.ReactNode;
 };
 
-function EditorFormShell({ loading, saving, error, onRetry, saveMsg, flush, children }: EditorShellProps) {
+function EditorFormShell({ loading, saving: _saving, error, onRetry, saveMsg, flush, children }: EditorShellProps) {
   const toast = useTopRightToast(3800);
   const toastErrorSigRef = useRef<string | null>(null);
 
@@ -789,7 +789,7 @@ export function QuizEditor(props: ContentEditorProps) {
   const [featured, setFeatured] = useState(0);
   const [editorTab, setEditorTab] = useState<'content' | 'settings' | 'questions'>('content');
   const [proQuizValues, setProQuizValues] = useState<ProQuizValues>(PRO_QUIZ_DEFAULTS);
-  const [quizAdvMaxDraw, setQuizAdvMaxDraw] = useState(QUIZ_ADVANCED_BANK_DRAW_HARD_MAX);
+  const [quizAdvMaxDraw] = useState(QUIZ_ADVANCED_BANK_DRAW_HARD_MAX);
 
   const QUIZ_Q_DND_MIME = 'application/x-sikshya-quiz-questions-v1';
   const reorderIds = (ids: number[], fromId: number, beforeId: number | null) => {
@@ -2410,19 +2410,20 @@ export function AssignmentEditor(props: ContentEditorProps) {
           ) : (
             <div className="space-y-6" role="tabpanel">
               <FormSection title="Submission" description="Scheduling and what learners submit.">
+                {/* Same hint row height in each column so inputs line up */}
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  <div>
+                  <div className="flex min-h-0 flex-col">
                     <label className={LABEL} htmlFor="sik-as-due">
                       Due (datetime)
                     </label>
-                    <p className={HINT}>Optional. Uses your site timezone.</p>
+                    <p className={`${HINT} min-h-[2.75rem]`}>Optional. Uses your site timezone.</p>
                     <DateTimePickerField kind="datetime" value={due} onChange={setDue} />
                   </div>
-                  <div>
+                  <div className="flex min-h-0 flex-col">
                     <label className={LABEL} htmlFor="sik-as-points">
                       Points
                     </label>
-                    <p className={HINT}>Maximum score when graded.</p>
+                    <p className={`${HINT} min-h-[2.75rem]`}>Maximum score when graded.</p>
                     <input
                       id="sik-as-points"
                       type="number"
@@ -2432,10 +2433,13 @@ export function AssignmentEditor(props: ContentEditorProps) {
                       onChange={(e) => setApoints(Number(e.target.value))}
                     />
                   </div>
-                  <div>
+                  <div className="flex min-h-0 flex-col">
                     <label className={LABEL} htmlFor="sik-as-type">
                       Submission type
                     </label>
+                    <p className={`${HINT} min-h-[2.75rem]`} aria-hidden="true">
+                      &nbsp;
+                    </p>
                     <select id="sik-as-type" className={FIELD} value={atype} onChange={(e) => setAtype(e.target.value)}>
                       <option value="">Choose how learners submit…</option>
                       <option value="essay">Essay</option>

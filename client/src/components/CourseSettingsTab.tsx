@@ -61,7 +61,7 @@ const SUB_TABS: Array<{ id: 'discovery'; label: string; icon: string; keys: stri
 
 export function CourseSettingsTab(props: Props) {
   const { tabSchema, renderField } = props;
-  const [sub, setSub] = useState<(typeof SUB_TABS)[number]['id']>('discovery');
+  const [sub] = useState<(typeof SUB_TABS)[number]['id']>('discovery');
 
   const byKey = useMemo(() => {
     const map = new Map<string, SettingsSection>();

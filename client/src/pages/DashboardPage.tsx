@@ -11,7 +11,7 @@ import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { getLicensing } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type DashboardStats = {
   publishedCourses: number;

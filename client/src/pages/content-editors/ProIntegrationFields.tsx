@@ -9,6 +9,16 @@ const FIELD =
 const LABEL = 'mb-1 block text-sm font-medium text-slate-900 dark:text-slate-100';
 const HINT = 'mb-2 text-xs text-slate-500 dark:text-slate-400';
 
+const LIVE_PROVIDER_OPTIONS: { value: string; label: string }[] = [
+  { value: 'zoom', label: 'Zoom' },
+  { value: 'google_meet', label: 'Google Meet' },
+  { value: 'teams', label: 'Microsoft Teams' },
+  { value: 'webex', label: 'Webex' },
+  { value: 'classroom', label: 'Google Classroom' },
+  { value: 'jitsi', label: 'Jitsi' },
+  { value: 'custom', label: 'Other / custom' },
+];
+
 function ProCard(props: { title: string; description?: string; badge?: string; children: ReactNode }) {
   const { title, description, badge, children } = props;
   return (
@@ -207,7 +217,6 @@ export function ProLessonLiveBlock(props: {
       badge="Pro"
       description="Paste the join link from Zoom, Meet, Teams, Classroom, or Webex. Learners see a polished join panel with schedule-aware hints."
     >
-      {settingsHint ? <p className={`${HINT} mb-3 text-slate-600 dark:text-slate-300`}>{settingsHint}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label className={LABEL} htmlFor="sik-pro-live-url">Meeting URL</label>

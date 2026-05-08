@@ -665,7 +665,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                             items.push({
                               key: 'delete',
                               label: 'Delete',
-                              destructive: true,
+                              danger: true,
                               onClick: async () => {
                                 const ok = await dialog.confirm({
                                   title: `Delete order #${r.id}?`,

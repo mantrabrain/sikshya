@@ -1,6 +1,9 @@
 /** Set from PHP when a nav target is plan-gated or the addon toggle is off (discoverability; routes stay visible). */
 export type NavItemBadge = 'off' | 'upgrade';
 
+/** Workspace chrome for gated add-on routes (upgrade vs enable vs pending). */
+export type GatedWorkspaceMode = 'full' | 'locked-plan' | 'addon-off' | 'pending-addon';
+
 export type NavItem = {
   id: string;
   label: string;
@@ -123,6 +126,8 @@ declare global {
 
 export type FieldConfig = {
   type?: string;
+  /** When true, inputs should be non-interactive (Pro-locked rows, readonly meta, etc.). */
+  disabled?: boolean;
   label?: string;
   description?: string;
   placeholder?: string;

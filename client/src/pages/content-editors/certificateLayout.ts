@@ -549,7 +549,7 @@ function normalizePageDeco(id: string): string {
   if (s === 'none') {
     return 'none';
   }
-  if (CERT_PAGE_DECO_ORDER.includes(s as CertPageDecoId)) {
+  if ((CERT_PAGE_DECO_ORDER as readonly string[]).includes(s)) {
     return s;
   }
   return 'none';

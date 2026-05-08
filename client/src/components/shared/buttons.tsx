@@ -68,13 +68,16 @@ export function LinkButtonPrimary({
   href,
   children,
   className = '',
+  title,
 }: {
   href: string;
   children: ReactNode;
   className?: string;
+  /** Optional native tooltip on the anchor. */
+  title?: string;
 }) {
   return (
-    <a href={href} className={`${basePrimary} no-underline ${className}`}>
+    <a href={href} className={`${basePrimary} no-underline ${className}`} title={title}>
       {children}
     </a>
   );

@@ -35,7 +35,7 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
   const { config, title, embedded } = props;
   const { confirm } = useSikshyaDialog();
   const adminBase = config.adminUrl.replace(/\/?$/, '/');
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
 
   const loader = useCallback(async () => {
     const q = new URLSearchParams({ page: String(page), per_page: '50' });

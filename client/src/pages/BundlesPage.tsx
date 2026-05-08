@@ -13,7 +13,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { appViewHref } from '../lib/appUrl';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type BundleRow = {
   id: number;

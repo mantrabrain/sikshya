@@ -9,7 +9,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 
 type OverviewResp = {
@@ -306,7 +306,7 @@ function OverviewPanel(props: {
 }
 
 function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success' | 'error'; text: string } | null) => void }) {
-  const { enabled, setToast } = props;
+  const { enabled, setToast: pushToast } = props;
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<string>('');
   const [search, setSearch] = useState('');
@@ -334,16 +334,22 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
 
   const setVendorStatus = async (vendor: Vendor, next: 'active' | 'pending' | 'suspended') => {
     setBusy(vendor.id);
-    toast.clear();
+    pushToast(null);
     try {
       await getSikshyaApi().put<{ ok?: boolean }>(
         SIKSHYA_ENDPOINTS.marketplace.admin.vendor(vendor.id),
         { status: next }
       );
-      toast.success('Updated', `Vendor ${vendor.display_name || vendor.user_display} marked ${next}.`);
+      pushToast({
+        kind: 'success',
+        text: `Vendor ${vendor.display_name || vendor.user_display} marked ${next}.`,
+      });
       void v.refetch();
     } catch (err) {
-      toast.error('Update failed', err instanceof Error ? err.message : 'Failed to update vendor.');
+      pushToast({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'Failed to update vendor.',
+      });
     } finally {
       setBusy(null);
     }
@@ -566,7 +572,7 @@ function CommissionsPanel(props: { enabled: boolean }) {
 }
 
 function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success' | 'error'; text: string } | null) => void }) {
-  const { enabled, setToast } = props;
+  const { enabled, setToast: pushToast } = props;
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<string>('pending');
   const [busy, setBusy] = useState<number | null>(null);
@@ -596,7 +602,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
 
   const act = async (id: number, action: 'approve' | 'reject' | 'mark-paid') => {
     setBusy(id);
-    toast.clear();
+    pushToast(null);
     try {
       const path =
         action === 'approve'
@@ -605,10 +611,13 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
           ? SIKSHYA_ENDPOINTS.marketplace.admin.withdrawalReject(id)
           : SIKSHYA_ENDPOINTS.marketplace.admin.withdrawalMarkPaid(id);
       await getSikshyaApi().post(path, {});
-      toast.success('Updated', `Withdrawal #${id} ${action.replace('-', ' ')}.`);
+      pushToast({ kind: 'success', text: `Withdrawal #${id} ${action.replace('-', ' ')}.` });
       void w.refetch();
     } catch (err) {
-      toast.error('Action failed', err instanceof Error ? err.message : 'Action failed.');
+      pushToast({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'Action failed.',
+      });
     } finally {
       setBusy(null);
     }
@@ -617,18 +626,21 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
   const submitAdjustment = async (e: FormEvent) => {
     e.preventDefault();
     setAdjustBusy(true);
-    toast.clear();
+    pushToast(null);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.marketplace.admin.adjustments, {
         vendor_user_id: Number(adjustVendor) || 0,
         amount: parseFloat(adjustAmount) || 0,
         reason: adjustReason.trim(),
       });
-      toast.success('Saved', 'Adjustment recorded.');
+      pushToast({ kind: 'success', text: 'Adjustment recorded.' });
       setAdjustAmount('');
       setAdjustReason('');
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Could not record adjustment.');
+      pushToast({
+        kind: 'error',
+        text: err instanceof Error ? err.message : 'Could not record adjustment.',
+      });
     } finally {
       setAdjustBusy(false);
     }

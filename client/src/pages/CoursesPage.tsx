@@ -12,7 +12,7 @@ import { formatDisplaySlug } from '../lib/formatDisplaySlug';
 import { embeddedTermNames } from '../lib/wpPostTerms';
 import { formatPostDate } from '../lib/formatPostDate';
 import { term, termLower } from '../lib/terminology';
-import type { NavItem, SikshyaReactConfig, WpPost } from '../types';
+import type { SikshyaReactConfig, WpPost } from '../types';
 import { FeaturedThumb } from '../components/shared/list/FeaturedThumb';
 
 function isBundleRow(r: WpPost): boolean {
@@ -54,7 +54,6 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
   const [typeFilter, setTypeFilter] = useState<'any' | 'regular' | 'subscription' | 'bundle'>('any');
   const showCourseStaff = isFeatureEnabled(config, 'multi_instructor');
   const course = term(config, 'course');
-  const courses = term(config, 'courses');
   const courseLower = termLower(config, 'course');
   const coursesLower = termLower(config, 'courses');
 

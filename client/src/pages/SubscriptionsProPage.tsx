@@ -17,7 +17,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { useAdminRouting } from '../lib/adminRouting';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig, WpRestUser } from '../types';
+import type { SikshyaReactConfig, WpRestUser } from '../types';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';

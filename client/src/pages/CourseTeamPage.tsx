@@ -12,7 +12,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type InstructorRow = {
   id: number;
@@ -448,7 +448,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
         addonEnableDescription="Enable the Multi-instructor add-on to register REST routes and unlock co-instructor management."
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
-        onEnable={() => void addon.enable()}
+        onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <>

@@ -14,7 +14,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type Row = {
   user_id: number;
@@ -358,7 +358,9 @@ export function GradebookPage(props: {
   const saveAssignmentGrade = async () => {
     if (!enabled || !drillData || drillData.item_type !== 'assignment' || !drillData.submission) return;
     const da = drillData as DrillAssignment;
-    const submissionId = da.submission.id;
+    const sub = da.submission;
+    if (!sub) return;
+    const submissionId = sub.id;
     const trimmed = gradeInput.trim();
     if (trimmed !== '' && !Number.isFinite(Number(trimmed))) return;
     const criteria = da.rubric_criteria ?? [];

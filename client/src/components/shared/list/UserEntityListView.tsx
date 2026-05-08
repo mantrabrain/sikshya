@@ -13,6 +13,7 @@ import { ListEmptyState } from './ListEmptyState';
 import { ListPanel } from './ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from './ListSearchToolbar';
 import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
+import { resolveColumnPickerLabel } from '../../../lib/columnPickerLabel';
 
 type Props = {
   roleSlug: string;
@@ -55,6 +56,8 @@ export function UserEntityListView({
   const [page, setPage] = useState(1);
   const [orderby, setOrderby] = useState(defaultSortField);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [bulkValue, setBulkValue] = useState('');
+  const noopBulkApply = useCallback(() => {}, []);
 
   useEffect(() => {
     setPage(1);
@@ -121,7 +124,7 @@ export function UserEntityListView({
     if (skeletonHeadersProp?.length) {
       return skeletonHeadersProp;
     }
-    return columns.map((c) => c.header || '\u00a0');
+    return columns.map((c) => resolveColumnPickerLabel(c) || '\u00a0');
   }, [columns, skeletonHeadersProp]);
 
   const listQuery = useWpUserCollection({
@@ -160,7 +163,11 @@ export function UserEntityListView({
 
   const columnPicker =
     columnPickerStorageKey && pickable.length > 0 ? (
-      <ColumnVisibilityMenu columns={pickable.map((c) => ({ id: c.id, label: c.header || 'Column' }))} visibility={pickerVisibility} onChange={onColumnToggle} />
+      <ColumnVisibilityMenu
+        columns={pickable.map((c) => ({ id: c.id, label: resolveColumnPickerLabel(c) }))}
+        visibility={pickerVisibility}
+        onChange={onColumnToggle}
+      />
     ) : null;
 
   const emptyContent = (
@@ -186,7 +193,14 @@ export function UserEntityListView({
       />
 
       <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-3 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
-        <BulkActionsBar />
+        <BulkActionsBar
+          disabled
+          selectedCount={0}
+          value={bulkValue}
+          onChange={setBulkValue}
+          onApply={noopBulkApply}
+          trashMode={false}
+        />
         <p className="text-xs text-slate-500 dark:text-slate-400">{contextHint}</p>
       </div>
 

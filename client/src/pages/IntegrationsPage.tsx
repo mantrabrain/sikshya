@@ -509,12 +509,12 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     description="Enable the Webhooks addon. Nothing is sent until you add a URL below."
                     canEnable={Boolean(whAddon.licenseOk) || Boolean(zapierAddon.licenseOk)}
                     enableBusy={whAddon.loading || zapierAddon.loading}
-                    onEnable={() => {
+                    onEnable={async () => {
                       // Prefer enabling Webhooks (generic) but allow Zapier-only customers to proceed.
-                      if (whAddon.licenseOk) void whAddon.enable();
-                      else void zapierAddon.enable();
+                      if (whAddon.licenseOk) await whAddon.enable();
+                      else await zapierAddon.enable();
                     }}
-                    upgradeUrl={lic.upgradeUrl}
+                    upgradeUrl={lic?.upgradeUrl}
                     error={whAddon.error || zapierAddon.error}
                   />
                 </PremiumGatedSurface>
@@ -717,7 +717,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     canEnable={Boolean(keyAddon.licenseOk)}
                     enableBusy={keyAddon.loading}
                     onEnable={() => keyAddon.enable()}
-                    upgradeUrl={lic.upgradeUrl}
+                    upgradeUrl={lic?.upgradeUrl}
                     error={keyAddon.error}
                   />
                 </PremiumGatedSurface>

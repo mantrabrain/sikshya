@@ -13,7 +13,7 @@ import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs'
 import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 
 type CouponRow = {
   id: number;
@@ -32,13 +32,38 @@ type ListResponse = {
   table_missing?: boolean;
 };
 
+type AdvancedRulesPayload = {
+  min_subtotal: number;
+  max_subtotal: number;
+  allowed_course_ids: number[];
+  excluded_course_ids: number[];
+  max_discount_amount: number;
+  per_user_limit: number;
+  first_order_only: boolean;
+  valid_from: string;
+  valid_until: string;
+};
+
+type AdvancedRulesApi = Partial<{
+  min_subtotal: number | null;
+  max_subtotal: number | null;
+  allowed_course_ids: number[];
+  excluded_course_ids: number[];
+  max_discount_amount: number | null;
+  per_user_limit: number | null;
+  first_order_only: boolean;
+  valid_from: string | null;
+  valid_until: string | null;
+}>;
+
 type AdvancedMetaResponse = {
   ok?: boolean;
   meta?: Record<string, string>;
+  rules?: AdvancedRulesApi;
 };
 
 type EditorMode = 'create' | 'manage';
-type PageTab = 'list' | 'create' | 'manage';
+type PageTab = 'list' | 'create' | 'manage' | 'settings';
 
 function clampNumberInput(v: string, fallback = 0) {
   const n = parseFloat(v);
@@ -95,12 +120,14 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
         const r = await getSikshyaApi().get<AdvancedMetaResponse>(
           SIKSHYA_ENDPOINTS.pro.couponAdvanced(advCouponId)
         );
-        const rules = r.rules || {};
+        const rules = r.rules ?? {};
         setAdvMin(rules.min_subtotal != null && rules.min_subtotal > 0 ? String(rules.min_subtotal) : '');
         setAdvMaxSub(rules.max_subtotal != null && rules.max_subtotal > 0 ? String(rules.max_subtotal) : '');
-        setAdvCourseIds(Array.isArray(rules.allowed_course_ids) ? rules.allowed_course_ids.filter((n) => n > 0) : []);
+        setAdvCourseIds(
+          Array.isArray(rules.allowed_course_ids) ? rules.allowed_course_ids.filter((n: number) => n > 0) : []
+        );
         setAdvExcludedCourseIds(
-          Array.isArray(rules.excluded_course_ids) ? rules.excluded_course_ids.filter((n) => n > 0) : []
+          Array.isArray(rules.excluded_course_ids) ? rules.excluded_course_ids.filter((n: number) => n > 0) : []
         );
         setAdvMaxDiscount(
           rules.max_discount_amount != null && rules.max_discount_amount > 0 ? String(rules.max_discount_amount) : ''
@@ -117,7 +144,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
     })();
   }, [advCouponId, advEnabled]);
 
-  const buildAdvancedRulesPayload = (): AdvancedRules => ({
+  const buildAdvancedRulesPayload = (): AdvancedRulesPayload => ({
     min_subtotal: clampNumberInput(advMin, 0),
     max_subtotal: clampNumberInput(advMaxSub, 0),
     allowed_course_ids: advCourseIds,

@@ -415,7 +415,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                               {
                                 key: 'delete',
                                 label: 'Delete',
-                                destructive: true,
+                                danger: true,
                                 onClick: async () => {
                                   const ok = await dialog.confirm({
                                     title: `Delete payment #${r.id}?`,

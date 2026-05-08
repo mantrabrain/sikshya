@@ -217,7 +217,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       return;
     }
     const cid = editing?.course_id ? Number(editing.course_id) : courseId > 0 ? courseId : 0;
-    const lid = editing?.lesson_id != null && editing.lesson_id !== '' ? Number(editing.lesson_id) : 0;
+    const lid = editing?.lesson_id != null ? Number(editing.lesson_id) : 0;
     const scope = Number.isFinite(lid) && lid > 0 ? 'lesson' : 'course';
     const rt = (editing?.rule_type as DripRuleType | undefined) || 'delay_days';
     setEditorCourseId(Number.isFinite(cid) ? cid : 0);

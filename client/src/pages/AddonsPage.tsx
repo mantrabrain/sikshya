@@ -4,7 +4,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
-import type { NavItem, SikshyaReactConfig } from '../types';
+import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { t } from '../lib/i18n';
 

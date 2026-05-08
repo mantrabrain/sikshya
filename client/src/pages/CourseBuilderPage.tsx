@@ -28,7 +28,7 @@ import { appViewHref } from '../lib/appUrl';
 import { getCatalogEntry, getLicensing, isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { useAdminRouting } from '../lib/adminRouting';
-import type { FieldConfig, NavItem, SikshyaReactConfig, TabFieldsMap } from '../types';
+import type { FieldConfig, SikshyaReactConfig, TabFieldsMap } from '../types';
 import { DateTimePickerField } from '../components/shared/DateTimePickerField';
 import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 import { QuillField } from '../components/shared/QuillField';
@@ -1449,7 +1449,6 @@ function BuilderSectionMenu({
 
 export function CourseBuilderPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
-  const { confirm } = useSikshyaDialog();
   const q = config.query || {};
   const courseIdFromUrl = Number(q.course_id || q.id || 0) || 0;
 
@@ -1523,7 +1522,7 @@ function CourseBuilderEditor({
   const [curriculumOutlineError, setCurriculumOutlineError] = useState<unknown>(null);
   const [openChapters, setOpenChapters] = useState<Record<number, boolean>>({});
   const [curriculumSelection, setCurriculumSelection] = useState<CurriculumSelection>(null);
-  const [editorHeaderMeta, setEditorHeaderMeta] = useState<BuilderHeaderMeta | null>(null);
+  const [, setEditorHeaderMeta] = useState<BuilderHeaderMeta | null>(null);
   const [chapterActionError, setChapterActionError] = useState<unknown>(null);
   const [addContentOpen, setAddContentOpen] = useState(false);
   const [addContentChapterId, setAddContentChapterId] = useState(0);
@@ -1534,6 +1533,7 @@ function CourseBuilderEditor({
   /** When true, outline uses page scroll; when false, outline scrolls inside the curriculum column. */
   const [curriculumOutlineFullHeight, setCurriculumOutlineFullHeight] = useState(readCurriculumOutlineFullHeightPref);
   const toast = useTopRightToast(5200);
+  const { confirm: confirmDialog } = useSikshyaDialog();
   const [saving, setSaving] = useState(false);
   const activeEmbeddedSaveRef = useRef<null | (() => Promise<boolean>)>(null);
   const registerEmbeddedSave = useCallback((fn: (() => Promise<boolean>) | null) => {
@@ -1869,7 +1869,7 @@ function CourseBuilderEditor({
     if (!postId || postId <= 0) {
       return;
     }
-    const ok = await confirm({
+    const ok = await confirmDialog({
       title: 'Delete permanently?',
       message: 'This removes the item from the site. This cannot be undone.',
       variant: 'danger',
@@ -2135,10 +2135,10 @@ function CourseBuilderEditor({
       />
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
-      {bootstrap.loading && <CourseBuilderSkeleton />}
-      {bootstrap.error && (
+      {bootstrap.loading ? <CourseBuilderSkeleton /> : null}
+      {bootstrap.error ? (
         <ApiErrorPanel error={bootstrap.error} onRetry={bootstrap.refetch} title="Could not load course" />
-      )}
+      ) : null}
       {!bootstrap.loading && !bootstrap.error && bootstrap.data && (
         <div className="rounded-xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="rounded-t-xl border-b border-slate-100 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-900/90">
@@ -2272,7 +2272,7 @@ function CourseBuilderEditor({
                       role={curriculumOutlineFullHeight ? undefined : 'region'}
                       aria-label={curriculumOutlineFullHeight ? undefined : 'Scrollable course outline'}
                     >
-                    {curriculumError && (
+                    {curriculumError ? (
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={curriculumError}
@@ -2295,8 +2295,8 @@ function CourseBuilderEditor({
                           }}
                         />
                       </div>
-                    )}
-                    {chapterActionError && (
+                    ) : null}
+                    {chapterActionError ? (
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={chapterActionError}
@@ -2304,8 +2304,8 @@ function CourseBuilderEditor({
                           onRetry={() => setChapterActionError(null)}
                         />
                       </div>
-                    )}
-                    {addContentError && (
+                    ) : null}
+                    {addContentError ? (
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={addContentError}
@@ -2313,8 +2313,8 @@ function CourseBuilderEditor({
                           onRetry={() => setAddContentError(null)}
                         />
                       </div>
-                    )}
-                    {curriculumOutlineError && (
+                    ) : null}
+                    {curriculumOutlineError ? (
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={curriculumOutlineError}
@@ -2322,7 +2322,7 @@ function CourseBuilderEditor({
                           onRetry={() => setCurriculumOutlineError(null)}
                         />
                       </div>
-                    )}
+                    ) : null}
                     {curriculumOutlineSaving ? (
                       <p className="mb-2 text-center text-[11px] font-medium text-slate-500 dark:text-slate-400">
                         Saving outline…
