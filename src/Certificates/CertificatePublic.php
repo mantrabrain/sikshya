@@ -108,6 +108,13 @@ final class CertificatePublic
             $user = get_userdata((int) $row->user_id);
             $learner = $user ? $user->display_name : '';
             $course_title = get_the_title((int) $row->course_id) ?: '';
+            $course_id = (int) $row->course_id;
+            $course_author_id = $course_id > 0 ? (int) get_post_field('post_author', $course_id) : 0;
+            $course_author = $course_author_id > 0 ? get_userdata($course_author_id) : false;
+            $instructor_name = $course_author ? (string) ($course_author->display_name ?? '') : '';
+            if ($instructor_name === '') {
+                $instructor_name = (string) get_bloginfo('name');
+            }
             $issued = (string) $row->issued_date;
             $serial = (string) $row->certificate_number;
             $template_id = isset($row->template_post_id) ? (int) $row->template_post_id : 0;
@@ -135,6 +142,7 @@ final class CertificatePublic
                 '{{student_name}}' => esc_html($learner),
                 '{{course_name}}' => esc_html($course_title),
                 '{{completion_date}}' => esc_html($issued),
+                '{{instructor_name}}' => esc_html($instructor_name),
 
                 // Shared tokens
                 '{{certificate_number}}' => esc_html($serial),
@@ -192,6 +200,7 @@ final class CertificatePublic
         $repl = [
             '{{student_name}}' => esc_html__('Student name', 'sikshya'),
             '{{course_name}}' => esc_html__('Course name', 'sikshya'),
+            '{{instructor_name}}' => esc_html__('Instructor', 'sikshya'),
             '{{completion_date}}' => esc_html(date_i18n(get_option('date_format'))),
             '{{certificate_number}}' => esc_html__('CERT-0001', 'sikshya'),
             '{{verification_code}}' => esc_html($clean),
