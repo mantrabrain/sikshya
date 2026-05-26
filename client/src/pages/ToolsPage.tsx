@@ -6,6 +6,7 @@ import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type ToolsTab = 'status' | 'export' | 'maintenance';
 
@@ -69,25 +70,25 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
         if (data && typeof data === 'object') {
           setSystemRows(data);
         }
-        toast.success('Done', res.message ?? 'System information loaded.');
+        toast.success(__('Done', 'sikshya'), res.message ?? 'System information loaded.');
       })
       .catch(() => void 0);
   };
 
   const clearCache = () => {
     void runTool({ action_type: 'clear_cache' })
-      .then((res) => toast.success('Done', res.message ?? 'Done.'))
+      .then((res) => toast.success(__('Done', 'sikshya'), res.message ?? 'Done.'))
       .catch(() => void 0);
   };
 
   const importSampleLms = () => {
     void (async () => {
       const ok = await confirm({
-        title: 'Import sample courses?',
+        title: __('Import sample courses?', 'sikshya'),
         message:
-          'This creates published sample courses, chapters, lessons, quizzes, and questions from the bundled JSON pack. Safe to run on a staging site; avoid duplicates on production if you already imported once.',
+          __('This creates published sample courses, chapters, lessons, quizzes, and questions from the bundled JSON pack. Safe to run on a staging site; avoid duplicates on production if you already imported once.', 'sikshya'),
         variant: 'default',
-        confirmLabel: 'Import sample data',
+        confirmLabel: __('Import sample data', 'sikshya'),
       });
       if (!ok) {
         return;
@@ -101,7 +102,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
                 .map(([k, v]) => `${k}: ${v}`)
                 .join(', ')
             : '';
-          toast.success('Done', bits ? `${res.message ?? 'Done.'} (${bits})` : (res.message ?? 'Done.'));
+          toast.success(__('Done', 'sikshya'), bits ? `${res.message ?? 'Done.'} (${bits})` : (res.message ?? 'Done.'));
         })
         .catch(() => void 0);
     })();
@@ -110,16 +111,16 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
   const resetPluginSettings = () => {
     void (async () => {
       const ok = await confirm({
-        title: 'Reset all settings?',
-        message: 'Reset every Sikshya setting to its default? This cannot be undone.',
+        title: __('Reset all settings?', 'sikshya'),
+        message: __('Reset every Sikshya setting to its default? This cannot be undone.', 'sikshya'),
         variant: 'danger',
-        confirmLabel: 'Reset everything',
+        confirmLabel: __('Reset everything', 'sikshya'),
       });
       if (!ok) {
         return;
       }
       void runTool({ action_type: 'reset_settings' })
-        .then((res) => toast.success('Done', res.message ?? 'Done.'))
+        .then((res) => toast.success(__('Done', 'sikshya'), res.message ?? 'Done.'))
         .catch(() => void 0);
     })();
   };
@@ -129,7 +130,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       void runTool({ action_type: 'export_settings' })
         .then((res) => {
           downloadJson(`sikshya-settings-${new Date().toISOString().slice(0, 10)}.json`, res.data ?? {});
-          toast.success('Download started', res.message ?? 'Download started.');
+          toast.success(__('Download started', 'sikshya'), res.message ?? 'Download started.');
         })
         .catch(() => void 0);
       return;
@@ -141,7 +142,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
           exported_at: new Date().toISOString(),
           items: res.data ?? [],
         });
-        toast.success('Download started', res.message ?? 'Download started.');
+        toast.success(__('Download started', 'sikshya'), res.message ?? 'Download started.');
       })
       .catch(() => void 0);
   };
@@ -163,7 +164,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       settings: parsed,
       overwrite: importOverwrite,
     })
-      .then((res) => toast.success('Import finished', res.message ?? 'Import finished.'))
+      .then((res) => toast.success(__('Import finished', 'sikshya'), res.message ?? 'Import finished.'))
       .catch(() => void 0);
   };
 
@@ -172,12 +173,12 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Diagnostics, exports, and maintenance for administrators"
+      subtitle={__('Diagnostics, exports, and maintenance for administrators', 'sikshya')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {config.setupWizardUrl ? (
         <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Setup wizard</h2>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Setup wizard', 'sikshya')}</h2>
           <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
             Configure storefront permalinks and learning URL style. You can return here anytime from
             Tools.
@@ -214,20 +215,20 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
 
       {error ? (
         <div className="mt-4">
-          <ApiErrorPanel error={error} title="Something went wrong" onRetry={() => setError(null)} />
+          <ApiErrorPanel error={error} title={__('Something went wrong', 'sikshya')} onRetry={() => setError(null)} />
         </div>
       ) : null}
 
       {tab === 'status' ? (
         <div className="mt-6 space-y-6">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Environment</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Environment', 'sikshya')}</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Load WordPress, PHP, database, and theme summary. Nothing is changed until you run a maintenance action.
             </p>
             <div className="mt-4">
               <ButtonPrimary type="button" disabled={busy} onClick={() => loadSystemInfo()}>
-                {busy ? 'Loading…' : 'Load system info'}
+                {busy ? __('Loading…', 'sikshya') : __('Load system info', 'sikshya')}
               </ButtonPrimary>
             </div>
             {systemRows ? (
@@ -249,7 +250,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
       {tab === 'export' ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Export</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Export', 'sikshya')}</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Download JSON for backups or staging. Content exports include titles, HTML bodies, and Sikshya meta keys.
             </p>
@@ -262,14 +263,14 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
               value={exportKind}
               onChange={(e) => setExportKind(e.target.value as typeof exportKind)}
             >
-              <option value="settings">All Sikshya settings (tabs)</option>
-              <option value="courses">Courses</option>
-              <option value="lessons">Lessons</option>
-              <option value="quizzes">Quizzes</option>
-              <option value="assignments">Assignments</option>
-              <option value="questions">Questions</option>
-              <option value="chapters">Chapters</option>
-              <option value="certificates">Certificates</option>
+              <option value="settings">{__('All Sikshya settings (tabs)', 'sikshya')}</option>
+              <option value="courses">{__('Courses', 'sikshya')}</option>
+              <option value="lessons">{__('Lessons', 'sikshya')}</option>
+              <option value="quizzes">{__('Quizzes', 'sikshya')}</option>
+              <option value="assignments">{__('Assignments', 'sikshya')}</option>
+              <option value="questions">{__('Questions', 'sikshya')}</option>
+              <option value="chapters">{__('Chapters', 'sikshya')}</option>
+              <option value="certificates">{__('Certificates', 'sikshya')}</option>
             </select>
             <div className="mt-4">
               <ButtonPrimary type="button" disabled={busy} onClick={() => exportPayload()}>
@@ -279,7 +280,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Import settings</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Import settings', 'sikshya')}</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Paste JSON from a settings export. Empty values are only overwritten when you enable the option below.
             </p>
@@ -290,7 +291,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
               id="sik-imp-json"
               rows={10}
               className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 font-mono text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              placeholder="Paste JSON from a settings export"
+              placeholder={__('Paste JSON from a settings export', 'sikshya')}
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
             />
@@ -314,7 +315,7 @@ export function ToolsPage(props: { config: SikshyaReactConfig; title: string; em
 
       {tab === 'maintenance' ? (
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Maintenance</h2>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Maintenance', 'sikshya')}</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Clear Sikshya-related transients and object cache. Import demo content from the plugin sample pack. Reset
             removes the main Sikshya settings option.

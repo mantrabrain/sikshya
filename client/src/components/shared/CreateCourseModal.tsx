@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from 'react';
 import { getErrorSummary } from '../../api/errors';
 import { appViewHref } from '../../lib/appUrl';
 import { useAdminRouting } from '../../lib/adminRouting';
@@ -11,6 +11,7 @@ import { useAddonEnabled } from '../../hooks/useAddons';
 import { ButtonPrimary } from './buttons';
 import { Modal } from './Modal';
 import { term, termLower } from '../../lib/terminology';
+import { __, sprintf } from '../../lib/i18n';
 
 type Props = {
   config: SikshyaReactConfig;
@@ -128,25 +129,29 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     }
   };
 
-  const regularCourseLabel = `Regular ${courseTitle}`;
-  const courseBundleLabel = `${courseTitle} bundle`;
+  const regularCourseLabel = sprintf(__('Regular %s', 'sikshya'), courseTitle);
+  const courseBundleLabel = sprintf(__('%s bundle', 'sikshya'), courseTitle);
   const titlePlaceholder =
-    kind === 'bundle' && canUseBundles ? 'e.g. Full Stack Bootcamp' : 'e.g. WordPress for Beginners';
+    kind === 'bundle' && canUseBundles
+      ? __('e.g. Full Stack Bootcamp', 'sikshya')
+      : __('e.g. WordPress for Beginners', 'sikshya');
   const nameFieldLabel =
-    kind === 'bundle' && canUseBundles ? `${courseBundleLabel} name` : `${courseTitle} name`;
+    kind === 'bundle' && canUseBundles
+      ? sprintf(__('%s name', 'sikshya'), courseBundleLabel)
+      : sprintf(__('%s name', 'sikshya'), courseTitle);
 
   return (
     <Modal
       open={open}
       onClose={handleClose}
-      title={`Create your ${courseLower}`}
-      description="Pick a format, add a name, and you're ready to build content."
+      title={sprintf(__('Create your %s', 'sikshya'), courseLower)}
+      description={__('Pick a format, add a name, and you\'re ready to build content.', 'sikshya')}
       size="comfortable"
       footer={
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <DraftIcon />
-            Starts as a draft — nothing is public until you publish.
+            {__('Starts as a draft — nothing is public until you publish.', 'sikshya')}
           </p>
           <div className="flex shrink-0 items-center justify-end gap-2">
             <button
@@ -155,7 +160,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
               disabled={submitting}
               className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
-              Cancel
+              {__('Cancel', 'sikshya')}
             </button>
             <ButtonPrimary
               type="submit"
@@ -163,7 +168,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
               disabled={submitting || !title.trim()}
               className="px-5 py-2.5"
             >
-              {submitting ? 'Creating…' : 'Create & continue'}
+              {submitting ? __('Creating…', 'sikshya') : __('Create & continue', 'sikshya')}
             </ButtonPrimary>
           </div>
         </div>
@@ -171,20 +176,35 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     >
       <form id="sikshya-create-course-form" onSubmit={onSubmit} className="space-y-5">
         <section>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Choose a format</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Choose a format', 'sikshya')}</h3>
           <p className={`${FIELD_HINT} mt-0.5`}>
             {canUseBundles
-              ? `Click a card to select — ${regularCourseLabel} or ${courseBundleLabel}.`
-              : `Click a card to select. With ${brandName} Pro, you can choose ${courseBundleLabel} too.`}
+              ? sprintf(
+                  __('Click a card to select — %1$s or %2$s.', 'sikshya'),
+                  regularCourseLabel,
+                  courseBundleLabel
+                )
+              : sprintf(
+                  __('Click a card to select. With %1$s Pro, you can choose %2$s too.', 'sikshya'),
+                  brandName,
+                  courseBundleLabel
+                )}
           </p>
-          <div className="mt-2.5 grid grid-cols-2 gap-2.5" role="radiogroup" aria-label={`${courseTitle} format`}>
+          <div
+            className="mt-2.5 grid grid-cols-2 gap-2.5"
+            role="radiogroup"
+            aria-label={sprintf(__('%s format', 'sikshya'), courseTitle)}
+          >
             <FormatChoiceCard
               selected={kind === 'regular'}
               onSelect={() => setKind('regular')}
               disabled={submitting}
               icon={<RegularIcon />}
               title={regularCourseLabel}
-              description={`One ${courseLower} with lessons, videos, and quizzes.`}
+              description={sprintf(
+                __('One %s with lessons, videos, and quizzes.', 'sikshya'),
+                courseLower
+              )}
             />
             {canUseBundles ? (
               <FormatChoiceCard
@@ -193,7 +213,10 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
                 disabled={submitting}
                 icon={<BundleIcon />}
                 title={courseBundleLabel}
-                description={`Package existing ${coursesLower} and sell them with one checkout.`}
+                description={sprintf(
+                  __('Package existing %s and sell them with one checkout.', 'sikshya'),
+                  coursesLower
+                )}
               />
             ) : (
               <BundleFormatCardLocked
@@ -235,8 +258,10 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
           </div>
 
           <div className="mt-4">
-            <span className={FIELD_LABEL}>Permalink</span>
-            <p className={`${FIELD_HINT} mt-0.5`}>The web address where learners open this {courseLower}.</p>
+            <span className={FIELD_LABEL}>{__('Permalink', 'sikshya')}</span>
+            <p className={`${FIELD_HINT} mt-0.5`}>
+              {sprintf(__('The web address where learners open this %s.', 'sikshya'), courseLower)}
+            </p>
             <PermalinkField
               editing={slugEditing}
               url={permalinkPreview}
@@ -280,7 +305,7 @@ function PermalinkField({
   url: string;
   slug: string;
   disabled?: boolean;
-  inputRef: RefObject<HTMLInputElement | null>;
+  inputRef: Ref<HTMLInputElement>;
   onStartEdit: () => void;
   onFinishEdit: () => void;
   onSlugChange: (slug: string) => void;
@@ -298,7 +323,7 @@ function PermalinkField({
             maxLength={180}
             value={slug}
             disabled={disabled}
-            aria-label="Customize permalink"
+            aria-label={__('Customize permalink', 'sikshya')}
             onChange={(e) => {
               const v = e.target.value
                 .toLowerCase()
@@ -324,11 +349,11 @@ function PermalinkField({
             disabled={disabled}
             className="flex shrink-0 items-center self-stretch border-l border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-brand-700 transition hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800/80 dark:text-brand-300 dark:hover:bg-brand-950/40"
           >
-            Done
+            {__('Done', 'sikshya')}
           </button>
         </div>
         <p className="mt-1.5 truncate font-mono text-[11px] text-slate-400 dark:text-slate-500" title={url}>
-          Preview: {url}
+          {sprintf(__('Preview: %s', 'sikshya'), url)}
         </p>
       </div>
     );
@@ -344,7 +369,7 @@ function PermalinkField({
         disabled={disabled}
         className="shrink-0 text-xs font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 disabled:opacity-50 dark:text-brand-300"
       >
-        Edit link
+        {__('Edit link', 'sikshya')}
       </button>
     </div>
   );
@@ -371,7 +396,11 @@ function FormatChoiceCard({
       onClick={onSelect}
       disabled={disabled}
       aria-pressed={selected}
-      aria-label={`${title}. ${description}${selected ? ' Selected.' : ''}`}
+      aria-label={
+        selected
+          ? sprintf(__('%1$s. %2$s Selected.', 'sikshya'), title, description)
+          : sprintf(__('%1$s. %2$s', 'sikshya'), title, description)
+      }
       className={`relative flex w-full cursor-pointer items-start gap-2.5 rounded-lg border px-2.5 py-2.5 text-left transition disabled:cursor-not-allowed disabled:opacity-60 ${
         selected
           ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/25'
@@ -414,7 +443,7 @@ function BundleFormatCardLocked({
     <div
       className="flex w-full items-start gap-2.5 rounded-lg border border-dashed border-slate-200 bg-slate-50/60 px-2.5 py-2.5 dark:border-slate-700 dark:bg-slate-800/25"
       role="group"
-      aria-label={`${bundleLabel} — ${brandName} Pro`}
+      aria-label={sprintf(__('%1$s — %2$s Pro', 'sikshya'), bundleLabel, brandName)}
     >
       <span
         className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-200/70 text-slate-400 dark:bg-slate-700"
@@ -430,9 +459,9 @@ function BundleFormatCardLocked({
           </span>
         </span>
         <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
-          Package existing {coursesLower} —{' '}
+          {sprintf(__('Package existing %s —', 'sikshya'), coursesLower)}{' '}
           {loading ? (
-            <span>checking plan…</span>
+            <span>{__('checking plan…', 'sikshya')}</span>
           ) : (
             <a
               href={upgradeHref}
@@ -440,7 +469,7 @@ function BundleFormatCardLocked({
               rel="noopener noreferrer"
               className="font-semibold text-accent-700 hover:underline dark:text-accent-300"
             >
-              Upgrade to Pro to select
+              {__('Upgrade to Pro to select', 'sikshya')}
             </a>
           )}
         </p>

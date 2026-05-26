@@ -284,6 +284,7 @@ while (have_posts()) :
                                     class="sikshya-btn sikshya-btn--outline sikshya-btn--sm"
                                     data-sikshya-toggle-all-chapters
                                     aria-controls="sikshya-course-curriculum-accordion"
+                                    aria-expanded="false"
                                 >
                                     <?php esc_html_e('Expand all', 'sikshya'); ?>
                                 </button>

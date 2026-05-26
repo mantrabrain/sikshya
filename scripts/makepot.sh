@@ -34,12 +34,9 @@ fi
 
 if [[ -x "${PLUGIN_DIR}/node_modules/.bin/babel" ]] && [[ -d "${PLUGIN_DIR}/client/src" ]]; then
   echo "==> Extracting JS/TS strings (babel + @wordpress/babel-plugin-makepot on client/src)"
-  (cd "${PLUGIN_DIR}" && ./node_modules/.bin/babel client/src \
-    --extensions ".ts,.tsx,.js,.jsx" \
-    --ignore "client/src/**/vite-env.d.ts" \
-    --out-file /dev/null)
+  (cd "${PLUGIN_DIR}" && node scripts/extract-admin-js-pot.mjs)
   if [[ ! -f "${JS_POT}" ]]; then
-    echo "Note: no ${DOMAIN}-js.pot (no __ / _n / _x calls in client/ yet, or babel skipped all files)." >&2
+    echo "Note: no ${DOMAIN}-js.pot (no __ / _n / _x / translate() literals in client/ yet)." >&2
   fi
 else
   echo "Warning: root node_modules/.bin/babel missing or no client/src — JS strings not merged." >&2

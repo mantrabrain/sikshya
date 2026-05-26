@@ -24,6 +24,7 @@ import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { appViewHref } from '../lib/appUrl';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 /** Mirrors `DripService::unlockAtForLesson` — keep the union in sync with the PHP side. */
 type DripRuleType = 'delay_days' | 'date';
@@ -259,10 +260,10 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
     toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.dripNotificationsSettings, { mode: dripEmailMode });
-      toast.success('Saved', 'Lesson notification mode saved.');
+      toast.success(__('Saved', 'sikshya'), 'Lesson notification mode saved.');
       void notifyQ.refetch();
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Could not save settings');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Could not save settings');
     } finally {
       setModeSaving(false);
     }
@@ -271,24 +272,24 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
   const saveRuleFromModal = async () => {
     const cid = editorCourseId;
     if (cid <= 0) {
-      toast.error('Missing course', 'Pick the course first.');
+      toast.error(__('Missing course', 'sikshya'), 'Pick the course first.');
       return;
     }
     if (editorScope === 'lesson' && editorLessonId <= 0) {
-      toast.error('Missing lesson', 'Pick the lesson this rule applies to.');
+      toast.error(__('Missing lesson', 'sikshya'), 'Pick the lesson this rule applies to.');
       return;
     }
     let value = '';
     if (editorRuleType === 'delay_days') {
       const days = parseInt(editorDelayDays, 10);
       if (!Number.isFinite(days) || days < 0) {
-        toast.error('Missing value', 'Enter how many days after enrollment the lesson should unlock.');
+        toast.error(__('Missing value', 'sikshya'), 'Enter how many days after enrollment the lesson should unlock.');
         return;
       }
       value = String(days);
     } else {
       if (!editorUnlockDate) {
-        toast.error('Missing date', 'Pick the date when learners should get access.');
+        toast.error(__('Missing date', 'sikshya'), 'Pick the date when learners should get access.');
         return;
       }
       value = editorUnlockDate;
@@ -310,7 +311,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       } else {
         await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.dripRules, payload);
       }
-      toast.success('Saved', isEdit ? 'Schedule updated.' : 'Schedule created.');
+      toast.success(__('Saved', 'sikshya'), isEdit ? __('Schedule updated.', 'sikshya') : __('Schedule created.', 'sikshya'));
       setEditorOpen(false);
       setEditing(null);
       // List is filtered by toolbar course + rule type + search — align filters so the new row appears.
@@ -320,7 +321,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       setListRuleType('');
       void rulesQ.refetch();
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Save failed');
     } finally {
       setEditorSaving(false);
     }
@@ -337,14 +338,14 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             : `Lesson #${lid}`
           : 'the whole course';
       const ok = await dialog.confirm({
-        title: 'Remove this schedule?',
+        title: __('Remove this schedule?', 'sikshya'),
         message: (
           <span>
             The unlock rule for <strong>{target}</strong> will be deleted. Learners who haven't unlocked it yet will get
             immediate access (unless another rule covers the same lesson).
           </span>
         ),
-        confirmLabel: 'Delete',
+        confirmLabel: __('Delete', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -353,10 +354,10 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       toast.clear();
       try {
         await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.dripRule(rule.id));
-        toast.success('Removed', 'Schedule removed.');
+        toast.success(__('Removed', 'sikshya'), 'Schedule removed.');
         void rulesQ.refetch();
       } catch (err) {
-        toast.error('Remove failed', err instanceof Error ? err.message : 'Could not delete the rule');
+        toast.error(__('Remove failed', 'sikshya'), err instanceof Error ? err.message : 'Could not delete the rule');
       } finally {
         setDeletingId(null);
       }
@@ -373,8 +374,8 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
     const ok = await dialog.confirm({
       title: `Delete ${n} schedule(s)?`,
       message:
-        'Selected unlock rules will be removed. Learners who have not unlocked those lessons yet may get immediate access unless another rule applies.',
-      confirmLabel: 'Delete',
+        __('Selected unlock rules will be removed. Learners who have not unlocked those lessons yet may get immediate access unless another rule applies.', 'sikshya'),
+      confirmLabel: __('Delete', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -384,7 +385,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
     toast.clear();
     try {
       await Promise.all(ids.map((id) => getSikshyaApi().delete(SIKSHYA_ENDPOINTS.pro.dripRule(id))));
-      toast.success('Removed', `Removed ${n} schedule(s).`);
+      toast.success(__('Removed', 'sikshya'), `Removed ${n} schedule(s).`);
       setSelectedRuleIds(new Set());
       setBulkActionValue('');
       void rulesQ.refetch();
@@ -404,7 +405,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             ref={headerSelectRef}
             type="checkbox"
             className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
-            aria-label="Select all rules on this page"
+            aria-label={__('Select all rules on this page', 'sikshya')}
             checked={allVisibleSelected}
             onChange={toggleSelectAllRules}
             disabled={selectableIdsOnPage.length === 0}
@@ -422,7 +423,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
-              aria-label="Select this schedule row"
+              aria-label={__('Select this schedule row', 'sikshya')}
               checked={selectedRuleIds.has(id)}
               onChange={() => toggleRuleSelected(id)}
             />
@@ -445,7 +446,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
         id: 'scope',
         header: 'Scope',
         cellClassName: 'whitespace-nowrap text-slate-600 dark:text-slate-300',
-        render: (r) => (r.lesson_id ? 'Lesson' : 'Course'),
+        render: (r) => (r.lesson_id ? __('Lesson', 'sikshya') : __('Course', 'sikshya')),
       },
       {
         id: 'lesson',
@@ -487,7 +488,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             },
             {
               key: 'delete',
-              label: busy ? 'Deleting…' : 'Delete schedule',
+              label: busy ? __('Deleting…', 'sikshya') : __('Delete schedule', 'sikshya'),
               danger: true,
               disabled: rid <= 0 || busy,
               onClick: () => {
@@ -523,17 +524,17 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Drip lessons after enrollment, or open them on a fixed date — one course at a time."
+      subtitle={__('Drip lessons after enrollment, or open them on a fixed date — one course at a time.', 'sikshya')}
     >
       <GatedFeatureWorkspace
         mode={mode}
         featureId="content_drip"
         config={config}
-        featureTitle="Scheduled access"
-        featureDescription="Release lessons on a schedule, after enrollment, or on a fixed calendar date. Learner actions respect these rules whenever this addon is enabled."
+        featureTitle={__('Scheduled access', 'sikshya')}
+        featureDescription={__('Release lessons on a schedule, after enrollment, or on a fixed calendar date. Learner actions respect these rules whenever this addon is enabled.', 'sikshya')}
         previewVariant="form"
-        addonEnableTitle="Scheduled access is not enabled"
-        addonEnableDescription="Enable the Content Drip addon to register its routes and start managing lesson unlock schedules."
+        addonEnableTitle={__('Scheduled access is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Content Drip addon to register its routes and start managing lesson unlock schedules.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -542,8 +543,8 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
         <div className="space-y-6">
           <Modal
             open={editorOpen}
-            title={editing ? 'Edit drip schedule' : 'Create drip schedule'}
-            description="Step 1: course • Step 2: scope • Step 3: unlock rule"
+            title={editing ? __('Edit drip schedule', 'sikshya') : __('Create drip schedule', 'sikshya')}
+            description={__('Step 1: course • Step 2: scope • Step 3: unlock rule', 'sikshya')}
             onClose={() => (editorSaving ? null : (setEditorOpen(false), setEditing(null)))}
             size="lg"
             footer={
@@ -562,7 +563,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                   }}
                   disabled={editorSaving}
                 >
-                  {editorStep === 1 ? 'Cancel' : 'Back'}
+                  {editorStep === 1 ? __('Cancel', 'sikshya') : __('Back', 'sikshya')}
                 </button>
                 {editorStep < 3 ? (
                   <ButtonPrimary
@@ -571,14 +572,14 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       if (editorSaving) return;
                       if (editorStep === 1) {
                         if (editorCourseId <= 0) {
-                          toast.error('Missing course', 'Pick the course first.');
+                          toast.error(__('Missing course', 'sikshya'), 'Pick the course first.');
                           return;
                         }
                         setEditorStep(2);
                         return;
                       }
                       if (editorScope === 'lesson' && editorLessonId <= 0) {
-                        toast.error('Missing lesson', 'Pick the lesson this schedule applies to.');
+                        toast.error(__('Missing lesson', 'sikshya'), 'Pick the lesson this schedule applies to.');
                         return;
                       }
                       setEditorStep(3);
@@ -589,7 +590,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                   </ButtonPrimary>
                 ) : (
                   <ButtonPrimary type="button" onClick={() => void saveRuleFromModal()} disabled={editorSaving}>
-                    {editorSaving ? 'Saving…' : editing ? 'Save changes' : 'Create schedule'}
+                    {editorSaving ? 'Saving…' : editing ? __('Save changes', 'sikshya') : __('Create schedule', 'sikshya')}
                   </ButtonPrimary>
                 )}
               </div>
@@ -648,8 +649,8 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                         }}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                       >
-                        <option value="course">Whole course</option>
-                        <option value="lesson">Specific lesson</option>
+                        <option value="course">{__('Whole course', 'sikshya')}</option>
+                        <option value="lesson">{__('Specific lesson', 'sikshya')}</option>
                       </select>
                     </label>
                     <FieldHint />
@@ -693,8 +694,8 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                         onChange={(e) => setEditorRuleType(e.target.value as DripRuleType)}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                       >
-                        <option value="delay_days">After enrollment (days)</option>
-                        <option value="date">On a fixed date</option>
+                        <option value="delay_days">{__('After enrollment (days)', 'sikshya')}</option>
+                        <option value="date">{__('On a fixed date', 'sikshya')}</option>
                       </select>
                     </label>
                     <FieldHint />
@@ -717,7 +718,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                     </div>
                   ) : (
                     <div className="flex min-h-0 flex-col sm:col-span-2">
-                      <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">Unlock date</label>
+                      <label className="block shrink-0 text-sm text-slate-700 dark:text-slate-300">{__('Unlock date', 'sikshya')}</label>
                       <div className="mt-1 shrink-0">
                         <DateTimePickerField kind="date" value={editorUnlockDate} onChange={setEditorUnlockDate} />
                       </div>
@@ -732,7 +733,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
           <ListPanel overflow="visible">
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-4 py-4 dark:border-slate-800">
               <div>
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Schedules</h2>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Schedules', 'sikshya')}</h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Same layout as Course listing: search, sort, bulk actions, then the table.
                 </p>
@@ -750,7 +751,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             <ListSearchToolbar
               searchValue={search}
               onSearchChange={setSearch}
-              searchPlaceholder="Search by course or lesson…"
+              searchPlaceholder={__('Search by course or lesson…', 'sikshya')}
               sortField={listOrderBy}
               sortFieldOptions={[
                 { value: 'created_at', label: 'Created' },
@@ -771,9 +772,9 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                     onChange={(e) => setListRuleType(e.target.value as DripRuleType | '')}
                     className={dripToolbarSelectClass}
                   >
-                    <option value="">All rule types</option>
-                    <option value="delay_days">After enrollment</option>
-                    <option value="date">Fixed date</option>
+                    <option value="">{__('All rule types', 'sikshya')}</option>
+                    <option value="delay_days">{__('After enrollment', 'sikshya')}</option>
+                    <option value="date">{__('Fixed date', 'sikshya')}</option>
                   </select>
                   <CourseFilterSelect
                     enabled={enabled}
@@ -808,13 +809,13 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
             </div>
             {bulkError ? (
               <div className="border-b border-red-100 px-4 py-3 dark:border-red-900/40">
-                <ApiErrorPanel error={bulkError} title="Bulk action failed" onRetry={() => setBulkError(null)} />
+                <ApiErrorPanel error={bulkError} title={__('Bulk action failed', 'sikshya')} onRetry={() => setBulkError(null)} />
               </div>
             ) : null}
 
             {rulesQ.error ? (
               <div className="p-4">
-                <ApiErrorPanel error={rulesQ.error} title="Could not load schedules" onRetry={() => rulesQ.refetch()} />
+                <ApiErrorPanel error={rulesQ.error} title={__('Could not load schedules', 'sikshya')} onRetry={() => rulesQ.refetch()} />
               </div>
             ) : rulesQ.loading ? (
               <DataTableSkeleton headers={['', 'Course', 'Scope', 'Lesson', 'Unlock', '']} rows={8} />
@@ -836,8 +837,8 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                   wrapInCard={false}
                   emptyContent={
                     <ListEmptyState
-                      title="No schedule rules"
-                      description="Create your first schedule rule to drip content to learners."
+                      title={__('No schedule rules', 'sikshya')}
+                      description={__('Create your first schedule rule to drip content to learners.', 'sikshya')}
                       action={
                         <ButtonPrimary
                           type="button"
@@ -869,14 +870,14 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
               author's "release notes" field. Mirrors the equivalent block on
               PrerequisitesPage so the two screens read as a pair. */}
           <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
-            <p className="font-semibold">What this page does</p>
+            <p className="font-semibold">{__('What this page does', 'sikshya')}</p>
             <p className="mt-1 leading-relaxed">
-              These rules <strong>actually block access</strong> to a lesson until the unlock condition is met. A learner
+              These rules <strong>{__('actually block access', 'sikshya')}</strong> to a lesson until the unlock condition is met. A learner
               who tries to open a locked lesson will see "This lesson will unlock on …" instead of the content. Pair this
-              with <strong>Prerequisites</strong> when you want learners to also finish prior lessons before unlocking.
+              with <strong>{__('Prerequisites', 'sikshya')}</strong> when you want learners to also finish prior lessons before unlocking.
             </p>
             <p className="mt-2 leading-relaxed">
-              <strong>Quizzes and assignments</strong> use the same unlock time as the <strong>nearest previous lesson</strong>{' '}
+              <strong>{__('Quizzes and assignments', 'sikshya')}</strong> use the same unlock time as the <strong>{__('nearest previous lesson', 'sikshya')}</strong>{' '}
               in your course outline (or the course-wide rule if nothing comes before them). Schedule per-lesson overrides to
               control when later quizzes open in sequence.
             </p>
@@ -892,11 +893,11 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
               mode={notifyMode}
               featureId="drip_notifications"
               config={config}
-              featureTitle="Drip notifications"
-              featureDescription="When a lesson unlocks for a learner, automatically email them so they come back and start it."
+              featureTitle={__('Drip notifications', 'sikshya')}
+              featureDescription={__('When a lesson unlocks for a learner, automatically email them so they come back and start it.', 'sikshya')}
               previewVariant="form"
-              addonEnableTitle="Drip notifications is not enabled"
-              addonEnableDescription="Enable Drip notifications. When the drip cron unlocks content, learners receive your transactional templates (From/SMTP on the Email page)."
+              addonEnableTitle={__('Drip notifications is not enabled', 'sikshya')}
+              addonEnableDescription={__('Enable Drip notifications. When the drip cron unlocks content, learners receive your transactional templates (From/SMTP on the Email page).', 'sikshya')}
               canEnable={Boolean(notifyAddon.licenseOk)}
               enableBusy={notifyAddon.loading}
               onEnable={() => notifyAddon.enable()}
@@ -925,10 +926,10 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
 
                 {notifyQ.error ? (
                   <div className="mt-3">
-                    <ApiErrorPanel error={notifyQ.error} title="Could not load status" onRetry={() => notifyQ.refetch()} />
+                    <ApiErrorPanel error={notifyQ.error} title={__('Could not load status', 'sikshya')} onRetry={() => notifyQ.refetch()} />
                   </div>
                 ) : notifyQ.loading ? (
-                  <p className="mt-3 text-sm text-slate-500">Loading…</p>
+                  <p className="mt-3 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
                 ) : (
                   <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
@@ -944,7 +945,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                         Schedule addon
                       </dt>
                       <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
-                        {notifyQ.data?.drip_addon_enabled ? 'Enabled' : 'Disabled'}
+                        {notifyQ.data?.drip_addon_enabled ? __('Enabled', 'sikshya') : __('Disabled', 'sikshya')}
                       </dd>
                     </div>
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
@@ -999,12 +1000,12 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                             onChange={(e) => setDripEmailMode(e.target.value === 'digest' ? 'digest' : 'per_lesson')}
                             disabled={modeSaving}
                           >
-                            <option value="per_lesson">One email per unlocked lesson (classic)</option>
-                            <option value="digest">Digest: one email per cron pass (recommended)</option>
+                            <option value="per_lesson">{__('One email per unlocked lesson (classic)', 'sikshya')}</option>
+                            <option value="digest">{__('Digest: one email per cron pass (recommended)', 'sikshya')}</option>
                           </select>
                           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                            Digest uses the <strong className="font-medium">Drip: lessons unlocked (digest)</strong> template.
-                            Per-lesson uses <strong className="font-medium">Drip: lesson unlocked</strong>.
+                            Digest uses the <strong className="font-medium">{__('Drip: lessons unlocked (digest)', 'sikshya')}</strong> template.
+                            Per-lesson uses <strong className="font-medium">{__('Drip: lesson unlocked', 'sikshya')}</strong>.
                           </p>
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -1012,7 +1013,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                             Refresh status
                           </ButtonSecondary>
                           <ButtonPrimary type="button" disabled={modeSaving} onClick={() => void saveDripEmailMode()}>
-                            {modeSaving ? 'Saving…' : 'Save mode'}
+                            {modeSaving ? __('Saving…', 'sikshya') : __('Save mode', 'sikshya')}
                           </ButtonPrimary>
                         </div>
                       </div>

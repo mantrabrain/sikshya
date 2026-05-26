@@ -1128,7 +1128,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('curriculum');
         if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $out = $svc->createContent($this->jsonBody($request));
@@ -1147,7 +1147,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('curriculum');
         if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);
@@ -1167,7 +1167,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('curriculum');
         if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);
@@ -1188,7 +1188,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('curriculum');
         if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);
@@ -1204,7 +1204,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('curriculum');
         if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);
@@ -1220,7 +1220,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('curriculum');
         if (!$svc instanceof CurriculumService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);
@@ -1250,7 +1250,7 @@ class AdminRestRoutes extends AbstractAdminRestController
                 continue;
             }
             if (!wp_delete_post($id, true)) {
-                $errors[] = "Failed to delete chapter ID: {$id}";
+                $errors[] = sprintf(__('Failed to delete chapter ID: %d', 'sikshya'), $id);
             } else {
                 $deleted++;
             }
@@ -1261,24 +1261,24 @@ class AdminRestRoutes extends AbstractAdminRestController
                 continue;
             }
             if (!wp_delete_post($id, true)) {
-                $errors[] = "Failed to delete lesson ID: {$id}";
+                $errors[] = sprintf(__('Failed to delete lesson ID: %d', 'sikshya'), $id);
             } else {
                 $deleted++;
             }
         }
 
         if (!empty($errors)) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Some items could not be deleted', 'errors' => $errors, 'deleted_count' => $deleted], 400);
+            return new WP_REST_Response(['success' => false, 'message' => __('Some items could not be deleted', 'sikshya'), 'errors' => $errors, 'deleted_count' => $deleted], 400);
         }
 
-        return new WP_REST_Response(['success' => true, 'message' => "Successfully deleted {$deleted} items", 'deleted_count' => $deleted], 200);
+        return new WP_REST_Response(['success' => true, 'message' => sprintf(__('Successfully deleted %d items', 'sikshya'), $deleted), 'deleted_count' => $deleted], 200);
     }
 
     public function getSettingsSchema(WP_REST_Request $request): WP_REST_Response
     {
         $svc = $this->plugin->getService('settings');
         if (!$svc instanceof SettingsManager) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $tabs = $svc->getAllSettings();
@@ -1303,7 +1303,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('settings');
         if (!$svc instanceof SettingsManager) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $tab = sanitize_key((string) $request->get_param('tab'));
@@ -1319,7 +1319,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('settings');
         if (!$svc instanceof SettingsManager) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);
@@ -1368,7 +1368,7 @@ class AdminRestRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('settings');
         if (!$svc instanceof SettingsManager) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $p = $this->jsonBody($request);

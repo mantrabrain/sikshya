@@ -21,7 +21,7 @@ class PaymentService
             return new WP_REST_Response(
                 [
                     'payments' => [],
-                    'message' => 'Payments table not found.',
+                    'message' => __('Payments table not found.', 'sikshya'),
                 ],
                 200
             );

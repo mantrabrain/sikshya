@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../../api';
 import { FieldHint } from './FieldHint';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { __, sprintf } from '../../lib/i18n';
 
 type CourseRow = { id: number; title: string; status?: string };
 
@@ -10,7 +11,7 @@ function normalizeCourses(raw: { courses?: Array<{ id: number; title: string; st
   const list = Array.isArray(raw?.courses)
     ? raw!.courses!.map((x) => ({
         id: x.id,
-        title: (x.title && String(x.title).trim()) || `Course #${x.id}`,
+        title: (x.title && String(x.title).trim()) || sprintf(__('Course #%d', 'sikshya'), x.id),
         status: x.status,
       }))
     : [];
@@ -45,12 +46,12 @@ export function CourseFilterSelect(props: {
     value,
     onChange,
     disabled,
-    allLabel = 'All courses',
+    allLabel = __('All courses', 'sikshya'),
     allowClear = true,
     fieldLayout = 'toolbar',
     dropdownZIndex = 10000,
     hint,
-    label = 'Course filter',
+    label = __('Course filter', 'sikshya'),
     labelVisibility = 'visible',
     className,
   } = props;
@@ -97,18 +98,22 @@ export function CourseFilterSelect(props: {
         );
         if (cancelled || !Array.isArray(data) || !data[0]) {
           if (!cancelled) {
-            setLabelById((prev) => (prev[value] ? prev : { ...prev, [value]: `Course #${value}` }));
+            setLabelById((prev) =>
+              prev[value] ? prev : { ...prev, [value]: sprintf(__('Course #%d', 'sikshya'), value) }
+            );
           }
           return;
         }
         const t = data[0].title?.rendered ? String(data[0].title.rendered).replace(/<[^>]*>/g, '').trim() : '';
         if (!cancelled) {
-          const title = t || `Course #${value}`;
+          const title = t || sprintf(__('Course #%d', 'sikshya'), value);
           setLabelById((prev) => ({ ...prev, [value]: title }));
         }
       } catch {
         if (!cancelled) {
-          setLabelById((prev) => (prev[value] ? prev : { ...prev, [value]: `Course #${value}` }));
+          setLabelById((prev) =>
+            prev[value] ? prev : { ...prev, [value]: sprintf(__('Course #%d', 'sikshya'), value) }
+          );
         }
       }
     })();
@@ -200,7 +205,7 @@ export function CourseFilterSelect(props: {
     if (!enabled) setOpen(false);
   }, [enabled]);
 
-  const displayLabel = value <= 0 ? allLabel : labelById[value] || `Course #${value}`;
+  const displayLabel = value <= 0 ? allLabel : labelById[value] || sprintf(__('Course #%d', 'sikshya'), value);
   const labelSrOnly = labelVisibility === 'sr-only';
   const hintForA11y = hint && labelSrOnly ? `${hint}` : undefined;
 
@@ -231,13 +236,13 @@ export function CourseFilterSelect(props: {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search courses…"
+            placeholder={__('Search courses…', 'sikshya')}
             aria-controls={listboxId}
             autoComplete="off"
             className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-brand-400 focus:border-brand-400 focus:ring-1 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
           />
         </div>
-        <ul id={listboxId} role="listbox" aria-label="Courses" className="max-h-64 overflow-y-auto py-1">
+        <ul id={listboxId} role="listbox" aria-label={__('Courses', 'sikshya')} className="max-h-64 overflow-y-auto py-1">
           {allowClear ? (
             <li role="presentation">
               <button
@@ -255,10 +260,10 @@ export function CourseFilterSelect(props: {
             </li>
           ) : null}
           {listLoading ? (
-            <li className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</li>
+            <li className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('Searching…', 'sikshya')}</li>
           ) : results.length === 0 ? (
             <li className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">
-              {query.trim() ? 'No courses match your search.' : 'No courses found.'}
+              {query.trim() ? __('No courses match your search.', 'sikshya') : __('No courses found.', 'sikshya')}
             </li>
           ) : (
             results.map((r) => (

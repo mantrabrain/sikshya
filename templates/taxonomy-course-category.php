@@ -71,7 +71,7 @@ $breadcrumb_items = [
 
                 <?php if (term_description()) : ?>
                     <div class="sikshya-archive-courses__desc sikshya-taxonomy-courses__description">
-                        <?php echo term_description(); ?>
+                        <?php echo wp_kses_post(term_description()); ?>
                     </div>
                 <?php endif; ?>
 

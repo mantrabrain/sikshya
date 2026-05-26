@@ -2,6 +2,7 @@ import type { Dispatch, ReactNode, SetStateAction } from 'react';
 import type { SettingsField } from '../types/settingsSchema';
 import { DynamicFieldsBuilder } from '../components/settings/DynamicFieldsBuilder';
 import { PERMALINK_SETTINGS_PREVIEW_KEYS, previewUrlForPermalinkField } from '../lib/permalinks';
+import { __ } from '../lib/i18n';
 
 export function fieldToStringValue(v: unknown): string {
   if (v === null || v === undefined) return '';
@@ -16,7 +17,7 @@ function renderDescription(desc: string): ReactNode {
   const raw = String(desc || '').trim();
   if (!raw) return null;
 
-  // Allow only <a href="...">text</a> from server-provided schema descriptions.
+  // Allow only <a href="...">{__('text', 'sikshya')}</a> from server-provided schema descriptions.
   // Everything else is rendered as plain text (with URL linkify).
   if (raw.includes('<a') && typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
     try {
@@ -111,7 +112,7 @@ function LockedFieldOverlay(props: { f: SettingsField; children: ReactNode; clas
         <span className="text-[11px] leading-snug text-violet-700/90 dark:text-violet-200/90">
           {addonLabel ? (
             <>
-              <span className="font-semibold">Addon:</span> {addonLabel} <span className="mx-1 opacity-70">•</span>
+              <span className="font-semibold">{__('Addon:', 'sikshya')}</span> {addonLabel} <span className="mx-1 opacity-70">•</span>
             </>
           ) : null}
           {reason}
@@ -170,7 +171,7 @@ export function renderSettingsField(
       <div>
         <label
           className={`flex items-start gap-3 rounded-xl border border-slate-200/70 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900 ${
-            readOnly ? 'cursor-not-allowed' : 'cursor-pointer'
+            readOnly ? __('cursor-not-allowed', 'sikshya') : __('cursor-pointer', 'sikshya')
           }`}
         >
           <input

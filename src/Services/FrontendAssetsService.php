@@ -7,6 +7,7 @@ use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Core\Plugin;
 use Sikshya\Frontend\Site\PublicPageUrls;
+use Sikshya\Services\PermalinkService;
 use Sikshya\Shortcodes\AuthShortcodes;
 
 /**
@@ -133,9 +134,17 @@ class FrontendAssetsService
     public function addCustomCss(): void
     {
         $custom_css = Settings::getRaw('sikshya_custom_css', '');
-        if (!empty($custom_css)) {
-            echo '<style type="text/css">' . esc_html($custom_css) . '</style>';
+        if ($custom_css === '') {
+            return;
         }
+
+        if (wp_style_is('sikshya-frontend', 'enqueued')) {
+            wp_add_inline_style('sikshya-frontend', $custom_css);
+            return;
+        }
+
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Site-admin CSS from settings.
+        echo '<style id="sikshya-custom-css">' . $custom_css . '</style>';
     }
 
     /**
@@ -144,9 +153,18 @@ class FrontendAssetsService
     public function addCustomJs(): void
     {
         $custom_js = Settings::getRaw('sikshya_custom_js', '');
-        if (!empty($custom_js)) {
-            echo '<script type="text/javascript">' . esc_html($custom_js) . '</script>';
+        if ($custom_js === '') {
+            return;
         }
+
+        if (wp_script_is('sikshya-frontend', 'registered')) {
+            wp_enqueue_script('sikshya-frontend');
+            wp_add_inline_script('sikshya-frontend', $custom_js);
+            return;
+        }
+
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Site-admin JS from settings.
+        echo '<script id="sikshya-custom-js">' . $custom_js . '</script>';
     }
 
     private function shouldEnqueueCourseListingStyles(): bool
@@ -160,6 +178,10 @@ class FrontendAssetsService
         }
 
         if (is_page('sikshya-courses')) {
+            return true;
+        }
+
+        if ((string) get_query_var(PermalinkService::INSTRUCTOR_VAR) !== '') {
             return true;
         }
 

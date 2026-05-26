@@ -3,6 +3,8 @@
  * Blocks use a freeform frame: x, y, w, h, z in percent of the page (0–100).
  */
 
+import { __ } from '../../lib/i18n';
+
 export const CERT_LAYOUT_VERSION = 2;
 
 export type CertBlockType = 'heading' | 'text' | 'merge_field' | 'spacer' | 'divider' | 'image' | 'qr';
@@ -52,36 +54,100 @@ export const MERGE_FIELD_KEYS: MergeFieldKey[] = [
   'site_name',
 ];
 
-const MERGE: Record<MergeFieldKey, { token: string; example: string }> = {
-  student_name: { token: '{{student_name}}', example: 'Alex Student' },
-  course_name: { token: '{{course_name}}', example: 'Intro to WordPress' },
-  instructor_name: { token: '{{instructor_name}}', example: 'Taylor Instructor' },
-  completion_date: { token: '{{completion_date}}', example: 'April 9, 2026' },
-  completion_time: { token: '{{completion_time}}', example: '10:42 AM' },
-  duration: { token: '{{duration}}', example: '3h 20m' },
-  points: { token: '{{points}}', example: '92' },
-  grade: { token: '{{grade}}', example: 'A' },
-  certificate_number: { token: '{{certificate_number}}', example: 'SK-12-55-20260423' },
-  verification_code: { token: '{{verification_code}}', example: 'ab12cd34ef56gh78' },
-  site_name: { token: '{{site_name}}', example: 'My LMS' },
+const MERGE_TOKENS: Record<MergeFieldKey, string> = {
+  student_name: '{{student_name}}',
+  course_name: '{{course_name}}',
+  instructor_name: '{{instructor_name}}',
+  completion_date: '{{completion_date}}',
+  completion_time: '{{completion_time}}',
+  duration: '{{duration}}',
+  points: '{{points}}',
+  grade: '{{grade}}',
+  certificate_number: '{{certificate_number}}',
+  verification_code: '{{verification_code}}',
+  site_name: '{{site_name}}',
 };
 
-export const PALETTE_ITEMS: PaletteItem[] = [
-  { type: 'text', label: 'Text', description: 'Paragraph or custom copy' },
-  { type: 'merge_field', label: 'Course', description: 'Dynamic: course title', preset: { field: 'course_name' } },
-  { type: 'merge_field', label: 'Student Name', description: 'Dynamic: learner name', preset: { field: 'student_name' } },
-  { type: 'merge_field', label: 'Instructor', description: 'Dynamic: instructor name', preset: { field: 'instructor_name' } },
-  { type: 'image', label: 'Signature', description: 'Upload a signature image', preset: { width: 180, align: 'center' } },
-  { type: 'merge_field', label: 'Verification ID', description: 'Dynamic: verification code', preset: { field: 'verification_code', fontSize: 12, align: 'center' } },
-  { type: 'qr', label: 'QR', description: 'Dynamic: QR to verification link', preset: { size: 140 } },
-  { type: 'merge_field', label: 'Time', description: 'Dynamic: completion time', preset: { field: 'completion_time', fontSize: 12, align: 'center' } },
-  { type: 'merge_field', label: 'Duration', description: 'Dynamic: learning duration', preset: { field: 'duration', fontSize: 12, align: 'center' } },
-  { type: 'merge_field', label: 'Point', description: 'Dynamic: points earned', preset: { field: 'points', fontSize: 12, align: 'center' } },
-  { type: 'merge_field', label: 'Grade', description: 'Dynamic: grade letter/value', preset: { field: 'grade', fontSize: 12, align: 'center' } },
-  { type: 'heading', label: 'Heading', description: 'Large title text' },
-  { type: 'divider', label: 'Divider', description: 'Horizontal line' },
-  { type: 'spacer', label: 'Spacer', description: 'Vertical space' },
-];
+function mergeFieldExample(field: MergeFieldKey): string {
+  const examples: Record<MergeFieldKey, string> = {
+    student_name: __('Alex Student', 'sikshya'),
+    course_name: __('Intro to WordPress', 'sikshya'),
+    instructor_name: __('Taylor Instructor', 'sikshya'),
+    completion_date: __('April 9, 2026', 'sikshya'),
+    completion_time: __('10:42 AM', 'sikshya'),
+    duration: __('3h 20m', 'sikshya'),
+    points: __('92', 'sikshya'),
+    grade: __('A', 'sikshya'),
+    certificate_number: __('SK-12-55-20260423', 'sikshya'),
+    verification_code: __('ab12cd34ef56gh78', 'sikshya'),
+    site_name: __('My LMS', 'sikshya'),
+  };
+  return examples[field];
+}
+
+export function getPaletteItems(): PaletteItem[] {
+  return [
+    { type: 'text', label: __('Text', 'sikshya'), description: __('Paragraph or custom copy', 'sikshya') },
+    {
+      type: 'merge_field',
+      label: __('Course', 'sikshya'),
+      description: __('Dynamic: course title', 'sikshya'),
+      preset: { field: 'course_name' },
+    },
+    {
+      type: 'merge_field',
+      label: __('Student Name', 'sikshya'),
+      description: __('Dynamic: learner name', 'sikshya'),
+      preset: { field: 'student_name' },
+    },
+    {
+      type: 'merge_field',
+      label: __('Instructor', 'sikshya'),
+      description: __('Dynamic: instructor name', 'sikshya'),
+      preset: { field: 'instructor_name' },
+    },
+    {
+      type: 'image',
+      label: __('Signature', 'sikshya'),
+      description: __('Upload a signature image', 'sikshya'),
+      preset: { width: 180, align: 'center' },
+    },
+    {
+      type: 'merge_field',
+      label: __('Verification ID', 'sikshya'),
+      description: __('Dynamic: verification code', 'sikshya'),
+      preset: { field: 'verification_code', fontSize: 12, align: 'center' },
+    },
+    { type: 'qr', label: __('QR', 'sikshya'), description: __('Dynamic: QR to verification link', 'sikshya'), preset: { size: 140 } },
+    {
+      type: 'merge_field',
+      label: __('Time', 'sikshya'),
+      description: __('Dynamic: completion time', 'sikshya'),
+      preset: { field: 'completion_time', fontSize: 12, align: 'center' },
+    },
+    {
+      type: 'merge_field',
+      label: __('Duration', 'sikshya'),
+      description: __('Dynamic: learning duration', 'sikshya'),
+      preset: { field: 'duration', fontSize: 12, align: 'center' },
+    },
+    {
+      type: 'merge_field',
+      label: __('Point', 'sikshya'),
+      description: __('Dynamic: points earned', 'sikshya'),
+      preset: { field: 'points', fontSize: 12, align: 'center' },
+    },
+    {
+      type: 'merge_field',
+      label: __('Grade', 'sikshya'),
+      description: __('Dynamic: grade letter/value', 'sikshya'),
+      preset: { field: 'grade', fontSize: 12, align: 'center' },
+    },
+    { type: 'heading', label: __('Heading', 'sikshya'), description: __('Large title text', 'sikshya') },
+    { type: 'divider', label: __('Divider', 'sikshya'), description: __('Horizontal line', 'sikshya') },
+    { type: 'spacer', label: __('Spacer', 'sikshya'), description: __('Vertical space', 'sikshya') },
+  ];
+}
 
 export type BlockFrame = { x: number; y: number; w: number; h: number; z: number };
 
@@ -167,10 +233,15 @@ export function getCertificatePagePhysicalSize(
         width: '210mm',
         height: '297mm',
         aspectRatio: '210 / 297',
-        label: 'A4 portrait (210×297mm)',
+        label: __('A4 portrait (210×297mm)', 'sikshya'),
       };
     }
-    return { width: '297mm', height: '210mm', aspectRatio: '297 / 210', label: 'A4 landscape (297×210mm)' };
+    return {
+      width: '297mm',
+      height: '210mm',
+      aspectRatio: '297 / 210',
+      label: __('A4 landscape (297×210mm)', 'sikshya'),
+    };
   }
   if (pageSize === 'a5') {
     if (orientation === 'portrait') {
@@ -178,20 +249,30 @@ export function getCertificatePagePhysicalSize(
         width: '148mm',
         height: '210mm',
         aspectRatio: '148 / 210',
-        label: 'A5 portrait (148×210mm)',
+        label: __('A5 portrait (148×210mm)', 'sikshya'),
       };
     }
-    return { width: '210mm', height: '148mm', aspectRatio: '210 / 148', label: 'A5 landscape (210×148mm)' };
+    return {
+      width: '210mm',
+      height: '148mm',
+      aspectRatio: '210 / 148',
+      label: __('A5 landscape (210×148mm)', 'sikshya'),
+    };
   }
   if (orientation === 'portrait') {
     return {
       width: '8.5in',
       height: '11in',
       aspectRatio: '8.5 / 11',
-      label: 'US Letter portrait (8.5×11in)',
+      label: __('US Letter portrait (8.5×11in)', 'sikshya'),
     };
   }
-  return { width: '11in', height: '8.5in', aspectRatio: '11 / 8.5', label: 'US Letter landscape (11×8.5in)' };
+  return {
+    width: '11in',
+    height: '8.5in',
+    aspectRatio: '11 / 8.5',
+    label: __('US Letter landscape (11×8.5in)', 'sikshya'),
+  };
 }
 
 /**
@@ -266,115 +347,121 @@ export const CERT_PAGE_DECO_ORDER = [
 export type CertPageDecoId = (typeof CERT_PAGE_DECO_ORDER)[number] | 'none';
 
 /** Short labels for the Theme grid (avoid raw ids in the UI). */
-export const CERT_PAGE_DECO_LABELS: Record<string, string> = {
-  slate: 'Slate',
-  cream: 'Cream',
-  paperFolio: 'Ledger',
-  corporateLetter: 'Corporate',
-  formalBlueBand: 'Navy band',
-  diplomaGold: 'Diploma gold',
-  educationMint: 'Education',
-  minimalFrame: 'Soft frame',
-  dawn: 'Dawn',
-  sky: 'Sky',
-  rose: 'Rose',
-  forest: 'Forest',
-  sand: 'Sand',
-  gold: 'Gold',
-  mint: 'Mint',
-  coral: 'Coral',
-  sea: 'Sea',
-  plum: 'Plum',
-  aurora: 'Aurora',
-  night: 'Night',
-  dusk: 'Dusk',
-};
+export function getCertPageDecoLabels(): Record<string, string> {
+  return {
+    slate: __('Slate', 'sikshya'),
+    cream: __('Cream', 'sikshya'),
+    paperFolio: __('Ledger', 'sikshya'),
+    corporateLetter: __('Corporate', 'sikshya'),
+    formalBlueBand: __('Navy band', 'sikshya'),
+    diplomaGold: __('Diploma gold', 'sikshya'),
+    educationMint: __('Education', 'sikshya'),
+    minimalFrame: __('Soft frame', 'sikshya'),
+    dawn: __('Dawn', 'sikshya'),
+    sky: __('Sky', 'sikshya'),
+    rose: __('Rose', 'sikshya'),
+    forest: __('Forest', 'sikshya'),
+    sand: __('Sand', 'sikshya'),
+    gold: __('Gold', 'sikshya'),
+    mint: __('Mint', 'sikshya'),
+    coral: __('Coral', 'sikshya'),
+    sea: __('Sea', 'sikshya'),
+    plum: __('Plum', 'sikshya'),
+    aurora: __('Aurora', 'sikshya'),
+    night: __('Night', 'sikshya'),
+    dusk: __('Dusk', 'sikshya'),
+  };
+}
 
 /** First row in Theme → Background before “View all” (most useful for certificates). */
 export const CERT_PAGE_DECO_SHOW_FIRST = 10;
 
-/**
- * One-tap combinations of color + pattern + art (or plain) for real certificate workflows.
- * `clearFeaturedImage`: when true, clears the full-bleed photo so art/gradient is visible.
- */
-export const CERTIFICATE_THEME_QUICK_PRESETS: readonly {
+export type CertificateThemeQuickPreset = {
   id: string;
   label: string;
   caption: string;
   finish: CertificatePageFinish;
   clearFeaturedImage: boolean;
-}[] = [
-  {
-    id: 'classic-print',
-    label: 'Classic print',
-    caption: 'White — signatures & seals stay sharp',
-    finish: { pageColor: '#ffffff', pagePattern: 'none', pageDeco: 'none' },
-    clearFeaturedImage: false,
-  },
-  {
-    id: 'soft-paper',
-    label: 'Soft paper',
-    caption: 'Ivory + light dots — works with a banner photo',
-    finish: { pageColor: '#fffdf7', pagePattern: 'dots', pageDeco: 'none' },
-    clearFeaturedImage: false,
-  },
-  {
-    id: 'lined-letter',
-    label: 'Lined letter',
-    caption: 'Cool gray lines — corporate certificates',
-    finish: { pageColor: '#f8fafc', pagePattern: 'lines', pageDeco: 'none' },
-    clearFeaturedImage: false,
-  },
-  {
-    id: 'photo-hero',
-    label: 'Photo hero',
-    caption: 'Plain fill so your background image is the star',
-    finish: { pageColor: '#f1f5f9', pagePattern: 'none', pageDeco: 'none' },
-    clearFeaturedImage: false,
-  },
-  {
-    id: 'formal-ledger',
-    label: 'Formal ledger',
-    caption: 'Warm ledger tone, subtle texture',
-    finish: { pageColor: '#fffef8', pagePattern: 'grid', pageDeco: 'paperFolio' },
-    clearFeaturedImage: true,
-  },
-  {
-    id: 'corporate-pack',
-    label: 'Corporate pack',
-    caption: 'Letterhead-style wash (no photo)',
-    finish: { pageColor: '#f1f5f9', pagePattern: 'none', pageDeco: 'corporateLetter' },
-    clearFeaturedImage: true,
-  },
-  {
-    id: 'navy-letterhead',
-    label: 'Navy letterhead',
-    caption: 'Top band — title + merge fields read well',
-    finish: { pageColor: '#ffffff', pagePattern: 'none', pageDeco: 'formalBlueBand' },
-    clearFeaturedImage: true,
-  },
-  {
-    id: 'achievement',
-    label: 'Achievement',
-    caption: 'Gold cream — diplomas & awards',
-    finish: { pageColor: '#fffbeb', pagePattern: 'none', pageDeco: 'diplomaGold' },
-    clearFeaturedImage: true,
-  },
-  {
-    id: 'education',
-    label: 'Education',
-    caption: 'Fresh mint wash — courses & training',
-    finish: { pageColor: '#ffffff', pagePattern: 'dots', pageDeco: 'educationMint' },
-    clearFeaturedImage: true,
-  },
-  {
-    id: 'minimal-pro',
-    label: 'Minimal',
-    caption: 'Neutral frame — modern certificates',
-    finish: { pageColor: '#ffffff', pagePattern: 'none', pageDeco: 'minimalFrame' },
-    clearFeaturedImage: true,
-  },
-] as const;
+};
+
+/**
+ * One-tap combinations of color + pattern + art (or plain) for real certificate workflows.
+ * `clearFeaturedImage`: when true, clears the full-bleed photo so art/gradient is visible.
+ */
+export function getCertificateThemeQuickPresets(): readonly CertificateThemeQuickPreset[] {
+  return [
+    {
+      id: 'classic-print',
+      label: __('Classic print', 'sikshya'),
+      caption: __('White — signatures & seals stay sharp', 'sikshya'),
+      finish: { pageColor: '#ffffff', pagePattern: 'none', pageDeco: 'none' },
+      clearFeaturedImage: false,
+    },
+    {
+      id: 'soft-paper',
+      label: __('Soft paper', 'sikshya'),
+      caption: __('Ivory + light dots — works with a banner photo', 'sikshya'),
+      finish: { pageColor: '#fffdf7', pagePattern: 'dots', pageDeco: 'none' },
+      clearFeaturedImage: false,
+    },
+    {
+      id: 'lined-letter',
+      label: __('Lined letter', 'sikshya'),
+      caption: __('Cool gray lines — corporate certificates', 'sikshya'),
+      finish: { pageColor: '#f8fafc', pagePattern: 'lines', pageDeco: 'none' },
+      clearFeaturedImage: false,
+    },
+    {
+      id: 'photo-hero',
+      label: __('Photo hero', 'sikshya'),
+      caption: __('Plain fill so your background image is the star', 'sikshya'),
+      finish: { pageColor: '#f1f5f9', pagePattern: 'none', pageDeco: 'none' },
+      clearFeaturedImage: false,
+    },
+    {
+      id: 'formal-ledger',
+      label: __('Formal ledger', 'sikshya'),
+      caption: __('Warm ledger tone, subtle texture', 'sikshya'),
+      finish: { pageColor: '#fffef8', pagePattern: 'grid', pageDeco: 'paperFolio' },
+      clearFeaturedImage: true,
+    },
+    {
+      id: 'corporate-pack',
+      label: __('Corporate pack', 'sikshya'),
+      caption: __('Letterhead-style wash (no photo)', 'sikshya'),
+      finish: { pageColor: '#f1f5f9', pagePattern: 'none', pageDeco: 'corporateLetter' },
+      clearFeaturedImage: true,
+    },
+    {
+      id: 'navy-letterhead',
+      label: __('Navy letterhead', 'sikshya'),
+      caption: __('Top band — title + merge fields read well', 'sikshya'),
+      finish: { pageColor: '#ffffff', pagePattern: 'none', pageDeco: 'formalBlueBand' },
+      clearFeaturedImage: true,
+    },
+    {
+      id: 'achievement',
+      label: __('Achievement', 'sikshya'),
+      caption: __('Gold cream — diplomas & awards', 'sikshya'),
+      finish: { pageColor: '#fffbeb', pagePattern: 'none', pageDeco: 'diplomaGold' },
+      clearFeaturedImage: true,
+    },
+    {
+      id: 'education',
+      label: __('Education', 'sikshya'),
+      caption: __('Fresh mint wash — courses & training', 'sikshya'),
+      finish: { pageColor: '#ffffff', pagePattern: 'dots', pageDeco: 'educationMint' },
+      clearFeaturedImage: true,
+    },
+    {
+      id: 'minimal-pro',
+      label: __('Minimal', 'sikshya'),
+      caption: __('Neutral frame — modern certificates', 'sikshya'),
+      finish: { pageColor: '#ffffff', pagePattern: 'none', pageDeco: 'minimalFrame' },
+      clearFeaturedImage: true,
+    },
+  ] as const;
+}
 
 function certSafeHex6(raw: string, fallback: string): string {
   const s = typeof raw === 'string' ? raw.trim() : '';
@@ -608,7 +695,7 @@ export function createBlock(type: CertBlockType, preset?: Record<string, unknown
         type,
         props: {
           ...baseFrame,
-          text: 'Certificate of Completion',
+          text: __('Certificate of Completion', 'sikshya'),
           tag: 'h1',
           align: 'center',
           fontSize: 28,
@@ -623,7 +710,7 @@ export function createBlock(type: CertBlockType, preset?: Record<string, unknown
         type,
         props: {
           ...baseFrame,
-          text: 'This certifies that the named learner has completed the course requirements.',
+          text: __('This certifies that the named learner has completed the course requirements.', 'sikshya'),
           align: 'center',
           fontSize: 14,
           color: '#334155',
@@ -668,21 +755,99 @@ export function createBlock(type: CertBlockType, preset?: Record<string, unknown
 
 export function defaultCertificateLayout(): CertLayoutFile {
   // Polished starter template (works well with default Theme values).
-  const eyebrow = createBlock('text', { text: 'CERTIFICATE OF ACHIEVEMENT', fontSize: 11, align: 'center', color: '#64748b', fontWeight: '600' });
-  const heading = createBlock('heading', { text: 'Certificate of Excellence', tag: 'h1', align: 'center', fontSize: 34, color: '#0f172a', fontWeight: '700' });
-  const presented = createBlock('text', { text: 'is proudly awarded to', fontSize: 12, align: 'center', color: '#64748b' });
-  const student = createBlock('merge_field', { field: 'student_name', fontSize: 28, align: 'center', color: '#0f172a', fontWeight: '600', fontFamily: 'serif' });
-  const forLine = createBlock('text', { text: 'for the successful completion of', fontSize: 12, align: 'center', color: '#64748b' });
-  const course = createBlock('merge_field', { field: 'course_name', fontSize: 18, align: 'center', color: '#1e3a5f', fontWeight: '600' });
-  const body = createBlock('text', { text: 'Awarded in recognition of dedication, effort, and academic excellence.', fontSize: 12, align: 'center', color: '#64748b' });
+  const eyebrow = createBlock('text', {
+    text: __('CERTIFICATE OF ACHIEVEMENT', 'sikshya'),
+    fontSize: 11,
+    align: 'center',
+    color: '#64748b',
+    fontWeight: '600',
+  });
+  const heading = createBlock('heading', {
+    text: __('Certificate of Excellence', 'sikshya'),
+    tag: 'h1',
+    align: 'center',
+    fontSize: 34,
+    color: '#0f172a',
+    fontWeight: '700',
+  });
+  const presented = createBlock('text', {
+    text: __('is proudly awarded to', 'sikshya'),
+    fontSize: 12,
+    align: 'center',
+    color: '#64748b',
+  });
+  const student = createBlock('merge_field', {
+    field: 'student_name',
+    fontSize: 28,
+    align: 'center',
+    color: '#0f172a',
+    fontWeight: '600',
+    fontFamily: 'serif',
+  });
+  const forLine = createBlock('text', {
+    text: __('for the successful completion of', 'sikshya'),
+    fontSize: 12,
+    align: 'center',
+    color: '#64748b',
+  });
+  const course = createBlock('merge_field', {
+    field: 'course_name',
+    fontSize: 18,
+    align: 'center',
+    color: '#1e3a5f',
+    fontWeight: '600',
+  });
+  const body = createBlock('text', {
+    text: __('Awarded in recognition of dedication, effort, and academic excellence.', 'sikshya'),
+    fontSize: 12,
+    align: 'center',
+    color: '#64748b',
+  });
   const divider = createBlock('divider', { thickness: 2, color: '#e2e8f0' });
   const qr = createBlock('qr', { size: 120 });
-  const verifyLabel = createBlock('text', { text: 'Verification ID', fontSize: 10, align: 'left', color: '#64748b', fontWeight: '600' });
-  const verifyCode = createBlock('merge_field', { field: 'verification_code', fontSize: 12, align: 'left', color: '#0f172a', fontWeight: '500', fontFamily: 'mono' });
-  const dateLabel = createBlock('text', { text: 'DATE', fontSize: 9, align: 'center', color: '#64748b', fontWeight: '600' });
-  const date = createBlock('merge_field', { field: 'completion_date', fontSize: 12, align: 'center', color: '#0f172a', fontWeight: '500' });
-  const instLabel = createBlock('text', { text: 'INSTRUCTOR', fontSize: 9, align: 'center', color: '#64748b', fontWeight: '600' });
-  const instructor = createBlock('merge_field', { field: 'instructor_name', fontSize: 12, align: 'center', color: '#0f172a', fontWeight: '500' });
+  const verifyLabel = createBlock('text', {
+    text: __('Verification ID', 'sikshya'),
+    fontSize: 10,
+    align: 'left',
+    color: '#64748b',
+    fontWeight: '600',
+  });
+  const verifyCode = createBlock('merge_field', {
+    field: 'verification_code',
+    fontSize: 12,
+    align: 'left',
+    color: '#0f172a',
+    fontWeight: '500',
+    fontFamily: 'mono',
+  });
+  const dateLabel = createBlock('text', {
+    text: __('DATE', 'sikshya'),
+    fontSize: 9,
+    align: 'center',
+    color: '#64748b',
+    fontWeight: '600',
+  });
+  const date = createBlock('merge_field', {
+    field: 'completion_date',
+    fontSize: 12,
+    align: 'center',
+    color: '#0f172a',
+    fontWeight: '500',
+  });
+  const instLabel = createBlock('text', {
+    text: __('INSTRUCTOR', 'sikshya'),
+    fontSize: 9,
+    align: 'center',
+    color: '#64748b',
+    fontWeight: '600',
+  });
+  const instructor = createBlock('merge_field', {
+    field: 'instructor_name',
+    fontSize: 12,
+    align: 'center',
+    color: '#0f172a',
+    fontWeight: '500',
+  });
 
   return {
     version: CERT_LAYOUT_VERSION,
@@ -842,29 +1007,29 @@ function sanitizeAspectRatioCss(input: string): string {
 /** Merge tokens → example text for preview only. */
 export function substituteMergePreview(html: string): string {
   let out = html;
-  for (const row of Object.values(MERGE)) {
-    out = out.split(row.token).join(row.example);
+  for (const key of MERGE_FIELD_KEYS) {
+    out = out.split(mergeFieldToken(key)).join(mergeFieldExample(key));
   }
   return out;
 }
 
 export function mergeFieldToken(field: MergeFieldKey): string {
-  return MERGE[field]?.token ?? '';
+  return MERGE_TOKENS[field] ?? '';
 }
 
 export function mergeFieldLabel(field: MergeFieldKey): string {
   const labels: Record<MergeFieldKey, string> = {
-    student_name: 'Student name',
-    course_name: 'Course name',
-    instructor_name: 'Instructor',
-    completion_date: 'Completion date',
-    completion_time: 'Completion time',
-    duration: 'Duration',
-    points: 'Point',
-    grade: 'Grade',
-    certificate_number: 'Certificate #',
-    verification_code: 'Verification ID',
-    site_name: 'Site name',
+    student_name: __('Student name', 'sikshya'),
+    course_name: __('Course name', 'sikshya'),
+    instructor_name: __('Instructor', 'sikshya'),
+    completion_date: __('Completion date', 'sikshya'),
+    completion_time: __('Completion time', 'sikshya'),
+    duration: __('Duration', 'sikshya'),
+    points: __('Point', 'sikshya'),
+    grade: __('Grade', 'sikshya'),
+    certificate_number: __('Certificate #', 'sikshya'),
+    verification_code: __('Verification ID', 'sikshya'),
+    site_name: __('Site name', 'sikshya'),
   };
   return labels[field] ?? field;
 }
@@ -918,7 +1083,7 @@ function blockInnerToHtml(b: CertBlock): string {
       )};line-height:${lh};letter-spacing:${ls}em;">${text}</p>`;
     }
     case 'merge_field': {
-      const field = (String(p.field) as MergeFieldKey) in MERGE ? (String(p.field) as MergeFieldKey) : 'student_name';
+      const field = (String(p.field) as MergeFieldKey) in MERGE_TOKENS ? (String(p.field) as MergeFieldKey) : 'student_name';
       const token = mergeFieldToken(field);
       const tokenHtml = escapeHtml(token);
       const align = ['left', 'center', 'right'].includes(String(p.align)) ? String(p.align) : 'center';

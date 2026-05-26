@@ -10,6 +10,7 @@ import type { Column } from '../components/shared/DataTable';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig, WpRestUser } from '../types';
 import { term, termLower } from '../lib/terminology';
+import { __ } from '../lib/i18n';
 
 type Variant = 'students' | 'instructors';
 
@@ -101,7 +102,7 @@ export function WpUserListPage(props: {
 
       // WordPress requires username, email and password for `/wp/v2/users` create.
       if (!uname || !em || !pw) {
-        throw new Error('Username, email, and password are required.');
+        throw new Error(__('Username, email, and password are required.', 'sikshya'));
       }
 
       const created = await getWpApi().post<{ id: number }>('/users', {
@@ -141,7 +142,7 @@ export function WpUserListPage(props: {
           <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
             + Add {variant === 'students' ? termStudent : termInstructor}
           </ButtonPrimary>
-          <LinkButtonPrimary href={newUrl} title="WordPress user creation screen">
+          <LinkButtonPrimary href={newUrl} title={__('WordPress user creation screen', 'sikshya')}>
             Add in WordPress
           </LinkButtonPrimary>
         </div>
@@ -150,7 +151,7 @@ export function WpUserListPage(props: {
       <Modal
         open={createOpen}
         title={`Add ${variant === 'students' ? termStudent : termInstructor}`}
-        description="Creates a WordPress user and assigns the appropriate Sikshya role."
+        description={__('Creates a WordPress user and assigns the appropriate Sikshya role.', 'sikshya')}
         onClose={() => (creating ? null : setCreateOpen(false))}
         size="md"
         footer={
@@ -164,12 +165,12 @@ export function WpUserListPage(props: {
               Cancel
             </button>
             <ButtonPrimary type="button" onClick={() => void createUser()} disabled={creating}>
-              {creating ? 'Creating…' : 'Create'}
+              {creating ? __('Creating…', 'sikshya') : __('Create', 'sikshya')}
             </ButtonPrimary>
           </div>
         }
       >
-        {createErr ? <ApiErrorPanel error={createErr} title="Could not create user" /> : null}
+        {createErr ? <ApiErrorPanel error={createErr} title={__('Could not create user', 'sikshya')} /> : null}
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm text-slate-700 dark:text-slate-300">
             Username
@@ -177,7 +178,7 @@ export function WpUserListPage(props: {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              placeholder="e.g. john_doe"
+              placeholder={__('e.g. john_doe', 'sikshya')}
               autoComplete="off"
               disabled={creating}
               required
@@ -190,7 +191,7 @@ export function WpUserListPage(props: {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              placeholder="name@example.com"
+              placeholder={__('name@example.com', 'sikshya')}
               autoComplete="off"
               disabled={creating}
               required
@@ -202,7 +203,7 @@ export function WpUserListPage(props: {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              placeholder="Shown publicly as the author/teacher"
+              placeholder={__('Shown publicly as the author/teacher', 'sikshya')}
               autoComplete="off"
               disabled={creating}
             />
@@ -214,7 +215,7 @@ export function WpUserListPage(props: {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-              placeholder="Set an initial password"
+              placeholder={__('Set an initial password', 'sikshya')}
               autoComplete="new-password"
               disabled={creating}
               required
@@ -244,9 +245,9 @@ export function WpUserListPage(props: {
         defaultSortField="name"
         columnPickerStorageKey={`users_${variant}`}
         columns={columns}
-        emptyMessage="No users match your search."
-        emptyStateTitle="No users found"
-        emptyStateDescription="Try another search or create one here."
+        emptyMessage={__('No users match your search.', 'sikshya')}
+        emptyStateTitle={__('No users found', 'sikshya')}
+        emptyStateDescription={__('Try another search or create one here.', 'sikshya')}
         emptyStateAction={
           <ButtonPrimary type="button" onClick={() => setCreateOpen(true)}>
             + Add {variant === 'students' ? termStudent : termInstructor}

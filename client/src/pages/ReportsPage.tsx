@@ -9,6 +9,7 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type ChartPayload = { labels?: string[]; counts?: number[] };
 
@@ -348,10 +349,10 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
     async (attemptId: number) => {
       if (!attemptId) return;
       const ok = await dialog.confirm({
-        title: 'Reset attempt timer?',
+        title: __('Reset attempt timer?', 'sikshya'),
         message:
-          'This will restart the countdown and clear any in-progress answers for this attempt.',
-        confirmLabel: 'Reset timer',
+          __('This will restart the countdown and clear any in-progress answers for this attempt.', 'sikshya'),
+        confirmLabel: __('Reset timer', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -445,10 +446,10 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Enrollment overview and completion trends"
+      subtitle={__('Enrollment overview and completion trends', 'sikshya')}
       pageActions={
         <ButtonPrimary type="button" disabled={busy} onClick={() => void refresh()}>
-          {busy ? 'Refreshing…' : 'Refresh report'}
+          {busy ? __('Refreshing…', 'sikshya') : __('Refresh report', 'sikshya')}
         </ButtonPrimary>
       }
     >
@@ -473,8 +474,8 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Enrollments by month</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Last twelve months (UTC month buckets).</p>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Enrollments by month', 'sikshya')}</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{__('Last twelve months (UTC month buckets).', 'sikshya')}</p>
           {labels.length ? (
             <div className="mt-6 flex h-48 items-end gap-1 sm:gap-2">
               {labels.map((label, i) => {
@@ -502,8 +503,8 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Revenue</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Completed payments total (if payments table exists).</p>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Revenue', 'sikshya')}</h2>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{__('Completed payments total (if payments table exists).', 'sikshya')}</p>
           <p className="mt-6 text-3xl font-bold tabular-nums text-slate-900 dark:text-white">
             {stats.revenue_html ? String(stats.revenue_html) : '—'}
           </p>
@@ -518,7 +519,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Quiz attempts</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Quiz attempts', 'sikshya')}</h2>
             {attemptsTotal > 0 ? (
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 {attemptsTotal} total • Page {attemptsPage}
@@ -544,37 +545,37 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
               Next
             </button>
             <ButtonPrimary type="button" disabled={attemptsBusy} onClick={() => void refreshAttempts(attemptsPage)}>
-              {attemptsBusy ? 'Refreshing…' : 'Refresh'}
+              {attemptsBusy ? __('Refreshing…', 'sikshya') : __('Refresh', 'sikshya')}
             </ButtonPrimary>
           </div>
         </div>
 
         <div className="mt-4 grid gap-3 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Search</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Search', 'sikshya')}</label>
             <input
               value={attemptsSearch}
               onChange={(e) => setAttemptsSearch(e.target.value)}
-              placeholder="Learner name/email, quiz, course…"
+              placeholder={__('Learner name/email, quiz, course…', 'sikshya')}
               className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             />
           </div>
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Status', 'sikshya')}</label>
             <select
               value={attemptsStatus}
               onChange={(e) => setAttemptsStatus(e.target.value as typeof attemptsStatus)}
               className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
             >
-              <option value="all">All</option>
-              <option value="completed">Completed</option>
-              <option value="in_progress">In progress</option>
-              <option value="passed">Passed</option>
-              <option value="failed">Failed</option>
+              <option value="all">{__('All', 'sikshya')}</option>
+              <option value="completed">{__('Completed', 'sikshya')}</option>
+              <option value="in_progress">{__('In progress', 'sikshya')}</option>
+              <option value="passed">{__('Passed', 'sikshya')}</option>
+              <option value="failed">{__('Failed', 'sikshya')}</option>
             </select>
           </div>
           <div className="lg:col-span-1">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">User ID</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('User ID', 'sikshya')}</label>
             <input
               value={attemptsUserId}
               onChange={(e) => setAttemptsUserId(e.target.value.replace(/[^\d]/g, ''))}
@@ -584,7 +585,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
             />
           </div>
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Course ID</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Course ID', 'sikshya')}</label>
             <input
               value={attemptsCourseId}
               onChange={(e) => setAttemptsCourseId(e.target.value.replace(/[^\d]/g, ''))}
@@ -594,7 +595,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
             />
           </div>
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Quiz ID</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Quiz ID', 'sikshya')}</label>
             <input
               value={attemptsQuizId}
               onChange={(e) => setAttemptsQuizId(e.target.value.replace(/[^\d]/g, ''))}
@@ -614,16 +615,16 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
             <table className="min-w-[980px] w-full border-collapse text-sm">
               <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
                 <tr>
-                  <th className="px-4 py-3">Learner</th>
-                  <th className="px-4 py-3">Quiz</th>
-                  <th className="px-4 py-3">Course</th>
-                  <th className="px-4 py-3">Attempt #</th>
-                  <th className="px-4 py-3">Used / Limit</th>
-                  <th className="px-4 py-3">Remaining</th>
-                  <th className="px-4 py-3">Score</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Completed</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{__('Learner', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Quiz', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Course', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Attempt #', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Used / Limit', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Remaining', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Score', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Completed', 'sikshya')}</th>
+                  <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -672,7 +673,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
             </table>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">No quiz attempts recorded yet.</p>
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">{__('No quiz attempts recorded yet.', 'sikshya')}</p>
         )}
       </div>
 
@@ -681,11 +682,11 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
           mode={reportsAdvMode}
           featureId="reports_advanced"
           config={config}
-          featureTitle="Advanced analytics & exports"
-          featureDescription="Download CSVs for finance, accreditation, or instructor reviews: site summary, row-level enrollments, or quiz attempts. Instructors only see courses they teach."
+          featureTitle={__('Advanced analytics & exports', 'sikshya')}
+          featureDescription={__('Download CSVs for finance, accreditation, or instructor reviews: site summary, row-level enrollments, or quiz attempts. Instructors only see courses they teach.', 'sikshya')}
           previewVariant="generic"
-          addonEnableTitle="Advanced export is not enabled"
-          addonEnableDescription="Enable the Advanced analytics add-on to unlock CSV exports alongside your on-screen charts."
+          addonEnableTitle={__('Advanced export is not enabled', 'sikshya')}
+          addonEnableDescription={__('Enable the Advanced analytics add-on to unlock CSV exports alongside your on-screen charts.', 'sikshya')}
           canEnable={Boolean(reportsAdvAddon.licenseOk)}
           enableBusy={reportsAdvAddon.loading}
           onEnable={() => reportsAdvAddon.enable()}
@@ -695,7 +696,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
             <div className="space-y-5 p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Spreadsheet exports</h2>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Spreadsheet exports', 'sikshya')}</h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Pick a report type, optionally narrow by course or dates, then download. Privacy and row limits live under{' '}
                     <span className="font-medium text-slate-700 dark:text-slate-200">Add-ons → Advanced analytics & exports</span> settings.
@@ -703,7 +704,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                 </div>
                 {reportsExportEnabled ? (
                   <ButtonPrimary type="button" disabled={exportBusy} onClick={() => void exportAdvancedCsv()}>
-                    {exportBusy ? 'Preparing…' : 'Download CSV'}
+                    {exportBusy ? __('Preparing…', 'sikshya') : __('Download CSV', 'sikshya')}
                   </ButtonPrimary>
                 ) : null}
               </div>
@@ -716,14 +717,14 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         Report type
                       </span>
                       <select
-                        title="Summary is one row of headline metrics. Enrollments and quiz attempts export individual rows (subject to your row cap)."
+                        title={__('Summary is one row of headline metrics. Enrollments and quiz attempts export individual rows (subject to your row cap).', 'sikshya')}
                         value={expType}
                         onChange={(e) => setExpType(e.target.value as typeof expType)}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                       >
-                        <option value="summary">Site summary (headline metrics)</option>
-                        <option value="enrollments">Enrollments (one row per seat)</option>
-                        <option value="quiz_attempts">Quiz attempts (one row per attempt)</option>
+                        <option value="summary">{__('Site summary (headline metrics)', 'sikshya')}</option>
+                        <option value="enrollments">{__('Enrollments (one row per seat)', 'sikshya')}</option>
+                        <option value="quiz_attempts">{__('Quiz attempts (one row per attempt)', 'sikshya')}</option>
                       </select>
                     </label>
                     <label className="block lg:col-span-2">
@@ -731,10 +732,10 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         Course ID
                       </span>
                       <input
-                        title="Optional. Limits exports to a single course you can manage."
+                        title={__('Optional. Limits exports to a single course you can manage.', 'sikshya')}
                         value={expCourseId}
                         onChange={(e) => setExpCourseId(e.target.value.replace(/[^\d]/g, ''))}
-                        placeholder="Any"
+                        placeholder={__('Any', 'sikshya')}
                         inputMode="numeric"
                         disabled={expType === 'summary'}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
@@ -746,7 +747,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       </span>
                       <input
                         type="date"
-                        title="Filters by enrolled date for enrollments, or started date for quiz attempts (stored server time)."
+                        title={__('Filters by enrolled date for enrollments, or started date for quiz attempts (stored server time).', 'sikshya')}
                         value={expDateFrom}
                         onChange={(e) => setExpDateFrom(e.target.value)}
                         disabled={expType === 'summary'}
@@ -759,7 +760,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       </span>
                       <input
                         type="date"
-                        title="Inclusive end of day for the stored datetime column (server time)."
+                        title={__('Inclusive end of day for the stored datetime column (server time).', 'sikshya')}
                         value={expDateTo}
                         onChange={(e) => setExpDateTo(e.target.value)}
                         disabled={expType === 'summary'}
@@ -776,20 +777,20 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         disabled={expType === 'summary'}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                       >
-                        <option value="">All</option>
+                        <option value="">{__('All', 'sikshya')}</option>
                         {expType === 'enrollments' ? (
                           <>
-                            <option value="enrolled">Enrolled</option>
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
+                            <option value="enrolled">{__('Enrolled', 'sikshya')}</option>
+                            <option value="active">{__('Active', 'sikshya')}</option>
+                            <option value="completed">{__('Completed', 'sikshya')}</option>
                           </>
                         ) : null}
                         {expType === 'quiz_attempts' ? (
                           <>
-                            <option value="completed">Completed</option>
-                            <option value="in_progress">In progress</option>
-                            <option value="passed">Passed</option>
-                            <option value="failed">Failed</option>
+                            <option value="completed">{__('Completed', 'sikshya')}</option>
+                            <option value="in_progress">{__('In progress', 'sikshya')}</option>
+                            <option value="passed">{__('Passed', 'sikshya')}</option>
+                            <option value="failed">{__('Failed', 'sikshya')}</option>
                           </>
                         ) : null}
                       </select>
@@ -822,7 +823,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                             <input
                               value={expUserId}
                               onChange={(e) => setExpUserId(e.target.value.replace(/[^\d]/g, ''))}
-                              placeholder="Any"
+                              placeholder={__('Any', 'sikshya')}
                               inputMode="numeric"
                               className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                             />
@@ -834,7 +835,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                             <input
                               value={expQuizId}
                               onChange={(e) => setExpQuizId(e.target.value.replace(/[^\d]/g, ''))}
-                              placeholder="Any"
+                              placeholder={__('Any', 'sikshya')}
                               inputMode="numeric"
                               className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                             />
@@ -862,11 +863,11 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
           mode={enterpriseMode}
           featureId="enterprise_reports"
           config={config}
-          featureTitle="Enterprise weekly summary"
-          featureDescription="Schedule a weekly summary email to the site administrator with revenue, enrollments, and completion totals."
+          featureTitle={__('Enterprise weekly summary', 'sikshya')}
+          featureDescription={__('Schedule a weekly summary email to the site administrator with revenue, enrollments, and completion totals.', 'sikshya')}
           previewVariant="generic"
-          addonEnableTitle="Enterprise reports is not enabled"
-          addonEnableDescription="Enable the Enterprise reports add-on to schedule the weekly summary email cron."
+          addonEnableTitle={__('Enterprise reports is not enabled', 'sikshya')}
+          addonEnableDescription={__('Enable the Enterprise reports add-on to schedule the weekly summary email cron.', 'sikshya')}
           canEnable={Boolean(enterpriseAddon.licenseOk)}
           enableBusy={enterpriseAddon.loading}
           onEnable={() => enterpriseAddon.enable()}
@@ -875,7 +876,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
           <ListPanel>
             <div className="flex flex-wrap items-start justify-between gap-3 p-6">
               <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Weekly summary email</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Weekly summary email', 'sikshya')}</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                   Sends to{' '}
                   <span className="font-medium text-slate-700 dark:text-slate-200">
@@ -913,7 +914,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                     onClick={() => void refreshEnterprise()}
                     disabled={enterpriseBusy}
                   >
-                    {enterpriseBusy ? 'Refreshing…' : 'Refresh status'}
+                    {enterpriseBusy ? __('Refreshing…', 'sikshya') : __('Refresh status', 'sikshya')}
                   </button>
                   <button
                     type="button"
@@ -924,7 +925,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                     Refresh schedules
                   </button>
                   <ButtonPrimary type="button" disabled={enterpriseSendBusy} onClick={() => void sendEnterprise()}>
-                    {enterpriseSendBusy ? 'Sending…' : 'Send a summary now'}
+                    {enterpriseSendBusy ? __('Sending…', 'sikshya') : __('Send a summary now', 'sikshya')}
                   </ButtonPrimary>
                 </div>
               ) : null}
@@ -934,7 +935,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
               <div className="border-t border-slate-100 px-6 py-5 dark:border-slate-800">
                 <div className="grid gap-4 lg:grid-cols-3">
                   <label className="block text-sm lg:col-span-2">
-                    <span className="font-medium text-slate-900 dark:text-white">Recipients</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Recipients', 'sikshya')}</span>
                     <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                       Comma-separated emails. Leave empty to default to the WordPress admin email.
                     </span>
@@ -943,30 +944,30 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       value={enterpriseRecipients}
                       onChange={(e) => setEnterpriseRecipients(e.target.value)}
                       className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
-                      placeholder="ceo@company.com, it@company.com"
+                      placeholder={__('ceo@company.com, it@company.com', 'sikshya')}
                     />
                   </label>
 
                   <label className="block text-sm">
-                    <span className="font-medium text-slate-900 dark:text-white">Day</span>
-                    <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">Weekday (site timezone).</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Day', 'sikshya')}</span>
+                    <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{__('Weekday (site timezone).', 'sikshya')}</span>
                     <select
                       value={enterpriseDow}
                       onChange={(e) => setEnterpriseDow(Number(e.target.value))}
                       className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
                     >
-                      <option value={0}>Sunday</option>
-                      <option value={1}>Monday</option>
-                      <option value={2}>Tuesday</option>
-                      <option value={3}>Wednesday</option>
-                      <option value={4}>Thursday</option>
-                      <option value={5}>Friday</option>
-                      <option value={6}>Saturday</option>
+                      <option value={0}>{__('Sunday', 'sikshya')}</option>
+                      <option value={1}>{__('Monday', 'sikshya')}</option>
+                      <option value={2}>{__('Tuesday', 'sikshya')}</option>
+                      <option value={3}>{__('Wednesday', 'sikshya')}</option>
+                      <option value={4}>{__('Thursday', 'sikshya')}</option>
+                      <option value={5}>{__('Friday', 'sikshya')}</option>
+                      <option value={6}>{__('Saturday', 'sikshya')}</option>
                     </select>
                   </label>
 
                   <label className="block text-sm">
-                    <span className="font-medium text-slate-900 dark:text-white">Hour</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Hour', 'sikshya')}</span>
                     <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">24h time (site timezone).</span>
                     <select
                       value={enterpriseHour}
@@ -983,52 +984,52 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
 
                   <div className="flex items-end">
                     <ButtonPrimary type="button" disabled={enterpriseSaveBusy} onClick={() => void saveEnterpriseSettings()}>
-                      {enterpriseSaveBusy ? 'Saving…' : 'Save schedule'}
+                      {enterpriseSaveBusy ? __('Saving…', 'sikshya') : __('Save schedule', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                 </div>
 
                 <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/60">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Enterprise schedules (v2)</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Enterprise schedules (v2)', 'sikshya')}</h3>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     Create multiple schedules and queue runs without touching server cron settings. This is admin-only.
                   </p>
 
                   <div className="mt-4 grid gap-3 lg:grid-cols-12">
                     <label className="block text-sm lg:col-span-5">
-                      <span className="font-medium text-slate-900 dark:text-white">Label</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Label', 'sikshya')}</span>
                       <input
                         value={scheduleLabel}
                         onChange={(e) => setScheduleLabel(e.target.value)}
                         className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
-                        placeholder="Weekly executive summary"
+                        placeholder={__('Weekly executive summary', 'sikshya')}
                       />
                     </label>
                     <label className="block text-sm lg:col-span-3">
-                      <span className="font-medium text-slate-900 dark:text-white">Frequency</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Frequency', 'sikshya')}</span>
                       <select
                         value={scheduleFrequency}
                         onChange={(e) => setScheduleFrequency(e.target.value as typeof scheduleFrequency)}
                         className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
                       >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
+                        <option value="daily">{__('Daily', 'sikshya')}</option>
+                        <option value="weekly">{__('Weekly', 'sikshya')}</option>
+                        <option value="monthly">{__('Monthly', 'sikshya')}</option>
                       </select>
                     </label>
                     <label className="block text-sm lg:col-span-4">
-                      <span className="font-medium text-slate-900 dark:text-white">Report type</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Report type', 'sikshya')}</span>
                       <select
                         value={scheduleReportType}
                         onChange={(e) => setScheduleReportType(e.target.value as typeof scheduleReportType)}
                         className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
                       >
-                        <option value="executive_summary">Executive summary</option>
+                        <option value="executive_summary">{__('Executive summary', 'sikshya')}</option>
                       </select>
                     </label>
                     <div className="flex items-end lg:col-span-12">
                       <ButtonPrimary type="button" disabled={scheduleCreateBusy} onClick={() => void createEnterpriseSchedule()}>
-                        {scheduleCreateBusy ? 'Creating…' : 'Create schedule'}
+                        {scheduleCreateBusy ? __('Creating…', 'sikshya') : __('Create schedule', 'sikshya')}
                       </ButtonPrimary>
                     </div>
                   </div>
@@ -1038,13 +1039,13 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       <table className="min-w-[980px] w-full border-collapse text-sm">
                         <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
                           <tr>
-                            <th className="px-4 py-3">ID</th>
-                            <th className="px-4 py-3">Label</th>
-                            <th className="px-4 py-3">Type</th>
-                            <th className="px-4 py-3">Cadence</th>
-                            <th className="px-4 py-3">Recipients</th>
-                            <th className="px-4 py-3">Last status</th>
-                            <th className="px-4 py-3">Actions</th>
+                            <th className="px-4 py-3">{__('ID', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Label', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Type', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Cadence', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Recipients', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Last status', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Actions', 'sikshya')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1076,7 +1077,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       </table>
                     </div>
                   ) : (
-                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">No schedules yet. Create one above.</p>
+                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{__('No schedules yet. Create one above.', 'sikshya')}</p>
                   )}
 
                   {enterpriseDash?.runs?.length ? (
@@ -1088,12 +1089,12 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         <table className="min-w-[980px] w-full border-collapse text-sm">
                           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
                             <tr>
-                              <th className="px-4 py-3">Run</th>
-                              <th className="px-4 py-3">Schedule</th>
-                              <th className="px-4 py-3">Status</th>
-                              <th className="px-4 py-3">Type</th>
-                              <th className="px-4 py-3">Created</th>
-                              <th className="px-4 py-3">Error</th>
+                              <th className="px-4 py-3">{__('Run', 'sikshya')}</th>
+                              <th className="px-4 py-3">{__('Schedule', 'sikshya')}</th>
+                              <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
+                              <th className="px-4 py-3">{__('Type', 'sikshya')}</th>
+                              <th className="px-4 py-3">{__('Created', 'sikshya')}</th>
+                              <th className="px-4 py-3">{__('Error', 'sikshya')}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

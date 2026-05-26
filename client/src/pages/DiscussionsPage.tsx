@@ -18,6 +18,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type ThreadStatus = 'pending' | 'approved' | 'spam' | 'trash';
 type ThreadType = 'discussion' | 'qa';
@@ -214,7 +215,7 @@ function StatusPill({ status }: { status: ThreadStatus }) {
   return (
     <span
       className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-800 dark:bg-slate-700 dark:text-slate-200"
-      title="Moved to trash (moderator rejection, not spam)."
+      title={__('Moved to trash (moderator rejection, not spam).', 'sikshya')}
     >
       Rejected
     </span>
@@ -226,7 +227,7 @@ function AttentionPill({ attention }: { attention: ThreadAttention }) {
     return (
       <span
         className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-900/35 dark:text-amber-100"
-        title="Approve or reject the thread before it is fully visible to learners."
+        title={__('Approve or reject the thread before it is fully visible to learners.', 'sikshya')}
       >
         Moderation first
       </span>
@@ -236,7 +237,7 @@ function AttentionPill({ attention }: { attention: ThreadAttention }) {
     return (
       <span
         className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-900 dark:bg-violet-900/45 dark:text-violet-100"
-        title="The latest approved reply is not from course staff—or there are no replies yet. Open and post an instructor/admin answer."
+        title={__('The latest approved reply is not from course staff—or there are no replies yet. Open and post an instructor/admin answer.', 'sikshya')}
       >
         Reply needed
       </span>
@@ -246,7 +247,7 @@ function AttentionPill({ attention }: { attention: ThreadAttention }) {
     return (
       <span
         className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200"
-        title="This thread is spam or was moved to trash and is hidden from learners."
+        title={__('This thread is spam or was moved to trash and is hidden from learners.', 'sikshya')}
       >
         Rejected thread
       </span>
@@ -255,7 +256,7 @@ function AttentionPill({ attention }: { attention: ThreadAttention }) {
   return (
     <span
       className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900 dark:bg-emerald-900/35 dark:text-emerald-100"
-      title="The most recent approved reply is from someone who can moderate this course (or there is nothing else to answer right now)."
+      title={__('The most recent approved reply is from someone who can moderate this course (or there is nothing else to answer right now).', 'sikshya')}
     >
       Staff up to date
     </span>
@@ -280,7 +281,7 @@ function TypeTag({ type }: { type: ThreadType }) {
           : 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200'
       }`}
     >
-      {isQa ? 'Q&A' : 'Discussion'}
+      {isQa ? __('Q&A', 'sikshya') : __('Discussion', 'sikshya')}
     </span>
   );
 }
@@ -487,11 +488,11 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
 
   const markSpam = async (id: number) => {
     const ok = await confirm({
-      title: 'Mark as spam?',
+      title: __('Mark as spam?', 'sikshya'),
       message:
-        'Hides this thread from learners and sends it to the WordPress spam queue. Use this for abusive or junk posts.',
+        __('Hides this thread from learners and sends it to the WordPress spam queue. Use this for abusive or junk posts.', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Mark as spam',
+      confirmLabel: __('Mark as spam', 'sikshya'),
     });
     if (!ok) return;
     setRowBusyId(id);
@@ -543,26 +544,26 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
 
     if (action === 'delete') {
       const ok = await confirm({
-        title: 'Delete selected threads?',
+        title: __('Delete selected threads?', 'sikshya'),
         message: `This permanently deletes ${countLabel} and their replies.`,
         variant: 'danger',
-        confirmLabel: 'Delete',
+        confirmLabel: __('Delete', 'sikshya'),
       });
       if (!ok) return;
     } else if (action === 'spam') {
       const ok = await confirm({
-        title: 'Mark selected as spam?',
+        title: __('Mark selected as spam?', 'sikshya'),
         message: `${countLabel} will be hidden from learners and sent to the spam queue.`,
         variant: 'danger',
-        confirmLabel: 'Mark as spam',
+        confirmLabel: __('Mark as spam', 'sikshya'),
       });
       if (!ok) return;
     } else if (action === 'trash') {
       const ok = await confirm({
-        title: 'Reject selected threads?',
+        title: __('Reject selected threads?', 'sikshya'),
         message: `${countLabel} will move to trash (not spam). Learners will no longer see them.`,
         variant: 'danger',
-        confirmLabel: 'Move to trash',
+        confirmLabel: __('Move to trash', 'sikshya'),
       });
       if (!ok) return;
     }
@@ -575,7 +576,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
       });
       if (!res.success) {
         await alert({
-          title: 'Bulk action failed',
+          title: __('Bulk action failed', 'sikshya'),
           message: typeof res.message === 'string' ? res.message : 'Request was not successful.',
         });
         return;
@@ -586,7 +587,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
       const skipped = res.data?.skipped?.length ?? 0;
       if (skipped > 0) {
         await alert({
-          title: 'Some threads were skipped',
+          title: __('Some threads were skipped', 'sikshya'),
           message:
             skipped === ids.length
               ? res.message ??
@@ -601,11 +602,11 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
 
   const trashThread = async (id: number) => {
     const ok = await confirm({
-      title: 'Reject this thread?',
+      title: __('Reject this thread?', 'sikshya'),
       message:
-        'Moves the thread to trash (moderator dismissal) without labeling it as spam. Learners no longer see it.',
+        __('Moves the thread to trash (moderator dismissal) without labeling it as spam. Learners no longer see it.', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Move to trash',
+      confirmLabel: __('Move to trash', 'sikshya'),
     });
     if (!ok) return;
     setRowBusyId(id);
@@ -619,13 +620,13 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
 
   const remove = async (id: number, kind: 'thread' | 'reply') => {
     const ok = await confirm({
-      title: kind === 'thread' ? 'Delete thread?' : 'Delete reply?',
+      title: kind === 'thread' ? __('Delete thread?', 'sikshya') : __('Delete reply?', 'sikshya'),
       message:
         kind === 'thread'
           ? 'This permanently removes the thread and all of its replies.'
           : 'This permanently removes the reply.',
       variant: 'danger',
-      confirmLabel: 'Delete',
+      confirmLabel: __('Delete', 'sikshya'),
     });
     if (!ok) return;
     setRowBusyId(id);
@@ -686,11 +687,11 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Browse, search, moderate, and reply to learner discussion threads and Q&A across every course."
+      subtitle={__('Browse, search, moderate, and reply to learner discussion threads and Q&A across every course.', 'sikshya')}
       pageActions={
         gateOpen ? (
           <ButtonPrimary type="button" disabled={list.loading} onClick={() => refreshAll()}>
-            {list.loading ? 'Refreshing…' : 'Refresh'}
+            {list.loading ? __('Refreshing…', 'sikshya') : __('Refresh', 'sikshya')}
           </ButtonPrimary>
         ) : null
       }
@@ -699,11 +700,11 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
         mode={mode}
         featureId="community_discussions"
         config={config}
-        featureTitle="Community discussions and Q&A"
-        featureDescription="Let learners ask questions and discuss lessons inside the Learn page, with optional instructor moderation. This screen lets you triage every thread across your catalog."
+        featureTitle={__('Community discussions and Q&A', 'sikshya')}
+        featureDescription={__('Let learners ask questions and discuss lessons inside the Learn page, with optional instructor moderation. This screen lets you triage every thread across your catalog.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Discussions and Q&A is not enabled"
-        addonEnableDescription="Enable the Community discussions add-on to register the Learn-page widgets, REST endpoints, and this moderation screen."
+        addonEnableTitle={__('Discussions and Q&A is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Community discussions add-on to register the Learn-page widgets, REST endpoints, and this moderation screen.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -721,7 +722,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
 
         {list.error ? (
           <div className="mb-4">
-            <ApiErrorPanel error={list.error} title="Could not load discussions" onRetry={() => list.refetch()} />
+            <ApiErrorPanel error={list.error} title={__('Could not load discussions', 'sikshya')} onRetry={() => list.refetch()} />
           </div>
         ) : null}
 
@@ -735,7 +736,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                   setFilterCourseId(id);
                   setPage(1);
                 }}
-                placeholder="All courses"
+                placeholder={__('All courses', 'sikshya')}
                 hint="Optional — limit threads to a single course."
                 className="w-full max-w-full"
               />
@@ -799,7 +800,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     setPage(1);
                   }}
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                  title="Triage threads by whether you should moderate or reply as staff."
+                  title={__('Triage threads by whether you should moderate or reply as staff.', 'sikshya')}
                 >
                   {ATTENTION_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -815,11 +816,11 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     type="search"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
-                    placeholder="Author, email, or content text…"
+                    placeholder={__('Author, email, or content text…', 'sikshya')}
                     className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                   />
                 </label>
-                <ButtonPrimary type="submit">Apply</ButtonPrimary>
+                <ButtonPrimary type="submit">{__('Apply', 'sikshya')}</ButtonPrimary>
                 <ButtonSecondary type="button" onClick={() => resetFilters()}>
                   Reset
                 </ButtonSecondary>
@@ -836,11 +837,11 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
           </div>
 
           {list.loading ? (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading…</div>
+            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
           ) : rows.length === 0 ? (
             <ListEmptyState
-              title="No threads match"
-              description="Try widening the filters or clearing the search. Threads appear here when learners post in the Learn page Discussions or Q&A widgets."
+              title={__('No threads match', 'sikshya')}
+              description={__('Try widening the filters or clearing the search. Threads appear here when learners post in the Learn page Discussions or Q&A widgets.', 'sikshya')}
             />
           ) : (
             <>
@@ -876,7 +877,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                   <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                     <tr>
                       <th className="w-10 px-3 py-3.5" scope="col">
-                        <span className="sr-only">Select</span>
+                        <span className="sr-only">{__('Select', 'sikshya')}</span>
                         <input
                           ref={bulkSelectAllRef}
                           type="checkbox"
@@ -887,17 +888,17 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                           }
                           disabled={selectableOnPage.length === 0 || list.loading || bulkBusy}
                           onChange={() => toggleSelectAllOnPage()}
-                          aria-label="Select all threads you can moderate on this page"
+                          aria-label={__('Select all threads you can moderate on this page', 'sikshya')}
                         />
                       </th>
-                      <th className="px-5 py-3.5">Author</th>
-                      <th className="px-5 py-3.5">Course</th>
-                      <th className="px-5 py-3.5">Content</th>
-                      <th className="px-5 py-3.5">What to do</th>
-                      <th className="px-5 py-3.5">Thread</th>
-                      <th className="px-5 py-3.5">Replies</th>
-                      <th className="px-5 py-3.5">Posted</th>
-                      <th className="px-5 py-3.5 text-right">Actions</th>
+                      <th className="px-5 py-3.5">{__('Author', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Course', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Content', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('What to do', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Thread', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Replies', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Posted', 'sikshya')}</th>
+                      <th className="px-5 py-3.5 text-right">{__('Actions', 'sikshya')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1014,7 +1015,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                               className="text-sm font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400"
                               onClick={() => setDrawerThreadId(r.id)}
                             >
-                              {attention === 'reply' ? 'Open & reply' : 'View'}
+                              {attention === 'reply' ? __('Open & reply', 'sikshya') : __('View', 'sikshya')}
                             </button>
                             <RowActionsMenu
                               ariaLabel={`Thread actions for #${r.id}`}
@@ -1057,15 +1058,15 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                 <button
                   type="button"
                   className={`absolute inset-0 bg-slate-900/45 backdrop-blur-[2px] transition-opacity duration-300 ease-out dark:bg-slate-950/55 ${
-                    discussionDrawerEntered ? 'opacity-100' : 'opacity-0'
+                    discussionDrawerEntered ? __('opacity-100', 'sikshya') : __('opacity-0', 'sikshya')
                   }`}
-                  aria-label="Close thread panel"
+                  aria-label={__('Close thread panel', 'sikshya')}
                   onClick={() => setDrawerThreadId(null)}
                 />
                 <aside
                   className={`absolute inset-y-0 right-0 z-10 flex flex-col overflow-hidden border-l border-slate-200/95 bg-white shadow-[-16px_0_48px_rgba(15,23,42,0.14)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.33,1,0.68,1)] dark:border-slate-700 dark:bg-slate-950 dark:shadow-[-16px_0_48px_rgba(0,0,0,0.35)] ${
-                    detailPanelCollapsed ? 'w-[3.35rem]' : 'w-[min(100vw,448px)]'
-                  } ${discussionDrawerEntered ? 'translate-x-0' : 'translate-x-full'}`}
+                    detailPanelCollapsed ? __('w-[3.35rem]', 'sikshya') : __('w-[min(100vw,448px)]', 'sikshya')
+                  } ${discussionDrawerEntered ? __('translate-x-0', 'sikshya') : __('translate-x-full', 'sikshya')}`}
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="sikshya-disc-drawer-title"
@@ -1074,7 +1075,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     id="sikshya-disc-drawer-title"
                     className="sr-only"
                   >
-                    {detailRow ? `${detailRow.thread_type === 'qa' ? 'Q&A' : 'Discussion'} thread` : 'Thread moderation'}
+                    {detailRow ? `${detailRow.thread_type === 'qa' ? __('Q&A', 'sikshya') : __('Discussion', 'sikshya')} thread` : 'Thread moderation'}
                   </div>
                   <ModerationThreadPanel
                     collapsed={detailPanelCollapsed}
@@ -1112,7 +1113,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
         {editingId !== null && drawerThreadId === null ? (
           <Modal
             open
-            title="Edit content"
+            title={__('Edit content', 'sikshya')}
             size="md"
             onClose={cancelEditing}
             footer={
@@ -1121,7 +1122,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                   Cancel
                 </ButtonSecondary>
                 <ButtonPrimary type="button" onClick={() => void saveEditing()} disabled={editingBusy || editingDraft.trim() === ''}>
-                  {editingBusy ? 'Saving…' : 'Save'}
+                  {editingBusy ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
                 </ButtonPrimary>
               </div>
             }
@@ -1197,7 +1198,7 @@ function ModerationThreadPanel(props: {
       <div className="flex h-full min-h-0 w-full flex-col items-center gap-4 border-transparent bg-gradient-to-b from-[#f8fafc] to-white py-5 dark:from-slate-900 dark:to-slate-950">
         <button
           type="button"
-          aria-label="Expand thread panel"
+          aria-label={__('Expand thread panel', 'sikshya')}
           className="rounded-lg p-2 text-slate-600 hover:bg-slate-200/80 dark:text-slate-300 dark:hover:bg-slate-800"
           onClick={onToggleCollapsed}
         >
@@ -1215,7 +1216,7 @@ function ModerationThreadPanel(props: {
         </div>
         <button
           type="button"
-          aria-label="Close thread panel"
+          aria-label={__('Close thread panel', 'sikshya')}
           className="rounded-lg p-2 text-slate-500 hover:bg-slate-200/80 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
           onClick={onClose}
         >
@@ -1234,7 +1235,7 @@ function ModerationThreadPanel(props: {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-                {detailRow ? (detailRow.thread_type === 'qa' ? 'Q&A' : 'Discussion') : 'Thread'}
+                {detailRow ? (detailRow.thread_type === 'qa' ? __('Q&A', 'sikshya') : __('Discussion', 'sikshya')) : 'Thread'}
               </h2>
               {detailRow ? (
                 <>
@@ -1263,7 +1264,7 @@ function ModerationThreadPanel(props: {
           <div className="flex shrink-0 items-center gap-1">
             {detailRow ? (
               <RowActionsMenu
-                ariaLabel="Thread actions"
+                ariaLabel={__('Thread actions', 'sikshya')}
                 items={buildThreadModerationMenuItems(detailRow, {
                   rowBusyId,
                   onApprove: () => void approve(detailRow.id),
@@ -1277,7 +1278,7 @@ function ModerationThreadPanel(props: {
             {collapsibleRail ? (
               <button
                 type="button"
-                aria-label="Collapse thread panel"
+                aria-label={__('Collapse thread panel', 'sikshya')}
                 className="inline-flex rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
                 onClick={onToggleCollapsed}
               >
@@ -1288,7 +1289,7 @@ function ModerationThreadPanel(props: {
             ) : null}
             <button
               type="button"
-              aria-label="Close thread panel"
+              aria-label={__('Close thread panel', 'sikshya')}
               className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
               onClick={onClose}
             >
@@ -1309,11 +1310,11 @@ function ModerationThreadPanel(props: {
         }}
       >
         {detailLoading ? (
-          <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">Loading thread…</div>
+          <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading thread…', 'sikshya')}</div>
         ) : detailError ? (
           <ApiErrorPanel
             error={detailError}
-            title="Could not load this thread"
+            title={__('Could not load this thread', 'sikshya')}
             onRetry={onRetryDetail}
           />
         ) : detailRow ? (
@@ -1428,7 +1429,7 @@ function ModerationThreadPanel(props: {
             </section>
           </div>
         ) : (
-          <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">No thread data.</div>
+          <div className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">{__('No thread data.', 'sikshya')}</div>
         )}
       </div>
 
@@ -1442,7 +1443,7 @@ function ModerationThreadPanel(props: {
               rows={3}
               value={replyDraft}
               onChange={(e) => onReplyDraftChange(e.target.value)}
-              placeholder="Type your reply…"
+              placeholder={__('Type your reply…', 'sikshya')}
               className="mb-3 w-full rounded-[14px] border border-transparent bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner shadow-slate-200/80 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:ring-brand-400/25"
             />
             <div className="flex justify-end px-1 pb-1">
@@ -1452,7 +1453,7 @@ function ModerationThreadPanel(props: {
                 disabled={replyBusy || replyDraft.trim() === ''}
                 onClick={() => void submitReply()}
               >
-                {replyBusy ? 'Posting…' : 'Post reply'}
+                {replyBusy ? __('Posting…', 'sikshya') : __('Post reply', 'sikshya')}
               </ButtonPrimary>
             </div>
           </div>
@@ -1505,7 +1506,7 @@ function EditingArea({
           onClick={() => void onSave()}
           disabled={busy || value.trim() === ''}
         >
-          {busy ? 'Saving…' : 'Save'}
+          {busy ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
         </ButtonPrimary>
       </div>
     </div>

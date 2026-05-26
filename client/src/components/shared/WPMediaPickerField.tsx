@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 import { NavIcon } from '../NavIcon';
 import { ButtonSecondary } from './buttons';
 import { useSikshyaDialog } from './SikshyaDialogContext';
+import { __ } from '../../lib/i18n';
 
 /** Compact URL preview; merge with caller `FIELD_INPUT` without double margins. */
 const URL_PREVIEW_BASE =
@@ -65,8 +66,8 @@ export function WPMediaPickerField(props: Props) {
   const openFrame = useCallback(() => {
     if (typeof window.wp?.media !== 'function') {
       void dialog.alert({
-        title: 'Media library unavailable',
-        message: 'WordPress media library is not loaded. Please reload the page.',
+        title: __('Media library unavailable', 'sikshya'),
+        message: __('WordPress media library is not loaded. Please reload the page.', 'sikshya'),
       });
       return;
     }
@@ -93,12 +94,13 @@ export function WPMediaPickerField(props: Props) {
     frameRef.current.open();
   }, [dialog, imageOnly, onChange, onAttachmentIdChange]);
 
-  const thumbLabel = imageOnly ? 'Featured image thumbnail' : 'Selected file';
+  const thumbLabel = imageOnly ? __('Featured image thumbnail', 'sikshya') : __('Selected file', 'sikshya');
 
   const hint =
-    placeholder || 'Opens the WordPress media library — upload something new or pick an existing file.';
+    placeholder ||
+    __('Opens the WordPress media library — upload something new or pick an existing file.', 'sikshya');
 
-  const chooseCtaLabel = imageOnly ? 'Choose image' : 'Choose file';
+  const chooseCtaLabel = imageOnly ? __('Choose image', 'sikshya') : __('Choose file', 'sikshya');
 
   const thumbStateClass = value
     ? 'border-slate-200 bg-white hover:border-brand-300 dark:border-slate-600 dark:bg-slate-900 dark:hover:border-brand-500/60'
@@ -118,7 +120,13 @@ export function WPMediaPickerField(props: Props) {
           type="button"
           id={id}
           title={thumbLabel}
-          aria-label={value ? (imageOnly ? 'Replace featured image' : 'Replace file') : chooseCtaLabel}
+          aria-label={
+            value
+              ? imageOnly
+                ? __('Replace featured image', 'sikshya')
+                : __('Replace file', 'sikshya')
+              : chooseCtaLabel
+          }
           onClick={openFrame}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -135,7 +143,7 @@ export function WPMediaPickerField(props: Props) {
               <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-slate-50 px-1 dark:bg-slate-800/80">
                 <NavIcon name="clipboard" className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                 <span className="max-w-full truncate px-0.5 text-[9px] font-medium text-slate-500 dark:text-slate-400">
-                  File
+                  {__('File', 'sikshya')}
                 </span>
               </div>
             )
@@ -163,19 +171,31 @@ export function WPMediaPickerField(props: Props) {
                   type="button"
                   onClick={openFrame}
                   className="px-3 py-1.5 text-xs font-semibold shadow-sm"
-                  aria-label={imageOnly ? 'Replace image from media library' : 'Replace file from media library'}
+                  aria-label={
+                    imageOnly
+                      ? __('Replace image from media library', 'sikshya')
+                      : __('Replace file from media library', 'sikshya')
+                  }
                 >
-                  {imageOnly ? 'Replace' : 'Replace file'}
+                  {imageOnly ? __('Replace', 'sikshya') : __('Replace file', 'sikshya')}
                 </ButtonSecondary>
                 <button
                   type="button"
                   className="text-xs font-semibold text-red-600 underline-offset-2 hover:text-red-800 hover:underline dark:text-red-400 dark:hover:text-red-300"
                   onClick={remove}
                 >
-                  {imageOnly ? 'Remove' : 'Remove file'}
+                  {imageOnly ? __('Remove', 'sikshya') : __('Remove file', 'sikshya')}
                 </button>
               </div>
-              <input type="text" readOnly tabIndex={-1} className={inputClass} value={value} title="URL" aria-label="File URL" />
+              <input
+                type="text"
+                readOnly
+                tabIndex={-1}
+                className={inputClass}
+                value={value}
+                title={__('URL', 'sikshya')}
+                aria-label={__('File URL', 'sikshya')}
+              />
             </>
           )}
         </div>

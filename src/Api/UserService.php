@@ -48,7 +48,7 @@ class UserService
         $id = $request->get_param('id');
         $user = get_userdata($id);
         if (!$user) {
-            return new WP_REST_Response(['error' => 'User not found'], 404);
+            return new WP_REST_Response(['error' => __('User not found', 'sikshya')], 404);
         }
         return new WP_REST_Response($this->formatUser($user));
     }
@@ -76,7 +76,7 @@ class UserService
         $id = $request->get_param('id');
         $result = wp_delete_user($id);
         if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to delete user'], 400);
+            return new WP_REST_Response(['error' => __('Failed to delete user', 'sikshya')], 400);
         }
         return new WP_REST_Response(['success' => true]);
     }

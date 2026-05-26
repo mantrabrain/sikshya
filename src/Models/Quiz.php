@@ -180,8 +180,14 @@ class Quiz
      */
     public function getDuration(int $quiz_id): int
     {
-        $duration = $this->getMeta($quiz_id, '_sikshya_quiz_duration', true);
-        return (int) ($duration ?: 0);
+        $time_limit = (int) $this->getMeta($quiz_id, '_sikshya_quiz_time_limit', true);
+        if ($time_limit > 0) {
+            return $time_limit;
+        }
+
+        $duration = (int) $this->getMeta($quiz_id, '_sikshya_quiz_duration', true);
+
+        return max(0, $duration);
     }
 
     /**

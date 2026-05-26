@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { OVERLAY_Z_TOAST } from '../../lib/overlayLayers';
+import { __ } from '../../lib/i18n';
 import { NavIcon } from '../NavIcon';
 
 export type ToastKind = 'success' | 'error' | 'info';
@@ -66,7 +68,10 @@ export function TopRightToast(props: { toast: ToastState | null; onDismiss: () =
           };
 
   return createPortal(
-    <div className="fixed right-6 top-6 z-[9999] w-[360px] max-w-[calc(100vw-48px)]">
+    <div
+      className="sikshya-admin-theme fixed right-6 top-6 w-[360px] max-w-[calc(100vw-48px)]"
+      style={{ zIndex: OVERLAY_Z_TOAST }}
+    >
       <div
         className={`rounded-2xl border ${palette.border} px-4 py-3 shadow-lg backdrop-blur dark:backdrop-blur ${palette.bg}`}
         role="status"
@@ -86,7 +91,7 @@ export function TopRightToast(props: { toast: ToastState | null; onDismiss: () =
             type="button"
             onClick={onDismiss}
             className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold opacity-70 hover:opacity-100"
-            aria-label="Dismiss"
+            aria-label={__('Dismiss', 'sikshya')}
           >
             ✕
           </button>

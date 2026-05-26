@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { NavIcon } from '../NavIcon';
+import { __, sprintf } from '../../lib/i18n';
 import { ButtonPrimary } from './buttons';
 import { ApiErrorPanel } from './ApiErrorPanel';
 import { Modal } from './Modal';
@@ -39,31 +40,54 @@ type PickerOpt = {
  * standalone "Add lesson" CTA on the Content library list and the in-course
  * curriculum builder modal. There is intentionally only one definition.
  */
-export const CONTENT_PICKER_TYPES: PickerOpt[] = [
-  { type: 'lesson_text', label: 'Text lesson', icon: 'plusDocument' },
-  { type: 'lesson_video', label: 'Video lesson', icon: 'curriculumLessonVideo' },
-  { type: 'lesson_live', label: 'Live class', icon: 'curriculumLessonLive', addonId: 'live_classes', proLabel: 'Pro' },
-  { type: 'lesson_scorm', label: 'SCORM package', icon: 'curriculumLessonScorm', addonId: 'scorm_h5p_pro', proLabel: 'Pro' },
-  { type: 'lesson_h5p', label: 'H5P interactive', icon: 'curriculumLessonH5p', addonId: 'scorm_h5p_pro', proLabel: 'Pro' },
-  { type: 'quiz', label: 'Quiz', icon: 'curriculumQuiz' },
-  { type: 'assignment', label: 'Assignment', icon: 'curriculumAssignment' },
-];
+export function getContentPickerTypes(): PickerOpt[] {
+  return [
+    { type: 'lesson_text', label: __('Text lesson', 'sikshya'), icon: 'plusDocument' },
+    { type: 'lesson_video', label: __('Video lesson', 'sikshya'), icon: 'curriculumLessonVideo' },
+    {
+      type: 'lesson_live',
+      label: __('Live class', 'sikshya'),
+      icon: 'curriculumLessonLive',
+      addonId: 'live_classes',
+      proLabel: 'Pro',
+    },
+    {
+      type: 'lesson_scorm',
+      label: __('SCORM package', 'sikshya'),
+      icon: 'curriculumLessonScorm',
+      addonId: 'scorm_h5p_pro',
+      proLabel: 'Pro',
+    },
+    {
+      type: 'lesson_h5p',
+      label: __('H5P interactive', 'sikshya'),
+      icon: 'curriculumLessonH5p',
+      addonId: 'scorm_h5p_pro',
+      proLabel: 'Pro',
+    },
+    { type: 'quiz', label: __('Quiz', 'sikshya'), icon: 'curriculumQuiz' },
+    { type: 'assignment', label: __('Assignment', 'sikshya'), icon: 'curriculumAssignment' },
+  ];
+}
+
+/** @deprecated Use {@link getContentPickerTypes} — kept for importers that expect a constant. */
+export const CONTENT_PICKER_TYPES: PickerOpt[] = getContentPickerTypes();
 
 export function defaultTitleFor(type: ContentPickerType, config?: SikshyaReactConfig): string {
-  const quiz = config ? term(config, 'quiz') : 'Quiz';
-  const assignment = config ? term(config, 'assignment') : 'Assignment';
-  const lesson = config ? term(config, 'lesson') : 'Lesson';
+  const quiz = config ? term(config, 'quiz') : __('Quiz', 'sikshya');
+  const assignment = config ? term(config, 'assignment') : __('Assignment', 'sikshya');
+  const lesson = config ? term(config, 'lesson') : __('Lesson', 'sikshya');
   const labels: Record<ContentPickerType, string> = {
-    lesson_text: `Text ${lesson.toLowerCase()}`,
-    lesson_video: `Video ${lesson.toLowerCase()}`,
-    lesson_live: 'Live class',
-    lesson_scorm: 'SCORM package',
-    lesson_h5p: 'H5P interactive',
+    lesson_text: sprintf(__('Text %s', 'sikshya'), lesson.toLowerCase()),
+    lesson_video: sprintf(__('Video %s', 'sikshya'), lesson.toLowerCase()),
+    lesson_live: __('Live class', 'sikshya'),
+    lesson_scorm: __('SCORM package', 'sikshya'),
+    lesson_h5p: __('H5P interactive', 'sikshya'),
     quiz,
     assignment,
   };
-  const lab = labels[type] || 'Content';
-  return `New ${lab.toLowerCase()}`;
+  const lab = labels[type] || __('Content', 'sikshya');
+  return sprintf(__('New %s', 'sikshya'), lab.toLowerCase());
 }
 
 const FIELD_INPUT =
@@ -114,8 +138,11 @@ export function AddContentTypePickerModal(props: Props) {
   const {
     open,
     config,
-    heading = 'Add a lesson, quiz, or assignment',
-    description = 'Pick a type, give it a clear name, then open it from the list to add the actual teaching material. Quiz questions are created inside the quiz editor after you add the quiz here.',
+    heading = __('Add a lesson, quiz, or assignment', 'sikshya'),
+    description = __(
+      'Pick a type, give it a clear name, then open it from the list to add the actual teaching material. Quiz questions are created inside the quiz editor after you add the quiz here.',
+      'sikshya'
+    ),
     contextLabel,
     contextValue,
     allowedTypes,
@@ -127,7 +154,7 @@ export function AddContentTypePickerModal(props: Props) {
     onSubmit,
     busy,
     error,
-    submitLabel = 'Add content',
+    submitLabel = __('Add content', 'sikshya'),
     addonsHref,
   } = props;
 
@@ -146,9 +173,10 @@ export function AddContentTypePickerModal(props: Props) {
     return () => window.clearTimeout(t);
   }, [open]);
 
+  const pickerTypes = getContentPickerTypes();
   const tiles = allowedTypes
-    ? CONTENT_PICKER_TYPES.filter((opt) => allowedTypes.includes(opt.type))
-    : CONTENT_PICKER_TYPES;
+    ? pickerTypes.filter((opt) => allowedTypes.includes(opt.type))
+    : pickerTypes;
 
   const lockedReason = (opt: PickerOpt): { locked: boolean; badge?: 'Pro' | 'Off' | 'Upgrade'; hint?: string } => {
     if (!opt.addonId) return { locked: false };
@@ -157,13 +185,13 @@ export function AddContentTypePickerModal(props: Props) {
     const licenseOk = Boolean(st.licenseOk);
     const loading = Boolean(st.loading) && st.enabled === null;
     if (loading) {
-      return { locked: true, badge: 'Pro', hint: 'Checking add-on status…' };
+      return { locked: true, badge: 'Pro', hint: __('Checking add-on status…', 'sikshya') };
     }
     if (!licenseOk) {
-      return { locked: true, badge: 'Upgrade', hint: 'Upgrade your plan to unlock this.' };
+      return { locked: true, badge: 'Upgrade', hint: __('Upgrade your plan to unlock this.', 'sikshya') };
     }
     if (!enabled) {
-      return { locked: true, badge: 'Off', hint: 'Turn this on in Addons to use it.' };
+      return { locked: true, badge: 'Off', hint: __('Turn this on in Addons to use it.', 'sikshya') };
     }
     return { locked: false };
   };
@@ -189,10 +217,10 @@ export function AddContentTypePickerModal(props: Props) {
             onClick={handleClose}
             disabled={busy}
           >
-            Cancel
+            {__('Cancel', 'sikshya')}
           </button>
           <ButtonPrimary type="button" className="px-4 py-2.5" disabled={busy || !title.trim()} onClick={onSubmit}>
-            {busy ? 'Adding…' : submitLabel}
+            {busy ? __('Adding…', 'sikshya') : submitLabel}
           </ButtonPrimary>
         </div>
       }
@@ -206,11 +234,13 @@ export function AddContentTypePickerModal(props: Props) {
 
       {error ? (
         <div className={contextLabel && contextValue ? 'mt-4' : ''}>
-          <ApiErrorPanel error={error} title="Could not create item" onRetry={() => void 0} />
+          <ApiErrorPanel error={error} title={__('Could not create item', 'sikshya')} onRetry={() => void 0} />
         </div>
       ) : null}
 
-      <div className={`${FIELD_LABEL} ${contextLabel && contextValue ? 'mt-5' : ''}`}>What are you adding?</div>
+      <div className={`${FIELD_LABEL} ${contextLabel && contextValue ? 'mt-5' : ''}`}>
+        {__('What are you adding?', 'sikshya')}
+      </div>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {tiles.map((opt) => {
           const active = contentType === opt.type;
@@ -225,7 +255,7 @@ export function AddContentTypePickerModal(props: Props) {
               }}
               disabled={gate.locked}
               aria-disabled={gate.locked}
-              title={gate.locked ? gate.hint || 'This item is locked.' : opt.label}
+              title={gate.locked ? gate.hint || __('This item is locked.', 'sikshya') : opt.label}
               className={`relative flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 sm:text-sm ${
                 gate.locked
                   ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-500'
@@ -253,21 +283,23 @@ export function AddContentTypePickerModal(props: Props) {
       </div>
       {addonsHref ? (
         <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-          Locked items can be enabled from{' '}
+          {__('Locked items can be enabled from', 'sikshya')}{' '}
           <a
             href={addonsHref}
             className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
           >
-            Addons
+            {__('Addons', 'sikshya')}
           </a>
           .
         </p>
       ) : null}
 
       <label htmlFor="sikshya-add-content-title-input" className={`${FIELD_LABEL} mt-5`}>
-        Name for this item
+        {__('Name for this item', 'sikshya')}
       </label>
-      <p className={`${FIELD_HINT} mt-0`}>Learners see this in the course outline. You can rename it later.</p>
+      <p className={`${FIELD_HINT} mt-0`}>
+        {__('Learners see this in the course outline. You can rename it later.', 'sikshya')}
+      </p>
       <input
         ref={inputRef}
         id="sikshya-add-content-title-input"

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { NavIcon } from '../../NavIcon';
 import { useClickOutside } from '../../../hooks/useClickOutside';
+import { __ } from '../../../lib/i18n';
 
 export type ColumnToggleDef = { id: string; label: string };
 
@@ -37,12 +38,14 @@ export function ColumnVisibilityMenu({
         onClick={() => setOpen((o) => !o)}
       >
         <NavIcon name="columns" className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-        Columns
+        {__('Columns', 'sikshya')}
         <NavIcon name="chevronDown" className="h-3.5 w-3.5 opacity-60" />
       </button>
       {open ? (
         <div className="absolute right-0 z-30 mt-1 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-lg ring-1 ring-black/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10">
-          <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Visible columns</p>
+          <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            {__('Visible columns', 'sikshya')}
+          </p>
           <ul className="max-h-64 overflow-auto">
             {columns.map((c) => (
               <li key={c.id}>

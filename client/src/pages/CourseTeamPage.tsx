@@ -13,6 +13,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type InstructorRow = {
   id: number;
@@ -332,7 +333,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
     const cid = parseInt(courseId, 10);
     const uid = parseInt(newUserId, 10);
     if (!Number.isFinite(cid) || cid <= 0 || !Number.isFinite(uid) || uid <= 0) {
-      setMsg('Pick a course and an instructor.');
+      setMsg(__('Pick a course and an instructor.', 'sikshya'));
       return;
     }
     setSaving(true);
@@ -343,7 +344,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
         revenue_share: parseFloat(share) || 0,
         role: newMemberRole,
       });
-      setMsg('Instructor saved.');
+      setMsg(__('Instructor saved.', 'sikshya'));
       setNewUserId('');
       setUserQuery('');
       setNewMemberRole('co_instructor');
@@ -361,7 +362,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
     const raw = rowShareDraft[userId] ?? '0';
     const revenueShare = parseFloat(raw);
     if (!Number.isFinite(revenueShare)) {
-      setMsg('Enter a valid percentage.');
+      setMsg(__('Enter a valid percentage.', 'sikshya'));
       return;
     }
     const roleRaw = rowRoleDraft[userId] ?? 'co_instructor';
@@ -375,7 +376,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
         revenue_share: revenueShare,
         role,
       });
-      setMsg('Staff row updated.');
+      setMsg(__('Staff row updated.', 'sikshya'));
       refetch();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Request failed');
@@ -389,7 +390,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
     setMsg(null);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.multiInstructorEarningsSetStatus, { id: rowId, status });
-      setMsg(status === 'paid' ? 'Marked as paid.' : 'Marked as pending.');
+      setMsg(status === 'paid' ? __('Marked as paid.', 'sikshya') : __('Marked as pending.', 'sikshya'));
       await refetchEarnings();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Request failed');
@@ -402,9 +403,9 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
     const cid = parseInt(courseId, 10);
     if (!Number.isFinite(cid) || cid <= 0) return;
     const ok = await dialog.confirm({
-      title: 'Remove staff member?',
-      message: 'Remove this person from the course staff list?',
-      confirmLabel: 'Remove',
+      title: __('Remove staff member?', 'sikshya'),
+      message: __('Remove this person from the course staff list?', 'sikshya'),
+      confirmLabel: __('Remove', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -413,7 +414,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
     try {
       const path = `${SIKSHYA_ENDPOINTS.pro.multiInstructorCourseStaffWrite}?course_id=${encodeURIComponent(String(cid))}&user_id=${encodeURIComponent(String(userId))}`;
       await getSikshyaApi().delete(path);
-      setMsg('Removed.');
+      setMsg(__('Removed.', 'sikshya'));
       refetch();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Request failed');
@@ -435,31 +436,31 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Assign co-instructors and revenue weights per course (Pro Multi-instructor). Open from Course → Course staff, or use Manage staff on any course row. Global visibility: Add-ons → Multi-instructor."
+      subtitle={__('Assign co-instructors and revenue weights per course (Pro Multi-instructor). Open from Course → Course staff, or use Manage staff on any course row. Global visibility: Add-ons → Multi-instructor.', 'sikshya')}
     >
       <GatedFeatureWorkspace
         mode={mode}
         featureId="multi_instructor"
         config={config}
-        featureTitle="Course staff"
-        featureDescription="Link co-instructors to a course, set optional revenue weights, and record ledger rows when orders complete."
+        featureTitle={__('Course staff', 'sikshya')}
+        featureDescription={__('Link co-instructors to a course, set optional revenue weights, and record ledger rows when orders complete.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Course staff is not enabled"
-        addonEnableDescription="Enable the Multi-instructor add-on to register REST routes and unlock co-instructor management."
+        addonEnableTitle={__('Course staff is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Multi-instructor add-on to register REST routes and unlock co-instructor management.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         <>
-          {error ? <ApiErrorPanel error={error} title="Could not load team" onRetry={() => refetch()} /> : null}
+          {error ? <ApiErrorPanel error={error} title={__('Could not load team', 'sikshya')} onRetry={() => refetch()} /> : null}
 
           {warnings.length > 0 ? (
             <div
               className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100"
               role="status"
             >
-              <p className="font-semibold">Heads up</p>
+              <p className="font-semibold">{__('Heads up', 'sikshya')}</p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 {warnings.map((w) => (
                   <li key={w}>{w}</li>
@@ -473,7 +474,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
             className="mb-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-b from-white to-slate-50/80 shadow-sm dark:border-slate-700 dark:from-slate-900 dark:to-slate-950/80"
           >
             <div className="border-b border-slate-100 bg-slate-50/90 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/80">
-              <h2 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">Build course team</h2>
+              <h2 className="text-base font-semibold tracking-tight text-slate-900 dark:text-white">{__('Build course team', 'sikshya')}</h2>
               <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 Pick a course, search staff by name (Administrator, Editor, Author, or Sikshya instructor), set role and
                 revenue weight. Weights apply to paid line items and are normalized per sale.
@@ -504,14 +505,14 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                   onChange={(e) => setCourseQuery(e.target.value)}
                   onFocus={() => setCourseDropdownOpen(true)}
                   className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-600 dark:bg-slate-950"
-                  placeholder="Type to search your catalog…"
-                  aria-label="Search courses"
+                  placeholder={__('Type to search your catalog…', 'sikshya')}
+                  aria-label={__('Search courses', 'sikshya')}
                   autoComplete="off"
                 />
                 {courseSearch.loading ? (
-                  <div className="mt-2 text-xs text-slate-500">Searching courses…</div>
+                  <div className="mt-2 text-xs text-slate-500">{__('Searching courses…', 'sikshya')}</div>
                 ) : courseSearch.error ? (
-                  <div className="mt-2 text-xs text-red-600 dark:text-red-400">Could not search courses.</div>
+                  <div className="mt-2 text-xs text-red-600 dark:text-red-400">{__('Could not search courses.', 'sikshya')}</div>
                 ) : courseDropdownOpen ? (
                   <div className="mt-2 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white text-sm shadow-md dark:border-slate-600 dark:bg-slate-950">
                     {(courseSearch.data?.data || []).length ? (
@@ -534,7 +535,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                       ))
                     ) : (
                       <div className="px-3 py-3 text-xs text-slate-500">
-                        {debouncedCourseQuery.trim() ? 'No courses match.' : 'Start typing to search.'}
+                        {debouncedCourseQuery.trim() ? __('No courses match.', 'sikshya') : __('Start typing to search.', 'sikshya')}
                       </div>
                     )}
                   </div>
@@ -550,7 +551,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                   onChange={(e) => setUserQuery(e.target.value)}
                   onFocus={() => setUserDropdownOpen(true)}
                   className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-inner dark:border-slate-600 dark:bg-slate-950"
-                  placeholder="Search by display name…"
+                  placeholder={__('Search by display name…', 'sikshya')}
                   autoComplete="off"
                 />
                 {pickedUserLabel ? (
@@ -569,9 +570,9 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                   </div>
                 ) : null}
                 {userSearch.loading ? (
-                  <div className="mt-2 text-xs text-slate-500">Searching people…</div>
+                  <div className="mt-2 text-xs text-slate-500">{__('Searching people…', 'sikshya')}</div>
                 ) : userSearch.error ? (
-                  <div className="mt-2 text-xs text-red-600 dark:text-red-400">Could not search users.</div>
+                  <div className="mt-2 text-xs text-red-600 dark:text-red-400">{__('Could not search users.', 'sikshya')}</div>
                 ) : userDropdownOpen ? (
                   <div className="mt-2 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white text-sm shadow-md dark:border-slate-600 dark:bg-slate-950">
                     {(userSearch.data?.data || []).length ? (
@@ -601,7 +602,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                       ))
                     ) : (
                       <div className="px-3 py-3 text-xs text-slate-500">
-                        {debouncedUserQuery.trim() ? 'No people match.' : 'Type to search staff accounts.'}
+                        {debouncedUserQuery.trim() ? __('No people match.', 'sikshya') : __('Type to search staff accounts.', 'sikshya')}
                       </div>
                     )}
                   </div>
@@ -616,10 +617,10 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                     value={newMemberRole}
                     onChange={(e) => setNewMemberRole(e.target.value === 'lead' ? 'lead' : 'co_instructor')}
                     className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-950"
-                    aria-label="Staff role for new member"
+                    aria-label={__('Staff role for new member', 'sikshya')}
                   >
-                    <option value="co_instructor">Co-instructor</option>
-                    <option value="lead">Lead</option>
+                    <option value="co_instructor">{__('Co-instructor', 'sikshya')}</option>
+                    <option value="lead">{__('Lead', 'sikshya')}</option>
                   </select>
                 </label>
                 <label className="text-sm text-slate-600 dark:text-slate-300">
@@ -638,7 +639,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                 </label>
                 <div className="flex items-end sm:col-span-2 lg:col-span-1">
                   <ButtonPrimary type="submit" disabled={saving} className="w-full sm:w-auto">
-                    {saving ? 'Saving…' : 'Add to team'}
+                    {saving ? __('Saving…', 'sikshya') : __('Add to team', 'sikshya')}
                   </ButtonPrimary>
                 </div>
               </div>
@@ -648,10 +649,10 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
 
           <ListPanel className="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
             {loading ? (
-              <div className="p-10 text-center text-sm text-slate-500">Loading team…</div>
+              <div className="p-10 text-center text-sm text-slate-500">{__('Loading team…', 'sikshya')}</div>
             ) : rowsBase.length === 0 ? (
               <ListEmptyState
-                title={isGlobal ? 'No staff rows yet' : 'No staff yet'}
+                title={isGlobal ? __('No staff rows yet', 'sikshya') : __('No staff yet', 'sikshya')}
                 description={
                   isGlobal
                     ? 'Once you link instructors to courses, they’ll show up here. Pick a course above to add staff.'
@@ -669,7 +670,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                       type="text"
                       value={staffFilter}
                       onChange={(e) => setStaffFilter(e.target.value)}
-                      placeholder="Search by name, email, or course…"
+                      placeholder={__('Search by name, email, or course…', 'sikshya')}
                       className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner dark:border-slate-600 dark:bg-slate-950"
                     />
                   </div>
@@ -692,11 +693,11 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                 <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                   <thead className="bg-slate-50/90 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/90 dark:text-slate-400">
                     <tr>
-                      {isGlobal ? <th className="px-5 py-3.5">Course</th> : null}
-                      <th className="px-5 py-3.5">Instructor</th>
-                      <th className="px-5 py-3.5">Role</th>
+                      {isGlobal ? <th className="px-5 py-3.5">{__('Course', 'sikshya')}</th> : null}
+                      <th className="px-5 py-3.5">{__('Instructor', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Role', 'sikshya')}</th>
                       <th className="px-5 py-3.5">Weight %</th>
-                      <th className="px-5 py-3.5 text-right">Actions</th>
+                      <th className="px-5 py-3.5 text-right">{__('Actions', 'sikshya')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -741,7 +742,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                           <td className="px-5 py-3.5">
                             {isGlobal ? (
                               <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                {r.role === 'lead' ? 'Lead' : 'Co-instructor'}
+                                {r.role === 'lead' ? __('Lead', 'sikshya') : __('Co-instructor', 'sikshya')}
                               </span>
                             ) : (
                               <select
@@ -755,8 +756,8 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                                 className="w-full max-w-[11rem] rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-950"
                                 aria-label={`Role for user ${r.user_id}`}
                               >
-                                <option value="co_instructor">Co-instructor</option>
-                                <option value="lead">Lead</option>
+                                <option value="co_instructor">{__('Co-instructor', 'sikshya')}</option>
+                                <option value="lead">{__('Lead', 'sikshya')}</option>
                               </select>
                             )}
                           </td>
@@ -830,7 +831,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
           </ListPanel>
 
           <div className="mt-8 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Instructor earnings ledger</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Instructor earnings ledger', 'sikshya')}</h2>
             <p className="mt-1 max-w-2xl text-xs text-slate-600 dark:text-slate-400">
               Ledger rows are created when a paid order completes. Search an instructor by name, then load their
               history. Admins with payout permissions can mark rows paid.
@@ -848,7 +849,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                     setLedgerPickedLabel('');
                   }}
                   onFocus={() => setLedgerDropdownOpen(true)}
-                  placeholder="Search by name…"
+                  placeholder={__('Search by name…', 'sikshya')}
                   className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-slate-600 dark:bg-slate-950"
                   autoComplete="off"
                 />
@@ -870,9 +871,9 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                   </div>
                 ) : null}
                 {ledgerUserSearch.loading ? (
-                  <div className="mt-2 text-xs text-slate-500">Searching…</div>
+                  <div className="mt-2 text-xs text-slate-500">{__('Searching…', 'sikshya')}</div>
                 ) : ledgerUserSearch.error ? (
-                  <div className="mt-2 text-xs text-red-600">Could not search users.</div>
+                  <div className="mt-2 text-xs text-red-600">{__('Could not search users.', 'sikshya')}</div>
                 ) : ledgerDropdownOpen ? (
                   <div className="mt-2 max-h-52 overflow-auto rounded-xl border border-slate-200 bg-white text-sm shadow-md dark:border-slate-600 dark:bg-slate-950">
                     {(ledgerUserSearch.data?.data || []).length ? (
@@ -899,14 +900,14 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                       ))
                     ) : (
                       <div className="px-3 py-3 text-xs text-slate-500">
-                        {debouncedLedgerQuery.trim() ? 'No matches.' : 'Type to search instructors.'}
+                        {debouncedLedgerQuery.trim() ? __('No matches.', 'sikshya') : __('Type to search instructors.', 'sikshya')}
                       </div>
                     )}
                   </div>
                 ) : null}
               </div>
               <ButtonPrimary type="button" disabled={earningsLoading || !earningsUserId} onClick={() => refetchEarnings()}>
-                {earningsLoading ? 'Loading…' : 'Refresh ledger'}
+                {earningsLoading ? __('Loading…', 'sikshya') : __('Refresh ledger', 'sikshya')}
               </ButtonPrimary>
               <div className="text-sm text-slate-600 dark:text-slate-400">
                 Total: <span className="font-semibold tabular-nums">{Number(earningsData?.total || 0).toFixed(2)}</span>
@@ -914,19 +915,19 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
             </div>
 
             {earningsError ? (
-              <ApiErrorPanel error={earningsError} title="Could not load earnings" onRetry={() => refetchEarnings()} />
+              <ApiErrorPanel error={earningsError} title={__('Could not load earnings', 'sikshya')} onRetry={() => refetchEarnings()} />
             ) : null}
             {(earningsData?.rows?.length || 0) > 0 ? (
               <div className="mt-4 overflow-x-auto">
                 <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                   <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                     <tr>
-                      <th className="px-5 py-3.5">ID</th>
-                      <th className="px-5 py-3.5">Order item</th>
-                      <th className="px-5 py-3.5">Amount</th>
-                      <th className="px-5 py-3.5">Status</th>
-                      <th className="px-5 py-3.5">Created</th>
-                      {canManageLedger ? <th className="px-5 py-3.5 text-right">Admin</th> : null}
+                      <th className="px-5 py-3.5">{__('ID', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Order item', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Amount', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                      <th className="px-5 py-3.5">{__('Created', 'sikshya')}</th>
+                      {canManageLedger ? <th className="px-5 py-3.5 text-right">{__('Admin', 'sikshya')}</th> : null}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -946,7 +947,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                                 disabled={ledgerBusyId === r.id}
                                 onClick={() => void setLedgerStatus(r.id, 'paid')}
                               >
-                                {ledgerBusyId === r.id ? '…' : 'Mark paid'}
+                                {ledgerBusyId === r.id ? '…' : __('Mark paid', 'sikshya')}
                               </button>
                             ) : r.status === 'paid' ? (
                               <button
@@ -955,7 +956,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                                 disabled={ledgerBusyId === r.id}
                                 onClick={() => void setLedgerStatus(r.id, 'pending')}
                               >
-                                {ledgerBusyId === r.id ? '…' : 'Set pending'}
+                                {ledgerBusyId === r.id ? '…' : __('Set pending', 'sikshya')}
                               </button>
                             ) : (
                               <span className="text-xs text-slate-400">—</span>
@@ -968,7 +969,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                 </table>
               </div>
             ) : (
-              <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">No earnings rows for this query yet.</p>
+              <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">{__('No earnings rows for this query yet.', 'sikshya')}</p>
             )}
           </div>
         </>

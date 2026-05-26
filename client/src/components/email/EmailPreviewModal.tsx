@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { OVERLAY_Z_MODAL } from '../../lib/overlayLayers';
+import { __ } from '../../lib/i18n';
 import { NavIcon } from '../NavIcon';
 
 type Props = {
@@ -49,8 +51,17 @@ export function EmailPreviewModal(props: Props) {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="presentation">
-      <button type="button" className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] dark:bg-slate-950/70" aria-label="Close" onClick={onClose} />
+    <div
+      className="sikshya-admin-theme fixed inset-0 flex items-center justify-center p-4 sm:p-6"
+      style={{ zIndex: OVERLAY_Z_MODAL }}
+      role="presentation"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] dark:bg-slate-950/70"
+        aria-label={__('Close', 'sikshya')}
+        onClick={onClose}
+      />
       <div
         ref={panelRef}
         role="dialog"
@@ -65,16 +76,18 @@ export function EmailPreviewModal(props: Props) {
             </span>
             <div className="min-w-0">
               <h2 id="sikshya-email-preview-title" className="text-lg font-semibold text-slate-900 dark:text-white">
-                Email Preview
+                {__('Email Preview', 'sikshya')}
               </h2>
-              <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Preview with sample data</p>
+              <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                {__('Preview with sample data', 'sikshya')}
+              </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-            aria-label="Close preview"
+            aria-label={__('Close preview', 'sikshya')}
           >
             <span className="text-xl leading-none">×</span>
           </button>
@@ -84,14 +97,18 @@ export function EmailPreviewModal(props: Props) {
           <div className="mb-4">
             <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               <span aria-hidden>✉️</span>
-              Subject
+              {__('Subject', 'sikshya')}
             </div>
             <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-100">
               {subject || '—'}
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50/80 dark:border-slate-600 dark:bg-slate-950/40">
-            <iframe title="Email preview" className="h-[min(480px,55vh)] w-full rounded-xl border-0 bg-white dark:bg-slate-900" srcDoc={html} />
+            <iframe
+              title={__('Email preview', 'sikshya')}
+              className="h-[min(480px,55vh)] w-full rounded-xl border-0 bg-white dark:bg-slate-900"
+              srcDoc={html}
+            />
           </div>
         </div>
 
@@ -101,7 +118,7 @@ export function EmailPreviewModal(props: Props) {
             onClick={onClose}
             className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
-            Close
+            {__('Close', 'sikshya')}
           </button>
         </div>
       </div>

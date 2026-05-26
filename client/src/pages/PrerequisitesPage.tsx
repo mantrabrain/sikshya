@@ -25,6 +25,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 type LessonRow = { id: number; title: string; status: string };
 
@@ -206,10 +207,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       const hasAny = (r.required_courses_count || 0) > 0 || (r.lesson_locks_count || 0) > 0;
       if (!hasAny) return;
       const ok = await dialog.confirm({
-        title: 'Delete all access locks?',
+        title: __('Delete all access locks?', 'sikshya'),
         message:
-          'Removes enrollment prerequisites and every lesson lock in this course. The course stays in your catalog; it disappears from this list until you add locks again.',
-        confirmLabel: 'Delete all locks',
+          __('Removes enrollment prerequisites and every lesson lock in this course. The course stays in your catalog; it disappears from this list until you add locks again.', 'sikshya'),
+        confirmLabel: __('Delete all locks', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -217,10 +218,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       toast.clear();
       try {
         await clearAllAccessLocksForCourseId(r.course_id);
-        toast.success('Removed', 'All access locks removed for this course.');
+        toast.success(__('Removed', 'sikshya'), 'All access locks removed for this course.');
         void listQ.refetch();
       } catch (e) {
-        toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
+        toast.error(__('Request failed', 'sikshya'), e instanceof Error ? e.message : 'Request failed');
       } finally {
         setClearingAllLocksCourseId(null);
       }
@@ -232,10 +233,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     async (r: PrereqCourseRow) => {
       if ((r.required_courses_count || 0) <= 0) return;
       const ok = await dialog.confirm({
-        title: 'Clear enrollment lock?',
+        title: __('Clear enrollment lock?', 'sikshya'),
         message:
-          'Learners will be able to enroll in this course without completing other courses first. This cannot be undone from here except by setting new requirements.',
-        confirmLabel: 'Clear lock',
+          __('Learners will be able to enroll in this course without completing other courses first. This cannot be undone from here except by setting new requirements.', 'sikshya'),
+        confirmLabel: __('Clear lock', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -245,10 +246,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
         await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.coursePrerequisites(r.course_id), {
           prerequisite_course_ids: [],
         });
-        toast.success('Removed', 'Enrollment lock cleared.');
+        toast.success(__('Removed', 'sikshya'), 'Enrollment lock cleared.');
         void listQ.refetch();
       } catch (e) {
-        toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
+        toast.error(__('Request failed', 'sikshya'), e instanceof Error ? e.message : 'Request failed');
       } finally {
         setClearingEnrollmentId(null);
       }
@@ -260,10 +261,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     async (r: PrereqCourseRow) => {
       if ((r.lesson_locks_count || 0) <= 0) return;
       const ok = await dialog.confirm({
-        title: 'Remove all lesson locks?',
+        title: __('Remove all lesson locks?', 'sikshya'),
         message:
-          'Every lesson in this course that currently requires other lessons first will be reset. Learners follow curriculum order only until you set locks again.',
-        confirmLabel: 'Remove all',
+          __('Every lesson in this course that currently requires other lessons first will be reset. Learners follow curriculum order only until you set locks again.', 'sikshya'),
+        confirmLabel: __('Remove all', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -279,10 +280,10 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.lessonPrerequisites(lid), { prerequisite_lesson_ids: [] })
           )
         );
-        toast.success('Removed', 'Lesson locks removed.');
+        toast.success(__('Removed', 'sikshya'), 'Lesson locks removed.');
         void listQ.refetch();
       } catch (e) {
-        toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
+        toast.error(__('Request failed', 'sikshya'), e instanceof Error ? e.message : 'Request failed');
       } finally {
         setClearingLessonsCourseId(null);
       }
@@ -302,7 +303,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
     const run = async () => {
       if (bulkActionValue === 'clear_all') {
         await Promise.all(ids.map((courseId) => clearAllAccessLocksForCourseId(courseId)));
-        toast.success('Removed', `Removed all access locks for ${n} course(s).`);
+        toast.success(__('Removed', 'sikshya'), `Removed all access locks for ${n} course(s).`);
         return;
       }
       if (bulkActionValue === 'clear_enrollment') {
@@ -313,7 +314,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             })
           )
         );
-        toast.success('Updated', `Updated ${n} course(s).`);
+        toast.success(__('Updated', 'sikshya'), `Updated ${n} course(s).`);
         return;
       }
       if (bulkActionValue === 'clear_lesson_locks') {
@@ -328,7 +329,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             )
           );
         }
-        toast.success('Removed', `Lesson locks cleared for ${n} course(s).`);
+        toast.success(__('Removed', 'sikshya'), `Lesson locks cleared for ${n} course(s).`);
       }
     };
 
@@ -336,8 +337,8 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       const ok = await dialog.confirm({
         title: `Delete all access locks for ${n} course(s)?`,
         message:
-          'Clears enrollment prerequisites and every lesson lock for each selected course. Rows disappear from this list until you add locks again (unless you turn on “Show courses without locks”).',
-        confirmLabel: 'Delete all locks',
+          __('Clears enrollment prerequisites and every lesson lock for each selected course. Rows disappear from this list until you add locks again (unless you turn on “Show courses without locks”).', 'sikshya'),
+        confirmLabel: __('Delete all locks', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -345,8 +346,8 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       const ok = await dialog.confirm({
         title: `Delete enrollment lock for ${n} course(s)?`,
         message:
-          'Learners will be able to enroll in those courses without completing other courses first, where a lock existed.',
-        confirmLabel: 'Delete locks',
+          __('Learners will be able to enroll in those courses without completing other courses first, where a lock existed.', 'sikshya'),
+        confirmLabel: __('Delete locks', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -354,8 +355,8 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       const ok = await dialog.confirm({
         title: `Delete all lesson locks for ${n} course(s)?`,
         message:
-          'Every lesson in those courses that currently requires other lessons first will be reset. This can take a moment.',
-        confirmLabel: 'Delete all lesson locks',
+          __('Every lesson in those courses that currently requires other lessons first will be reset. This can take a moment.', 'sikshya'),
+        confirmLabel: __('Delete all lesson locks', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -385,7 +386,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             ref={headerSelectRef}
             type="checkbox"
             className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
-            aria-label="Select all courses on this page"
+            aria-label={__('Select all courses on this page', 'sikshya')}
             checked={allVisibleSelected}
             onChange={toggleSelectAllCourses}
           />
@@ -472,21 +473,21 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             },
             {
               key: 'delete-all-access',
-              label: allBusy ? 'Deleting all locks…' : 'Delete all access locks',
+              label: allBusy ? __('Deleting all locks…', 'sikshya') : __('Delete all access locks', 'sikshya'),
               danger: true,
               disabled: !hasAnyLock || allBusy || enrollmentBusy || lessonsBusy,
               onClick: () => void clearAllAccessLocksForRow(r),
             },
             {
               key: 'delete-enrollment',
-              label: enrollmentBusy ? 'Deleting enrollment lock…' : 'Delete enrollment lock only',
+              label: enrollmentBusy ? __('Deleting enrollment lock…', 'sikshya') : __('Delete enrollment lock only', 'sikshya'),
               danger: true,
               disabled: !hasEnrollmentLock || enrollmentBusy || allBusy,
               onClick: () => void clearEnrollmentLocks(r),
             },
             {
               key: 'delete-lesson-locks',
-              label: lessonsBusy ? 'Deleting lesson locks…' : 'Delete lesson locks only',
+              label: lessonsBusy ? __('Deleting lesson locks…', 'sikshya') : __('Delete lesson locks only', 'sikshya'),
               danger: true,
               disabled: !hasLessonLocks || lessonsBusy || allBusy,
               onClick: () => void clearAllLessonLocks(r),
@@ -568,12 +569,12 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.coursePrerequisites(cid), {
         prerequisite_course_ids: modalCoursePrereqs,
       });
-      toast.success('Saved', 'Enrollment lock saved.');
+      toast.success(__('Saved', 'sikshya'), 'Enrollment lock saved.');
       setEnrollmentModalOpen(false);
       setActiveCourseRow(null);
       void listQ.refetch();
     } catch (e) {
-      toast.error('Save failed', e instanceof Error ? e.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), e instanceof Error ? e.message : 'Save failed');
     } finally {
       setModalSavingEnrollment(false);
     }
@@ -581,7 +582,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
 
   const saveLessonModal = async () => {
     if (modalLessonId <= 0) {
-      toast.error('Missing lesson', 'Pick a lesson first.');
+      toast.error(__('Missing lesson', 'sikshya'), 'Pick a lesson first.');
       return;
     }
     setModalSavingLesson(true);
@@ -590,13 +591,13 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.lessonPrerequisites(modalLessonId), {
         prerequisite_lesson_ids: modalLessonPrereqs,
       });
-      toast.success('Saved', 'Lesson lock saved.');
+      toast.success(__('Saved', 'sikshya'), 'Lesson lock saved.');
       setLessonModalOpen(false);
       setActiveCourseRow(null);
       setModalLessonId(0);
       void listQ.refetch();
     } catch (e) {
-      toast.error('Save failed', e instanceof Error ? e.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), e instanceof Error ? e.message : 'Save failed');
     } finally {
       setModalSavingLesson(false);
     }
@@ -635,7 +636,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
         setEnrollmentModalOpen(true);
       }
     } catch (e) {
-      toast.error('Could not load', e instanceof Error ? e.message : 'Could not load the selected course.');
+      toast.error(__('Could not load', 'sikshya'), e instanceof Error ? e.message : 'Could not load the selected course.');
     } finally {
       setAddStarting(false);
     }
@@ -648,17 +649,17 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Block enrollment, or unlock lessons in order. Two simple rules per course."
+      subtitle={__('Block enrollment, or unlock lessons in order. Two simple rules per course.', 'sikshya')}
     >
       <GatedFeatureWorkspace
         mode={mode}
         featureId="prerequisites"
         config={config}
-        featureTitle="Access locks (Prerequisites)"
-        featureDescription="Build a guided learning path: require prior courses before enrolment, or require earlier lessons before later ones unlock."
+        featureTitle={__('Access locks (Prerequisites)', 'sikshya')}
+        featureDescription={__('Build a guided learning path: require prior courses before enrolment, or require earlier lessons before later ones unlock.', 'sikshya')}
         previewVariant="form"
-        addonEnableTitle="Prerequisites is not enabled"
-        addonEnableDescription="Turn on the Prerequisites add-on to enforce a learning order across courses and lessons."
+        addonEnableTitle={__('Prerequisites is not enabled', 'sikshya')}
+        addonEnableDescription={__('Turn on the Prerequisites add-on to enforce a learning order across courses and lessons.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -667,8 +668,8 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
         <div className="space-y-6">
           <Modal
             open={addModalOpen}
-            title="Add prerequisites"
-            description="Pick a course, then choose whether you want to add an enrollment lock or lesson-level prerequisite locks."
+            title={__('Add prerequisites', 'sikshya')}
+            description={__('Pick a course, then choose whether you want to add an enrollment lock or lesson-level prerequisite locks.', 'sikshya')}
             onClose={() => (addStarting ? null : setAddModalOpen(false))}
             size="lg"
             footer={
@@ -677,7 +678,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   Cancel
                 </ButtonSecondary>
                 <ButtonPrimary type="button" onClick={() => void startAddPrerequisite()} disabled={addCourseId <= 0 || addStarting}>
-                  {addStarting ? 'Opening…' : 'Continue'}
+                  {addStarting ? __('Opening…', 'sikshya') : __('Continue', 'sikshya')}
                 </ButtonPrimary>
               </div>
             }
@@ -687,12 +688,12 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                 value={addCourseId}
                 onChange={setAddCourseId}
                 label="Course"
-                placeholder="Choose a course to add access locks…"
+                placeholder={__('Choose a course to add access locks…', 'sikshya')}
                 hint="You can add prerequisites even if the course is not currently listed below."
               />
 
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Lock type</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{__('Lock type', 'sikshya')}</p>
                 <div className="mt-2 grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
@@ -703,7 +704,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                     }`}
                     onClick={() => setAddLockType('enrollment')}
                   >
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Enrollment lock</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Enrollment lock', 'sikshya')}</div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Require learners to complete other courses before they can enroll.
                     </div>
@@ -717,7 +718,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                     }`}
                     onClick={() => setAddLockType('lessons')}
                   >
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Lesson locks</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Lesson locks', 'sikshya')}</div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Force learners to complete earlier lessons before later lessons unlock.
                     </div>
@@ -730,7 +731,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
           <Modal
             open={enrollmentModalOpen}
             title={activeCourseRow ? `Edit enrollment lock — ${activeCourseRow.course_title}` : 'Edit enrollment lock'}
-            description="Learners cannot enroll until they complete every required course."
+            description={__('Learners cannot enroll until they complete every required course.', 'sikshya')}
             onClose={() => (modalSavingEnrollment ? null : (setEnrollmentModalOpen(false), setActiveCourseRow(null)))}
             size="lg"
             footer={
@@ -747,7 +748,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   Cancel
                 </button>
                 <ButtonPrimary type="button" onClick={() => void saveEnrollmentModal()} disabled={modalSavingEnrollment}>
-                  {modalSavingEnrollment ? 'Saving…' : 'Save'}
+                  {modalSavingEnrollment ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
                 </ButtonPrimary>
               </div>
             }
@@ -757,8 +758,8 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
               onChange={setModalCoursePrereqs}
               labels={modalCoursePrereqLabels}
               excludeIds={activeCourseRow?.course_id ? [activeCourseRow.course_id] : []}
-              title="Select required courses"
-              placeholder="Click to select courses…"
+              title={__('Select required courses', 'sikshya')}
+              placeholder={__('Click to select courses…', 'sikshya')}
               hint="Empty means enrollment is open."
             />
           </Modal>
@@ -766,7 +767,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
           <Modal
             open={lessonModalOpen}
             title={activeCourseRow ? `Edit lesson order — ${activeCourseRow.course_title}` : 'Edit lesson order'}
-            description="Pick a lesson, then choose which lessons must be completed first."
+            description={__('Pick a lesson, then choose which lessons must be completed first.', 'sikshya')}
             onClose={() => (modalSavingLesson ? null : (setLessonModalOpen(false), setActiveCourseRow(null), setModalLessonId(0)))}
             size="xl"
             footer={
@@ -784,20 +785,20 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   Cancel
                 </button>
                 <ButtonPrimary type="button" onClick={() => void saveLessonModal()} disabled={modalSavingLesson}>
-                  {modalSavingLesson ? 'Saving…' : 'Save'}
+                  {modalSavingLesson ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
                 </ButtonPrimary>
               </div>
             }
           >
             <div className="grid gap-4 lg:grid-cols-[340px_1fr] lg:items-stretch">
               <div className="flex min-h-0 flex-col">
-                <label className="block shrink-0 text-sm font-medium text-slate-800 dark:text-slate-200">Lesson</label>
+                <label className="block shrink-0 text-sm font-medium text-slate-800 dark:text-slate-200">{__('Lesson', 'sikshya')}</label>
                 <select
                   value={modalLessonId}
                   onChange={(e) => setModalLessonId(Number(e.target.value))}
                   className="mt-1 w-full shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                 >
-                  <option value={0}>{modalLessonsQ.loading ? 'Loading…' : '— Select —'}</option>
+                  <option value={0}>{modalLessonsQ.loading ? __('Loading…', 'sikshya') : __('— Select —', 'sikshya')}</option>
                   {modalLessons.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.title}
@@ -805,21 +806,21 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   ))}
                 </select>
                 <div className="min-h-0 flex-1" aria-hidden />
-                <FieldHint>Select the lesson you want to lock.</FieldHint>
+                <FieldHint>{__('Select the lesson you want to lock.', 'sikshya')}</FieldHint>
               </div>
 
               <div className="flex min-h-0 flex-col">
                 <div className="flex shrink-0 items-center justify-between gap-2">
-                  <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Required lessons</label>
+                  <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Required lessons', 'sikshya')}</label>
                   {modalLessonId > 0 ? (
                     <span className="text-xs text-slate-500 dark:text-slate-400">{modalLessonPrereqs.length} selected</span>
                   ) : null}
                 </div>
                 <div className="mt-2 min-h-[12rem] max-h-[360px] flex-1 overflow-auto rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-950">
                   {modalLessonId <= 0 ? (
-                    <div className="p-3 text-sm text-slate-500 dark:text-slate-400">Pick a lesson to edit prerequisites.</div>
+                    <div className="p-3 text-sm text-slate-500 dark:text-slate-400">{__('Pick a lesson to edit prerequisites.', 'sikshya')}</div>
                   ) : modalLessonQ.loading ? (
-                    <div className="p-3 text-sm text-slate-500 dark:text-slate-400">Loading…</div>
+                    <div className="p-3 text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
                   ) : (
                     <>
                       {modalLessons
@@ -856,12 +857,12 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                           );
                         })}
                       {modalLessons.length <= 1 ? (
-                        <div className="p-3 text-sm text-slate-500 dark:text-slate-400">This course has no other lessons yet.</div>
+                        <div className="p-3 text-sm text-slate-500 dark:text-slate-400">{__('This course has no other lessons yet.', 'sikshya')}</div>
                       ) : null}
                     </>
                   )}
                 </div>
-                <FieldHint>Only lessons earlier in the curriculum can be prerequisites.</FieldHint>
+                <FieldHint>{__('Only lessons earlier in the curriculum can be prerequisites.', 'sikshya')}</FieldHint>
               </div>
             </div>
           </Modal>
@@ -870,7 +871,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Courses with access locks</h2>
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Courses with access locks', 'sikshya')}</h2>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     Each row is a course that still has an enrollment lock and/or lesson locks. Deleting all locks removes the
                     row from this list (the course is not deleted from the site). Use “Show courses without locks” to browse
@@ -888,7 +889,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
               searchValue={search}
               onSearchChange={setSearch}
               searchPlaceholder={
-                filterCourseId > 0 ? 'Clear course filter (right) to search by title…' : 'Search courses by title…'
+                filterCourseId > 0 ? __('Clear course filter (right) to search by title…', 'sikshya') : __('Search courses by title…', 'sikshya')
               }
               searchDisabled={filterCourseId > 0}
               sortField={listOrderBy}
@@ -947,13 +948,13 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
             </div>
             {bulkError ? (
               <div className="border-b border-red-100 px-4 py-3 dark:border-red-900/40">
-                <ApiErrorPanel error={bulkError} title="Bulk action failed" onRetry={() => setBulkError(null)} />
+                <ApiErrorPanel error={bulkError} title={__('Bulk action failed', 'sikshya')} onRetry={() => setBulkError(null)} />
               </div>
             ) : null}
 
             {listQ.error ? (
               <div className="p-4">
-                <ApiErrorPanel error={listQ.error} title="Could not load courses" onRetry={() => listQ.refetch()} />
+                <ApiErrorPanel error={listQ.error} title={__('Could not load courses', 'sikshya')} onRetry={() => listQ.refetch()} />
               </div>
             ) : listQ.loading ? (
               <DataTableSkeleton headers={['', 'Course', 'Enrollment lock', 'Lesson locks', '']} rows={8} />
@@ -975,7 +976,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                   wrapInCard={false}
                   emptyContent={
                     <ListEmptyState
-                      title="No courses found"
+                      title={__('No courses found', 'sikshya')}
                       description={
                         filterCourseId > 0
                           ? 'No course matches this filter, or it was removed.'
@@ -999,11 +1000,11 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
 
           {/* What is this page? — disambiguation block */}
           <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
-            <p className="font-semibold">What this page does</p>
+            <p className="font-semibold">{__('What this page does', 'sikshya')}</p>
             <p className="mt-1 leading-relaxed">
-              These are <strong>access rules</strong> the LMS enforces. They are different from the marketing
+              These are <strong>{__('access rules', 'sikshya')}</strong> the LMS enforces. They are different from the marketing
               "Prerequisites" list inside the Course Builder, which is just text shown to visitors. Use this page when you
-              want learners to <em>actually</em> be blocked until they finish prior content.
+              want learners to <em>{__('actually', 'sikshya')}</em> be blocked until they finish prior content.
             </p>
           </div>
 

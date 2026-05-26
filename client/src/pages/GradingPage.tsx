@@ -13,6 +13,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type GradeScale = {
   id: number;
@@ -154,9 +155,9 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
   const deleteScale = async () => {
     if (!enabled || activeScaleIdResolved <= 0) return;
     const ok = await dialog.confirm({
-      title: 'Delete this grade scale?',
-      message: 'This cannot be undone.',
-      confirmLabel: 'Delete',
+      title: __('Delete this grade scale?', 'sikshya'),
+      message: __('This cannot be undone.', 'sikshya'),
+      confirmLabel: __('Delete', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -167,7 +168,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
       await refetchScale();
     } catch (e) {
       void dialog.alert({
-        title: 'Could not delete',
+        title: __('Could not delete', 'sikshya'),
         message: e instanceof Error ? e.message : 'Delete failed.',
       });
     }
@@ -178,7 +179,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Letter scales are site-wide. Optionally pick a course to open its builder tab for per-course weights, scale mapping, and visibility."
+      subtitle={__('Letter scales are site-wide. Optionally pick a course to open its builder tab for per-course weights, scale mapping, and visibility.', 'sikshya')}
       pageActions={
         enabled ? (
           <div className="flex gap-2">
@@ -196,18 +197,18 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
         mode={mode}
         featureId="gradebook"
         config={config}
-        featureTitle="Grading"
-        featureDescription="Define grade scales and reuse them across courses. Use Reports → Gradebook for exports, grids, and final-grade overrides."
+        featureTitle={__('Grading', 'sikshya')}
+        featureDescription={__('Define grade scales and reuse them across courses. Use Reports → Gradebook for exports, grids, and final-grade overrides.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Gradebook is not enabled"
-        addonEnableDescription="Enable the Gradebook add-on for scales, course weights in the builder, and the full admin gradebook."
+        addonEnableTitle={__('Gradebook is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Gradebook add-on for scales, course weights in the builder, and the full admin gradebook.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {scaleListError ? (
-          <ApiErrorPanel error={scaleListError} title="Could not load grade scales" onRetry={() => refetchScales()} />
+          <ApiErrorPanel error={scaleListError} title={__('Could not load grade scales', 'sikshya')} onRetry={() => refetchScales()} />
         ) : (
           <ListPanel className="p-5">
             <div className="mb-5 flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-900/35">
@@ -215,7 +216,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                 <SingleCoursePicker
                   value={filterCourseId}
                   onChange={setFilterCourseId}
-                  placeholder="All courses (optional filter)"
+                  placeholder={__('All courses (optional filter)', 'sikshya')}
                   hint="Does not change the scales list—use it to jump to one course’s Grading settings in the builder."
                   className="w-full"
                 />
@@ -238,9 +239,9 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
               <div className="lg:col-span-1">
                 <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
                   {scaleListLoading ? (
-                    <div className="p-3 text-sm text-slate-500">Loading…</div>
+                    <div className="p-3 text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
                   ) : scales.length === 0 ? (
-                    <div className="p-3 text-sm text-slate-500">No grade scales yet.</div>
+                    <div className="p-3 text-sm text-slate-500">{__('No grade scales yet.', 'sikshya')}</div>
                   ) : (
                     <div className="space-y-1">
                       {scales.map((s) => {
@@ -258,7 +259,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                           >
                             <div className="font-medium">{s.name || `Scale #${s.id}`}</div>
                             <div className="text-xs text-slate-500 dark:text-slate-400">
-                              {Number(s.use_points) ? 'Points + GPA' : 'Letter only'}
+                              {Number(s.use_points) ? __('Points + GPA', 'sikshya') : __('Letter only', 'sikshya')}
                             </div>
                           </button>
                         );
@@ -270,7 +271,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
 
               <div className="lg:col-span-2">
                 {scaleError ? (
-                  <ApiErrorPanel error={scaleError} title="Could not load scale" onRetry={() => refetchScale()} />
+                  <ApiErrorPanel error={scaleError} title={__('Could not load scale', 'sikshya')} onRetry={() => refetchScale()} />
                 ) : !activeScaleIdResolved ? (
                   <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
                     Create a grade scale to get started.
@@ -302,10 +303,10 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                       <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                         <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                           <tr>
-                            <th className="px-4 py-3">Grade</th>
+                            <th className="px-4 py-3">{__('Grade', 'sikshya')}</th>
                             <th className="px-4 py-3">Min %</th>
                             <th className="px-4 py-3">Max %</th>
-                            <th className="px-4 py-3">Points</th>
+                            <th className="px-4 py-3">{__('Points', 'sikshya')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -329,8 +330,8 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
 
         <Modal
           open={scaleModalOpen}
-          title={scaleModalMode === 'create' ? 'Create grade scale' : 'Edit grade scale'}
-          description="Define grade ranges by percent. Optionally attach points (GPA)."
+          title={scaleModalMode === 'create' ? __('Create grade scale', 'sikshya') : __('Edit grade scale', 'sikshya')}
+          description={__('Define grade ranges by percent. Optionally attach points (GPA).', 'sikshya')}
           onClose={() => setScaleModalOpen(false)}
           size="xl"
           footer={
@@ -339,7 +340,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                 Cancel
               </ButtonSecondary>
               <ButtonPrimary type="button" onClick={() => void saveScale()} disabled={savingScale || !scaleName.trim()}>
-                {savingScale ? 'Saving…' : 'Save scale'}
+                {savingScale ? __('Saving…', 'sikshya') : __('Save scale', 'sikshya')}
               </ButtonPrimary>
             </div>
           }
@@ -350,7 +351,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
               <input
                 value={scaleName}
                 onChange={(e) => setScaleName(e.target.value)}
-                placeholder="e.g. Default A–F"
+                placeholder={__('e.g. Default A–F', 'sikshya')}
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
               />
             </label>
@@ -390,7 +391,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
 
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">Rows</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Rows', 'sikshya')}</div>
               <ButtonSecondary
                 type="button"
                 onClick={() =>
@@ -408,10 +409,10 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
               <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                   <tr>
-                    <th className="px-3 py-2">Label</th>
+                    <th className="px-3 py-2">{__('Label', 'sikshya')}</th>
                     <th className="px-3 py-2">Min %</th>
                     <th className="px-3 py-2">Max %</th>
-                    <th className="px-3 py-2">Points</th>
+                    <th className="px-3 py-2">{__('Points', 'sikshya')}</th>
                     <th className="px-3 py-2"></th>
                   </tr>
                 </thead>
@@ -425,7 +426,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                             setScaleRows((prev) => prev.map((x, i) => (i === idx ? { ...x, label: e.target.value } : x)))
                           }
                           className="w-24 rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-900"
-                          placeholder="A+"
+                          placeholder={__('A+', 'sikshya')}
                         />
                       </td>
                       <td className="px-3 py-2">

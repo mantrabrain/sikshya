@@ -3,6 +3,7 @@ import { getSikshyaApi } from '../../api';
 import { SIKSHYA_ENDPOINTS } from '../../api/endpoints';
 import { useAddonEnabled } from '../../hooks/useAddons';
 import { DateTimePickerField } from '../../components/shared/DateTimePickerField';
+import { __ } from '../../lib/i18n';
 
 const FIELD =
   'block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100';
@@ -198,8 +199,8 @@ export function ProLessonLiveBlock(props: {
   if (!ready) {
     return (
       <ProCard
-        title="Live class"
-        badge={addon.licenseOk ? 'Addon off' : 'Pro'}
+        title={__('Live class', 'sikshya')}
+        badge={addon.licenseOk ? __('Addon off', 'sikshya') : __('Pro', 'sikshya')}
         description={
           addon.licenseOk
             ? 'Turn on the “Live classes” addon to schedule a Zoom / Meet / Teams / Jitsi session for this lesson.'
@@ -213,13 +214,13 @@ export function ProLessonLiveBlock(props: {
 
   return (
     <ProCard
-      title="Live class"
+      title={__('Live class', 'sikshya')}
       badge="Pro"
-      description="Paste the join link from Zoom, Meet, Teams, Classroom, or Webex. Learners see a polished join panel with schedule-aware hints."
+      description={__('Paste the join link from Zoom, Meet, Teams, Classroom, or Webex. Learners see a polished join panel with schedule-aware hints.', 'sikshya')}
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className={LABEL} htmlFor="sik-pro-live-url">Meeting URL</label>
+          <label className={LABEL} htmlFor="sik-pro-live-url">{__('Meeting URL', 'sikshya')}</label>
           <input
             id="sik-pro-live-url"
             type="url"
@@ -231,14 +232,14 @@ export function ProLessonLiveBlock(props: {
           <p className={HINT}>Must be an https:// link. Learners only see this after they can access the lesson.</p>
         </div>
         <div>
-          <label className={LABEL} htmlFor="sik-pro-live-provider">Provider</label>
+          <label className={LABEL} htmlFor="sik-pro-live-provider">{__('Provider', 'sikshya')}</label>
           <select
             id="sik-pro-live-provider"
             className={FIELD}
             value={values.liveProvider}
             onChange={(e) => set('liveProvider', e.target.value)}
           >
-            <option value="">— pick one —</option>
+            <option value="">{__('— pick one —', 'sikshya')}</option>
             {LIVE_PROVIDER_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
@@ -247,7 +248,7 @@ export function ProLessonLiveBlock(props: {
           </select>
         </div>
         <div>
-          <label className={LABEL} htmlFor="sik-pro-live-start">Scheduled start</label>
+          <label className={LABEL} htmlFor="sik-pro-live-start">{__('Scheduled start', 'sikshya')}</label>
           <DateTimePickerField
             kind="datetime"
             value={values.liveStart}
@@ -257,7 +258,7 @@ export function ProLessonLiveBlock(props: {
           <p className={HINT}>Drives the course schedule strip, learn banner, catalog “Live” badge window, and calendar export.</p>
         </div>
         <div>
-          <label className={LABEL} htmlFor="sik-pro-live-duration">Duration (minutes)</label>
+          <label className={LABEL} htmlFor="sik-pro-live-duration">{__('Duration (minutes)', 'sikshya')}</label>
           <input
             id="sik-pro-live-duration"
             type="number"
@@ -269,31 +270,31 @@ export function ProLessonLiveBlock(props: {
           />
         </div>
         <div className="sm:col-span-2">
-          <label className={LABEL} htmlFor="sik-pro-live-session-title">Session title (optional)</label>
+          <label className={LABEL} htmlFor="sik-pro-live-session-title">{__('Session title (optional)', 'sikshya')}</label>
           <input
             id="sik-pro-live-session-title"
             type="text"
             className={FIELD}
             value={values.liveSessionTitle}
             onChange={(e) => set('liveSessionTitle', e.target.value)}
-            placeholder="Week 2 · Design critique"
+            placeholder={__('Week 2 · Design critique', 'sikshya')}
           />
-          <p className={HINT}>Shown in schedules and calendar instead of the lesson title when set.</p>
+          <p className={HINT}>{__('Shown in schedules and calendar instead of the lesson title when set.', 'sikshya')}</p>
         </div>
         <div>
-          <label className={LABEL} htmlFor="sik-pro-live-pass">Meeting ID / passcode hint</label>
+          <label className={LABEL} htmlFor="sik-pro-live-pass">{__('Meeting ID / passcode hint', 'sikshya')}</label>
           <input
             id="sik-pro-live-pass"
             type="text"
             className={FIELD}
             value={values.livePasscodeHint}
             onChange={(e) => set('livePasscodeHint', e.target.value)}
-            placeholder="ID: 123 456 7890"
+            placeholder={__('ID: 123 456 7890', 'sikshya')}
           />
-          <p className={HINT}>Plain text only. Never store secrets you would not email to students.</p>
+          <p className={HINT}>{__('Plain text only. Never store secrets you would not email to students.', 'sikshya')}</p>
         </div>
         <div>
-          <label className={LABEL} htmlFor="sik-pro-live-recording">Recording URL (optional)</label>
+          <label className={LABEL} htmlFor="sik-pro-live-recording">{__('Recording URL (optional)', 'sikshya')}</label>
           <input
             id="sik-pro-live-recording"
             type="url"
@@ -302,7 +303,7 @@ export function ProLessonLiveBlock(props: {
             onChange={(e) => set('liveRecordingUrl', e.target.value)}
             placeholder="https://…"
           />
-          <p className={HINT}>Cloud replay link appears under the join panel when populated.</p>
+          <p className={HINT}>{__('Cloud replay link appears under the join panel when populated.', 'sikshya')}</p>
         </div>
       </div>
     </ProCard>
@@ -422,8 +423,8 @@ export function ProLessonScormBlock(props: {
   if (!ready) {
     return (
       <ProCard
-        title="SCORM package"
-        badge={addon.licenseOk ? 'Addon off' : 'Pro'}
+        title={__('SCORM package', 'sikshya')}
+        badge={addon.licenseOk ? __('Addon off', 'sikshya') : __('Pro', 'sikshya')}
         description={
           addon.licenseOk
             ? 'Turn on the “SCORM / H5P” addon to launch packaged content from this lesson.'
@@ -439,12 +440,12 @@ export function ProLessonScormBlock(props: {
 
   return (
     <ProCard
-      title="SCORM package"
+      title={__('SCORM package', 'sikshya')}
       badge="Pro"
-      description="This lesson step loads one SCORM player (packages attach per lesson — same mental model as a Moodle SCORM activity or Canvas placement). Course-wide defaults for attempts and completion live under Course builder → Interactive content. One zip can contain multiple SCOs; navigation between them stays inside the package."
+      description={__('This lesson step loads one SCORM player (packages attach per lesson — same mental model as a Moodle SCORM activity or Canvas placement). Course-wide defaults for attempts and completion live under Course builder → Interactive content. One zip can contain multiple SCOs; navigation between them stays inside the package.', 'sikshya')}
     >
       <div>
-        <label className={LABEL}>Managed package</label>
+        <label className={LABEL}>{__('Managed package', 'sikshya')}</label>
         <p className={HINT}>
           Upload zipped packages on the SCORM / H5P workspace, then attach here. Multiple curriculum lessons may reuse the same library package (lesson attempts are tracked per learner per lesson).
         </p>
@@ -454,27 +455,27 @@ export function ProLessonScormBlock(props: {
             className={FIELD}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search packages by title…"
-            aria-label="Search SCORM packages"
+            placeholder={__('Search packages by title…', 'sikshya')}
+            aria-label={__('Search SCORM packages', 'sikshya')}
           />
           <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white text-sm dark:border-slate-700 dark:bg-slate-900">
             {loading ? (
-              <p className="p-3 text-slate-500 dark:text-slate-400">Loading library…</p>
+              <p className="p-3 text-slate-500 dark:text-slate-400">{__('Loading library…', 'sikshya')}</p>
             ) : error ? (
               <p className="p-3 text-rose-600 dark:text-rose-300">{error}</p>
             ) : packages.length === 0 ? (
               <p className="p-3 text-slate-500 dark:text-slate-400">
-                No packages found. Upload one on the <em>SCORM / H5P</em> workspace, then refresh this picker.
+                No packages found. Upload one on the <em>{__('SCORM / H5P', 'sikshya')}</em> workspace, then refresh this picker.
               </p>
             ) : (
-              <ul role="listbox" aria-label="SCORM packages">
+              <ul role="listbox" aria-label={__('SCORM packages', 'sikshya')}>
                 <li>
                   <button
                     type="button"
                     onClick={() => set('scormPackageId', 0)}
-                    className={`block w-full px-3 py-2 text-left text-sm transition ${values.scormPackageId === 0 ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}
+                    className={`block w-full px-3 py-2 text-left text-sm transition ${values.scormPackageId === 0 ? __('bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200', 'sikshya') : __('hover:bg-slate-50 dark:hover:bg-slate-800/60', 'sikshya')}`}
                   >
-                    <span className="font-medium">No managed package</span>
+                    <span className="font-medium">{__('No managed package', 'sikshya')}</span>
                     <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">(use the URL fallback below)</span>
                   </button>
                 </li>
@@ -488,7 +489,7 @@ export function ProLessonScormBlock(props: {
                         type="button"
                         disabled={disabled}
                         onClick={() => set('scormPackageId', p.id)}
-                        className={`block w-full border-t border-slate-100 px-3 py-2 text-left text-sm transition first:border-t-0 dark:border-slate-800 ${isActive ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                        className={`block w-full border-t border-slate-100 px-3 py-2 text-left text-sm transition first:border-t-0 dark:border-slate-800 ${isActive ? __('bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200', 'sikshya') : __('hover:bg-slate-50 dark:hover:bg-slate-800/60', 'sikshya')} ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
                       >
                         <span className="block font-medium">{p.title || `Package #${p.id}`}</span>
                         <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
@@ -511,7 +512,7 @@ export function ProLessonScormBlock(props: {
       </div>
 
       <div>
-        <label className={LABEL} htmlFor="sik-pro-scorm-url">Fallback launch URL (optional)</label>
+        <label className={LABEL} htmlFor="sik-pro-scorm-url">{__('Fallback launch URL (optional)', 'sikshya')}</label>
         <input
           id="sik-pro-scorm-url"
           type="url"
@@ -594,8 +595,8 @@ export function ProLessonH5pBlock(props: {
   if (!ready) {
     return (
       <ProCard
-        title="H5P interactive"
-        badge={addon.licenseOk ? 'Addon off' : 'Pro'}
+        title={__('H5P interactive', 'sikshya')}
+        badge={addon.licenseOk ? __('Addon off', 'sikshya') : __('Pro', 'sikshya')}
         description={
           addon.licenseOk
             ? 'Turn on the “SCORM / H5P” addon to embed H5P interactives in this lesson.'
@@ -609,7 +610,7 @@ export function ProLessonH5pBlock(props: {
 
   return (
     <ProCard
-      title="H5P interactive"
+      title={__('H5P interactive', 'sikshya')}
       badge="Pro"
       description={
         available
@@ -619,7 +620,7 @@ export function ProLessonH5pBlock(props: {
     >
       {available ? (
         <div>
-          <label className={LABEL}>H5P content</label>
+          <label className={LABEL}>{__('H5P content', 'sikshya')}</label>
           <p className={HINT}>Selecting content auto-renders it via the H5P shortcode and tracks results in reports.</p>
           <div className="space-y-2">
             <input
@@ -627,12 +628,12 @@ export function ProLessonH5pBlock(props: {
               className={FIELD}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search H5P content by title…"
-              aria-label="Search H5P content"
+              placeholder={__('Search H5P content by title…', 'sikshya')}
+              aria-label={__('Search H5P content', 'sikshya')}
             />
             <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white text-sm dark:border-slate-700 dark:bg-slate-900">
               {loading ? (
-                <p className="p-3 text-slate-500 dark:text-slate-400">Loading content…</p>
+                <p className="p-3 text-slate-500 dark:text-slate-400">{__('Loading content…', 'sikshya')}</p>
               ) : error ? (
                 <p className="p-3 text-rose-600 dark:text-rose-300">{error}</p>
               ) : contents.length === 0 ? (
@@ -640,14 +641,14 @@ export function ProLessonH5pBlock(props: {
                   No H5P content yet. Create some inside the H5P plugin, then refresh this picker.
                 </p>
               ) : (
-                <ul role="listbox" aria-label="H5P content">
+                <ul role="listbox" aria-label={__('H5P content', 'sikshya')}>
                   <li>
                     <button
                       type="button"
                       onClick={() => set('h5pContentId', 0)}
-                      className={`block w-full px-3 py-2 text-left text-sm transition ${values.h5pContentId === 0 ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}
+                      className={`block w-full px-3 py-2 text-left text-sm transition ${values.h5pContentId === 0 ? __('bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200', 'sikshya') : __('hover:bg-slate-50 dark:hover:bg-slate-800/60', 'sikshya')}`}
                     >
-                      <span className="font-medium">No H5P content</span>
+                      <span className="font-medium">{__('No H5P content', 'sikshya')}</span>
                       <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">(use the iframe fallback below)</span>
                     </button>
                   </li>
@@ -658,7 +659,7 @@ export function ProLessonH5pBlock(props: {
                         <button
                           type="button"
                           onClick={() => set('h5pContentId', c.id)}
-                          className={`block w-full border-t border-slate-100 px-3 py-2 text-left text-sm transition first:border-t-0 dark:border-slate-800 ${isActive ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'}`}
+                          className={`block w-full border-t border-slate-100 px-3 py-2 text-left text-sm transition first:border-t-0 dark:border-slate-800 ${isActive ? __('bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-200', 'sikshya') : __('hover:bg-slate-50 dark:hover:bg-slate-800/60', 'sikshya')}`}
                         >
                           <span className="block font-medium">{c.title || `Content #${c.id}`}</span>
                           <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
@@ -682,14 +683,14 @@ export function ProLessonH5pBlock(props: {
       ) : null}
 
       <div>
-        <label className={LABEL} htmlFor="sik-pro-h5p-embed">Iframe fallback (optional)</label>
+        <label className={LABEL} htmlFor="sik-pro-h5p-embed">{__('Iframe fallback (optional)', 'sikshya')}</label>
         <textarea
           id="sik-pro-h5p-embed"
           rows={5}
           className={`${FIELD} font-mono text-[12px]`}
           value={values.h5pEmbed}
           onChange={(e) => set('h5pEmbed', e.target.value)}
-          placeholder="<iframe src=... />"
+          placeholder={__('<iframe src=... />', 'sikshya')}
           disabled={hasSelection}
         />
         <p className={HINT}>
@@ -715,7 +716,7 @@ function ProInteractiveLaunchModeField(props: {
   const helpText = LAUNCH_MODE_OPTIONS.find((o) => o.value === value)?.help ?? '';
   return (
     <div>
-      <label className={LABEL} htmlFor="sik-pro-launch-mode">Player display</label>
+      <label className={LABEL} htmlFor="sik-pro-launch-mode">{__('Player display', 'sikshya')}</label>
       <select
         id="sik-pro-launch-mode"
         className={FIELD}
@@ -836,9 +837,9 @@ export function ProGradebookQuizWeightFields(props: {
   const { gradeWeight, onGradeWeightChange } = props;
   return (
     <ProCard
-      title="Gradebook weight"
+      title={__('Gradebook weight', 'sikshya')}
       badge="Pro"
-      description="How much this quiz counts relative to other quizzes in the same course when computing the quiz portion of the overall grade."
+      description={__('How much this quiz counts relative to other quizzes in the same course when computing the quiz portion of the overall grade.', 'sikshya')}
     >
       <div>
         <label className={LABEL} htmlFor="sik-pro-quiz-grade-weight">
@@ -870,9 +871,9 @@ export function ProGradebookAssignmentWeightFields(props: {
   const { gradeWeight, onGradeWeightChange } = props;
   return (
     <ProCard
-      title="Gradebook weight"
+      title={__('Gradebook weight', 'sikshya')}
       badge="Pro"
-      description="How much this assignment counts relative to other graded assignments in the same course."
+      description={__('How much this assignment counts relative to other graded assignments in the same course.', 'sikshya')}
     >
       <div>
         <label className={LABEL} htmlFor="sik-pro-asg-grade-weight">
@@ -909,7 +910,7 @@ export function ProQuizFields(props: {
   const set = <K extends keyof ProQuizValues>(k: K, val: ProQuizValues[K]) => onChange({ ...values, [k]: val });
 
   return (
-    <ProCard title="Advanced quiz behaviour" badge="Pro" description="Shuffle, paginate, or draw random questions from a pool.">
+    <ProCard title={__('Advanced quiz behaviour', 'sikshya')} badge="Pro" description={__('Shuffle, paginate, or draw random questions from a pool.', 'sikshya')}>
       <div className="space-y-3">
         <label className="flex items-start gap-2 text-sm text-slate-800 dark:text-slate-100">
           <input
@@ -919,8 +920,8 @@ export function ProQuizFields(props: {
             onChange={(e) => set('shuffle', e.target.checked)}
           />
           <span>
-            <span className="font-medium">Shuffle questions</span>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">Random order on each attempt.</span>
+            <span className="font-medium">{__('Shuffle questions', 'sikshya')}</span>
+            <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Random order on each attempt.', 'sikshya')}</span>
           </span>
         </label>
         <label className="flex items-start gap-2 text-sm text-slate-800 dark:text-slate-100">
@@ -931,25 +932,25 @@ export function ProQuizFields(props: {
             onChange={(e) => set('onePerPage', e.target.checked)}
           />
           <span>
-            <span className="font-medium">One question per page</span>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">Show Next / Previous controls between questions.</span>
+            <span className="font-medium">{__('One question per page', 'sikshya')}</span>
+            <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Show Next / Previous controls between questions.', 'sikshya')}</span>
           </span>
         </label>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={LABEL} htmlFor="sik-pro-quiz-bank-tag">Question pool tag</label>
+          <label className={LABEL} htmlFor="sik-pro-quiz-bank-tag">{__('Question pool tag', 'sikshya')}</label>
           <input
             id="sik-pro-quiz-bank-tag"
             className={FIELD}
             value={values.bankTag}
             onChange={(e) => set('bankTag', e.target.value)}
-            placeholder="unit-1"
+            placeholder={__('unit-1', 'sikshya')}
           />
           <p className={HINT}>When set, draws random questions whose pool tag matches, instead of attached questions.</p>
         </div>
         <div>
-          <label className={LABEL} htmlFor="sik-pro-quiz-bank-count">Random questions to draw</label>
+          <label className={LABEL} htmlFor="sik-pro-quiz-bank-count">{__('Random questions to draw', 'sikshya')}</label>
           <input
             id="sik-pro-quiz-bank-count"
             type="number"
@@ -988,15 +989,15 @@ export function ProQuestionFields(props: { values: ProQuestionValues; onChange: 
   if (!adv.enabled || !adv.licenseOk) return null;
 
   return (
-    <ProCard title="Question pool" badge="Pro" description="Tag this question so quizzes drawing from this pool can pick it up at random.">
+    <ProCard title={__('Question pool', 'sikshya')} badge="Pro" description={__('Tag this question so quizzes drawing from this pool can pick it up at random.', 'sikshya')}>
       <div>
-        <label className={LABEL} htmlFor="sik-pro-question-pool-tag">Pool tag</label>
+        <label className={LABEL} htmlFor="sik-pro-question-pool-tag">{__('Pool tag', 'sikshya')}</label>
         <input
           id="sik-pro-question-pool-tag"
           className={FIELD}
           value={values.poolTag}
           onChange={(e) => onChange({ poolTag: e.target.value })}
-          placeholder="e.g. unit-1"
+          placeholder={__('e.g. unit-1', 'sikshya')}
         />
       </div>
     </ProCard>
@@ -1179,13 +1180,13 @@ export function ProAssignmentFields(props: {
 
   return (
     <ProCard
-      title="Advanced assignment options"
+      title={__('Advanced assignment options', 'sikshya')}
       badge="Pro"
-      description="Rubric criteria (with optional learner checklist lines), file rules, and submission behaviour."
+      description={__('Rubric criteria (with optional learner checklist lines), file rules, and submission behaviour.', 'sikshya')}
     >
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <span className={LABEL}>Rubric criteria</span>
+          <span className={LABEL}>{__('Rubric criteria', 'sikshya')}</span>
           <button type="button" className="text-xs font-semibold text-brand-600 hover:underline" onClick={addRow}>
             + Add criterion
           </button>
@@ -1225,7 +1226,7 @@ export function ProAssignmentFields(props: {
                       className={FIELD}
                       value={row.title}
                       onChange={(e) => updateRow(row.id, { title: e.target.value })}
-                      placeholder="e.g. Clear thesis"
+                      placeholder={__('e.g. Clear thesis', 'sikshya')}
                     />
                   </div>
                   <div>
@@ -1252,7 +1253,7 @@ export function ProAssignmentFields(props: {
                     className={FIELD}
                     value={row.description}
                     onChange={(e) => updateRow(row.id, { description: e.target.value })}
-                    placeholder="What you expect in this area…"
+                    placeholder={__('What you expect in this area…', 'sikshya')}
                   />
                 </div>
                 <div className="mt-2">
@@ -1282,7 +1283,7 @@ export function ProAssignmentFields(props: {
           className={FIELD}
           value={values.allowedExts}
           onChange={(e) => set('allowedExts', e.target.value)}
-          placeholder="pdf,docx,zip"
+          placeholder={__('pdf,docx,zip', 'sikshya')}
         />
         <p className={HINT}>Comma separated, lower-case, no dots. Leave empty to use the global default from add-on settings.</p>
       </div>
@@ -1325,7 +1326,7 @@ export function ProAssignmentFields(props: {
             checked={values.allowLate}
             onChange={(e) => set('allowLate', e.target.checked)}
           />
-          <span>Allow late submissions</span>
+          <span>{__('Allow late submissions', 'sikshya')}</span>
         </label>
         <label className="flex items-start gap-2 text-sm text-slate-800 dark:text-slate-100">
           <input
@@ -1334,7 +1335,7 @@ export function ProAssignmentFields(props: {
             checked={values.requireText}
             onChange={(e) => set('requireText', e.target.checked)}
           />
-          <span>Require written response in addition to file uploads</span>
+          <span>{__('Require written response in addition to file uploads', 'sikshya')}</span>
         </label>
         <label className="flex items-start gap-2 text-sm text-slate-800 dark:text-slate-100">
           <input
@@ -1343,7 +1344,7 @@ export function ProAssignmentFields(props: {
             checked={values.allowResubmit}
             onChange={(e) => set('allowResubmit', e.target.checked)}
           />
-          <span>Allow resubmission after grading</span>
+          <span>{__('Allow resubmission after grading', 'sikshya')}</span>
         </label>
       </div>
     </ProCard>

@@ -1,4 +1,5 @@
 import { MultiCoursePicker } from './MultiCoursePicker';
+import { __ } from '../../lib/i18n';
 
 /**
  * Single-course filter using the same modal picker UX as {@link MultiCoursePicker}
@@ -33,9 +34,9 @@ export function SingleCoursePicker(props: {
           onChange(ids[ids.length - 1] ?? 0);
         }}
         maxSelection={1}
-        placeholder={placeholder ?? 'Click to choose a course…'}
+        placeholder={placeholder ?? __('Click to choose a course…', 'sikshya')}
         hint={hint}
-        title="Select a course"
+        title={__('Select a course', 'sikshya')}
         perPage={perPage ?? 20}
         reserveHintSpace={reserveHintSpace}
         density={density}

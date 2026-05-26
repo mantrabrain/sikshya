@@ -8,6 +8,7 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useShellState } from '../context/ShellStateContext';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __, sprintf } from '../lib/i18n';
 
 type LicenseInfo = {
   key: string;
@@ -72,7 +73,7 @@ function statusBadge(status: string): { label: string; className: string } {
   }
   if (s === 'disabled' || s === 'invalid') {
     return {
-      label: s === 'invalid' ? 'Invalid' : 'Disabled',
+      label: s === 'invalid' ? __('Invalid', 'sikshya') : __('Disabled', 'sikshya'),
       className:
         'bg-amber-50 text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-900/40',
     };
@@ -135,10 +136,10 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
 
   const showToast = (kind: 'success' | 'error', text: string) => {
     if (kind === 'success') {
-      toast.success('Success', text);
+      toast.success(__('Success', 'sikshya'), text);
       return;
     }
-    toast.error('Error', text);
+    toast.error(__('Error', 'sikshya'), text);
   };
 
   const proInstalled = Boolean(data?.pro_plugin_active);
@@ -221,10 +222,10 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
 
   const onDeactivate = async () => {
     const ok = await confirm({
-      title: 'Deactivate license',
+      title: __('Deactivate license', 'sikshya'),
       message:
-        'This frees an activation on your account and turns off Pro features on this site until you activate again. Continue?',
-      confirmLabel: 'Deactivate',
+        __('This frees an activation on your account and turns off Pro features on this site until you activate again. Continue?', 'sikshya'),
+      confirmLabel: __('Deactivate', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -254,7 +255,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Sikshya Pro licensing and updates"
+      subtitle={sprintf(__('%s licensing and updates', 'sikshya'), 'Sikshya Pro')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {inner}
@@ -291,16 +292,18 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
               <NavIcon name="key" className="h-5 w-5" />
             </span>
-            <h1 className="text-lg font-semibold text-slate-900 dark:text-white">License</h1>
+            <h1 className="text-lg font-semibold text-slate-900 dark:text-white">{__('License', 'sikshya')}</h1>
           </div>
           <div className="p-6 text-center">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              You are running <span className="font-semibold text-slate-900 dark:text-white">Sikshya</span> without the
-              Pro add-on. Install and activate <span className="font-semibold">Sikshya Pro</span> to enter a license key
-              and unlock premium features.
+              {sprintf(
+                __('You are running %1$s without the Pro add-on. Install and activate %2$s to enter a license key and unlock premium features.', 'sikshya'),
+                'Sikshya',
+                'Sikshya Pro'
+              )}
             </p>
             <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-brand-100 bg-brand-50/60 p-6 text-left dark:border-brand-900/40 dark:bg-brand-950/30">
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Upgrade to Sikshya Pro</h2>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Upgrade to Sikshya Pro', 'sikshya')}</h2>
               <ul className="mt-4 space-y-2 text-sm text-slate-700 dark:text-slate-300">
                 <li className="flex gap-2">
                   <span className="text-emerald-600 dark:text-emerald-400">✓</span>
@@ -362,7 +365,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
               <NavIcon name="key" className="h-5 w-5" />
             </span>
             <div>
-              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">License management</h1>
+              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">{__('License management', 'sikshya')}</h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Activate your Sikshya Pro license for updates and premium modules.
               </p>
@@ -399,7 +402,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
           ) : null}
           {!keyActive ? (
             <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-6 dark:border-slate-700 dark:bg-slate-950/40">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Activate your license</h2>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Activate your license', 'sikshya')}</h2>
               <form className="mt-4 space-y-4" onSubmit={onActivate}>
                 <div>
                   <label htmlFor="sikshya-license-key" className={Oe}>
@@ -410,7 +413,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
                     className={Inp}
                     value={licenseKey}
                     onChange={(ev) => setLicenseKey(ev.target.value)}
-                    placeholder="Paste your license key"
+                    placeholder={__('Paste your license key', 'sikshya')}
                     disabled={busy === 'activate'}
                     autoComplete="off"
                   />
@@ -442,13 +445,13 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
             <div className="space-y-6">
               <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-6 dark:border-slate-700 dark:bg-slate-950/40">
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">License key</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('License key', 'sikshya')}</h3>
                   <button
                     type="button"
                     className="text-xs font-semibold text-brand-700 hover:underline dark:text-brand-300"
                     onClick={() => setShowKey((v) => !v)}
                   >
-                    {showKey ? 'Hide' : 'Show'}
+                    {showKey ? __('Hide', 'sikshya') : __('Show', 'sikshya')}
                   </button>
                 </div>
                 <div className="mt-2 rounded-xl border border-slate-200 bg-white px-4 py-3 font-mono text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
@@ -459,19 +462,19 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {customerName ? (
                   <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Licensed to</div>
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{__('Licensed to', 'sikshya')}</div>
                     <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{customerName}</div>
                   </div>
                 ) : null}
                 {customerEmail ? (
                   <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Email</div>
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{__('Email', 'sikshya')}</div>
                     <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{customerEmail}</div>
                   </div>
                 ) : null}
                 {expires && expires !== 'lifetime' ? (
                   <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Expires</div>
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{__('Expires', 'sikshya')}</div>
                     <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
                       {Number.isNaN(Date.parse(expires)) ? expires : new Date(expires).toLocaleDateString()}
                     </div>
@@ -479,13 +482,13 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
                 ) : null}
                 {expires === 'lifetime' ? (
                   <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Expires</div>
-                    <div className="mt-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Lifetime</div>
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{__('Expires', 'sikshya')}</div>
+                    <div className="mt-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300">{__('Lifetime', 'sikshya')}</div>
                   </div>
                 ) : null}
                 {siteCount !== undefined ? (
                   <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Activations</div>
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">{__('Activations', 'sikshya')}</div>
                     <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
                       {siteCount}
                       {licenseLimit !== undefined ? ` / ${licenseLimit}` : ''}
@@ -533,7 +536,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
           {debugOpen ? (
             <div className="rounded-2xl border border-purple-200/80 bg-purple-50/50 p-4 dark:border-purple-900/40 dark:bg-purple-950/30">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-xs font-semibold text-purple-900 dark:text-purple-100">Debug</div>
+                <div className="text-xs font-semibold text-purple-900 dark:text-purple-100">{__('Debug', 'sikshya')}</div>
                 {debugData ? (
                   <button
                     type="button"

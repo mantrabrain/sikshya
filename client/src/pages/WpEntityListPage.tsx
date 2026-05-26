@@ -23,6 +23,7 @@ import {
   contentLibraryChapterLearnFallback,
   contentLibraryLearnViewFallback,
 } from '../lib/learnContentViewUrl';
+import { __ } from '../lib/i18n';
 
 /** Map a picker selection to the WordPress post type the new item lives under. */
 function postTypeForPickerType(t: ContentPickerType): 'sik_lesson' | 'sik_quiz' | 'sik_assignment' {
@@ -114,7 +115,7 @@ export function WpEntityListPage(props: {
       })
       .then((created) => {
         if (!created?.id) {
-          throw new Error('Could not create item.');
+          throw new Error(__('Could not create item.', 'sikshya'));
         }
         navigateHref(
           appViewHref(config, 'edit-content', {
@@ -518,9 +519,9 @@ export function WpEntityListPage(props: {
         }}
         postRowActions={postRowActions}
         columns={columns}
-        emptyMessage="No items match your filters."
-        emptyStateTitle="No items found"
-        emptyStateDescription="Try another status or search term, or add a new item."
+        emptyMessage={__('No items match your filters.', 'sikshya')}
+        emptyStateTitle={__('No items found', 'sikshya')}
+        emptyStateDescription={__('Try another status or search term, or add a new item.', 'sikshya')}
         emptyStateAction={
           isLessonList ? (
             <ButtonPrimary onClick={openAddLesson}>+ Add {T.lesson.toLowerCase()}</ButtonPrimary>

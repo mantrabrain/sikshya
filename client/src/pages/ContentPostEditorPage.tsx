@@ -5,6 +5,7 @@ import { appViewHref } from '../lib/appUrl';
 import { useAdminRouting } from '../lib/adminRouting';
 import type { SikshyaReactConfig } from '../types';
 import { renderContentEditor } from './content-editors/editors';
+import { __ } from '../lib/i18n';
 
 /**
  * Where the editor should send the user when they click "back" / "all". For the
@@ -68,12 +69,12 @@ export function ContentPostEditorPage(props: { embedded?: boolean; config: Siksh
         embedded={props.embedded}
         config={config}
         title={shellTitle}
-        subtitle="Missing content type"
+        subtitle={__('Missing content type', 'sikshya')}
         sidebarActivePage="dashboard"
       >
         <ApiErrorPanel
           error={new Error('No post_type in the URL. Open this screen from a list link.')}
-          title="Cannot load editor"
+          title={__('Cannot load editor', 'sikshya')}
         />
       </EmbeddableShell>
     );

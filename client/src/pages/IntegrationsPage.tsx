@@ -17,6 +17,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
 import { getLicensing, isFeatureEnabled } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type WebhookEndpointRowV2 = {
   id: number;
@@ -57,95 +58,95 @@ type OAuthAppRow = {
 };
 
 const API_SCOPES: Array<{ value: string; title: string; hint: string }> = [
-  { value: 'catalog:read', title: 'Catalog (read)', hint: 'Read courses and course pages.' },
-  { value: 'users:read', title: 'Users (read)', hint: 'Read learner profiles (PII). Use carefully.' },
-  { value: 'enrollments:read', title: 'Enrollments (read)', hint: 'Read enrollment and progress status.' },
-  { value: 'enrollments:write', title: 'Enrollments (write)', hint: 'Enroll/unenroll users. High impact.' },
-  { value: 'commerce:read', title: 'Commerce (read)', hint: 'Read order data.' },
-  { value: 'commerce:write', title: 'Commerce (write)', hint: 'Create/modify orders and payments. Highest risk.' },
-  { value: 'learning:read', title: 'Learning (read)', hint: 'Read learning progress.' },
-  { value: 'learning:write', title: 'Learning (write)', hint: 'Write progress/completions. High impact.' },
+  { value: 'catalog:read', title: __('Catalog (read)', 'sikshya'), hint: 'Read courses and course pages.' },
+  { value: 'users:read', title: __('Users (read)', 'sikshya'), hint: 'Read learner profiles (PII). Use carefully.' },
+  { value: 'enrollments:read', title: __('Enrollments (read)', 'sikshya'), hint: 'Read enrollment and progress status.' },
+  { value: 'enrollments:write', title: __('Enrollments (write)', 'sikshya'), hint: 'Enroll/unenroll users. High impact.' },
+  { value: 'commerce:read', title: __('Commerce (read)', 'sikshya'), hint: 'Read order data.' },
+  { value: 'commerce:write', title: __('Commerce (write)', 'sikshya'), hint: 'Create/modify orders and payments. Highest risk.' },
+  { value: 'learning:read', title: __('Learning (read)', 'sikshya'), hint: 'Read learning progress.' },
+  { value: 'learning:write', title: __('Learning (write)', 'sikshya'), hint: 'Write progress/completions. High impact.' },
 ];
 
 const WEBHOOK_EVENTS: Array<{ value: string; title: string; hint: string }> = [
   {
     value: 'enrollment.created',
-    title: 'Learner enrolled',
+    title: __('Learner enrolled', 'sikshya'),
     hint: 'Runs the moment a learner is enrolled (paid checkout, manual add, or free signup). Perfect for adding contacts to a CRM list.',
   },
   {
     value: 'enrollment.deleted',
-    title: 'Learner unenrolled',
+    title: __('Learner unenrolled', 'sikshya'),
     hint: 'Runs when a learner is removed from a course (manual removal or access revoked). Useful for subscription cancellations and cleanup.',
   },
   {
     value: 'order.fulfilled',
-    title: 'Order completed',
+    title: __('Order completed', 'sikshya'),
     hint: 'Runs after a learner’s payment is confirmed and they are enrolled. Use this to notify your CRM or accounting tool.',
   },
   {
     value: 'lesson.completed',
-    title: 'Lesson finished',
+    title: __('Lesson finished', 'sikshya'),
     hint: 'Runs when a learner completes a lesson. Great for progress-based nudges or unlocking external content.',
   },
   {
     value: 'quiz.completed',
-    title: 'Quiz finished',
+    title: __('Quiz finished', 'sikshya'),
     hint: 'Runs when a learner completes a quiz. Use the payload score to trigger remediation or congratulations.',
   },
   {
     value: 'assignment.submitted',
-    title: 'Assignment submitted',
+    title: __('Assignment submitted', 'sikshya'),
     hint: 'Runs when a learner submits an assignment. Perfect for Slack/Email notifications or helpdesk tickets.',
   },
   {
     value: 'course.completed',
-    title: 'Course finished',
+    title: __('Course finished', 'sikshya'),
     hint: 'Runs when a learner completes every required item in a course. Great for celebration emails or loyalty workflows.',
   },
   {
     value: 'certificate.issued',
-    title: 'Certificate created',
+    title: __('Certificate created', 'sikshya'),
     hint: 'Runs when Sikshya saves a new certificate row. Ideal for badges, LinkedIn automations, or secure archives.',
   },
   {
     value: 'drip.lesson_unlocked',
-    title: 'Drip: lesson unlocked',
+    title: __('Drip: lesson unlocked', 'sikshya'),
     hint: 'Runs when a lesson becomes available due to drip rules. Useful for “new lesson available” notifications.',
   },
   {
     value: 'drip.course_unlocked',
-    title: 'Drip: course unlocked',
+    title: __('Drip: course unlocked', 'sikshya'),
     hint: 'Runs when a full course becomes available due to drip rules.',
   },
   {
     value: 'review.submitted',
-    title: 'Review submitted',
+    title: __('Review submitted', 'sikshya'),
     hint: 'Runs when a learner submits a course review (before or after approval depending on your workflow).',
   },
   {
     value: 'review.approved',
-    title: 'Review approved',
+    title: __('Review approved', 'sikshya'),
     hint: 'Runs when an admin approves a review.',
   },
   {
     value: 'review.rejected',
-    title: 'Review rejected',
+    title: __('Review rejected', 'sikshya'),
     hint: 'Runs when an admin rejects a review.',
   },
   {
     value: 'course.rating_updated',
-    title: 'Course rating updated',
+    title: __('Course rating updated', 'sikshya'),
     hint: 'Runs when course rating aggregates change (after review changes).',
   },
   {
     value: '*',
-    title: 'Everything (advanced)',
+    title: __('Everything (advanced)', 'sikshya'),
     hint: 'Sends all supported event types to the same URL. Only pick this if you understand how to separate events in Zapier/Make.',
   },
   {
     value: 'webhook.test',
-    title: 'Test event (manual)',
+    title: __('Test event (manual)', 'sikshya'),
     hint: 'A manual test payload you can send from Sikshya to validate your Zap or receiver URL.',
   },
 ];
@@ -250,7 +251,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     e.preventDefault();
     toast.clear();
     if (!whUrl.trim()) {
-      toast.error('Missing URL', 'Please paste the URL Zapier, Make, or your developer gave you.');
+      toast.error(__('Missing URL', 'sikshya'), 'Please paste the URL Zapier, Make, or your developer gave you.');
       return;
     }
     setWhBusy(true);
@@ -263,10 +264,10 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       });
       setWhUrl('');
       setWhSecret('');
-      toast.success('Saved', 'Webhook saved. We will POST JSON to that address when the event happens.');
+      toast.success(__('Saved', 'sikshya'), 'Webhook saved. We will POST JSON to that address when the event happens.');
       wh.refetch();
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Could not save webhook.');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Could not save webhook.');
     } finally {
       setWhBusy(false);
     }
@@ -274,14 +275,14 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const removeWebhook = async (row: WebhookEndpointRowV2) => {
     const ok = await dialog.confirm({
-      title: 'Remove this webhook?',
+      title: __('Remove this webhook?', 'sikshya'),
       message: (
         <p>
           Stops sending <span className="font-mono text-xs">{row.event_key || '*'}</span> events to{' '}
           <span className="break-all font-medium">{row.delivery_url}</span>. You can add it again later.
         </p>
       ),
-      confirmLabel: 'Remove webhook',
+      confirmLabel: __('Remove webhook', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) {
@@ -291,7 +292,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.webhooksV2Endpoint(row.id), { is_active: false });
       wh.refetch();
     } catch {
-      await dialog.alert({ title: 'Something went wrong', message: 'We could not remove that webhook. Try again.' });
+      await dialog.alert({ title: __('Something went wrong', 'sikshya'), message: __('We could not remove that webhook. Try again.', 'sikshya') });
     }
   };
 
@@ -299,9 +300,9 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     toast.clear();
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.scale.webhooksV2EndpointTest(row.id), {});
-      toast.success('Queued', 'Queued a test delivery. Check your receiver and the delivery log.');
+      toast.success(__('Queued', 'sikshya'), 'Queued a test delivery. Check your receiver and the delivery log.');
     } catch (err) {
-      toast.error('Queue failed', err instanceof Error ? err.message : 'Could not queue test delivery.');
+      toast.error(__('Queue failed', 'sikshya'), err instanceof Error ? err.message : 'Could not queue test delivery.');
     }
   };
 
@@ -310,7 +311,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     toast.clear();
     setFreshKey(null);
     if (!keyLabel.trim()) {
-      toast.error('Missing label', 'Give this key a short name so you remember what uses it (for example “Mobile app”).');
+      toast.error(__('Missing label', 'sikshya'), 'Give this key a short name so you remember what uses it (for example “Mobile app”).');
       return;
     }
     setKeyBusy(true);
@@ -324,13 +325,13 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
         setKeyLabel('');
         setKeyScopes(['catalog:read']);
         setKeyExpiryDays(90);
-        toast.success('Created', res.message || 'Key created.');
+        toast.success(__('Created', 'sikshya'), res.message || 'Key created.');
         keys.refetch();
       } else {
-        toast.error('Create failed', res.message || 'Unexpected response from server.');
+        toast.error(__('Create failed', 'sikshya'), res.message || 'Unexpected response from server.');
       }
     } catch (err) {
-      toast.error('Create failed', err instanceof Error ? err.message : 'Could not create key.');
+      toast.error(__('Create failed', 'sikshya'), err instanceof Error ? err.message : 'Could not create key.');
     } finally {
       setKeyBusy(false);
     }
@@ -338,14 +339,14 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const revokeKey = async (row: ApiKeyRow) => {
     const ok = await dialog.confirm({
-      title: 'Revoke this API key?',
+      title: __('Revoke this API key?', 'sikshya'),
       message: (
         <p>
           Anything still using <span className="font-mono text-xs">{row.key_prefix}…</span> will stop working
           immediately. This cannot be undone.
         </p>
       ),
-      confirmLabel: 'Revoke key',
+      confirmLabel: __('Revoke key', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) {
@@ -355,7 +356,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.scale.publicApiKey(row.id));
       keys.refetch();
     } catch {
-      await dialog.alert({ title: 'Something went wrong', message: 'We could not revoke that key. Try again.' });
+      await dialog.alert({ title: __('Something went wrong', 'sikshya'), message: __('We could not revoke that key. Try again.', 'sikshya') });
     }
   };
 
@@ -363,7 +364,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     setPingResult(null);
     const token = pingToken.trim();
     if (!token) {
-      setPingResult('Paste an API key first, then tap “Test key”.');
+      setPingResult(__('Paste an API key first, then tap “Test key”.', 'sikshya'));
       return;
     }
     setPingBusy(true);
@@ -393,11 +394,11 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
     toast.clear();
     setFreshAppSecret(null);
     if (!appName.trim()) {
-      toast.error('Missing name', 'Give the app a name (for example “Mobile app”).');
+      toast.error(__('Missing name', 'sikshya'), 'Give the app a name (for example “Mobile app”).');
       return;
     }
     if (!appRedirect.trim()) {
-      toast.error('Missing redirect URL', 'Add a redirect URL (must start with https://).');
+      toast.error(__('Missing redirect URL', 'sikshya'), 'Add a redirect URL (must start with https://).');
       return;
     }
     setAppBusy(true);
@@ -411,13 +412,13 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
         setAppName('');
         setAppRedirect('');
         setAppScopes(['catalog:read']);
-        toast.success('Created', res.message || 'App created.');
+        toast.success(__('Created', 'sikshya'), res.message || 'App created.');
         apps.refetch();
       } else {
-        toast.error('Create failed', res.message || 'Unexpected response from server.');
+        toast.error(__('Create failed', 'sikshya'), res.message || 'Unexpected response from server.');
       }
     } catch (err) {
-      toast.error('Create failed', err instanceof Error ? err.message : 'Could not create app.');
+      toast.error(__('Create failed', 'sikshya'), err instanceof Error ? err.message : 'Could not create app.');
     } finally {
       setAppBusy(false);
     }
@@ -425,14 +426,14 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
   const revokeApp = async (row: OAuthAppRow) => {
     const ok = await dialog.confirm({
-      title: 'Revoke this OAuth app?',
+      title: __('Revoke this OAuth app?', 'sikshya'),
       message: (
         <p>
           Any tokens issued to <span className="font-mono text-xs">{row.client_id}</span> may stop working. You can create a
           new app later.
         </p>
       ),
-      confirmLabel: 'Revoke app',
+      confirmLabel: __('Revoke app', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -440,7 +441,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.scale.publicApiApp(row.id));
       apps.refetch();
     } catch {
-      await dialog.alert({ title: 'Something went wrong', message: 'We could not revoke that app. Try again.' });
+      await dialog.alert({ title: __('Something went wrong', 'sikshya'), message: __('We could not revoke that app. Try again.', 'sikshya') });
     }
   };
 
@@ -449,19 +450,19 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Connect Sikshya to Zapier, custom scripts, or mobile apps — without touching code unless you want to."
+      subtitle={__('Connect Sikshya to Zapier, custom scripts, or mobile apps — without touching code unless you want to.', 'sikshya')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <div className={`${SIKSHYA_ADMIN_PAGE_FULL_WIDTH} space-y-8`}>
         <section className="rounded-2xl border border-sky-200 bg-sky-50/90 p-5 text-sm leading-relaxed text-sky-950 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-100">
-          <h2 className="text-base font-semibold text-sky-950 dark:text-sky-50">Start here</h2>
+          <h2 className="text-base font-semibold text-sky-950 dark:text-sky-50">{__('Start here', 'sikshya')}</h2>
           <ol className="mt-3 list-decimal space-y-2 pl-5">
             <li>
-              <strong>Webhooks</strong> let other websites react when something happens in Sikshya (for example “new
+              <strong>{__('Webhooks', 'sikshya')}</strong> let other websites react when something happens in Sikshya (for example “new
               order”). You only paste a URL your automation tool gives you.
             </li>
             <li>
-              <strong>API keys</strong> let trusted apps read a small “ping” endpoint today; you can expand usage later
+              <strong>{__('API keys', 'sikshya')}</strong> let trusted apps read a small “ping” endpoint today; you can expand usage later
               with your developer.
             </li>
             <li>
@@ -478,7 +479,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Webhooks</h2>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{__('Webhooks', 'sikshya')}</h2>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   Send a tiny JSON message to another service when important learning events happen.
                 </p>
@@ -493,8 +494,8 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                 <PlanUpgradeOverlay
                   config={config}
                   featureId="webhooks"
-                  featureTitle="Webhooks"
-                  description="Send JSON to Zapier, Make, or custom HTTPS endpoints when orders complete, courses finish, or certificates are issued."
+                  featureTitle={__('Webhooks', 'sikshya')}
+                  description={__('Send JSON to Zapier, Make, or custom HTTPS endpoints when orders complete, courses finish, or certificates are issued.', 'sikshya')}
                 />
               </div>
             ) : !webhooksOn ? (
@@ -505,8 +506,8 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                 <PremiumGatedSurface>
                   <AddonEnablePanel
                     variant="premium"
-                    title="Turn on webhooks"
-                    description="Enable the Webhooks addon. Nothing is sent until you add a URL below."
+                    title={__('Turn on webhooks', 'sikshya')}
+                    description={__('Enable the Webhooks addon. Nothing is sent until you add a URL below.', 'sikshya')}
                     canEnable={Boolean(whAddon.licenseOk) || Boolean(zapierAddon.licenseOk)}
                     enableBusy={whAddon.loading || zapierAddon.loading}
                     onEnable={async () => {
@@ -564,33 +565,33 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       autoComplete="new-password"
                       value={whSecret}
                       onChange={(e) => setWhSecret(e.target.value)}
-                      placeholder="Same secret you configure in Zapier"
+                      placeholder={__('Same secret you configure in Zapier', 'sikshya')}
                       className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
                     />
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      If you set this, we add an <span className="font-mono">X-Sikshya-Signature</span> header so the
+                      If you set this, we add an <span className="font-mono">{__('X-Sikshya-Signature', 'sikshya')}</span> header so the
                       receiver can trust the payload.
                     </p>
                   </div>
                   <ButtonPrimary type="submit" disabled={whBusy}>
-                    {whBusy ? 'Saving…' : 'Save webhook'}
+                    {whBusy ? __('Saving…', 'sikshya') : __('Save webhook', 'sikshya')}
                   </ButtonPrimary>
                 </form>
 
                 <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Active webhooks</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Active webhooks', 'sikshya')}</h3>
                   {wh.error ? (
                     <div className="mt-2">
-                      <ApiErrorPanel error={wh.error} title="Webhooks" onRetry={() => wh.refetch()} />
+                      <ApiErrorPanel error={wh.error} title={__('Webhooks', 'sikshya')} onRetry={() => wh.refetch()} />
                     </div>
                   ) : (
                     <ListPanel className="mt-3">
                       {wh.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
+                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
                       ) : (wh.data?.items?.length ?? 0) === 0 ? (
                         <ListEmptyState
-                          title="No webhooks yet"
-                          description="When you save your first URL it will appear here. You can add more than one — for example separate Zapier Zaps per event."
+                          title={__('No webhooks yet', 'sikshya')}
+                          description={__('When you save your first URL it will appear here. You can add more than one — for example separate Zapier Zaps per event.', 'sikshya')}
                         />
                       ) : (
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -633,7 +634,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
                 <div className="mt-8">
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Recent deliveries</h3>
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Recent deliveries', 'sikshya')}</h3>
                     <button
                       type="button"
                       onClick={() => deliveries.refetch()}
@@ -644,24 +645,24 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                   </div>
                   {deliveries.error ? (
                     <div className="mt-2">
-                      <ApiErrorPanel error={deliveries.error} title="Deliveries" onRetry={() => deliveries.refetch()} />
+                      <ApiErrorPanel error={deliveries.error} title={__('Deliveries', 'sikshya')} onRetry={() => deliveries.refetch()} />
                     </div>
                   ) : (
                     <ListPanel className="mt-3">
                       {deliveries.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
+                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
                       ) : (deliveries.data?.items?.length ?? 0) === 0 ? (
-                        <ListEmptyState title="No deliveries yet" description="Once events trigger, deliveries will appear here." />
+                        <ListEmptyState title={__('No deliveries yet', 'sikshya')} description={__('Once events trigger, deliveries will appear here.', 'sikshya')} />
                       ) : (
                         <div className="overflow-x-auto">
                           <table className="min-w-full text-left text-xs">
                             <thead className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
                               <tr>
-                                <th className="px-4 py-3 font-semibold">Status</th>
-                                <th className="px-4 py-3 font-semibold">Event</th>
-                                <th className="px-4 py-3 font-semibold">Endpoint</th>
-                                <th className="px-4 py-3 font-semibold">Attempts</th>
-                                <th className="px-4 py-3 font-semibold">Created</th>
+                                <th className="px-4 py-3 font-semibold">{__('Status', 'sikshya')}</th>
+                                <th className="px-4 py-3 font-semibold">{__('Event', 'sikshya')}</th>
+                                <th className="px-4 py-3 font-semibold">{__('Endpoint', 'sikshya')}</th>
+                                <th className="px-4 py-3 font-semibold">{__('Attempts', 'sikshya')}</th>
+                                <th className="px-4 py-3 font-semibold">{__('Created', 'sikshya')}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -687,7 +688,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
         {/* API keys — full width */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">API keys</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{__('API keys', 'sikshya')}</h2>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Keys let external apps prove they are allowed to talk to your site. Treat them like passwords.
             </p>
@@ -700,8 +701,8 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                 <PlanUpgradeOverlay
                   config={config}
                   featureId="public_api_keys"
-                  featureTitle="API keys"
-                  description="Let trusted apps authenticate to your site with revocable keys — start with a safe ping endpoint, expand with your developer."
+                  featureTitle={__('API keys', 'sikshya')}
+                  description={__('Let trusted apps authenticate to your site with revocable keys — start with a safe ping endpoint, expand with your developer.', 'sikshya')}
                 />
               </div>
             ) : !keyAddon.enabled ? (
@@ -712,8 +713,8 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                 <PremiumGatedSurface>
                   <AddonEnablePanel
                     variant="premium"
-                    title="Turn on API keys"
-                    description="Enable the “Public API & API keys” addon. You can create keys right after."
+                    title={__('Turn on API keys', 'sikshya')}
+                    description={__('Enable the “Public API & API keys” addon. You can create keys right after.', 'sikshya')}
                     canEnable={Boolean(keyAddon.licenseOk)}
                     enableBusy={keyAddon.loading}
                     onEnable={() => keyAddon.enable()}
@@ -726,7 +727,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
               <>
                 {freshKey ? (
                   <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40">
-                    <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">Copy this key now</p>
+                    <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">{__('Copy this key now', 'sikshya')}</p>
                     <p className="mt-1 text-xs leading-relaxed text-amber-900/90 dark:text-amber-200/90">
                       For your security we never show the full key again. If you lose it, revoke the old key and create a
                       new one.
@@ -739,7 +740,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                         type="button"
                         onClick={() =>
                           void copyText('the API key', freshKey, async (m) => {
-                            await dialog.alert({ title: 'Copy manually', message: m });
+                            await dialog.alert({ title: __('Copy manually', 'sikshya'), message: m });
                           })
                         }
                       >
@@ -764,12 +765,12 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     <input
                       value={keyLabel}
                       onChange={(e) => setKeyLabel(e.target.value)}
-                      placeholder="e.g. Zapier read-only"
+                      placeholder={__('e.g. Zapier read-only', 'sikshya')}
                       className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Scopes</label>
+                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Scopes', 'sikshya')}</label>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       {API_SCOPES.map((s) => {
                         const checked = keyScopes.includes(s.value);
@@ -797,7 +798,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Expiry (days)</label>
+                    <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Expiry (days)', 'sikshya')}</label>
                     <input
                       type="number"
                       min={1}
@@ -808,12 +809,12 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     />
                   </div>
                   <ButtonPrimary type="submit" disabled={keyBusy}>
-                    {keyBusy ? 'Creating…' : 'Create new key'}
+                    {keyBusy ? __('Creating…', 'sikshya') : __('Create new key', 'sikshya')}
                   </ButtonPrimary>
                 </form>
 
                 <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Test a key (optional)</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Test a key (optional)', 'sikshya')}</h3>
                   <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     Paste a key and tap test — we call a safe “ping” endpoint so you know the format is correct before
                     you plug it into another system.
@@ -822,30 +823,30 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     <input
                       value={pingToken}
                       onChange={(e) => setPingToken(e.target.value)}
-                      placeholder="sk_live_…"
+                      placeholder={__('sk_live_…', 'sikshya')}
                       className="w-full flex-1 rounded-xl border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
                     />
                     <ButtonPrimary type="button" disabled={pingBusy} onClick={() => void runPing()}>
-                      {pingBusy ? 'Testing…' : 'Test key'}
+                      {pingBusy ? __('Testing…', 'sikshya') : __('Test key', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                   {pingResult ? <p className="mt-2 text-xs text-slate-700 dark:text-slate-300">{pingResult}</p> : null}
                 </div>
 
                 <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Existing keys</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Existing keys', 'sikshya')}</h3>
                   {keys.error ? (
                     <div className="mt-2">
-                      <ApiErrorPanel error={keys.error} title="API keys" onRetry={() => keys.refetch()} />
+                      <ApiErrorPanel error={keys.error} title={__('API keys', 'sikshya')} onRetry={() => keys.refetch()} />
                     </div>
                   ) : (
                     <ListPanel className="mt-3">
                       {keys.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
+                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
                       ) : (keys.data?.rows?.length ?? 0) === 0 ? (
                         <ListEmptyState
-                          title="No keys yet"
-                          description="Create a key for each integration (never reuse the same key everywhere). Revoke a key if you think it leaked."
+                          title={__('No keys yet', 'sikshya')}
+                          description={__('Create a key for each integration (never reuse the same key everywhere). Revoke a key if you think it leaked.', 'sikshya')}
                         />
                       ) : (
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -857,7 +858,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                               <div>
                                 <div className="text-sm font-medium text-slate-900 dark:text-white">{r.label}</div>
                                 <div className="font-mono text-xs text-slate-500">
-                                  {r.key_prefix}… · {r.revoked ? 'revoked' : 'active'}
+                                  {r.key_prefix}… · {r.revoked ? __('revoked', 'sikshya') : __('active', 'sikshya')}
                                 </div>
                               </div>
                               {!r.revoked ? (
@@ -880,7 +881,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                 <div className="mt-10">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">OAuth apps</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('OAuth apps', 'sikshya')}</h3>
                       <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                         Use OAuth when you need user consent and per-user access tokens (recommended for third-party apps).
                       </p>
@@ -889,25 +890,25 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
                   {apps.error ? (
                     <div className="mt-2">
-                      <ApiErrorPanel error={apps.error} title="OAuth apps" onRetry={() => apps.refetch()} />
+                      <ApiErrorPanel error={apps.error} title={__('OAuth apps', 'sikshya')} onRetry={() => apps.refetch()} />
                     </div>
                   ) : (
                     <ListPanel className="mt-3">
                       {freshAppSecret ? (
                         <div className="m-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40">
-                          <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">Store these credentials now</p>
+                          <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">{__('Store these credentials now', 'sikshya')}</p>
                           <p className="mt-1 text-xs text-amber-900/90 dark:text-amber-200/90">
                             We only show the client secret once.
                           </p>
                           <div className="mt-3 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Client ID</span>
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Client ID', 'sikshya')}</span>
                               <code className="flex-1 overflow-x-auto rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900 dark:bg-slate-900 dark:text-slate-100">
                                 {freshAppSecret.clientId}
                               </code>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Client secret</span>
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Client secret', 'sikshya')}</span>
                               <code className="flex-1 overflow-x-auto rounded-lg bg-white px-2 py-1.5 font-mono text-xs text-slate-900 dark:bg-slate-900 dark:text-slate-100">
                                 {freshAppSecret.clientSecret}
                               </code>
@@ -916,7 +917,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                               type="button"
                               onClick={() =>
                                 void copyText('the client secret', freshAppSecret.clientSecret, async (m) => {
-                                  await dialog.alert({ title: 'Copy manually', message: m });
+                                  await dialog.alert({ title: __('Copy manually', 'sikshya'), message: m });
                                 })
                               }
                             >
@@ -928,16 +929,16 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
 
                       <form onSubmit={createApp} className="p-4 space-y-3">
                         <div>
-                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">App name</label>
+                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('App name', 'sikshya')}</label>
                           <input
                             value={appName}
                             onChange={(e) => setAppName(e.target.value)}
-                            placeholder="e.g. Mobile app"
+                            placeholder={__('e.g. Mobile app', 'sikshya')}
                             className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Redirect URL</label>
+                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Redirect URL', 'sikshya')}</label>
                           <input
                             value={appRedirect}
                             onChange={(e) => setAppRedirect(e.target.value)}
@@ -946,7 +947,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Scopes</label>
+                          <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Scopes', 'sikshya')}</label>
                           <div className="mt-2 grid gap-2 sm:grid-cols-2">
                             {API_SCOPES.map((s) => {
                               const checked = appScopes.includes(s.value);
@@ -971,16 +972,16 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                           </div>
                         </div>
                         <ButtonPrimary type="submit" disabled={appBusy}>
-                          {appBusy ? 'Creating…' : 'Create OAuth app'}
+                          {appBusy ? __('Creating…', 'sikshya') : __('Create OAuth app', 'sikshya')}
                         </ButtonPrimary>
                       </form>
 
                       {apps.loading ? (
-                        <div className="p-6 text-center text-sm text-slate-500">Loading…</div>
+                        <div className="p-6 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
                       ) : (apps.data?.rows?.length ?? 0) === 0 ? (
                         <ListEmptyState
-                          title="No OAuth apps yet"
-                          description="Create an OAuth app if you want external products to connect using user consent."
+                          title={__('No OAuth apps yet', 'sikshya')}
+                          description={__('Create an OAuth app if you want external products to connect using user consent.', 'sikshya')}
                         />
                       ) : (
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -989,7 +990,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                               <div className="min-w-0">
                                 <div className="text-sm font-medium text-slate-900 dark:text-white">{r.name}</div>
                                 <div className="mt-1 font-mono text-xs text-slate-500">{r.client_id}</div>
-                                <div className="mt-1 text-xs text-slate-500">{r.revoked ? 'revoked' : 'active'}</div>
+                                <div className="mt-1 text-xs text-slate-500">{r.revoked ? __('revoked', 'sikshya') : __('active', 'sikshya')}</div>
                               </div>
                               {!r.revoked ? (
                                 <button

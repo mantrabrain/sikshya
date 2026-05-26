@@ -15,6 +15,7 @@ import type { SettingsField, SettingsSection } from '../types/settingsSchema';
 import { renderSettingsField } from './settingsRenderField';
 import { normalizeTabSections } from './settingsTabUtils';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 type SettingsSchema = Record<string, SettingsSection[]>;
 
@@ -47,7 +48,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       SIKSHYA_ENDPOINTS.settings.schema
     );
     if (!res.success) {
-      throw new Error('Could not load settings schema.');
+      throw new Error(__('Could not load settings schema.', 'sikshya'));
     }
     return { tabs: res.data?.tabs || {} };
   }, []);
@@ -57,7 +58,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       SIKSHYA_ENDPOINTS.settings.values(tab)
     );
     if (!res.success) {
-      throw new Error('Could not load settings values.');
+      throw new Error(__('Could not load settings values.', 'sikshya'));
     }
     return res.data?.values || {};
   }, [tab]);
@@ -106,10 +107,10 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       setInitialValues(next);
       const msg = res.message || 'Settings saved.';
       setSaveMsg(msg);
-      toast.success('Saved', msg);
+      toast.success(__('Saved', 'sikshya'), msg);
     } catch (e) {
       setSaveError(e);
-      toast.error('Save failed', e instanceof Error ? e.message : 'Could not save settings. Please try again.');
+      toast.error(__('Save failed', 'sikshya'), e instanceof Error ? e.message : 'Could not save settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -117,10 +118,10 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
 
   const onReset = async () => {
     const ok = await confirm({
-      title: 'Reset email settings?',
-      message: 'Reset email settings to their default values?',
+      title: __('Reset email settings?', 'sikshya'),
+      message: __('Reset email settings to their default values?', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Reset',
+      confirmLabel: __('Reset', 'sikshya'),
     });
     if (!ok) {
       return;
@@ -139,10 +140,10 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       await values.refetch();
       const msg = res.message || 'Settings reset.';
       setSaveMsg(msg);
-      toast.success('Reset', msg);
+      toast.success(__('Reset', 'sikshya'), msg);
     } catch (e) {
       setSaveError(e);
-      toast.error('Reset failed', e instanceof Error ? e.message : 'Could not reset settings. Please try again.');
+      toast.error(__('Reset failed', 'sikshya'), e instanceof Error ? e.message : 'Could not reset settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -155,7 +156,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Contact addresses, transactional send toggle, SMTP, wrappers, certificate email — template copies under Email templates"
+      subtitle={__('Contact addresses, transactional send toggle, SMTP, wrappers, certificate email — template copies under Email templates', 'sikshya')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
 
@@ -181,7 +182,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
                     <NavIcon name="plusDocument" className="h-4 w-4" />
                     Email
                   </div>
-                  <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Email delivery</h2>
+                  <h2 className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{__('Email delivery', 'sikshya')}</h2>
                   <p className="mt-1 text-sm text-slate-400/90 dark:text-slate-500/80">
                     Configure how mail is sent and wrapped. Enable or edit individual messages on the Email templates screen.
                   </p>
@@ -197,7 +198,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
                     Reset
                   </button>
                   <ButtonPrimary type="button" disabled={saving || !dirty} onClick={() => void onSave()}>
-                    {saving ? 'Saving…' : 'Save email settings'}
+                    {saving ? __('Saving…', 'sikshya') : __('Save email settings', 'sikshya')}
                   </ButtonPrimary>
                 </div>
               </div>
@@ -205,7 +206,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
 
             {saveError ? (
               <div className="px-6 pt-4">
-                <ApiErrorPanel error={saveError} title="Settings request failed" onRetry={() => setSaveError(null)} />
+                <ApiErrorPanel error={saveError} title={__('Settings request failed', 'sikshya')} onRetry={() => setSaveError(null)} />
               </div>
             ) : null}
 
@@ -214,7 +215,7 @@ export function EmailPage(props: { config: SikshyaReactConfig; title: string; em
                 <EmailDeliverySettings config={config} tabSchema={tabSchema} renderField={renderField} />
               ) : (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-950/20">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">No email settings defined.</p>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{__('No email settings defined.', 'sikshya')}</p>
                 </div>
               )}
             </div>

@@ -11,6 +11,7 @@ import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { useAdminRouting } from '../lib/adminRouting';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type ReviewRow = {
   id: number;
@@ -65,7 +66,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
 
   const loader = useCallback(async () => {
     if (!reviewId) {
-      throw new Error('Missing review id.');
+      throw new Error(__('Missing review id.', 'sikshya'));
     }
     if (!gateOpen) {
       return null;
@@ -99,10 +100,10 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
   const removeReply = async () => {
     if (!reviewId) return;
     const ok = await confirm({
-      title: 'Remove reply?',
-      message: 'This removes the public instructor/admin reply from the course page.',
+      title: __('Remove reply?', 'sikshya'),
+      message: __('This removes the public instructor/admin reply from the course page.', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Remove',
+      confirmLabel: __('Remove', 'sikshya'),
     });
     if (!ok) return;
     setBusy(true);
@@ -140,10 +141,10 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
   const remove = async () => {
     if (!reviewId) return;
     const ok = await confirm({
-      title: 'Delete review?',
-      message: 'This review will be permanently removed and the course rating recalculated.',
+      title: __('Delete review?', 'sikshya'),
+      message: __('This review will be permanently removed and the course rating recalculated.', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Delete',
+      confirmLabel: __('Delete', 'sikshya'),
     });
     if (!ok) return;
     setBusy(true);
@@ -160,7 +161,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Moderate this review and post an official reply on the course page."
+      subtitle={__('Moderate this review and post an official reply on the course page.', 'sikshya')}
       pageActions={
         <ButtonSecondary type="button" onClick={() => navigateView('reviews')}>
           ← Back to reviews
@@ -171,22 +172,22 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
         mode={mode}
         featureId="course_reviews"
         config={config}
-        featureTitle="Course reviews & ratings"
-        featureDescription="Collect star ratings and written reviews on your course pages, with optional moderation."
+        featureTitle={__('Course reviews & ratings', 'sikshya')}
+        featureDescription={__('Collect star ratings and written reviews on your course pages, with optional moderation.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Reviews moderation is not enabled"
-        addonEnableDescription="Enable the Course reviews addon to use this screen."
+        addonEnableTitle={__('Reviews moderation is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Course reviews addon to use this screen.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
         addonError={addon.error}
       >
         {!gateOpen ? null : error ? (
-          <ApiErrorPanel error={error} title="Could not load review" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load review', 'sikshya')} onRetry={() => refetch()} />
         ) : loading ? (
-          <div className="p-8 text-center text-sm text-slate-500">Loading…</div>
+          <div className="p-8 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
         ) : !reviewId ? (
-          <p className="text-sm text-slate-600 dark:text-slate-400">Missing review id.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{__('Missing review id.', 'sikshya')}</p>
         ) : row ? (
           <div className="space-y-6">
             <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
@@ -213,7 +214,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
                   ) : null}
                 </p>
                 <p className="text-sm">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Course: </span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300">{__('Course:', 'sikshya')}</span>
                   {row.view_url ? (
                     <a
                       href={row.view_url}
@@ -256,7 +257,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Review</h2>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Review', 'sikshya')}</h2>
               {row.review_text ? (
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
                   {row.review_text}
@@ -267,7 +268,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-700 dark:bg-slate-950/40">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Official reply</h2>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Official reply', 'sikshya')}</h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Shown publicly under this review on the course page.
               </p>
@@ -275,7 +276,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
                 rows={5}
                 value={replyDraft}
                 onChange={(e) => setReplyDraft(e.target.value)}
-                placeholder="Write a short reply…"
+                placeholder={__('Write a short reply…', 'sikshya')}
                 className="mt-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
               />
               <div className="mt-3 flex flex-wrap justify-end gap-2">
@@ -291,7 +292,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
             </div>
           </div>
         ) : !loading && !error ? (
-          <p className="text-sm text-slate-600 dark:text-slate-400">Review not found.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{__('Review not found.', 'sikshya')}</p>
         ) : null}
       </GatedFeatureWorkspace>
     </EmbeddableShell>

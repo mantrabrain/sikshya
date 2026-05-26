@@ -101,7 +101,7 @@ final class AdminAddonsRestRoutes
     {
         $mgr = $this->addonManager();
         if (!$mgr) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Addons service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Addons service unavailable', 'sikshya')], 500);
         }
 
         $items = [];
@@ -130,17 +130,17 @@ final class AdminAddonsRestRoutes
     {
         $id = sanitize_key((string) $request->get_param('id'));
         if ($id === '') {
-            return new WP_REST_Response(['success' => false, 'message' => 'Missing addon id'], 400);
+            return new WP_REST_Response(['success' => false, 'message' => __('Missing addon id', 'sikshya')], 400);
         }
 
         $mgr = $this->addonManager();
         if (!$mgr) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Addons service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Addons service unavailable', 'sikshya')], 500);
         }
 
         $reg = $mgr->registry();
         if (!isset($reg[$id])) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Unknown addon'], 404);
+            return new WP_REST_Response(['success' => false, 'message' => __('Unknown addon', 'sikshya')], 404);
         }
 
         $addon = $reg[$id];
@@ -149,7 +149,7 @@ final class AdminAddonsRestRoutes
             return new WP_REST_Response(
                 [
                     'success' => false,
-                    'message' => 'License required',
+                    'message' => __('License required', 'sikshya'),
                     'code' => 'sikshya_plan_feature_required',
                     'legacy_error_code' => 'sikshya_pro_required',
                     'feature' => $id,
@@ -192,17 +192,17 @@ final class AdminAddonsRestRoutes
     {
         $id = sanitize_key((string) $request->get_param('id'));
         if ($id === '') {
-            return new WP_REST_Response(['success' => false, 'message' => 'Missing addon id'], 400);
+            return new WP_REST_Response(['success' => false, 'message' => __('Missing addon id', 'sikshya')], 400);
         }
 
         $mgr = $this->addonManager();
         if (!$mgr) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Addons service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Addons service unavailable', 'sikshya')], 500);
         }
 
         $reg = $mgr->registry();
         if (!isset($reg[$id])) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Unknown addon'], 404);
+            return new WP_REST_Response(['success' => false, 'message' => __('Unknown addon', 'sikshya')], 404);
         }
 
         if ($reg[$id]->tier() === 'free') {

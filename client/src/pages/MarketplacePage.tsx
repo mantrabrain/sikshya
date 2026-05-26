@@ -11,6 +11,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 type OverviewResp = {
   ok?: boolean;
@@ -178,9 +179,9 @@ export function MarketplacePage(props: { embedded?: boolean; config: SikshyaReac
         return;
       }
       if (t.kind === 'success') {
-        toast.success('Success', t.text);
+        toast.success(__('Success', 'sikshya'), t.text);
       } else {
-        toast.error('Error', t.text);
+        toast.error(__('Error', 'sikshya'), t.text);
       }
     },
     [toast]
@@ -201,17 +202,17 @@ export function MarketplacePage(props: { embedded?: boolean; config: SikshyaReac
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Run a multi-vendor LMS marketplace: track per-line commissions, manage vendor storefronts, and process withdrawals from one workspace."
+      subtitle={__('Run a multi-vendor LMS marketplace: track per-line commissions, manage vendor storefronts, and process withdrawals from one workspace.', 'sikshya')}
     >
       <GatedFeatureWorkspace
         mode={mode}
         featureId="marketplace_multivendor"
         config={config}
-        featureTitle="Marketplace"
-        featureDescription="Let instructors sell from storefronts, split commissions automatically, and process withdrawals with a clear audit trail."
+        featureTitle={__('Marketplace', 'sikshya')}
+        featureDescription={__('Let instructors sell from storefronts, split commissions automatically, and process withdrawals with a clear audit trail.', 'sikshya')}
         previewVariant="cards"
-        addonEnableTitle="Marketplace is not enabled"
-        addonEnableDescription="Enable the Marketplace addon to register vendor routes and unlock multi-vendor selling."
+        addonEnableTitle={__('Marketplace is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Marketplace addon to register vendor routes and unlock multi-vendor selling.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -274,10 +275,10 @@ function OverviewPanel(props: {
 }) {
   const { loading, data, error, onRefresh, currency } = props;
   if (error) {
-    return <ApiErrorPanel error={error} title="Could not load marketplace overview" onRetry={onRefresh} />;
+    return <ApiErrorPanel error={error} title={__('Could not load marketplace overview', 'sikshya')} onRetry={onRefresh} />;
   }
   if (loading) {
-    return <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">Loading overview…</div>;
+    return <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">{__('Loading overview…', 'sikshya')}</div>;
   }
   if (!data) {
     return null;
@@ -299,7 +300,7 @@ function OverviewPanel(props: {
         <StatTile label="Suspended" value={String(vendors.suspended ?? 0)} />
       </div>
       <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
-        <strong className="text-slate-800 dark:text-slate-200">Tip:</strong> Commission rows accrue immediately when a paid order fulfills, but only become withdrawable once the hold period passes. You can adjust the hold period in Marketplace settings.
+        <strong className="text-slate-800 dark:text-slate-200">{__('Tip:', 'sikshya')}</strong> Commission rows accrue immediately when a paid order fulfills, but only become withdrawable once the hold period passes. You can adjust the hold period in Marketplace settings.
       </div>
     </div>
   );
@@ -369,10 +370,10 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
                 setStatus(e.target.value);
               }}
             >
-              <option value="">All</option>
-              <option value="pending">Pending</option>
-              <option value="active">Active</option>
-              <option value="suspended">Suspended</option>
+              <option value="">{__('All', 'sikshya')}</option>
+              <option value="pending">{__('Pending', 'sikshya')}</option>
+              <option value="active">{__('Active', 'sikshya')}</option>
+              <option value="suspended">{__('Suspended', 'sikshya')}</option>
             </select>
           </label>
           <label className="block min-w-[220px] flex-1 text-sm text-slate-700 dark:text-slate-300">
@@ -383,7 +384,7 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
                 setPage(1);
                 setSearch(e.target.value);
               }}
-              placeholder="Name or store slug…"
+              placeholder={__('Name or store slug…', 'sikshya')}
               className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </label>
@@ -393,15 +394,15 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
 
       {v.error ? (
         <div className="mt-4">
-          <ApiErrorPanel error={v.error} title="Could not load vendors" onRetry={() => void v.refetch()} />
+          <ApiErrorPanel error={v.error} title={__('Could not load vendors', 'sikshya')} onRetry={() => void v.refetch()} />
         </div>
       ) : v.loading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
       ) : rows.length === 0 ? (
         <div className="mt-6">
           <ListEmptyState
-            title="No vendors yet"
-            description="Vendors are created automatically when an instructor saves their marketplace profile, or when an order with a course you authored fulfills."
+            title={__('No vendors yet', 'sikshya')}
+            description={__('Vendors are created automatically when an instructor saves their marketplace profile, or when an order with a course you authored fulfills.', 'sikshya')}
           />
         </div>
       ) : (
@@ -409,12 +410,12 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
           <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
             <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
               <tr>
-                <th className="px-4 py-3">Vendor</th>
-                <th className="px-4 py-3">Store</th>
-                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">{__('Vendor', 'sikshya')}</th>
+                <th className="px-4 py-3">{__('Store', 'sikshya')}</th>
+                <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
                 <th className="px-4 py-3">Commission %</th>
-                <th className="px-4 py-3">Joined</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-3">{__('Joined', 'sikshya')}</th>
+                <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -426,7 +427,7 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
                   </td>
                   <td className="px-4 py-3 font-mono text-xs">{r.store_slug || '—'}</td>
                   <td className="px-4 py-3"><StatusPill kind="vendor" status={r.status} /></td>
-                  <td className="px-4 py-3 tabular-nums">{r.commission_override !== null && r.commission_override !== undefined ? `${r.commission_override.toFixed(2)} %` : <span className="text-slate-400">default</span>}</td>
+                  <td className="px-4 py-3 tabular-nums">{r.commission_override !== null && r.commission_override !== undefined ? `${r.commission_override.toFixed(2)} %` : <span className="text-slate-400">{__('default', 'sikshya')}</span>}</td>
                   <td className="px-4 py-3 text-slate-500">{r.created_at ? r.created_at.replace(' ', ' · ') : '—'}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
@@ -493,11 +494,11 @@ function CommissionsPanel(props: { enabled: boolean }) {
                 setStatus(e.target.value);
               }}
             >
-              <option value="">All</option>
-              <option value="accrued">Accrued (in hold)</option>
-              <option value="available">Available</option>
-              <option value="paid">Paid out</option>
-              <option value="reversed">Reversed</option>
+              <option value="">{__('All', 'sikshya')}</option>
+              <option value="accrued">{__('Accrued (in hold)', 'sikshya')}</option>
+              <option value="available">{__('Available', 'sikshya')}</option>
+              <option value="paid">{__('Paid out', 'sikshya')}</option>
+              <option value="reversed">{__('Reversed', 'sikshya')}</option>
             </select>
           </label>
           <label className="block text-sm text-slate-700 dark:text-slate-300">
@@ -508,29 +509,29 @@ function CommissionsPanel(props: { enabled: boolean }) {
                 setPage(1);
                 setVendorId(e.target.value.replace(/[^0-9]/g, ''));
               }}
-              placeholder="e.g. 12"
+              placeholder={__('e.g. 12', 'sikshya')}
               className="mt-1 w-32 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             />
           </label>
         </div>
         <div className="grid gap-1 text-right text-xs text-slate-500 dark:text-slate-400">
-          <span>Platform: <strong className="text-slate-900 dark:text-white">{fmtCurrency(totals.platform_commission, currency)}</strong></span>
-          <span>Vendors: <strong className="text-slate-900 dark:text-white">{fmtCurrency(totals.vendor_net, currency)}</strong></span>
-          <span>Gross: <strong className="text-slate-900 dark:text-white">{fmtCurrency(totals.gross, currency)}</strong></span>
+          <span>{__('Platform:', 'sikshya')}<strong className="text-slate-900 dark:text-white">{fmtCurrency(totals.platform_commission, currency)}</strong></span>
+          <span>{__('Vendors:', 'sikshya')}<strong className="text-slate-900 dark:text-white">{fmtCurrency(totals.vendor_net, currency)}</strong></span>
+          <span>{__('Gross:', 'sikshya')}<strong className="text-slate-900 dark:text-white">{fmtCurrency(totals.gross, currency)}</strong></span>
         </div>
       </div>
 
       {c.error ? (
         <div className="mt-4">
-          <ApiErrorPanel error={c.error} title="Could not load commissions" onRetry={() => void c.refetch()} />
+          <ApiErrorPanel error={c.error} title={__('Could not load commissions', 'sikshya')} onRetry={() => void c.refetch()} />
         </div>
       ) : c.loading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
       ) : rows.length === 0 ? (
         <div className="mt-6">
           <ListEmptyState
-            title="No commission rows yet"
-            description="When a marketplace order fulfills, Sikshya creates one row per line item showing gross, fees, platform commission, and vendor net."
+            title={__('No commission rows yet', 'sikshya')}
+            description={__('When a marketplace order fulfills, Sikshya creates one row per line item showing gross, fees, platform commission, and vendor net.', 'sikshya')}
           />
         </div>
       ) : (
@@ -538,15 +539,15 @@ function CommissionsPanel(props: { enabled: boolean }) {
           <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
             <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
               <tr>
-                <th className="px-4 py-3">When</th>
-                <th className="px-4 py-3">Order #</th>
-                <th className="px-4 py-3">Course</th>
-                <th className="px-4 py-3">Vendor</th>
-                <th className="px-4 py-3 text-right">Gross</th>
-                <th className="px-4 py-3 text-right">Fee</th>
-                <th className="px-4 py-3 text-right">Platform</th>
-                <th className="px-4 py-3 text-right">Vendor net</th>
-                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">{__('When', 'sikshya')}</th>
+                <th className="px-4 py-3">{__('Order #', 'sikshya')}</th>
+                <th className="px-4 py-3">{__('Course', 'sikshya')}</th>
+                <th className="px-4 py-3">{__('Vendor', 'sikshya')}</th>
+                <th className="px-4 py-3 text-right">{__('Gross', 'sikshya')}</th>
+                <th className="px-4 py-3 text-right">{__('Fee', 'sikshya')}</th>
+                <th className="px-4 py-3 text-right">{__('Platform', 'sikshya')}</th>
+                <th className="px-4 py-3 text-right">{__('Vendor net', 'sikshya')}</th>
+                <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -661,12 +662,12 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
                   setStatus(e.target.value);
                 }}
               >
-                <option value="">All</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="paid">Paid</option>
-                <option value="rejected">Rejected</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="">{__('All', 'sikshya')}</option>
+                <option value="pending">{__('Pending', 'sikshya')}</option>
+                <option value="approved">{__('Approved', 'sikshya')}</option>
+                <option value="paid">{__('Paid', 'sikshya')}</option>
+                <option value="rejected">{__('Rejected', 'sikshya')}</option>
+                <option value="cancelled">{__('Cancelled', 'sikshya')}</option>
               </select>
             </label>
           </div>
@@ -675,25 +676,25 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
 
         {w.error ? (
           <div className="mt-4">
-            <ApiErrorPanel error={w.error} title="Could not load withdrawals" onRetry={() => void w.refetch()} />
+            <ApiErrorPanel error={w.error} title={__('Could not load withdrawals', 'sikshya')} onRetry={() => void w.refetch()} />
           </div>
         ) : w.loading ? (
-          <p className="mt-6 text-sm text-slate-500">Loading…</p>
+          <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
         ) : rows.length === 0 ? (
           <div className="mt-6">
-            <ListEmptyState title="No withdrawal requests" description="Vendors can request a payout from their account once their balance is above the minimum withdrawal." />
+            <ListEmptyState title={__('No withdrawal requests', 'sikshya')} description={__('Vendors can request a payout from their account once their balance is above the minimum withdrawal.', 'sikshya')} />
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
               <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                 <tr>
-                  <th className="px-4 py-3">Requested</th>
-                  <th className="px-4 py-3">Vendor</th>
-                  <th className="px-4 py-3 text-right">Amount</th>
-                  <th className="px-4 py-3">Method</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{__('Requested', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Vendor', 'sikshya')}</th>
+                  <th className="px-4 py-3 text-right">{__('Amount', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Method', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
+                  <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -732,7 +733,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
       </ListPanel>
 
       <ListPanel className="p-4">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Manual adjustment</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Manual adjustment', 'sikshya')}</h2>
         <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
           Record a credit (positive) or a debit (negative) for a vendor — for refund clawbacks, bonuses, or one-off corrections. Adjustments affect the vendor's withdrawable balance immediately.
         </p>
@@ -763,13 +764,13 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
               required
               value={adjustReason}
               onChange={(e) => setAdjustReason(e.target.value)}
-              placeholder="e.g. Refund clawback for order #1234"
+              placeholder={__('e.g. Refund clawback for order #1234', 'sikshya')}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             />
           </label>
           <div className="sm:col-span-3">
             <ButtonPrimary type="submit" disabled={adjustBusy}>
-              {adjustBusy ? 'Saving…' : 'Record adjustment'}
+              {adjustBusy ? __('Saving…', 'sikshya') : __('Record adjustment', 'sikshya')}
             </ButtonPrimary>
           </div>
         </form>

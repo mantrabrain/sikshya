@@ -14,6 +14,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type CouponRow = {
   id: number;
@@ -164,7 +165,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.couponAdvanced(advCouponId), {
         rules: buildAdvancedRulesPayload(),
       });
-      setAdvMsg('Advanced rules saved.');
+      setAdvMsg(__('Advanced rules saved.', 'sikshya'));
     } catch (err) {
       setAdvMsg(err instanceof Error ? err.message : 'Save failed');
     } finally {
@@ -229,7 +230,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
           expires_at: expiresAt || null,
           status: selected.status || 'active',
         });
-        setSaveMsg('Coupon updated.');
+        setSaveMsg(__('Coupon updated.', 'sikshya'));
         await refetch();
         return;
       }
@@ -261,7 +262,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
         }
       }
 
-      setSaveMsg('Coupon created.');
+      setSaveMsg(__('Coupon created.', 'sikshya'));
       await refetch();
       setTab('list');
       resetEditor();
@@ -297,7 +298,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Discount codes applied at native checkout (Stripe / PayPal)."
+      subtitle={__('Discount codes applied at native checkout (Stripe / PayPal).', 'sikshya')}
       pageActions={
         <ButtonSecondary type="button" disabled={loading} onClick={() => refetch()}>
           Refresh
@@ -306,7 +307,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load coupons" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load coupons', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -341,7 +342,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
               beginManage(selected);
             }
           }}
-          ariaLabel="Coupons tabs"
+          ariaLabel={__('Coupons tabs', 'sikshya')}
         />
       </div>
 
@@ -351,9 +352,9 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
           config={config}
           title={title}
           addonId="coupons_advanced"
-          subtitle="Storefront hints, cart promo, and checkout guidance."
-          featureTitle="Advanced coupons & upsells"
-          featureDescription="Tune where learners see coupon guidance and optional cart merchandising. Per-coupon rules stay on each coupon’s Manage screen."
+          subtitle={__('Storefront hints, cart promo, and checkout guidance.', 'sikshya')}
+          featureTitle={__('Advanced coupons & upsells', 'sikshya')}
+          featureDescription={__('Tune where learners see coupon guidance and optional cart merchandising. Per-coupon rules stay on each coupon’s Manage screen.', 'sikshya')}
           relatedCoreSettingsTab="payment"
           relatedCoreSettingsLabel="Payment"
         />
@@ -361,7 +362,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
         <ListPanel>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5 dark:border-slate-800">
             <div>
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">All coupons</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('All coupons', 'sikshya')}</div>
               <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Tip: click “Manage” on a coupon to view advanced rules (and set them if you have Advanced coupons).
               </div>
@@ -371,7 +372,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search code…"
+                placeholder={__('Search code…', 'sikshya')}
                 className="w-56 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
               />
               <ButtonPrimary type="button" onClick={beginCreate} disabled={tableMissing}>
@@ -381,10 +382,10 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading…</div>
+            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
           ) : visibleRows.length === 0 ? (
             <ListEmptyState
-              title={rows.length === 0 ? 'No coupons' : 'No matches'}
+              title={rows.length === 0 ? __('No coupons', 'sikshya') : __('No matches', 'sikshya')}
               description={
                 rows.length === 0
                   ? 'Create a code learners can enter during checkout.'
@@ -396,12 +397,12 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
               <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                   <tr>
-                    <th className="px-5 py-3.5">Code</th>
-                    <th className="px-5 py-3.5">Discount</th>
-                    <th className="px-5 py-3.5">Uses</th>
-                    <th className="px-5 py-3.5">Expires</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Actions</th>
+                    <th className="px-5 py-3.5">{__('Code', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Discount', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Uses', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Expires', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                    <th className="px-5 py-3.5 text-right">{__('Actions', 'sikshya')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -463,28 +464,28 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
 
             <form id="sikshya-coupon-form" onSubmit={onSubmit} className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <label className="block text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Code</span>
+                <span className="text-slate-600 dark:text-slate-400">{__('Code', 'sikshya')}</span>
                 <input
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950"
-                  placeholder="SAVE10"
+                  placeholder={__('SAVE10', 'sikshya')}
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Type</span>
+                <span className="text-slate-600 dark:text-slate-400">{__('Type', 'sikshya')}</span>
                 <select
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value as 'percent' | 'fixed')}
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                 >
-                  <option value="percent">Percent off</option>
-                  <option value="fixed">Fixed amount</option>
+                  <option value="percent">{__('Percent off', 'sikshya')}</option>
+                  <option value="fixed">{__('Fixed amount', 'sikshya')}</option>
                 </select>
               </label>
               <label className="block text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Value</span>
+                <span className="text-slate-600 dark:text-slate-400">{__('Value', 'sikshya')}</span>
                 <input
                   type="number"
                   step="0.01"
@@ -495,7 +496,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Max uses (0 = unlimited)</span>
+                <span className="text-slate-600 dark:text-slate-400">{__('Max uses (0 = unlimited)', 'sikshya')}</span>
                 <input
                   type="number"
                   min="0"
@@ -520,11 +521,11 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                 mode={advMode}
                 featureId="coupons_advanced"
                 config={config}
-                featureTitle="Advanced coupon rules"
-                featureDescription="Target carts with min/max totals, allow or block specific courses, cap percent discounts, limit uses per learner, first-purchase-only windows, and optional schedule."
+                featureTitle={__('Advanced coupon rules', 'sikshya')}
+                featureDescription={__('Target carts with min/max totals, allow or block specific courses, cap percent discounts, limit uses per learner, first-purchase-only windows, and optional schedule.', 'sikshya')}
                 previewVariant="form"
-                addonEnableTitle="Advanced coupons is not enabled"
-                addonEnableDescription="Enable the Advanced coupons add-on for targeting, caps, and storefront hints."
+                addonEnableTitle={__('Advanced coupons is not enabled', 'sikshya')}
+                addonEnableDescription={__('Enable the Advanced coupons add-on for targeting, caps, and storefront hints.', 'sikshya')}
                 canEnable={Boolean(advAddon.licenseOk)}
                 enableBusy={advAddon.loading}
                 onEnable={() => advAddon.enable()}
@@ -540,30 +541,30 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                         Leave fields empty or zero to disable that rule. Course exclude list blocks the code if any
                         excluded course is in the cart.
                       </p>
-                      {editorMode === 'manage' && advLoading ? <p className="mt-2 text-sm text-slate-500">Loading…</p> : null}
+                      {editorMode === 'manage' && advLoading ? <p className="mt-2 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p> : null}
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <label className="block text-sm">
-                        <span className="text-slate-600 dark:text-slate-400">Minimum cart subtotal</span>
+                        <span className="text-slate-600 dark:text-slate-400">{__('Minimum cart subtotal', 'sikshya')}</span>
                         <input
                           type="number"
                           step="0.01"
                           min={0}
                           value={advMin}
                           onChange={(e) => setAdvMin(e.target.value)}
-                          placeholder="0 = none"
+                          placeholder={__('0 = none', 'sikshya')}
                           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                         />
                       </label>
                       <label className="block text-sm">
-                        <span className="text-slate-600 dark:text-slate-400">Maximum cart subtotal</span>
+                        <span className="text-slate-600 dark:text-slate-400">{__('Maximum cart subtotal', 'sikshya')}</span>
                         <input
                           type="number"
                           step="0.01"
                           min={0}
                           value={advMaxSub}
                           onChange={(e) => setAdvMaxSub(e.target.value)}
-                          placeholder="0 = none"
+                          placeholder={__('0 = none', 'sikshya')}
                           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                         />
                       </label>
@@ -575,12 +576,12 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                           min={0}
                           value={advMaxDiscount}
                           onChange={(e) => setAdvMaxDiscount(e.target.value)}
-                          placeholder="0 = no cap"
+                          placeholder={__('0 = no cap', 'sikshya')}
                           className="mt-1 w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                         />
                       </label>
                       <label className="block text-sm">
-                        <span className="text-slate-600 dark:text-slate-400">Uses per learner (0 = unlimited)</span>
+                        <span className="text-slate-600 dark:text-slate-400">{__('Uses per learner (0 = unlimited)', 'sikshya')}</span>
                         <input
                           type="number"
                           min={0}
@@ -596,7 +597,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                           onChange={(e) => setAdvFirstOrder(e.target.checked)}
                           className="rounded border-slate-300"
                         />
-                        <span className="text-slate-700 dark:text-slate-300">First paid order only (logged-in checkout)</span>
+                        <span className="text-slate-700 dark:text-slate-300">{__('First paid order only (logged-in checkout)', 'sikshya')}</span>
                       </label>
                       <DateTimePickerField
                         kind="datetime"
@@ -614,7 +615,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                       />
                     </div>
                     <div className="text-sm">
-                      <span className="block text-slate-600 dark:text-slate-400">Allowed courses</span>
+                      <span className="block text-slate-600 dark:text-slate-400">{__('Allowed courses', 'sikshya')}</span>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         If set, the cart must include at least one of these courses.
                       </p>
@@ -622,13 +623,13 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                         <MultiCoursePicker
                           value={advCourseIds}
                           onChange={setAdvCourseIds}
-                          title="Select allowed courses"
-                          placeholder="Click to select courses…"
+                          title={__('Select allowed courses', 'sikshya')}
+                          placeholder={__('Click to select courses…', 'sikshya')}
                         />
                       </div>
                     </div>
                     <div className="text-sm">
-                      <span className="block text-slate-600 dark:text-slate-400">Excluded courses</span>
+                      <span className="block text-slate-600 dark:text-slate-400">{__('Excluded courses', 'sikshya')}</span>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         If the cart contains any of these courses, the code is rejected.
                       </p>
@@ -636,15 +637,15 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                         <MultiCoursePicker
                           value={advExcludedCourseIds}
                           onChange={setAdvExcludedCourseIds}
-                          title="Select excluded courses"
-                          placeholder="Click to select courses…"
+                          title={__('Select excluded courses', 'sikshya')}
+                          placeholder={__('Click to select courses…', 'sikshya')}
                         />
                       </div>
                     </div>
                     {editorMode === 'manage' && selected ? (
                       <div className="flex flex-wrap items-center gap-3">
                         <ButtonPrimary type="button" onClick={() => void saveAdvanced()} disabled={advSaving || !advCouponId}>
-                          {advSaving ? 'Saving…' : 'Save advanced rules'}
+                          {advSaving ? __('Saving…', 'sikshya') : __('Save advanced rules', 'sikshya')}
                         </ButtonPrimary>
                         {advMsg ? <span className="text-xs text-slate-600 dark:text-slate-400">{advMsg}</span> : null}
                       </div>
@@ -656,8 +657,8 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                   </div>
                 ) : (
                   <ListEmptyState
-                    title="Pick a coupon"
-                    description="Open “Manage” from the Coupons list to load and edit advanced rules."
+                    title={__('Pick a coupon', 'sikshya')}
+                    description={__('Open “Manage” from the Coupons list to load and edit advanced rules.', 'sikshya')}
                   />
                 )}
               </GatedFeatureWorkspace>
@@ -677,7 +678,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                 </ButtonSecondary>
               ) : null}
               <ButtonPrimary type="submit" form="sikshya-coupon-form" disabled={saving || tableMissing}>
-                {saving ? 'Saving…' : editorMode === 'create' ? 'Create coupon' : 'Save coupon'}
+                {saving ? 'Saving…' : editorMode === 'create' ? __('Create coupon', 'sikshya') : __('Save coupon', 'sikshya')}
               </ButtonPrimary>
             </div>
           </ListPanel>

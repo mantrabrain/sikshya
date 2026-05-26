@@ -47,7 +47,7 @@ class QuizService
         $id = $request->get_param('id');
         $post = get_post($id);
         if (!$post || $post->post_type !== 'sikshya_quiz') {
-            return new WP_REST_Response(['error' => 'Quiz not found'], 404);
+            return new WP_REST_Response(['error' => __('Quiz not found', 'sikshya')], 404);
         }
         return new WP_REST_Response($this->formatQuiz($post));
     }
@@ -73,7 +73,7 @@ class QuizService
         $id = $request->get_param('id');
         $result = wp_delete_post($id, true);
         if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to delete quiz'], 400);
+            return new WP_REST_Response(['error' => __('Failed to delete quiz', 'sikshya')], 400);
         }
         return new WP_REST_Response(['success' => true]);
     }

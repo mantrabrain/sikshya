@@ -83,7 +83,7 @@ class PublicRestRoutes
 
         $courseService = $this->plugin->getService('course');
         if (!$courseService instanceof CourseService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         try {

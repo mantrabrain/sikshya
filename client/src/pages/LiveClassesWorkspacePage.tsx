@@ -5,6 +5,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 export function LiveClassesWorkspacePage(props: {
   config: SikshyaReactConfig;
@@ -21,11 +22,11 @@ export function LiveClassesWorkspacePage(props: {
       mode={mode}
       featureId="live_classes"
       config={config}
-      featureTitle="Live classes"
-      featureDescription="Store join links, providers, and schedules on lessons so learners always know where to go — with optional course-level promos, calendar sync, and global defaults."
+      featureTitle={__('Live classes', 'sikshya')}
+      featureDescription={__('Store join links, providers, and schedules on lessons so learners always know where to go — with optional course-level promos, calendar sync, and global defaults.', 'sikshya')}
       previewVariant="cards"
-      addonEnableTitle="Live classes are not enabled"
-      addonEnableDescription="Enable the add-on to tune join-link behaviour, session defaults, and where upcoming sessions appear across the storefront and learner experience."
+      addonEnableTitle={__('Live classes are not enabled', 'sikshya')}
+      addonEnableDescription={__('Enable the add-on to tune join-link behaviour, session defaults, and where upcoming sessions appear across the storefront and learner experience.', 'sikshya')}
       canEnable={Boolean(addon.licenseOk)}
       enableBusy={addon.loading}
       onEnable={() => addon.enable()}
@@ -33,7 +34,7 @@ export function LiveClassesWorkspacePage(props: {
       {mode === 'full' ? (
         <div className="space-y-8">
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">How teams use this</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('How teams use this', 'sikshya')}</h2>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600 dark:text-slate-300">
               <li>Create the meeting in Zoom / Meet / Teams, then paste the join URL on each live lesson.</li>
               <li>Set a start time so Sikshya can surface “Upcoming live sessions” on the course page and learner calendar.</li>
@@ -44,11 +45,11 @@ export function LiveClassesWorkspacePage(props: {
           <AddonSettingsPage
             embedded
             config={config}
-            title="Live class defaults"
+            title={__('Live class defaults', 'sikshya')}
             addonId="live_classes"
-            subtitle="Join-link behaviour, schedule limits, and learner-facing hints."
-            featureTitle="Live class settings"
-            featureDescription="Every toggle below changes real behaviour on the storefront, learn shell, cart, or account dashboard."
+            subtitle={__('Join-link behaviour, schedule limits, and learner-facing hints.', 'sikshya')}
+            featureTitle={__('Live class settings', 'sikshya')}
+            featureDescription={__('Every toggle below changes real behaviour on the storefront, learn shell, cart, or account dashboard.', 'sikshya')}
             relatedCoreSettingsTab="lessons"
             relatedCoreSettingsLabel="Lessons"
             nextSteps={[

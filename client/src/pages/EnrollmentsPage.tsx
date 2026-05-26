@@ -14,6 +14,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { term, termLower } from '../lib/terminology';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type EnrollmentRow = {
   id: number;
@@ -232,7 +233,7 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
                   setPickedUserId(null);
                 }}
                 onFocus={() => setUserDropdownOpen(true)}
-                placeholder="Search by name or email…"
+                placeholder={__('Search by name or email…', 'sikshya')}
                 className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
               {pickedUserLabel ? (
@@ -243,9 +244,9 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
               {userDropdownOpen ? (
                 <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
                   {userSearch.loading ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('Searching…', 'sikshya')}</div>
                   ) : (userSearch.data?.data || []).length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No users found.</div>
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('No users found.', 'sikshya')}</div>
                   ) : (
                     <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
                       {(userSearch.data?.data || []).map((u) => (
@@ -318,10 +319,10 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
             }}
             className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           >
-            <option value="">All statuses</option>
-            <option value="enrolled">Enrolled</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">{__('All statuses', 'sikshya')}</option>
+            <option value="enrolled">{__('Enrolled', 'sikshya')}</option>
+            <option value="completed">{__('Completed', 'sikshya')}</option>
+            <option value="cancelled">{__('Cancelled', 'sikshya')}</option>
           </select>
         </div>
       </div>
@@ -356,8 +357,8 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
                   <tr>
                     <th className="px-5 py-3.5">{student}</th>
                     <th className="px-5 py-3.5">{course}</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5">Enrolled</th>
+                    <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Enrolled', 'sikshya')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

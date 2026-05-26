@@ -98,13 +98,31 @@ class QuestionTypeService
     ];
 
     /**
+     * Get question types with translated label and description.
+     *
+     * @return array
+     */
+    public function getLocalizedQuestionTypes(): array
+    {
+        $localized = [];
+
+        foreach (self::QUESTION_TYPES as $key => $type) {
+            $localized[$key] = $type;
+            $localized[$key]['label'] = __($type['label'], 'sikshya');
+            $localized[$key]['description'] = __($type['description'], 'sikshya');
+        }
+
+        return $localized;
+    }
+
+    /**
      * Get all question types
      *
      * @return array
      */
     public function getAllQuestionTypes(): array
     {
-        return self::QUESTION_TYPES;
+        return $this->getLocalizedQuestionTypes();
     }
 
     /**
@@ -115,7 +133,9 @@ class QuestionTypeService
      */
     public function getQuestionType(string $type): ?array
     {
-        return self::QUESTION_TYPES[$type] ?? null;
+        $types = $this->getLocalizedQuestionTypes();
+
+        return $types[$type] ?? null;
     }
 
     /**
@@ -138,7 +158,7 @@ class QuestionTypeService
     public function getQuestionTypeLabel(string $type): string
     {
         $questionType = $this->getQuestionType($type);
-        return $questionType ? $questionType['label'] : 'Unknown';
+        return $questionType ? $questionType['label'] : __('Unknown', 'sikshya');
     }
 
     /**
@@ -237,19 +257,19 @@ class QuestionTypeService
         $errors = [];
 
         if (!$this->isValidQuestionType($type)) {
-            $errors[] = 'Invalid question type';
+            $errors[] = __('Invalid question type', 'sikshya');
             return ['valid' => false, 'errors' => $errors];
         }
 
         // Check required fields
         if (empty($data['question_text'])) {
-            $errors[] = 'Question text is required';
+            $errors[] = __('Question text is required', 'sikshya');
         }
 
         // Check options for question types that support them
         if ($this->supportsOptions($type) && $type !== 'matching') {
             if (empty($data['options']) || !is_array($data['options'])) {
-                $errors[] = 'Options are required for this question type';
+                $errors[] = __('Options are required for this question type', 'sikshya');
             } else {
                 $validOptions = array_filter(
                     $data['options'],
@@ -259,7 +279,7 @@ class QuestionTypeService
                 );
 
                 if (count($validOptions) < 2) {
-                    $errors[] = 'At least 2 options are required';
+                    $errors[] = __('At least 2 options are required', 'sikshya');
                 }
             }
         }
@@ -274,7 +294,7 @@ class QuestionTypeService
                 || empty($dec['matching']['map'])
                 || !is_array($dec['matching']['map'])
             ) {
-                $errors[] = 'Matching pairs are incomplete';
+                $errors[] = __('Matching pairs are incomplete', 'sikshya');
             }
         }
 
@@ -284,22 +304,22 @@ class QuestionTypeService
                 $raw = $data['correct_answer'] ?? '';
                 $arr = is_string($raw) ? json_decode($raw, true) : $raw;
                 if (!is_array($arr) || count($arr) < 1) {
-                    $errors[] = 'Select at least one correct option';
+                    $errors[] = __('Select at least one correct option', 'sikshya');
                 }
             } elseif ($type === 'ordering') {
                 $raw = $data['correct_answer'] ?? '';
                 $arr = is_string($raw) ? json_decode($raw, true) : $raw;
                 if (!is_array($arr) || count($arr) < 2) {
-                    $errors[] = 'Ordering answer is invalid';
+                    $errors[] = __('Ordering answer is invalid', 'sikshya');
                 }
             } elseif ($type === 'matching') {
                 /* validated above */
             } elseif (!array_key_exists('correct_answer', $data)) {
-                $errors[] = 'Correct answer is required for auto-gradable questions';
+                $errors[] = __('Correct answer is required for auto-gradable questions', 'sikshya');
             } else {
                 $ca = $data['correct_answer'];
                 if ($ca === '' || $ca === null) {
-                    $errors[] = 'Correct answer is required for auto-gradable questions';
+                    $errors[] = __('Correct answer is required for auto-gradable questions', 'sikshya');
                 }
             }
         }
@@ -308,7 +328,7 @@ class QuestionTypeService
         if (isset($data['points'])) {
             $points = (int) $data['points'];
             if ($points < 1) {
-                $errors[] = 'Points must be at least 1';
+                $errors[] = __('Points must be at least 1', 'sikshya');
             }
         }
 
@@ -370,7 +390,7 @@ class QuestionTypeService
     {
         $options = [];
 
-        foreach (self::QUESTION_TYPES as $key => $type) {
+        foreach ($this->getLocalizedQuestionTypes() as $key => $type) {
             $options[$key] = $type['label'];
         }
 
@@ -384,7 +404,7 @@ class QuestionTypeService
      */
     public function getAutoGradableTypes(): array
     {
-        return array_filter(self::QUESTION_TYPES, function ($type) {
+        return array_filter($this->getLocalizedQuestionTypes(), function ($type) {
             return $type['auto_gradable'];
         });
     }
@@ -396,7 +416,7 @@ class QuestionTypeService
      */
     public function getManualGradingTypes(): array
     {
-        return array_filter(self::QUESTION_TYPES, function ($type) {
+        return array_filter($this->getLocalizedQuestionTypes(), function ($type) {
             return !$type['auto_gradable'];
         });
     }

@@ -21,6 +21,7 @@ import { useWpTermCollection } from '../hooks/useWpTermCollection';
 import { useAdminRouting } from '../lib/adminRouting';
 import { courseCategoryViewHref } from '../lib/courseCategoryViewHref';
 import type { SikshyaReactConfig, WpTerm } from '../types';
+import { __ } from '../lib/i18n';
 
 const TAXONOMY = 'sikshya_course_category';
 
@@ -198,17 +199,17 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
       }
       const notice = (res.message || '').trim();
       if (selectedId === null) {
-        toast.success('Category created', notice || 'The category was saved.');
+        toast.success(__('Category created', 'sikshya'), notice || 'The category was saved.');
         bumpList();
         startNew();
       } else {
-        toast.success('Category updated', notice || 'Your changes were saved.');
+        toast.success(__('Category updated', 'sikshya'), notice || 'Your changes were saved.');
         bumpList();
       }
     } catch (err) {
       const msg = getErrorSummary(err);
       setFormError(msg);
-      toast.error('Could not save category', msg);
+      toast.error(__('Could not save category', 'sikshya'), msg);
     } finally {
       setSaving(false);
     }
@@ -281,10 +282,10 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
               onClick: () =>
                 void (async () => {
                   const ok = await confirm({
-                    title: 'Delete category?',
+                    title: __('Delete category?', 'sikshya'),
                     message: `Delete category “${t.name}”?`,
                     variant: 'danger',
-                    confirmLabel: 'Delete',
+                    confirmLabel: __('Delete', 'sikshya'),
                   });
                   if (!ok) {
                     return;
@@ -295,10 +296,10 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                       startNew();
                     }
                     bumpList();
-                    toast.success('Category deleted', 'The category was removed.');
+                    toast.success(__('Category deleted', 'sikshya'), 'The category was removed.');
                   } catch (e) {
                     await alertDialog({
-                      title: 'Could not delete category',
+                      title: __('Could not delete category', 'sikshya'),
                       message: getErrorSummary(e),
                     });
                   }
@@ -340,8 +341,8 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
 
   const emptyContent = (
     <ListEmptyState
-      title="No categories found"
-      description="No categories match your search. Adjust filters or add one using the form on the left."
+      title={__('No categories found', 'sikshya')}
+      description={__('No categories match your search. Adjust filters or add one using the form on the left.', 'sikshya')}
     />
   );
 
@@ -368,7 +369,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
             <div className="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
               <div>
                 <h2 className="text-base font-semibold text-slate-900 dark:text-white">
-                  {selectedId === null ? 'Add category' : 'Edit category'}
+                  {selectedId === null ? __('Add category', 'sikshya') : __('Edit category', 'sikshya')}
                 </h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Name, slug, parent, and image. Select a row on the right to edit.
@@ -384,7 +385,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
             </div>
 
             {loadingCategory ? (
-              <p className="mt-4 text-sm text-slate-500">Loading…</p>
+              <p className="mt-4 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
             ) : (
               <form id="sikshya-category-side-form" className="mt-4 space-y-4" onSubmit={(e) => void onSubmit(e)}>
                 <div>
@@ -404,7 +405,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                     label="Description"
                     value={description}
                     onChange={(html) => setDescription(html)}
-                    placeholder="Optional description shown on the category page"
+                    placeholder={__('Optional description shown on the category page', 'sikshya')}
                     disabled={saving}
                     minHeightPx={220}
                   />
@@ -418,7 +419,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                     value={slug}
                     onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                     className={`${FIELD} font-mono text-sm`}
-                    placeholder="url-segment"
+                    placeholder={__('url-segment', 'sikshya')}
                   />
                 </div>
                 <div>
@@ -431,7 +432,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                     onChange={(e) => setParent(Number(e.target.value))}
                     className={FIELD}
                   >
-                    <option value={0}>None</option>
+                    <option value={0}>{__('None', 'sikshya')}</option>
                     {parentOptions.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name}
@@ -440,7 +441,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                   </select>
                 </div>
                 <div>
-                  <label className={LABEL}>Featured image</label>
+                  <label className={LABEL}>{__('Featured image', 'sikshya')}</label>
                   <div className="mt-1.5 flex flex-wrap items-center gap-3">
                     <button
                       type="button"
@@ -453,15 +454,15 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                         const mediaFactory = wpAny.wp?.media;
                         if (!mediaFactory) {
                           void alertDialog({
-                            title: 'Media picker unavailable',
+                            title: __('Media picker unavailable', 'sikshya'),
                             message:
-                              'WordPress media picker was not found. Please ensure media scripts are available in the admin page.',
+                              __('WordPress media picker was not found. Please ensure media scripts are available in the admin page.', 'sikshya'),
                           });
                           return;
                         }
                         if (!mediaFrameRef.current) {
                           mediaFrameRef.current = mediaFactory({
-                            title: 'Select category image',
+                            title: __('Select category image', 'sikshya'),
                             button: { text: 'Use this image' },
                             multiple: false,
                             library: { type: 'image' },
@@ -479,7 +480,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                       }}
                       className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
-                      {imageId > 0 ? 'Change image' : 'Select image'}
+                      {imageId > 0 ? __('Change image', 'sikshya') : __('Select image', 'sikshya')}
                     </button>
                     {imageId > 0 ? (
                       <button
@@ -496,7 +497,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                     {imageId > 0 ? (
                       <span className="text-xs text-slate-500 dark:text-slate-400">Attachment ID: {imageId}</span>
                     ) : (
-                      <span className="text-xs text-slate-500 dark:text-slate-400">Optional</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{__('Optional', 'sikshya')}</span>
                     )}
                   </div>
                   {imagePreview ? (
@@ -513,7 +514,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                 ) : null}
 
                 <ButtonPrimary type="submit" className="w-full" disabled={saving}>
-                  {saving ? 'Saving…' : selectedId === null ? 'Create category' : 'Update category'}
+                  {saving ? 'Saving…' : selectedId === null ? __('Create category', 'sikshya') : __('Update category', 'sikshya')}
                 </ButtonPrimary>
               </form>
             )}
@@ -525,7 +526,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
             <ListSearchToolbar
               searchValue={search}
               onSearchChange={setSearch}
-              searchPlaceholder="Search categories…"
+              searchPlaceholder={__('Search categories…', 'sikshya')}
               sortField={orderby}
               sortFieldOptions={sortFieldOptions}
               onSortFieldChange={(v) => setOrderby(v as 'name' | 'count')}
@@ -538,12 +539,12 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
                   Showing {rows.length} of {listQuery.data.total}
                 </span>
               ) : (
-                <span>Course categories for your catalog</span>
+                <span>{__('Course categories for your catalog', 'sikshya')}</span>
               )}
             </div>
             {listQuery.error ? (
               <div className="p-4">
-                <ApiErrorPanel error={listQuery.error} onRetry={listQuery.refetch} title="Could not load categories" />
+                <ApiErrorPanel error={listQuery.error} onRetry={listQuery.refetch} title={__('Could not load categories', 'sikshya')} />
               </div>
             ) : listQuery.loading ? (
               <DataTableSkeleton headers={['ID', 'Category', 'Courses']} rows={8} />

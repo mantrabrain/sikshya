@@ -10,6 +10,7 @@ import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { useAsyncData } from '../hooks/useAsyncData';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type CertRow = {
   id: number;
@@ -47,10 +48,10 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
 
   const revoke = async (id: number) => {
     const ok = await confirm({
-      title: 'Revoke certificate?',
-      message: 'This certificate will no longer verify publicly.',
+      title: __('Revoke certificate?', 'sikshya'),
+      message: __('This certificate will no longer verify publicly.', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Revoke',
+      confirmLabel: __('Revoke', 'sikshya'),
     });
     if (!ok) {
       return;
@@ -64,7 +65,7 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Learner certificates issued when courses are completed (table-backed records)."
+      subtitle={__('Learner certificates issued when courses are completed (table-backed records).', 'sikshya')}
       pageActions={
         <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
           Refresh
@@ -73,30 +74,30 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load certificates" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load certificates', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading…</div>
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
         ) : rows.length === 0 ? (
           <ListEmptyState
-            title="No issued certificates yet"
-            description="When learners complete a course and certificates are enabled, records appear here with verification codes."
+            title={__('No issued certificates yet', 'sikshya')}
+            description={__('When learners complete a course and certificates are enabled, records appear here with verification codes.', 'sikshya')}
           />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
               <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                 <tr>
-                  <th className="px-5 py-3.5">Issued</th>
-                  <th className="px-5 py-3.5">Learner</th>
-                  <th className="px-5 py-3.5">Course</th>
-                  <th className="px-5 py-3.5">Number</th>
-                  <th className="px-5 py-3.5">Verification</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-5 py-3.5">{__('Issued', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Learner', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Course', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Number', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Verification', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                  <th className="px-5 py-3.5 text-right">{__('Actions', 'sikshya')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -129,7 +130,7 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
                           target="_blank"
                           rel="noreferrer noopener"
                           className="break-all font-mono text-xs text-brand-600 hover:underline dark:text-brand-400"
-                          title="Open public verification URL"
+                          title={__('Open public verification URL', 'sikshya')}
                         >
                           {r.verify_url}
                         </a>

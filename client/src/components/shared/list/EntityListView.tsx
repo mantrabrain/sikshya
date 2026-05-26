@@ -22,6 +22,7 @@ import type { RowActionItem } from './RowActionsMenu';
 import { StatusCountPills, type StatusPillDef } from './StatusCountPills';
 import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from './ListPaginationBar';
 import { WpPostInlineRowActions } from './WpPostInlineRowActions';
+import { __, sprintf } from '../../../lib/i18n';
 
 export type EntityListPostRowActions = {
   /** Column id to attach inline actions under (default `title`). */
@@ -31,13 +32,13 @@ export type EntityListPostRowActions = {
 };
 
 const DEFAULT_PILLS: StatusPillDef[] = [
-  { id: 'any', label: 'All' },
-  { id: 'publish', label: 'Published' },
-  { id: 'draft', label: 'Draft' },
-  { id: 'pending', label: 'Pending' },
-  { id: 'future', label: 'Scheduled' },
-  { id: 'private', label: 'Private' },
-  { id: 'trash', label: 'Trash' },
+  { id: 'any', label: __('All', 'sikshya') },
+  { id: 'publish', label: __('Published', 'sikshya') },
+  { id: 'draft', label: __('Draft', 'sikshya') },
+  { id: 'pending', label: __('Pending', 'sikshya') },
+  { id: 'future', label: __('Scheduled', 'sikshya') },
+  { id: 'private', label: __('Private', 'sikshya') },
+  { id: 'trash', label: __('Trash', 'sikshya') },
 ];
 
 function columnMenuLabel(c: Column<WpPost>): string {
@@ -307,7 +308,7 @@ export function EntityListView({
           ref={headerSelectRef}
           type="checkbox"
           className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-700"
-          aria-label="Select all on this page"
+          aria-label={__('Select all on this page', 'sikshya')}
           checked={allVisibleSelected}
           onChange={toggleSelectAll}
         />
@@ -376,10 +377,13 @@ export function EntityListView({
       }
       if (bulkActionValue === 'delete_permanent') {
         const ok = await confirm({
-          title: 'Delete permanently?',
-          message: `Permanently delete ${n} item(s)? This cannot be undone.`,
+          title: __('Delete permanently?', 'sikshya'),
+          message: sprintf(
+            __('Permanently delete %d item(s)? This cannot be undone.', 'sikshya'),
+            n
+          ),
           variant: 'danger',
-          confirmLabel: 'Delete permanently',
+          confirmLabel: __('Delete permanently', 'sikshya'),
         });
         if (!ok) {
           return;
@@ -403,10 +407,13 @@ export function EntityListView({
 
     if (bulkActionValue === 'move_trash') {
       const ok = await confirm({
-        title: 'Move to trash?',
-        message: `Move ${n} item(s) to the trash? You can restore from the All or Trash tab.`,
+        title: __('Move to trash?', 'sikshya'),
+        message: sprintf(
+          __('Move %d item(s) to the trash? You can restore from the All or Trash tab.', 'sikshya'),
+          n
+        ),
         variant: 'danger',
-        confirmLabel: 'Move to trash',
+        confirmLabel: __('Move to trash', 'sikshya'),
       });
       if (!ok) {
         return;
@@ -470,7 +477,7 @@ export function EntityListView({
 
   const emptyContent = (
     <ListEmptyState
-      title={emptyStateTitle ?? 'No results'}
+      title={emptyStateTitle ?? __('No results', 'sikshya')}
       description={emptyStateDescription ?? emptyMessage}
       action={emptyStateAction}
     />
@@ -518,13 +525,21 @@ export function EntityListView({
 
       {bulkError ? (
         <div className="border-b border-red-100 px-4 py-3 dark:border-red-900/40">
-          <ApiErrorPanel error={bulkError} title="Bulk action failed" onRetry={() => setBulkError(null)} />
+          <ApiErrorPanel
+            error={bulkError}
+            title={__('Bulk action failed', 'sikshya')}
+            onRetry={() => setBulkError(null)}
+          />
         </div>
       ) : null}
 
       {listQuery.error ? (
         <div className="p-4">
-          <ApiErrorPanel error={listQuery.error} onRetry={listQuery.refetch} title="Could not load list" />
+          <ApiErrorPanel
+            error={listQuery.error}
+            onRetry={listQuery.refetch}
+            title={__('Could not load list', 'sikshya')}
+          />
         </div>
       ) : listQuery.loading ? (
         <DataTableSkeleton headers={tableSkeletonHeaders} rows={8} />

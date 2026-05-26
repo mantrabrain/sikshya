@@ -12,6 +12,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { useAsyncData } from '../hooks/useAsyncData';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __, sprintf } from '../lib/i18n';
 
 type ProviderId = 'mailchimp' | 'mailerlite' | 'brevo' | 'kit';
 type FieldType = 'string' | 'password' | 'textarea' | 'bool' | 'int' | 'select' | 'csv' | 'mapping';
@@ -297,10 +298,10 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
     setSaving(true);
     try {
       await getSikshyaApi().post(`/pro/addons/${encodeURIComponent(addonId)}/settings`, opts);
-      toast.success('Saved', 'Settings saved.');
+      toast.success(__('Saved', 'sikshya'), 'Settings saved.');
       void refetch();
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -321,7 +322,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
           {name === 'api_key' ? providerCopy.credentialLabel : `${providerCopy.listLabel} ID`}
         </span>
         <input
-          type={def.type === 'password' ? 'password' : 'text'}
+          type={def.type === 'password' ? __('password', 'sikshya') : __('text', 'sikshya')}
           autoComplete={def.type === 'password' ? 'new-password' : undefined}
           value={typeof value === 'string' ? value : ''}
           onChange={(e) => setField(name, e.target.value)}
@@ -369,11 +370,11 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         actions: { upsert: true, tags_add: [event_key] },
       };
       await getSikshyaApi().post(`/pro/email-marketing/rules`, payload);
-      toast.success('Created', 'Rule created.');
+      toast.success(__('Created', 'sikshya'), 'Rule created.');
       void refetchRules();
       setTab('rules');
     } catch (err) {
-      toast.error('Create failed', err instanceof Error ? err.message : 'Could not create rule');
+      toast.error(__('Create failed', 'sikshya'), err instanceof Error ? err.message : 'Could not create rule');
     }
   };
 
@@ -384,18 +385,18 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
       const user_id = Number(toolUserId) || 0;
       const course_id = Number(toolCourseId) || 0;
       if (!user_id) {
-        throw new Error('User ID is required.');
+        throw new Error(__('User ID is required.', 'sikshya'));
       }
       await getSikshyaApi().post(`/pro/email-marketing/tools/test`, {
         user_id,
         course_id,
         event_key: 'sikshya_user_enrolled',
       });
-      toast.success('Queued', 'Test queued (if consent + rule match).');
+      toast.success(__('Queued', 'sikshya'), 'Test queued (if consent + rule match).');
       setTab('logs');
       void refetchLogs();
     } catch (err) {
-      toast.error('Tool failed', err instanceof Error ? err.message : 'Tool failed');
+      toast.error(__('Tool failed', 'sikshya'), err instanceof Error ? err.message : 'Tool failed');
     } finally {
       setToolBusy(false);
     }
@@ -411,11 +412,11 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
         max: 200,
         days: 365,
       });
-      toast.success('Queued', `Backfill queued ${res?.queued ?? 0} enrollments.`);
+      toast.success(__('Queued', 'sikshya'), `Backfill queued ${res?.queued ?? 0} enrollments.`);
       setTab('logs');
       void refetchLogs();
     } catch (err) {
-      toast.error('Backfill failed', err instanceof Error ? err.message : 'Backfill failed');
+      toast.error(__('Backfill failed', 'sikshya'), err instanceof Error ? err.message : 'Backfill failed');
     } finally {
       setToolBusy(false);
     }
@@ -426,18 +427,18 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Sync learners into your email marketing provider when they enroll or complete courses."
+      subtitle={__('Sync learners into your email marketing provider when they enroll or complete courses.', 'sikshya')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <GatedFeatureWorkspace
         mode={mode}
         featureId={addonId}
         config={config}
-        featureTitle="Email marketing"
-        featureDescription="Native Mailchimp, MailerLite, Brevo, and Kit sync. Sikshya will upsert subscribers, attach list membership, and map learner/course data into provider fields."
+        featureTitle={__('Email marketing', 'sikshya')}
+        featureDescription={__('Native Mailchimp, MailerLite, Brevo, and Kit sync. Sikshya will upsert subscribers, attach list membership, and map learner/course data into provider fields.', 'sikshya')}
         previewVariant="form"
-        addonEnableTitle="Email marketing is not enabled"
-        addonEnableDescription="Turn on the Email marketing add-on to configure provider sync and beginner-friendly setup."
+        addonEnableTitle={__('Email marketing is not enabled', 'sikshya')}
+        addonEnableDescription={__('Turn on the Email marketing add-on to configure provider sync and beginner-friendly setup.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -461,12 +462,12 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
 
           {tab === 'setup' ? (
             <>
-              {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
+              {error ? <ApiErrorPanel error={error} title={__('Could not load settings', 'sikshya')} onRetry={() => refetch()} /> : null}
 
               <ListPanel className="p-6">
                 <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
                   <div>
-                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Beginner-friendly setup</h2>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Beginner-friendly setup', 'sikshya')}</h2>
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       Choose the provider your team already uses, paste the two values it asks for, enable sync, then add field mappings only if you need extra data.
                     </p>
@@ -501,7 +502,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                   </div>
 
                   <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 text-sm text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
-                    <div className="text-sm font-semibold">Recommended flow</div>
+                    <div className="text-sm font-semibold">{__('Recommended flow', 'sikshya')}</div>
                     <ol className="mt-3 space-y-2 text-xs leading-relaxed">
                       <li>1. Pick one provider only.</li>
                       <li>2. Paste the API key and destination ID.</li>
@@ -551,7 +552,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                         Map Sikshya fields into your {providerCopy.listLabel.toLowerCase()} {providerCopy.mappingNoun}. Skip this until after your first successful sync if you want the easiest setup.
                       </p>
                     </div>
-                    <ButtonSecondary onClick={() => addMapping()}>Add mapping</ButtonSecondary>
+                    <ButtonSecondary onClick={() => addMapping()}>{__('Add mapping', 'sikshya')}</ButtonSecondary>
                   </div>
 
                   <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
@@ -594,7 +595,9 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                           </label>
 
                           <label className="block text-sm">
-                            <span className="font-medium text-slate-900 dark:text-white">Sikshya source</span>
+                            <span className="font-medium text-slate-900 dark:text-white">
+                              {sprintf(__('%s source', 'sikshya'), 'Sikshya')}
+                            </span>
                             <select
                               value={row.source}
                               onChange={(e) => updateProviderMapping(index, { source: e.target.value })}
@@ -629,7 +632,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
 
                 <div className="flex items-center gap-3">
                   <ButtonPrimary type="submit" disabled={saving}>
-                    {saving ? 'Saving…' : '4. Save settings'}
+                    {saving ? __('Saving…', 'sikshya') : __('4. Save settings', 'sikshya')}
                   </ButtonPrimary>
                 </div>
                   </form>
@@ -637,7 +640,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
               </ListPanel>
 
               <ListPanel className="p-6">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Next steps</h2>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Next steps', 'sikshya')}</h2>
                 <ul className="mt-3 space-y-2 text-sm">
                   <li className="text-slate-700 dark:text-slate-200">
                     Mailchimp: find your Audience ID in <span className="font-medium">Audience {'->'} Settings {'->'} Audience name and defaults</span>.
@@ -657,10 +660,10 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
 
           {tab === 'rules' ? (
             <ListPanel className="p-6">
-              {rulesError ? <ApiErrorPanel error={rulesError} title="Could not load rules" onRetry={() => refetchRules()} /> : null}
+              {rulesError ? <ApiErrorPanel error={rulesError} title={__('Could not load rules', 'sikshya')} onRetry={() => refetchRules()} /> : null}
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Rules</h2>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Rules', 'sikshya')}</h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Define what to do when events happen. Start with one enrollment rule, confirm it works, then add completion or order rules.
                   </p>
@@ -699,7 +702,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                                     : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
                                 }`}
                               >
-                                {on ? 'Active' : 'Off'}
+                                {on ? __('Active', 'sikshya') : __('Off', 'sikshya')}
                               </span>
                               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                 {r.event_key}
@@ -728,21 +731,21 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                                     });
                                     void refetchRules();
                                   } catch (err) {
-                                    toast.error('Update failed', err instanceof Error ? err.message : 'Update failed');
+                                    toast.error(__('Update failed', 'sikshya'), err instanceof Error ? err.message : 'Update failed');
                                   }
                                 })();
                               }}
                             >
-                              {on ? 'Disable' : 'Enable'}
+                              {on ? __('Disable', 'sikshya') : __('Enable', 'sikshya')}
                             </ButtonSecondary>
                             <ButtonSecondary
                               type="button"
                               onClick={() => {
                                 void (async () => {
                                   const ok = await dialog.confirm({
-                                    title: 'Delete this rule?',
-                                    message: 'This automation rule will be permanently removed.',
-                                    confirmLabel: 'Delete',
+                                    title: __('Delete this rule?', 'sikshya'),
+                                    message: __('This automation rule will be permanently removed.', 'sikshya'),
+                                    confirmLabel: __('Delete', 'sikshya'),
                                     variant: 'danger',
                                   });
                                   if (!ok) return;
@@ -750,7 +753,7 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                                     await getSikshyaApi().delete(`/pro/email-marketing/rules/${encodeURIComponent(String(r.id))}`);
                                     void refetchRules();
                                   } catch (err) {
-                                    toast.error('Delete failed', err instanceof Error ? err.message : 'Delete failed');
+                                    toast.error(__('Delete failed', 'sikshya'), err instanceof Error ? err.message : 'Delete failed');
                                   }
                                 })();
                               }}
@@ -773,10 +776,10 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
 
           {tab === 'logs' ? (
             <ListPanel className="p-6">
-              {logsError ? <ApiErrorPanel error={logsError} title="Could not load logs" onRetry={() => refetchLogs()} /> : null}
+              {logsError ? <ApiErrorPanel error={logsError} title={__('Could not load logs', 'sikshya')} onRetry={() => refetchLogs()} /> : null}
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Logs</h2>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Logs', 'sikshya')}</h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Delivery history for provider calls. This becomes more useful once the queue runner is enabled.
                   </p>
@@ -795,13 +798,13 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
                   <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
                       <tr>
-                        <th className="px-4 py-3">When</th>
-                        <th className="px-4 py-3">Event</th>
-                        <th className="px-4 py-3">Provider</th>
-                        <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3">HTTP</th>
-                        <th className="px-4 py-3">User</th>
-                        <th className="px-4 py-3">Course</th>
+                        <th className="px-4 py-3">{__('When', 'sikshya')}</th>
+                        <th className="px-4 py-3">{__('Event', 'sikshya')}</th>
+                        <th className="px-4 py-3">{__('Provider', 'sikshya')}</th>
+                        <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
+                        <th className="px-4 py-3">{__('HTTP', 'sikshya')}</th>
+                        <th className="px-4 py-3">{__('User', 'sikshya')}</th>
+                        <th className="px-4 py-3">{__('Course', 'sikshya')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -836,62 +839,62 @@ export function EmailMarketingPage(props: { config: SikshyaReactConfig; title: s
 
           {tab === 'tools' ? (
             <ListPanel className="p-6">
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Tools</h2>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Tools', 'sikshya')}</h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Test sync and bulk operations. These respect consent and per-course overrides.
               </p>
               <div className="mt-5 grid gap-3 md:grid-cols-2">
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm dark:border-slate-700 dark:bg-slate-950/40">
-                  <div className="font-semibold text-slate-900 dark:text-white">Test sync (safe)</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">{__('Test sync (safe)', 'sikshya')}</div>
                   <p className="mt-1 text-slate-600 dark:text-slate-300">
                     Queues a test run for one user (and optional course). If there is no matching rule or the user is not opted-in, nothing is sent.
                   </p>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <label className="block text-sm">
-                      <span className="font-medium text-slate-900 dark:text-white">User ID</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('User ID', 'sikshya')}</span>
                       <input
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                         value={toolUserId}
                         onChange={(e) => setToolUserId(e.target.value)}
-                        placeholder="e.g. 123"
+                        placeholder={__('e.g. 123', 'sikshya')}
                       />
                     </label>
                     <label className="block text-sm">
-                      <span className="font-medium text-slate-900 dark:text-white">Course ID (optional)</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Course ID (optional)', 'sikshya')}</span>
                       <input
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                         value={toolCourseId}
                         onChange={(e) => setToolCourseId(e.target.value)}
-                        placeholder="e.g. 456"
+                        placeholder={__('e.g. 456', 'sikshya')}
                       />
                     </label>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <ButtonPrimary type="button" disabled={toolBusy} onClick={() => void runToolTest()}>
-                      {toolBusy ? 'Working…' : 'Queue test'}
+                      {toolBusy ? __('Working…', 'sikshya') : __('Queue test', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm dark:border-slate-700 dark:bg-slate-950/40">
-                  <div className="font-semibold text-slate-900 dark:text-white">Backfill enrollments</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">{__('Backfill enrollments', 'sikshya')}</div>
                   <p className="mt-1 text-slate-600 dark:text-slate-300">
                     Queues sync jobs for recent enrollments. Use after you create your first enrollment rule.
                   </p>
                   <div className="mt-4">
                     <label className="block text-sm">
-                      <span className="font-medium text-slate-900 dark:text-white">Course ID (optional)</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Course ID (optional)', 'sikshya')}</span>
                       <input
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
                         value={toolCourseId}
                         onChange={(e) => setToolCourseId(e.target.value)}
-                        placeholder="Leave empty for recent site-wide enrollments"
+                        placeholder={__('Leave empty for recent site-wide enrollments', 'sikshya')}
                       />
                     </label>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <ButtonSecondary type="button" disabled={toolBusy} onClick={() => void runToolBackfill()}>
-                      {toolBusy ? 'Working…' : 'Queue backfill (last 365 days)'}
+                      {toolBusy ? __('Working…', 'sikshya') : __('Queue backfill (last 365 days)', 'sikshya')}
                     </ButtonSecondary>
                   </div>
                 </div>

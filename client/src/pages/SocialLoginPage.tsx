@@ -10,6 +10,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type Options = {
   google_client_id?: string;
@@ -60,10 +61,10 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
     setSaving(true);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.socialLogin, opts);
-      toast.success('Saved', 'Social login settings saved.');
+      toast.success(__('Saved', 'sikshya'), 'Social login settings saved.');
       refetch();
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -74,32 +75,32 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Let learners sign up using Google or Facebook in addition to email."
+      subtitle={__('Let learners sign up using Google or Facebook in addition to email.', 'sikshya')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <GatedFeatureWorkspace
         mode={mode}
         featureId="social_login"
         config={config}
-        featureTitle="Social login"
-        featureDescription="Add one-click Google / Facebook sign-in. Sikshya stores your provider keys and shows a notice on the login form."
+        featureTitle={__('Social login', 'sikshya')}
+        featureDescription={__('Add one-click Google / Facebook sign-in. Sikshya stores your provider keys and shows a notice on the login form.', 'sikshya')}
         previewVariant="form"
-        addonEnableTitle="Social login is not enabled"
-        addonEnableDescription="Enable the Social login add-on to register login bridge endpoints and surface configuration."
+        addonEnableTitle={__('Social login is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Social login add-on to register login bridge endpoints and surface configuration.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
         addonError={addon.error}
       >
-        {error ? <ApiErrorPanel error={error} title="Could not load social login config" onRetry={() => refetch()} /> : null}
+        {error ? <ApiErrorPanel error={error} title={__('Could not load social login config', 'sikshya')} onRetry={() => refetch()} /> : null}
 
         <ListPanel className="p-6">
           {loading ? (
-            <p className="text-sm text-slate-500">Loading…</p>
+            <p className="text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
           ) : (
             <form onSubmit={onSave} className="space-y-5">
               <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm dark:border-slate-800 dark:bg-slate-950">
-                <p className="font-semibold text-slate-900 dark:text-white">Redirect / callback URL</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{__('Redirect / callback URL', 'sikshya')}</p>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Add this exact URL as the authorized redirect URI in your provider console.
                 </p>
@@ -113,19 +114,19 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Google</h2>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Google', 'sikshya')}</h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Create OAuth credentials in the Google Cloud Console and paste them here. Use the WordPress login URL as
                   the authorized redirect URI.
                 </p>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">Client ID</span>
+                    <span className="text-slate-600 dark:text-slate-400">{__('Client ID', 'sikshya')}</span>
                     <input
                       value={opts.google_client_id || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, google_client_id: e.target.value }))}
                       className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"
+                      placeholder={__('xxxxxxxxxxxx.apps.googleusercontent.com', 'sikshya')}
                     />
                   </label>
                   <label className="block text-sm">
@@ -143,20 +144,20 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       value={opts.google_client_secret || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, google_client_secret: e.target.value }))}
                       className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                      placeholder={opts.google_client_secret_set ? '•••••••• (leave blank to keep unchanged)' : 'Paste client secret'}
+                      placeholder={opts.google_client_secret_set ? __('•••••••• (leave blank to keep unchanged)', 'sikshya') : __('Paste client secret', 'sikshya')}
                     />
                   </label>
                 </div>
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Facebook</h2>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Facebook', 'sikshya')}</h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Create an app in Meta for Developers and paste the keys below.
                 </p>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">App ID</span>
+                    <span className="text-slate-600 dark:text-slate-400">{__('App ID', 'sikshya')}</span>
                     <input
                       value={opts.facebook_app_id || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, facebook_app_id: e.target.value }))}
@@ -178,7 +179,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       value={opts.facebook_app_secret || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, facebook_app_secret: e.target.value }))}
                       className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                      placeholder={opts.facebook_app_secret_set ? '•••••••• (leave blank to keep unchanged)' : 'Paste app secret'}
+                      placeholder={opts.facebook_app_secret_set ? __('•••••••• (leave blank to keep unchanged)', 'sikshya') : __('Paste app secret', 'sikshya')}
                     />
                   </label>
                 </div>
@@ -195,8 +196,8 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Show buttons on the WordPress login page</span>
-                      <span className="block text-xs text-slate-500 dark:text-slate-400">Adds Google/Facebook buttons above the form.</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Show buttons on the WordPress login page', 'sikshya')}</span>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Adds Google/Facebook buttons above the form.', 'sikshya')}</span>
                     </span>
                   </label>
 
@@ -208,8 +209,8 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Show a short login-page notice</span>
-                      <span className="block text-xs text-slate-500 dark:text-slate-400">Helpful hint when buttons are disabled or incomplete.</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Show a short login-page notice', 'sikshya')}</span>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Helpful hint when buttons are disabled or incomplete.', 'sikshya')}</span>
                     </span>
                   </label>
 
@@ -221,8 +222,8 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Show on single course page</span>
-                      <span className="block text-xs text-slate-500 dark:text-slate-400">Shows a “Continue with Google/Facebook” box for logged-out users.</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Show on single course page', 'sikshya')}</span>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Shows a “Continue with Google/Facebook” box for logged-out users.', 'sikshya')}</span>
                     </span>
                   </label>
 
@@ -234,8 +235,8 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Show on cart</span>
-                      <span className="block text-xs text-slate-500 dark:text-slate-400">Encourages sign-in before checkout.</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Show on cart', 'sikshya')}</span>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Encourages sign-in before checkout.', 'sikshya')}</span>
                     </span>
                   </label>
 
@@ -247,8 +248,8 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Allow account linking</span>
-                      <span className="block text-xs text-slate-500 dark:text-slate-400">Lets logged-in learners link Google/Facebook to their account.</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Allow account linking', 'sikshya')}</span>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400">{__('Lets logged-in learners link Google/Facebook to their account.', 'sikshya')}</span>
                     </span>
                   </label>
                 </div>
@@ -265,9 +266,9 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Allow social registration</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Allow social registration', 'sikshya')}</span>
                       <span className="block text-xs text-slate-500 dark:text-slate-400">
-                        Creates a new WordPress user when no match exists. {opts.users_can_register ? null : <strong>WordPress registration is currently disabled.</strong>}
+                        Creates a new WordPress user when no match exists. {opts.users_can_register ? null : <strong>{__('WordPress registration is currently disabled.', 'sikshya')}</strong>}
                       </span>
                     </span>
                   </label>
@@ -280,7 +281,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Link to existing users by verified email</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Link to existing users by verified email', 'sikshya')}</span>
                       <span className="block text-xs text-slate-500 dark:text-slate-400">
                         If a provider returns a verified email that matches an existing user, Sikshya logs them into that account.
                       </span>
@@ -295,7 +296,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-slate-900 dark:text-white">Require verified Google email</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Require verified Google email', 'sikshya')}</span>
                       <span className="block text-xs text-slate-500 dark:text-slate-400">
                         Blocks sign-in if Google marks the email as unverified.
                       </span>
@@ -306,7 +307,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
 
               <div className="flex items-center gap-3">
                 <ButtonPrimary type="submit" disabled={saving}>
-                  {saving ? 'Saving…' : 'Save settings'}
+                  {saving ? __('Saving…', 'sikshya') : __('Save settings', 'sikshya')}
                 </ButtonPrimary>
               </div>
             </form>

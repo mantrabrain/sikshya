@@ -21,6 +21,7 @@ import type { SikshyaReactConfig, WpRestUser } from '../types';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
+import { __ } from '../lib/i18n';
 
 type Plan = {
   id: number;
@@ -66,10 +67,10 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
       return;
     }
     if (t.kind === 'success') {
-      toast.success('Success', t.text);
+      toast.success(__('Success', 'sikshya'), t.text);
       return;
     }
-    toast.error('Error', t.text);
+    toast.error(__('Error', 'sikshya'), t.text);
   };
 
   const { route, navigateView } = useAdminRouting();
@@ -170,7 +171,7 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Recurring billing and access periods synced from your payment provider."
+      subtitle={__('Recurring billing and access periods synced from your payment provider.', 'sikshya')}
       pageActions={
         enabled && activeTab !== 'settings' ? (
           <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
@@ -183,11 +184,11 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
         mode={mode}
         featureId="subscriptions"
         config={config}
-        featureTitle="Subscriptions"
-        featureDescription="Sell monthly or yearly plans, sync status from payment webhooks, and expire access when billing stops."
+        featureTitle={__('Subscriptions', 'sikshya')}
+        featureDescription={__('Sell monthly or yearly plans, sync status from payment webhooks, and expire access when billing stops.', 'sikshya')}
         previewVariant="cards"
-        addonEnableTitle="Subscriptions is not enabled"
-        addonEnableDescription="Enable the Subscriptions addon to register recurring billing routes and show subscription settings."
+        addonEnableTitle={__('Subscriptions is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Subscriptions addon to register recurring billing routes and show subscription settings.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -195,7 +196,7 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
       >
         <div className="-mt-2 mb-5 flex flex-wrap items-center gap-2 overflow-x-auto">
           <HorizontalEditorTabs
-            ariaLabel="Subscriptions sections"
+            ariaLabel={__('Subscriptions sections', 'sikshya')}
             tabs={[
               { id: 'list', label: 'Subscriptions', icon: 'arrowPath' },
               { id: 'plans', label: 'Plans', icon: 'documentText' },
@@ -207,16 +208,16 @@ export function SubscriptionsProPage(props: { embedded?: boolean; config: Sikshy
         </div>
 
         {error && activeTab !== 'settings' ? (
-          <ApiErrorPanel error={error} title="Could not load subscriptions" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load subscriptions', 'sikshya')} onRetry={() => refetch()} />
         ) : activeTab === 'settings' ? (
           <AddonSettingsPage
             embedded
             config={config}
-            title="Subscription settings"
+            title={__('Subscription settings', 'sikshya')}
             addonId="subscriptions"
-            subtitle="Site-wide rules for manual grants, learner account UI, and how billing periods affect access."
-            featureTitle="Subscription settings"
-            featureDescription="These options apply everywhere subscription gating runs. Plans and per-course required plan still live on the other tabs."
+            subtitle={__('Site-wide rules for manual grants, learner account UI, and how billing periods affect access.', 'sikshya')}
+            featureTitle={__('Subscription settings', 'sikshya')}
+            featureDescription={__('These options apply everywhere subscription gating runs. Plans and per-course required plan still live on the other tabs.', 'sikshya')}
             relatedCoreSettingsTab="payment"
             relatedCoreSettingsLabel="Payment"
             nextSteps={[
@@ -313,8 +314,8 @@ function PlansTab(props: {
     if (bulkAction === 'delete') {
       const ok = await dialog.confirm({
         title: `Delete ${selectedIds.length} plan(s)?`,
-        message: 'Plans with existing subscriptions will be skipped. This cannot be undone.',
-        confirmLabel: 'Delete',
+        message: __('Plans with existing subscriptions will be skipped. This cannot be undone.', 'sikshya'),
+        confirmLabel: __('Delete', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -345,7 +346,7 @@ function PlansTab(props: {
         header: (
           <input
             type="checkbox"
-            aria-label="Select all plans"
+            aria-label={__('Select all plans', 'sikshya')}
             checked={plans.length > 0 && selectedIds.length === plans.length}
             onChange={(e) => toggleAll(e.target.checked)}
           />
@@ -426,8 +427,8 @@ function PlansTab(props: {
                 onClick: async () => {
                   const ok = await dialog.confirm({
                     title: `Delete plan “${p.name}”?`,
-                    message: 'This cannot be undone.',
-                    confirmLabel: 'Delete',
+                    message: __('This cannot be undone.', 'sikshya'),
+                    confirmLabel: __('Delete', 'sikshya'),
                     variant: 'danger',
                   });
                   if (!ok) return;
@@ -452,7 +453,7 @@ function PlansTab(props: {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Plans</h2>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Plans', 'sikshya')}</h2>
           <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
             Define the price and billing interval that subscriptions attach to.
           </p>
@@ -498,8 +499,8 @@ function PlansTab(props: {
               rowKey={(p) => p.id}
               emptyContent={
                 <ListEmptyState
-                  title="No plans yet"
-                  description="Create your first membership plan to start selling subscriptions."
+                  title={__('No plans yet', 'sikshya')}
+                  description={__('Create your first membership plan to start selling subscriptions.', 'sikshya')}
                 />
               }
             />
@@ -509,8 +510,8 @@ function PlansTab(props: {
 
       <Modal
         open={createOpen}
-        title="Add plan"
-        description="Plans define the price and billing interval for membership access."
+        title={__('Add plan', 'sikshya')}
+        description={__('Plans define the price and billing interval for membership access.', 'sikshya')}
         onClose={() => setCreateOpen(false)}
         footer={
           <div className="flex items-center justify-end gap-2">
@@ -522,7 +523,7 @@ function PlansTab(props: {
               Cancel
             </button>
             <ButtonPrimary type="submit" form="sikshya-plan-create" disabled={saving}>
-              {saving ? 'Saving…' : 'Create plan'}
+              {saving ? __('Saving…', 'sikshya') : __('Create plan', 'sikshya')}
             </ButtonPrimary>
           </div>
         }
@@ -580,8 +581,8 @@ function PlansTab(props: {
               onChange={(e) => setInterval(e.target.value === 'year' ? 'year' : 'month')}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             >
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
+              <option value="month">{__('Monthly', 'sikshya')}</option>
+              <option value="year">{__('Yearly', 'sikshya')}</option>
             </select>
           </label>
           <label className="text-sm text-slate-600 dark:text-slate-400 sm:col-span-2">
@@ -591,8 +592,8 @@ function PlansTab(props: {
               onChange={(e) => setStatus(e.target.value === 'inactive' ? 'inactive' : 'active')}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">{__('Active', 'sikshya')}</option>
+              <option value="inactive">{__('Inactive', 'sikshya')}</option>
             </select>
           </label>
         </form>
@@ -600,8 +601,8 @@ function PlansTab(props: {
 
       <Modal
         open={editOpen}
-        title="Edit plan"
-        description="Update the plan name, price, interval, and status."
+        title={__('Edit plan', 'sikshya')}
+        description={__('Update the plan name, price, interval, and status.', 'sikshya')}
         onClose={() => setEditOpen(false)}
         footer={
           <div className="flex items-center justify-end gap-2">
@@ -613,7 +614,7 @@ function PlansTab(props: {
               Cancel
             </button>
             <ButtonPrimary type="submit" form="sikshya-plan-edit" disabled={saving || editingId <= 0}>
-              {saving ? 'Saving…' : 'Save changes'}
+              {saving ? __('Saving…', 'sikshya') : __('Save changes', 'sikshya')}
             </ButtonPrimary>
           </div>
         }
@@ -671,8 +672,8 @@ function PlansTab(props: {
               onChange={(e) => setInterval(e.target.value === 'year' ? 'year' : 'month')}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             >
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
+              <option value="month">{__('Monthly', 'sikshya')}</option>
+              <option value="year">{__('Yearly', 'sikshya')}</option>
             </select>
           </label>
           <label className="text-sm text-slate-600 dark:text-slate-400 sm:col-span-2">
@@ -682,8 +683,8 @@ function PlansTab(props: {
               onChange={(e) => setStatus(e.target.value === 'inactive' ? 'inactive' : 'active')}
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">{__('Active', 'sikshya')}</option>
+              <option value="inactive">{__('Inactive', 'sikshya')}</option>
             </select>
           </label>
         </form>
@@ -748,8 +749,8 @@ function SubscriptionsTab(props: {
     if (bulkAction === 'delete') {
       const ok = await dialog.confirm({
         title: `Delete ${selectedIds.length} subscription(s)?`,
-        message: 'This permanently removes the subscription rows. This cannot be undone.',
-        confirmLabel: 'Delete',
+        message: __('This permanently removes the subscription rows. This cannot be undone.', 'sikshya'),
+        confirmLabel: __('Delete', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -824,7 +825,7 @@ function SubscriptionsTab(props: {
         header: (
           <input
             type="checkbox"
-            aria-label="Select all subscriptions"
+            aria-label={__('Select all subscriptions', 'sikshya')}
             checked={rows.length > 0 && selectedIds.length === rows.length}
             onChange={(e) => toggleAll(e.target.checked)}
           />
@@ -908,9 +909,9 @@ function SubscriptionsTab(props: {
                       danger: true,
                       onClick: async () => {
                         const ok = await dialog.confirm({
-                          title: 'Cancel subscription?',
-                          message: 'This marks the row cancelled. It does not contact your gateway.',
-                          confirmLabel: 'Cancel subscription',
+                          title: __('Cancel subscription?', 'sikshya'),
+                          message: __('This marks the row cancelled. It does not contact your gateway.', 'sikshya'),
+                          confirmLabel: __('Cancel subscription', 'sikshya'),
                           variant: 'danger',
                         });
                         if (!ok) return;
@@ -932,8 +933,8 @@ function SubscriptionsTab(props: {
                 onClick: async () => {
                   const ok = await dialog.confirm({
                     title: `Delete subscription #${r.id}?`,
-                    message: 'This permanently removes the subscription row. This cannot be undone.',
-                    confirmLabel: 'Delete',
+                    message: __('This permanently removes the subscription row. This cannot be undone.', 'sikshya'),
+                    confirmLabel: __('Delete', 'sikshya'),
                     variant: 'danger',
                   });
                   if (!ok) return;
@@ -958,7 +959,7 @@ function SubscriptionsTab(props: {
     <>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">Subscriptions</h2>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Subscriptions', 'sikshya')}</h2>
           <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
             Manual subscriptions are useful for offline renewals or admin grants.
           </p>
@@ -1033,8 +1034,8 @@ function SubscriptionsTab(props: {
               rowKey={(r) => r.id}
               emptyContent={
                 <ListEmptyState
-                  title="No subscriptions yet"
-                  description="Create a subscription manually, or connect a gateway to sync recurring billing."
+                  title={__('No subscriptions yet', 'sikshya')}
+                  description={__('Create a subscription manually, or connect a gateway to sync recurring billing.', 'sikshya')}
                 />
               }
             />
@@ -1044,8 +1045,8 @@ function SubscriptionsTab(props: {
 
       <Modal
         open={open}
-        title="Add subscription (manual)"
-        description="Pick a user and a plan. Use this for offline renewals or admin grants."
+        title={__('Add subscription (manual)', 'sikshya')}
+        description={__('Pick a user and a plan. Use this for offline renewals or admin grants.', 'sikshya')}
         size="xl"
         onClose={() => setOpen(false)}
         footer={
@@ -1068,7 +1069,7 @@ function SubscriptionsTab(props: {
                 Cancel
               </button>
               <ButtonPrimary type="submit" form="sikshya-sub-create" disabled={creating || !pickedUser || pickedPlanId <= 0}>
-                {creating ? 'Creating…' : 'Create subscription'}
+                {creating ? __('Creating…', 'sikshya') : __('Create subscription', 'sikshya')}
               </ButtonPrimary>
             </div>
           </div>
@@ -1109,7 +1110,7 @@ function SubscriptionsTab(props: {
         >
           <div className="mb-5 grid gap-4 sm:grid-cols-2">
             <div className="text-sm text-slate-600 dark:text-slate-400">
-              <div className="mb-1">User</div>
+              <div className="mb-1">{__('User', 'sikshya')}</div>
               <div className="relative">
                 <input
                   value={pickedUser ? `${pickedUser.name || pickedUser.slug || `User #${pickedUser.id}`} · ${pickedUser.email}` : userQuery}
@@ -1119,17 +1120,17 @@ function SubscriptionsTab(props: {
                     setUserOpen(true);
                   }}
                   onFocus={() => setUserOpen(true)}
-                  placeholder="Search users by name or email…"
+                  placeholder={__('Search users by name or email…', 'sikshya')}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
                 />
                 {userOpen ? (
                   <div className="absolute z-20 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
                     {userLoading ? (
-                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
+                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('Searching…', 'sikshya')}</div>
                     ) : userQuery.trim().length < 2 ? (
-                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Type at least 2 characters.</div>
+                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('Type at least 2 characters.', 'sikshya')}</div>
                     ) : userResults.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No users found.</div>
+                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('No users found.', 'sikshya')}</div>
                     ) : (
                       userResults.map((u) => (
                         <button
@@ -1161,7 +1162,7 @@ function SubscriptionsTab(props: {
             </div>
 
             <div className="text-sm text-slate-600 dark:text-slate-400">
-              <div className="mb-1">Plan</div>
+              <div className="mb-1">{__('Plan', 'sikshya')}</div>
               <div className="relative">
                 <input
                   value={
@@ -1177,13 +1178,13 @@ function SubscriptionsTab(props: {
                     setPlanOpen(true);
                   }}
                   onFocus={() => setPlanOpen(true)}
-                  placeholder="Search plans…"
+                  placeholder={__('Search plans…', 'sikshya')}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
                 />
                 {planOpen ? (
                   <div className="absolute z-20 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
                     {filteredPlans.length === 0 ? (
-                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No plans found.</div>
+                      <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('No plans found.', 'sikshya')}</div>
                     ) : (
                       filteredPlans.map((p) => (
                         <button

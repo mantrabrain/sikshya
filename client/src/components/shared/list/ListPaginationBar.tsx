@@ -1,3 +1,5 @@
+import { __, sprintf } from '../../../lib/i18n';
+
 export const DEFAULT_LIST_PER_PAGE = 20;
 
 export type ListPaginationBarProps = {
@@ -78,12 +80,13 @@ export function ListPaginationBar({
         <span className="font-medium text-slate-800 dark:text-slate-200">
           {from}–{to}
         </span>
-        {' of '}
+        {' '}
+        {__('of', 'sikshya')}{' '}
         <span className="font-medium text-slate-800 dark:text-slate-200">{total}</span>
         {pages > 1 ? (
           <>
             {' · '}
-            Page <span className="font-medium">{page}</span> of {pages}
+            {sprintf(__('Page %1$d of %2$d', 'sikshya'), page, pages)}
           </>
         ) : null}
       </p>
@@ -95,9 +98,9 @@ export function ListPaginationBar({
               disabled={disabled || page <= 1}
               onClick={() => onPageChange(1)}
               className={`${pageBtnBase} ${pageBtnIdle}`}
-              title="First page"
+              title={__('First page', 'sikshya')}
             >
-              First
+              {__('First', 'sikshya')}
             </button>
             <button
               type="button"
@@ -105,7 +108,7 @@ export function ListPaginationBar({
               onClick={() => onPageChange(page - 1)}
               className={`${pageBtnBase} ${pageBtnIdle}`}
             >
-              Previous
+              {__('Previous', 'sikshya')}
             </button>
             {nums.map((item, idx) =>
               item === 'ellipsis' ? (
@@ -135,16 +138,16 @@ export function ListPaginationBar({
               onClick={() => onPageChange(page + 1)}
               className={`${pageBtnBase} ${pageBtnIdle}`}
             >
-              Next
+              {__('Next', 'sikshya')}
             </button>
             <button
               type="button"
               disabled={disabled || page >= pages}
               onClick={() => onPageChange(pages)}
               className={`${pageBtnBase} ${pageBtnIdle}`}
-              title="Last page"
+              title={__('Last page', 'sikshya')}
             >
-              Last
+              {__('Last', 'sikshya')}
             </button>
           </div>
         </div>

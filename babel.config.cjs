@@ -17,6 +17,19 @@ module.exports = {
       {
         output: 'languages/sikshya-js.pot',
         domain: 'sikshya',
+        /**
+         * Must list every function used for user-facing strings in client/src.
+         * Only string literals at the call site are extracted (not variables).
+         */
+        functions: {
+          __: ['msgid'],
+          _n: ['msgid', 'msgid_plural'],
+          _x: ['msgid', 'msgctxt'],
+          _nx: ['msgid', 'msgid_plural', null, 'msgctxt'],
+          /** client/src/lib/i18n.ts — same argument layout as __ */
+          translate: ['msgid'],
+          t: ['msgid'],
+        },
       },
     ],
   ],

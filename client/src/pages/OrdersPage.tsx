@@ -16,6 +16,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { SikshyaReactConfig, WpRestUser } from '../types';
+import { __ } from '../lib/i18n';
 
 type OrderLine = { course_id: number; course_title: string; line_total: number };
 
@@ -133,8 +134,8 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
     if (bulkAction === 'delete') {
       const ok = await dialog.confirm({
         title: `Delete ${selectedIds.length} order(s)?`,
-        message: 'This permanently removes the orders and their line items. This cannot be undone.',
-        confirmLabel: 'Delete',
+        message: __('This permanently removes the orders and their line items. This cannot be undone.', 'sikshya'),
+        confirmLabel: __('Delete', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -151,7 +152,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
       setBulkAction('');
       await refetch();
     } catch (err) {
-      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+      void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
     } finally {
       setBulkBusy(false);
     }
@@ -204,7 +205,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
 
   const openEdit = (r: OrderRow) => {
     setEditId(r.id);
-    setEditStatus((r.status === 'paid' ? 'paid' : r.status === 'on-hold' ? 'on-hold' : 'pending') as any);
+    setEditStatus((r.status === 'paid' ? 'paid' : r.status === 'on-hold' ? __('on-hold', 'sikshya') : __('pending', 'sikshya')) as any);
     setEditOpen(true);
   };
 
@@ -218,7 +219,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Checkout orders and manual entries (offline) — create pending orders or record paid access in one step."
+      subtitle={__('Checkout orders and manual entries (offline) — create pending orders or record paid access in one step.', 'sikshya')}
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           {!tableMissing ? (
@@ -234,7 +235,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load orders" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load orders', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -246,7 +247,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
 
       {!tableMissing ? (
         <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
-          <strong className="font-semibold text-slate-900 dark:text-white">Manual / offline orders:</strong>{' '}
+          <strong className="font-semibold text-slate-900 dark:text-white">{__('Manual / offline orders:', 'sikshya')}</strong>{' '}
           {config.offlineCheckoutEnabled === false ? (
             <>
               Enable offline checkout under{' '}
@@ -259,15 +260,15 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               so learners can choose offline on the storefront.{' '}
             </>
           ) : null}
-          Use <strong>New manual order</strong> to bill a learner without going through the cart, or open a pending
-          offline row and use <strong>Mark paid</strong> after you confirm payment.
+          Use <strong>{__('New manual order', 'sikshya')}</strong> to bill a learner without going through the cart, or open a pending
+          offline row and use <strong>{__('Mark paid', 'sikshya')}</strong> after you confirm payment.
         </div>
       ) : null}
 
       <Modal
         open={createOpen}
-        title="New manual order"
-        description="Creates a real checkout order with the same prices as the storefront (including coupons). Gateway is set to offline."
+        title={__('New manual order', 'sikshya')}
+        description={__('Creates a real checkout order with the same prices as the storefront (including coupons). Gateway is set to offline.', 'sikshya')}
         size="xl"
         onClose={() => {
           if (!creating) {
@@ -299,7 +300,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                 form="sikshya-manual-order"
                 disabled={creating || !pickedUser || courseIds.length === 0}
               >
-                {creating ? 'Creating…' : 'Create order'}
+                {creating ? __('Creating…', 'sikshya') : __('Create order', 'sikshya')}
               </ButtonPrimary>
             </div>
           </div>
@@ -327,16 +328,16 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               setCreateOpen(false);
               resetCreateForm();
               await refetch();
-              await dialog.alert({ title: 'Order created', message: res?.message || 'The order was created successfully.' });
+              await dialog.alert({ title: __('Order created', 'sikshya'), message: res?.message || 'The order was created successfully.' });
             } catch (err) {
-              void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+              void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
             } finally {
               setCreating(false);
             }
           }}
         >
           <div>
-            <div className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-200">Learner</div>
+            <div className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-200">{__('Learner', 'sikshya')}</div>
             <div className="relative">
               <input
                 value={
@@ -350,18 +351,18 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                   setUserOpen(true);
                 }}
                 onFocus={() => setUserOpen(true)}
-                placeholder="Search users by name or email…"
+                placeholder={__('Search users by name or email…', 'sikshya')}
                 disabled={creating}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
               />
               {userOpen ? (
                 <div className="absolute z-20 mt-2 max-h-64 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
                   {userLoading ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('Searching…', 'sikshya')}</div>
                   ) : userQuery.trim().length < 2 ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">Type at least 2 characters.</div>
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('Type at least 2 characters.', 'sikshya')}</div>
                   ) : userResults.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No users found.</div>
+                    <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">{__('No users found.', 'sikshya')}</div>
                   ) : (
                     userResults.map((u) => (
                       <button
@@ -388,12 +389,12 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
           </div>
 
           <div>
-            <div className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-200">Courses</div>
+            <div className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-200">{__('Courses', 'sikshya')}</div>
             <MultiCoursePicker
               value={courseIds}
               onChange={setCourseIds}
-              placeholder="Choose one or more courses…"
-              title="Courses for this order"
+              placeholder={__('Choose one or more courses…', 'sikshya')}
+              title={__('Courses for this order', 'sikshya')}
               hint="Line totals use each course’s configured price (same as checkout)."
               readOnly={creating}
             />
@@ -405,7 +406,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
               disabled={creating}
-              placeholder="e.g. SAVE10"
+              placeholder={__('e.g. SAVE10', 'sikshya')}
               className="mt-1 w-full max-w-md rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
             />
           </label>
@@ -419,10 +420,10 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600"
             />
             <span>
-              <span className="font-medium">Mark as paid and enroll now</span>
+              <span className="font-medium">{__('Mark as paid and enroll now', 'sikshya')}</span>
               <span className="mt-0.5 block text-xs font-normal text-slate-500 dark:text-slate-400">
                 Use when payment is already confirmed (cash, bank transfer you verified, comp). Leave unchecked to create
-                a pending order and use <strong>Mark paid</strong> on the list later.
+                a pending order and use <strong>{__('Mark paid', 'sikshya')}</strong> on the list later.
               </span>
             </span>
           </label>
@@ -432,7 +433,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
       <Modal
         open={editOpen}
         title={editId ? `Edit order #${editId}` : 'Edit order'}
-        description="Change order status. Use Mark paid for offline orders to apply enrollments."
+        description={__('Change order status. Use Mark paid for offline orders to apply enrollments.', 'sikshya')}
         size="lg"
         onClose={() => {
           if (!markBusyId) {
@@ -463,13 +464,13 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                   setEditOpen(false);
                   await refetch();
                 } catch (err) {
-                  void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                  void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                 } finally {
                   setMarkBusyId(null);
                 }
               }}
             >
-              {markBusyId === editId ? 'Saving…' : 'Save'}
+              {markBusyId === editId ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
             </ButtonPrimary>
           </div>
         }
@@ -483,25 +484,25 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               onChange={(e) => setEditStatus(e.target.value as any)}
               disabled={markBusyId !== null}
             >
-              <option value="pending">pending</option>
-              <option value="on-hold">on-hold</option>
-              <option value="paid">paid</option>
+              <option value="pending">{__('pending', 'sikshya')}</option>
+              <option value="on-hold">{__('on-hold', 'sikshya')}</option>
+              <option value="paid">{__('paid', 'sikshya')}</option>
             </select>
           </label>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            Setting status to <strong>paid</strong> here updates the row, but does not run fulfillment hooks. For offline
-            payments, prefer <strong>Mark paid</strong>.
+            Setting status to <strong>{__('paid', 'sikshya')}</strong> here updates the row, but does not run fulfillment hooks. For offline
+            payments, prefer <strong>{__('Mark paid', 'sikshya')}</strong>.
           </div>
         </div>
       </Modal>
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading orders…</div>
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading orders…', 'sikshya')}</div>
         ) : rows.length === 0 ? (
           <ListEmptyState
-            title="No orders"
-            description="Orders from checkout or manual creation appear here. Use New manual order to add one without the cart."
+            title={__('No orders', 'sikshya')}
+            description={__('Orders from checkout or manual creation appear here. Use New manual order to add one without the cart.', 'sikshya')}
           />
         ) : (
           <>
@@ -532,18 +533,18 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                     <th className="w-10 px-5 py-3.5">
                       <input
                         type="checkbox"
-                        aria-label="Select all orders on this page"
+                        aria-label={__('Select all orders on this page', 'sikshya')}
                         checked={rows.length > 0 && selectedIds.length === rows.length}
                         onChange={(e) => toggleAll(e.target.checked)}
                       />
                     </th>
-                    <th className="px-5 py-3.5">Created</th>
-                    <th className="px-5 py-3.5">Customer</th>
-                    <th className="px-5 py-3.5">Courses</th>
-                    <th className="px-5 py-3.5">Total</th>
-                    <th className="px-5 py-3.5">Gateway</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5">Actions</th>
+                    <th className="px-5 py-3.5">{__('Created', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Customer', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Courses', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Total', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Gateway', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Actions', 'sikshya')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -564,7 +565,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                             type="button"
                             className="text-xs font-semibold text-brand-600 hover:underline dark:text-brand-400"
                             onClick={() => navigateView('order', { id: String(r.id) })}
-                            title="View order details"
+                            title={__('View order details', 'sikshya')}
                           >
                             Order #{r.id}
                           </button>
@@ -644,7 +645,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                             if (canMarkOrderPaid(r)) {
                               items.push({
                                 key: 'mark_paid',
-                                label: markBusyId === r.id ? 'Marking…' : 'Mark paid',
+                                label: markBusyId === r.id ? __('Marking…', 'sikshya') : __('Mark paid', 'sikshya'),
                                 disabled: markBusyId === r.id || loading,
                                 onClick: async () => {
                                   setMarkBusyId(r.id);
@@ -655,7 +656,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                                     );
                                     await refetch();
                                   } catch (err) {
-                                    void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                                    void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                                   } finally {
                                     setMarkBusyId(null);
                                   }
@@ -669,8 +670,8 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                               onClick: async () => {
                                 const ok = await dialog.confirm({
                                   title: `Delete order #${r.id}?`,
-                                  message: 'This permanently removes the order and its line items. This cannot be undone.',
-                                  confirmLabel: 'Delete',
+                                  message: __('This permanently removes the order and its line items. This cannot be undone.', 'sikshya'),
+                                  confirmLabel: __('Delete', 'sikshya'),
                                   variant: 'danger',
                                 });
                                 if (!ok) return;
@@ -680,7 +681,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                                   );
                                   await refetch();
                                 } catch (err) {
-                                  void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                                  void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                                 }
                               },
                             });

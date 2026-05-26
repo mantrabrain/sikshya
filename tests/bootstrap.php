@@ -19,4 +19,17 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
 
+if (!function_exists('__')) {
+    /**
+     * @param string $text
+     * @param string $domain
+     * @return string
+     */
+    function __($text, $domain = 'default')
+    {
+        unset($domain);
+        return $text;
+    }
+}
+
 require_once dirname(__DIR__) . '/vendor/autoload.php';

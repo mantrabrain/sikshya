@@ -35,6 +35,7 @@ import { MultiCoursePicker } from '../components/shared/MultiCoursePicker';
 import { QuillField } from '../components/shared/QuillField';
 import { term, termLower } from '../lib/terminology';
 import { navIconForCurriculumRow } from '../lib/curriculumIcons';
+import { __ } from '../lib/i18n';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
 const FIELD_INPUT =
@@ -199,7 +200,7 @@ function MultiUserPickerField(props: {
             ))}
           </div>
         ) : (
-          <div className="mb-2 text-sm text-slate-500 dark:text-slate-400">No instructors selected.</div>
+          <div className="mb-2 text-sm text-slate-500 dark:text-slate-400">{__('No instructors selected.', 'sikshya')}</div>
         )}
 
         <input
@@ -235,7 +236,7 @@ function MultiUserPickerField(props: {
             </ul>
           ) : (
             <div className="px-3 py-3 text-sm text-slate-500 dark:text-slate-400">
-              {users.length === selectedIds.length ? 'All users selected.' : 'No matches.'}
+              {users.length === selectedIds.length ? __('All users selected.', 'sikshya') : __('No matches.', 'sikshya')}
             </div>
           )}
         </div>
@@ -456,8 +457,8 @@ function ContentDripCourseBuilderGateInput(props: { config: SikshyaReactConfig; 
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900">
         <AddonEnablePanel
-          title="Content drip is not enabled"
-          description="Turn on the Content Drip add-on to load unlock schedules. Edit rules under Learning rules → Scheduled access."
+          title={__('Content drip is not enabled', 'sikshya')}
+          description={__('Turn on the Content Drip add-on to load unlock schedules. Edit rules under Learning rules → Scheduled access.', 'sikshya')}
           canEnable={Boolean(addon.licenseOk)}
           enableBusy={enableBusy}
           onEnable={async () => {
@@ -477,7 +478,7 @@ function ContentDripCourseBuilderGateInput(props: { config: SikshyaReactConfig; 
 
   return (
     <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/25">
-      <p className="text-sm font-medium text-slate-900 dark:text-white">Content drip is ready</p>
+      <p className="text-sm font-medium text-slate-900 dark:text-white">{__('Content drip is ready', 'sikshya')}</p>
       <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
         Configure per-lesson delays and fixed unlock dates in Learning rules. Use the button below to jump straight to
         schedules for this course.
@@ -497,7 +498,7 @@ function ContentDripCourseBuilderGateInput(props: { config: SikshyaReactConfig; 
         </a>
       </div>
       {courseId <= 0 ? (
-        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Save the course first to pre-select it on the drip screen.</p>
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">{__('Save the course first to pre-select it on the drip screen.', 'sikshya')}</p>
       ) : null}
     </div>
   );
@@ -627,7 +628,7 @@ function FieldInput(props: {
             onChange(next);
           }}
         >
-          <option value="">{cfg.select_placeholder || 'Default scale'}</option>
+          <option value="">{cfg.select_placeholder || __('Default scale', 'sikshya')}</option>
           {scales.map((s) => (
             <option key={s.id} value={String(s.id)}>
               {s.name || `Scale #${s.id}`}
@@ -635,9 +636,9 @@ function FieldInput(props: {
           ))}
         </select>
         {gradeScales.loading ? (
-          <p className={FIELD_HINT}>Loading grade scales…</p>
+          <p className={FIELD_HINT}>{__('Loading grade scales…', 'sikshya')}</p>
         ) : scales.length === 0 ? (
-          <p className={FIELD_HINT}>No grade scales yet. Create one from the Grading page.</p>
+          <p className={FIELD_HINT}>{__('No grade scales yet. Create one from the Grading page.', 'sikshya')}</p>
         ) : null}
       </div>
     );
@@ -651,7 +652,7 @@ function FieldInput(props: {
       return `${c} ${n.toFixed(2)}`;
     };
     if (subscriptionPlans.loading) {
-      return <p className={FIELD_HINT}>Loading subscription plans…</p>;
+      return <p className={FIELD_HINT}>{__('Loading subscription plans…', 'sikshya')}</p>;
     }
     if (plans.length === 0) {
       return (
@@ -686,7 +687,7 @@ function FieldInput(props: {
             onChange(next);
           }}
         >
-          <option value="">{cfg.select_placeholder || 'Select a plan…'}</option>
+          <option value="">{cfg.select_placeholder || __('Select a plan…', 'sikshya')}</option>
           {plans.map((p) => (
             <option key={p.id} value={String(p.id)}>
               {(p.name || `Plan #${p.id}`) +
@@ -852,8 +853,8 @@ function FieldInput(props: {
         users={users}
         value={ids}
         onChange={(next) => onChange(isMulti ? next : (next[0] ?? ''))}
-        placeholder="Search instructors…"
-        hint={isMulti ? 'Type to search, click to add, and use × to remove.' : 'Type to search and click to select.'}
+        placeholder={__('Search instructors…', 'sikshya')}
+        hint={isMulti ? __('Type to search, click to add, and use × to remove.', 'sikshya') : __('Type to search and click to select.', 'sikshya')}
       />
     );
   }
@@ -942,7 +943,7 @@ function FieldInput(props: {
                     {fieldKey === 'course_resources' && sk === 'url' ? (
                       <div className="mt-1.5 space-y-2">
                         <div className="rounded-xl border border-slate-200/90 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/40">
-                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">Choose from Media</div>
+                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Choose from Media', 'sikshya')}</div>
                           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                             Pick a file from the WordPress media library (recommended), or paste a URL below.
                           </p>
@@ -961,14 +962,14 @@ function FieldInput(props: {
                                 onChange(next);
                               }}
                               imageOnly={false}
-                              placeholder="Upload or choose a file (PDF, ZIP, DOCX, etc.)"
+                              placeholder={__('Upload or choose a file (PDF, ZIP, DOCX, etc.)', 'sikshya')}
                               className={FIELD_INPUT}
                             />
                           </div>
                         </div>
 
                         <div className="rounded-xl border border-slate-200/90 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/40">
-                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">Or paste a URL</div>
+                          <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Or paste a URL', 'sikshya')}</div>
                           <input
                             type="url"
                             className={`${FIELD_INPUT} mt-2`}
@@ -1175,7 +1176,7 @@ function AddChapterModal(props: {
     <Modal
       open={open}
       onClose={handleClose}
-      title="Add a chapter"
+      title={__('Add a chapter', 'sikshya')}
       description='A chapter is a section of your course (for example "Getting started" or "Week 2"). Put lessons and quizzes inside it from the outline.'
       size="sm"
       footer={
@@ -1189,7 +1190,7 @@ function AddChapterModal(props: {
             Cancel
           </button>
           <ButtonPrimary type="button" className="px-4 py-2.5" disabled={busy || !title.trim()} onClick={onSubmit}>
-            {busy ? 'Adding…' : 'Add chapter'}
+            {busy ? __('Adding…', 'sikshya') : __('Add chapter', 'sikshya')}
           </ButtonPrimary>
         </div>
       }
@@ -1202,7 +1203,7 @@ function AddChapterModal(props: {
         id="sikshya-new-chapter-title"
         type="text"
         className={`${FIELD_INPUT} mt-1.5`}
-        placeholder="e.g. Introduction or Module 1"
+        placeholder={__('e.g. Introduction or Module 1', 'sikshya')}
         value={title}
         onChange={(e) => onTitleChange(e.target.value)}
         onKeyDown={(e) => {
@@ -1371,7 +1372,7 @@ function BuilderSectionMenu({
   const activeIndex = entries.findIndex(([k]) => k === openSectionKey);
 
   return (
-    <nav className="flex flex-col p-2 lg:sticky lg:top-4 lg:max-h-[min(80vh,calc(100vh-6rem))] lg:overflow-y-auto lg:p-3" aria-label="Form sections">
+    <nav className="flex flex-col p-2 lg:sticky lg:top-4 lg:max-h-[min(80vh,calc(100vh-6rem))] lg:overflow-y-auto lg:p-3" aria-label={__('Form sections', 'sikshya')}>
       <div className="mb-3 flex items-center justify-between gap-2 px-2">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Sections
@@ -1709,8 +1710,7 @@ function CourseBuilderEditor({
     if (activeEmbeddedSaveRef.current) {
       const ok = await activeEmbeddedSaveRef.current();
       if (!ok) {
-        toast.error(
-          'Could not save',
+        toast.error(__('Could not save', 'sikshya'),
           'Save or close the embedded lesson, quiz, assignment, or chapter editor first — fix any errors there, save the item, then try again.'
         );
         return;
@@ -1736,15 +1736,15 @@ function CourseBuilderEditor({
       }
       const newId = res.data?.course_id;
       if (newId && newId !== courseId) {
-        const view = isBundleUi ? 'bundle-builder' : 'add-course';
+        const view = isBundleUi ? __('bundle-builder', 'sikshya') : __('add-course', 'sikshya');
         navigateHref(appViewHref(config, view, { course_id: String(newId) }));
         return;
       }
       const msg = res.message || 'Saved.';
       if (status === 'publish') {
-        toast.success('Published', msg);
+        toast.success(__('Published', 'sikshya'), msg);
       } else {
-        toast.success('Saved', msg);
+        toast.success(__('Saved', 'sikshya'), msg);
       }
       // Reflect the saved status locally instead of re-fetching the entire
       // bootstrap. The full refetch was wiping every input back to the server's
@@ -1854,10 +1854,10 @@ function CourseBuilderEditor({
       return;
     }
     const ok = await confirmDialog({
-      title: 'Delete permanently?',
-      message: 'This removes the item from the site. This cannot be undone.',
+      title: __('Delete permanently?', 'sikshya'),
+      message: __('This removes the item from the site. This cannot be undone.', 'sikshya'),
       variant: 'danger',
-      confirmLabel: 'Delete permanently',
+      confirmLabel: __('Delete permanently', 'sikshya'),
     });
     if (!ok) {
       return;
@@ -2063,7 +2063,7 @@ function CourseBuilderEditor({
       config={config}
       title={title}
       subtitle={subtitle}
-      badge={isBundleUi ? 'Bundle' : courseId ? 'Editing' : 'Draft'}
+      badge={isBundleUi ? 'Bundle' : courseId ? __('Editing', 'sikshya') : __('Draft', 'sikshya')}
       pageActions={
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
           <a
@@ -2121,7 +2121,7 @@ function CourseBuilderEditor({
 
       {bootstrap.loading ? <CourseBuilderSkeleton /> : null}
       {bootstrap.error ? (
-        <ApiErrorPanel error={bootstrap.error} onRetry={bootstrap.refetch} title="Could not load course" />
+        <ApiErrorPanel error={bootstrap.error} onRetry={bootstrap.refetch} title={__('Could not load course', 'sikshya')} />
       ) : null}
       {!bootstrap.loading && !bootstrap.error && bootstrap.data && (
         <div className="rounded-xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -2130,7 +2130,7 @@ function CourseBuilderEditor({
               {tabs.length > 1 ? (
                 <nav
                   className="flex min-w-0 flex-1 gap-0 overflow-x-auto pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                  aria-label="Course builder steps"
+                  aria-label={__('Course builder steps', 'sikshya')}
                 >
                   {tabs.map((tab) => {
                     const active = activeTab === tab.id;
@@ -2176,15 +2176,15 @@ function CourseBuilderEditor({
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-950/40 dark:text-emerald-300'
                           : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300'
                       }`}
-                      title={isPublished ? 'This course is published and visible to learners' : 'This course is a draft — not visible to learners'}
+                      title={isPublished ? __('This course is published and visible to learners', 'sikshya') : __('This course is a draft — not visible to learners', 'sikshya')}
                     >
                       <span
                         className={`h-1.5 w-1.5 rounded-full ${
-                          isPublished ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-slate-400 dark:bg-slate-500'
+                          isPublished ? __('bg-emerald-500 dark:bg-emerald-400', 'sikshya') : __('bg-slate-400 dark:bg-slate-500', 'sikshya')
                         }`}
                         aria-hidden
                       />
-                      {isPublished ? 'Published' : 'Draft'}
+                      {isPublished ? __('Published', 'sikshya') : __('Draft', 'sikshya')}
                     </span>
                   );
                 })()}
@@ -2211,7 +2211,7 @@ function CourseBuilderEditor({
                         className="inline-flex items-center gap-2 rounded-lg border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       >
                         <NavIcon name="iconSaveDraft" className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                        {saving ? 'Saving…' : isPublished ? 'Switch to draft' : 'Save draft'}
+                        {saving ? 'Saving…' : isPublished ? __('Switch to draft', 'sikshya') : __('Save draft', 'sikshya')}
                       </button>
                       <ButtonPrimary
                         type="button"
@@ -2220,7 +2220,7 @@ function CourseBuilderEditor({
                         className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5"
                       >
                         <NavIcon name="iconPublish" className="h-4 w-4 text-white/90" />
-                        {saving ? 'Publishing…' : isPublished ? 'Update' : 'Publish'}
+                        {saving ? 'Publishing…' : isPublished ? __('Update', 'sikshya') : __('Publish', 'sikshya')}
                       </ButtonPrimary>
                     </>
                   );
@@ -2268,13 +2268,13 @@ function CourseBuilderEditor({
                         className="h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:focus:ring-brand-400/25"
                       />
                       <span className="min-w-0 text-[11.5px] font-medium leading-snug text-slate-500 dark:text-slate-400">
-                        {curriculumOutlineFullHeight ? 'Outline: page scroll' : 'Outline: panel scroll'}
+                        {curriculumOutlineFullHeight ? __('Outline: page scroll', 'sikshya') : __('Outline: panel scroll', 'sikshya')}
                       </span>
                     </label>
                   </div>
                   <div
                     className={
-                      curriculumOutlineFullHeight ? 'flex-1 px-4 pb-4' : 'flex min-h-0 flex-1 flex-col px-4 pb-4'
+                      curriculumOutlineFullHeight ? __('flex-1 px-4 pb-4', 'sikshya') : __('flex min-h-0 flex-1 flex-col px-4 pb-4', 'sikshya')
                     }
                   >
                     <div
@@ -2290,7 +2290,7 @@ function CourseBuilderEditor({
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={curriculumError}
-                          title="Could not load curriculum"
+                          title={__('Could not load curriculum', 'sikshya')}
                           onRetry={() => {
                             setCurriculumError(null);
                             if (courseId) {
@@ -2314,7 +2314,7 @@ function CourseBuilderEditor({
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={chapterActionError}
-                          title="Could not create chapter"
+                          title={__('Could not create chapter', 'sikshya')}
                           onRetry={() => setChapterActionError(null)}
                         />
                       </div>
@@ -2323,7 +2323,7 @@ function CourseBuilderEditor({
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={addContentError}
-                          title="Could not add content"
+                          title={__('Could not add content', 'sikshya')}
                           onRetry={() => setAddContentError(null)}
                         />
                       </div>
@@ -2332,7 +2332,7 @@ function CourseBuilderEditor({
                       <div className="mb-3">
                         <ApiErrorPanel
                           error={curriculumOutlineError}
-                          title="Could not save outline order"
+                          title={__('Could not save outline order', 'sikshya')}
                           onRetry={() => setCurriculumOutlineError(null)}
                         />
                       </div>
@@ -2343,7 +2343,7 @@ function CourseBuilderEditor({
                       </p>
                     ) : null}
                     {curriculumLoading ? (
-                      <ul className="space-y-3" aria-busy="true" aria-label="Loading curriculum">
+                      <ul className="space-y-3" aria-busy="true" aria-label={__('Loading curriculum', 'sikshya')}>
                         {Array.from({ length: 4 }).map((_, i) => (
                           <li key={i}>
                             <SkeletonLine className="h-4 w-full max-w-[12rem]" />
@@ -2446,7 +2446,7 @@ function CourseBuilderEditor({
                               >
                                 <span
                                   className={`flex h-10 w-5 shrink-0 select-none items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 ${
-                                    chapterRowDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'
+                                    chapterRowDraggable ? __('cursor-grab active:cursor-grabbing', 'sikshya') : __('cursor-not-allowed', 'sikshya')
                                   }`}
                                   aria-hidden
                                 >
@@ -2460,7 +2460,7 @@ function CourseBuilderEditor({
                                       : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                                   }`}
                                   aria-expanded={expanded}
-                                  aria-label={expanded ? 'Collapse chapter' : 'Expand chapter'}
+                                  aria-label={expanded ? __('Collapse chapter', 'sikshya') : __('Expand chapter', 'sikshya')}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setOpenChapters((p) => ({
@@ -2470,7 +2470,7 @@ function CourseBuilderEditor({
                                   }}
                                 >
                                   <NavIcon
-                                    name={expanded ? 'chevronDown' : 'chevronRight'}
+                                    name={expanded ? __('chevronDown', 'sikshya') : __('chevronRight', 'sikshya')}
                                     className="h-4 w-4"
                                   />
                                 </button>
@@ -2491,7 +2491,7 @@ function CourseBuilderEditor({
                                       e.stopPropagation();
                                     }}
                                   >
-                                    <RowActionsMenu items={chapterActions} ariaLabel="Chapter actions" />
+                                    <RowActionsMenu items={chapterActions} ariaLabel={__('Chapter actions', 'sikshya')} />
                                   </div>
                                 </div>
                               </div>
@@ -2589,7 +2589,7 @@ function CourseBuilderEditor({
                                                 <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-2 py-1">
                                                   <span
                                                     className={`flex h-8 w-5 shrink-0 select-none items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 ${
-                                                      contentRowDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'
+                                                      contentRowDraggable ? __('cursor-grab active:cursor-grabbing', 'sikshya') : __('cursor-not-allowed', 'sikshya')
                                                     }`}
                                                     aria-hidden
                                                   >
@@ -2634,7 +2634,7 @@ function CourseBuilderEditor({
                                                       </span>
                                                     ) : null}
                                                     <div className="shrink-0">
-                                                      <RowActionsMenu items={contentActions} ariaLabel="Content actions" />
+                                                      <RowActionsMenu items={contentActions} ariaLabel={__('Content actions', 'sikshya')} />
                                                     </div>
                                                   </div>
                                                 </div>
@@ -2717,7 +2717,7 @@ function CourseBuilderEditor({
                         })}
                         {!curriculumTree.length && !curriculumError && (
                           <li className="rounded-xl border border-dashed border-slate-200 bg-white/50 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Start with a chapter</p>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{__('Start with a chapter', 'sikshya')}</p>
                             <p className="mx-auto mt-2 max-w-[16rem] text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                               Chapters are sections (like “Week 1”). Use “Add chapter” below, open the chapter, then “Add content”
                               for lessons and quizzes.
@@ -2859,7 +2859,7 @@ function CourseBuilderEditor({
                             />
                           ));
                         }
-                        const gridCols = row.cols === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3';
+                        const gridCols = row.cols === 2 ? __('sm:grid-cols-2', 'sikshya') : __('sm:grid-cols-2 lg:grid-cols-3', 'sikshya');
                         return (
                           <div key={`row-${rowIdx}`} className={`grid gap-6 ${gridCols}`}>
                             {row.fields.map(([fid, fcfg]) => (

@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { OVERLAY_Z_MODAL } from '../../lib/overlayLayers';
+import { __ } from '../../lib/i18n';
 
 type Props = {
   open: boolean;
@@ -94,13 +96,14 @@ export function Modal({ open, title, description, onClose, children, footer, siz
 
   return createPortal(
     <div
-      className="sikshya-admin-theme fixed inset-0 z-[100090] flex items-center justify-center p-4 sm:p-6"
+      className="sikshya-admin-theme fixed inset-0 flex items-center justify-center p-4 sm:p-6"
+      style={{ zIndex: OVERLAY_Z_MODAL }}
       role="presentation"
     >
       <button
         type="button"
         className="absolute inset-0 z-0 bg-slate-900/60 backdrop-blur-[2px] dark:bg-slate-950/70"
-        aria-label="Close dialog"
+        aria-label={__('Close dialog', 'sikshya')}
         onClick={onClose}
       />
       <div
@@ -129,7 +132,7 @@ export function Modal({ open, title, description, onClose, children, footer, siz
           <button
             type="button"
             className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-            aria-label="Close"
+            aria-label={__('Close', 'sikshya')}
             onClick={onClose}
           >
             <span className="block text-xl leading-none" aria-hidden>

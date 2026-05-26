@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../../api';
+import { __, sprintf } from '../../lib/i18n';
 
 type NoticeAction = {
   label: string;
@@ -89,7 +90,7 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
       <button
         type="button"
         className="absolute right-2 top-2 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-        aria-label="Dismiss notice"
+        aria-label={__('Dismiss notice', 'sikshya')}
         onClick={onDismiss}
       >
         <span aria-hidden="true">×</span>
@@ -132,7 +133,7 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
   const ctaUrl =
     primary?.url ||
     'https://mantrabrain.com/plugins/sikshya-lms/pricing/?utm_source=sikshya&utm_medium=admin&utm_campaign=upgrade-gate&utm_content=buy-pro-strip';
-  const ctaLabel = primary?.label || 'Upgrade to Pro';
+  const ctaLabel = primary?.label || __('Upgrade to Pro', 'sikshya');
   const orderCount = typeof notice.order_count === 'number' ? notice.order_count : 0;
 
   return (
@@ -145,30 +146,37 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
       }}
     >
       <div className="absolute right-24 top-2 rounded-full bg-[#ff9500] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-        ⚡ Limited time
+        {__('⚡ Limited time', 'sikshya')}
       </div>
       <button
         type="button"
         className="absolute right-2 top-2 rounded p-1 text-slate-500 hover:bg-black/5 hover:text-slate-800"
-        aria-label="Dismiss notice"
+        aria-label={__('Dismiss notice', 'sikshya')}
         onClick={onDismiss}
       >
         <span aria-hidden="true">×</span>
       </button>
       <div className="p-4 pr-10">
         <h3 className="m-0 text-[17px] font-semibold text-[#2c3e50] dark:text-slate-100">
-          🚀 Upgrade to Sikshya Pro — up to 50% off!
+          {__('🚀 Upgrade to Sikshya Pro — up to 50% off!', 'sikshya')}
         </h3>
         <p className="mt-2 m-0 text-sm leading-relaxed text-[#495057] dark:text-slate-300">
-          You’ve recorded <strong className="text-[#ff9500]">{orderCount}</strong> order(s)! Get{' '}
-          <strong className="text-[#ff9500]">up to 50% off</strong> on Sikshya Pro. Unlock premium payment tools, advanced
-          modules, automation, and priority support.
+          {sprintf(
+            __(
+              'You’ve recorded %1$d order(s)! Get up to 50%% off on Sikshya Pro. Unlock premium payment tools, advanced modules, automation, and priority support.',
+              'sikshya'
+            ),
+            orderCount
+          )}
         </p>
         <div
           className="mt-3 rounded border-l-[3px] border-[#ff9500] p-2.5 text-[13px] font-semibold text-[#495057] dark:text-slate-200"
           style={{ background: 'rgba(255, 149, 0, 0.08)' }}
         >
-          🎉 <strong>Special Offer:</strong> Save up to 50% on your Pro upgrade with premium features and priority support!
+          {__(
+            '🎉 Special Offer: Save up to 50% on your Pro upgrade with premium features and priority support!',
+            'sikshya'
+          )}
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <a
@@ -177,14 +185,14 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
             rel="noopener noreferrer"
             className="inline-flex items-center rounded bg-[#ff9500] px-3.5 py-1.5 text-[13px] font-semibold text-white shadow hover:opacity-95"
           >
-            ⚡ Save up to 50% — {ctaLabel}
+            {sprintf(__('⚡ Save up to 50%% — %s', 'sikshya'), ctaLabel)}
           </a>
           <button
             type="button"
             className="text-[13px] text-[#6c757d] underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
             onClick={onDismiss}
           >
-            Maybe later
+            {__('Maybe later', 'sikshya')}
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { ShellStateProvider, useShellState } from './context/ShellStateContext';
 import { AdminRoutingProvider, parseAdminRoute, useAdminRouting } from './lib/adminRouting';
 import { applyAdminBrandThemeToRoot, clearAdminBrandThemeFromRoot } from './lib/adminBrandTokens';
 import { term } from './lib/terminology';
+import { __, sprintf } from './lib/i18n';
 import type { NavItem } from './types';
 
 const ActivityLogPage = lazy(() =>
@@ -121,7 +122,7 @@ function AdminRouteFallback() {
       aria-live="polite"
     >
       <span className="sikshya-admin-boot-spinner" aria-hidden />
-      <span className="screen-reader-text">Loading Sikshya…</span>
+      <span className="screen-reader-text">{__('Loading Sikshya…', 'sikshya')}</span>
     </div>
   );
 }
@@ -205,22 +206,22 @@ function RoutedApp() {
   const routes = (() => {
   switch (page) {
     case 'dashboard':
-      return <DashboardPage embedded config={config} title="Dashboard" />;
+      return <DashboardPage embedded config={config} title={__('Dashboard', 'sikshya')} />;
     case 'courses':
       return <CoursesPage embedded config={config} title={T.courses} restBase="sik_course" />;
     case 'add-course':
-      return <CourseBuilderPage embedded config={config} title={`${T.course} builder`} />;
+      return <CourseBuilderPage embedded config={config} title={sprintf(__('%s builder', 'sikshya'), T.course)} />;
     case 'bundle-builder':
-      return <CourseBuilderPage embedded config={config} title="Bundle builder" />;
+      return <CourseBuilderPage embedded config={config} title={__('Bundle builder', 'sikshya')} />;
     case 'edit-content':
-      return <ContentPostEditorPage embedded config={config} shellTitle="Edit content" />;
+      return <ContentPostEditorPage embedded config={config} shellTitle={__('Edit content', 'sikshya')} />;
     case 'lessons':
     case 'add-lesson':
       return (
         <WpEntityListPage
           config={config}
           title={T.lessons}
-          subtitle="All lessons"
+          subtitle={sprintf(__('All %s', 'sikshya'), T.lessons.toLowerCase())}
           restBase="sik_lesson"
         />
       );
@@ -229,7 +230,7 @@ function RoutedApp() {
         <WpEntityListPage
           config={config}
           title={T.quizzes}
-          subtitle="All quizzes"
+          subtitle={sprintf(__('All %s', 'sikshya'), T.quizzes.toLowerCase())}
           restBase="sik_quiz"
         />
       );
@@ -238,7 +239,7 @@ function RoutedApp() {
         <WpEntityListPage
           config={config}
           title={T.assignments}
-          subtitle="All assignments"
+          subtitle={sprintf(__('All %s', 'sikshya'), T.assignments.toLowerCase())}
           restBase="sik_assignment"
         />
       );
@@ -246,8 +247,8 @@ function RoutedApp() {
       return (
         <WpEntityListPage
           config={config}
-          title="Questions"
-          subtitle="All questions"
+          title={__('Questions', 'sikshya')}
+          subtitle={__('All questions', 'sikshya')}
           restBase="sik_question"
         />
       );
@@ -255,8 +256,8 @@ function RoutedApp() {
       return (
         <WpEntityListPage
           config={config}
-          title="Chapters"
-          subtitle="All chapters"
+          title={__('Chapters', 'sikshya')}
+          subtitle={sprintf(__('All %s', 'sikshya'), T.chapters.toLowerCase())}
           restBase="sik_chapter"
         />
       );
@@ -264,86 +265,86 @@ function RoutedApp() {
       return (
         <WpEntityListPage
           config={config}
-          title="Certificates"
-          subtitle="Certificate templates"
+          title={__('Certificates', 'sikshya')}
+          subtitle={__('Certificate templates', 'sikshya')}
           restBase="sikshya_certificate"
         />
       );
     case 'issued-certificates':
-      return <IssuedCertificatesPage embedded config={config} title="Issued certificates" />;
+      return <IssuedCertificatesPage embedded config={config} title={__('Issued certificates', 'sikshya')} />;
     case 'orders':
-      return <OrdersPage embedded config={config} title="Orders" />;
+      return <OrdersPage embedded config={config} title={__('Orders', 'sikshya')} />;
     case 'order':
-      return <OrderDetailsPage embedded config={config} title="Order" />;
+      return <OrderDetailsPage embedded config={config} title={__('Order', 'sikshya')} />;
     case 'coupons':
-      return <CouponsPage embedded config={config} title="Coupons" />;
+      return <CouponsPage embedded config={config} title={__('Coupons', 'sikshya')} />;
     case 'reviews':
-      return <ReviewsPage embedded config={config} title="Course reviews" />;
+      return <ReviewsPage embedded config={config} title={__('Course reviews', 'sikshya')} />;
     case 'review':
-      return <ReviewDetailPage embedded config={config} title="Review details" />;
+      return <ReviewDetailPage embedded config={config} title={__('Review details', 'sikshya')} />;
     case 'discussions':
-      return <DiscussionsPage embedded config={config} title="Discussions & Q&A" />;
+      return <DiscussionsPage embedded config={config} title={__('Discussions & Q&A', 'sikshya')} />;
     case 'gradebook':
-      return <GradebookPage embedded config={config} title="Gradebook" uiMode="default" />;
+      return <GradebookPage embedded config={config} title={__('Gradebook', 'sikshya')} uiMode="default" />;
     case 'assignment-submissions':
       return (
-        <GradebookPage embedded config={config} title="Assignment submissions" uiMode="submissions" />
+        <GradebookPage embedded config={config} title={__('Assignment submissions', 'sikshya')} uiMode="submissions" />
       );
     case 'grading':
-      return <GradingPage embedded config={config} title="Grading" />;
+      return <GradingPage embedded config={config} title={__('Grading', 'sikshya')} />;
     case 'activity-log':
-      return <ActivityLogPage embedded config={config} title="Activity log" />;
+      return <ActivityLogPage embedded config={config} title={__('Activity log', 'sikshya')} />;
     case 'content-drip':
-      return <ContentDripPage embedded config={config} title="Scheduled access" />;
+      return <ContentDripPage embedded config={config} title={__('Scheduled access', 'sikshya')} />;
     case 'subscriptions':
-      return <SubscriptionsProPage embedded config={config} title="Subscriptions" />;
+      return <SubscriptionsProPage embedded config={config} title={__('Subscriptions', 'sikshya')} />;
     case 'course-team':
-      return <CourseTeamPage embedded config={config} title="Course staff" />;
+      return <CourseTeamPage embedded config={config} title={__('Course staff', 'sikshya')} />;
     case 'marketplace':
-      return <MarketplacePage embedded config={config} title="Marketplace" />;
+      return <MarketplacePage embedded config={config} title={__('Marketplace', 'sikshya')} />;
     case 'bundles':
-      return <BundlesPage embedded config={config} title="Course bundles" />;
+      return <BundlesPage embedded config={config} title={__('Course bundles', 'sikshya')} />;
     case 'prerequisites':
-      return <PrerequisitesPage embedded config={config} title="Prerequisites" />;
+      return <PrerequisitesPage embedded config={config} title={__('Prerequisites', 'sikshya')} />;
     case 'social-login':
-      return <SocialLoginPage embedded config={config} title="Social login" />;
+      return <SocialLoginPage embedded config={config} title={__('Social login', 'sikshya')} />;
     case 'white-label':
-      return <WhiteLabelPage embedded config={config} title="White label" />;
+      return <WhiteLabelPage embedded config={config} title={__('White label', 'sikshya')} />;
     case 'crm-automation':
       return (
         <GenericPlaceholderPage
           config={config}
-          title="CRM & email automation"
-          description="This screen is not wired in the React shell yet."
+          title={__('CRM & email automation', 'sikshya')}
+          description={__('This screen is not wired in the React shell yet.', 'sikshya')}
         />
       );
     case 'calendar':
-      return <CalendarPage embedded config={config} title="Calendar" />;
+      return <CalendarPage embedded config={config} title={__('Calendar', 'sikshya')} />;
     /* ---- Tabbed hubs (new sidebar entries that fan out to existing pages). ---- */
     case 'content-library':
-      return <ContentLibraryHubPage embedded config={config} title="Content library" />;
+      return <ContentLibraryHubPage embedded config={config} title={__('Content library', 'sikshya')} />;
     case 'people':
-      return <PeopleHubPage embedded config={config} title="People" />;
+      return <PeopleHubPage embedded config={config} title={__('People', 'sikshya')} />;
     case 'certificates-hub':
-      return <CertificatesHubPage embedded config={config} title="Certificates" />;
+      return <CertificatesHubPage embedded config={config} title={__('Certificates', 'sikshya')} />;
     case 'sales':
-      return <SalesHubPage embedded config={config} title="Sales" />;
+      return <SalesHubPage embedded config={config} title={__('Sales', 'sikshya')} />;
     case 'email-hub':
     case 'email-templates':
-      return <EmailHubPage embedded config={config} title="Email" />;
+      return <EmailHubPage embedded config={config} title={__('Email', 'sikshya')} />;
     case 'branding':
-      return <BrandingHubPage embedded config={config} title="Branding" />;
+      return <BrandingHubPage embedded config={config} title={__('Branding', 'sikshya')} />;
     case 'integrations-hub':
-      return <IntegrationsHubPage embedded config={config} title="Integrations" />;
+      return <IntegrationsHubPage embedded config={config} title={__('Integrations', 'sikshya')} />;
     case 'learning-rules':
-      return <LearningRulesHubPage embedded config={config} title="Learning rules" />;
+      return <LearningRulesHubPage embedded config={config} title={__('Learning rules', 'sikshya')} />;
     case 'course-categories':
       return (
         <CourseCategoriesPage
           embedded
           config={config}
-          title="Course categories"
-          subtitle="Organize courses with hierarchical categories."
+          title={__('Course categories', 'sikshya')}
+          subtitle={__('Organize courses with hierarchical categories.', 'sikshya')}
         />
       );
     case 'students':
@@ -351,7 +352,7 @@ function RoutedApp() {
         <WpUserListPage
           config={config}
           title={T.students}
-          subtitle={`Users with the ${T.student} role.`}
+          subtitle={sprintf(__('Users with the %s role.', 'sikshya'), T.student)}
           variant="students"
         />
       );
@@ -360,7 +361,10 @@ function RoutedApp() {
         <WpUserListPage
           config={config}
           title={T.instructors}
-          subtitle={`Users with the ${T.instructor} role. Pending sign-ups are under People → Applications.`}
+          subtitle={sprintf(
+            __('Users with the %s role. Pending sign-ups are under People → Applications.', 'sikshya'),
+            T.instructor
+          )}
           variant="instructors"
         />
       );
@@ -369,40 +373,40 @@ function RoutedApp() {
         <InstructorApplicationsPage
           embedded
           config={config}
-          title="Instructor applications"
-          subtitle="Approve or reject learners who applied to teach."
+          title={__('Instructor applications', 'sikshya')}
+          subtitle={__('Approve or reject learners who applied to teach.', 'sikshya')}
         />
       );
     case 'enrollments':
       return <EnrollmentsPage embedded config={config} title={T.enrollments} />;
     case 'reports':
-      return <ReportsHubPage embedded config={config} title="Reports" />;
+      return <ReportsHubPage embedded config={config} title={__('Reports', 'sikshya')} />;
     case 'payments':
-      return <PaymentsPage embedded config={config} title="Payments" />;
+      return <PaymentsPage embedded config={config} title={__('Payments', 'sikshya')} />;
     case 'payment':
-      return <PaymentDetailsPage embedded config={config} title="Payment" />;
+      return <PaymentDetailsPage embedded config={config} title={__('Payment', 'sikshya')} />;
     case 'settings':
-      return <SettingsPage embedded config={config} title="Settings" />;
+      return <SettingsPage embedded config={config} title={__('Settings', 'sikshya')} />;
     case 'email':
-      return <EmailPage embedded config={config} title="Email" />;
+      return <EmailPage embedded config={config} title={__('Email', 'sikshya')} />;
     case 'email-template-edit':
-      return <EmailTemplateEditPage embedded config={config} title="Email template" />;
+      return <EmailTemplateEditPage embedded config={config} title={__('Email template', 'sikshya')} />;
     case 'tools':
-      return <ToolsHubPage embedded config={config} title="Tools" />;
+      return <ToolsHubPage embedded config={config} title={__('Tools', 'sikshya')} />;
     case 'addons':
-      return <AddonsPage embedded config={config} title="Addons" />;
+      return <AddonsPage embedded config={config} title={__('Addons', 'sikshya')} />;
     case 'integrations':
-      return <IntegrationsPage embedded config={config} title="Integrations" />;
+      return <IntegrationsPage embedded config={config} title={__('Integrations', 'sikshya')} />;
     case 'email-marketing':
-      return <EmailMarketingPage embedded config={config} title="Email marketing" />;
+      return <EmailMarketingPage embedded config={config} title={__('Email marketing', 'sikshya')} />;
     case 'license':
-      return <LicensePage embedded config={config} title="License" />;
+      return <LicensePage embedded config={config} title={__('License', 'sikshya')} />;
     default:
       return (
         <GenericPlaceholderPage
           config={config}
           title={platformName}
-          description="This admin screen is powered by the React shell."
+          description={__('This admin screen is powered by the React shell.', 'sikshya')}
         />
       );
   }
@@ -427,17 +431,17 @@ function RoutedApp() {
 
   const shellTitle = (() => {
     if (navTitle) return navTitle;
-    if (page === 'dashboard') return 'Dashboard';
-    if (page === 'settings') return 'Settings';
+    if (page === 'dashboard') return __('Dashboard', 'sikshya');
+    if (page === 'settings') return __('Settings', 'sikshya');
     if (page === 'courses') return T.courses;
-    if (page === 'add-course') return `${T.course} builder`;
-    if (page === 'bundle-builder') return 'Bundle builder';
+    if (page === 'add-course') return sprintf(__('%s builder', 'sikshya'), T.course);
+    if (page === 'bundle-builder') return __('Bundle builder', 'sikshya');
     if (page === 'edit-content') {
       const postType = String(q.post_type || '').trim();
       const id = Number(q.post_id || q.id || 0) || 0;
       const label =
         postType === 'sikshya_certificate'
-          ? 'Certificate'
+          ? __('Certificate', 'sikshya')
           : postType === 'sik_lesson'
             ? T.lesson
             : postType === 'sik_quiz'
@@ -448,8 +452,8 @@ function RoutedApp() {
                   ? T.course
                   : postType
                     ? postType
-                    : 'Content';
-      return id > 0 ? `Edit ${label}` : `New ${label}`;
+                    : __('Content', 'sikshya');
+      return id > 0 ? sprintf(__('Edit %s', 'sikshya'), label) : sprintf(__('New %s', 'sikshya'), label);
     }
     return platformName;
   })();
@@ -471,7 +475,7 @@ function RoutedApp() {
       user={config.user}
       branding={config.branding}
       title={shellTitle}
-      subtitle={page === 'settings' ? 'Site-wide defaults for every course' : undefined}
+      subtitle={page === 'settings' ? __('Site-wide defaults for every course', 'sikshya') : undefined}
     >
       <Suspense fallback={<AdminRouteFallback />}>{routes}</Suspense>
     </AppShell>

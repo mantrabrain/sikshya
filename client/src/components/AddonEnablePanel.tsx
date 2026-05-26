@@ -3,6 +3,7 @@ import { ButtonPrimary } from './shared/buttons';
 import { PREMIUM_LOCK_CARD_CLASS } from './PremiumGatedSurface';
 import { TopRightToast, useTopRightToast } from './shared/TopRightToast';
 import { getErrorSummary } from '../api';
+import { __, sprintf } from '../lib/i18n';
 
 export function AddonEnablePanel(props: {
   title: string;
@@ -24,9 +25,12 @@ export function AddonEnablePanel(props: {
     try {
       await onEnable();
       const base = title.replace(/\s+is\s+not\s+enabled\s*$/i, '').trim();
-      toast.success('Enabled', base ? `${base} enabled.` : 'Add-on enabled.');
+      toast.success(
+        __('Enabled', 'sikshya'),
+        base ? sprintf(__('%s enabled.', 'sikshya'), base) : __('Add-on enabled.', 'sikshya')
+      );
     } catch (e) {
-      toast.error('Enable failed', getErrorSummary(e));
+      toast.error(__('Enable failed', 'sikshya'), getErrorSummary(e));
     }
   };
 
@@ -40,13 +44,13 @@ export function AddonEnablePanel(props: {
         <div className="mt-1 text-sm text-slate-600 dark:text-slate-400">{description}</div>
         {error ? (
           <div className="mt-4">
-            <ApiErrorPanel error={error} title="Could not update addon" onRetry={() => void 0} />
+            <ApiErrorPanel error={error} title={__('Could not update addon', 'sikshya')} onRetry={() => void 0} />
           </div>
         ) : null}
         <div className="mt-5 flex flex-wrap gap-2">
           {canEnable ? (
             <ButtonPrimary type="button" disabled={enableBusy} onClick={onEnableClick}>
-              {enableBusy ? 'Enabling…' : enableLabel || 'Enable add-on'}
+              {enableBusy ? __('Enabling…', 'sikshya') : enableLabel || __('Enable add-on', 'sikshya')}
             </ButtonPrimary>
           ) : upgradeUrl ? (
             <a
@@ -55,7 +59,7 @@ export function AddonEnablePanel(props: {
               rel="noreferrer noopener"
               className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
-              Upgrade to unlock
+              {__('Upgrade to unlock', 'sikshya')}
             </a>
           ) : null}
         </div>
@@ -94,7 +98,7 @@ export function AddonEnablePanel(props: {
               </svg>
             </div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
-              Add-on
+              {__('Add-on', 'sikshya')}
             </span>
           </div>
 
@@ -109,7 +113,7 @@ export function AddonEnablePanel(props: {
 
       {error ? (
         <div className="px-7 pt-6 sm:px-10">
-          <ApiErrorPanel error={error} title="Could not update addon" onRetry={() => void 0} />
+          <ApiErrorPanel error={error} title={__('Could not update addon', 'sikshya')} onRetry={() => void 0} />
         </div>
       ) : null}
 
@@ -123,7 +127,7 @@ export function AddonEnablePanel(props: {
               onClick={onEnableClick}
               className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-[14.5px] font-semibold text-white shadow-sm transition hover:bg-accent-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:focus-visible:ring-offset-slate-900"
             >
-              {enableBusy ? 'Enabling…' : enableLabel || 'Enable add-on'}
+              {enableBusy ? __('Enabling…', 'sikshya') : enableLabel || __('Enable add-on', 'sikshya')}
               {!enableBusy ? (
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25} aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -137,7 +141,7 @@ export function AddonEnablePanel(props: {
               rel="noreferrer noopener"
               className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-[14.5px] font-semibold text-white shadow-sm transition hover:bg-accent-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
-              View plans &amp; upgrade
+              {__('View plans & upgrade', 'sikshya')}
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -157,10 +161,10 @@ export function AddonEnablePanel(props: {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {canEnable
-            ? 'Enable in one click. Activates the feature immediately for your site.'
+            ? __('Enable in one click. Activates the feature immediately for your site.', 'sikshya')
             : upgradeUrl
-              ? 'Upgrade to the right tier, then return here to enable.'
-              : 'Contact support if you need help with your license.'}
+              ? __('Upgrade to the right tier, then return here to enable.', 'sikshya')
+              : __('Contact support if you need help with your license.', 'sikshya')}
         </p>
       </div>
     </div>

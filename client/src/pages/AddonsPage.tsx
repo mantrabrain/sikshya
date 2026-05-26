@@ -6,7 +6,7 @@ import { appViewHref } from '../lib/appUrl';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
-import { t } from '../lib/i18n';
+import { __, sprintf, t } from '../lib/i18n';
 
 type AddonTier = 'free' | 'starter' | 'pro' | 'scale';
 
@@ -163,7 +163,7 @@ function AddonDescriptionWithHelp(props: { addonId: string; label: string; descr
     <div className="group/addonhelp relative mt-2 w-full min-w-0">
       <p
         className={`min-w-0 text-xs leading-snug text-slate-600 dark:text-slate-300 ${
-          hasPopover ? 'line-clamp-3 cursor-help' : 'line-clamp-3'
+          hasPopover ? __('line-clamp-3 cursor-help', 'sikshya') : __('line-clamp-3', 'sikshya')
         }`}
         aria-describedby={hasPopover ? panelId : undefined}
       >
@@ -304,13 +304,13 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       setData(res);
       await refreshShell();
       if (addon.enabled) {
-        toast.success('Disabled', `${addon.label} disabled.`);
+        toast.success(__('Disabled', 'sikshya'), `${addon.label} disabled.`);
       } else {
-        toast.success('Enabled', `${addon.label} enabled.`);
+        toast.success(__('Enabled', 'sikshya'), `${addon.label} enabled.`);
       }
     } catch (e) {
       setError(e);
-      toast.error('Action failed', getErrorSummary(e));
+      toast.error(__('Action failed', 'sikshya'), getErrorSummary(e));
     } finally {
       setBusyId(null);
     }
@@ -357,13 +357,13 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       setSelected({});
       if (updated > 0) {
         await refreshShell();
-        toast.success(mode === 'enable' ? 'Enabled' : 'Disabled', `${updated} add-on(s) updated.`);
+        toast.success(mode === 'enable' ? __('Enabled', 'sikshya') : __('Disabled', 'sikshya'), `${updated} add-on(s) updated.`);
       } else {
         toast.info('No changes', 'Nothing to update for the selected add-ons.');
       }
     } catch (e) {
       setError(e);
-      toast.error('Bulk update failed', getErrorSummary(e));
+      toast.error(__('Bulk update failed', 'sikshya'), getErrorSummary(e));
     } finally {
       setBulkBusy(false);
     }
@@ -374,36 +374,44 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Sikshya Free always runs the core LMS. Optional add-ons extend it — turn each switch on only when you need that feature."
+      subtitle={sprintf(
+        __('%s always runs the core LMS. Optional add-ons extend it — turn each switch on only when you need that feature.', 'sikshya'),
+        'Sikshya Free'
+      )}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
-      {error ? <ApiErrorPanel error={error} title="Could not load addons" onRetry={() => void refetch()} /> : null}
+      {error ? <ApiErrorPanel error={error} title={__('Could not load addons', 'sikshya')} onRetry={() => void refetch()} /> : null}
 
       <div className="mb-4 rounded-2xl border border-sky-200 bg-sky-50/90 p-4 text-sm text-sky-950 shadow-sm dark:border-sky-900/50 dark:bg-sky-950/35 dark:text-sky-50">
-        <p className="font-semibold text-sky-950 dark:text-sky-100">How Sikshya Free, Pro, and add-ons fit together</p>
+        <p className="font-semibold text-sky-950 dark:text-sky-100">{__('How Sikshya Free, Pro, and add-ons fit together', 'sikshya')}</p>
         <ul className="mt-2 list-disc space-y-1.5 pl-5 leading-relaxed text-sky-950/95 dark:text-sky-100/95">
           <li>
-            <span className="font-medium">Sikshya (free)</span> — courses, lessons, quizzes, enrollments, and basic
-            checkout. Nothing on this page can “turn off” the core plugin.
+            {sprintf(
+              __('%1$s — courses, lessons, quizzes, enrollments, and basic checkout. Nothing on this page can “turn off” the core plugin.', 'sikshya'),
+              'Sikshya (free)'
+            )}
           </li>
           <li>
-            <span className="font-medium">Sikshya Pro (paid license)</span> — unlocks commercial plans (Starter, Growth,
-            Scale). Install and activate the Pro plugin, then activate your license under{' '}
+            {sprintf(
+              __('%1$s — unlocks commercial plans (Starter, Growth, Scale). Install and activate the Pro plugin, then activate your license under %2$s.', 'sikshya'),
+              'Sikshya Pro (paid license)',
+              __('License', 'sikshya')
+            )}{' '}
             <a className="font-semibold text-brand-700 underline hover:text-brand-800 dark:text-brand-300" href={appViewHref(config, 'license')}>
-              License
+              {__('License', 'sikshya')}
             </a>
             .
           </li>
           <li>
-            <span className="font-medium">Add-ons (this page)</span> — optional modules (subscriptions, drip, gradebook,
+            <span className="font-medium">{__('Add-ons (this page)', 'sikshya')}</span> — optional modules (subscriptions, drip, gradebook,
             …). Enable one, then open its menu in the sidebar to configure it. Site-wide defaults often live under{' '}
-            <span className="font-medium">Settings</span>; per-feature tabs may say <span className="font-medium">Add-on defaults</span>.
+            <span className="font-medium">{__('Settings', 'sikshya')}</span>; per-feature tabs may say <span className="font-medium">{__('Add-on defaults', 'sikshya')}</span>.
           </li>
         </ul>
         <p className="mt-2 text-xs text-sky-900/85 dark:text-sky-200/85">
-          Tip: in filters and badges, <span className="font-semibold">Growth</span> is the catalog name for the mid-tier
-          Pro plan (technical tier <code className="rounded bg-white/60 px-1 py-0.5 text-[11px] dark:bg-slate-900/60">pro</code>
-          ). <span className="font-semibold">Scale</span> is the highest tier.
+          Tip: in filters and badges, <span className="font-semibold">{__('Growth', 'sikshya')}</span> is the catalog name for the mid-tier
+          Pro plan (technical tier <code className="rounded bg-white/60 px-1 py-0.5 text-[11px] dark:bg-slate-900/60">{__('pro', 'sikshya')}</code>
+          ). <span className="font-semibold">{__('Scale', 'sikshya')}</span> is the highest tier.
         </p>
       </div>
 
@@ -411,7 +419,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
         <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm dark:border-amber-900/50 dark:from-amber-950/40 dark:to-slate-900">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">Upgrade to Sikshya Pro</p>
+              <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">{__('Upgrade to Sikshya Pro', 'sikshya')}</p>
               <p className="mt-1 text-sm leading-relaxed text-amber-900/90 dark:text-amber-200/90">
                 Starter, Growth, and Scale add-ons on this page need an active Sikshya Pro license. After you purchase a
                 plan, install and activate the Sikshya Pro plugin — then you can turn each add-on on here and use its admin
@@ -439,7 +447,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       {data && isProActive && lockedCount > 0 ? (
         <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
           Your site is on <span className="font-semibold">{siteTierLabel}</span>. Add-ons marked “Requires …” need a
-          higher plan — use <span className="font-semibold">Upgrade to unlock</span> on each card or visit the store to
+          higher plan — use <span className="font-semibold">{__('Upgrade to unlock', 'sikshya')}</span> on each card or visit the store to
           upgrade.
         </div>
       ) : null}
@@ -618,11 +626,11 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                         ? 'bg-brand-600'
                         : 'bg-slate-200 dark:bg-slate-700'
                     } ${busy || locked ? 'opacity-60' : ''}`}
-                    aria-label={`${a.enabled ? 'Disable' : 'Enable'} ${a.label}`}
+                    aria-label={`${a.enabled ? __('Disable', 'sikshya') : __('Enable', 'sikshya')} ${a.label}`}
                   >
                     <span
                       className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
-                        a.enabled ? 'translate-x-5' : 'translate-x-1'
+                        a.enabled ? __('translate-x-5', 'sikshya') : __('translate-x-1', 'sikshya')
                       }`}
                     />
                   </button>

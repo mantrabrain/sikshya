@@ -56,7 +56,7 @@ class CourseService
         $id = $request->get_param('id');
         $post = get_post($id);
         if (!$post || $post->post_type !== 'sikshya_course') {
-            return new WP_REST_Response(['error' => 'Course not found'], 404);
+            return new WP_REST_Response(['error' => __('Course not found', 'sikshya')], 404);
         }
         return new WP_REST_Response($this->formatCourse($post));
     }
@@ -88,7 +88,7 @@ class CourseService
         $id = $request->get_param('id');
         $result = wp_delete_post($id, true);
         if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to delete course'], 400);
+            return new WP_REST_Response(['error' => __('Failed to delete course', 'sikshya')], 400);
         }
         return new WP_REST_Response(['success' => true]);
     }

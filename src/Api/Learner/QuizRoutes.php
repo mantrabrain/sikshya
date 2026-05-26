@@ -299,7 +299,7 @@ final class QuizRoutes extends AbstractLearnerRestController
 
         $row = $this->quizAttempts->getLatestInProgressAttemptForUserQuiz($uid, $quiz_id);
 
-        $duration_mins = (int) get_post_meta($quiz_id, '_sikshya_quiz_duration', true);
+        $duration_mins = (new \Sikshya\Models\Quiz())->getDuration($quiz_id);
         $duration_seconds = $duration_mins > 0 ? $duration_mins * 60 : 0;
         $started_at_ts = null;
         if ($row && isset($row->started_at)) {

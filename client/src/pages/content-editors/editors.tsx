@@ -71,6 +71,7 @@ import {
   QUESTION_PICKER_TYPES,
   type QuestionType,
 } from '../../components/shared/AddQuestionAuthoringModal';
+import { __ } from '../../lib/i18n';
 
 const FIELD =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
@@ -140,7 +141,7 @@ function EditorFeaturedImageField(props: {
         onChange={() => {}}
         onAttachmentIdChange={props.onAttachmentIdChange}
         className={FIELD}
-        placeholder="Opens the media library — upload a new image or choose an existing file."
+        placeholder={__('Opens the media library — upload a new image or choose an existing file.', 'sikshya')}
       />
     </div>
   );
@@ -198,7 +199,7 @@ function EditorFormShell({ loading, saving: _saving, error, onRetry, saveMsg, fl
 
   useEffect(() => {
     if (!saveMsg) return;
-    toast.success('Saved', saveMsg);
+    toast.success(__('Saved', 'sikshya'), saveMsg);
   }, [saveMsg, toast]);
 
   useEffect(() => {
@@ -234,7 +235,7 @@ function EditorFormShell({ loading, saving: _saving, error, onRetry, saveMsg, fl
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       {showErrorPanel ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Request failed" onRetry={onRetry} />
+          <ApiErrorPanel error={error} title={__('Request failed', 'sikshya')} onRetry={onRetry} />
         </div>
       ) : null}
       {loading ? (
@@ -281,10 +282,10 @@ function useMoveToTrash(
         return;
       }
       const ok = await confirm({
-        title: 'Move to trash?',
+        title: __('Move to trash?', 'sikshya'),
         message: `Move this ${entityLabel.toLowerCase()} to the trash? You can restore it later from the Trash tab.`,
         variant: 'danger',
-        confirmLabel: 'Move to trash',
+        confirmLabel: __('Move to trash', 'sikshya'),
       });
       if (!ok) {
         return;
@@ -375,7 +376,7 @@ export function LessonEditor(props: ContentEditorProps) {
     const durNum = parseFloat(durationValue);
     const duration =
       durationValue.trim() && Number.isFinite(durNum) && durNum > 0
-        ? `${durNum}${Number.isInteger(durNum) ? '' : ''} ${durationUnit === 'hr' ? 'hr' : 'min'}`
+        ? `${durNum}${Number.isInteger(durNum) ? '' : ''} ${durationUnit === 'hr' ? __('hr', 'sikshya') : __('min', 'sikshya')}`
         : '';
     const body: Record<string, unknown> = {
       title,
@@ -400,7 +401,7 @@ export function LessonEditor(props: ContentEditorProps) {
           return true;
         }
       }
-      setSaveMsg('Lesson saved.');
+      setSaveMsg(__('Lesson saved.', 'sikshya'));
       await editor.load();
       return true;
     } catch {
@@ -441,7 +442,7 @@ export function LessonEditor(props: ContentEditorProps) {
     >
       <div className="space-y-3">
         <HorizontalEditorTabs
-          ariaLabel="Lesson editor sections"
+          ariaLabel={__('Lesson editor sections', 'sikshya')}
           tabs={[
             { id: 'content', label: 'Content', icon: 'plusDocument' },
             { id: 'settings', label: 'Settings', icon: 'cog' },
@@ -450,7 +451,7 @@ export function LessonEditor(props: ContentEditorProps) {
           onChange={(id) => setEditorTab(id as 'content' | 'settings')}
         />
 
-        <section className={EDITOR_SURFACE} aria-label="Lesson editor">
+        <section className={EDITOR_SURFACE} aria-label={__('Lesson editor', 'sikshya')}>
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -465,7 +466,7 @@ export function LessonEditor(props: ContentEditorProps) {
               </span>
               {durationValue?.trim() ? (
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
-                  {`${durationValue.trim()} ${durationUnit === 'hr' ? 'hr' : 'min'}`}
+                  {`${durationValue.trim()} ${durationUnit === 'hr' ? __('hr', 'sikshya') : __('min', 'sikshya')}`}
                 </span>
               ) : null}
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
@@ -494,7 +495,7 @@ export function LessonEditor(props: ContentEditorProps) {
                   className={FIELD}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Installing WordPress"
+                  placeholder={__('e.g. Installing WordPress', 'sikshya')}
                 />
               </div>
               <div>
@@ -507,7 +508,7 @@ export function LessonEditor(props: ContentEditorProps) {
                   className={`${FIELD} min-h-[72px]`}
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
-                  placeholder="One or two sentences about this lesson"
+                  placeholder={__('One or two sentences about this lesson', 'sikshya')}
                   disabled={editor.saving}
                   rows={3}
                 />
@@ -525,22 +526,34 @@ export function LessonEditor(props: ContentEditorProps) {
                   value={lessonType}
                   onChange={(e) => setLessonType(e.target.value)}
                 >
-                  <option value="text">Text lesson</option>
-                  <option value="video">Video lesson</option>
+                  <option value="text">{__('Text lesson', 'sikshya')}</option>
+                  <option value="video">{__('Video lesson', 'sikshya')}</option>
                   {liveOffered ? (
-                    <option value="live">{liveReady ? 'Live class (Pro)' : 'Live class (Pro · addon off)'}</option>
+                    <option value="live">
+                      {liveReady
+                        ? __('Live class (Pro)', 'sikshya')
+                        : __('Live class (Pro · addon off)', 'sikshya')}
+                    </option>
                   ) : (
-                    <option value="live" disabled>Live class (requires Sikshya Pro)</option>
+                    <option value="live" disabled>{__('Live class (requires Sikshya Pro)', 'sikshya')}</option>
                   )}
                   {scormOffered ? (
-                    <option value="scorm">{scormReady ? 'SCORM package (Pro)' : 'SCORM package (Pro · addon off)'}</option>
+                    <option value="scorm">
+                      {scormReady
+                        ? __('SCORM package (Pro)', 'sikshya')
+                        : __('SCORM package (Pro · addon off)', 'sikshya')}
+                    </option>
                   ) : (
-                    <option value="scorm" disabled>SCORM package (requires Sikshya Pro)</option>
+                    <option value="scorm" disabled>{__('SCORM package (requires Sikshya Pro)', 'sikshya')}</option>
                   )}
                   {scormOffered ? (
-                    <option value="h5p">{scormReady ? 'H5P interactive (Pro)' : 'H5P interactive (Pro · addon off)'}</option>
+                    <option value="h5p">
+                      {scormReady
+                        ? __('H5P interactive (Pro)', 'sikshya')
+                        : __('H5P interactive (Pro · addon off)', 'sikshya')}
+                    </option>
                   ) : (
-                    <option value="h5p" disabled>H5P interactive (requires Sikshya Pro)</option>
+                    <option value="h5p" disabled>{__('H5P interactive (requires Sikshya Pro)', 'sikshya')}</option>
                   )}
                 </select>
               </div>
@@ -548,7 +561,7 @@ export function LessonEditor(props: ContentEditorProps) {
                 fieldId="sik-lesson-featured"
                 attachmentId={featured}
                 onAttachmentIdChange={setFeatured}
-                description="Optional cover image for lesson lists and course outlines when your theme supports featured images."
+                description={__('Optional cover image for lesson lists and course outlines when your theme supports featured images.', 'sikshya')}
               />
               {lessonType === 'video' ? (
                 <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
@@ -605,7 +618,7 @@ export function LessonEditor(props: ContentEditorProps) {
                   }
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder={lessonType === 'video' ? 'Optional notes under the video…' : 'Your lesson content…'}
+                  placeholder={lessonType === 'video' ? __('Optional notes under the video…', 'sikshya') : __('Your lesson content…', 'sikshya')}
                   disabled={editor.saving}
                   minHeightPx={360}
                 />
@@ -614,8 +627,8 @@ export function LessonEditor(props: ContentEditorProps) {
           ) : (
             <div className="space-y-6" role="tabpanel">
               <FormSection
-                title="Publishing"
-                description="Controls whether this lesson is visible to learners when the course is published."
+                title={__('Publishing', 'sikshya')}
+                description={__('Controls whether this lesson is visible to learners when the course is published.', 'sikshya')}
               >
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
@@ -632,10 +645,10 @@ export function LessonEditor(props: ContentEditorProps) {
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
                     >
-                      <option value="draft">Draft</option>
-                      <option value="publish">Published</option>
-                      <option value="private">Private</option>
-                      <option value="pending">Pending review</option>
+                      <option value="draft">{__('Draft', 'sikshya')}</option>
+                      <option value="publish">{__('Published', 'sikshya')}</option>
+                      <option value="private">{__('Private', 'sikshya')}</option>
+                      <option value="pending">{__('Pending review', 'sikshya')}</option>
                     </select>
                   </div>
                   <div>
@@ -654,14 +667,14 @@ export function LessonEditor(props: ContentEditorProps) {
                       fieldClassName={FIELD}
                       labelClassName={LABEL}
                       hintClassName={HINT}
-                      placeholder={durationUnit === 'hr' ? 'e.g. 1.5' : 'e.g. 12'}
+                      placeholder={durationUnit === 'hr' ? __('e.g. 1.5', 'sikshya') : __('e.g. 12', 'sikshya')}
                     />
                   </div>
                 </div>
               </FormSection>
               <FormSection
-                title="Free preview"
-                description="When enabled, this lesson can be opened by visitors who are not enrolled (useful for demo lessons)."
+                title={__('Free preview', 'sikshya')}
+                description={__('When enabled, this lesson can be opened by visitors who are not enrolled (useful for demo lessons).', 'sikshya')}
               >
                 <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
                   <input
@@ -672,7 +685,7 @@ export function LessonEditor(props: ContentEditorProps) {
                     disabled={editor.saving}
                   />
                   <span className="min-w-0">
-                    <span className="block font-semibold text-slate-900 dark:text-white">Allow free preview</span>
+                    <span className="block font-semibold text-slate-900 dark:text-white">{__('Allow free preview', 'sikshya')}</span>
                     <span className="mt-1 block text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                       Tip: mark one or two lessons as preview so learners understand the teaching style before purchasing.
                     </span>
@@ -720,7 +733,7 @@ function EmbeddedSaveBar(props: { saving: boolean; entityLabel: string; canSave?
         </button>
       </div>
       {!canSave ? (
-        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Add the required fields (usually title) to enable saving.</p>
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">{__('Add the required fields (usually title) to enable saving.', 'sikshya')}</p>
       ) : null}
     </div>
   );
@@ -746,7 +759,7 @@ function EditorActions(props: {
       </a>
       <div className="flex flex-wrap gap-2">
         <ButtonPrimary type="button" disabled={saving || !canSave} onClick={onSave} className="rounded-xl px-5 py-2.5">
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
         </ButtonPrimary>
         {!isNew ? (
         <button
@@ -760,7 +773,7 @@ function EditorActions(props: {
         ) : null}
       </div>
       {!canSave ? (
-        <p className="w-full text-[11px] text-slate-500 dark:text-slate-400">Add the required fields (usually title) to enable saving.</p>
+        <p className="w-full text-[11px] text-slate-500 dark:text-slate-400">{__('Add the required fields (usually title) to enable saving.', 'sikshya')}</p>
       ) : null}
     </div>
   );
@@ -932,7 +945,7 @@ export function QuizEditor(props: ContentEditorProps) {
           return true;
         }
       }
-      setSaveMsg('Quiz saved.');
+      setSaveMsg(__('Quiz saved.', 'sikshya'));
       await editor.load();
       return true;
     } catch {
@@ -972,7 +985,7 @@ export function QuizEditor(props: ContentEditorProps) {
     >
       <div className="space-y-3">
         <HorizontalEditorTabs
-          ariaLabel="Quiz editor sections"
+          ariaLabel={__('Quiz editor sections', 'sikshya')}
           tabs={[
             { id: 'content', label: 'Content', icon: 'plusDocument' },
             { id: 'settings', label: 'Settings', icon: 'cog' },
@@ -982,15 +995,15 @@ export function QuizEditor(props: ContentEditorProps) {
           onChange={(id) => setEditorTab(id as 'content' | 'settings' | 'questions')}
         />
 
-        <section className={EDITOR_SURFACE} aria-label="Quiz editor">
+        <section className={EDITOR_SURFACE} aria-label={__('Quiz editor', 'sikshya')}>
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <h2 className="truncate text-lg font-semibold text-slate-900 dark:text-white">{title?.trim() ? title : 'Quiz'}</h2>
           {embedded ? (
             <p className={`${HINT} mt-1`}>
-              Use <span className="font-medium text-slate-700 dark:text-slate-200">Content</span> for the name, instructions,
-              and optional cover image; use <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span> for
+              Use <span className="font-medium text-slate-700 dark:text-slate-200">{__('Content', 'sikshya')}</span> for the name, instructions,
+              and optional cover image; use <span className="font-medium text-slate-700 dark:text-slate-200">{__('Settings', 'sikshya')}</span> for
               timing and scoring. Questions live in the{' '}
               <a
                 href={appViewHref(config, 'content-library', { tab: 'questions' })}
@@ -1002,9 +1015,9 @@ export function QuizEditor(props: ContentEditorProps) {
             </p>
           ) : (
             <p className={HINT}>
-              Use <span className="font-medium text-slate-700 dark:text-slate-200">Content</span> for the quiz name and what
-              students read before starting; use <span className="font-medium text-slate-700 dark:text-slate-200">Settings</span> for
-              timer, pass mark, and attempts. Attach questions on the <span className="font-medium text-slate-700 dark:text-slate-200">Questions</span> tab.
+              Use <span className="font-medium text-slate-700 dark:text-slate-200">{__('Content', 'sikshya')}</span> for the quiz name and what
+              students read before starting; use <span className="font-medium text-slate-700 dark:text-slate-200">{__('Settings', 'sikshya')}</span> for
+              timer, pass mark, and attempts. Attach questions on the <span className="font-medium text-slate-700 dark:text-slate-200">{__('Questions', 'sikshya')}</span> tab.
             </p>
           )}
             </div>
@@ -1027,13 +1040,13 @@ export function QuizEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-quiz-title">
                   Quiz name
                 </label>
-                <p className={HINT}>Shown in the course outline and at the top of the quiz for learners.</p>
+                <p className={HINT}>{__('Shown in the course outline and at the top of the quiz for learners.', 'sikshya')}</p>
                 <input
                   id="sik-quiz-title"
                   className={FIELD}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Module 1 checkpoint"
+                  placeholder={__('e.g. Module 1 checkpoint', 'sikshya')}
                 />
               </div>
               <div>
@@ -1044,7 +1057,7 @@ export function QuizEditor(props: ContentEditorProps) {
                   label="Instructions for students"
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder="What students see before starting the quiz…"
+                  placeholder={__('What students see before starting the quiz…', 'sikshya')}
                   disabled={editor.saving}
                   minHeightPx={220}
                 />
@@ -1053,18 +1066,18 @@ export function QuizEditor(props: ContentEditorProps) {
                 fieldId="sik-quiz-featured"
                 attachmentId={featured}
                 onAttachmentIdChange={setFeatured}
-                description="Optional image for quiz cards or outlines when your theme supports featured images."
+                description={__('Optional image for quiz cards or outlines when your theme supports featured images.', 'sikshya')}
               />
             </div>
           ) : editorTab === 'settings' ? (
             <div className="space-y-6" role="tabpanel">
-              <FormSection title="Grading & timing" description="How the quiz is scored and constrained for learners.">
+              <FormSection title={__('Grading & timing', 'sikshya')} description={__('How the quiz is scored and constrained for learners.', 'sikshya')}>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
                     <label className={LABEL} htmlFor="sik-quiz-time">
                       Time limit (minutes)
                     </label>
-                    <p className={HINT}>Use 0 for no time limit.</p>
+                    <p className={HINT}>{__('Use 0 for no time limit.', 'sikshya')}</p>
                     <input
                       id="sik-quiz-time"
                       type="number"
@@ -1078,7 +1091,7 @@ export function QuizEditor(props: ContentEditorProps) {
                     <label className={LABEL} htmlFor="sik-quiz-pass">
                       Passing score (%)
                     </label>
-                    <p className={HINT}>Based on total points across questions.</p>
+                    <p className={HINT}>{__('Based on total points across questions.', 'sikshya')}</p>
                     <input
                       id="sik-quiz-pass"
                       type="number"
@@ -1093,7 +1106,7 @@ export function QuizEditor(props: ContentEditorProps) {
                     <label className={LABEL} htmlFor="sik-quiz-attempts">
                       Attempts allowed
                     </label>
-                    <p className={HINT}>Minimum 1.</p>
+                    <p className={HINT}>{__('Minimum 1.', 'sikshya')}</p>
                     <input
                       id="sik-quiz-attempts"
                       type="number"
@@ -1105,15 +1118,15 @@ export function QuizEditor(props: ContentEditorProps) {
                   </div>
                 </div>
               </FormSection>
-              <FormSection title="Publishing" description="Draft hides the quiz from learners until you publish.">
+              <FormSection title={__('Publishing', 'sikshya')} description={__('Draft hides the quiz from learners until you publish.', 'sikshya')}>
                 <div>
                   <label className={LABEL} htmlFor="sik-quiz-status">
                     Status
                   </label>
                   <select id="sik-quiz-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                    <option value="draft">Draft</option>
-                    <option value="publish">Published</option>
-                    <option value="private">Private</option>
+                    <option value="draft">{__('Draft', 'sikshya')}</option>
+                    <option value="publish">{__('Published', 'sikshya')}</option>
+                    <option value="private">{__('Private', 'sikshya')}</option>
                   </select>
                 </div>
               </FormSection>
@@ -1143,7 +1156,7 @@ export function QuizEditor(props: ContentEditorProps) {
                       className={FIELD}
                       value={questionSearch}
                       onChange={(e) => setQuestionSearch(e.target.value)}
-                      placeholder="Search questions…"
+                      placeholder={__('Search questions…', 'sikshya')}
                     />
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
@@ -1164,15 +1177,15 @@ export function QuizEditor(props: ContentEditorProps) {
                 </div>
                 {questionError ? (
                   <div className="mt-3">
-                    <ApiErrorPanel error={questionError} title="Could not load questions" onRetry={() => setQuestionSearch((s) => s)} />
+                    <ApiErrorPanel error={questionError} title={__('Could not load questions', 'sikshya')} onRetry={() => setQuestionSearch((s) => s)} />
                   </div>
                 ) : null}
                 {questionLoading ? (
-                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Loading questions…</p>
+                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{__('Loading questions…', 'sikshya')}</p>
                 ) : (
                   <div className="mt-3 grid gap-3 lg:grid-cols-2">
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Library</div>
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">{__('Library', 'sikshya')}</div>
                       <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-slate-100 dark:border-slate-800">
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                           {questionRows.map((q) => {
@@ -1193,7 +1206,7 @@ export function QuizEditor(props: ContentEditorProps) {
                                   disabled={added}
                                   onClick={() => setQuizQuestionIds((prev) => (prev.includes(q.id) ? prev : [...prev, q.id]))}
                                 >
-                                  {added ? 'Added' : 'Add'}
+                                  {added ? __('Added', 'sikshya') : __('Add', 'sikshya')}
                                 </button>
                               </li>
                             );
@@ -1207,7 +1220,7 @@ export function QuizEditor(props: ContentEditorProps) {
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">Selected in this quiz</div>
+                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">{__('Selected in this quiz', 'sikshya')}</div>
                       <div className="mt-2 rounded-lg border border-slate-100 dark:border-slate-800">
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                           {quizQuestionIds.map((qid) => {
@@ -1236,8 +1249,8 @@ export function QuizEditor(props: ContentEditorProps) {
                                     e.dataTransfer.setData(QUIZ_Q_DND_MIME, String(qid));
                                     e.dataTransfer.effectAllowed = 'move';
                                   }}
-                                  title="Drag to reorder"
-                                  aria-label="Drag to reorder"
+                                  title={__('Drag to reorder', 'sikshya')}
+                                  aria-label={__('Drag to reorder', 'sikshya')}
                                 >
                                   <NavIcon name="dragHandle" className="h-4 w-4" />
                                 </span>
@@ -1247,7 +1260,7 @@ export function QuizEditor(props: ContentEditorProps) {
                                 <button
                                   type="button"
                                   className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                                  title="Edit this question in the same form as New question"
+                                  title={__('Edit this question in the same form as New question', 'sikshya')}
                                   onClick={() => openEditQuestionInModal(qid)}
                                 >
                                   Edit
@@ -1568,7 +1581,7 @@ export function QuestionEditor(props: ContentEditorProps) {
           return true;
         }
       }
-      setSaveMsg('Question saved.');
+      setSaveMsg(__('Question saved.', 'sikshya'));
       await editor.load();
       return true;
     } catch {
@@ -1636,7 +1649,7 @@ export function QuestionEditor(props: ContentEditorProps) {
     >
       <div className="space-y-3">
         <HorizontalEditorTabs
-          ariaLabel="Question editor sections"
+          ariaLabel={__('Question editor sections', 'sikshya')}
           tabs={[
             { id: 'content', label: 'Content', icon: 'plusDocument' },
             { id: 'settings', label: 'Settings', icon: 'cog' },
@@ -1645,7 +1658,7 @@ export function QuestionEditor(props: ContentEditorProps) {
           onChange={(id) => setEditorTab(id as 'content' | 'settings')}
         />
 
-        <section className={EDITOR_SURFACE} aria-label="Question editor">
+        <section className={EDITOR_SURFACE} aria-label={__('Question editor', 'sikshya')}>
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -1710,12 +1723,12 @@ export function QuestionEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-q-title">
                   Question text
                 </label>
-                <p className={HINT}>What the learner sees (plain text or short HTML).</p>
+                <p className={HINT}>{__('What the learner sees (plain text or short HTML).', 'sikshya')}</p>
                 <textarea
                   id="sik-q-title"
                   rows={4}
                   className={`${FIELD} min-h-[88px] w-full`}
-                  placeholder="Enter the question stem…"
+                  placeholder={__('Enter the question stem…', 'sikshya')}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
@@ -1727,7 +1740,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                       <NavIcon name="helpCircle" className="h-5 w-5" />
                     </span>
                     <div className="min-w-0">
-                      <div className="font-semibold">Choose a question type to continue</div>
+                      <div className="font-semibold">{__('Choose a question type to continue', 'sikshya')}</div>
                       <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                         Once you pick a type, Sikshya will show the right answer fields (options, matching pairs, ordering, etc.).
                       </p>
@@ -1764,8 +1777,8 @@ export function QuestionEditor(props: ContentEditorProps) {
               ) : null}
               {qType === 'multiple_choice' ? (
                 <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Answer choices</div>
-                  <p className={HINT}>At least two options; mark the correct one.</p>
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{__('Answer choices', 'sikshya')}</div>
+                  <p className={HINT}>{__('At least two options; mark the correct one.', 'sikshya')}</p>
                   <ul className="space-y-3">
                     {options.map((opt, idx) => (
                       <li key={idx} className="flex flex-wrap items-start gap-3">
@@ -1828,8 +1841,8 @@ export function QuestionEditor(props: ContentEditorProps) {
               ) : null}
               {qType === 'multiple_response' ? (
                 <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Answer choices</div>
-                  <p className={HINT}>Check every option that should be marked correct.</p>
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{__('Answer choices', 'sikshya')}</div>
+                  <p className={HINT}>{__('Check every option that should be marked correct.', 'sikshya')}</p>
                   <ul className="space-y-3">
                     {options.map((opt, idx) => (
                       <li key={idx} className="flex flex-wrap items-start gap-3">
@@ -1893,22 +1906,22 @@ export function QuestionEditor(props: ContentEditorProps) {
                   <label className={LABEL} htmlFor="sik-q-tf">
                     Correct answer
                   </label>
-                  <p className={HINT}>Learners choose between true and false.</p>
+                  <p className={HINT}>{__('Learners choose between true and false.', 'sikshya')}</p>
                   <select
                     id="sik-q-tf"
                     className={FIELD}
-                    value={correctAnswer === 'false' ? 'false' : 'true'}
+                    value={correctAnswer}
                     onChange={(e) => setCorrectAnswer(e.target.value)}
                   >
-                    <option value="true">True</option>
-                    <option value="false">False</option>
+                    <option value="true">{__('True', 'sikshya')}</option>
+                    <option value="false">{__('False', 'sikshya')}</option>
                   </select>
                 </div>
               ) : null}
               {qType === 'short_answer' || qType === 'fill_blank' ? (
                 <div>
                   <label className={LABEL} htmlFor="sik-q-expected">
-                    {qType === 'fill_blank' ? 'Accepted answer(s)' : 'Expected answer'}
+                    {qType === 'fill_blank' ? __('Accepted answer(s)', 'sikshya') : __('Expected answer', 'sikshya')}
                   </label>
                   <p className={HINT}>
                     {qType === 'fill_blank'
@@ -1920,14 +1933,14 @@ export function QuestionEditor(props: ContentEditorProps) {
                     className={FIELD}
                     value={correctAnswer}
                     onChange={(e) => setCorrectAnswer(e.target.value)}
-                    placeholder={qType === 'fill_blank' ? 'e.g. Paris|paris' : 'e.g. photosynthesis'}
+                    placeholder={qType === 'fill_blank' ? __('e.g. Paris|paris', 'sikshya') : __('e.g. photosynthesis', 'sikshya')}
                   />
                 </div>
               ) : null}
               {qType === 'ordering' ? (
                 <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Steps / items</div>
-                  <p className={HINT}>Edit labels, then arrange the correct order (top = first).</p>
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{__('Steps / items', 'sikshya')}</div>
+                  <p className={HINT}>{__('Edit labels, then arrange the correct order (top = first).', 'sikshya')}</p>
                   <ul className="space-y-2">
                     {orderItems.map((lab, idx) => (
                       <li key={idx} className="flex flex-wrap gap-2">
@@ -1970,7 +1983,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                   >
                     + Add item
                   </button>
-                  <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">Correct order</div>
+                  <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">{__('Correct order', 'sikshya')}</div>
                   <ol className="mt-2 space-y-2">
                     {orderPerm.map((itemIdx, pos) => (
                       <li
@@ -2003,8 +2016,8 @@ export function QuestionEditor(props: ContentEditorProps) {
               ) : null}
               {qType === 'matching' ? (
                 <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Matching pairs</div>
-                  <p className={HINT}>For each prompt on the left, choose the matching answer column index.</p>
+                  <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{__('Matching pairs', 'sikshya')}</div>
+                  <p className={HINT}>{__('For each prompt on the left, choose the matching answer column index.', 'sikshya')}</p>
                   <ul className="space-y-3">
                     {matchLeft.map((left, i) => (
                       <li key={i} className="grid gap-2 sm:grid-cols-2 sm:items-end">
@@ -2020,12 +2033,12 @@ export function QuestionEditor(props: ContentEditorProps) {
                                 return n;
                               })
                             }
-                            placeholder="Left column text"
+                            placeholder={__('Left column text', 'sikshya')}
                           />
                         </label>
                         <div className="flex flex-wrap gap-2">
                           <label className="block min-w-0 flex-1">
-                            <span className={HINT}>Matches answer</span>
+                            <span className={HINT}>{__('Matches answer', 'sikshya')}</span>
                             <select
                               className={`${FIELD} mt-1 w-full`}
                               value={matchMap[i] ?? 0}
@@ -2048,7 +2061,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">Answer column</div>
+                  <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">{__('Answer column', 'sikshya')}</div>
                   <ul className="mt-2 space-y-2">
                     {matchRight.map((r, i) => (
                       <li key={i} className="flex gap-2">
@@ -2097,18 +2110,18 @@ export function QuestionEditor(props: ContentEditorProps) {
                 fieldId="sik-q-featured"
                 attachmentId={featured}
                 onAttachmentIdChange={setFeatured}
-                description="Optional image shown with the question in supported themes or future quiz layouts."
+                description={__('Optional image shown with the question in supported themes or future quiz layouts.', 'sikshya')}
               />
               <div>
                 <label className={LABEL} htmlFor="sik-q-body">
                   Explanation / feedback (optional)
                 </label>
-                <p className={HINT}>Shown after grading or kept for instructors. Stored as post content.</p>
+                <p className={HINT}>{__('Shown after grading or kept for instructors. Stored as post content.', 'sikshya')}</p>
                 <QuillField
                   label="Explanation / feedback (optional)"
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder="Optional explanation for learners or grading notes…"
+                  placeholder={__('Optional explanation for learners or grading notes…', 'sikshya')}
                   disabled={editor.saving}
                   minHeightPx={220}
                 />
@@ -2120,7 +2133,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-q-points">
                   Points
                 </label>
-                <p className={HINT}>Awarded when the answer is correct (auto-graded types only).</p>
+                <p className={HINT}>{__('Awarded when the answer is correct (auto-graded types only).', 'sikshya')}</p>
                 <input
                   id="sik-q-points"
                   type="number"
@@ -2135,10 +2148,10 @@ export function QuestionEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-q-status">
                   Status
                 </label>
-                <p className={HINT}>Draft stays hidden from learners until published.</p>
+                <p className={HINT}>{__('Draft stays hidden from learners until published.', 'sikshya')}</p>
                 <select id="sik-q-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="draft">Draft</option>
-                  <option value="publish">Published</option>
+                  <option value="draft">{__('Draft', 'sikshya')}</option>
+                  <option value="publish">{__('Published', 'sikshya')}</option>
                 </select>
               </div>
               <ProQuestionFields values={proQuestionValues} onChange={setProQuestionValues} />
@@ -2159,7 +2172,7 @@ export function QuestionEditor(props: ContentEditorProps) {
           className="fixed z-[100] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
           style={{ top: typeMenuPos.top, left: typeMenuPos.left }}
           role="listbox"
-          aria-label="Question type"
+          aria-label={__('Question type', 'sikshya')}
         >
           <div className="border-b border-slate-100 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
             Select question type
@@ -2192,7 +2205,9 @@ export function QuestionEditor(props: ContentEditorProps) {
                   >
                     <span
                       className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        active ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200'
+                        active
+                          ? 'bg-brand-600 text-white'
+                          : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200'
                       }`}
                       aria-hidden
                     >
@@ -2304,7 +2319,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
           return true;
         }
       }
-      setSaveMsg('Assignment saved.');
+      setSaveMsg(__('Assignment saved.', 'sikshya'));
       await editor.load();
       return true;
     } catch {
@@ -2331,7 +2346,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
     >
       <div className="space-y-3">
         <HorizontalEditorTabs
-          ariaLabel="Assignment editor sections"
+          ariaLabel={__('Assignment editor sections', 'sikshya')}
           tabs={[
             { id: 'content', label: 'Content', icon: 'plusDocument' },
             { id: 'settings', label: 'Settings', icon: 'cog' },
@@ -2340,7 +2355,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
           onChange={(id) => setEditorTab(id as 'content' | 'settings')}
         />
 
-        <section className={EDITOR_SURFACE} aria-label="Assignment editor">
+        <section className={EDITOR_SURFACE} aria-label={__('Assignment editor', 'sikshya')}>
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2383,7 +2398,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
                   className={FIELD}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Week 3 project brief"
+                  placeholder={__('e.g. Week 3 project brief', 'sikshya')}
                 />
               </div>
               <div>
@@ -2395,7 +2410,7 @@ export function AssignmentEditor(props: ContentEditorProps) {
                   label="Instructions & rubric"
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder="Task description, deliverables, and grading criteria…"
+                  placeholder={__('Task description, deliverables, and grading criteria…', 'sikshya')}
                   disabled={editor.saving}
                   minHeightPx={280}
                 />
@@ -2404,26 +2419,26 @@ export function AssignmentEditor(props: ContentEditorProps) {
                 fieldId="sik-as-featured"
                 attachmentId={featured}
                 onAttachmentIdChange={setFeatured}
-                description="Optional image for assignment lists or course outlines when your theme supports featured images."
+                description={__('Optional image for assignment lists or course outlines when your theme supports featured images.', 'sikshya')}
               />
             </div>
           ) : (
             <div className="space-y-6" role="tabpanel">
-              <FormSection title="Submission" description="Scheduling and what learners submit.">
+              <FormSection title={__('Submission', 'sikshya')} description={__('Scheduling and what learners submit.', 'sikshya')}>
                 {/* Same hint row height in each column so inputs line up */}
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="flex min-h-0 flex-col">
                     <label className={LABEL} htmlFor="sik-as-due">
                       Due (datetime)
                     </label>
-                    <p className={`${HINT} min-h-[2.75rem]`}>Optional. Uses your site timezone.</p>
+                    <p className={`${HINT} min-h-[2.75rem]`}>{__('Optional. Uses your site timezone.', 'sikshya')}</p>
                     <DateTimePickerField kind="datetime" value={due} onChange={setDue} />
                   </div>
                   <div className="flex min-h-0 flex-col">
                     <label className={LABEL} htmlFor="sik-as-points">
                       Points
                     </label>
-                    <p className={`${HINT} min-h-[2.75rem]`}>Maximum score when graded.</p>
+                    <p className={`${HINT} min-h-[2.75rem]`}>{__('Maximum score when graded.', 'sikshya')}</p>
                     <input
                       id="sik-as-points"
                       type="number"
@@ -2441,22 +2456,22 @@ export function AssignmentEditor(props: ContentEditorProps) {
                       &nbsp;
                     </p>
                     <select id="sik-as-type" className={FIELD} value={atype} onChange={(e) => setAtype(e.target.value)}>
-                      <option value="">Choose how learners submit…</option>
-                      <option value="essay">Essay</option>
-                      <option value="file_upload">File upload</option>
-                      <option value="url_submission">URL</option>
+                      <option value="">{__('Choose how learners submit…', 'sikshya')}</option>
+                      <option value="essay">{__('Essay', 'sikshya')}</option>
+                      <option value="file_upload">{__('File upload', 'sikshya')}</option>
+                      <option value="url_submission">{__('URL', 'sikshya')}</option>
                     </select>
                   </div>
                 </div>
               </FormSection>
-              <FormSection title="Publishing">
+              <FormSection title={__('Publishing', 'sikshya')}>
                 <div>
                   <label className={LABEL} htmlFor="sik-as-status">
                     Status
                   </label>
                   <select id="sik-as-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                    <option value="draft">Draft</option>
-                    <option value="publish">Published</option>
+                    <option value="draft">{__('Draft', 'sikshya')}</option>
+                    <option value="publish">{__('Published', 'sikshya')}</option>
                   </select>
                 </div>
               </FormSection>
@@ -2581,7 +2596,7 @@ export function ChapterEditor(props: ContentEditorProps) {
           return true;
         }
       }
-      setSaveMsg('Chapter saved.');
+      setSaveMsg(__('Chapter saved.', 'sikshya'));
       await editor.load();
       return true;
     } catch {
@@ -2608,7 +2623,7 @@ export function ChapterEditor(props: ContentEditorProps) {
     >
       <div className="space-y-3">
         <HorizontalEditorTabs
-          ariaLabel="Chapter editor sections"
+          ariaLabel={__('Chapter editor sections', 'sikshya')}
           tabs={[
             { id: 'content', label: 'Content', icon: 'plusDocument' },
             { id: 'settings', label: 'Settings', icon: 'cog' },
@@ -2617,7 +2632,7 @@ export function ChapterEditor(props: ContentEditorProps) {
           onChange={(id) => setEditorTab(id as 'content' | 'settings')}
         />
 
-        <section className={EDITOR_SURFACE} aria-label="Chapter editor">
+        <section className={EDITOR_SURFACE} aria-label={__('Chapter editor', 'sikshya')}>
         <div className="border-b border-slate-100 px-6 pb-4 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -2652,7 +2667,7 @@ export function ChapterEditor(props: ContentEditorProps) {
                   className={FIELD}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Getting started"
+                  placeholder={__('e.g. Getting started', 'sikshya')}
                 />
               </div>
               <div>
@@ -2660,7 +2675,7 @@ export function ChapterEditor(props: ContentEditorProps) {
                   label="Description / intro"
                   value={content}
                   onChange={(html) => setContent(html)}
-                  placeholder="Optional text shown above the lessons in this chapter…"
+                  placeholder={__('Optional text shown above the lessons in this chapter…', 'sikshya')}
                   disabled={editor.saving}
                   minHeightPx={220}
                 />
@@ -2669,12 +2684,12 @@ export function ChapterEditor(props: ContentEditorProps) {
                 fieldId="sik-ch-featured"
                 attachmentId={featured}
                 onAttachmentIdChange={setFeatured}
-                description="Optional banner or icon for this chapter in the course outline when your theme supports featured images."
+                description={__('Optional banner or icon for this chapter in the course outline when your theme supports featured images.', 'sikshya')}
               />
             </div>
           ) : (
             <div className="space-y-6" role="tabpanel">
-              <FormSection title="Placement" description="Which course outline this chapter belongs to.">
+              <FormSection title={__('Placement', 'sikshya')} description={__('Which course outline this chapter belongs to.', 'sikshya')}>
                 <div>
                   <label className={LABEL} htmlFor="sik-ch-course">
                     Parent course
@@ -2693,7 +2708,7 @@ export function ChapterEditor(props: ContentEditorProps) {
                       value={courseId}
                       onChange={(e) => setCourseId(Number(e.target.value))}
                     >
-                      <option value={0}>Choose a course…</option>
+                      <option value={0}>{__('Choose a course…', 'sikshya')}</option>
                       {courses.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.title}
@@ -2703,7 +2718,7 @@ export function ChapterEditor(props: ContentEditorProps) {
                   )}
                 </div>
               </FormSection>
-              <FormSection title="Ordering" description="Lower numbers appear first in the course outline.">
+              <FormSection title={__('Ordering', 'sikshya')} description={__('Lower numbers appear first in the course outline.', 'sikshya')}>
                 <div>
                   <label className={LABEL} htmlFor="sik-ch-order">
                     Sort order
@@ -2718,14 +2733,14 @@ export function ChapterEditor(props: ContentEditorProps) {
                   />
                 </div>
               </FormSection>
-              <FormSection title="Publishing">
+              <FormSection title={__('Publishing', 'sikshya')}>
                 <div>
                   <label className={LABEL} htmlFor="sik-ch-status">
                     Status
                   </label>
                   <select id="sik-ch-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                    <option value="draft">Draft</option>
-                    <option value="publish">Published</option>
+                    <option value="draft">{__('Draft', 'sikshya')}</option>
+                    <option value="publish">{__('Published', 'sikshya')}</option>
                   </select>
                 </div>
               </FormSection>
@@ -2911,7 +2926,7 @@ export function CertificateEditor(props: ContentEditorProps) {
           (res && typeof res === 'object' && 'meta' in res
             ? (res as { meta?: Record<string, unknown> }).meta
             : undefined) ?? undefined;
-        toast.error('Saved, but could not reload', 'Refresh this page to see the latest version.');
+        toast.error(__('Saved, but could not reload', 'sikshya'), 'Refresh this page to see the latest version.');
         return;
       }
 
@@ -2955,12 +2970,11 @@ export function CertificateEditor(props: ContentEditorProps) {
       }
 
       if (mismatchedKeys.length) {
-        toast.error(
-          'Some settings could not be saved',
+        toast.error(__('Some settings could not be saved', 'sikshya'),
           mismatchedKeys.map((k) => k.replace(/^_sikshya_certificate_/, '')).join(', ')
         );
       } else {
-        toast.success(targetStatus === 'publish' ? 'Certificate published' : 'Saved');
+        toast.success(targetStatus === 'publish' ? __('Certificate published', 'sikshya') : __('Saved', 'sikshya'));
       }
     } catch {
       return;
@@ -2975,10 +2989,10 @@ export function CertificateEditor(props: ContentEditorProps) {
 
     if (!postId || postId <= 0) {
       const errHtml = `<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-      <title>Preview unavailable</title>
+      <title>{__('Preview unavailable', 'sikshya')}</title>
       <style>html,body{height:100%;margin:0}body{font-family:system-ui;background:#0b1220;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px}
       .box{max-width:720px;width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:18px 20px}</style></head>
-      <body><div class="box"><strong>Save the certificate first.</strong><div style="margin-top:10px;opacity:.85;font-size:13px">Preview needs a saved certificate so the server can authorize the request.</div></div></body></html>`;
+      <body><div class="box"><strong>{__('Save the certificate first.', 'sikshya')}</strong><div style="margin-top:10px;opacity:.85;font-size:13px">Preview needs a saved certificate so the server can authorize the request.</div></div></body></html>`;
       win.document.open();
       win.document.write(errHtml);
       win.document.close();
@@ -2990,7 +3004,7 @@ export function CertificateEditor(props: ContentEditorProps) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Certificate preview</title>
+  <title>{__('Certificate preview', 'sikshya')}</title>
   <style>
     html,body{height:100%;margin:0}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial,sans-serif;background:#f3f4f6;color:#0f172a}
@@ -3006,8 +3020,8 @@ export function CertificateEditor(props: ContentEditorProps) {
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="title">Loading certificate preview…</div>
-      <div class="sub">Generating a clean full-page preview (no theme styling).</div>
+      <div class="title">{__('Loading certificate preview…', 'sikshya')}</div>
+      <div class="sub">{__('Generating a clean full-page preview (no theme styling).', 'sikshya')}</div>
       <div class="bar"></div>
     </div>
   </div>
@@ -3037,10 +3051,10 @@ export function CertificateEditor(props: ContentEditorProps) {
 
       if (!raw.trim()) {
         const emptyHtml = `<!doctype html><html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>Empty preview</title>
+        <title>{__('Empty preview', 'sikshya')}</title>
         <style>html,body{height:100%;margin:0}body{font-family:system-ui;background:#f8fafc;color:#0f172a;display:flex;align-items:center;justify-content:center;padding:24px}
         .box{max-width:520px;text-align:center}</style></head>
-        <body><div class="box"><p style="font-weight:600">No layout HTML was returned.</p><p style="margin-top:8px;font-size:13px;color:#64748b">Add blocks on the canvas, save, and try preview again.</p></div></body></html>`;
+        <body><div class="box"><p style="font-weight:600">{__('No layout HTML was returned.', 'sikshya')}</p><p style="margin-top:8px;font-size:13px;color:#64748b">{__('Add blocks on the canvas, save, and try preview again.', 'sikshya')}</p></div></body></html>`;
         win.document.open();
         win.document.write(emptyHtml);
         win.document.close();
@@ -3086,10 +3100,10 @@ export function CertificateEditor(props: ContentEditorProps) {
       win.document.close();
     } catch (e) {
       const errHtml = `<!doctype html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
-      <title>Preview failed</title>
+      <title>{__('Preview failed', 'sikshya')}</title>
       <style>html,body{height:100%;margin:0}body{font-family:system-ui;background:#0b1220;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px}
       .box{max-width:720px;width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:18px 20px}</style></head>
-      <body><div class="box"><strong>Could not load preview.</strong><div style="margin-top:10px;opacity:.85;font-size:13px">Please try saving the certificate and opening preview again.</div></div></body></html>`;
+      <body><div class="box"><strong>{__('Could not load preview.', 'sikshya')}</strong><div style="margin-top:10px;opacity:.85;font-size:13px">{__('Please try saving the certificate and opening preview again.', 'sikshya')}</div></div></body></html>`;
       win.document.open();
       win.document.write(errHtml);
       win.document.close();
@@ -3129,7 +3143,7 @@ export function CertificateEditor(props: ContentEditorProps) {
     >
       <section
         className="flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-slate-100 dark:bg-slate-950"
-        aria-label="Certificate editor"
+        aria-label={__('Certificate editor', 'sikshya')}
       >
         <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
         <div className="shrink-0 border-b border-slate-200/80 bg-white/90 px-4 py-2.5 backdrop-blur dark:border-slate-800 dark:bg-slate-950/88 sm:px-6 xl:px-8">
@@ -3143,12 +3157,12 @@ export function CertificateEditor(props: ContentEditorProps) {
                   ← Back
                 </a>
                 <span className="bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                  {status === 'publish' ? 'Published' : 'Draft'}
+                  {status === 'publish' ? __('Published', 'sikshya') : __('Draft', 'sikshya')}
                 </span>
                 {isProtectedTemplate ? (
                   <span
                     className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
-                    title="This is a default template included with Sikshya. It cannot be deleted, but you can duplicate or edit it."
+                    title={__('This is a default template included with Sikshya. It cannot be deleted, but you can duplicate or edit it.', 'sikshya')}
                   >
                     <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
                       <path
@@ -3183,7 +3197,7 @@ export function CertificateEditor(props: ContentEditorProps) {
                     target="_blank"
                     rel="noreferrer noopener"
                     className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    title="Open the public verification/preview link (uses this certificate’s preview hash)."
+                    title={__('Open the public verification/preview link (uses this certificate’s preview hash).', 'sikshya')}
                   >
                     Preview
                   </a>
@@ -3192,7 +3206,7 @@ export function CertificateEditor(props: ContentEditorProps) {
                     type="button"
                     disabled={editor.saving}
                     onClick={() => void openPreview()}
-                    title="Opens an internal layout preview window. Save once to enable the public preview link."
+                    title={__('Opens an internal layout preview window. Save once to enable the public preview link.', 'sikshya')}
                     className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
                     Preview
@@ -3206,11 +3220,11 @@ export function CertificateEditor(props: ContentEditorProps) {
                   onClick={() => void onSave('publish')}
                   className="bg-emerald-50 px-3.5 py-1.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:bg-emerald-950/30 dark:text-emerald-300"
                 >
-                  {editor.saving ? 'Publishing…' : 'Publish'}
+                  {editor.saving ? __('Publishing…', 'sikshya') : __('Publish', 'sikshya')}
                 </button>
               ) : null}
               <ButtonPrimary type="button" disabled={editor.saving} onClick={() => void onSave()} className="px-4 py-1.5">
-                {editor.saving ? 'Saving…' : 'Save'}
+                {editor.saving ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
               </ButtonPrimary>
               {!editor.isNew && !isProtectedTemplate ? (
                 <button
@@ -3230,11 +3244,11 @@ export function CertificateEditor(props: ContentEditorProps) {
           mode={mode}
           featureId="certificates_advanced"
           config={config}
-          featureTitle="Certificate Builder"
-          featureDescription="Design printable, verifiable certificates with templates, QR codes, and verification links."
+          featureTitle={__('Certificate Builder', 'sikshya')}
+          featureDescription={__('Design printable, verifiable certificates with templates, QR codes, and verification links.', 'sikshya')}
           previewVariant="generic"
-          addonEnableTitle="Certificate Builder is not enabled"
-          addonEnableDescription="Turn on the Advanced certificates add-on to use the certificate builder."
+          addonEnableTitle={__('Certificate Builder is not enabled', 'sikshya')}
+          addonEnableDescription={__('Turn on the Advanced certificates add-on to use the certificate builder.', 'sikshya')}
           canEnable={Boolean(addon.licenseOk)}
           enableBusy={addon.loading}
           onEnable={() => addon.enable()}
@@ -3312,7 +3326,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
           return true;
         }
       }
-      setSaveMsg('Saved.');
+      setSaveMsg(__('Saved.', 'sikshya'));
       await editor.load();
       return true;
     } catch {
@@ -3365,7 +3379,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
                   className={FIELD}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Entry title"
+                  placeholder={__('Entry title', 'sikshya')}
                 />
               </div>
               <div>
@@ -3378,7 +3392,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
                   className={`${FIELD} min-h-[300px] w-full font-mono text-[13px]`}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="<p>HTML or plain text…</p>"
+                  placeholder={__('HTML or plain text…', 'sikshya')}
                 />
               </div>
               <EditorFeaturedImageField
@@ -3393,11 +3407,11 @@ export function DefaultContentEditor(props: ContentEditorProps) {
                 <label className={LABEL} htmlFor="sik-def-status">
                   Status
                 </label>
-                <p className={HINT}>Draft hides this item from public views until you publish.</p>
+                <p className={HINT}>{__('Draft hides this item from public views until you publish.', 'sikshya')}</p>
                 <select id="sik-def-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="draft">Draft</option>
-                  <option value="publish">Published</option>
-                  <option value="private">Private</option>
+                  <option value="draft">{__('Draft', 'sikshya')}</option>
+                  <option value="publish">{__('Published', 'sikshya')}</option>
+                  <option value="private">{__('Private', 'sikshya')}</option>
                 </select>
               </div>
             </div>

@@ -6,6 +6,7 @@ import { useAdminRouting } from '../../lib/adminRouting';
 import type { SikshyaReactConfig } from '../../types';
 import { ButtonPrimary } from './buttons';
 import { Modal } from './Modal';
+import { __, sprintf } from '../../lib/i18n';
 
 type Props = {
   config: SikshyaReactConfig;
@@ -48,7 +49,7 @@ export function CreateCertificateModal({ config, open, onClose }: Props) {
         status: 'draft',
       });
       if (!created?.id) {
-        throw new Error('Could not create certificate.');
+        throw new Error(__('Could not create certificate.', 'sikshya'));
       }
       navigateHref(
         appViewHref(config, 'edit-content', {
@@ -66,8 +67,11 @@ export function CreateCertificateModal({ config, open, onClose }: Props) {
     <Modal
       open={open}
       onClose={handleClose}
-      title="Create certificate"
-      description="Give your certificate a title first. When you click Build, Sikshya opens the full-page certificate builder directly."
+      title={__('Create certificate', 'sikshya')}
+      description={__(
+        'Give your certificate a title first. When you click Build, Sikshya opens the full-page certificate builder directly.',
+        'sikshya'
+      )}
       size="md"
       footer={
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -77,10 +81,10 @@ export function CreateCertificateModal({ config, open, onClose }: Props) {
             disabled={submitting}
             className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            Cancel
+            {__('Cancel', 'sikshya')}
           </button>
           <ButtonPrimary type="submit" form="sikshya-create-certificate-form" disabled={submitting}>
-            {submitting ? 'Opening builder…' : 'Build certificate'}
+            {submitting ? __('Opening builder…', 'sikshya') : __('Build certificate', 'sikshya')}
           </ButtonPrimary>
         </div>
       }
@@ -88,10 +92,10 @@ export function CreateCertificateModal({ config, open, onClose }: Props) {
       <form id="sikshya-create-certificate-form" onSubmit={onSubmit} className="space-y-4">
         <div>
           <label htmlFor="sikshya-new-certificate-title" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Certificate title
+            {__('Certificate title', 'sikshya')}
           </label>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            This becomes the template name shown in your certificates list.
+            {__('This becomes the template name shown in your certificates list.', 'sikshya')}
           </p>
           <input
             id="sikshya-new-certificate-title"
@@ -102,7 +106,7 @@ export function CreateCertificateModal({ config, open, onClose }: Props) {
             maxLength={200}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Course Completion Certificate"
+            placeholder={__('e.g. Course Completion Certificate', 'sikshya')}
             disabled={submitting}
             className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
           />
@@ -113,7 +117,10 @@ export function CreateCertificateModal({ config, open, onClose }: Props) {
           </div>
         ) : null}
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          The certificate is created as a <strong className="font-medium text-slate-700 dark:text-slate-300">draft</strong> and opened directly in the builder.
+          {sprintf(
+            __('The certificate is created as a %s and opened directly in the builder.', 'sikshya'),
+            __('draft', 'sikshya')
+          )}
         </p>
       </form>
     </Modal>

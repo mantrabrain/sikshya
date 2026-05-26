@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { NavIcon } from '../../NavIcon';
+import { __ } from '../../../lib/i18n';
 
 export type SortFieldOption = { value: string; label: string };
 
@@ -54,7 +55,7 @@ export function ListSearchToolbar({
       </div>
       <div className="flex w-full flex-wrap items-center gap-2 lg:ml-auto lg:w-auto lg:flex-nowrap lg:justify-end">
         <label className="sr-only" htmlFor="sikshya-list-sort-by">
-          Sort by
+          {__('Sort by', 'sikshya')}
         </label>
         <select
           id="sikshya-list-sort-by"
@@ -72,9 +73,9 @@ export function ListSearchToolbar({
           type="button"
           onClick={onSortOrderToggle}
           className={`${selectClass} inline-flex items-center gap-1.5`}
-          title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+          title={sortOrder === 'asc' ? __('Ascending', 'sikshya') : __('Descending', 'sikshya')}
         >
-          {sortOrder === 'asc' ? 'Asc' : 'Desc'}
+          {sortOrder === 'asc' ? __('Asc', 'sikshya') : __('Desc', 'sikshya')}
           <NavIcon name="chevronDown" className="h-3.5 w-3.5 opacity-60" />
         </button>
         {trailing ? (

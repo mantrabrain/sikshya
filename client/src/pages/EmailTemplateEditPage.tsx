@@ -10,6 +10,7 @@ import type { SikshyaReactConfig } from '../types';
 import type { EmailTemplateApi } from '../types/emailTemplate';
 import { EmailTemplateCreateForm, EmailTemplateEditorPanel } from '../components/email/EmailTemplateForms';
 import { SIKSHYA_ADMIN_PAGE_FULL_WIDTH } from '../constants/shellLayout';
+import { __ } from '../lib/i18n';
 
 /**
  * Full-page create (`template_id=new`) or edit for a single email template (no modal).
@@ -95,19 +96,19 @@ export function EmailTemplateEditPage(props: { embedded?: boolean; config: Siksh
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle={isNew ? 'Create a custom transactional template' : 'Edit subject, body, and availability'}
+      subtitle={isNew ? __('Create a custom transactional template', 'sikshya') : __('Edit subject, body, and availability', 'sikshya')}
       sidebarActivePage="email-hub"
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
           <LinkButtonSecondary href={listHref}>← All templates</LinkButtonSecondary>
-          <LinkButtonSecondary href={appViewHref(config, 'email-hub', { tab: 'delivery' })}>Email delivery</LinkButtonSecondary>
+          <LinkButtonSecondary href={appViewHref(config, 'email-hub', { tab: 'delivery' })}>{__('Email delivery', 'sikshya')}</LinkButtonSecondary>
         </div>
       }
     >
       <div className={SIKSHYA_ADMIN_PAGE_FULL_WIDTH}>
         {error && !loading ? (
           <div className="mb-4">
-            <ApiErrorPanel error={error} title="Could not load template" onRetry={() => void load()} />
+            <ApiErrorPanel error={error} title={__('Could not load template', 'sikshya')} onRetry={() => void load()} />
           </div>
         ) : null}
 

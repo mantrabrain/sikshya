@@ -12,6 +12,7 @@ import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import { getLicensing } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __, _n, sprintf } from '../lib/i18n';
 
 type DashboardStats = {
   publishedCourses: number;
@@ -85,12 +86,12 @@ function resolveDashboardData(config: SikshyaReactConfig): {
 function greetingLabel(): string {
   const h = new Date().getHours();
   if (h < 12) {
-    return 'Good morning';
+    return __('Good morning', 'sikshya');
   }
   if (h < 18) {
-    return 'Good afternoon';
+    return __('Good afternoon', 'sikshya');
   }
-  return 'Good evening';
+  return __('Good evening', 'sikshya');
 }
 
 type OverviewPayload = {
@@ -103,15 +104,12 @@ type OverviewPayload = {
 export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string }) {
   const { config, title } = props;
   const [createOpen, setCreateOpen] = useState(false);
-  const [refreshBusy, setRefreshBusy] = useState(false);
-
   const boot = useMemo(() => resolveDashboardData(config), [config.initialData]);
   const [live, setLive] = useState<typeof boot | null>(null);
 
   const { siteName, stats, recentCourses, dashboardLinks } = live ?? boot;
 
   const refreshOverview = useCallback(async () => {
-    setRefreshBusy(true);
     try {
       const d = await getSikshyaApi().get<OverviewPayload>(SIKSHYA_ENDPOINTS.admin.overview);
       setLive((prev) => {
@@ -128,8 +126,6 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
       });
     } catch {
       /* keep SSR / boot data */
-    } finally {
-      setRefreshBusy(false);
     }
   }, [boot]);
 
@@ -152,12 +148,20 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
 
   const draftHint =
     (stats.draftCourses ?? 0) > 0
-      ? `${stats.draftCourses} draft course${stats.draftCourses === 1 ? '' : 's'} not yet published`
-      : 'All courses are either live or archived';
+      ? sprintf(
+          _n(
+            '%d draft course not yet published',
+            '%d draft courses not yet published',
+            stats.draftCourses ?? 0,
+            'sikshya'
+          ),
+          stats.draftCourses ?? 0
+        )
+      : __('All courses are either live or archived', 'sikshya');
 
   const enrollmentHint = stats.hasEnrollmentTable
-    ? `${stats.completedEnrollments ?? 0} marked completed`
-    : 'Enrollments table not found — activate the plugin or run DB updates';
+    ? sprintf(__(' %d marked completed', 'sikshya'), stats.completedEnrollments ?? 0).trimStart()
+    : __('Enrollments table not found — activate the plugin or run DB updates', 'sikshya');
 
   const licensing = getLicensing(config);
 
@@ -166,7 +170,7 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Course health, learners, and shortcuts in one place"
+      subtitle={__('Course health, learners, and shortcuts in one place', 'sikshya')}
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
       <div className="w-full min-w-0 space-y-8">
@@ -191,7 +195,7 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
                   growth, learner sign-ups, and revenue from this overview.
                 </>
               ) : (
-                <>Track catalog growth, learner sign-ups, and revenue from this overview.</>
+                <>{__('Track catalog growth, learner sign-ups, and revenue from this overview.', 'sikshya')}</>
               )}
             </p>
           </div>
@@ -200,14 +204,13 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
         {licensing && !licensing.isProActive ? (
           <section
             className="rounded-2xl border border-indigo-200/90 bg-indigo-50/90 px-4 py-3 text-sm text-indigo-950 shadow-sm dark:border-indigo-900/50 dark:bg-indigo-950/50 dark:text-indigo-100"
-            aria-label="Advanced LMS capabilities"
+            aria-label={__('Advanced LMS capabilities', 'sikshya')}
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="min-w-0 leading-relaxed">
-                <span className="font-semibold">Scale your course business</span>
+                <span className="font-semibold">{__('Scale your course business', 'sikshya')}</span>
                 {' — '}
-                Scheduled lesson access, subscriptions, gradebook, shared course staff, richer certificates, and more.
-                Your admin layout stays familiar; upgraded plans unlock the behaviour behind each screen.
+                {__('Scheduled lesson access, subscriptions, gradebook, shared course staff, richer certificates, and more. Your admin layout stays familiar; upgraded plans unlock the behaviour behind each screen.', 'sikshya')}
               </p>
               <a
                 href={licensing.upgradeUrl}
@@ -228,32 +231,32 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricTile
               accent="brand"
-              label="Published courses"
+              label={__('Published courses', 'sikshya')}
               value={stats.publishedCourses}
-              hint="Live in your catalog"
+              hint={__('Live in your catalog', 'sikshya')}
               icon={<NavIcon name="course" className="h-5 w-5" />}
             />
             <MetricTile
               accent="emerald"
-              label="Students"
+              label={__('Students', 'sikshya')}
               value={stats.students}
-              hint="Users with the Sikshya student role"
+              hint={__('Users with the Sikshya student role', 'sikshya')}
               icon={<NavIcon name="users" className="h-5 w-5" />}
             />
             <MetricTile
               accent="violet"
-              label="Total revenue"
+              label={__('Total revenue', 'sikshya')}
               value={stats.revenue}
               hint={
                 stats.hasPaymentsTable
-                  ? 'Sum of completed payments in Sikshya'
-                  : 'Payments table not found — revenue may stay at zero'
+                  ? __('Sum of completed payments in Sikshya', 'sikshya')
+                  : __('Payments table not found — revenue may stay at zero', 'sikshya')
               }
               icon={<NavIcon name="chart" className="h-5 w-5" />}
             />
             <MetricTile
               accent="amber"
-              label="Active enrollments"
+              label={__('Active enrollments', 'sikshya')}
               value={stats.enrollments}
               hint={enrollmentHint}
               icon={<NavIcon name="badge" className="h-5 w-5" />}
@@ -270,60 +273,60 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricTile
               accent="slate"
-              label="Draft courses"
+              label={__('Draft courses', 'sikshya')}
               value={stats.draftCourses ?? 0}
               hint={draftHint}
               icon={<NavIcon name="table" className="h-5 w-5" />}
             />
             <MetricTile
               accent="sky"
-              label="Lessons"
+              label={__('Lessons', 'sikshya')}
               value={stats.lessons ?? 0}
-              hint="Published lesson posts"
+              hint={__('Published lesson posts', 'sikshya')}
               icon={<NavIcon name="bookOpen" className="h-5 w-5" />}
             />
             <MetricTile
               accent="sky"
-              label="Quizzes"
+              label={__('Quizzes', 'sikshya')}
               value={stats.quizzes ?? 0}
-              hint="Published quiz posts"
+              hint={__('Published quiz posts', 'sikshya')}
               icon={<NavIcon name="puzzle" className="h-5 w-5" />}
             />
             <MetricTile
               accent="sky"
-              label="Assignments"
+              label={__('Assignments', 'sikshya')}
               value={stats.assignments ?? 0}
-              hint="Published assignment posts"
+              hint={__('Published assignment posts', 'sikshya')}
               icon={<NavIcon name="clipboard" className="h-5 w-5" />}
             />
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricTile
               accent="emerald"
-              label="Instructors"
+              label={__('Instructors', 'sikshya')}
               value={stats.instructors ?? 0}
-              hint="Users with the instructor role"
+              hint={__('Users with the instructor role', 'sikshya')}
               icon={<NavIcon name="userCircle" className="h-5 w-5" />}
             />
             <MetricTile
               accent="slate"
-              label="Certificate templates"
+              label={__('Certificate templates', 'sikshya')}
               value={stats.certificateTemplates ?? 0}
-              hint="Published certificate designs"
+              hint={__('Published certificate designs', 'sikshya')}
               icon={<NavIcon name="badge" className="h-5 w-5" />}
             />
             <MetricTile
               accent="slate"
-              label="Questions"
+              label={__('Questions', 'sikshya')}
               value={stats.questions ?? 0}
-              hint="Published question bank items"
+              hint={__('Published question bank items', 'sikshya')}
               icon={<NavIcon name="helpCircle" className="h-5 w-5" />}
             />
             <MetricTile
               accent="slate"
-              label="Chapters"
+              label={__('Chapters', 'sikshya')}
               value={stats.chapters ?? 0}
-              hint="Published chapter posts"
+              hint={__('Published chapter posts', 'sikshya')}
               icon={<NavIcon name="layers" className="h-5 w-5" />}
             />
           </div>
@@ -346,9 +349,9 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
               {recentCourses.length === 0 ? (
                 <ListEmptyState
                   compact
-                  title="No courses yet"
-                  description="Create your first course to see recent activity and status here."
-                  action={<ButtonPrimary onClick={() => setCreateOpen(true)}>Create a course</ButtonPrimary>}
+                  title={__('No courses yet', 'sikshya')}
+                  description={__('Create your first course to see recent activity and status here.', 'sikshya')}
+                  action={<ButtonPrimary onClick={() => setCreateOpen(true)}>{__('Create a course', 'sikshya')}</ButtonPrimary>}
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -365,7 +368,7 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
                           Updated
                         </th>
                         <th scope="col" className="w-12 px-5 py-3.5 text-right">
-                          <span className="sr-only">Open</span>
+                          <span className="sr-only">{__('Open', 'sikshya')}</span>
                         </th>
                       </tr>
                     </thead>
@@ -393,8 +396,8 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
                             <a
                               href={appViewHref(config, 'add-course', { course_id: String(row.id) })}
                               className="inline-flex rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                              title="Open in course builder"
-                              aria-label="Open in course builder"
+                              title={__('Open in course builder', 'sikshya')}
+                              aria-label={__('Open in course builder', 'sikshya')}
                             >
                               <NavIcon name="chevronRight" className="h-4 w-4" />
                             </a>
@@ -414,66 +417,66 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
                 Shortcuts
               </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Jump to the screens you use most when running your LMS.
+                {__('Jump to the screens you use most when running your LMS.', 'sikshya')}
               </p>
               <div className="mt-4 space-y-3">
                 <QuickActionCard
                   onClick={() => setCreateOpen(true)}
                   icon="plusCircle"
-                  title="New course"
-                  description="Name your course, we save a draft and open the builder."
+                  title={__('New course', 'sikshya')}
+                  description={__('Name your course, we save a draft and open the builder.', 'sikshya')}
                 />
                 <QuickActionCard
                   href={appViewHref(config, 'courses')}
                   icon="table"
-                  title="Browse courses"
-                  description="Search, filter, and bulk-manage your catalog."
+                  title={__('Browse courses', 'sikshya')}
+                  description={__('Search, filter, and bulk-manage your catalog.', 'sikshya')}
                 />
                 <QuickActionCard
                   href={appViewHref(config, 'content-library', { tab: 'lessons' })}
                   icon="bookOpen"
-                  title="Lessons"
-                  description="Review and edit lesson content across your site."
+                  title={__('Lessons', 'sikshya')}
+                  description={__('Review and edit lesson content across your site.', 'sikshya')}
                 />
                 <QuickActionCard
                   href={appViewHref(config, 'content-library', { tab: 'quizzes' })}
                   icon="puzzle"
-                  title="Quizzes"
-                  description="Manage assessments tied to your courses."
+                  title={__('Quizzes', 'sikshya')}
+                  description={__('Manage assessments tied to your courses.', 'sikshya')}
                 />
                 {dashboardLinks.enrollments ? (
                   <QuickActionCard
                     href={appViewHref(config, 'enrollments')}
                     icon="clipboard"
-                    title="Enrollments"
-                    description="See who is enrolled and in which courses."
+                    title={__('Enrollments', 'sikshya')}
+                    description={__('See who is enrolled and in which courses.', 'sikshya')}
                   />
                 ) : null}
                 {dashboardLinks.payments ? (
                   <QuickActionCard
                     href={appViewHref(config, 'sales', { tab: 'payments' })}
                     icon="columns"
-                    title="Payments"
-                    description="Review transactions and reconciliation."
+                    title={__('Payments', 'sikshya')}
+                    description={__('Review transactions and reconciliation.', 'sikshya')}
                   />
                 ) : null}
               </div>
             </div>
 
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-5 dark:border-slate-700 dark:bg-slate-900/40">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Grow your course business</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Grow your course business', 'sikshya')}</h3>
               <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden />
-                  Invite instructors and assign content ownership from Users.
+                  {__('Invite instructors and assign content ownership from Users.', 'sikshya')}
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden />
-                  Use Reports to spot completion trends once learners are active.
+                  {__('Use Reports to spot completion trends once learners are active.', 'sikshya')}
                 </li>
                 <li className="flex gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" aria-hidden />
-                  Tune certificates, emails, and branding under Settings.
+                  {__('Tune certificates, emails, and branding under Settings.', 'sikshya')}
                 </li>
               </ul>
               <div className="mt-4 flex flex-wrap gap-2">

@@ -11,6 +11,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type Options = {
   brand_name?: string;
@@ -89,7 +90,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
     setSaving(true);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.whiteLabel, opts);
-      toast.success('Saved', embedded ? 'Changes saved.' : 'Saved. Applying…');
+      toast.success(__('Saved', 'sikshya'), embedded ? __('Changes saved.', 'sikshya') : __('Saved. Applying…', 'sikshya'));
       refetch();
       // The shell branding is injected server-side into the bootstrap config.
       // Reload so all pages pick up updated colors/menu branding immediately.
@@ -97,7 +98,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
         window.setTimeout(() => window.location.reload(), 350);
       }
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -113,7 +114,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
         );
         setCourseOverrides(r.overrides || {});
       } catch (err) {
-        toast.error('Could not load', err instanceof Error ? err.message : 'Could not load course overrides');
+        toast.error(__('Could not load', 'sikshya'), err instanceof Error ? err.message : 'Could not load course overrides');
       } finally {
         setCourseLoading(false);
       }
@@ -126,9 +127,9 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
     setSaving(true);
     try {
       await getSikshyaApi().post(SIKSHYA_ENDPOINTS.pro.whiteLabelCourse(courseId), courseOverrides);
-      toast.success('Saved', 'Course overrides saved.');
+      toast.success(__('Saved', 'sikshya'), 'Course overrides saved.');
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Course override save failed');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Course override save failed');
     } finally {
       setSaving(false);
     }
@@ -146,26 +147,26 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
         mode={mode}
         featureId="white_label"
         config={config}
-        featureTitle="White label"
+        featureTitle={__('White label', 'sikshya')}
         featureDescription={`Hide the ${platformName} footer credit, replace it with your own HTML, and tint the login form to match your brand.`}
         previewVariant="form"
-        addonEnableTitle="White label is not enabled"
-        addonEnableDescription="Enable the White label add-on to apply branding overrides to admin and login screens."
+        addonEnableTitle={__('White label is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the White label add-on to apply branding overrides to admin and login screens.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
         addonError={addon.error}
       >
-        {error ? <ApiErrorPanel error={error} title="Could not load branding settings" onRetry={() => refetch()} /> : null}
+        {error ? <ApiErrorPanel error={error} title={__('Could not load branding settings', 'sikshya')} onRetry={() => refetch()} /> : null}
 
         <ListPanel className="p-6">
           {loading ? (
-            <p className="text-sm text-slate-500">Loading…</p>
+            <p className="text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
           ) : (
             <form onSubmit={onSave} className="space-y-5">
               <div className="grid gap-6 lg:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Brand name</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Brand name', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Used across admin, frontend, and emails when Sikshya would normally show its product name.
                   </span>
@@ -174,12 +175,12 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     value={opts.brand_name || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, brand_name: e.target.value }))}
                     className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                    placeholder="Acme Academy LMS"
+                    placeholder={__('Acme Academy LMS', 'sikshya')}
                   />
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Short name</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Short name', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Optional shorter label for breadcrumbs and compact UI areas.
                   </span>
@@ -188,7 +189,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     value={opts.brand_short_name || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, brand_short_name: e.target.value }))}
                     className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                    placeholder="Acme"
+                    placeholder={__('Acme', 'sikshya')}
                   />
                 </label>
               </div>
@@ -196,7 +197,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
               <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-900/30">
                 <div className="font-semibold text-slate-900 dark:text-white">Where should branding apply?</div>
                 <label className="flex items-center justify-between gap-3">
-                  <span className="text-slate-700 dark:text-slate-200">Admin (wp-admin + React shell)</span>
+                  <span className="text-slate-700 dark:text-slate-200">{__('Admin (wp-admin + React shell)', 'sikshya')}</span>
                   <input
                     type="checkbox"
                     checked={opts.admin_enabled ?? true}
@@ -204,7 +205,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   />
                 </label>
                 <label className="flex items-center justify-between gap-3">
-                  <span className="text-slate-700 dark:text-slate-200">Login screen</span>
+                  <span className="text-slate-700 dark:text-slate-200">{__('Login screen', 'sikshya')}</span>
                   <input
                     type="checkbox"
                     checked={opts.login_enabled ?? true}
@@ -212,7 +213,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   />
                 </label>
                 <label className="flex items-center justify-between gap-3">
-                  <span className="text-slate-700 dark:text-slate-200">Frontend pages</span>
+                  <span className="text-slate-700 dark:text-slate-200">{__('Frontend pages', 'sikshya')}</span>
                   <input
                     type="checkbox"
                     checked={opts.frontend_enabled ?? true}
@@ -220,7 +221,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   />
                 </label>
                 <label className="flex items-center justify-between gap-3">
-                  <span className="text-slate-700 dark:text-slate-200">Emails</span>
+                  <span className="text-slate-700 dark:text-slate-200">{__('Emails', 'sikshya')}</span>
                   <input
                     type="checkbox"
                     checked={opts.email_enabled ?? true}
@@ -237,7 +238,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   className="mt-1"
                 />
                 <span>
-                  <span className="font-medium text-slate-900 dark:text-white">Hide platform footer credit</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Hide platform footer credit', 'sikshya')}</span>
                   <span className="block text-xs text-slate-500 dark:text-slate-400">
                     Removes the “Powered by …” line that normally appears at the bottom of admin pages.
                   </span>
@@ -245,7 +246,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
               </label>
 
               <label className="block text-sm">
-                <span className="font-medium text-slate-900 dark:text-white">Plugin name (wp-admin menu + sidebar)</span>
+                <span className="font-medium text-slate-900 dark:text-white">{__('Plugin name (wp-admin menu + sidebar)', 'sikshya')}</span>
                 <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                   Replaces the default product name with your own name in the WordPress admin menu and the admin sidebar.
                 </span>
@@ -254,14 +255,14 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   value={opts.plugin_name || ''}
                   onChange={(e) => setOpts((p) => ({ ...p, plugin_name: e.target.value }))}
                   className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                  placeholder="Acme Academy LMS"
+                  placeholder={__('Acme Academy LMS', 'sikshya')}
                 />
               </label>
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <div>
                   <div className="text-sm">
-                    <div className="font-medium text-slate-900 dark:text-white">Logo (React sidebar)</div>
+                    <div className="font-medium text-slate-900 dark:text-white">{__('Logo (React sidebar)', 'sikshya')}</div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Shown in the Sikshya admin sidebar header.
                     </div>
@@ -275,7 +276,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
 
                 <div>
                   <div className="text-sm">
-                    <div className="font-medium text-slate-900 dark:text-white">Admin menu icon (WordPress sidebar)</div>
+                    <div className="font-medium text-slate-900 dark:text-white">{__('Admin menu icon (WordPress sidebar)', 'sikshya')}</div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Replaces the icon next to the top-level menu item in wp-admin. Use a square image (20×20 works best).
                     </div>
@@ -291,7 +292,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
               <div className="grid gap-6 lg:grid-cols-2">
                 <div>
                   <div className="text-sm">
-                    <div className="font-medium text-slate-900 dark:text-white">Login logo (optional)</div>
+                    <div className="font-medium text-slate-900 dark:text-white">{__('Login logo (optional)', 'sikshya')}</div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Replaces the WordPress login logo when login branding is enabled.
                     </div>
@@ -304,7 +305,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                 </div>
 
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Frontend accent colour</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Frontend accent colour', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Updates public Sikshya pages (course listing, course page, cart, checkout, learn, account).
                   </span>
@@ -320,14 +321,14 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       value={opts.frontend_accent || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, frontend_accent: e.target.value }))}
                       className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="#7a2e80"
+                      placeholder={__('#7a2e80', 'sikshya')}
                     />
                   </div>
                 </label>
               </div>
 
               <label className="block text-sm">
-                <span className="font-medium text-slate-900 dark:text-white">Custom admin footer HTML</span>
+                <span className="font-medium text-slate-900 dark:text-white">{__('Custom admin footer HTML', 'sikshya')}</span>
                 <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                   Replace the footer with your own HTML — useful for support links or copyright. Standard WordPress
                   sanitization applies (KSES post).
@@ -337,12 +338,12 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   value={opts.admin_footer_html || ''}
                   onChange={(e) => setOpts((p) => ({ ...p, admin_footer_html: e.target.value }))}
                   className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                  placeholder="<p>© Acme Academy</p>"
+                  placeholder={__('<p>© Acme Academy</p>', 'sikshya')}
                 />
               </label>
 
               <label className="block text-sm">
-                <span className="font-medium text-slate-900 dark:text-white">Login accent colour</span>
+                <span className="font-medium text-slate-900 dark:text-white">{__('Login accent colour', 'sikshya')}</span>
                 <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                   Hex value (e.g. <span className="font-mono">#0ea5e9</span>). Applied to the login submit button.
                 </span>
@@ -358,14 +359,14 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     value={opts.login_accent_color || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, login_accent_color: e.target.value }))}
                     className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                    placeholder="#2c5ba8"
+                    placeholder={__('#2c5ba8', 'sikshya')}
                   />
                 </div>
               </label>
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Admin accent colour</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Admin accent colour', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Drives link, primary button, and focus colours in the React admin (the content header stays
                     neutral). Sidebar colour is used first when it is a strong tone; otherwise this value fills in.
@@ -382,13 +383,13 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       value={opts.topbar_bg || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, topbar_bg: e.target.value }))}
                       className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="#ffffff"
+                      placeholder={__('#ffffff', 'sikshya')}
                     />
                   </div>
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Legacy accent text colour</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Legacy accent text colour', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Kept for saved profiles; not applied to the React top header (default title colours).
                   </span>
@@ -404,13 +405,13 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       value={opts.topbar_text || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, topbar_text: e.target.value }))}
                       className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="#0f172a"
+                      placeholder={__('#0f172a', 'sikshya')}
                     />
                   </div>
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Left sidebar background</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Left sidebar background', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Applied to the Sikshya React left navigation sidebar.
                   </span>
@@ -426,13 +427,13 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       value={opts.sidebar_bg || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, sidebar_bg: e.target.value }))}
                       className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="#ffffff"
+                      placeholder={__('#ffffff', 'sikshya')}
                     />
                   </div>
                 </label>
 
                 <label className="block text-sm">
-                  <span className="font-medium text-slate-900 dark:text-white">Left sidebar menu text</span>
+                  <span className="font-medium text-slate-900 dark:text-white">{__('Left sidebar menu text', 'sikshya')}</span>
                   <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                     Base colour for sidebar menu labels.
                   </span>
@@ -448,14 +449,14 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       value={opts.sidebar_text || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, sidebar_text: e.target.value }))}
                       className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="#475569"
+                      placeholder={__('#475569', 'sikshya')}
                     />
                   </div>
                 </label>
               </div>
 
               <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">Terminology</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Terminology', 'sikshya')}</div>
                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Rename common LMS nouns across Sikshya UI. Leave blank to keep defaults.
                 </div>
@@ -500,13 +501,13 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
               </div>
 
               <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">Links</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Links', 'sikshya')}</div>
                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Used in admin footer, upsell prompts, and help surfaces.
                 </div>
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   <label className="block text-sm">
-                    <span className="font-medium text-slate-900 dark:text-white">Documentation URL</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Documentation URL', 'sikshya')}</span>
                     <input
                       type="url"
                       value={opts.documentation_url || ''}
@@ -516,7 +517,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     />
                   </label>
                   <label className="block text-sm">
-                    <span className="font-medium text-slate-900 dark:text-white">Support URL</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Support URL', 'sikshya')}</span>
                     <input
                       type="url"
                       value={opts.support_url || ''}
@@ -526,7 +527,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     />
                   </label>
                   <label className="block text-sm lg:col-span-2">
-                    <span className="font-medium text-slate-900 dark:text-white">Upgrade / pricing URL</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Upgrade / pricing URL', 'sikshya')}</span>
                     <input
                       type="url"
                       value={opts.upgrade_url || ''}
@@ -539,21 +540,21 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
               </div>
 
               <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">Per-course overrides (optional)</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Per-course overrides (optional)', 'sikshya')}</div>
                 <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Override brand name/logo/accent for a single course page and learn experience. Admins only.
                 </div>
 
                 <div className="mt-4 flex flex-wrap items-end gap-3">
                   <label className="block text-sm">
-                    <span className="font-medium text-slate-900 dark:text-white">Course ID</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{__('Course ID', 'sikshya')}</span>
                     <input
                       type="number"
                       min={0}
                       value={courseId ? String(courseId) : ''}
                       onChange={(e) => setCourseId(Number(e.target.value || 0))}
                       className="mt-2 w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="123"
+                      placeholder={__('123', 'sikshya')}
                     />
                   </label>
                   <button
@@ -562,14 +563,14 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     disabled={!courseId || courseLoading}
                     className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                   >
-                    {courseLoading ? 'Loading…' : 'Load'}
+                    {courseLoading ? __('Loading…', 'sikshya') : __('Load', 'sikshya')}
                   </button>
                 </div>
 
                 {courseId ? (
                   <div className="mt-4 grid gap-4 lg:grid-cols-2">
                     <label className="block text-sm">
-                      <span className="font-medium text-slate-900 dark:text-white">Course brand name</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Course brand name', 'sikshya')}</span>
                       <input
                         type="text"
                         value={(courseOverrides.brand_name as string) || ''}
@@ -578,7 +579,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       />
                     </label>
                     <label className="block text-sm">
-                      <span className="font-medium text-slate-900 dark:text-white">Course accent</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{__('Course accent', 'sikshya')}</span>
                       <div className="mt-2 flex items-center gap-3">
                         <input
                           type="color"
@@ -596,8 +597,8 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     </label>
                     <div className="lg:col-span-2">
                       <div className="text-sm">
-                        <div className="font-medium text-slate-900 dark:text-white">Course logo (optional)</div>
-                        <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">Overrides the admin/sidebar logo for this course context.</div>
+                        <div className="font-medium text-slate-900 dark:text-white">{__('Course logo (optional)', 'sikshya')}</div>
+                        <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{__('Overrides the admin/sidebar logo for this course context.', 'sikshya')}</div>
                       </div>
                       <WPMediaPickerField
                         id="sik-white-label-course-logo"
@@ -612,7 +613,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                         disabled={saving}
                         className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-slate-900"
                       >
-                        {saving ? 'Saving…' : 'Save course overrides'}
+                        {saving ? __('Saving…', 'sikshya') : __('Save course overrides', 'sikshya')}
                       </button>
                     </div>
                   </div>
@@ -621,7 +622,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
 
               <div className="flex items-center gap-3">
                 <ButtonPrimary type="submit" disabled={saving}>
-                  {saving ? 'Saving…' : 'Save branding'}
+                  {saving ? __('Saving…', 'sikshya') : __('Save branding', 'sikshya')}
                 </ButtonPrimary>
               </div>
             </form>

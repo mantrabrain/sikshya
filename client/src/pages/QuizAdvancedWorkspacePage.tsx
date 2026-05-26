@@ -14,6 +14,7 @@ import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import type { SikshyaReactConfig, WpTerm } from '../types';
+import { __ } from '../lib/i18n';
 
 type BankTerm = { slug: string; name: string; count: number };
 
@@ -156,11 +157,11 @@ export function QuizAdvancedWorkspacePage(props: {
       mode={mode}
       featureId="quiz_advanced"
       config={config}
-      featureTitle="Advanced quiz types"
-      featureDescription="Reuse questions via banks and pool tags, shuffle order, paginate one question at a time, and keep grading aligned with what each learner actually saw."
+      featureTitle={__('Advanced quiz types', 'sikshya')}
+      featureDescription={__('Reuse questions via banks and pool tags, shuffle order, paginate one question at a time, and keep grading aligned with what each learner actually saw.', 'sikshya')}
       previewVariant="table"
-      addonEnableTitle="Advanced quiz types are not enabled"
-      addonEnableDescription="Enable the add-on to edit global settings, inspect taxonomy banks, and preview pool sizes before you wire quizzes."
+      addonEnableTitle={__('Advanced quiz types are not enabled', 'sikshya')}
+      addonEnableDescription={__('Enable the add-on to edit global settings, inspect taxonomy banks, and preview pool sizes before you wire quizzes.', 'sikshya')}
       canEnable={Boolean(addon.licenseOk)}
       enableBusy={addon.loading}
       onEnable={() => addon.enable()}
@@ -170,7 +171,7 @@ export function QuizAdvancedWorkspacePage(props: {
         <div className="space-y-6">
           <div className="-mt-1 flex flex-wrap items-center gap-2 overflow-x-auto">
             <HorizontalEditorTabs
-              ariaLabel="Question banks workspace"
+              ariaLabel={__('Question banks workspace', 'sikshya')}
               tabs={[
                 { id: 'overview', label: 'Banks & preview', icon: 'table' },
                 { id: 'terms', label: 'Bank terms', icon: 'tag' },
@@ -183,28 +184,28 @@ export function QuizAdvancedWorkspacePage(props: {
           {workspaceTab === 'overview' ? (
             <div className="space-y-8">
               <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Question banks (taxonomy)</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Question banks (taxonomy)', 'sikshya')}</h2>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                  Assign banks in the block editor or under <strong>Content library → Questions</strong>. Use the same
-                  slug in a quiz’s <em>Pool tag</em> field (or legacy pool meta on questions) for random draws. Create
-                  and edit taxonomy banks in the <strong>Bank terms</strong> tab—no classic WordPress tags screen
+                  Assign banks in the block editor or under <strong>{__('Content library → Questions', 'sikshya')}</strong>. Use the same
+                  slug in a quiz’s <em>{__('Pool tag', 'sikshya')}</em> field (or legacy pool meta on questions) for random draws. Create
+                  and edit taxonomy banks in the <strong>{__('Bank terms', 'sikshya')}</strong> tab—no classic WordPress tags screen
                   required.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <LinkButtonSecondary href={questionsReactHref}>Browse all questions</LinkButtonSecondary>
+                  <LinkButtonSecondary href={questionsReactHref}>{__('Browse all questions', 'sikshya')}</LinkButtonSecondary>
                   <ButtonSecondary type="button" onClick={() => setWorkspaceTab('terms')}>
                     Manage bank terms
                   </ButtonSecondary>
                 </div>
                 {termsState.loading ? (
-                  <p className="mt-4 text-sm text-slate-500">Loading banks…</p>
+                  <p className="mt-4 text-sm text-slate-500">{__('Loading banks…', 'sikshya')}</p>
                 ) : termsState.error ? (
                   <div className="mt-4">
-                    <ApiErrorPanel error={termsState.error} title="Could not load banks" onRetry={() => termsState.refetch()} />
+                    <ApiErrorPanel error={termsState.error} title={__('Could not load banks', 'sikshya')} onRetry={() => termsState.refetch()} />
                   </div>
                 ) : terms.length === 0 ? (
                   <p className="mt-4 text-sm text-slate-500">
-                    No taxonomy banks yet. Open <strong>Bank terms</strong> to add a bank, then assign it to published
+                    No taxonomy banks yet. Open <strong>{__('Bank terms', 'sikshya')}</strong> to add a bank, then assign it to published
                     questions to see counts here.
                   </p>
                 ) : (
@@ -215,7 +216,7 @@ export function QuizAdvancedWorkspacePage(props: {
               </section>
 
               <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Pool preview</h2>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Pool preview', 'sikshya')}</h2>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   Enter a pool slug to see how many published questions match via meta tag, via taxonomy, and combined
                   (deduplicated).
@@ -230,28 +231,28 @@ export function QuizAdvancedWorkspacePage(props: {
                       className="w-56 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
-                      placeholder="e.g. unit-1"
+                      placeholder={__('e.g. unit-1', 'sikshya')}
                     />
                   </div>
                   <ButtonPrimary type="button" disabled={previewBusy || !tagInput.trim()} onClick={() => void runPreview()}>
-                    {previewBusy ? 'Checking…' : 'Preview'}
+                    {previewBusy ? __('Checking…', 'sikshya') : __('Preview', 'sikshya')}
                   </ButtonPrimary>
                 </div>
                 {previewErr ? (
                   <div className="mt-3">
-                    <ApiErrorPanel error={previewErr} title="Preview failed" />
+                    <ApiErrorPanel error={previewErr} title={__('Preview failed', 'sikshya')} />
                   </div>
                 ) : null}
                 {preview && preview.ok ? (
                   <ul className="mt-4 grid gap-2 text-sm text-slate-700 dark:text-slate-300 sm:grid-cols-3">
                     <li>
-                      <span className="font-medium">Meta tag matches:</span> {preview.meta_count ?? 0}
+                      <span className="font-medium">{__('Meta tag matches:', 'sikshya')}</span> {preview.meta_count ?? 0}
                     </li>
                     <li>
-                      <span className="font-medium">Taxonomy matches:</span> {preview.taxonomy_count ?? 0}
+                      <span className="font-medium">{__('Taxonomy matches:', 'sikshya')}</span> {preview.taxonomy_count ?? 0}
                     </li>
                     <li>
-                      <span className="font-medium">Combined (unique):</span> {preview.combined_count ?? 0}
+                      <span className="font-medium">{__('Combined (unique):', 'sikshya')}</span> {preview.combined_count ?? 0}
                     </li>
                   </ul>
                 ) : null}
@@ -268,9 +269,9 @@ export function QuizAdvancedWorkspacePage(props: {
             </div>
           ) : (
             <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-              <h2 className="text-base font-semibold text-slate-900 dark:text-white">Bank terms (REST)</h2>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Bank terms (REST)', 'sikshya')}</h2>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                These terms are the taxonomy behind question banks. The slug is what you enter as a quiz <em>Pool tag</em>
+                These terms are the taxonomy behind question banks. The slug is what you enter as a quiz <em>{__('Pool tag', 'sikshya')}</em>
                 . Assign banks to individual questions from the question editor sidebar or the Questions list.
               </p>
 
@@ -284,7 +285,7 @@ export function QuizAdvancedWorkspacePage(props: {
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
                     value={newBankName}
                     onChange={(e) => setNewBankName(e.target.value)}
-                    placeholder="e.g. Unit 1 review"
+                    placeholder={__('e.g. Unit 1 review', 'sikshya')}
                   />
                 </div>
                 <div>
@@ -296,11 +297,11 @@ export function QuizAdvancedWorkspacePage(props: {
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
                     value={newBankSlug}
                     onChange={(e) => setNewBankSlug(e.target.value)}
-                    placeholder="Defaults from name"
+                    placeholder={__('Defaults from name', 'sikshya')}
                   />
                 </div>
                 <ButtonPrimary type="button" disabled={createBusy} onClick={() => void createBankTerm()}>
-                  {createBusy ? 'Saving…' : 'Add bank'}
+                  {createBusy ? __('Saving…', 'sikshya') : __('Add bank', 'sikshya')}
                 </ButtonPrimary>
               </div>
               {createErr ? (
@@ -314,20 +315,20 @@ export function QuizAdvancedWorkspacePage(props: {
                 <TermEntityListView
                   taxonomyRestBase={QB_TAXONOMY}
                   listRefreshNonce={termListNonce}
-                  contextHint="Search and sort banks. Counts reflect published questions tagged with each bank."
-                  searchPlaceholder="Search banks…"
+                  contextHint={__('Search and sort banks. Counts reflect published questions tagged with each bank.', 'sikshya')}
+                  searchPlaceholder={__('Search banks…', 'sikshya')}
                   sortFieldOptions={[
                     { value: 'name', label: 'Name' },
                     { value: 'count', label: 'Question count' },
                   ]}
                   defaultSortField="name"
                   columns={termColumns}
-                  emptyMessage="No banks match your search."
+                  emptyMessage={__('No banks match your search.', 'sikshya')}
                   columnPickerStorageKey="sikshya_qbank_terms"
                   skeletonHeaders={['Bank name', 'Slug (pool tag)', 'Questions']}
-                  emptyStateTitle="No question banks yet"
-                  emptyStateDescription="Add a bank above, then assign it to questions from Content library → Questions."
-                  emptyStateAction={<LinkButtonSecondary href={questionsReactHref}>Open questions</LinkButtonSecondary>}
+                  emptyStateTitle={__('No question banks yet', 'sikshya')}
+                  emptyStateDescription={__('Add a bank above, then assign it to questions from Content library → Questions.', 'sikshya')}
+                  emptyStateAction={<LinkButtonSecondary href={questionsReactHref}>{__('Open questions', 'sikshya')}</LinkButtonSecondary>}
                 />
               </div>
             </section>
@@ -336,11 +337,11 @@ export function QuizAdvancedWorkspacePage(props: {
           <AddonSettingsPage
             embedded
             config={config}
-            title="Advanced quiz settings"
+            title={__('Advanced quiz settings', 'sikshya')}
             addonId="quiz_advanced"
-            subtitle="Pool draws and learner-facing notices for randomized banks."
-            featureTitle="Advanced quiz settings"
-            featureDescription="Tune how many questions can be drawn from a pool and whether learners see a short notice when a quiz uses randomized banks."
+            subtitle={__('Pool draws and learner-facing notices for randomized banks.', 'sikshya')}
+            featureTitle={__('Advanced quiz settings', 'sikshya')}
+            featureDescription={__('Tune how many questions can be drawn from a pool and whether learners see a short notice when a quiz uses randomized banks.', 'sikshya')}
             relatedCoreSettingsTab="quizzes"
             relatedCoreSettingsLabel="Quizzes"
             nextSteps={[

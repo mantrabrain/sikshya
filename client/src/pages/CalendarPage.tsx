@@ -15,6 +15,7 @@ import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { appViewHref } from '../lib/appUrl';
 import { AddonSettingsPage } from './AddonSettingsPage';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type TabId = 'staff' | 'settings';
 
@@ -158,11 +159,11 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Staff catalog dates, learner schedules on My account, REST feeds, and optional teasers on course + learn pages."
+      subtitle={__('Staff catalog dates, learner schedules on My account, REST feeds, and optional teasers on course + learn pages.', 'sikshya')}
       pageActions={
         enabled && tab === 'staff' ? (
           <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
-            {loading ? 'Refreshing…' : 'Refresh'}
+            {loading ? __('Refreshing…', 'sikshya') : __('Refresh', 'sikshya')}
           </ButtonPrimary>
         ) : null
       }
@@ -171,11 +172,11 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
         mode={mode}
         featureId="calendar"
         config={config}
-        featureTitle="Calendar"
-        featureDescription="Learners see enrollments, drip unlocks, live sessions, and assignment due dates. Staff can browse published course dates, filter exports, and tune what appears in feeds."
+        featureTitle={__('Calendar', 'sikshya')}
+        featureDescription={__('Learners see enrollments, drip unlocks, live sessions, and assignment due dates. Staff can browse published course dates, filter exports, and tune what appears in feeds.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Calendar is not enabled"
-        addonEnableDescription="Enable the Calendar add-on to expose staff and learner schedule endpoints and dashboard blocks."
+        addonEnableTitle={__('Calendar is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Calendar add-on to expose staff and learner schedule endpoints and dashboard blocks.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -196,11 +197,11 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
           <AddonSettingsPage
             embedded
             config={config}
-            title="Calendar settings"
+            title={__('Calendar settings', 'sikshya')}
             addonId="calendar"
-            subtitle="Control how many events load, what is included, and whether the My account strip is shown."
-            featureTitle="Calendar settings"
-            featureDescription="Every toggle and number here changes what learners see on the account dashboard and what the REST API returns."
+            subtitle={__('Control how many events load, what is included, and whether the My account strip is shown.', 'sikshya')}
+            featureTitle={__('Calendar settings', 'sikshya')}
+            featureDescription={__('Every toggle and number here changes what learners see on the account dashboard and what the REST API returns.', 'sikshya')}
             nextSteps={[
               {
                 label: 'Wire drip rules',
@@ -226,7 +227,7 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
                   <input
                     id="sik-cal-from"
                     type="text"
-                    placeholder="YYYY-MM-DD"
+                    placeholder={__('YYYY-MM-DD', 'sikshya')}
                     value={from}
                     onChange={(e) => setFrom(e.target.value)}
                     className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-950"
@@ -239,7 +240,7 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
                   <input
                     id="sik-cal-to"
                     type="text"
-                    placeholder="YYYY-MM-DD"
+                    placeholder={__('YYYY-MM-DD', 'sikshya')}
                     value={to}
                     onChange={(e) => setTo(e.target.value)}
                     className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-950"
@@ -265,7 +266,7 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
               </div>
             ) : null}
 
-            {error ? <ApiErrorPanel error={error} title="Could not load calendar" onRetry={() => refetch()} /> : null}
+            {error ? <ApiErrorPanel error={error} title={__('Could not load calendar', 'sikshya')} onRetry={() => refetch()} /> : null}
 
             {description ? (
               <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">{description}</p>
@@ -290,8 +291,8 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
                   emptyContent={
                     rows.length === 0 ? (
                       <ListEmptyState
-                        title="No courses in this range"
-                        description="Adjust the publish-date filters or publish a course. Learner-specific schedules (drip, due dates, live classes) still appear on My account and via the learner calendar API."
+                        title={__('No courses in this range', 'sikshya')}
+                        description={__('Adjust the publish-date filters or publish a course. Learner-specific schedules (drip, due dates, live classes) still appear on My account and via the learner calendar API.', 'sikshya')}
                       />
                     ) : undefined
                   }

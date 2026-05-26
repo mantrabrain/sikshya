@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetSt
 import type React from 'react';
 import { getConfig } from '../config/env';
 import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
+import { __, sprintf } from '../lib/i18n';
 import { NavIcon } from './NavIcon';
 import type { NavItem, NavItemBadge } from '../types';
 
@@ -14,9 +15,9 @@ function NavBadge({ badge }: { badge: NavItemBadge }) {
           ? 'bg-slate-100 text-slate-600 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700'
           : 'bg-accent-50 text-accent-700 ring-accent-200 dark:bg-accent-950/40 dark:text-accent-300 dark:ring-accent-900/60'
       }`}
-      title={isOff ? 'Addon is turned off in Addons' : 'Pro feature — upgrade to unlock'}
+      title={isOff ? __('Addon is turned off in Addons', 'sikshya') : __('Pro feature — upgrade to unlock', 'sikshya')}
     >
-      {isOff ? 'Off' : 'Pro'}
+      {isOff ? __('Off', 'sikshya') : __('Pro', 'sikshya')}
     </span>
   );
 }
@@ -290,7 +291,7 @@ export function Sidebar({
                 ? 'border-white/15 bg-black/[0.12] text-inherit shadow-black/10 dark:border-white/10 dark:bg-white/[0.08]'
                 : 'border-slate-200/90 bg-white text-slate-600 shadow-slate-900/[0.04] dark:border-slate-600/80 dark:bg-slate-800/90 dark:text-slate-300 dark:shadow-none'
             }`}
-            title={`${title} (free) ${version}`}
+            title={sprintf(__('%1$s (free) %2$s', 'sikshya'), title, version)}
           >
             <span
               className={`h-1.5 w-1.5 shrink-0 rounded-full ${
@@ -298,7 +299,7 @@ export function Sidebar({
               }`}
               aria-hidden
             />
-            <span className={brandedChrome ? 'text-inherit/90' : ''}>Free</span>
+            <span className={brandedChrome ? 'text-inherit/90' : ''}>{__('Free', 'sikshya')}</span>
             <span
               className={`tabular-nums opacity-75 ${
                 brandedChrome ? 'text-inherit/80' : 'text-slate-500 dark:text-slate-400'
@@ -316,8 +317,12 @@ export function Sidebar({
               }`}
               title={
                 proLicensed
-                  ? `${title} Pro ${proPluginVersion} (licensed)`
-                  : `${title} Pro ${proPluginVersion} — activate your license for updates and paid modules`
+                  ? sprintf(__('%1$s Pro %2$s (licensed)', 'sikshya'), title, proPluginVersion)
+                  : sprintf(
+                      __('%1$s Pro %2$s — activate your license for updates and paid modules', 'sikshya'),
+                      title,
+                      proPluginVersion
+                    )
               }
             >
               <span
@@ -327,7 +332,7 @@ export function Sidebar({
                 aria-hidden
               />
               <span className={proLicensed ? 'text-emerald-800 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-200'}>
-                Pro
+                {__('Pro', 'sikshya')}
               </span>
               <span
                 className={`tabular-nums ${
@@ -368,7 +373,7 @@ export function Sidebar({
           <IconSlot size="sm">
             <NavIcon name="arrowLeft" className={`h-4 w-4 ${brandedChrome ? 'text-inherit/70' : ''}`} />
           </IconSlot>
-          <span className="min-w-0 flex-1 truncate">Back to WordPress</span>
+          <span className="min-w-0 flex-1 truncate">{__('Back to WordPress', 'sikshya')}</span>
         </a>
       </div>
     </aside>

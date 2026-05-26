@@ -15,6 +15,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAdminRouting } from '../lib/adminRouting';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type PaymentRow = {
   id: number;
@@ -104,8 +105,8 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
     if (bulkAction === 'delete') {
       const ok = await dialog.confirm({
         title: `Delete ${selectedIds.length} payment(s)?`,
-        message: 'This permanently removes the payment records. This cannot be undone.',
-        confirmLabel: 'Delete',
+        message: __('This permanently removes the payment records. This cannot be undone.', 'sikshya'),
+        confirmLabel: __('Delete', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -126,7 +127,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
       setBulkAction('');
       await refetch();
     } catch (err) {
-      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+      void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
     } finally {
       setBulkBusy(false);
     }
@@ -143,7 +144,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Checkout charges and automated subscription renewals (when the payments table is installed)"
+      subtitle={__('Checkout charges and automated subscription renewals (when the payments table is installed)', 'sikshya')}
       pageActions={
         <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
           Refresh
@@ -152,7 +153,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load payments" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load payments', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -166,7 +167,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
       <Modal
         open={editOpen}
         title={editId ? `Change payment status (#${editId})` : 'Change payment status'}
-        description="Update the payment record status."
+        description={__('Update the payment record status.', 'sikshya')}
         size="lg"
         onClose={() => {
           if (!saving) setEditOpen(false);
@@ -195,13 +196,13 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                   setEditOpen(false);
                   await refetch();
                 } catch (err) {
-                  void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                  void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                 } finally {
                   setSaving(false);
                 }
               }}
             >
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
             </ButtonPrimary>
           </div>
         }
@@ -214,10 +215,10 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
             onChange={(e) => setEditStatus(e.target.value)}
             disabled={saving}
           >
-            <option value="pending">pending</option>
-            <option value="completed">completed</option>
-            <option value="failed">failed</option>
-            <option value="refunded">refunded</option>
+            <option value="pending">{__('pending', 'sikshya')}</option>
+            <option value="completed">{__('completed', 'sikshya')}</option>
+            <option value="failed">{__('failed', 'sikshya')}</option>
+            <option value="refunded">{__('refunded', 'sikshya')}</option>
           </select>
         </label>
       </Modal>
@@ -225,8 +226,8 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
       <ListPanel>
         {tableMissing ? (
           <ListEmptyState
-            title="No payments"
-            description="The payments database table is not installed yet."
+            title={__('No payments', 'sikshya')}
+            description={__('The payments database table is not installed yet.', 'sikshya')}
           />
         ) : (
           <>
@@ -261,11 +262,11 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                   onChange={(e) => setStatusFilter(e.target.value)}
                   disabled={loading}
                 >
-                  <option value="">All</option>
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                  <option value="failed">Failed</option>
-                  <option value="refunded">Refunded</option>
+                  <option value="">{__('All', 'sikshya')}</option>
+                  <option value="pending">{__('Pending', 'sikshya')}</option>
+                  <option value="completed">{__('Completed', 'sikshya')}</option>
+                  <option value="failed">{__('Failed', 'sikshya')}</option>
+                  <option value="refunded">{__('Refunded', 'sikshya')}</option>
                 </select>
               </label>
               <label className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -276,9 +277,9 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                   onChange={(e) => setChargeKindFilter(e.target.value)}
                   disabled={loading}
                 >
-                  <option value="">All</option>
-                  <option value="checkout">Checkout</option>
-                  <option value="renewal">Renewal</option>
+                  <option value="">{__('All', 'sikshya')}</option>
+                  <option value="checkout">{__('Checkout', 'sikshya')}</option>
+                  <option value="renewal">{__('Renewal', 'sikshya')}</option>
                 </select>
               </label>
             </div>
@@ -289,18 +290,18 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                     <th className="w-10 px-5 py-3.5">
                       <input
                         type="checkbox"
-                        aria-label="Select all payments on this page"
+                        aria-label={__('Select all payments on this page', 'sikshya')}
                         disabled={loading || rows.length === 0}
                         checked={rows.length > 0 && selectedIds.length === rows.length}
                         onChange={(e) => toggleAll(e.target.checked)}
                       />
                     </th>
-                    <th className="px-5 py-3.5">Date</th>
-                    <th className="px-5 py-3.5">Payer</th>
-                    <th className="px-5 py-3.5">Course</th>
-                    <th className="px-5 py-3.5">Amount</th>
-                    <th className="px-5 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Actions</th>
+                    <th className="px-5 py-3.5">{__('Date', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Payer', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Course', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Amount', 'sikshya')}</th>
+                    <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                    <th className="px-5 py-3.5 text-right">{__('Actions', 'sikshya')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -340,7 +341,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                               e.stopPropagation();
                               navigateView('payment', { id: String(r.id) });
                             }}
-                            title="Open payment details"
+                            title={__('Open payment details', 'sikshya')}
                           >
                             Payment #{r.id}
                           </button>
@@ -355,7 +356,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                                 e.stopPropagation();
                                 navigateView('payment', { id: String(r.id) });
                               }}
-                              title="Open payment details"
+                              title={__('Open payment details', 'sikshya')}
                             >
                               {r.transaction_id}
                             </button>
@@ -382,7 +383,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                             {r.course_title || `Course #${r.course_id}`}
                           </a>
                         ) : (r.charge_kind || '').toLowerCase() === 'renewal' ? (
-                          <span className="font-medium text-slate-700 dark:text-slate-200">Subscription renewal</span>
+                          <span className="font-medium text-slate-700 dark:text-slate-200">{__('Subscription renewal', 'sikshya')}</span>
                         ) : (
                           '—'
                         )}
@@ -419,8 +420,8 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                                 onClick: async () => {
                                   const ok = await dialog.confirm({
                                     title: `Delete payment #${r.id}?`,
-                                    message: 'This permanently removes the payment record. This cannot be undone.',
-                                    confirmLabel: 'Delete',
+                                    message: __('This permanently removes the payment record. This cannot be undone.', 'sikshya'),
+                                    confirmLabel: __('Delete', 'sikshya'),
                                     variant: 'danger',
                                   });
                                   if (!ok) return;
@@ -430,7 +431,7 @@ export function PaymentsPage(props: { config: SikshyaReactConfig; title: string;
                                     );
                                     await refetch();
                                   } catch (err) {
-                                    void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                                    void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                                   }
                                 },
                               },

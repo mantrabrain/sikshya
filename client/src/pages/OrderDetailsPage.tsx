@@ -12,6 +12,7 @@ import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
 import type { ApiError } from '../api/errors';
+import { __ } from '../lib/i18n';
 
 type OrderLine = {
   course_id: number;
@@ -75,7 +76,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
   const [editStatus, setEditStatus] = useState<'pending' | 'on-hold' | 'paid'>('pending');
 
   const loader = useCallback(async () => {
-    if (!orderId) throw new Error('Missing order id.');
+    if (!orderId) throw new Error(__('Missing order id.', 'sikshya'));
     return getSikshyaApi().get<DetailsResponse>(SIKSHYA_ENDPOINTS.admin.order(orderId));
   }, [orderId]);
 
@@ -99,7 +100,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
             disabled={!order || loading}
             onClick={() => {
               if (!order) return;
-              setEditStatus((order.status === 'paid' ? 'paid' : order.status === 'on-hold' ? 'on-hold' : 'pending') as any);
+              setEditStatus((order.status === 'paid' ? 'paid' : order.status === 'on-hold' ? __('on-hold', 'sikshya') : __('pending', 'sikshya')) as any);
               setEditOpen(true);
             }}
           >
@@ -113,7 +114,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error as ApiError} title="Could not load order" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error as ApiError} title={__('Could not load order', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -130,7 +131,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
           <Modal
             open={editOpen}
             title={`Edit order #${order.id}`}
-            description="Change order status. For offline payments, prefer “Mark paid” to apply fulfillment."
+            description={__('Change order status. For offline payments, prefer “Mark paid” to apply fulfillment.', 'sikshya')}
             size="lg"
             onClose={() => {
               if (!saving) setEditOpen(false);
@@ -158,13 +159,13 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                       setEditOpen(false);
                       await refetch();
                     } catch (err) {
-                      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                      void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                     } finally {
                       setSaving(false);
                     }
                   }}
                 >
-                  {saving ? 'Saving…' : 'Save'}
+                  {saving ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
                 </ButtonPrimary>
               </div>
             }
@@ -177,9 +178,9 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                 onChange={(e) => setEditStatus(e.target.value as any)}
                 disabled={saving}
               >
-                <option value="pending">pending</option>
-                <option value="on-hold">on-hold</option>
-                <option value="paid">paid</option>
+                <option value="pending">{__('pending', 'sikshya')}</option>
+                <option value="on-hold">{__('on-hold', 'sikshya')}</option>
+                <option value="paid">{__('paid', 'sikshya')}</option>
               </select>
             </label>
           </Modal>
@@ -218,14 +219,14 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                         );
                         await refetch();
                       } catch (err) {
-                        void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                        void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                       } finally {
                         setMarkBusy(false);
                       }
                     }}
                     className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/40"
                   >
-                    {markBusy ? 'Marking…' : 'Mark paid'}
+                    {markBusy ? __('Marking…', 'sikshya') : __('Mark paid', 'sikshya')}
                   </button>
                 ) : null}
                 {order.receipt_url ? (
@@ -278,19 +279,19 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
               </div>
               <div className="mt-2 space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300">Subtotal</span>
+                  <span className="text-slate-600 dark:text-slate-300">{__('Subtotal', 'sikshya')}</span>
                   <span className="font-semibold text-slate-900 dark:text-white">
                     {order.subtotal.toFixed(2)} {order.currency}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-300">Discount</span>
+                  <span className="text-slate-600 dark:text-slate-300">{__('Discount', 'sikshya')}</span>
                   <span className="font-semibold text-slate-900 dark:text-white">
                     {order.discount_total.toFixed(2)} {order.currency}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-t border-slate-200 pt-2 dark:border-slate-800">
-                  <span className="text-slate-700 dark:text-slate-200">Total</span>
+                  <span className="text-slate-700 dark:text-slate-200">{__('Total', 'sikshya')}</span>
                   <span className="text-base font-bold text-slate-900 dark:text-white">
                     {order.total.toFixed(2)} {order.currency}
                   </span>
@@ -306,7 +307,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
               </div>
               <p className="mt-1 text-sm text-amber-950/90 dark:text-amber-50/90">
                 This order created or renewed access through a membership plan. The row in{' '}
-                <strong>Subscriptions</strong> for this learner is keyed by user + plan; gateway webhooks keep status
+                <strong>{__('Subscriptions', 'sikshya')}</strong> for this learner is keyed by user + plan; gateway webhooks keep status
                 and billing period in sync when configured.
               </p>
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
@@ -356,15 +357,15 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
           ) : null}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <div className="text-sm font-semibold text-slate-900 dark:text-white">Items</div>
+            <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Items', 'sikshya')}</div>
             <div className="mt-3 overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                 <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/70 dark:text-slate-400">
                   <tr>
-                    <th className="px-4 py-2.5">Course</th>
-                    <th className="px-4 py-2.5">Qty</th>
-                    <th className="px-4 py-2.5">Unit</th>
-                    <th className="px-4 py-2.5">Line</th>
+                    <th className="px-4 py-2.5">{__('Course', 'sikshya')}</th>
+                    <th className="px-4 py-2.5">{__('Qty', 'sikshya')}</th>
+                    <th className="px-4 py-2.5">{__('Unit', 'sikshya')}</th>
+                    <th className="px-4 py-2.5">{__('Line', 'sikshya')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -392,7 +393,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
 
           {order.dynamic_fields_display && order.dynamic_fields_display.length ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">Dynamic checkout fields</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Dynamic checkout fields', 'sikshya')}</div>
               <div className="mt-3 space-y-1 text-sm">
                 {order.dynamic_fields_display.map((it) => (
                   <div key={it.id} className="flex gap-3">

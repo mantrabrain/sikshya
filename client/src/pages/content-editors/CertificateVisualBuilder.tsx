@@ -31,11 +31,12 @@ import {
   type MergeFieldKey,
   MERGE_FIELD_KEYS,
   type PaletteItem as PaletteItemDef,
-  PALETTE_ITEMS,
+  getPaletteItems,
   CERT_PAGE_DECO_ORDER,
-  CERT_PAGE_DECO_LABELS,
+  getCertPageDecoLabels,
   CERT_PAGE_DECO_SHOW_FIRST,
-  CERTIFICATE_THEME_QUICK_PRESETS,
+  getCertificateThemeQuickPresets,
+  type CertificateThemeQuickPreset,
   CERT_PAGE_SWATCHES,
   CERT_PAGE_PATTERN_ORDER,
   CERT_LAYOUT_VERSION,
@@ -53,6 +54,7 @@ import {
   type CertLayoutFile,
 } from './certificateLayout';
 import { cloneRegaliaSeed, cloneVertexSeed } from './certificateTemplateSeeds';
+import { __, sprintf } from '../../lib/i18n';
 
 const FIELD =
   'mt-1.5 w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 transition-colors focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200/80 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:focus:border-slate-500 dark:focus:ring-slate-600/50';
@@ -118,7 +120,7 @@ function certBlockLayerTitle(block: CertBlock): string {
     case 'divider':
       return 'Divider';
     case 'image':
-      return String(p.src || '').trim() ? 'Image' : 'Image (no URL)';
+      return String(p.src || '').trim() ? __('Image', 'sikshya') : __('Image (no URL)', 'sikshya');
     case 'qr':
       return 'QR';
     default:
@@ -127,7 +129,7 @@ function certBlockLayerTitle(block: CertBlock): string {
 }
 
 function certBlockTypeLabel(type: CertBlockType): string {
-  const hit = PALETTE_ITEMS.find((x) => x.type === type);
+  const hit = getPaletteItems().find((x) => x.type === type);
   return hit?.label ?? type;
 }
 
@@ -344,7 +346,7 @@ function BlockCanvasPreview({
       const src = String(p.src || '').trim();
       const w = Number(p.width) || 120;
       const align = (p.align as string) || 'center';
-      const jc = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+      const jc = align === 'left' ? 'flex-start' : align === 'right' ? __('flex-end', 'sikshya') : __('center', 'sikshya');
       if (!src) {
         return (
           <div
@@ -599,7 +601,7 @@ function PositionedCanvasBlock(props: {
           type="button"
           className={`absolute right-0.5 top-0.5 z-[6] flex h-6 w-6 items-center justify-center rounded border border-slate-200/90 bg-white/95 text-sm font-semibold leading-none text-slate-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 dark:border-slate-600 dark:bg-slate-900/95 dark:text-slate-300 dark:hover:bg-red-950/50 dark:hover:text-red-300 ${handleChrome}`}
           tabIndex={-1}
-          aria-label="Remove block"
+          aria-label={__('Remove block', 'sikshya')}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
@@ -628,7 +630,7 @@ function PositionedCanvasBlock(props: {
             type="button"
             tabIndex={-1}
             aria-label={`Resize (${h.k.toUpperCase()})`}
-            title="Drag to resize"
+            title={__('Drag to resize', 'sikshya')}
             onPointerDown={startResize(h.k)}
             className={`absolute z-[7] touch-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 ${
               selected ? 'opacity-100' : handleChrome
@@ -758,7 +760,7 @@ function CanvasDropArea(props: {
             >
               <div
                 className={`pointer-events-none absolute inset-0 ${
-                  useDarkScrim ? 'bg-slate-900/25' : 'bg-white/82 dark:bg-slate-950/80'
+                  useDarkScrim ? __('bg-slate-900/25', 'sikshya') : __('bg-white/82 dark:bg-slate-950/80', 'sikshya')
                 }`}
                 style={useDarkScrim ? { backdropFilter: 'blur(0.5px)' } : { backdropFilter: 'blur(1px)' }}
                 aria-hidden
@@ -778,12 +780,12 @@ function CanvasDropArea(props: {
                       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                         <NavIcon name="plusCircle" className="h-7 w-7" />
                       </div>
-                      <p className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-100">Start your certificate</p>
+                      <p className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-100">{__('Start your certificate', 'sikshya')}</p>
                       <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                        Open <span className="font-medium text-slate-700 dark:text-slate-300">Elements</span> to drag blocks
-                        here, <span className="font-medium text-slate-700 dark:text-slate-300">Layers</span> to reorder the
-                        stack, <span className="font-medium text-slate-700 dark:text-slate-300">Media</span> for images, and{' '}
-                        <span className="font-medium text-slate-700 dark:text-slate-300">Theme</span> for page finish.
+                        Open <span className="font-medium text-slate-700 dark:text-slate-300">{__('Elements', 'sikshya')}</span> to drag blocks
+                        here, <span className="font-medium text-slate-700 dark:text-slate-300">{__('Layers', 'sikshya')}</span> to reorder the
+                        stack, <span className="font-medium text-slate-700 dark:text-slate-300">{__('Media', 'sikshya')}</span> for images, and{' '}
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{__('Theme', 'sikshya')}</span> for page finish.
                       </p>
                     </div>
                   </div>
@@ -814,10 +816,10 @@ function Inspector(props: {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
           <NavIcon name="pencil" className="h-6 w-6" />
         </div>
-        <p className={`mt-3 ${SECTION_LABEL}`}>Nothing selected</p>
+        <p className={`mt-3 ${SECTION_LABEL}`}>{__('Nothing selected', 'sikshya')}</p>
         <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           Click a block on the certificate to edit layout, text, merge fields, or images. Use the{' '}
-          <span className="font-medium text-slate-700 dark:text-slate-300">Layers</span> tab to reorder the stack in the
+          <span className="font-medium text-slate-700 dark:text-slate-300">{__('Layers', 'sikshya')}</span> tab to reorder the stack in the
           side panel. Press{' '}
           <kbd className="rounded border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[11px] text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">
             Esc
@@ -841,14 +843,14 @@ function Inspector(props: {
         ? String(p.src || '').trim()
           ? 'Image'
           : 'Image'
-        : PALETTE_ITEMS.find((x) => x.type === selected.type)?.label ?? selected.type;
+        : getPaletteItems().find((x) => x.type === selected.type)?.label ?? selected.type;
 
   return (
     <div className="space-y-4">
       <div className={INSPECTOR_CARD}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className={SECTION_LABEL}>Selected</p>
+            <p className={SECTION_LABEL}>{__('Selected', 'sikshya')}</p>
             <p className="mt-1.5 truncate text-sm font-semibold text-slate-900 dark:text-white">{inspectorTitle}</p>
           </div>
           <button
@@ -856,16 +858,18 @@ function Inspector(props: {
             className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/45 dark:border-slate-600 dark:bg-slate-800 dark:text-red-400 dark:hover:border-red-900/50 dark:hover:bg-red-950/30"
             onClick={() => onRemoveBlock(selected.id)}
           >
-            Remove
+            {__('Remove', 'sikshya')}
           </button>
         </div>
       </div>
 
       <div className={INSPECTOR_CARD}>
-        <h3 className={SECTION_LABEL}>Position & size</h3>
+        <h3 className={SECTION_LABEL}>{__('Position & size', 'sikshya')}</h3>
         <p className={HINT}>
-          Values are % of the page. Drag the block to move, drag the corner handle on the canvas to resize, or edit numbers
-          here.
+          {__(
+            'Values are % of the page. Drag the block to move, drag the corner handle on the canvas to resize, or edit numbers here.',
+            'sikshya'
+          )}
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div>
@@ -916,7 +920,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-pos-w">
-              Width
+              {__('Width', 'sikshya')}
             </label>
             <input
               id="insp-pos-w"
@@ -939,7 +943,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-pos-h">
-              Height
+              {__('Height', 'sikshya')}
             </label>
             <input
               id="insp-pos-h"
@@ -962,7 +966,7 @@ function Inspector(props: {
           </div>
           <div className="col-span-2">
             <label className={LABEL} htmlFor="insp-pos-z">
-              Stack (z)
+              {__('Stack (z)', 'sikshya')}
             </label>
             <input
               id="insp-pos-z"
@@ -973,18 +977,18 @@ function Inspector(props: {
               value={frame.z}
               onChange={(e) => patch({ z: Math.min(200, Math.max(0, Math.floor(Number(e.target.value) || 0))) })}
             />
-            <p className={HINT}>Higher numbers draw in front of lower ones.</p>
+            <p className={HINT}>{__('Higher numbers draw in front of lower ones.', 'sikshya')}</p>
           </div>
         </div>
       </div>
 
       {selected.type === 'heading' ? (
         <div className={INSPECTOR_CARD}>
-          <h3 className={SECTION_LABEL}>Heading</h3>
+          <h3 className={SECTION_LABEL}>{__('Heading', 'sikshya')}</h3>
           <div className="mt-3 space-y-3">
           <div>
             <label className={LABEL} htmlFor="insp-h-text">
-              Text
+              {__('Text', 'sikshya')}
             </label>
             <textarea
               id="insp-h-text"
@@ -995,7 +999,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-tag">
-              Level
+              {__('Level', 'sikshya')}
             </label>
             <select
               id="insp-h-tag"
@@ -1003,14 +1007,14 @@ function Inspector(props: {
               value={String(p.tag ?? 'h1')}
               onChange={(e) => patch({ tag: e.target.value })}
             >
-              <option value="h1">Heading 1</option>
-              <option value="h2">Heading 2</option>
-              <option value="h3">Heading 3</option>
+              <option value="h1">{__('Heading 1', 'sikshya')}</option>
+              <option value="h2">{__('Heading 2', 'sikshya')}</option>
+              <option value="h3">{__('Heading 3', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-align">
-              Align
+              {__('Align', 'sikshya')}
             </label>
             <select
               id="insp-h-align"
@@ -1018,14 +1022,14 @@ function Inspector(props: {
               value={String(p.align ?? 'center')}
               onChange={(e) => patch({ align: e.target.value })}
             >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
+              <option value="left">{__('Left', 'sikshya')}</option>
+              <option value="center">{__('Center', 'sikshya')}</option>
+              <option value="right">{__('Right', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-fs">
-              Font size (px)
+              {__('Font size (px)', 'sikshya')}
             </label>
             <input
               id="insp-h-fs"
@@ -1039,7 +1043,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-color">
-              Color
+              {__('Color', 'sikshya')}
             </label>
             <input
               id="insp-h-color"
@@ -1051,7 +1055,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-fw">
-              Weight
+              {__('Weight', 'sikshya')}
             </label>
             <select
               id="insp-h-fw"
@@ -1059,14 +1063,14 @@ function Inspector(props: {
               value={String(p.fontWeight ?? '700')}
               onChange={(e) => patch({ fontWeight: e.target.value })}
             >
-              <option value="400">Normal</option>
-              <option value="600">Semibold</option>
-              <option value="700">Bold</option>
+              <option value="400">{__('Normal', 'sikshya')}</option>
+              <option value="600">{__('Semibold', 'sikshya')}</option>
+              <option value="700">{__('Bold', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-ff">
-              Font family
+              {__('Font family', 'sikshya')}
             </label>
             <select
               id="insp-h-ff"
@@ -1074,14 +1078,14 @@ function Inspector(props: {
               value={String(p.fontFamily ?? 'serif')}
               onChange={(e) => patch({ fontFamily: e.target.value })}
             >
-              <option value="serif">Serif (diploma)</option>
-              <option value="sans">Sans (modern)</option>
-              <option value="mono">Mono (code)</option>
+              <option value="serif">{__('Serif (diploma)', 'sikshya')}</option>
+              <option value="sans">{__('Sans (modern)', 'sikshya')}</option>
+              <option value="mono">{__('Mono (code)', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-lh">
-              Line height
+              {__('Line height', 'sikshya')}
             </label>
             <input
               id="insp-h-lh"
@@ -1096,7 +1100,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-h-ls">
-              Letter spacing (em)
+              {__('Letter spacing (em)', 'sikshya')}
             </label>
             <input
               id="insp-h-ls"
@@ -1115,11 +1119,11 @@ function Inspector(props: {
 
       {selected.type === 'text' ? (
         <div className={INSPECTOR_CARD}>
-          <h3 className={SECTION_LABEL}>Paragraph</h3>
+          <h3 className={SECTION_LABEL}>{__('Paragraph', 'sikshya')}</h3>
           <div className="mt-3 space-y-3">
           <div>
             <label className={LABEL} htmlFor="insp-t-text">
-              Text
+              {__('Text', 'sikshya')}
             </label>
             <textarea
               id="insp-t-text"
@@ -1130,7 +1134,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-align">
-              Align
+              {__('Align', 'sikshya')}
             </label>
             <select
               id="insp-t-align"
@@ -1138,14 +1142,14 @@ function Inspector(props: {
               value={String(p.align ?? 'left')}
               onChange={(e) => patch({ align: e.target.value })}
             >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
+              <option value="left">{__('Left', 'sikshya')}</option>
+              <option value="center">{__('Center', 'sikshya')}</option>
+              <option value="right">{__('Right', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-fs">
-              Font size (px)
+              {__('Font size (px)', 'sikshya')}
             </label>
             <input
               id="insp-t-fs"
@@ -1159,7 +1163,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-color">
-              Color
+              {__('Color', 'sikshya')}
             </label>
             <input
               id="insp-t-color"
@@ -1171,7 +1175,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-fw">
-              Weight
+              {__('Weight', 'sikshya')}
             </label>
             <select
               id="insp-t-fw"
@@ -1179,15 +1183,15 @@ function Inspector(props: {
               value={String(p.fontWeight ?? '400')}
               onChange={(e) => patch({ fontWeight: e.target.value })}
             >
-              <option value="400">Normal</option>
-              <option value="500">Medium</option>
-              <option value="600">Semibold</option>
-              <option value="700">Bold</option>
+              <option value="400">{__('Normal', 'sikshya')}</option>
+              <option value="500">{__('Medium', 'sikshya')}</option>
+              <option value="600">{__('Semibold', 'sikshya')}</option>
+              <option value="700">{__('Bold', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-ff">
-              Font family
+              {__('Font family', 'sikshya')}
             </label>
             <select
               id="insp-t-ff"
@@ -1195,14 +1199,14 @@ function Inspector(props: {
               value={String(p.fontFamily ?? 'sans')}
               onChange={(e) => patch({ fontFamily: e.target.value })}
             >
-              <option value="sans">Sans (default)</option>
-              <option value="serif">Serif</option>
-              <option value="mono">Mono</option>
+              <option value="sans">{__('Sans (default)', 'sikshya')}</option>
+              <option value="serif">{__('Serif', 'sikshya')}</option>
+              <option value="mono">{__('Mono', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-lh">
-              Line height
+              {__('Line height', 'sikshya')}
             </label>
             <input
               id="insp-t-lh"
@@ -1217,7 +1221,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-t-ls">
-              Letter spacing (em)
+              {__('Letter spacing (em)', 'sikshya')}
             </label>
             <input
               id="insp-t-ls"
@@ -1236,11 +1240,11 @@ function Inspector(props: {
 
       {selected.type === 'merge_field' ? (
         <div className={INSPECTOR_CARD}>
-          <h3 className={SECTION_LABEL}>Merge field</h3>
+          <h3 className={SECTION_LABEL}>{__('Merge field', 'sikshya')}</h3>
           <div className="mt-3 space-y-3">
           <div>
             <label className={LABEL} htmlFor="insp-m-field">
-              Field
+              {__('Field', 'sikshya')}
             </label>
             <select
               id="insp-m-field"
@@ -1258,7 +1262,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-align">
-              Align
+              {__('Align', 'sikshya')}
             </label>
             <select
               id="insp-m-align"
@@ -1266,14 +1270,14 @@ function Inspector(props: {
               value={String(p.align ?? 'center')}
               onChange={(e) => patch({ align: e.target.value })}
             >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
+              <option value="left">{__('Left', 'sikshya')}</option>
+              <option value="center">{__('Center', 'sikshya')}</option>
+              <option value="right">{__('Right', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-fs">
-              Font size (px)
+              {__('Font size (px)', 'sikshya')}
             </label>
             <input
               id="insp-m-fs"
@@ -1287,7 +1291,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-color">
-              Color
+              {__('Color', 'sikshya')}
             </label>
             <input
               id="insp-m-color"
@@ -1299,7 +1303,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-fw">
-              Weight
+              {__('Weight', 'sikshya')}
             </label>
             <select
               id="insp-m-fw"
@@ -1307,15 +1311,15 @@ function Inspector(props: {
               value={String(p.fontWeight ?? '600')}
               onChange={(e) => patch({ fontWeight: e.target.value })}
             >
-              <option value="400">Normal</option>
-              <option value="500">Medium</option>
-              <option value="600">Semibold</option>
-              <option value="700">Bold</option>
+              <option value="400">{__('Normal', 'sikshya')}</option>
+              <option value="500">{__('Medium', 'sikshya')}</option>
+              <option value="600">{__('Semibold', 'sikshya')}</option>
+              <option value="700">{__('Bold', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-ff">
-              Font family
+              {__('Font family', 'sikshya')}
             </label>
             <select
               id="insp-m-ff"
@@ -1323,14 +1327,14 @@ function Inspector(props: {
               value={String(p.fontFamily ?? 'sans')}
               onChange={(e) => patch({ fontFamily: e.target.value })}
             >
-              <option value="sans">Sans (default)</option>
-              <option value="serif">Serif</option>
-              <option value="mono">Mono</option>
+              <option value="sans">{__('Sans (default)', 'sikshya')}</option>
+              <option value="serif">{__('Serif', 'sikshya')}</option>
+              <option value="mono">{__('Mono', 'sikshya')}</option>
             </select>
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-lh">
-              Line height
+              {__('Line height', 'sikshya')}
             </label>
             <input
               id="insp-m-lh"
@@ -1345,7 +1349,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-m-ls">
-              Letter spacing (em)
+              {__('Letter spacing (em)', 'sikshya')}
             </label>
             <input
               id="insp-m-ls"
@@ -1364,10 +1368,10 @@ function Inspector(props: {
 
       {selected.type === 'spacer' ? (
         <div className={INSPECTOR_CARD}>
-          <h3 className={SECTION_LABEL}>Spacer</h3>
+          <h3 className={SECTION_LABEL}>{__('Spacer', 'sikshya')}</h3>
           <div className="mt-3">
           <label className={LABEL} htmlFor="insp-s-h">
-            Height (px)
+            {__('Height (px)', 'sikshya')}
           </label>
           <input
             id="insp-s-h"
@@ -1387,11 +1391,11 @@ function Inspector(props: {
 
       {selected.type === 'divider' ? (
         <div className={INSPECTOR_CARD}>
-          <h3 className={SECTION_LABEL}>Divider</h3>
+          <h3 className={SECTION_LABEL}>{__('Divider', 'sikshya')}</h3>
           <div className="mt-3 space-y-3">
           <div>
             <label className={LABEL} htmlFor="insp-d-thick">
-              Thickness (px)
+              {__('Thickness (px)', 'sikshya')}
             </label>
             <input
               id="insp-d-thick"
@@ -1405,7 +1409,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-d-color">
-              Color
+              {__('Color', 'sikshya')}
             </label>
             <input
               id="insp-d-color"
@@ -1421,23 +1425,23 @@ function Inspector(props: {
 
       {selected.type === 'image' ? (
         <div className={INSPECTOR_CARD}>
-          <h3 className={SECTION_LABEL}>Image</h3>
+          <h3 className={SECTION_LABEL}>{__('Image', 'sikshya')}</h3>
           <div className="mt-3 space-y-3">
           <div>
             <label className={LABEL} htmlFor="insp-i-src">
-              Image
+              {__('Image', 'sikshya')}
             </label>
             <WPMediaPickerField
               id="insp-i-src"
               value={String(p.src || '')}
               onChange={(url) => patch({ src: url })}
-              placeholder="Pick or paste image URL"
+              placeholder={__('Pick or paste image URL', 'sikshya')}
               imageOnly
             />
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-i-w">
-              Width (px)
+              {__('Width (px)', 'sikshya')}
             </label>
             <input
               id="insp-i-w"
@@ -1451,7 +1455,7 @@ function Inspector(props: {
           </div>
           <div>
             <label className={LABEL} htmlFor="insp-i-align">
-              Align
+              {__('Align', 'sikshya')}
             </label>
             <select
               id="insp-i-align"
@@ -1459,9 +1463,9 @@ function Inspector(props: {
               value={String(p.align ?? 'center')}
               onChange={(e) => patch({ align: e.target.value })}
             >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
+              <option value="left">{__('Left', 'sikshya')}</option>
+              <option value="center">{__('Center', 'sikshya')}</option>
+              <option value="right">{__('Right', 'sikshya')}</option>
             </select>
           </div>
           </div>
@@ -1535,10 +1539,10 @@ function LayersPanel(props: {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
           <NavIcon name="layers" className="h-6 w-6" />
         </div>
-        <p className="mt-3 text-sm font-medium text-slate-800 dark:text-slate-100">No blocks on the sheet</p>
+        <p className="mt-3 text-sm font-medium text-slate-800 dark:text-slate-100">{__('No blocks on the sheet', 'sikshya')}</p>
         <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-          Use <span className="font-medium text-slate-700 dark:text-slate-300">Templates</span> or{' '}
-          <span className="font-medium text-slate-700 dark:text-slate-300">Elements</span>, then return here to reorder.
+          Use <span className="font-medium text-slate-700 dark:text-slate-300">{__('Templates', 'sikshya')}</span> or{' '}
+          <span className="font-medium text-slate-700 dark:text-slate-300">{__('Elements', 'sikshya')}</span>, then return here to reorder.
         </p>
       </div>
     );
@@ -1546,8 +1550,8 @@ function LayersPanel(props: {
 
   return (
     <div className="space-y-2">
-      <p className={`${SECTION_LABEL} px-0.5`}>Front → back</p>
-      <ul className="space-y-1.5" aria-label="Certificate block layers">
+      <p className={`${SECTION_LABEL} px-0.5`}>{__('Front → back', 'sikshya')}</p>
+      <ul className="space-y-1.5" aria-label={__('Certificate block layers', 'sikshya')}>
         {orderedFrontFirst.map((block, displayIndex) => {
           const active = selectedId === block.id;
           const z = getBlockFrame(block.props, block.type).z;
@@ -1578,7 +1582,7 @@ function LayersPanel(props: {
                     type="button"
                     className="flex min-h-[2.25rem] flex-1 items-center justify-center px-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400/35 disabled:cursor-not-allowed disabled:opacity-35 dark:text-slate-300 dark:hover:bg-slate-700/80"
                     disabled={displayIndex === 0}
-                    title="Bring forward (draw on top)"
+                    title={__('Bring forward (draw on top)', 'sikshya')}
                     aria-label={`Bring ${certBlockLayerTitle(block)} forward`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1591,7 +1595,7 @@ function LayersPanel(props: {
                     type="button"
                     className="flex min-h-[2.25rem] flex-1 items-center justify-center border-t border-slate-200/80 px-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400/35 disabled:cursor-not-allowed disabled:opacity-35 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700/80"
                     disabled={displayIndex === orderedFrontFirst.length - 1}
-                    title="Send backward"
+                    title={__('Send backward', 'sikshya')}
                     aria-label={`Send ${certBlockLayerTitle(block)} backward`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1604,7 +1608,7 @@ function LayersPanel(props: {
                 <button
                   type="button"
                   className="shrink-0 border-l border-slate-200/80 px-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-400/45 dark:border-slate-600 dark:text-red-400 dark:hover:bg-red-950/40"
-                  title="Remove block"
+                  title={__('Remove block', 'sikshya')}
                   aria-label={`Remove ${certBlockLayerTitle(block)}`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1663,7 +1667,7 @@ export function CertificateVisualBuilder(props: Props) {
   );
 
   const applyThemeQuickPreset = useCallback(
-    (preset: (typeof CERTIFICATE_THEME_QUICK_PRESETS)[number]) => {
+    (preset: CertificateThemeQuickPreset) => {
       patchPageFinish({
         pageColor: preset.finish.pageColor,
         pagePattern: preset.finish.pagePattern,
@@ -2063,16 +2067,16 @@ export function CertificateVisualBuilder(props: Props) {
           <div
             className={`flex h-full min-h-0 w-[5.25rem] shrink-0 flex-col items-stretch gap-1 overflow-y-auto border-r border-slate-200/90 bg-slate-100 py-2.5 dark:border-slate-800 dark:bg-slate-900/60 ${CERT_BUILDER_SCROLL}`}
             role="tablist"
-            aria-label="Builder panels"
+            aria-label={__('Builder panels', 'sikshya')}
           >
             {(
               [
-                { id: 'templates' as const, label: 'Templates', icon: 'plusDocument' },
-                { id: 'elements' as const, label: 'Elements', icon: 'plusCircle' },
-                { id: 'media' as const, label: 'Media', icon: 'photoImage' },
-                { id: 'backgrounds' as const, label: 'Theme', icon: 'swatch' },
+                { id: 'templates' as const, label: __('Templates', 'sikshya'), icon: 'plusDocument' },
+                { id: 'elements' as const, label: __('Elements', 'sikshya'), icon: 'plusCircle' },
+                { id: 'media' as const, label: __('Media', 'sikshya'), icon: 'photoImage' },
+                { id: 'backgrounds' as const, label: __('Theme', 'sikshya'), icon: 'swatch' },
                 // Keep Layers at the bottom of the rail.
-                { id: 'layers' as const, label: 'Layers', icon: 'chapterStack', bottom: true },
+                { id: 'layers' as const, label: __('Layers', 'sikshya'), icon: 'chapterStack', bottom: true },
               ] as const
             ).map((t) => {
               const active = leftTab === t.id;
@@ -2113,16 +2117,16 @@ export function CertificateVisualBuilder(props: Props) {
             {leftTab === 'templates' ? (
               <div className="space-y-5">
                 <div className={PANEL_HEAD_RULE}>
-                  <h3 className={PANEL_TITLE}>Templates</h3>
-                  <p className={PANEL_LEDE}>Apply a starter layout, then fine-tune on the canvas.</p>
+                  <h3 className={PANEL_TITLE}>{__('Templates', 'sikshya')}</h3>
+                  <p className={PANEL_LEDE}>{__('Apply a starter layout, then fine-tune on the canvas.', 'sikshya')}</p>
                 </div>
                 <input
                   type="search"
                   className={FIELD}
                   value={templateQuery}
                   onChange={(e) => setTemplateQuery(e.target.value)}
-                  placeholder="Search templates…"
-                  aria-label="Search templates"
+                  placeholder={__('Search templates…', 'sikshya')}
+                  aria-label={__('Search templates', 'sikshya')}
                 />
                 <div className="grid min-w-0 gap-2.5">
                   {filteredTemplates.map((t) => {
@@ -2218,7 +2222,7 @@ export function CertificateVisualBuilder(props: Props) {
                     );
                   })}
                   {!filteredTemplates.length ? (
-                    <p className="text-center text-xs text-slate-500 dark:text-slate-400">No templates match.</p>
+                    <p className="text-center text-xs text-slate-500 dark:text-slate-400">{__('No templates match.', 'sikshya')}</p>
                   ) : null}
                 </div>
               </div>
@@ -2227,7 +2231,7 @@ export function CertificateVisualBuilder(props: Props) {
             {leftTab === 'layers' ? (
               <div className="space-y-5">
                 <div className={PANEL_HEAD_RULE}>
-                  <h3 className={PANEL_TITLE}>Layers</h3>
+                  <h3 className={PANEL_TITLE}>{__('Layers', 'sikshya')}</h3>
                   <p className={PANEL_LEDE}>Top of the list draws in front. Use ↑ ↓ to reorder, click a row to select, or remove with ×.</p>
                 </div>
                 <LayersPanel blocks={blocks} selectedId={selectedId} onSelect={setSelectedId} onLayoutChange={onLayoutChange} onRemoveBlock={removeBlock} />
@@ -2237,21 +2241,21 @@ export function CertificateVisualBuilder(props: Props) {
             {leftTab === 'elements' ? (
               <div className="space-y-5">
                 <div className={PANEL_HEAD_RULE}>
-                  <h3 className={PANEL_TITLE}>Elements</h3>
-                  <p className={PANEL_LEDE}>Drag a tile to the canvas, or use quick add for the same block.</p>
+                  <h3 className={PANEL_TITLE}>{__('Elements', 'sikshya')}</h3>
+                  <p className={PANEL_LEDE}>{__('Drag a tile to the canvas, or use quick add for the same block.', 'sikshya')}</p>
                 </div>
                 <div className="min-w-0">
-                  <p className={`mb-2.5 ${SECTION_LABEL}`}>Library</p>
+                  <p className={`mb-2.5 ${SECTION_LABEL}`}>{__('Library', 'sikshya')}</p>
                   <div className="grid min-w-0 grid-cols-2 gap-2.5">
-                    {PALETTE_ITEMS.map((item) => (
+                    {getPaletteItems().map((item) => (
                       <PaletteItem key={`${item.type}-${item.label}`} {...item} />
                     ))}
                   </div>
                 </div>
                 <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/40">
-                  <p className={`mb-2.5 ${SECTION_LABEL}`}>Quick add</p>
+                  <p className={`mb-2.5 ${SECTION_LABEL}`}>{__('Quick add', 'sikshya')}</p>
                   <div className="grid min-w-0 grid-cols-2 gap-2">
-                    {PALETTE_ITEMS.map((item) => (
+                    {getPaletteItems().map((item) => (
                       <button
                         key={`q-${item.type}-${item.label}`}
                         type="button"
@@ -2271,18 +2275,18 @@ export function CertificateVisualBuilder(props: Props) {
             {leftTab === 'media' ? (
               <div className="space-y-5">
                 <div className={PANEL_HEAD_RULE}>
-                  <h3 className={PANEL_TITLE}>Media</h3>
-                  <p className={PANEL_LEDE}>Pick an image from the library, then place it on the certificate.</p>
+                  <h3 className={PANEL_TITLE}>{__('Media', 'sikshya')}</h3>
+                  <p className={PANEL_LEDE}>{__('Pick an image from the library, then place it on the certificate.', 'sikshya')}</p>
                 </div>
                 <div className="rounded-lg border border-slate-200/90 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-800/40">
                   <label className={LABEL} htmlFor="cv-media-pick">
-                    Image from library
+                    {__('Image from library', 'sikshya')}
                   </label>
                   <WPMediaPickerField
                     id="cv-media-pick"
                     value={mediaPickUrl}
                     onChange={setMediaPickUrl}
-                    placeholder="Pick or paste image URL"
+                    placeholder={__('Pick or paste image URL', 'sikshya')}
                     imageOnly
                   />
                     <button
@@ -2301,17 +2305,17 @@ export function CertificateVisualBuilder(props: Props) {
             {leftTab === 'backgrounds' ? (
               <div className="space-y-5">
                 <div className={PANEL_HEAD_RULE}>
-                  <h3 className={PANEL_TITLE}>Theme</h3>
-                  <p className={PANEL_LEDE}>Page color, texture, art background, paper size, and accent stripe.</p>
+                  <h3 className={PANEL_TITLE}>{__('Theme', 'sikshya')}</h3>
+                  <p className={PANEL_LEDE}>{__('Page color, texture, art background, paper size, and accent stripe.', 'sikshya')}</p>
                 </div>
 
                 <div className="rounded-lg border border-slate-200/90 bg-slate-50/40 p-3 dark:border-slate-700 dark:bg-slate-800/35">
-                  <h4 className={SECTION_LABEL}>Quick themes</h4>
+                  <h4 className={SECTION_LABEL}>{__('Quick themes', 'sikshya')}</h4>
                   <p className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                     One-tap combinations. Some keep your background photo; others clear it so art shows.
                   </p>
                   <div className="mt-3 grid grid-cols-1 gap-2">
-                    {CERTIFICATE_THEME_QUICK_PRESETS.map((preset) => {
+                    {getCertificateThemeQuickPresets().map((preset) => {
                       const active =
                         pageFinish.pageColor.toLowerCase() === preset.finish.pageColor.toLowerCase() &&
                         pageFinish.pagePattern === preset.finish.pagePattern &&
@@ -2338,8 +2342,8 @@ export function CertificateVisualBuilder(props: Props) {
                 </div>
 
                 <div>
-                  <h4 className={SECTION_LABEL}>Color</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Base fill; pattern and image go on top.</p>
+                  <h4 className={SECTION_LABEL}>{__('Color', 'sikshya')}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{__('Base fill; pattern and image go on top.', 'sikshya')}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     {CERT_PAGE_SWATCHES.map((hex) => (
                       <button
@@ -2361,7 +2365,7 @@ export function CertificateVisualBuilder(props: Props) {
                       Overlay the real input (opacity-0) on top of the "+" badge so the picker opens
                       right next to the button instead of off-screen.
                     */}
-                    <span className="relative inline-flex h-8 w-8" title="Pick custom color">
+                    <span className="relative inline-flex h-8 w-8" title={__('Pick custom color', 'sikshya')}>
                       <span
                         aria-hidden="true"
                         className="pointer-events-none flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-slate-300 bg-slate-50 text-slate-500 shadow-sm transition dark:border-slate-600 dark:bg-slate-800"
@@ -2370,7 +2374,7 @@ export function CertificateVisualBuilder(props: Props) {
                       </span>
                       <input
                         type="color"
-                        aria-label="Pick custom page color"
+                        aria-label={__('Pick custom page color', 'sikshya')}
                         className="absolute inset-0 h-8 w-8 cursor-pointer rounded-full border-0 bg-transparent p-0 opacity-0 focus-visible:opacity-10 focus-visible:outline-2 focus-visible:outline-slate-400"
                         value={/^#[0-9A-Fa-f]{6}$/i.test(pageFinish.pageColor) ? pageFinish.pageColor : '#ffffff'}
                         onChange={(e) => patchPageFinish({ pageColor: e.target.value })}
@@ -2381,16 +2385,16 @@ export function CertificateVisualBuilder(props: Props) {
 
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className={SECTION_LABEL}>Pattern</h4>
+                    <h4 className={SECTION_LABEL}>{__('Pattern', 'sikshya')}</h4>
                     <button
                       type="button"
                       className="shrink-0 rounded px-1 py-0.5 text-xs text-slate-600 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40 dark:text-slate-400 dark:hover:text-slate-200"
                       onClick={() => setShowAllPatterns((s) => !s)}
                     >
-                      {showAllPatterns ? 'Less' : 'View all'}
+                      {showAllPatterns ? __('Less', 'sikshya') : __('View all', 'sikshya')}
                     </button>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">A subtle texture on top of your color (optional).</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{__('A subtle texture on top of your color (optional).', 'sikshya')}</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {(showAllPatterns
                       ? [...CERT_PAGE_PATTERN_ORDER]
@@ -2419,8 +2423,8 @@ export function CertificateVisualBuilder(props: Props) {
                                 }
                               : { backgroundColor: '#f8fafc' }
                           }
-                          title={isNone ? 'No pattern' : pid}
-                          aria-label={isNone ? 'No pattern' : `Pattern ${pid}`}
+                          title={isNone ? __('No pattern', 'sikshya') : pid}
+                          aria-label={isNone ? __('No pattern', 'sikshya') : sprintf(__('Pattern %s', 'sikshya'), pid)}
                         >
                           {isNone ? <span className="text-xs text-slate-400">—</span> : null}
                         </button>
@@ -2431,13 +2435,13 @@ export function CertificateVisualBuilder(props: Props) {
 
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className={SECTION_LABEL}>Background</h4>
+                    <h4 className={SECTION_LABEL}>{__('Background', 'sikshya')}</h4>
                     <button
                       type="button"
                       className="shrink-0 rounded px-1 py-0.5 text-xs text-slate-600 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40 dark:text-slate-400 dark:hover:text-slate-200"
                       onClick={() => setShowAllDecos((s) => !s)}
                     >
-                      {showAllDecos ? 'Less' : 'View all'}
+                      {showAllDecos ? __('Less', 'sikshya') : __('View all', 'sikshya')}
                     </button>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -2448,7 +2452,7 @@ export function CertificateVisualBuilder(props: Props) {
                       (id) => {
                         const g = getCertificatePageDecoGradient(id);
                         const active = pageFinish.pageDeco === id;
-                        const label = CERT_PAGE_DECO_LABELS[id] ?? id;
+                        const label = getCertPageDecoLabels()[id] ?? id;
                         return (
                           <button
                             key={id}
@@ -2481,22 +2485,24 @@ export function CertificateVisualBuilder(props: Props) {
                 </div>
 
                 <div className="border-t border-slate-200/80 pt-4 dark:border-slate-800">
-                  <h4 className={SECTION_LABEL}>Page settings</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Size and orientation.</p>
+                  <h4 className={SECTION_LABEL}>{__('Page settings', 'sikshya')}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{__('Size and orientation.', 'sikshya')}</p>
                   <div className="mt-3 space-y-4">
                     <div>
                       <label className={LABEL} htmlFor="cv-size">
-                        Certificate size
+                        {__('Certificate size', 'sikshya')}
                       </label>
                       <select
                         id="cv-size"
                         className={FIELD}
                         value={pageSize}
-                        onChange={(e) => onPageSizeChange(e.target.value === 'a4' ? 'a4' : e.target.value === 'a5' ? 'a5' : 'letter')}
+                        onChange={(e) =>
+                          onPageSizeChange(e.target.value === 'a4' ? 'a4' : e.target.value === 'a5' ? 'a5' : 'letter')
+                        }
                       >
-                        <option value="letter">Letter (US)</option>
-                        <option value="a4">A4</option>
-                        <option value="a5">A5</option>
+                        <option value="letter">{__('Letter (US)', 'sikshya')}</option>
+                        <option value="a4">{__('A4', 'sikshya')}</option>
+                        <option value="a5">{__('A5', 'sikshya')}</option>
                       </select>
                       <p className={HINT}>
                         The sheet in the center is drawn at real size (A4/A5 in millimetres, Letter in inches). Scroll the
@@ -2505,16 +2511,18 @@ export function CertificateVisualBuilder(props: Props) {
                     </div>
                     <div>
                       <label className={LABEL} htmlFor="cv-orient">
-                        Orientation
+                        {__('Orientation', 'sikshya')}
                       </label>
                       <select
                         id="cv-orient"
                         className={FIELD}
                         value={orientation}
-                        onChange={(e) => onOrientationChange(e.target.value === 'portrait' ? 'portrait' : 'landscape')}
+                        onChange={(e) =>
+                          onOrientationChange(e.target.value === 'portrait' ? 'portrait' : 'landscape')
+                        }
                       >
-                        <option value="landscape">Landscape</option>
-                        <option value="portrait">Portrait</option>
+                        <option value="landscape">{__('Landscape', 'sikshya')}</option>
+                        <option value="portrait">{__('Portrait', 'sikshya')}</option>
                       </select>
                     </div>
                   </div>
@@ -2522,14 +2530,14 @@ export function CertificateVisualBuilder(props: Props) {
 
                 <div>
                   <label className={LABEL} htmlFor="cv-bg">
-                    Your background photo
+                    {__('Your background photo', 'sikshya')}
                   </label>
                   <WPMediaPickerField
                     id="cv-bg"
                     value={featuredPreview}
                     onChange={onFeaturedPreviewChange}
                     onAttachmentIdChange={onFeaturedIdChange}
-                    placeholder="Optional: use your own full-page image (replaces the art background above)."
+                    placeholder={__('Optional: use your own full-page image (replaces the art background above).', 'sikshya')}
                     imageOnly
                   />
                   <p className={HINT}>Add a company banner or stock image. This sits above your color and pattern.</p>
@@ -2568,7 +2576,7 @@ export function CertificateVisualBuilder(props: Props) {
 
         <aside className="flex h-full max-h-full min-h-0 min-w-0 flex-col overflow-hidden border-l border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900">
           <div className="shrink-0 border-b border-slate-200/90 px-4 pb-3 pt-4 dark:border-slate-800">
-            <h3 className={PANEL_TITLE}>{selected ? 'Properties' : 'Inspector'}</h3>
+            <h3 className={PANEL_TITLE}>{selected ? __('Properties', 'sikshya') : __('Inspector', 'sikshya')}</h3>
             <p className={PANEL_LEDE}>
               {selected
                 ? 'Adjust the selected block. Changes apply to this certificate only.'
@@ -2588,7 +2596,7 @@ export function CertificateVisualBuilder(props: Props) {
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
               <NavIcon name="plusCircle" className="h-4 w-4" />
             </span>
-            <span>Add {PALETTE_ITEMS.find((x) => x.type === activeDrag.type)?.label ?? activeDrag.type}</span>
+            <span>Add {getPaletteItems().find((x) => x.type === activeDrag.type)?.label ?? activeDrag.type}</span>
           </div>
         ) : null}
       </DragOverlay>

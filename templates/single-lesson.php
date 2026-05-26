@@ -706,6 +706,10 @@ while (have_posts()) :
     echo wp_json_encode((string) $__lesson_rest->getUrl(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     ?>;
     const restNonce = <?php echo wp_json_encode((string) $__lesson_rest->getNonce(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+    const completeMsgs = <?php echo wp_json_encode([
+        'saving' => __('Saving…', 'sikshya'),
+        'failed' => __('Could not mark complete. Try again.', 'sikshya'),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
     completeBtn.addEventListener('click', async () => {
       const courseId = completeBtn.getAttribute('data-course-id') || '';
       const lessonId = completeBtn.getAttribute('data-lesson-id') || '';
@@ -713,7 +717,7 @@ while (have_posts()) :
 
       const prevText = completeBtn.textContent || '';
       completeBtn.setAttribute('disabled', 'disabled');
-      completeBtn.textContent = 'Saving...';
+      completeBtn.textContent = completeMsgs.saving || '';
       try {
         const res = await fetch(restBase.replace(/\/?$/, '/') + 'me/lesson-complete', {
           method: 'POST',
@@ -726,7 +730,7 @@ while (have_posts()) :
         });
         const json = await res.json().catch(() => null);
         if (!res.ok || !json || json.ok !== true) {
-          throw new Error((json && (json.message || json.data?.message)) || 'Failed');
+          throw new Error((json && (json.message || json.data?.message)) || completeMsgs.failed || '');
         }
         window.location.reload();
       } catch (e) {

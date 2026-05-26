@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { NavIcon } from './NavIcon';
 import type { SettingsField, SettingsSection } from '../types/settingsSchema';
 import { isTruthyCheckboxValue } from '../pages/settingsRenderField';
+import { __ } from '../lib/i18n';
 
 type Props = {
   tabSchema: SettingsSection[];
@@ -66,7 +67,7 @@ function SectionShell(props: {
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
               {locked ? (
                 <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-200">
-                  <span aria-hidden>★</span> Pro
+                  <span aria-hidden>★</span> {__('Pro', 'sikshya')}
                 </span>
               ) : null}
             </div>
@@ -75,7 +76,7 @@ function SectionShell(props: {
             ) : null}
             {locked ? (
               <p className="mt-2 text-xs leading-relaxed text-violet-700 dark:text-violet-200">
-                {lockedReason || 'Turn on the matching addon to edit these settings.'}
+                {lockedReason || __('Turn on the matching addon to edit these settings.', 'sikshya')}
               </p>
             ) : null}
           </div>
@@ -90,19 +91,19 @@ function SectionShell(props: {
 const SUB_TABS: Array<{ id: 'purchase' | 'access' | 'rules'; label: string; icon: string; keys: string[] }> = [
   {
     id: 'purchase',
-    label: 'Purchase & completion',
+    label: __('Purchase & completion', 'sikshya'),
     icon: 'chart',
     keys: ['enrollment_checkout', 'enrollment_dynamic_checkout_fields', 'enrollment_completion'],
   },
   {
     id: 'access',
-    label: 'Access & capacity',
+    label: __('Access & capacity', 'sikshya'),
     icon: 'users',
     keys: ['enrollment_access', 'enrollment_limits'],
   },
   {
     id: 'rules',
-    label: 'Unenroll & advanced',
+    label: __('Unenroll & advanced', 'sikshya'),
     icon: 'layers',
     keys: ['enrollment_unenroll', 'enrollment_prerequisites', 'enrollment_periods'],
   },
@@ -136,9 +137,10 @@ export function EnrollmentSettingsTab(props: Props) {
     <div className="w-full space-y-0">
       <div className="space-y-4 px-6">
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          Everything about joining courses, checkout behavior, completion rules, and capacity lives here — not under Courses.
-          Use <span className="font-semibold text-slate-600 dark:text-slate-300">Courses</span> for catalog layout, reviews, and
-          search only.
+          {__(
+            'Everything about joining courses, checkout behavior, completion rules, and capacity lives here — not under Courses. Use Courses for catalog layout, reviews, and search only.',
+            'sikshya'
+          )}
         </p>
 
         {guestLoginConflict ? (
@@ -146,12 +148,14 @@ export function EnrollmentSettingsTab(props: Props) {
             className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100"
             role="status"
           >
-            <p className="font-semibold text-amber-950 dark:text-amber-50">These two options usually conflict</p>
+            <p className="font-semibold text-amber-950 dark:text-amber-50">
+              {__('These two options usually conflict', 'sikshya')}
+            </p>
             <p className="mt-1 text-xs leading-relaxed text-amber-900/90 dark:text-amber-100/90">
-              Guest enrollment lets people join <strong>without</strong> a WordPress account. “Require login for course access”
-              expects a <strong>logged-in</strong> user to open lessons. Together, guests may enroll but then cannot open
-              content. Turn off guest enrollment if everyone must log in, or turn off the login requirement if you truly need
-              guest access (subject to how your theme handles identity).
+              {__(
+                'Guest enrollment lets people join without a WordPress account. “Require login for course access” expects a logged-in user to open lessons. Together, guests may enroll but then cannot open content. Turn off guest enrollment if everyone must log in, or turn off the login requirement if you truly need guest access (subject to how your theme handles identity).',
+                'sikshya'
+              )}
             </p>
           </div>
         ) : null}

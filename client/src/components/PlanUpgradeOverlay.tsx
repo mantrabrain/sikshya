@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { getCatalogEntry, requiredPlanLabelForFeature } from '../lib/licensing';
+import { __, sprintf } from '../lib/i18n';
 import { sikshyaPricingUrl } from '../lib/upgradeUrl';
 import type { SikshyaReactConfig } from '../types';
 import {
@@ -34,10 +35,22 @@ function buildValueRows(fullDescription: string): ValueRow[] {
     .filter((s) => s.length > 8);
 
   const generic: ValueRow[] = [
-    { title: 'Full feature access', detail: 'Use this module without any limits.' },
-    { title: 'Priority support', detail: 'Direct email support from our team.' },
-    { title: 'Regular updates', detail: 'New features and improvements as they ship.' },
-    { title: 'Self-hosted, no SaaS', detail: 'Runs on your WordPress — your data stays with you.' },
+    {
+      title: __('Full feature access', 'sikshya'),
+      detail: __('Use this module without any limits.', 'sikshya'),
+    },
+    {
+      title: __('Priority support', 'sikshya'),
+      detail: __('Direct email support from our team.', 'sikshya'),
+    },
+    {
+      title: __('Regular updates', 'sikshya'),
+      detail: __('New features and improvements as they ship.', 'sikshya'),
+    },
+    {
+      title: __('Self-hosted, no SaaS', 'sikshya'),
+      detail: __('Runs on your WordPress — your data stays with you.', 'sikshya'),
+    },
   ];
 
   const rows: ValueRow[] = [];
@@ -122,7 +135,7 @@ export function PlanUpgradeOverlay(props: Props) {
                 </svg>
               </div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
-                {brandName} Pro · {plan}
+                {sprintf(__('%1$s Pro · %2$s', 'sikshya'), brandName, plan)}
               </span>
             </div>
 
@@ -131,7 +144,7 @@ export function PlanUpgradeOverlay(props: Props) {
               id={titleId}
               className="mt-5 text-xl font-bold leading-snug tracking-tight text-white sm:text-[1.375rem]"
             >
-              Unlock {title}
+              {sprintf(__('Unlock %s', 'sikshya'), title)}
             </h2>
             <p
               id={descId}
@@ -145,7 +158,7 @@ export function PlanUpgradeOverlay(props: Props) {
         {/* Value grid */}
         <div className="px-7 pt-6 pb-2 sm:px-9 sm:pt-7">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            What you unlock
+            {__('What you unlock', 'sikshya')}
           </p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3">
             {valueRows.map((row, i) => (
@@ -183,7 +196,7 @@ export function PlanUpgradeOverlay(props: Props) {
               rel="noreferrer noopener"
               className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-[14.5px] font-semibold text-white shadow-sm transition hover:bg-accent-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
-              Upgrade to {plan}
+              {sprintf(__('Upgrade to %s', 'sikshya'), plan)}
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -194,7 +207,7 @@ export function PlanUpgradeOverlay(props: Props) {
               rel="noreferrer noopener"
               className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-[14px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
             >
-              See pricing
+              {__('See pricing', 'sikshya')}
             </a>
           </div>
           <p className="mt-4 flex items-center gap-2 text-[12.5px] text-slate-500 dark:text-slate-400">
@@ -208,7 +221,7 @@ export function PlanUpgradeOverlay(props: Props) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            14-day refund · Cancel anytime · Existing data stays exactly as it is
+            {__('14-day refund · Cancel anytime · Existing data stays exactly as it is', 'sikshya')}
           </p>
         </div>
       </div>

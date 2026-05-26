@@ -58,7 +58,7 @@ final class TaxonomyRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('categoryService');
         if (!$svc instanceof CategoryService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $id = (int) $request->get_param('id');
@@ -76,7 +76,7 @@ final class TaxonomyRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('categoryService');
         if (!$svc instanceof CategoryService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $r = $svc->save($this->jsonBody($request));
@@ -97,7 +97,7 @@ final class TaxonomyRoutes extends AbstractAdminRestController
     {
         $svc = $this->plugin->getService('categoryService');
         if (!$svc instanceof CategoryService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('Service unavailable', 'sikshya')], 500);
         }
 
         $id = (int) $request->get_param('id');

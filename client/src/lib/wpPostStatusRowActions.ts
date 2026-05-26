@@ -2,6 +2,7 @@ import { getWpApi } from '../api';
 import type { SikshyaConfirmOptions } from '../components/shared/SikshyaDialogContext';
 import type { RowActionItem } from '../components/shared/list/RowActionsMenu';
 import type { WpPost } from '../types';
+import { __ } from './i18n';
 
 type ConfirmFn = (opts: SikshyaConfirmOptions) => Promise<boolean>;
 
@@ -26,20 +27,20 @@ export function wpPostStatusRowActions(
     return [
       {
         key: 'restore',
-        label: 'Restore to draft',
+        label: __('Restore to draft', 'sikshya'),
         onClick: () => void patchStatus('draft')(),
       },
       {
         key: 'delete_perm',
-        label: 'Delete permanently',
+        label: __('Delete permanently', 'sikshya'),
         danger: true,
         onClick: () =>
           void (async () => {
             const ok = await confirm({
-              title: 'Delete permanently?',
-              message: 'This cannot be undone.',
+              title: __('Delete permanently?', 'sikshya'),
+              message: __('This cannot be undone.', 'sikshya'),
               variant: 'danger',
-              confirmLabel: 'Delete permanently',
+              confirmLabel: __('Delete permanently', 'sikshya'),
             });
             if (!ok) {
               return;
@@ -56,7 +57,7 @@ export function wpPostStatusRowActions(
   if (st !== 'publish' && st !== 'future') {
     items.push({
       key: 'publish',
-      label: 'Publish',
+      label: __('Publish', 'sikshya'),
       onClick: () => void patchStatus('publish')(),
     });
   }
@@ -64,7 +65,7 @@ export function wpPostStatusRowActions(
   if (st !== 'draft') {
     items.push({
       key: 'draft',
-      label: 'Move to draft',
+      label: __('Move to draft', 'sikshya'),
       onClick: () => void patchStatus('draft')(),
     });
   }
@@ -72,7 +73,7 @@ export function wpPostStatusRowActions(
   if (st !== 'pending') {
     items.push({
       key: 'pending',
-      label: 'Mark pending review',
+      label: __('Mark pending review', 'sikshya'),
       onClick: () => void patchStatus('pending')(),
     });
   }
@@ -80,23 +81,25 @@ export function wpPostStatusRowActions(
   if (st !== 'private') {
     items.push({
       key: 'private',
-      label: 'Move to private',
+      label: __('Move to private', 'sikshya'),
       onClick: () => void patchStatus('private')(),
     });
   }
 
   items.push({
     key: 'trash',
-    label: 'Move to trash',
+    label: __('Move to trash', 'sikshya'),
     danger: true,
     onClick: () =>
       void (async () => {
         const ok = await confirm({
-          title: 'Move to trash?',
-          message:
+          title: __('Move to trash?', 'sikshya'),
+          message: __(
             'While in trash, WordPress may add a __trashed suffix to the stored slug (restored automatically when you restore).',
+            'sikshya'
+          ),
           variant: 'danger',
-          confirmLabel: 'Move to trash',
+          confirmLabel: __('Move to trash', 'sikshya'),
         });
         if (!ok) {
           return;

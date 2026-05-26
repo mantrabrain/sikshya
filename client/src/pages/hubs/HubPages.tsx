@@ -27,6 +27,7 @@ import { ToolsPage } from '../ToolsPage';
 import { isFeatureEnabled } from '../../lib/licensing';
 import { appViewHref } from '../../lib/appUrl';
 import { term } from '../../lib/terminology';
+import { __ } from '../../lib/i18n';
 
 type Props = { embedded?: boolean; config: SikshyaReactConfig; title: string };
 
@@ -93,8 +94,8 @@ export function ContentLibraryHubPage({ config, title }: Props) {
             <WpEntityListPage
               embedded
               config={c}
-              title="Questions"
-              subtitle="All questions"
+              title={__('Questions', 'sikshya')}
+              subtitle={__('All questions', 'sikshya')}
               restBase="sik_question"
             />
           ),
@@ -113,7 +114,7 @@ export function ContentLibraryHubPage({ config, title }: Props) {
           icon: 'layers',
           hidden: !isFeatureEnabled(config, 'quiz_advanced'),
           render: (c) => (
-            <QuizAdvancedWorkspacePage embedded config={c} title="Question banks" />
+            <QuizAdvancedWorkspacePage embedded config={c} title={__('Question banks', 'sikshya')} />
           ),
         },
       ]}
@@ -168,8 +169,8 @@ export function PeopleHubPage({ config, title }: Props) {
             <InstructorApplicationsPage
               embedded
               config={c}
-              title="Instructor applications"
-              subtitle="Approve or reject learners who applied to teach. Approving assigns the instructor role."
+              title={__('Instructor applications', 'sikshya')}
+              subtitle={__('Approve or reject learners who applied to teach. Approving assigns the instructor role.', 'sikshya')}
             />
           ),
         },
@@ -184,7 +185,7 @@ export function CertificatesHubPage({ config, title }: Props) {
       embedded
       config={config}
       title={title}
-      subtitle="Designs that get rendered, and a record of every certificate already awarded."
+      subtitle={__('Designs that get rendered, and a record of every certificate already awarded.', 'sikshya')}
       sidebarActivePage="certificates-hub"
       tabs={[
         {
@@ -195,8 +196,8 @@ export function CertificatesHubPage({ config, title }: Props) {
             <WpEntityListPage
               embedded
               config={c}
-              title="Certificates"
-              subtitle="Certificate templates"
+              title={__('Certificates', 'sikshya')}
+              subtitle={__('Certificate templates', 'sikshya')}
               restBase="sikshya_certificate"
             />
           ),
@@ -205,7 +206,7 @@ export function CertificatesHubPage({ config, title }: Props) {
           id: 'issued',
           label: 'Issued',
           icon: 'documentText',
-          render: (c) => <IssuedCertificatesPage embedded config={c} title="Issued certificates" />,
+          render: (c) => <IssuedCertificatesPage embedded config={c} title={__('Issued certificates', 'sikshya')} />,
         },
         {
           id: 'settings',
@@ -216,11 +217,11 @@ export function CertificatesHubPage({ config, title }: Props) {
             <AddonSettingsPage
               embedded
               config={c}
-              title="Advanced certificates"
+              title={__('Advanced certificates', 'sikshya')}
               addonId="certificates_advanced"
-              subtitle="Verification links, QR images, and learner-facing controls."
-              featureTitle="Advanced certificates"
-              featureDescription="Control QR visibility, learner download/share toolbars, and the learn sidebar shortcut to My account."
+              subtitle={__('Verification links, QR images, and learner-facing controls.', 'sikshya')}
+              featureTitle={__('Advanced certificates', 'sikshya')}
+              featureDescription={__('Control QR visibility, learner download/share toolbars, and the learn sidebar shortcut to My account.', 'sikshya')}
               relatedCoreSettingsTab="certificates"
               relatedCoreSettingsLabel="Certificates"
               nextSteps={[
@@ -261,13 +262,13 @@ export function SalesHubPage({ config, title }: Props) {
           id: 'orders',
           label: 'Orders',
           icon: 'documentText',
-          render: (c) => <OrdersPage embedded config={c} title="Orders" />,
+          render: (c) => <OrdersPage embedded config={c} title={__('Orders', 'sikshya')} />,
         },
         {
           id: 'payments',
           label: 'Payments',
           icon: 'creditCard',
-          render: (c) => <PaymentsPage embedded config={c} title="Payments" />,
+          render: (c) => <PaymentsPage embedded config={c} title={__('Payments', 'sikshya')} />,
         },
       ]}
     />
@@ -295,20 +296,20 @@ export function EmailHubPage({ config, title }: Props) {
       embedded
       config={config}
       title={title}
-      subtitle="Sender identity, SMTP, and the transactional email templates Sikshya uses."
+      subtitle={__('Sender identity, SMTP, and the transactional email templates Sikshya uses.', 'sikshya')}
       sidebarActivePage="email-hub"
       tabs={[
         {
           id: 'delivery',
           label: 'Delivery',
           icon: 'mail',
-          render: (c) => <EmailPage embedded config={c} title="Email" />,
+          render: (c) => <EmailPage embedded config={c} title={__('Email', 'sikshya')} />,
         },
         {
           id: 'templates',
           label: 'Templates',
           icon: 'documentText',
-          render: (c) => <EmailTemplatesListPage embedded config={c} title="Email templates" />,
+          render: (c) => <EmailTemplatesListPage embedded config={c} title={__('Email templates', 'sikshya')} />,
         },
       ]}
     />
@@ -324,21 +325,21 @@ export function BrandingHubPage({ config, title }: Props) {
       embedded
       config={config}
       title={title}
-      subtitle="How your brand looks across login, account, and admin screens."
+      subtitle={__('How your brand looks across login, account, and admin screens.', 'sikshya')}
       sidebarActivePage="branding"
       tabs={[
         {
           id: 'white-label',
           label: 'White label',
           icon: 'swatch',
-          render: (c) => <WhiteLabelPage embedded config={c} title="White label" />,
+          render: (c) => <WhiteLabelPage embedded config={c} title={__('White label', 'sikshya')} />,
         },
         {
           id: 'social-login',
           label: 'Social login',
           icon: 'users',
           hidden: !hasSocial,
-          render: (c) => <SocialLoginPage embedded config={c} title="Social login" />,
+          render: (c) => <SocialLoginPage embedded config={c} title={__('Social login', 'sikshya')} />,
         },
       ]}
     />
@@ -351,34 +352,34 @@ export function IntegrationsHubPage({ config, title }: Props) {
       embedded
       config={config}
       title={title}
-      subtitle="Automation and external tools (webhooks, API keys, live classes, SCORM, email marketing). Site-wide LMS defaults stay under Settings — this hub is for connections and add-on workspaces."
+      subtitle={__('Automation and external tools (webhooks, API keys, live classes, SCORM, email marketing). Site-wide LMS defaults stay under Settings — this hub is for connections and add-on workspaces.', 'sikshya')}
       sidebarActivePage="integrations-hub"
       tabs={[
         {
           id: 'webhooks',
           label: 'Webhooks & API',
           icon: 'link',
-          render: (c) => <IntegrationsPage embedded config={c} title="Webhooks & API" />,
+          render: (c) => <IntegrationsPage embedded config={c} title={__('Webhooks & API', 'sikshya')} />,
         },
         {
           id: 'email-marketing',
           label: 'Email marketing',
           icon: 'mail',
-          render: (c) => <EmailMarketingPage embedded config={c} title="Email marketing" />,
+          render: (c) => <EmailMarketingPage embedded config={c} title={__('Email marketing', 'sikshya')} />,
         },
         {
           id: 'live-classes',
           label: 'Live classes',
           icon: 'schedule',
           hidden: !isFeatureEnabled(config, 'live_classes'),
-          render: (c) => <LiveClassesWorkspacePage embedded config={c} title="Live classes" />,
+          render: (c) => <LiveClassesWorkspacePage embedded config={c} title={__('Live classes', 'sikshya')} />,
         },
         {
           id: 'scorm-h5p',
           label: 'SCORM / H5P',
           icon: 'layers',
           hidden: !isFeatureEnabled(config, 'scorm_h5p_pro'),
-          render: (c) => <ScormH5pWorkspacePage embedded config={c} title="SCORM / H5P" />,
+          render: (c) => <ScormH5pWorkspacePage embedded config={c} title={__('SCORM / H5P', 'sikshya')} />,
         },
         {
           id: 'multilingual',
@@ -389,11 +390,11 @@ export function IntegrationsHubPage({ config, title }: Props) {
             <AddonSettingsPage
               embedded
               config={c}
-              title="Multilingual"
+              title={__('Multilingual', 'sikshya')}
               addonId="multilingual_enterprise"
-              subtitle="WPML / Weglot compatibility, translatable settings strings, and per-course overrides."
-              featureTitle="Multilingual"
-              featureDescription="Make Sikshya’s course pages, cart/checkout, learn experience, and key settings behave correctly in translated sites."
+              subtitle={__('WPML / Weglot compatibility, translatable settings strings, and per-course overrides.', 'sikshya')}
+              featureTitle={__('Multilingual', 'sikshya')}
+              featureDescription={__('Make Sikshya’s course pages, cart/checkout, learn experience, and key settings behave correctly in translated sites.', 'sikshya')}
               nextSteps={[
                 {
                   label: 'Enable the add-on',
@@ -423,20 +424,20 @@ export function LearningRulesHubPage({ embedded, config, title }: Props) {
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Cross-course access logic — when does each lesson open, and what must be done first."
+      subtitle={__('Cross-course access logic — when does each lesson open, and what must be done first.', 'sikshya')}
       sidebarActivePage="learning-rules"
       tabs={[
         {
           id: 'drip',
           label: 'Scheduled access',
           icon: 'schedule',
-          render: (c) => <ContentDripPage embedded config={c} title="Scheduled access" />,
+          render: (c) => <ContentDripPage embedded config={c} title={__('Scheduled access', 'sikshya')} />,
         },
         {
           id: 'prerequisites',
           label: 'Prerequisites',
           icon: 'lockClosed',
-          render: (c) => <PrerequisitesPage embedded config={c} title="Prerequisites" />,
+          render: (c) => <PrerequisitesPage embedded config={c} title={__('Prerequisites', 'sikshya')} />,
         },
       ]}
     />
@@ -455,20 +456,20 @@ export function ReportsHubPage({ embedded, config, title }: Props) {
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Enrollment, completion, and dated events."
+      subtitle={__('Enrollment, completion, and dated events.', 'sikshya')}
       sidebarActivePage="reports"
       tabs={[
         {
           id: 'overview',
           label: 'Overview',
           icon: 'chart',
-          render: (c) => <ReportsPage embedded config={c} title="Reports overview" />,
+          render: (c) => <ReportsPage embedded config={c} title={__('Reports overview', 'sikshya')} />,
         },
         {
           id: 'calendar',
           label: 'Calendar',
           icon: 'schedule',
-          render: (c) => <CalendarPage embedded config={c} title="Calendar" />,
+          render: (c) => <CalendarPage embedded config={c} title={__('Calendar', 'sikshya')} />,
         },
       ]}
     />
@@ -486,20 +487,20 @@ export function ToolsHubPage({ embedded, config, title }: Props) {
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Diagnostics, exports, audit log, and maintenance."
+      subtitle={__('Diagnostics, exports, audit log, and maintenance.', 'sikshya')}
       sidebarActivePage="tools"
       tabs={[
         {
           id: 'system',
           label: 'System',
           icon: 'wrench',
-          render: (c) => <ToolsPage embedded config={c} title="Tools" />,
+          render: (c) => <ToolsPage embedded config={c} title={__('Tools', 'sikshya')} />,
         },
         {
           id: 'activity',
           label: 'Activity log',
           icon: 'bolt',
-          render: (c) => <ActivityLogPage embedded config={c} title="Activity log" />,
+          render: (c) => <ActivityLogPage embedded config={c} title={__('Activity log', 'sikshya')} />,
         },
       ]}
     />

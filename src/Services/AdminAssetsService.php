@@ -104,7 +104,7 @@ class AdminAssetsService
         wp_register_script(
             'sikshya-react-admin',
             $this->plugin->getAssetUrl('admin/react/sikshya-admin.js'),
-            ['jquery'],
+            ['wp-i18n'],
             file_exists($react_js) ? (string) filemtime($react_js) : SIKSHYA_VERSION,
             true
         );
@@ -222,6 +222,14 @@ class AdminAssetsService
                 'before'
             );
             wp_enqueue_script('sikshya-react-admin');
+
+            if (function_exists('wp_set_script_translations')) {
+                wp_set_script_translations(
+                    'sikshya-react-admin',
+                    'sikshya',
+                    $this->plugin->getPluginPath() . 'languages'
+                );
+            }
 
             wp_enqueue_style('sikshya-toast');
             wp_enqueue_script('sikshya-toast');

@@ -10,6 +10,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 type Row = {
   user_id: number;
@@ -73,10 +74,10 @@ export function InstructorApplicationsPage(props: {
           ? SIKSHYA_ENDPOINTS.admin.instructorApplicationApprove(userId)
           : SIKSHYA_ENDPOINTS.admin.instructorApplicationReject(userId);
       await getSikshyaApi().post(path, {});
-      toast.success('Saved', action === 'approve' ? 'Approved.' : 'Rejected.');
+      toast.success(__('Saved', 'sikshya'), action === 'approve' ? __('Approved.', 'sikshya') : __('Rejected.', 'sikshya'));
       void refetch();
     } catch (e) {
-      toast.error('Request failed', e instanceof Error ? e.message : 'Request failed');
+      toast.error(__('Request failed', 'sikshya'), e instanceof Error ? e.message : 'Request failed');
     } finally {
       setBusyId(null);
     }
@@ -107,11 +108,11 @@ export function InstructorApplicationsPage(props: {
                   setStatus(e.target.value);
                 }}
               >
-                <option value="">All</option>
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
-                <option value="rejected">Rejected</option>
-                <option value="inactive">Inactive</option>
+                <option value="">{__('All', 'sikshya')}</option>
+                <option value="pending">{__('Pending', 'sikshya')}</option>
+                <option value="active">{__('Active', 'sikshya')}</option>
+                <option value="rejected">{__('Rejected', 'sikshya')}</option>
+                <option value="inactive">{__('Inactive', 'sikshya')}</option>
               </select>
             </label>
             <label className="block min-w-[220px] flex-1 text-sm text-slate-700 dark:text-slate-300">
@@ -122,7 +123,7 @@ export function InstructorApplicationsPage(props: {
                   setPage(1);
                   setSearch(e.target.value);
                 }}
-                placeholder="Name or email…"
+                placeholder={__('Name or email…', 'sikshya')}
                 className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
             </label>
@@ -132,15 +133,15 @@ export function InstructorApplicationsPage(props: {
 
         {error ? (
           <div className="mt-4">
-            <ApiErrorPanel error={error} title="Could not load applications" onRetry={() => void refetch()} />
+            <ApiErrorPanel error={error} title={__('Could not load applications', 'sikshya')} onRetry={() => void refetch()} />
           </div>
         ) : loading ? (
-          <p className="mt-6 text-sm text-slate-500">Loading…</p>
+          <p className="mt-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
         ) : rows.length === 0 ? (
           <div className="mt-6">
             <ListEmptyState
-              title="No applications"
-              description="When learners submit the instructor form on the account page or shortcode, they appear here."
+              title={__('No applications', 'sikshya')}
+              description={__('When learners submit the instructor form on the account page or shortcode, they appear here.', 'sikshya')}
             />
           </div>
         ) : (
@@ -148,11 +149,11 @@ export function InstructorApplicationsPage(props: {
             <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
               <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
                 <tr>
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Headline</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Submitted</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{__('User', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Headline', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
+                  <th className="px-4 py-3">{__('Submitted', 'sikshya')}</th>
+                  <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -179,7 +180,7 @@ export function InstructorApplicationsPage(props: {
                           {r.status === 'pending' ? (
                             <>
                               <ButtonPrimary type="button" disabled={busy} onClick={() => void act(r.user_id, 'approve')}>
-                                {busy ? '…' : 'Approve'}
+                                {busy ? '…' : __('Approve', 'sikshya')}
                               </ButtonPrimary>
                               <ButtonSecondary type="button" disabled={busy} onClick={() => void act(r.user_id, 'reject')}>
                                 Reject

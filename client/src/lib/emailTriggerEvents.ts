@@ -1,3 +1,5 @@
+import { __ } from './i18n';
+
 /**
  * Sikshya email template trigger keys (WordPress actions / internal hooks).
  * Must match `CustomEmailTemplateHookDispatcher` (PHP) and `EmailTemplateCatalog` / `do_action` usage.
@@ -16,87 +18,92 @@ export type EmailTriggerEventOption = {
 export const SIKSHYA_EMAIL_TRIGGER_EVENTS: EmailTriggerEventOption[] = [
   {
     key: 'custom.manual',
-    title: 'No event (sequence only)',
+    title: __('No event (sequence only)', 'sikshya'),
     badgeLabel: 'custom.manual',
-    description: 'Use when this template is only sent from automations or manual sends — not tied to a live hook.',
+    description: __(
+      'Use when this template is only sent from automations or manual sends — not tied to a live hook.',
+      'sikshya'
+    ),
     kind: 'none',
   },
   {
     key: 'user_register',
-    title: 'New account registered',
+    title: __('New account registered', 'sikshya'),
     badgeLabel: 'user_register',
-    description: 'WordPress fires this when a new user account is created (welcome-style emails).',
+    description: __('WordPress fires this when a new user account is created (welcome-style emails).', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_user_enrolled',
-    title: 'Learner enrolled in a course',
+    title: __('Learner enrolled in a course', 'sikshya'),
     badgeLabel: 'sikshya_user_enrolled',
-    description: 'Triggered when a learner successfully enrolls in a course.',
+    description: __('Triggered when a learner successfully enrolls in a course.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_user_unenrolled',
-    title: 'Learner unenrolled',
+    title: __('Learner unenrolled', 'sikshya'),
     badgeLabel: 'sikshya_user_unenrolled',
-    description: 'Triggered when a learner is removed or unenrolls from a course.',
+    description: __('Triggered when a learner is removed or unenrolls from a course.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_course_completed',
-    title: 'Course completed',
+    title: __('Course completed', 'sikshya'),
     badgeLabel: 'sikshya_course_completed',
-    description: 'Triggered when a learner completes all required content in a course.',
+    description: __('Triggered when a learner completes all required content in a course.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_certificate_issued',
-    title: 'Certificate issued',
+    title: __('Certificate issued', 'sikshya'),
     badgeLabel: 'sikshya_certificate_issued',
-    description: 'Triggered when a certificate is generated for the learner.',
+    description: __('Triggered when a certificate is generated for the learner.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_order_fulfilled',
-    title: 'Order fulfilled',
+    title: __('Order fulfilled', 'sikshya'),
     badgeLabel: 'sikshya_order_fulfilled',
-    description: 'Triggered when a purchase is fulfilled and course access is granted.',
+    description: __('Triggered when a purchase is fulfilled and course access is granted.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_assignment_submitted',
-    title: 'Assignment submitted',
+    title: __('Assignment submitted', 'sikshya'),
     badgeLabel: 'sikshya_assignment_submitted',
-    description: 'Triggered when a learner submits an assignment.',
+    description: __('Triggered when a learner submits an assignment.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya.scheduled_reminder',
-    title: 'Scheduled / progress reminder',
+    title: __('Scheduled / progress reminder', 'sikshya'),
     badgeLabel: 'sikshya.scheduled_reminder',
-    description: 'Generic progress nudges (automation), not the same as Pro drip unlock emails.',
+    description: __('Generic progress nudges (automation), not the same as Pro drip unlock emails.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_drip_lesson_unlocked',
-    title: 'Drip: lesson unlocked',
+    title: __('Drip: lesson unlocked', 'sikshya'),
     badgeLabel: 'sikshya_drip_lesson_unlocked',
-    description:
+    description: __(
       'Fires when Sikshya Pro drip cron unlocks a lesson for a learner. Pair with Content drip + Drip notifications.',
+      'sikshya'
+    ),
     kind: 'event',
   },
   {
     key: 'sikshya_drip_course_unlocked',
-    title: 'Drip: course schedule unlocked',
+    title: __('Drip: course schedule unlocked', 'sikshya'),
     badgeLabel: 'sikshya_drip_course_unlocked',
-    description: 'Fires when a course-wide drip rule opens the full curriculum for a learner.',
+    description: __('Fires when a course-wide drip rule opens the full curriculum for a learner.', 'sikshya'),
     kind: 'event',
   },
   {
     key: 'sikshya_certificate_row_created',
-    title: 'Certificate row created',
+    title: __('Certificate row created', 'sikshya'),
     badgeLabel: 'sikshya_certificate_row_created',
-    description: 'Lower-level hook when a certificate database row is created (advanced / integrations).',
+    description: __('Lower-level hook when a certificate database row is created (advanced / integrations).', 'sikshya'),
     kind: 'event',
   },
 ];
@@ -117,9 +124,12 @@ export function resolveTriggerOptionsForValue(value: string): EmailTriggerEventO
     ...base,
     {
       key: v,
-      title: 'Custom / legacy event',
+      title: __('Custom / legacy event', 'sikshya'),
       badgeLabel: v,
-      description: 'This key is not in the standard list. Choose another hook or keep it for custom integrations.',
+      description: __(
+        'This key is not in the standard list. Choose another hook or keep it for custom integrations.',
+        'sikshya'
+      ),
       kind: 'event' as const,
     },
   ];

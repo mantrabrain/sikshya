@@ -3,6 +3,7 @@ import { AddonEnablePanel } from './AddonEnablePanel';
 import { FeaturePreviewSkeleton } from './FeaturePreviewSkeleton';
 import { PlanUpgradeOverlay } from './PlanUpgradeOverlay';
 import { PREMIUM_GATE_VIEWPORT_MIN_H, PremiumGatedSurface } from './PremiumGatedSurface';
+import { __ } from '../lib/i18n';
 import { sikshyaPricingUrl } from '../lib/upgradeUrl';
 import type { GatedWorkspaceMode, SikshyaReactConfig } from '../types';
 
@@ -93,7 +94,7 @@ export function GatedFeatureWorkspace(props: Props) {
       {mode === 'pending-addon' ? (
         <div className="absolute inset-0 z-20 flex min-h-full w-full flex-col items-center justify-center bg-white/85 p-6 backdrop-blur-sm dark:bg-slate-950/85">
           <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm font-medium text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-            Loading add-on status…
+            {__('Loading add-on status…', 'sikshya')}
           </div>
         </div>
       ) : null}

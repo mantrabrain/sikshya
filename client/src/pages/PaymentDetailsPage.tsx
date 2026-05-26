@@ -11,6 +11,7 @@ import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type PaymentDetails = {
   id: number;
@@ -42,7 +43,7 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
   const paymentId = useMemo(() => parseInt(route.query?.id || '0', 10) || 0, [route.query]);
 
   const loader = useCallback(async () => {
-    if (!paymentId) throw new Error('Missing payment id.');
+    if (!paymentId) throw new Error(__('Missing payment id.', 'sikshya'));
     return getSikshyaApi().get<DetailsResponse>(SIKSHYA_ENDPOINTS.admin.payment(paymentId));
   }, [paymentId]);
 
@@ -82,7 +83,7 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load payment" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load payment', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -99,7 +100,7 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
           <Modal
             open={editOpen}
             title={`Edit payment #${p.id}`}
-            description="Change payment status."
+            description={__('Change payment status.', 'sikshya')}
             size="lg"
             onClose={() => {
               if (!saving) setEditOpen(false);
@@ -127,13 +128,13 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
                       setEditOpen(false);
                       await refetch();
                     } catch (err) {
-                      void dialog.alert({ title: 'Something went wrong', message: getErrorSummary(err) });
+                      void dialog.alert({ title: __('Something went wrong', 'sikshya'), message: getErrorSummary(err) });
                     } finally {
                       setSaving(false);
                     }
                   }}
                 >
-                  {saving ? 'Saving…' : 'Save'}
+                  {saving ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
                 </ButtonPrimary>
               </div>
             }
@@ -146,10 +147,10 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
                 onChange={(e) => setEditStatus(e.target.value)}
                 disabled={saving}
               >
-                <option value="pending">pending</option>
-                <option value="completed">completed</option>
-                <option value="failed">failed</option>
-                <option value="refunded">refunded</option>
+                <option value="pending">{__('pending', 'sikshya')}</option>
+                <option value="completed">{__('completed', 'sikshya')}</option>
+                <option value="failed">{__('failed', 'sikshya')}</option>
+                <option value="refunded">{__('refunded', 'sikshya')}</option>
               </select>
             </label>
           </Modal>
@@ -272,7 +273,7 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
           ) : null}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <div className="text-sm font-semibold text-slate-900 dark:text-white">Gateway response</div>
+            <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Gateway response', 'sikshya')}</div>
             <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
               <pre className="whitespace-pre-wrap break-words">
                 {(() => {

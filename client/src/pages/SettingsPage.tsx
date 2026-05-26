@@ -16,6 +16,7 @@ import { EnrollmentSettingsTab } from '../components/EnrollmentSettingsTab';
 import { isTruthyCheckboxValue, renderSettingsField } from './settingsRenderField';
 import { normalizeTabSections } from './settingsTabUtils';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 type SettingsSchema = Record<string, SettingsSection[]>;
 
@@ -174,7 +175,7 @@ function PaymentSettingsTab(props: {
                   decoding="async"
                 />
               ) : (
-                <NavIcon name={id === 'offline' ? 'tag' : id === 'paypal' ? 'users' : 'badge'} className="h-5 w-5" />
+                <NavIcon name={id === 'offline' ? 'tag' : id === 'paypal' ? __('users', 'sikshya') : __('badge', 'sikshya')} className="h-5 w-5" />
               )}
             </span>
             <div className="min-w-0">
@@ -205,8 +206,8 @@ function PaymentSettingsTab(props: {
                   type="button"
                   className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
                   onClick={onMoveUp}
-                  aria-label="Move up"
-                  title="Move up"
+                  aria-label={__('Move up', 'sikshya')}
+                  title={__('Move up', 'sikshya')}
                   disabled={!onMoveUp}
                 >
                   ↑
@@ -215,8 +216,8 @@ function PaymentSettingsTab(props: {
                   type="button"
                   className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200 dark:hover:bg-slate-900"
                   onClick={onMoveDown}
-                  aria-label="Move down"
-                  title="Move down"
+                  aria-label={__('Move down', 'sikshya')}
+                  title={__('Move down', 'sikshya')}
                   disabled={!onMoveDown}
                 >
                   ↓
@@ -226,7 +227,7 @@ function PaymentSettingsTab(props: {
             {enabledKey ? (
               <label
                 className={`flex items-center gap-2 text-xs font-semibold ${
-                  locked ? 'opacity-60' : 'text-slate-700 dark:text-slate-200'
+                  locked ? __('opacity-60', 'sikshya') : __('text-slate-700 dark:text-slate-200', 'sikshya')
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -236,7 +237,7 @@ function PaymentSettingsTab(props: {
                   checked={!!enabled}
                   onChange={(e) => setDraft((p) => ({ ...p, [enabledKey]: e.target.checked ? '1' : '0' }))}
                 />
-                {enabled ? 'Enabled' : 'Disabled'}
+                {enabled ? __('Enabled', 'sikshya') : __('Disabled', 'sikshya')}
               </label>
             ) : null}
             <span className={`text-slate-400 transition ${selected ? 'rotate-180' : ''}`} aria-hidden>
@@ -260,8 +261,8 @@ function PaymentSettingsTab(props: {
   return (
     <div className="space-y-8">
       <SectionCard
-        title="Payment gateways"
-        description="Enable and configure payment gateways. Expand a gateway to edit its settings."
+        title={__('Payment gateways', 'sikshya')}
+        description={__('Enable and configure payment gateways. Expand a gateway to edit its settings.', 'sikshya')}
         icon="fas fa-credit-card"
       >
         <div className="grid gap-6 lg:grid-cols-2">
@@ -332,7 +333,7 @@ function PaymentSettingsTab(props: {
                       </div>
                     ) : (
                       <div className="text-sm text-slate-600 dark:text-slate-300">
-                        {locked ? 'Upgrade to configure this gateway.' : 'No additional settings for this gateway.'}
+                        {locked ? __('Upgrade to configure this gateway.', 'sikshya') : __('No additional settings for this gateway.', 'sikshya')}
                       </div>
                     )}
                   </div>
@@ -566,7 +567,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
       SIKSHYA_ENDPOINTS.settings.schema
     );
     if (!res.success) {
-      throw new Error('Could not load settings schema.');
+      throw new Error(__('Could not load settings schema.', 'sikshya'));
     }
     return { tabs: res.data?.tabs || {}, meta: res.data?.meta || {} };
   }, []);
@@ -589,7 +590,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
           SIKSHYA_ENDPOINTS.settings.values(tab)
         );
         if (!res.success) {
-          throw new Error('Could not load settings values.');
+          throw new Error(__('Could not load settings values.', 'sikshya'));
         }
         const next = res.data?.values || {};
         if (cancelled) return;
@@ -664,10 +665,10 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
       setDraft(next);
       setInitialValues(next);
       const msg = res.message || 'Settings saved.';
-      toast.success('Saved', msg);
+      toast.success(__('Saved', 'sikshya'), msg);
     } catch (e) {
       setSaveError(e);
-      toast.error('Save failed', e instanceof Error ? e.message : 'Could not save settings. Please try again.');
+      toast.error(__('Save failed', 'sikshya'), e instanceof Error ? e.message : 'Could not save settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -675,10 +676,10 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
 
   const onReset = async () => {
     const ok = await confirm({
-      title: 'Reset settings?',
+      title: __('Reset settings?', 'sikshya'),
       message: `Reset ${tabMeta.label} settings to their default values?`,
       variant: 'danger',
-      confirmLabel: 'Reset',
+      confirmLabel: __('Reset', 'sikshya'),
     });
     if (!ok) {
       return;
@@ -709,10 +710,10 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
         setInitialValues(next);
       }
       const msg = res.message || 'Settings reset.';
-      toast.success('Reset', msg);
+      toast.success(__('Reset', 'sikshya'), msg);
     } catch (e) {
       setSaveError(e);
-      toast.error('Reset failed', e instanceof Error ? e.message : 'Could not reset settings. Please try again.');
+      toast.error(__('Reset failed', 'sikshya'), e instanceof Error ? e.message : 'Could not reset settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -734,9 +735,9 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
       if (!res.success) {
         throw new Error(res.message || 'Send failed.');
       }
-      toast.success('Sent', res.message || 'Usage data sent.');
+      toast.success(__('Sent', 'sikshya'), res.message || 'Usage data sent.');
     } catch (e) {
-      toast.error('Send failed', e instanceof Error ? e.message : 'Could not send usage data.');
+      toast.error(__('Send failed', 'sikshya'), e instanceof Error ? e.message : 'Could not send usage data.');
     } finally {
       setSaving(false);
     }
@@ -750,7 +751,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Site-wide defaults for every course"
+      subtitle={__('Site-wide defaults for every course', 'sikshya')}
     >
       <TopRightToast toast={toast.toast} onDismiss={toast.clear} />
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -758,7 +759,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
           <div className="flex max-h-full flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
             <nav
               className="min-h-0 flex-1 overflow-y-auto p-2 [-ms-overflow-style:auto] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/80 [&::-webkit-scrollbar-track]:bg-transparent dark:[&::-webkit-scrollbar-thumb]:bg-slate-700/70"
-              aria-label="Settings sections"
+              aria-label={__('Settings sections', 'sikshya')}
             >
               <ul className="space-y-1">
                 {TAB_META.map((t) => {
@@ -832,7 +833,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                       Reset
                     </button>
                     <ButtonPrimary type="button" disabled={saving || !dirty} onClick={() => void onSave()}>
-                      {saving ? 'Saving…' : 'Save changes'}
+                      {saving ? __('Saving…', 'sikshya') : __('Save changes', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                 </div>
@@ -840,7 +841,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
 
               {saveError ? (
                 <div className="px-6 pt-4">
-                  <ApiErrorPanel error={saveError} title="Settings request failed" onRetry={() => setSaveError(null)} />
+                  <ApiErrorPanel error={saveError} title={__('Settings request failed', 'sikshya')} onRetry={() => setSaveError(null)} />
                 </div>
               ) : null}
 
@@ -925,7 +926,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                                               onClick={() => void onSendUsageNow()}
                                               className="inline-flex items-center justify-center rounded-lg border border-slate-200/70 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-950/30 dark:text-slate-200 dark:hover:bg-slate-900"
                                             >
-                                              {saving ? 'Sending…' : 'Send now'}
+                                              {saving ? __('Sending…', 'sikshya') : __('Send now', 'sikshya')}
                                             </button>
                                           </div>
                                           {!enabled ? (
@@ -947,7 +948,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                   )
                 ) : (
                   <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 px-6 py-12 text-center dark:border-slate-800 dark:bg-slate-950/20">
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">No settings defined for this tab.</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{__('No settings defined for this tab.', 'sikshya')}</p>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Add fields in the SettingsManager config to show them here.
                     </p>
@@ -959,7 +960,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
               <div className="sticky bottom-0 z-10 border-t border-slate-200/60 bg-white/95 px-6 py-4 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/80">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    {dirty ? 'You have unsaved changes.' : 'All changes saved.'}
+                    {dirty ? __('You have unsaved changes.', 'sikshya') : __('All changes saved.', 'sikshya')}
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                     <button
@@ -971,7 +972,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                       Reset
                     </button>
                     <ButtonPrimary type="button" disabled={saving || !dirty} onClick={() => void onSave()}>
-                      {saving ? 'Saving…' : 'Save changes'}
+                      {saving ? __('Saving…', 'sikshya') : __('Save changes', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                 </div>

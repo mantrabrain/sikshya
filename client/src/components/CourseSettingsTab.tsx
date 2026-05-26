@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { NavIcon } from './NavIcon';
 import type { SettingsField, SettingsSection } from '../types/settingsSchema';
+import { __ } from '../lib/i18n';
 type Props = {
   tabSchema: SettingsSection[];
   renderField: (f: SettingsField) => React.ReactNode;
@@ -56,7 +57,7 @@ function SectionShell(props: {
 
 const SUB_TABS: Array<{ id: 'discovery'; label: string; icon: string; keys: string[] }> = [
   /** Categories → search → reviews reads top-to-bottom like the public catalog flow. */
-  { id: 'discovery', label: 'Discovery', icon: 'tag', keys: ['course_tax', 'course_search', 'course_reviews'] },
+  { id: 'discovery', label: __('Discovery', 'sikshya'), icon: 'tag', keys: ['course_tax', 'course_search', 'course_reviews'] },
 ];
 
 export function CourseSettingsTab(props: Props) {
@@ -82,9 +83,10 @@ export function CourseSettingsTab(props: Props) {
     <div className="w-full space-y-0">
       <div className="space-y-4 px-6">
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          Layout of the course catalog and single course pages, plus reviews, categories, and search. Enrollment rules, buttons,
-          and completion are under <span className="font-semibold text-slate-600 dark:text-slate-300">Enrollment</span> in the
-          sidebar.
+          {__(
+            'Layout of the course catalog and single course pages, plus reviews, categories, and search. Enrollment rules, buttons, and completion are under Enrollment in the sidebar.',
+            'sikshya'
+          )}
         </p>
 
         {/* Only one Courses sub-tab is currently supported; keep the UI simple. */}

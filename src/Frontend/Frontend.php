@@ -975,6 +975,10 @@ class Frontend
             return true;
         }
 
+        if ((string) get_query_var(PermalinkService::INSTRUCTOR_VAR) !== '') {
+            return true;
+        }
+
         return ContentHasSikshyaBlock::hasCoursesListing();
     }
 

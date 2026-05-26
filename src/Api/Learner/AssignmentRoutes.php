@@ -130,6 +130,22 @@ final class AssignmentRoutes extends AbstractLearnerRestController
     {
         $uid = get_current_user_id();
         $assignment_id = (int) $request->get_param('assignment_id');
+        if ($assignment_id <= 0) {
+            return $this->error('invalid_assignment', __('Invalid assignment.', 'sikshya'), 400);
+        }
+
+        $course_id = (int) LessonCourseLink::resolvedCourseIdForAssignment($assignment_id);
+        $denied = LearnerEnrollmentGuard::denyUnlessEnrolled(
+            $uid,
+            $course_id,
+            $this->getCourseService(),
+            'assignment_no_course',
+            __('Assignment is not linked to a course.', 'sikshya')
+        );
+        if ($denied !== null) {
+            return $this->error($denied['code'], $denied['message'], $denied['status']);
+        }
+
         $svc = $this->assignmentService();
         $row = $svc->getAssignmentFeedback($assignment_id, $uid);
 

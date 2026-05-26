@@ -23,6 +23,7 @@ import {
   titleFromPost,
   type WpPostRest,
 } from '../../pages/content-editors/useWpContentPost';
+import { __, sprintf } from '../../lib/i18n';
 
 export type QuestionType =
   | 'true_false'
@@ -44,51 +45,56 @@ type PickerOpt = {
 };
 
 export const QUESTION_PICKER_TYPES: PickerOpt[] = [
-  { type: 'true_false', label: 'True / False', hint: 'Fast checks with one correct answer.', icon: 'puzzle' },
+  {
+    type: 'true_false',
+    label: __('True / False', 'sikshya'),
+    hint: __('Fast checks with one correct answer.', 'sikshya'),
+    icon: 'puzzle',
+  },
   {
     type: 'multiple_choice',
-    label: 'Multiple choice',
-    hint: 'One correct answer from a list of options.',
+    label: __('Multiple choice', 'sikshya'),
+    hint: __('One correct answer from a list of options.', 'sikshya'),
     icon: 'puzzle',
   },
   {
     type: 'multiple_response',
-    label: 'Multiple response',
-    hint: 'Learner can select more than one correct option.',
+    label: __('Multiple response', 'sikshya'),
+    hint: __('Learner can select more than one correct option.', 'sikshya'),
     icon: 'layers',
     requiresAdvancedQuiz: true,
   },
   {
     type: 'short_answer',
-    label: 'Short answer',
-    hint: 'Learner types a short text response.',
+    label: __('Short answer', 'sikshya'),
+    hint: __('Learner types a short text response.', 'sikshya'),
     icon: 'plusDocument',
   },
   {
     type: 'fill_blank',
-    label: 'Fill in the blank',
-    hint: 'A short prompt with a missing word or phrase.',
+    label: __('Fill in the blank', 'sikshya'),
+    hint: __('A short prompt with a missing word or phrase.', 'sikshya'),
     icon: 'puzzle',
     requiresAdvancedQuiz: true,
   },
   {
     type: 'matching',
-    label: 'Matching',
-    hint: 'Pair items from two columns.',
+    label: __('Matching', 'sikshya'),
+    hint: __('Pair items from two columns.', 'sikshya'),
     icon: 'layers',
     requiresAdvancedQuiz: true,
   },
   {
     type: 'ordering',
-    label: 'Ordering',
-    hint: 'Reorder items into the correct sequence.',
+    label: __('Ordering', 'sikshya'),
+    hint: __('Reorder items into the correct sequence.', 'sikshya'),
     icon: 'layers',
     requiresAdvancedQuiz: true,
   },
   {
     type: 'essay',
-    label: 'Essay',
-    hint: 'Long-form response, typically manually graded.',
+    label: __('Essay', 'sikshya'),
+    hint: __('Long-form response, typically manually graded.', 'sikshya'),
     icon: 'helpCircle',
     requiresAdvancedQuiz: true,
   },
@@ -288,7 +294,10 @@ function ModalFeaturedImageField(props: {
         onChange={() => {}}
         onAttachmentIdChange={props.onAttachmentIdChange}
         className={FIELD}
-        placeholder="Opens the media library — upload a new image or choose an existing file."
+        placeholder={__(
+          'Opens the media library — upload a new image or choose an existing file.',
+          'sikshya'
+        )}
       />
     </div>
   );
@@ -714,11 +723,17 @@ export function AddQuestionAuthoringModal(props: Props) {
             onClose();
           }
         }}
-        title={isEditMode ? 'Edit question' : 'New question'}
+        title={isEditMode ? __('Edit question', 'sikshya') : __('New question', 'sikshya')}
         description={
           isEditMode
-            ? 'Update this question in your library. Changes apply everywhere this question is used.'
-            : 'Same authoring flow as Content library → Questions. Add to this quiz when you are ready.'
+            ? __(
+                'Update this question in your library. Changes apply everywhere this question is used.',
+                'sikshya'
+              )
+            : __(
+                'Same authoring flow as Content library → Questions. Add to this quiz when you are ready.',
+                'sikshya'
+              )
         }
         size="xl"
         footer={
@@ -729,7 +744,7 @@ export function AddQuestionAuthoringModal(props: Props) {
               disabled={busy}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
-              Cancel
+              {__('Cancel', 'sikshya')}
             </button>
             {onPickExisting ? (
               <button
@@ -744,11 +759,17 @@ export function AddQuestionAuthoringModal(props: Props) {
                 }}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
-                Add selected
+                {__('Add selected', 'sikshya')}
               </button>
             ) : null}
             <ButtonPrimary type="button" disabled={!canSubmit} onClick={submitPrimary}>
-              {busy ? (isEditMode ? 'Saving…' : 'Creating…') : isEditMode ? 'Save changes' : 'Create and add to quiz'}
+              {busy
+                ? isEditMode
+                  ? __('Saving…', 'sikshya')
+                  : __('Creating…', 'sikshya')
+                : isEditMode
+                  ? __('Save changes', 'sikshya')
+                  : __('Create and add to quiz', 'sikshya')}
             </ButtonPrimary>
           </div>
         }
@@ -757,7 +778,7 @@ export function AddQuestionAuthoringModal(props: Props) {
           {loadError && isEditMode ? (
             <ApiErrorPanel
               error={loadError}
-              title="Could not load question"
+              title={__('Could not load question', 'sikshya')}
               onRetry={() => {
                 setLoadError(null);
                 setLoadRetry((n) => n + 1);
@@ -767,22 +788,26 @@ export function AddQuestionAuthoringModal(props: Props) {
           {error ? (
             <ApiErrorPanel
               error={error}
-              title={isEditMode ? 'Could not save question' : 'Could not create question'}
+              title={
+                isEditMode ? __('Could not save question', 'sikshya') : __('Could not create question', 'sikshya')
+              }
               onRetry={() => setError(null)}
             />
           ) : null}
 
           {postLoading && isEditMode && !loadError ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Loading question…</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{__('Loading question…', 'sikshya')}</p>
           ) : null}
 
           {!(isEditMode && (postLoading || loadError)) ? (
             <>
           <HorizontalEditorTabs
-            ariaLabel={isEditMode ? 'Edit question sections' : 'New question sections'}
+            ariaLabel={
+              isEditMode ? __('Edit question sections', 'sikshya') : __('New question sections', 'sikshya')
+            }
             tabs={[
-              { id: 'content', label: 'Content', icon: 'plusDocument' },
-              { id: 'settings', label: 'Settings', icon: 'cog' },
+              { id: 'content', label: __('Content', 'sikshya'), icon: 'plusDocument' },
+              { id: 'settings', label: __('Settings', 'sikshya'), icon: 'cog' },
             ]}
             value={editorTab}
             onChange={(id) => setEditorTab(id as 'content' | 'settings')}
@@ -793,9 +818,14 @@ export function AddQuestionAuthoringModal(props: Props) {
                 <div className="space-y-6" role="tabpanel">
                   <div>
                     <label className={LABEL} htmlFor="sik-q-modal-type">
-                      Question type
+                      {__('Question type', 'sikshya')}
                     </label>
-                    <p className={HINT}>Each type shows different fields — multiple choice, matching, essay, and so on.</p>
+                    <p className={HINT}>
+                      {__(
+                        'Each type shows different fields — multiple choice, matching, essay, and so on.',
+                        'sikshya'
+                      )}
+                    </p>
                     <div className="mt-1.5">
                       <button
                         type="button"
@@ -810,13 +840,16 @@ export function AddQuestionAuthoringModal(props: Props) {
                             {qType
                               ? QUESTION_PICKER_TYPES.find((t) => t.type === (qType as QuestionType))?.label ||
                                 qType.replace(/_/g, ' ')
-                              : 'Select question type'}
+                              : __('Select question type', 'sikshya')}
                           </span>
                           <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400">
                             {qType
                               ? QUESTION_PICKER_TYPES.find((t) => t.type === (qType as QuestionType))?.hint ||
-                                'Answers depend on the chosen type.'
-                              : 'Choose the format first — it will unlock the right answer fields.'}
+                                __('Answers depend on the chosen type.', 'sikshya')
+                              : __(
+                                  'Choose the format first — it will unlock the right answer fields.',
+                                  'sikshya'
+                                )}
                           </span>
                         </span>
                         <NavIcon name="chevronDown" className="h-4 w-4 shrink-0 text-slate-400" />
@@ -825,14 +858,14 @@ export function AddQuestionAuthoringModal(props: Props) {
                   </div>
                   <div>
                     <label className={LABEL} htmlFor="sik-q-modal-stem">
-                      Question text
+                      {__('Question text', 'sikshya')}
                     </label>
-                    <p className={HINT}>What the learner sees (plain text or short HTML).</p>
+                    <p className={HINT}>{__('What the learner sees (plain text or short HTML).', 'sikshya')}</p>
                     <textarea
                       id="sik-q-modal-stem"
                       rows={4}
                       className={`${FIELD} min-h-[88px] w-full`}
-                      placeholder="Enter the question stem…"
+                      placeholder={__('Enter the question stem…', 'sikshya')}
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />
@@ -844,10 +877,12 @@ export function AddQuestionAuthoringModal(props: Props) {
                           <NavIcon name="helpCircle" className="h-5 w-5" />
                         </span>
                         <div className="min-w-0">
-                          <div className="font-semibold">Choose a question type to continue</div>
+                          <div className="font-semibold">{__('Choose a question type to continue', 'sikshya')}</div>
                           <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                            Once you pick a type, Sikshya will show the right answer fields (options, matching pairs,
-                            ordering, etc.).
+                            {__(
+                              'Once you pick a type, Sikshya will show the right answer fields (options, matching pairs, ordering, etc.).',
+                              'sikshya'
+                            )}
                           </p>
                           <div className="mt-3 flex flex-wrap gap-2">
                             {QUESTION_PICKER_TYPES.slice(0, 6).map((t) => (
@@ -863,20 +898,24 @@ export function AddQuestionAuthoringModal(props: Props) {
                                 onClick={() => onTypeChange(t.type)}
                               >
                                 {t.label}
-                                {isLockedType(t.type) ? <span className="ml-1">• Pro</span> : null}
+                                {isLockedType(t.type) ? (
+                                  <span className="ml-1">{__('• Pro', 'sikshya')}</span>
+                                ) : null}
                               </button>
                             ))}
                           </div>
                           {!canUseAdvancedTypes ? (
                             <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                              Advanced question types are available in{' '}
+                              {__(
+                                'Advanced question types are available in Advanced Quiz.',
+                                'sikshya'
+                              )}{' '}
                               <a
                                 href={addonsHref}
                                 className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
                               >
-                                Advanced Quiz
+                                {__('Advanced Quiz', 'sikshya')}
                               </a>
-                              .
                             </p>
                           ) : null}
                         </div>
@@ -885,8 +924,10 @@ export function AddQuestionAuthoringModal(props: Props) {
                   ) : null}
                   {qType === 'multiple_choice' ? (
                     <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Answer choices</div>
-                      <p className={HINT}>At least two options; mark the correct one.</p>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {__('Answer choices', 'sikshya')}
+                      </div>
+                      <p className={HINT}>{__('At least two options; mark the correct one.', 'sikshya')}</p>
                       <ul className="space-y-3">
                         {options.map((opt, idx) => (
                           <li key={idx} className="flex flex-wrap items-start gap-3">
@@ -898,7 +939,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                 onChange={() => setCorrectAnswer(String(idx))}
                                 className="h-4 w-4 border-slate-300 text-brand-600 focus:ring-brand-500"
                               />
-                              Correct
+                              {__('Correct', 'sikshya')}
                             </label>
                             <input
                               className={`${FIELD} min-w-0 flex-1`}
@@ -910,7 +951,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                   return next;
                                 })
                               }
-                              placeholder={`Option ${idx + 1}`}
+                              placeholder={sprintf(__('Option %d', 'sikshya'), idx + 1)}
                             />
                             <button
                               type="button"
@@ -933,7 +974,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                               }}
                               disabled={options.length <= 2}
                             >
-                              Remove
+                              {__('Remove', 'sikshya')}
                             </button>
                           </li>
                         ))}
@@ -943,14 +984,18 @@ export function AddQuestionAuthoringModal(props: Props) {
                         className="text-sm font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
                         onClick={() => setOptions((prev) => [...prev, ''])}
                       >
-                        + Add option
+                        {__('+ Add option', 'sikshya')}
                       </button>
                     </div>
                   ) : null}
                   {qType === 'multiple_response' ? (
                     <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Answer choices</div>
-                      <p className={HINT}>Check every option that should be marked correct.</p>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {__('Answer choices', 'sikshya')}
+                      </div>
+                      <p className={HINT}>
+                        {__('Check every option that should be marked correct.', 'sikshya')}
+                      </p>
                       <ul className="space-y-3">
                         {options.map((opt, idx) => (
                           <li key={idx} className="flex flex-wrap items-start gap-3">
@@ -967,7 +1012,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                 }
                                 className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                               />
-                              Correct
+                              {__('Correct', 'sikshya')}
                             </label>
                             <input
                               className={`${FIELD} min-w-0 flex-1`}
@@ -979,7 +1024,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                   return next;
                                 })
                               }
-                              placeholder={`Option ${idx + 1}`}
+                              placeholder={sprintf(__('Option %d', 'sikshya'), idx + 1)}
                             />
                             <button
                               type="button"
@@ -995,7 +1040,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                               }}
                               disabled={options.length <= 2}
                             >
-                              Remove
+                              {__('Remove', 'sikshya')}
                             </button>
                           </li>
                         ))}
@@ -1005,50 +1050,66 @@ export function AddQuestionAuthoringModal(props: Props) {
                         className="text-sm font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
                         onClick={() => setOptions((prev) => [...prev, ''])}
                       >
-                        + Add option
+                        {__('+ Add option', 'sikshya')}
                       </button>
                     </div>
                   ) : null}
                   {qType === 'true_false' ? (
                     <div>
                       <label className={LABEL} htmlFor="sik-q-modal-tf">
-                        Correct answer
+                        {__('Correct answer', 'sikshya')}
                       </label>
-                      <p className={HINT}>Learners choose between true and false.</p>
+                      <p className={HINT}>{__('Learners choose between true and false.', 'sikshya')}</p>
                       <select
                         id="sik-q-modal-tf"
                         className={FIELD}
                         value={correctAnswer === 'false' ? 'false' : 'true'}
                         onChange={(e) => setCorrectAnswer(e.target.value)}
                       >
-                        <option value="true">True</option>
-                        <option value="false">False</option>
+                        <option value="true">{__('True', 'sikshya')}</option>
+                        <option value="false">{__('False', 'sikshya')}</option>
                       </select>
                     </div>
                   ) : null}
                   {qType === 'short_answer' || qType === 'fill_blank' ? (
                     <div>
                       <label className={LABEL} htmlFor="sik-q-modal-expected">
-                        {qType === 'fill_blank' ? 'Accepted answer(s)' : 'Expected answer'}
+                        {qType === 'fill_blank'
+                          ? __('Accepted answer(s)', 'sikshya')
+                          : __('Expected answer', 'sikshya')}
                       </label>
                       <p className={HINT}>
                         {qType === 'fill_blank'
-                          ? 'Separate multiple correct spellings with | (pipe). Comparison is case-insensitive.'
-                          : 'Case-insensitive match. Use | between alternative correct answers.'}
+                          ? __(
+                              'Separate multiple correct spellings with | (pipe). Comparison is case-insensitive.',
+                              'sikshya'
+                            )
+                          : __(
+                              'Case-insensitive match. Use | between alternative correct answers.',
+                              'sikshya'
+                            )}
                       </p>
                       <input
                         id="sik-q-modal-expected"
                         className={FIELD}
                         value={correctAnswer}
                         onChange={(e) => setCorrectAnswer(e.target.value)}
-                        placeholder={qType === 'fill_blank' ? 'e.g. Paris|paris' : 'e.g. photosynthesis'}
+                        placeholder={
+                          qType === 'fill_blank'
+                            ? __('e.g. Paris|paris', 'sikshya')
+                            : __('e.g. photosynthesis', 'sikshya')
+                        }
                       />
                     </div>
                   ) : null}
                   {qType === 'ordering' ? (
                     <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Steps / items</div>
-                      <p className={HINT}>Edit labels, then arrange the correct order (top = first).</p>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {__('Steps / items', 'sikshya')}
+                      </div>
+                      <p className={HINT}>
+                        {__('Edit labels, then arrange the correct order (top = first).', 'sikshya')}
+                      </p>
                       <ul className="space-y-2">
                         {orderItems.map((lab, idx) => (
                           <li key={idx} className="flex flex-wrap gap-2">
@@ -1062,7 +1123,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                   return next;
                                 })
                               }
-                              placeholder={`Item ${idx + 1}`}
+                              placeholder={sprintf(__('Item %d', 'sikshya'), idx + 1)}
                             />
                             <button
                               type="button"
@@ -1076,7 +1137,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                               }}
                               disabled={orderItems.length <= 2}
                             >
-                              Remove
+                              {__('Remove', 'sikshya')}
                             </button>
                           </li>
                         ))}
@@ -1089,9 +1150,11 @@ export function AddQuestionAuthoringModal(props: Props) {
                           setOrderPerm((prev) => [...prev, prev.length]);
                         }}
                       >
-                        + Add item
+                        {__('+ Add item', 'sikshya')}
                       </button>
-                      <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">Correct order</div>
+                      <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {__('Correct order', 'sikshya')}
+                      </div>
                       <ol className="mt-2 space-y-2">
                         {orderPerm.map((itemIdx, pos) => (
                           <li
@@ -1107,7 +1170,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                               onClick={() => moveOrderSlot(pos, -1)}
                               disabled={pos === 0}
                             >
-                              Up
+                              {__('Up', 'sikshya')}
                             </button>
                             <button
                               type="button"
@@ -1115,7 +1178,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                               onClick={() => moveOrderSlot(pos, 1)}
                               disabled={pos >= orderPerm.length - 1}
                             >
-                              Down
+                              {__('Down', 'sikshya')}
                             </button>
                           </li>
                         ))}
@@ -1124,13 +1187,20 @@ export function AddQuestionAuthoringModal(props: Props) {
                   ) : null}
                   {qType === 'matching' ? (
                     <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Matching pairs</div>
-                      <p className={HINT}>For each prompt on the left, choose the matching answer column index.</p>
+                      <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {__('Matching pairs', 'sikshya')}
+                      </div>
+                      <p className={HINT}>
+                        {__(
+                          'For each prompt on the left, choose the matching answer column index.',
+                          'sikshya'
+                        )}
+                      </p>
                       <ul className="space-y-3">
                         {matchLeft.map((left, i) => (
                           <li key={i} className="grid gap-2 sm:grid-cols-2 sm:items-end">
                             <label className="block min-w-0">
-                              <span className={HINT}>Prompt {i + 1}</span>
+                              <span className={HINT}>{sprintf(__('Prompt %d', 'sikshya'), i + 1)}</span>
                               <input
                                 className={`${FIELD} mt-1 w-full`}
                                 value={left}
@@ -1141,12 +1211,12 @@ export function AddQuestionAuthoringModal(props: Props) {
                                     return n;
                                   })
                                 }
-                                placeholder="Left column text"
+                                placeholder={__('Left column text', 'sikshya')}
                               />
                             </label>
                             <div className="flex flex-wrap gap-2">
                               <label className="block min-w-0 flex-1">
-                                <span className={HINT}>Matches answer</span>
+                                <span className={HINT}>{__('Matches answer', 'sikshya')}</span>
                                 <select
                                   className={`${FIELD} mt-1 w-full`}
                                   value={matchMap[i] ?? 0}
@@ -1169,7 +1239,9 @@ export function AddQuestionAuthoringModal(props: Props) {
                           </li>
                         ))}
                       </ul>
-                      <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">Answer column</div>
+                      <div className="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {__('Answer column', 'sikshya')}
+                      </div>
                       <ul className="mt-2 space-y-2">
                         {matchRight.map((r, i) => (
                           <li key={i} className="flex gap-2">
@@ -1183,7 +1255,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                   return n;
                                 })
                               }
-                              placeholder={`Answer ${i + 1}`}
+                              placeholder={sprintf(__('Answer %d', 'sikshya'), i + 1)}
                             />
                           </li>
                         ))}
@@ -1197,21 +1269,24 @@ export function AddQuestionAuthoringModal(props: Props) {
                             setMatchMap((prev) => [...prev, 0]);
                           }}
                         >
-                          + Add prompt
+                          {__('+ Add prompt', 'sikshya')}
                         </button>
                         <button
                           type="button"
                           className="text-sm font-semibold text-brand-600"
                           onClick={() => setMatchRight((prev) => [...prev, ''])}
                         >
-                          + Add answer
+                          {__('+ Add answer', 'sikshya')}
                         </button>
                       </div>
                     </div>
                   ) : null}
                   {qType === 'essay' ? (
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      Essays are graded manually. Use the explanation field below for model answers or staff notes.
+                      {__(
+                        'Essays are graded manually. Use the explanation field below for model answers or staff notes.',
+                        'sikshya'
+                      )}
                     </p>
                   ) : null}
                   <ModalFeaturedImageField
@@ -1221,14 +1296,22 @@ export function AddQuestionAuthoringModal(props: Props) {
                   />
                   <div>
                     <label className={LABEL} htmlFor="sik-q-modal-body">
-                      Explanation / feedback (optional)
+                      {__('Explanation / feedback (optional)', 'sikshya')}
                     </label>
-                    <p className={HINT}>Shown after grading or kept for instructors. Stored as post content.</p>
+                    <p className={HINT}>
+                      {__(
+                        'Shown after grading or kept for instructors. Stored as post content.',
+                        'sikshya'
+                      )}
+                    </p>
                     <textarea
                       id="sik-q-modal-body"
                       rows={6}
                       className={`${FIELD} min-h-[120px] w-full`}
-                      placeholder="Optional explanation for learners or grading notes…"
+                      placeholder={__(
+                        'Optional explanation for learners or grading notes…',
+                        'sikshya'
+                      )}
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                     />
@@ -1237,9 +1320,14 @@ export function AddQuestionAuthoringModal(props: Props) {
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/20">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Question library</div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                          {__('Question library', 'sikshya')}
+                        </div>
                         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                          Pick an existing question instead of creating a new one.
+                          {__(
+                            'Pick an existing question instead of creating a new one.',
+                            'sikshya'
+                          )}
                         </p>
                       </div>
                       <div className="w-full sm:w-[280px]">
@@ -1247,7 +1335,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                           type="search"
                           value={librarySearch}
                           onChange={(e) => setLibrarySearch(e.target.value)}
-                          placeholder="Search questions…"
+                          placeholder={__('Search questions…', 'sikshya')}
                           className={FIELD}
                         />
                       </div>
@@ -1255,7 +1343,9 @@ export function AddQuestionAuthoringModal(props: Props) {
                     {onPickExisting && libraryRows.length ? (
                       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
                         <div className="font-medium text-slate-600 dark:text-slate-300">
-                          {librarySelected.length ? `${librarySelected.length} selected` : 'Select multiple to add at once'}
+                          {librarySelected.length
+                            ? sprintf(__('%d selected', 'sikshya'), librarySelected.length)
+                            : __('Select multiple to add at once', 'sikshya')}
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <button
@@ -1264,7 +1354,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                             disabled={!libraryRows.length}
                             onClick={() => setLibrarySelected(libraryRows.map((r) => r.id))}
                           >
-                            Select all
+                            {__('Select all', 'sikshya')}
                           </button>
                           <button
                             type="button"
@@ -1272,7 +1362,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                             disabled={!librarySelected.length}
                             onClick={() => setLibrarySelected([])}
                           >
-                            Clear
+                            {__('Clear', 'sikshya')}
                           </button>
                         </div>
                       </div>
@@ -1281,12 +1371,14 @@ export function AddQuestionAuthoringModal(props: Props) {
                       <div className="mt-3">
                         <ApiErrorPanel
                           error={libraryError}
-                          title="Could not load question library"
+                          title={__('Could not load question library', 'sikshya')}
                           onRetry={() => setLibrarySearch((s) => s)}
                         />
                       </div>
                     ) : libraryLoading ? (
-                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Loading questions…</p>
+                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                        {__('Loading questions…', 'sikshya')}
+                      </p>
                     ) : libraryRows.length ? (
                       <div className="mt-3 rounded-xl border border-slate-100 dark:border-slate-800">
                         <ul className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1330,7 +1422,9 @@ export function AddQuestionAuthoringModal(props: Props) {
                         </ul>
                       </div>
                     ) : (
-                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">No questions found.</p>
+                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                        {__('No questions found.', 'sikshya')}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1338,9 +1432,11 @@ export function AddQuestionAuthoringModal(props: Props) {
                 <div className="space-y-6" role="tabpanel">
                   <div>
                     <label className={LABEL} htmlFor="sik-q-modal-points">
-                      Points
+                      {__('Points', 'sikshya')}
                     </label>
-                    <p className={HINT}>Awarded when the answer is correct (auto-graded types only).</p>
+                    <p className={HINT}>
+                      {__('Awarded when the answer is correct (auto-graded types only).', 'sikshya')}
+                    </p>
                     <input
                       id="sik-q-modal-points"
                       type="number"
@@ -1353,12 +1449,14 @@ export function AddQuestionAuthoringModal(props: Props) {
                   </div>
                   <div>
                     <label className={LABEL} htmlFor="sik-q-modal-status">
-                      Status
+                      {__('Status', 'sikshya')}
                     </label>
-                    <p className={HINT}>Draft stays hidden from learners until published.</p>
+                    <p className={HINT}>
+                      {__('Draft stays hidden from learners until published.', 'sikshya')}
+                    </p>
                     <select id="sik-q-modal-status" className={FIELD} value={status} onChange={(e) => setStatus(e.target.value)}>
-                      <option value="draft">Draft</option>
-                      <option value="publish">Published</option>
+                      <option value="draft">{__('Draft', 'sikshya')}</option>
+                      <option value="publish">{__('Published', 'sikshya')}</option>
                     </select>
                   </div>
                   <ProQuestionFields values={proQuestionValues} onChange={setProQuestionValues} />

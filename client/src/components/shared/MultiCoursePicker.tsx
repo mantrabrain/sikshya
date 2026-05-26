@@ -3,6 +3,7 @@ import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../../api';
 import { ButtonPrimary, ButtonSecondary } from './buttons';
 import { FieldHint } from './FieldHint';
 import { Modal } from './Modal';
+import { __, _n, sprintf } from '../../lib/i18n';
 
 export type MultiCourseOption = { id: number; title: string; status: string };
 
@@ -50,8 +51,8 @@ export function MultiCoursePicker({
   onChange,
   labels,
   excludeIds,
-  placeholder = 'Click to select courses…',
-  title = 'Select courses',
+  placeholder = __('Click to select courses…', 'sikshya'),
+  title = __('Select courses', 'sikshya'),
   confirmLabel,
   hint,
   perPage = 20,
@@ -163,7 +164,7 @@ export function MultiCoursePicker({
               id: p.id,
               title: p.title?.rendered
                 ? String(p.title.rendered).replace(/<[^>]*>/g, '').trim()
-                : `Course #${p.id}`,
+                : sprintf(__('Course #%d', 'sikshya'), p.id),
               status: typeof p.status === 'string' ? p.status : 'publish',
             }));
           setResults(mapped);
@@ -212,13 +213,13 @@ export function MultiCoursePicker({
     if (selected.length === 1) {
       const id = selected[0];
       const t = labelMap[id];
-      return t ? `${t} · #${id}` : `Course #${id}`;
+      return t ? sprintf(__('%1$s · #%2$d', 'sikshya'), t, id) : sprintf(__('Course #%d', 'sikshya'), id);
     }
-    return `${selected.length} courses selected`;
+    return sprintf(_n('%d course selected', '%d courses selected', selected.length, 'sikshya'), selected.length);
   })();
 
   const max = maxSelection !== undefined && maxSelection > 0 ? maxSelection : undefined;
-  const primaryLabel = confirmLabel ?? (max === 1 ? 'Select course' : 'Select courses');
+  const primaryLabel = confirmLabel ?? (max === 1 ? __('Select course', 'sikshya') : __('Select courses', 'sikshya'));
   const padY = density === 'compact' ? 'py-2' : 'py-3';
   const showChips = selected.length > 0 && max !== 1;
 
@@ -251,7 +252,9 @@ export function MultiCoursePicker({
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <span className="max-w-[16rem] truncate">
-                {labelMap[id] ? `${labelMap[id]} · #${id}` : `Course #${id}`}
+                {labelMap[id]
+                  ? sprintf(__('%1$s · #%2$d', 'sikshya'), labelMap[id], id)
+                  : sprintf(__('Course #%d', 'sikshya'), id)}
               </span>
             </li>
           ))}
@@ -261,17 +264,25 @@ export function MultiCoursePicker({
       <Modal
         open={open}
         title={title}
-        description={max === 1 ? 'Search courses, then pick one course (or leave empty for all).' : 'Search courses, then tick one or more items.'}
+        description={
+          max === 1
+            ? __('Search courses, then pick one course (or leave empty for all).', 'sikshya')
+            : __('Search courses, then tick one or more items.', 'sikshya')
+        }
         size="lg"
         onClose={() => setOpen(false)}
         footer={
           <div className="flex flex-wrap items-center justify-between gap-3">
             <ButtonSecondary type="button" onClick={() => setOpen(false)}>
-              Close
+              {__('Close', 'sikshya')}
             </ButtonSecondary>
             <div className="flex flex-wrap items-center justify-end gap-3">
               <span className="text-xs text-slate-500 dark:text-slate-400">
-                {max === 1 ? (draft.length === 0 ? 'No course' : '1 course') : `${draft.length} selected`}
+                {max === 1
+                  ? draft.length === 0
+                    ? __('No course', 'sikshya')
+                    : __('1 course', 'sikshya')
+                  : sprintf(__('%d selected', 'sikshya'), draft.length)}
               </span>
               <ButtonPrimary
                 type="button"
@@ -297,16 +308,18 @@ export function MultiCoursePicker({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search courses…"
+            placeholder={__('Search courses…', 'sikshya')}
             className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
           />
 
           <div className="max-h-[360px] overflow-auto rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950">
             {busy ? (
-              <div className="p-4 text-sm text-slate-500 dark:text-slate-400">Searching…</div>
+              <div className="p-4 text-sm text-slate-500 dark:text-slate-400">{__('Searching…', 'sikshya')}</div>
             ) : results.length === 0 ? (
               <div className="p-4 text-sm text-slate-500 dark:text-slate-400">
-                {query.trim() ? 'No matching courses.' : 'Start typing to search courses.'}
+                {query.trim()
+                  ? __('No matching courses.', 'sikshya')
+                  : __('Start typing to search courses.', 'sikshya')}
               </div>
             ) : (
               <ul className="divide-y divide-slate-100 dark:divide-slate-800">

@@ -14,6 +14,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { appViewHref } from '../lib/appUrl';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type BundleRow = {
   id: number;
@@ -124,9 +125,9 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
 
   const onDelete = async (id: number) => {
     const ok = await dialog.confirm({
-      title: 'Move bundle to trash?',
-      message: 'Existing enrollments are not affected.',
-      confirmLabel: 'Move to trash',
+      title: __('Move bundle to trash?', 'sikshya'),
+      message: __('Existing enrollments are not affected.', 'sikshya'),
+      confirmLabel: __('Move to trash', 'sikshya'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -136,7 +137,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
       if (expandedId === id) setExpandedId(null);
     } catch (err) {
       void dialog.alert({
-        title: 'Delete failed',
+        title: __('Delete failed', 'sikshya'),
         message: err instanceof Error ? err.message : 'Delete failed.',
       });
     }
@@ -147,11 +148,11 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Bundles are courses — create one here and configure it in the Course Builder."
+      subtitle={__('Bundles are courses — create one here and configure it in the Course Builder.', 'sikshya')}
       pageActions={
         enabled ? (
           <ButtonPrimary type="button" disabled={list.loading} onClick={() => list.refetch()}>
-            {list.loading ? 'Refreshing…' : 'Refresh'}
+            {list.loading ? __('Refreshing…', 'sikshya') : __('Refresh', 'sikshya')}
           </ButtonPrimary>
         ) : null
       }
@@ -160,11 +161,11 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
         mode={mode}
         featureId="course_bundles"
         config={config}
-        featureTitle="Course bundles"
-        featureDescription="Package multiple courses into one purchase. Customers pay once and gain access to every course in the bundle."
+        featureTitle={__('Course bundles', 'sikshya')}
+        featureDescription={__('Package multiple courses into one purchase. Customers pay once and gain access to every course in the bundle.', 'sikshya')}
         previewVariant="cards"
-        addonEnableTitle="Course bundles is not enabled"
-        addonEnableDescription="Enable the Course bundles add-on to unlock bundle features."
+        addonEnableTitle={__('Course bundles is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Course bundles add-on to unlock bundle features.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -173,7 +174,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
         {enabled ? (
           <div className="-mt-2 mb-5 flex flex-wrap items-center gap-2 overflow-x-auto">
             <HorizontalEditorTabs
-              ariaLabel="Course bundles sections"
+              ariaLabel={__('Course bundles sections', 'sikshya')}
               tabs={[
                 { id: 'bundles', label: 'Bundles', icon: 'table' },
                 { id: 'settings', label: 'Add-on defaults', icon: 'cog' },
@@ -188,11 +189,11 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
           <AddonSettingsPage
             embedded
             config={config}
-            title="Course bundles settings"
+            title={__('Course bundles settings', 'sikshya')}
             addonId="course_bundles"
-            subtitle="Control storefront links, redirects, marketing badges, and optional default bundle matching."
-            featureTitle="Course bundles settings"
-            featureDescription="These options apply site-wide. Bundle contents and prices are still edited per bundle in the Course Builder."
+            subtitle={__('Control storefront links, redirects, marketing badges, and optional default bundle matching.', 'sikshya')}
+            featureTitle={__('Course bundles settings', 'sikshya')}
+            featureDescription={__('These options apply site-wide. Bundle contents and prices are still edited per bundle in the Course Builder.', 'sikshya')}
             relatedCoreSettingsTab="payment"
             relatedCoreSettingsLabel="Payment"
             nextSteps={[
@@ -221,9 +222,9 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
               </svg>
             </span>
             <div className="text-sm leading-relaxed text-brand-900 dark:text-brand-100">
-              <p className="font-semibold">Bundles live in the Course Builder</p>
+              <p className="font-semibold">{__('Bundles live in the Course Builder', 'sikshya')}</p>
               <p className="mt-1 text-brand-700 dark:text-brand-300">
-                A bundle is a regular course with <strong>type = Course Bundle</strong>. After creating one below,
+                A bundle is a regular course with <strong>{__('type = Course Bundle', 'sikshya')}</strong>. After creating one below,
                 you land directly on the <strong>Pricing &amp; Access</strong> tab where you set the price, pick the
                 included courses, and control listing visibility — all in one place.
               </p>
@@ -233,25 +234,25 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
 
         {/* ── Quick create ── */}
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">New bundle</h2>
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('New bundle', 'sikshya')}</h2>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Give it a title, hit Create — you will be taken to the Course Builder to finish the setup.
           </p>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <label className="block flex-1 min-w-[200px] text-sm">
-              <span className="text-slate-600 dark:text-slate-400">Bundle title</span>
+              <span className="text-slate-600 dark:text-slate-400">{__('Bundle title', 'sikshya')}</span>
               <input
                 required
                 value={titleInput}
                 onChange={(e) => setTitleInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') void onCreate(); }}
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                placeholder="e.g. Photography Mastery Bundle"
+                placeholder={__('e.g. Photography Mastery Bundle', 'sikshya')}
                 disabled={creating}
               />
             </label>
             <label className="block w-36 text-sm">
-              <span className="text-slate-600 dark:text-slate-400">Starting price</span>
+              <span className="text-slate-600 dark:text-slate-400">{__('Starting price', 'sikshya')}</span>
               <input
                 type="number"
                 step="0.01"
@@ -259,12 +260,12 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                 value={priceInput}
                 onChange={(e) => setPriceInput(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
-                placeholder="0.00"
+                placeholder={__('0.00', 'sikshya')}
                 disabled={creating}
               />
             </label>
             <ButtonPrimary type="button" onClick={() => void onCreate()} disabled={creating || !titleInput.trim()}>
-              {creating ? 'Creating…' : 'Create & configure →'}
+              {creating ? __('Creating…', 'sikshya') : __('Create & configure →', 'sikshya')}
             </ButtonPrimary>
           </div>
           {createError ? (
@@ -274,7 +275,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
 
         {/* ── Bundle list ── */}
         {list.error && workspaceTab === 'bundles' ? (
-          <ApiErrorPanel error={list.error} title="Could not load bundles" onRetry={() => list.refetch()} />
+          <ApiErrorPanel error={list.error} title={__('Could not load bundles', 'sikshya')} onRetry={() => list.refetch()} />
         ) : null}
 
         <ListPanel>
@@ -283,11 +284,11 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
           </div>
 
           {list.loading ? (
-            <div className="p-6 text-sm text-slate-500">Loading…</div>
+            <div className="p-6 text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
           ) : bundleRows.length === 0 ? (
             <ListEmptyState
-              title="No bundles yet"
-              description="Create your first bundle above. It will appear here once saved."
+              title={__('No bundles yet', 'sikshya')}
+              description={__('Create your first bundle above. It will appear here once saved.', 'sikshya')}
             />
           ) : (
             <ul className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -318,7 +319,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                         <div className="mt-0.5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                           <span className="tabular-nums">{Number(b.price).toFixed(2)} {b.currency}</span>
                           <span>·</span>
-                          <span>{b.course_count} {b.course_count === 1 ? 'course' : 'courses'}</span>
+                          <span>{b.course_count} {b.course_count === 1 ? __('course', 'sikshya') : __('courses', 'sikshya')}</span>
                           <span>·</span>
                           <span className="capitalize">{b.status}</span>
                           <span>·</span>
@@ -339,7 +340,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                             target="_blank"
                             rel="noreferrer"
                             className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                            title="View on site"
+                            title={__('View on site', 'sikshya')}
                           >
                             ↗
                           </a>
@@ -364,7 +365,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                           Share this URL on landing pages. It adds all bundle courses to the cart at the bundle price.
                         </p>
                         {loadingLinks[b.id] ? (
-                          <p className="mt-2 text-xs text-slate-400">Generating link…</p>
+                          <p className="mt-2 text-xs text-slate-400">{__('Generating link…', 'sikshya')}</p>
                         ) : purchaseUrl ? (
                           <div className="mt-2 flex flex-wrap items-center gap-2">
                             <input

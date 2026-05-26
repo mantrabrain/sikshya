@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { NavIcon } from '../NavIcon';
 import { resolveTriggerOptionsForValue } from '../../lib/emailTriggerEvents';
+import { __ } from '../../lib/i18n';
 
 function IconEnvelope(props: { className?: string }) {
   return (
@@ -108,7 +109,7 @@ export function TriggerEventSelect(props: Props) {
           className="absolute left-0 right-0 z-50 mt-1 max-h-[min(24rem,70vh)] overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-xl dark:border-slate-600 dark:bg-slate-900"
         >
           <p className="px-3 py-2 text-xs leading-snug text-slate-500 dark:text-slate-400">
-            Select an event to trigger this email, or choose “No event” for sequence / manual use.
+            {__('Select an event to trigger this email, or choose “No event” for sequence / manual use.', 'sikshya')}
           </p>
           <div className="border-t border-slate-100 dark:border-slate-800" />
           {options.map((opt) => {

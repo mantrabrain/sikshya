@@ -16,6 +16,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { appViewHref } from '../lib/appUrl';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type LogRow = {
   id?: number;
@@ -170,7 +171,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         render: (r) => {
           const cid = r.course_id ?? 0;
           if (cid <= 0) {
-            return <span className="text-slate-500">Site-wide</span>;
+            return <span className="text-slate-500">{__('Site-wide', 'sikshya')}</span>;
           }
           const t = (r.course_title || '').trim() || `Course #${cid}`;
           return (
@@ -208,8 +209,8 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
 
   const emptyContent = (
     <ListEmptyState
-      title="No activity matches"
-      description="Try widening the date range or clearing filters. New events appear as learners enroll, progress, and complete purchases."
+      title={__('No activity matches', 'sikshya')}
+      description={__('Try widening the date range or clearing filters. New events appear as learners enroll, progress, and complete purchases.', 'sikshya')}
     />
   );
 
@@ -228,7 +229,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Filterable timeline of enrollments, progress, submissions, certificates, and fulfilled orders."
+      subtitle={__('Filterable timeline of enrollments, progress, submissions, certificates, and fulfilled orders.', 'sikshya')}
       pageActions={
         enabled ? (
           <div className="flex flex-wrap gap-2">
@@ -236,7 +237,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
               Activity log settings
             </ButtonSecondary>
             <ButtonPrimary type="button" disabled={loading} onClick={() => void refetch()}>
-              {loading ? 'Refreshing…' : 'Refresh'}
+              {loading ? __('Refreshing…', 'sikshya') : __('Refresh', 'sikshya')}
             </ButtonPrimary>
           </div>
         ) : null
@@ -246,11 +247,11 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         mode={mode}
         featureId="activity_log"
         config={config}
-        featureTitle="Student activity log"
-        featureDescription="Answer “what happened?” for a learner or course: filter by user, course, action, or free-text search. Site managers see commerce-wide rows; instructors only see their own courses."
+        featureTitle={__('Student activity log', 'sikshya')}
+        featureDescription={__('Answer “what happened?” for a learner or course: filter by user, course, action, or free-text search. Site managers see commerce-wide rows; instructors only see their own courses.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Activity log is not enabled"
-        addonEnableDescription="Enable the Student activity log add-on to record Sikshya events and unlock this audit view plus the My account strip."
+        addonEnableTitle={__('Activity log is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Student activity log add-on to record Sikshya events and unlock this audit view plus the My account strip.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -287,11 +288,11 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
           <AddonSettingsPage
             embedded
             config={config}
-            title="Activity log settings"
+            title={__('Activity log settings', 'sikshya')}
             addonId="activity_log"
-            subtitle="Retention, learner dashboard strip size, and whether to honor per-course logging opt-out."
-            featureTitle="Activity log settings"
-            featureDescription="Every control here changes stored data or what learners and instructors see."
+            subtitle={__('Retention, learner dashboard strip size, and whether to honor per-course logging opt-out.', 'sikshya')}
+            featureTitle={__('Activity log settings', 'sikshya')}
+            featureDescription={__('Every control here changes stored data or what learners and instructors see.', 'sikshya')}
             nextSteps={[
               {
                 label: 'Open the timeline',
@@ -308,7 +309,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
         ) : null}
 
         {enabled && workspaceTab === 'timeline' && error ? (
-          <ApiErrorPanel error={error} title="Could not load activity log" onRetry={() => void refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load activity log', 'sikshya')} onRetry={() => void refetch()} />
         ) : null}
 
         {enabled && workspaceTab === 'timeline' && tableMissing ? (
@@ -330,7 +331,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                     setFilterCourseId(id);
                     setPage(1);
                   }}
-                  placeholder="All courses"
+                  placeholder={__('All courses', 'sikshya')}
                   hint="Optional — limit events to one course."
                   className="w-full max-w-full"
                 />
@@ -344,7 +345,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setFilterUserId(e.target.value);
                       setPage(1);
                     }}
-                    placeholder="e.g. 12"
+                    placeholder={__('e.g. 12', 'sikshya')}
                     className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
                   />
                 </label>
@@ -375,7 +376,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setPage(1);
                     }}
                     className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                    placeholder="Text contained in the event"
+                    placeholder={__('Text contained in the event', 'sikshya')}
                   />
                 </label>
                 <label className="block text-sm text-slate-600 dark:text-slate-400">
@@ -419,7 +420,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       Showing {rows.length} row{rows.length === 1 ? '' : 's'} · {total} total events
                     </span>
                   ) : (
-                    <span>Learner and course events captured by Sikshya Pro</span>
+                    <span>{__('Learner and course events captured by Sikshya Pro', 'sikshya')}</span>
                   )}
                 </div>
                 <ListPaginationBar
@@ -436,7 +437,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                   rows={rows}
                   rowKey={(r) => String(r.id ?? `${r.created_at}-${r.user_id}-${r.action}-${r.object_id}`)}
                   emptyContent={rows.length === 0 ? emptyContent : undefined}
-                  emptyMessage="No rows to display."
+                  emptyMessage={__('No rows to display.', 'sikshya')}
                   wrapInCard={false}
                 />
                 <ListPaginationBar

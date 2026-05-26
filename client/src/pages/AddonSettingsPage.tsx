@@ -12,6 +12,7 @@ import { useAsyncData } from '../hooks/useAsyncData';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type FieldType = 'string' | 'password' | 'textarea' | 'bool' | 'int' | 'select' | 'csv';
 
@@ -114,10 +115,10 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
     setSaving(true);
     try {
       await getSikshyaApi().post(`/pro/addons/${encodeURIComponent(addonId)}/settings`, opts);
-      toast.success('Saved', 'Settings saved.');
+      toast.success(__('Saved', 'sikshya'), 'Settings saved.');
       void refetch();
     } catch (err) {
-      toast.error('Save failed', err instanceof Error ? err.message : 'Save failed');
+      toast.error(__('Save failed', 'sikshya'), err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -252,11 +253,11 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
         addonError={addon.error}
       >
         <div className="space-y-6">
-          {error ? <ApiErrorPanel error={error} title="Could not load settings" onRetry={() => refetch()} /> : null}
+          {error ? <ApiErrorPanel error={error} title={__('Could not load settings', 'sikshya')} onRetry={() => refetch()} /> : null}
 
           {showSettingsScopeCallout ? (
             <div className="rounded-xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-xs leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-              <p className="font-semibold text-slate-800 dark:text-slate-100">What you are editing</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-100">{__('What you are editing', 'sikshya')}</p>
               <p className="mt-1">
                 This form saves{' '}
                 <span className="font-medium text-slate-900 dark:text-white">{featureTitle}</span> add-on options for
@@ -305,7 +306,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
 
                 <div className="flex items-center gap-3">
                   <ButtonPrimary type="submit" disabled={saving}>
-                    {saving ? 'Saving…' : 'Save settings'}
+                    {saving ? __('Saving…', 'sikshya') : __('Save settings', 'sikshya')}
                   </ButtonPrimary>
                 </div>
               </form>
@@ -314,7 +315,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
 
           {nextSteps && nextSteps.length > 0 ? (
             <ListPanel className="p-6">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Next steps</h2>
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Next steps', 'sikshya')}</h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Where to actually use this add-on once it's configured.
               </p>

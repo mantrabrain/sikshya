@@ -255,6 +255,8 @@ while (have_posts()) {
                               'reviewAnswers' => __('Review answers', 'sikshya'),
                               'hideAnswers' => __('Hide answers', 'sikshya'),
                               'tryAgain' => __('Try again', 'sikshya'),
+                              'previous' => __('Previous', 'sikshya'),
+                              'next' => __('Next', 'sikshya'),
                           ],
                       ],
                       JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
@@ -1168,32 +1170,7 @@ while (have_posts()) {
     });
   }
 
-  // Quiz start: reveal the form, hide the intro landing, focus first question.
-  const startBtns = document.querySelectorAll('[data-sikshya-quiz-start]');
-  const quizForm = document.querySelector('[data-sikshya-quiz-form]');
-  const quizIntro = document.querySelector('[data-sikshya-quiz-intro]');
-  if (quizForm && startBtns.length) {
-    startBtns.forEach((startBtn) => {
-      startBtn.addEventListener('click', () => {
-        if (startBtn.hasAttribute('disabled') || startBtn.getAttribute('aria-disabled') === 'true') {
-          return;
-        }
-        quizForm.hidden = false;
-        if (quizIntro) {
-          quizIntro.setAttribute('hidden', '');
-        }
-        startBtns.forEach((b) => {
-          b.setAttribute('hidden', '');
-          b.setAttribute('aria-expanded', 'true');
-        });
-        const first = quizForm.querySelector('input, textarea, select, button');
-        if (first && first.focus) {
-          first.focus({ preventScroll: true });
-        }
-        quizForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-  }
+  // Quiz start UI + server attempt/timer: handled by quiz-taker.js (avoid duplicate click handlers).
 })();
 </script>
     <?php

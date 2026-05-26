@@ -12,6 +12,7 @@ import type { SikshyaReactConfig } from '../types';
 import type { EmailTemplateApi } from '../types/emailTemplate';
 import { ToggleSwitch } from '../components/email/EmailTemplateForms';
 import { TableSkeleton } from '../components/shared/Skeleton';
+import { __ } from '../lib/i18n';
 
 function categoryStyle(cat: string): string {
   const c = cat.toLowerCase();
@@ -121,8 +122,8 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
       const ok = await dialog.confirm({
         title: `Delete ${ids.length} template(s)?`,
         message:
-          'Only custom templates are removed. System templates cannot be deleted and will be skipped if selected.',
-        confirmLabel: 'Delete',
+          __('Only custom templates are removed. System templates cannot be deleted and will be skipped if selected.', 'sikshya'),
+        confirmLabel: __('Delete', 'sikshya'),
         variant: 'danger',
       });
       if (!ok) {
@@ -149,10 +150,10 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
       embedded={embedded}
       config={config}
       title={title}
-      subtitle="Enable and edit transactional messages — including drip unlock templates. Disable one template only disables that mail. Addresses, SMTP, global HTML, the LMS send-email switch, and certificate email delivery are centralized under Email → Delivery."
+      subtitle={__('Enable and edit transactional messages — including drip unlock templates. Disable one template only disables that mail. Addresses, SMTP, global HTML, the LMS send-email switch, and certificate email delivery are centralized under Email → Delivery.', 'sikshya')}
       pageActions={
         <div className="flex flex-wrap items-center gap-2">
-          <LinkButtonSecondary href={appViewHref(config, 'email-hub', { tab: 'delivery' })}>Email delivery</LinkButtonSecondary>
+          <LinkButtonSecondary href={appViewHref(config, 'email-hub', { tab: 'delivery' })}>{__('Email delivery', 'sikshya')}</LinkButtonSecondary>
           <ButtonPrimary type="button" disabled={loading} onClick={() => void load()}>
             Refresh
           </ButtonPrimary>
@@ -164,7 +165,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
     >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load templates" onRetry={() => void load()} />
+          <ApiErrorPanel error={error} title={__('Could not load templates', 'sikshya')} onRetry={() => void load()} />
         </div>
       ) : null}
 
@@ -210,7 +211,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                     checked={allSelected}
                     onChange={toggleSelectAll}
                     disabled={loading || rows.length === 0}
-                    aria-label="Select all templates"
+                    aria-label={__('Select all templates', 'sikshya')}
                   />
                 </th>
                 <th className="px-3 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -244,7 +245,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                   <tr
                     key={row.id}
                     className={`border-b border-slate-100 transition hover:bg-slate-50/90 dark:border-slate-800/80 dark:hover:bg-slate-900/40 ${
-                      idx % 2 === 0 ? 'bg-white dark:bg-transparent' : 'bg-slate-50/40 dark:bg-slate-950/30'
+                      idx % 2 === 0 ? __('bg-white dark:bg-transparent', 'sikshya') : __('bg-slate-50/40 dark:bg-slate-950/30', 'sikshya')
                     } ${row.locked ? 'opacity-[0.88]' : ''}`}
                   >
                     <td className="px-3 py-3 align-middle">
@@ -280,7 +281,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                                   : 'bg-slate-200/90 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
                               }`}
                             >
-                              {row.template_type === 'system' ? 'System' : 'Custom'}
+                              {row.template_type === 'system' ? __('System', 'sikshya') : __('Custom', 'sikshya')}
                             </span>
                             {row.locked ? (
                               <span className="inline-flex rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 dark:bg-amber-950/50 dark:text-amber-100">
@@ -334,7 +335,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                               : 'text-brand-600 dark:text-brand-400'
                           }`}
                         >
-                          {row.locked ? 'View (locked)' : 'Edit'}
+                          {row.locked ? __('View (locked)', 'sikshya') : __('Edit', 'sikshya')}
                         </button>
                         {row.locked ? (
                           <a
@@ -353,7 +354,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
           </table>
         </div>
         {!loading && rows.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">No templates found.</div>
+          <div className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">{__('No templates found.', 'sikshya')}</div>
         ) : null}
       </div>
     </EmbeddableShell>

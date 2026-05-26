@@ -14,6 +14,7 @@ import { formatPostDate } from '../lib/formatPostDate';
 import { term, termLower } from '../lib/terminology';
 import type { SikshyaReactConfig, WpPost } from '../types';
 import { FeaturedThumb } from '../components/shared/list/FeaturedThumb';
+import { __ } from '../lib/i18n';
 
 function isBundleRow(r: WpPost): boolean {
   const m = r.meta as Record<string, unknown> | undefined;
@@ -205,7 +206,7 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Live data from your site. Create a draft, then finish details in the builder."
+      subtitle={__('Live data from your site. Create a draft, then finish details in the builder.', 'sikshya')}
       pageActions={
         <ButtonPrimary onClick={() => setCreateOpen(true)}>+ Add new {courseLower}</ButtonPrimary>
       }
@@ -244,10 +245,10 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
               title={`Filter by ${courseLower} type`}
             >
-              <option value="any">All types</option>
-              <option value="regular">Regular {coursesLower}</option>
-              <option value="subscription">Subscription {coursesLower}</option>
-              <option value="bundle">Bundle {coursesLower}</option>
+              <option value="any">{__('All types', 'sikshya')}</option>
+              <option value="regular">{__('Regular {coursesLower}', 'sikshya')}</option>
+              <option value="subscription">{__('Subscription {coursesLower}', 'sikshya')}</option>
+              <option value="bundle">{__('Bundle {coursesLower}', 'sikshya')}</option>
             </select>
           </div>
         }

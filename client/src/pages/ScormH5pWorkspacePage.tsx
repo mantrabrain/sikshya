@@ -15,6 +15,7 @@ import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs'
 import { AddonSettingsPage } from './AddonSettingsPage';
 import type { SikshyaReactConfig } from '../types';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
+import { __ } from '../lib/i18n';
 
 type ScormPackage = {
   id: number;
@@ -94,11 +95,11 @@ export function ScormH5pWorkspacePage(props: {
       mode={mode}
       featureId="scorm_h5p_pro"
       config={config}
-      featureTitle="SCORM / H5P"
-      featureDescription="Manage SCORM packages, run H5P interactives, capture attempts and scores, and ship reports — all native to Sikshya."
+      featureTitle={__('SCORM / H5P', 'sikshya')}
+      featureDescription={__('Manage SCORM packages, run H5P interactives, capture attempts and scores, and ship reports — all native to Sikshya.', 'sikshya')}
       previewVariant="cards"
-      addonEnableTitle="SCORM / H5P is not enabled"
-      addonEnableDescription="Enable the add-on to upload SCORM packages, run the runtime tracker, and unlock attempt reporting."
+      addonEnableTitle={__('SCORM / H5P is not enabled', 'sikshya')}
+      addonEnableDescription={__('Enable the add-on to upload SCORM packages, run the runtime tracker, and unlock attempt reporting.', 'sikshya')}
       canEnable={Boolean(addon.licenseOk)}
       enableBusy={addon.loading}
       onEnable={() => addon.enable()}
@@ -108,7 +109,7 @@ export function ScormH5pWorkspacePage(props: {
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <HorizontalEditorTabs
-              ariaLabel="SCORM / H5P sections"
+              ariaLabel={__('SCORM / H5P sections', 'sikshya')}
               tabs={TAB_LIST}
               value={tab}
               onChange={(id) => setTab(id as PanelTab)}
@@ -171,7 +172,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
         { method: 'POST', body: fd },
       );
       setUploadWarnings(resp.warnings ?? []);
-      toast.success('Uploaded', 'Package uploaded.');
+      toast.success(__('Uploaded', 'sikshya'), 'Package uploaded.');
       setReloadTick((n) => n + 1);
     } catch (err) {
       setUploadErr(err);
@@ -186,11 +187,11 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
       await getSikshyaApi().delete(
         `${SIKSHYA_ENDPOINTS.pro.scormPackage(pkg.id)}${force ? '?force=1' : ''}`,
       );
-      toast.success('Deleted', 'Package deleted.');
+      toast.success(__('Deleted', 'sikshya'), 'Package deleted.');
       setConfirmDelete(null);
       setReloadTick((n) => n + 1);
     } catch (err) {
-      toast.error('Delete failed', err instanceof Error ? err.message : 'Delete failed');
+      toast.error(__('Delete failed', 'sikshya'), err instanceof Error ? err.message : 'Delete failed');
     } finally {
       setBusyId(null);
     }
@@ -247,7 +248,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
               Preview
             </ButtonSecondary>
             <ButtonSecondary type="button" onClick={() => setConfirmDelete(p)} disabled={busyId === p.id}>
-              {busyId === p.id ? 'Working…' : 'Delete'}
+              {busyId === p.id ? __('Working…', 'sikshya') : __('Delete', 'sikshya')}
             </ButtonSecondary>
           </div>
         ),
@@ -262,7 +263,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">Upload a SCORM package</h2>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Upload a SCORM package', 'sikshya')}</h2>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Drop a SCORM 1.2 or 2004 zip. Sikshya validates the manifest, extracts files into a sandboxed folder, and
               keeps every launch behind an auth-gated proxy.
@@ -277,7 +278,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
               onChange={(e) => void onUpload(e)}
             />
             <ButtonPrimary type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-              {uploading ? 'Uploading…' : 'Upload .zip'}
+              {uploading ? __('Uploading…', 'sikshya') : __('Upload .zip', 'sikshya')}
             </ButtonPrimary>
           </div>
         </div>
@@ -290,7 +291,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
         ) : null}
         {uploadErr ? (
           <div className="mt-3">
-            <ApiErrorPanel error={uploadErr} title="Upload failed" />
+            <ApiErrorPanel error={uploadErr} title={__('Upload failed', 'sikshya')} />
           </div>
         ) : null}
       </section>
@@ -305,7 +306,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Search packages…"
+            placeholder={__('Search packages…', 'sikshya')}
             className="w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
           />
           <span className="ml-auto text-xs text-slate-500">{total} package{total === 1 ? '' : 's'}</span>
@@ -314,7 +315,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
           {loading ? (
             <SkeletonCard rows={4} />
           ) : error ? (
-            <ApiErrorPanel error={error} title="Could not load packages" onRetry={() => refetch()} />
+            <ApiErrorPanel error={error} title={__('Could not load packages', 'sikshya')} onRetry={() => refetch()} />
           ) : rows.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500 dark:border-slate-700">
               No packages yet. Upload a zip to get started.
@@ -329,9 +330,9 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
 
       <ConfirmDialog
         open={Boolean(confirmDelete)}
-        title="Delete package?"
+        title={__('Delete package?', 'sikshya')}
         confirmLabel={
-          confirmDelete && (confirmDelete.lesson_reference_count ?? 0) > 0 ? 'Force delete' : 'Delete'
+          confirmDelete && (confirmDelete.lesson_reference_count ?? 0) > 0 ? __('Force delete', 'sikshya') : __('Delete', 'sikshya')
         }
         variant="danger"
         busy={busyId !== null}
@@ -471,7 +472,7 @@ function ReportsPanel({ config }: { config: SikshyaReactConfig }) {
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/40">
-      <h2 className="text-base font-semibold text-slate-900 dark:text-white">Course report</h2>
+      <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Course report', 'sikshya')}</h2>
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
         Pull a SCORM/H5P attempt summary for a single course. Use the CSV export to share with stakeholders.
       </p>
@@ -485,24 +486,24 @@ function ReportsPanel({ config }: { config: SikshyaReactConfig }) {
             className="w-40 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
             value={courseId}
             onChange={(e) => setCourseId(e.target.value.replace(/[^0-9]/g, ''))}
-            placeholder="e.g. 142"
+            placeholder={__('e.g. 142', 'sikshya')}
           />
         </div>
         <ButtonPrimary type="button" onClick={() => void refetch()} disabled={courseIdNum <= 0}>
           Load report
         </ButtonPrimary>
         <ButtonSecondary type="button" onClick={() => void handleExport()} disabled={courseIdNum <= 0 || exportBusy}>
-          {exportBusy ? 'Preparing…' : 'Export CSV'}
+          {exportBusy ? __('Preparing…', 'sikshya') : __('Export CSV', 'sikshya')}
         </ButtonSecondary>
       </div>
 
       <div className="mt-5">
         {courseIdNum <= 0 ? (
-          <p className="text-sm text-slate-500">Enter a course ID above to see attempt rollups.</p>
+          <p className="text-sm text-slate-500">{__('Enter a course ID above to see attempt rollups.', 'sikshya')}</p>
         ) : loading ? (
           <SkeletonCard rows={4} />
         ) : error ? (
-          <ApiErrorPanel error={error} title="Could not load report" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load report', 'sikshya')} onRetry={() => refetch()} />
         ) : !data || data.lessons.length === 0 ? (
           <div className="rounded-lg border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500 dark:border-slate-700">
             No interactive lessons (with managed packages) found for this course yet.
@@ -546,11 +547,11 @@ function SettingsPanel({ config }: { config: SikshyaReactConfig }) {
     <AddonSettingsPage
       embedded
       config={config}
-      title="SCORM / H5P settings"
+      title={__('SCORM / H5P settings', 'sikshya')}
       addonId="scorm_h5p_pro"
-      subtitle="Player presentation, attempts & completion, storage limits, reporting retention, and debug logging."
-      featureTitle="SCORM / H5P defaults"
-      featureDescription="These options apply site-wide for this add-on. Per-course overrides live in the course builder; per-lesson overrides live in the lesson editor."
+      subtitle={__('Player presentation, attempts & completion, storage limits, reporting retention, and debug logging.', 'sikshya')}
+      featureTitle={__('SCORM / H5P defaults', 'sikshya')}
+      featureDescription={__('These options apply site-wide for this add-on. Per-course overrides live in the course builder; per-lesson overrides live in the lesson editor.', 'sikshya')}
       relatedCoreSettingsTab="lessons"
       relatedCoreSettingsLabel="Lessons"
       nextSteps={[

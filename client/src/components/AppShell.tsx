@@ -5,6 +5,7 @@ import { ShellAlertStrip } from './ShellAlertStrip';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import type { NavItem, SikshyaShellUser } from '../types';
+import { __ } from '../lib/i18n';
 
 const THEME_KEY = 'sikshya-admin-theme';
 
@@ -54,7 +55,7 @@ export function AppShell({
   children,
 }: Props) {
   const [isDark, setIsDark] = useState(false);
-  const safeUser: SikshyaShellUser = user || { name: 'Admin', avatarUrl: '' };
+  const safeUser: SikshyaShellUser = user || { name: __('Admin', 'sikshya'), avatarUrl: '' };
 
 	useEffect(() => {
 		const root = document.documentElement;

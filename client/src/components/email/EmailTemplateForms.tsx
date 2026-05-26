@@ -5,6 +5,7 @@ import { QuillField } from '../shared/QuillField';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../../api';
 import type { EmailTemplateApi } from '../../types/emailTemplate';
 import { TriggerEventSelect } from './TriggerEventSelect';
+import { __ } from '../../lib/i18n';
 
 export function ToggleSwitch(props: {
   checked: boolean;
@@ -108,7 +109,7 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
       const done = afterSave ?? onBack;
       done();
     } catch (e) {
-      setSaveErr(e instanceof Error ? e.message : 'Save failed');
+      setSaveErr(e instanceof Error ? e.message : __('Save failed', 'sikshya'));
     }
   };
 
@@ -119,9 +120,12 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
     <div className="w-full space-y-6">
       {locked ? (
         <div className="rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-50">
-          <strong className="font-semibold">Add-on required.</strong>{' '}
+          <strong className="font-semibold">{__('Add-on required.', 'sikshya')}</strong>{' '}
           {editing.locked_reason?.trim() ||
-            'Enable the add-on and plan for this template under Addons and licensing, then return here to edit.'}
+            __(
+              'Enable the add-on and plan for this template under Addons and licensing, then return here to edit.',
+              'sikshya'
+            )}
         </div>
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -131,24 +135,30 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
             onClick={onBack}
             className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400"
           >
-            ← Back to templates
+            {__('← Back to templates', 'sikshya')}
           </button>
           <div className="flex items-center gap-2">
             <NavIcon name="layers" className="h-5 w-5 text-slate-500" />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Edit email template</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              {__('Edit email template', 'sikshya')}
+            </h2>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Sender identity and SMTP are configured under <strong className="font-medium">Email</strong> (delivery).
+            {__('Sender identity and SMTP are configured under Email (delivery).', 'sikshya')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50 px-3.5 py-2 dark:border-slate-600 dark:bg-slate-800/60">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</span>
-            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{enabled ? 'Active' : 'Inactive'}</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {__('Status', 'sikshya')}
+            </span>
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {enabled ? __('Active', 'sikshya') : __('Inactive', 'sikshya')}
+            </span>
             <ToggleSwitch
               checked={enabled}
               onChange={setEnabled}
-              label="Template active"
+              label={__('Template active', 'sikshya')}
               disabled={fieldLock}
             />
           </div>
@@ -158,10 +168,10 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
             onClick={() => void onPreview(editing, { subject, body_html: bodyHtml })}
             className="inline-flex items-center justify-center rounded-lg border border-slate-200/70 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
-            Preview
+            {__('Preview', 'sikshya')}
           </button>
           <ButtonPrimary type="button" disabled={fieldLock} onClick={() => void save()}>
-            Save template
+            {__('Save template', 'sikshya')}
           </ButtonPrimary>
         </div>
       </div>
@@ -171,46 +181,51 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
           <label className="block">
-            <span className={LB}>Template name</span>
+            <span className={LB}>{__('Template name', 'sikshya')}</span>
             <input
               className={FT_INPUT}
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={fieldLock}
-              placeholder="e.g. Post-enrollment tips"
+              placeholder={__('e.g. Post-enrollment tips', 'sikshya')}
             />
           </label>
           <label className="block">
             <QuillField
-              label="Description"
+              label={__('Description', 'sikshya')}
               value={description}
               onChange={(html) => setDescription(html)}
               disabled={fieldLock}
-              placeholder="Short note for admins: when this email should be used"
+              placeholder={__('Short note for admins: when this email should be used', 'sikshya')}
               minHeightPx={96}
             />
           </label>
           <div>
-            <span className={LB}>Trigger Event</span>
+            <span className={LB}>{__('Trigger Event', 'sikshya')}</span>
             {editing.template_type === 'system' ? (
               <>
                 <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/50">
                   <span className="text-violet-600 dark:text-violet-400">⚡</span>
                   <code className="text-xs text-slate-800 dark:text-slate-200">{editing.event}</code>
                 </div>
-                <p className={HELP}>System templates cannot change events.</p>
+                <p className={HELP}>{__('System templates cannot change events.', 'sikshya')}</p>
               </>
             ) : (
               <>
                 <div className="mt-1.5">
                   <TriggerEventSelect value={eventKey} onChange={setEventKey} disabled={fieldLock} />
                 </div>
-                <p className={HELP}>Sikshya fires these WordPress actions; your template runs when the matching event occurs.</p>
+                <p className={HELP}>
+                  {__(
+                    'Sikshya fires these WordPress actions; your template runs when the matching event occurs.',
+                    'sikshya'
+                  )}
+                </p>
               </>
             )}
           </div>
           <label className="block">
-            <span className={LB}>Send to</span>
+            <span className={LB}>{__('Send to', 'sikshya')}</span>
             <input
               className={`${FT_INPUT} font-mono text-xs`}
               value={recipientTo}
@@ -219,12 +234,13 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
               placeholder="{{student_email}} or {{instructor_email}} or {{admin_email}}"
             />
             <p className={HELP}>
-              Use merge tags for dynamic recipients. Examples: <code className="text-[11px]">{'{{student_email}}'}</code>,{' '}
+              {__('Use merge tags for dynamic recipients. Examples:', 'sikshya')}{' '}
+              <code className="text-[11px]">{'{{student_email}}'}</code>,{' '}
               <code className="text-[11px]">{'{{instructor_email}}'}</code>, <code className="text-[11px]">{'{{admin_email}}'}</code>
             </p>
           </label>
           <label className="block">
-            <span className={LB}>Subject line</span>
+            <span className={LB}>{__('Subject line', 'sikshya')}</span>
             <input
               className={FT_INPUT}
               value={subject}
@@ -234,7 +250,7 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
             />
           </label>
           <label className="block">
-            <span className={LB}>Email body (HTML)</span>
+            <span className={LB}>{__('Email body (HTML)', 'sikshya')}</span>
             <textarea
               className={`${FT_INPUT} min-h-[280px] font-mono text-xs leading-relaxed`}
               value={bodyHtml}
@@ -249,9 +265,11 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
               <span className="font-mono text-slate-500">&lt; &gt;</span>
-              Available variables
+              {__('Available variables', 'sikshya')}
             </div>
-            <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Click a tag to copy; paste into subject or HTML body.</p>
+            <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+              {__('Click a tag to copy; paste into subject or HTML body.', 'sikshya')}
+            </p>
             <div className="flex flex-wrap gap-2">
               {(editing.merge_tags || []).map((tag) => (
                 <button
@@ -266,10 +284,12 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
             </div>
           </div>
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">Template info</div>
+            <div className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+              {__('Template info', 'sikshya')}
+            </div>
             <dl className="space-y-2 text-xs">
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">Event</dt>
+                <dt className="text-slate-500">{__('Event', 'sikshya')}</dt>
                 <dd>
                   <span className="rounded-md bg-violet-100 px-2 py-0.5 font-mono text-[10px] text-violet-900 dark:bg-violet-950/50 dark:text-violet-200">
                     {editing.event}
@@ -277,24 +297,26 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
                 </dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">Key</dt>
+                <dt className="text-slate-500">{__('Key', 'sikshya')}</dt>
                 <dd className="font-mono text-slate-800 dark:text-slate-200">{editing.id}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">Category</dt>
+                <dt className="text-slate-500">{__('Category', 'sikshya')}</dt>
                 <dd className="capitalize text-slate-800 dark:text-slate-200">{editing.category}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">Audience</dt>
+                <dt className="text-slate-500">{__('Audience', 'sikshya')}</dt>
                 <dd className="font-mono text-[10px] text-slate-700 dark:text-slate-300">{editing.recipient}</dd>
               </div>
               <div className="flex flex-col gap-1">
-                <dt className="text-slate-500">Send to</dt>
+                <dt className="text-slate-500">{__('Send to', 'sikshya')}</dt>
                 <dd className="break-all font-mono text-[10px] text-slate-800 dark:text-slate-200">{recipientTo}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">Type</dt>
-                <dd className="text-slate-800 dark:text-slate-200">{editing.template_type === 'system' ? 'System' : 'Custom'}</dd>
+                <dt className="text-slate-500">{__('Type', 'sikshya')}</dt>
+                <dd className="text-slate-800 dark:text-slate-200">
+                  {editing.template_type === 'system' ? __('System', 'sikshya') : __('Custom', 'sikshya')}
+                </dd>
               </div>
             </dl>
           </div>
@@ -334,7 +356,7 @@ export function EmailTemplateCreateForm(props: CreateProps) {
       });
       onCreated(created);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Could not create template');
+      setErr(e instanceof Error ? e.message : __('Could not create template', 'sikshya'));
     }
   };
 
@@ -347,22 +369,30 @@ export function EmailTemplateCreateForm(props: CreateProps) {
             onClick={onCancel}
             className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400"
           >
-            ← Back to templates
+            {__('← Back to templates', 'sikshya')}
           </button>
           <div className="flex items-center gap-2">
             <NavIcon name="plusDocument" className="h-5 w-5 text-slate-500" />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">New email template</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              {__('New email template', 'sikshya')}
+            </h2>
           </div>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Custom templates can use manual or automation triggers.</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {__('Custom templates can use manual or automation triggers.', 'sikshya')}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50 px-3.5 py-2 dark:border-slate-600 dark:bg-slate-800/60">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</span>
-            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{enabled ? 'Active' : 'Inactive'}</span>
-            <ToggleSwitch checked={enabled} onChange={setEnabled} label="Template active" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {__('Status', 'sikshya')}
+            </span>
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {enabled ? __('Active', 'sikshya') : __('Inactive', 'sikshya')}
+            </span>
+            <ToggleSwitch checked={enabled} onChange={setEnabled} label={__('Template active', 'sikshya')} />
           </div>
           <ButtonPrimary type="button" onClick={() => void submit()} disabled={!name.trim()}>
-            Create template
+            {__('Create template', 'sikshya')}
           </ButtonPrimary>
         </div>
       </div>
@@ -372,42 +402,46 @@ export function EmailTemplateCreateForm(props: CreateProps) {
       <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
         <div className="space-y-4">
           <label className="block">
-            <span className={LB}>Template name</span>
+            <span className={LB}>{__('Template name', 'sikshya')}</span>
             <input
               className={FT_INPUT}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Re-engagement after enrollment"
+              placeholder={__('e.g. Re-engagement after enrollment', 'sikshya')}
             />
           </label>
           <label className="block">
             <QuillField
-              label="Description"
+              label={__('Description', 'sikshya')}
               value={description}
               onChange={(html) => setDescription(html)}
-              placeholder="When to send this template (internal note)"
+              placeholder={__('When to send this template (internal note)', 'sikshya')}
               minHeightPx={160}
             />
           </label>
           <div>
-            <span className={LB}>Trigger Event</span>
+            <span className={LB}>{__('Trigger Event', 'sikshya')}</span>
             <div className="mt-1.5">
               <TriggerEventSelect value={event} onChange={setEvent} />
             </div>
-            <p className={HELP}>Select an event to trigger this email, or “No event” for sequence / manual use.</p>
+            <p className={HELP}>
+              {__('Select an event to trigger this email, or “No event” for sequence / manual use.', 'sikshya')}
+            </p>
           </div>
           <label className="block">
-            <span className={LB}>Send to</span>
+            <span className={LB}>{__('Send to', 'sikshya')}</span>
             <input
               className={`${FT_INPUT} font-mono text-xs`}
               value={recipientTo}
               onChange={(e) => setRecipientTo(e.target.value)}
               placeholder="{{student_email}} · {{instructor_email}} · {{admin_email}}"
             />
-            <p className={HELP}>Who receives this email — merge tags resolve when the message is sent.</p>
+            <p className={HELP}>
+              {__('Who receives this email — merge tags resolve when the message is sent.', 'sikshya')}
+            </p>
           </label>
           <label className="block">
-            <span className={LB}>Subject line</span>
+            <span className={LB}>{__('Subject line', 'sikshya')}</span>
             <input
               className={FT_INPUT}
               value={subject}
@@ -416,7 +450,7 @@ export function EmailTemplateCreateForm(props: CreateProps) {
             />
           </label>
           <label className="block">
-            <span className={LB}>Email body (HTML)</span>
+            <span className={LB}>{__('Email body (HTML)', 'sikshya')}</span>
             <textarea
               className={`${FT_INPUT} min-h-[200px] font-mono text-xs`}
               value={bodyHtml}

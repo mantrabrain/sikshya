@@ -108,7 +108,7 @@ class AuthRestRoutes
 
         $jwt = $this->plugin->getService('jwtAuth');
         if (!$jwt instanceof JwtAuthService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'JWT unavailable'], 500);
+            return new WP_REST_Response(['success' => false, 'message' => __('JWT unavailable', 'sikshya')], 500);
         }
 
         $token = $jwt->issueToken((int) $user->ID);

@@ -1,4 +1,5 @@
 import { Card } from './Card';
+import { __ } from '../../lib/i18n';
 
 const pulse = 'animate-pulse rounded-md bg-slate-200/80';
 
@@ -13,7 +14,7 @@ export function SkeletonCircle({ className = 'h-10 w-10' }: { className?: string
 /** Generic card-sized placeholder. */
 export function SkeletonCard({ rows = 3 }: { rows?: number }) {
   return (
-    <div className="space-y-3 p-2" aria-busy="true" aria-label="Loading">
+    <div className="space-y-3 p-2" aria-busy="true" aria-label={__('Loading', 'sikshya')}>
       {Array.from({ length: rows }).map((_, i) => (
         <SkeletonLine key={i} className={i === 0 ? 'w-2/3' : 'w-full'} />
       ))}
@@ -27,7 +28,7 @@ export function SkeletonStatGrid({ count = 4 }: { count?: number }) {
     <div
       className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       aria-busy="true"
-      aria-label="Loading statistics"
+      aria-label={__('Loading statistics', 'sikshya')}
     >
       {Array.from({ length: count }).map((_, i) => (
         <div
@@ -50,7 +51,7 @@ type TableSkeletonProps = {
 /** Table body placeholder — use inside a table layout matching {@link DataTable}. */
 export function TableSkeleton({ columns, rows = 8 }: TableSkeletonProps) {
   return (
-    <tbody className="divide-y divide-slate-100" aria-busy="true" aria-label="Loading table">
+    <tbody className="divide-y divide-slate-100" aria-busy="true" aria-label={__('Loading table', 'sikshya')}>
       {Array.from({ length: rows }).map((_, ri) => (
         <tr key={ri}>
           {Array.from({ length: columns }).map((_, ci) => (
@@ -67,7 +68,7 @@ export function TableSkeleton({ columns, rows = 8 }: TableSkeletonProps) {
 /** Course builder: left step rail + main form panels. */
 export function CourseBuilderSkeleton() {
   return (
-    <div className="flex flex-col gap-6 lg:flex-row" aria-busy="true" aria-label="Loading course builder">
+    <div className="flex flex-col gap-6 lg:flex-row" aria-busy="true" aria-label={__('Loading course builder', 'sikshya')}>
       <div className="shrink-0 space-y-2 lg:w-72">
         <SkeletonLine className="h-3 w-24" />
         {Array.from({ length: 5 }).map((_, i) => (

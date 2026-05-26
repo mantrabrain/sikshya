@@ -15,6 +15,7 @@ import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import { useAdminRouting } from '../lib/adminRouting';
 import { formatPostDate } from '../lib/formatPostDate';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type ReviewRow = {
   id: number;
@@ -146,10 +147,10 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
   const remove = useCallback(
     async (id: number) => {
       const ok = await confirm({
-        title: 'Delete review?',
-        message: 'This review will be permanently removed and the course rating recalculated.',
+        title: __('Delete review?', 'sikshya'),
+        message: __('This review will be permanently removed and the course rating recalculated.', 'sikshya'),
         variant: 'danger',
-        confirmLabel: 'Delete',
+        confirmLabel: __('Delete', 'sikshya'),
       });
       if (!ok) return;
       setRowBusyId(id);
@@ -220,7 +221,7 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle="Approve, unpublish, or delete learner reviews. Course averages update automatically."
+      subtitle={__('Approve, unpublish, or delete learner reviews. Course averages update automatically.', 'sikshya')}
       pageActions={
         gateOpen ? (
           <ButtonPrimary type="button" disabled={loading} onClick={() => refetch()}>
@@ -233,11 +234,11 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
         mode={mode}
         featureId="course_reviews"
         config={config}
-        featureTitle="Course reviews & ratings"
-        featureDescription="Collect star ratings and written reviews on your course pages, with optional moderation — boosting social proof on catalog cards and learner trust."
+        featureTitle={__('Course reviews & ratings', 'sikshya')}
+        featureDescription={__('Collect star ratings and written reviews on your course pages, with optional moderation — boosting social proof on catalog cards and learner trust.', 'sikshya')}
         previewVariant="table"
-        addonEnableTitle="Reviews moderation is not enabled"
-        addonEnableDescription="Enable the Course reviews addon to register the public review form, the REST endpoints, and this moderation screen."
+        addonEnableTitle={__('Reviews moderation is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Course reviews addon to register the public review form, the REST endpoints, and this moderation screen.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -245,7 +246,7 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
       >
       {error ? (
         <div className="mb-4">
-          <ApiErrorPanel error={error} title="Could not load reviews" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load reviews', 'sikshya')} onRetry={() => refetch()} />
         </div>
       ) : null}
 
@@ -257,7 +258,7 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
             setStatus(id as StatusFilter);
             setPage(1);
           }}
-          ariaLabel="Review status"
+          ariaLabel={__('Review status', 'sikshya')}
         />
 
         <form onSubmit={onSearchSubmit} className="flex items-center gap-2">
@@ -265,10 +266,10 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search text, student, course…"
+            placeholder={__('Search text, student, course…', 'sikshya')}
             className="w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
           />
-          <ButtonPrimary type="submit">Search</ButtonPrimary>
+          <ButtonPrimary type="submit">{__('Search', 'sikshya')}</ButtonPrimary>
           {search ? (
             <button
               type="button"
@@ -287,10 +288,10 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
 
       <ListPanel>
         {loading ? (
-          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">Loading…</div>
+          <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">{__('Loading…', 'sikshya')}</div>
         ) : rows.length === 0 ? (
           <ListEmptyState
-            title={status === 'pending' ? 'Nothing waiting for moderation' : 'No reviews found'}
+            title={status === 'pending' ? __('Nothing waiting for moderation', 'sikshya') : __('No reviews found', 'sikshya')}
             description={
               status === 'pending'
                 ? 'All caught up! New learner reviews will appear here when Approval mode is set to Manual.'
@@ -302,13 +303,13 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
             <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
               <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/80 dark:text-slate-400">
                 <tr>
-                  <th className="px-5 py-3.5">Submitted</th>
-                  <th className="px-5 py-3.5">Student</th>
-                  <th className="px-5 py-3.5">Course</th>
-                  <th className="px-5 py-3.5">Rating</th>
-                  <th className="px-5 py-3.5">Review</th>
-                  <th className="px-5 py-3.5">Status</th>
-                  <th className="px-5 py-3.5 text-right">Actions</th>
+                  <th className="px-5 py-3.5">{__('Submitted', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Student', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Course', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Rating', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Review', 'sikshya')}</th>
+                  <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
+                  <th className="px-5 py-3.5 text-right">{__('Actions', 'sikshya')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -356,7 +357,7 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
                           <span>Reports: {Number(r.reported_count).toLocaleString()}</span>
                         ) : null}
                         {r.reply_text ? (
-                          <span className="font-medium text-slate-600 dark:text-slate-300">Has official reply</span>
+                          <span className="font-medium text-slate-600 dark:text-slate-300">{__('Has official reply', 'sikshya')}</span>
                         ) : null}
                       </div>
                     </td>

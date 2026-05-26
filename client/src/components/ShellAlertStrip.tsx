@@ -1,4 +1,5 @@
 import { useAdminRouting, isSikshyaReactAdminHref } from '../lib/adminRouting';
+import { __ } from '../lib/i18n';
 import type { ShellAlert } from '../types';
 
 const variantBar: Record<ShellAlert['variant'], string> = {
@@ -17,7 +18,7 @@ export function ShellAlertStrip({ alerts }: { alerts: ShellAlert[] }) {
     <div
       className="-mx-6 -mt-6 mb-6 divide-y divide-slate-200/80 border-b border-slate-200/80 bg-white dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900/95"
       role="region"
-      aria-label="Site notices"
+      aria-label={__('Site notices', 'sikshya')}
     >
       {alerts.map((a) => (
         <div

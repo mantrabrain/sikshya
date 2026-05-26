@@ -212,11 +212,11 @@
 		var prev = document.createElement('button');
 		prev.type = 'button';
 		prev.className = 'sikshya-btn sikshya-btn--outline sikshya-btn--sm sikshya-quizPager__prev';
-		prev.textContent = 'Previous';
+		prev.textContent = (cfg && cfg.i18n && cfg.i18n.previous) ? cfg.i18n.previous : 'Previous';
 		var next = document.createElement('button');
 		next.type = 'button';
 		next.className = 'sikshya-btn sikshya-btn--primary sikshya-btn--sm sikshya-quizPager__next';
-		next.textContent = 'Next';
+		next.textContent = (cfg && cfg.i18n && cfg.i18n.next) ? cfg.i18n.next : 'Next';
 		var label = document.createElement('p');
 		label.className = 'sikshya-quizPager__label';
 		nav.appendChild(prev);

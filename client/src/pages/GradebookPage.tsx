@@ -15,6 +15,7 @@ import { useAddonEnabled } from '../hooks/useAddons';
 import { appViewHref } from '../lib/appUrl';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
 import type { SikshyaReactConfig } from '../types';
+import { __ } from '../lib/i18n';
 
 type Row = {
   user_id: number;
@@ -573,7 +574,7 @@ export function GradebookPage(props: {
               Refresh
             </ButtonPrimary>
             <ButtonPrimary type="button" disabled={loading || exporting} onClick={() => void exportCsv()}>
-              {exporting ? 'Exporting…' : 'Export CSV'}
+              {exporting ? __('Exporting…', 'sikshya') : __('Export CSV', 'sikshya')}
             </ButtonPrimary>
           </div>
         ) : null
@@ -583,15 +584,15 @@ export function GradebookPage(props: {
         mode={mode}
         featureId="gradebook"
         config={config}
-        featureTitle={uiMode === 'submissions' ? 'Assignment submissions' : 'Gradebook'}
+        featureTitle={uiMode === 'submissions' ? __('Assignment submissions', 'sikshya') : __('Gradebook', 'sikshya')}
         featureDescription={
           uiMode === 'submissions'
             ? 'Work through learner uploads in one list, or narrow by course. The summary and grid below still give full gradebook tools and CSV export.'
             : 'See each learner’s combined quiz and assignment performance, open a per-course grid to drill into items, export CSVs for records, and set final-grade overrides when needed.'
         }
         previewVariant="table"
-        addonEnableTitle="Gradebook is not enabled"
-        addonEnableDescription="Enable the Gradebook add-on to load grade REST routes, the admin gradebook screen, and optional learner-facing grade snippets on My account."
+        addonEnableTitle={__('Gradebook is not enabled', 'sikshya')}
+        addonEnableDescription={__('Enable the Gradebook add-on to load grade REST routes, the admin gradebook screen, and optional learner-facing grade snippets on My account.', 'sikshya')}
         canEnable={Boolean(addon.licenseOk)}
         enableBusy={addon.loading}
         onEnable={() => addon.enable()}
@@ -628,11 +629,11 @@ export function GradebookPage(props: {
           <AddonSettingsPage
             embedded
             config={config}
-            title="Gradebook settings"
+            title={__('Gradebook settings', 'sikshya')}
             addonId="gradebook"
-            subtitle="CSV export defaults and the default page size for the course grid."
-            featureTitle="Gradebook settings"
-            featureDescription="These options apply site-wide. Instructors still manage weights and scales from each course (Grading tab) and from Letter grades & scales under Grading & submissions."
+            subtitle={__('CSV export defaults and the default page size for the course grid.', 'sikshya')}
+            featureTitle={__('Gradebook settings', 'sikshya')}
+            featureDescription={__('These options apply site-wide. Instructors still manage weights and scales from each course (Grading tab) and from Letter grades & scales under Grading & submissions.', 'sikshya')}
             relatedCoreSettingsTab="progress"
             relatedCoreSettingsLabel="Progress"
             nextSteps={[
@@ -654,14 +655,14 @@ export function GradebookPage(props: {
             ]}
           />
         ) : error ? (
-          <ApiErrorPanel error={error} title="Could not load gradebook" onRetry={() => refetch()} />
+          <ApiErrorPanel error={error} title={__('Could not load gradebook', 'sikshya')} onRetry={() => refetch()} />
         ) : (
           <>
             {enabled && uiMode === 'submissions' && workspaceTab === 'grades' ? (
               <ListPanel className="mb-4 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4 dark:border-slate-700">
                   <div>
-                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Submission queue</h2>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">{__('Submission queue', 'sikshya')}</h2>
                     <p className="mt-1 max-w-2xl text-xs text-slate-500 dark:text-slate-400">
                       Newest first across all courses you can grade. Use the filters in the next panel to match the
                       gradebook summary tools below.
@@ -671,15 +672,15 @@ export function GradebookPage(props: {
                 {submissionsState.error ? (
                   <ApiErrorPanel
                     error={submissionsState.error}
-                    title="Could not load submissions"
+                    title={__('Could not load submissions', 'sikshya')}
                     onRetry={() => void submissionsState.refetch()}
                   />
                 ) : submissionsState.loading ? (
-                  <div className="py-10 text-center text-sm text-slate-500">Loading submissions…</div>
+                  <div className="py-10 text-center text-sm text-slate-500">{__('Loading submissions…', 'sikshya')}</div>
                 ) : submissionRows.length === 0 ? (
                   <ListEmptyState
-                    title="No submissions to show"
-                    description="Try clearing the course filter or status filter, or check back after learners submit work."
+                    title={__('No submissions to show', 'sikshya')}
+                    description={__('Try clearing the course filter or status filter, or check back after learners submit work.', 'sikshya')}
                   />
                 ) : (
                   <>
@@ -687,12 +688,12 @@ export function GradebookPage(props: {
                       <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                         <thead className="bg-slate-50/90 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                           <tr>
-                            <th className="px-4 py-3">Submitted</th>
-                            <th className="px-4 py-3">Learner</th>
-                            <th className="px-4 py-3">Course</th>
-                            <th className="px-4 py-3">Assignment</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Grade</th>
+                            <th className="px-4 py-3">{__('Submitted', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Learner', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Course', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Assignment', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
+                            <th className="px-4 py-3">{__('Grade', 'sikshya')}</th>
                             <th className="px-4 py-3 text-right"> </th>
                           </tr>
                         </thead>
@@ -775,15 +776,15 @@ export function GradebookPage(props: {
                 </summary>
                 <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                   <li>
-                    The <strong className="font-semibold text-slate-800 dark:text-slate-200">submission list</strong>{' '}
+                    The <strong className="font-semibold text-slate-800 dark:text-slate-200">{__('submission list', 'sikshya')}</strong>{' '}
                     shows every upload by default; use course and status filters to narrow it.
                   </li>
                   <li>
-                    Click <strong className="font-semibold text-slate-800 dark:text-slate-200">Grade</strong> on a row to
+                    Click <strong className="font-semibold text-slate-800 dark:text-slate-200">{__('Grade', 'sikshya')}</strong> on a row to
                     open the same panel as the course grid.
                   </li>
                   <li>
-                    The <strong className="font-semibold text-slate-800 dark:text-slate-200">Course grid</strong> further
+                    The <strong className="font-semibold text-slate-800 dark:text-slate-200">{__('Course grid', 'sikshya')}</strong> further
                     below is best when you want columns per assignment—select a course first.
                   </li>
                 </ol>
@@ -806,7 +807,7 @@ export function GradebookPage(props: {
                         : 'min-w-0 sm:col-span-2 lg:col-span-6'
                     }
                   >
-                    <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">Course</p>
+                    <p className="block text-sm font-medium text-slate-700 dark:text-slate-300">{__('Course', 'sikshya')}</p>
                     <div className="mt-1">
                       <SingleCoursePicker
                         value={courseId}
@@ -817,7 +818,7 @@ export function GradebookPage(props: {
                             setView('summary');
                           }
                         }}
-                        placeholder="All courses"
+                        placeholder={__('All courses', 'sikshya')}
                         className="w-full max-w-full"
                         reserveHintSpace={false}
                         density="compact"
@@ -842,7 +843,7 @@ export function GradebookPage(props: {
                         setSearch(e.target.value);
                         setPage(1);
                       }}
-                      placeholder="Learner, email, course…"
+                      placeholder={__('Learner, email, course…', 'sikshya')}
                       className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
                     />
                   </div>
@@ -860,10 +861,10 @@ export function GradebookPage(props: {
                         onChange={(e) => setSubmissionStatus(e.target.value)}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
                       >
-                        <option value="">All statuses</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="graded">Graded</option>
-                        <option value="draft">Draft</option>
+                        <option value="">{__('All statuses', 'sikshya')}</option>
+                        <option value="submitted">{__('Submitted', 'sikshya')}</option>
+                        <option value="graded">{__('Graded', 'sikshya')}</option>
+                        <option value="draft">{__('Draft', 'sikshya')}</option>
                       </select>
                     </div>
                   ) : null}
@@ -890,7 +891,7 @@ export function GradebookPage(props: {
                       }`}
                       onClick={() => setView('grid')}
                       disabled={courseId <= 0}
-                      title={courseId <= 0 ? 'Pick a course to open the grid.' : 'Course-centric grid'}
+                      title={courseId <= 0 ? __('Pick a course to open the grid.', 'sikshya') : __('Course-centric grid', 'sikshya')}
                     >
                       Course grid
                     </button>
@@ -911,26 +912,26 @@ export function GradebookPage(props: {
             {view === 'summary' ? (
               <ListPanel>
                 {loading ? (
-                  <div className="p-8 text-center text-sm text-slate-500">Loading…</div>
+                  <div className="p-8 text-center text-sm text-slate-500">{__('Loading…', 'sikshya')}</div>
                 ) : rows.length === 0 ? (
                   <ListEmptyState
-                    title="No gradebook rows yet"
-                    description="Rows appear after learners complete quizzes or receive assignment grades. Courses marked “hide from the learner gradebook” in Course builder → Grading are hidden from this list unless your role can bypass that setting."
+                    title={__('No gradebook rows yet', 'sikshya')}
+                    description={__('Rows appear after learners complete quizzes or receive assignment grades. Courses marked “hide from the learner gradebook” in Course builder → Grading are hidden from this list unless your role can bypass that setting.', 'sikshya')}
                   />
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                       <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                         <tr>
-                          <th className="px-5 py-3.5">Learner</th>
-                          <th className="px-5 py-3.5">Course</th>
-                          <th className="px-5 py-3.5">Quizzes</th>
+                          <th className="px-5 py-3.5">{__('Learner', 'sikshya')}</th>
+                          <th className="px-5 py-3.5">{__('Course', 'sikshya')}</th>
+                          <th className="px-5 py-3.5">{__('Quizzes', 'sikshya')}</th>
                           <th className="px-5 py-3.5">Avg quiz %</th>
-                          <th className="px-5 py-3.5">Assignments</th>
-                          <th className="px-5 py-3.5">Avg assignment</th>
+                          <th className="px-5 py-3.5">{__('Assignments', 'sikshya')}</th>
+                          <th className="px-5 py-3.5">{__('Avg assignment', 'sikshya')}</th>
                           <th className="px-5 py-3.5">Overall %</th>
-                          <th className="px-5 py-3.5">Letter</th>
-                          <th className="px-5 py-3.5">GPA</th>
+                          <th className="px-5 py-3.5">{__('Letter', 'sikshya')}</th>
+                          <th className="px-5 py-3.5">{__('GPA', 'sikshya')}</th>
                           <th className="px-5 py-3.5"></th>
                         </tr>
                       </thead>
@@ -1010,22 +1011,22 @@ export function GradebookPage(props: {
             ) : (
               <ListPanel>
                 {courseId <= 0 ? (
-                  <ListEmptyState title="Pick a course first" description="Course grid view is per-course so we can build columns for quizzes and assignments." />
+                  <ListEmptyState title={__('Pick a course first', 'sikshya')} description={__('Course grid view is per-course so we can build columns for quizzes and assignments.', 'sikshya')} />
                 ) : gridState.loading ? (
-                  <div className="p-8 text-center text-sm text-slate-500">Loading grid…</div>
+                  <div className="p-8 text-center text-sm text-slate-500">{__('Loading grid…', 'sikshya')}</div>
                 ) : gridState.error ? (
                   <div className="p-5">
-                    <ApiErrorPanel error={gridState.error} title="Could not load grid" onRetry={() => gridState.refetch()} />
+                    <ApiErrorPanel error={gridState.error} title={__('Could not load grid', 'sikshya')} onRetry={() => gridState.refetch()} />
                   </div>
                 ) : !grid || (grid.rows?.length ?? 0) === 0 ? (
-                  <ListEmptyState title="No learners found" description="Enroll learners or clear your search filter." />
+                  <ListEmptyState title={__('No learners found', 'sikshya')} description={__('Enroll learners or clear your search filter.', 'sikshya')} />
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                       <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                         <tr>
-                          <th className="sticky left-0 z-10 bg-slate-50/80 px-5 py-3.5 dark:bg-slate-800">Learner</th>
-                          <th className="px-5 py-3.5">Overall</th>
+                          <th className="sticky left-0 z-10 bg-slate-50/80 px-5 py-3.5 dark:bg-slate-800">{__('Learner', 'sikshya')}</th>
+                          <th className="px-5 py-3.5">{__('Overall', 'sikshya')}</th>
                           {(grid.items || []).map((it) => (
                             <th key={`${it.type}:${it.id}`} className="min-w-[14rem] px-5 py-3.5">
                               <div className="truncate">{it.title || `${it.type} #${it.id}`}</div>
@@ -1110,7 +1111,7 @@ export function GradebookPage(props: {
 
             <Modal
               open={detailOpen}
-              title="Learner grade detail"
+              title={__('Learner grade detail', 'sikshya')}
               description={detailLabel}
               onClose={() => setDetailOpen(false)}
               size="lg"
@@ -1124,18 +1125,18 @@ export function GradebookPage(props: {
                       Close
                     </ButtonSecondary>
                     <ButtonPrimary type="button" disabled={overrideSaving} onClick={() => void saveOverride()}>
-                      {overrideSaving ? 'Saving…' : 'Save'}
+                      {overrideSaving ? __('Saving…', 'sikshya') : __('Save', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                 </div>
               }
             >
               {detailLoading ? (
-                <p className="text-sm text-slate-500">Loading detail…</p>
+                <p className="text-sm text-slate-500">{__('Loading detail…', 'sikshya')}</p>
               ) : detailError ? (
                 <ApiErrorPanel
                   error={detailError}
-                  title="Could not load detail"
+                  title={__('Could not load detail', 'sikshya')}
                   onRetry={() => {
                     setDetailFetchVersion((v) => v + 1);
                   }}
@@ -1153,13 +1154,13 @@ export function GradebookPage(props: {
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs font-semibold uppercase text-slate-500">Letter</div>
+                      <div className="text-xs font-semibold uppercase text-slate-500">{__('Letter', 'sikshya')}</div>
                       <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">
                         {detail.letter_grade ? String(detail.letter_grade) : '—'}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs font-semibold uppercase text-slate-500">GPA</div>
+                      <div className="text-xs font-semibold uppercase text-slate-500">{__('GPA', 'sikshya')}</div>
                       <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">
                         {detail.gpa_display ? String(detail.gpa_display) : '—'}
                       </div>
@@ -1168,17 +1169,17 @@ export function GradebookPage(props: {
 
                   <div className="grid gap-6 lg:grid-cols-2">
                     <div>
-                      <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">Quizzes</h3>
+                      <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">{__('Quizzes', 'sikshya')}</h3>
                       {detail.quizzes.length === 0 ? (
-                        <p className="text-sm text-slate-500">No quiz attempts yet.</p>
+                        <p className="text-sm text-slate-500">{__('No quiz attempts yet.', 'sikshya')}</p>
                       ) : (
                         <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">
                           <table className="min-w-full text-xs">
                             <thead className="bg-slate-50 text-left dark:bg-slate-800/80">
                               <tr>
-                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">Quiz</th>
+                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">{__('Quiz', 'sikshya')}</th>
                                 <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">Best %</th>
-                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">Weight</th>
+                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">{__('Weight', 'sikshya')}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1195,17 +1196,17 @@ export function GradebookPage(props: {
                       )}
                     </div>
                     <div>
-                      <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">Assignments</h3>
+                      <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">{__('Assignments', 'sikshya')}</h3>
                       {detail.assignments.length === 0 ? (
-                        <p className="text-sm text-slate-500">No graded assignments yet.</p>
+                        <p className="text-sm text-slate-500">{__('No graded assignments yet.', 'sikshya')}</p>
                       ) : (
                         <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">
                           <table className="min-w-full text-xs">
                             <thead className="bg-slate-50 text-left dark:bg-slate-800/80">
                               <tr>
-                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">Assignment</th>
+                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">{__('Assignment', 'sikshya')}</th>
                                 <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">Grade %</th>
-                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">Weight</th>
+                                <th className="px-3 py-2 font-semibold text-slate-600 dark:text-slate-400">{__('Weight', 'sikshya')}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1224,7 +1225,7 @@ export function GradebookPage(props: {
                   </div>
 
                   <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Manual override</h3>
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{__('Manual override', 'sikshya')}</h3>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Set a final course percent (0–100). Leave empty to use the computed value and clear any stored override.
                     </p>
@@ -1240,7 +1241,7 @@ export function GradebookPage(props: {
                           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
                           value={overridePctInput}
                           onChange={(e) => setOverridePctInput(e.target.value)}
-                          placeholder="e.g. 87.5"
+                          placeholder={__('e.g. 87.5', 'sikshya')}
                         />
                       </div>
                       <div className="sm:col-span-2">
@@ -1253,20 +1254,20 @@ export function GradebookPage(props: {
                           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
                           value={overrideNoteInput}
                           onChange={(e) => setOverrideNoteInput(e.target.value)}
-                          placeholder="Visible to staff in records…"
+                          placeholder={__('Visible to staff in records…', 'sikshya')}
                         />
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">No data.</p>
+                <p className="text-sm text-slate-500">{__('No data.', 'sikshya')}</p>
               )}
             </Modal>
 
             <Modal
               open={drillOpen}
-              title="Item detail"
+              title={__('Item detail', 'sikshya')}
               onClose={closeDrill}
               size="lg"
               footer={
@@ -1276,7 +1277,7 @@ export function GradebookPage(props: {
                       Close
                     </ButtonSecondary>
                     <ButtonPrimary type="button" disabled={gradeSaving} onClick={() => void saveAssignmentGrade()}>
-                      {gradeSaving ? 'Saving…' : 'Save grade'}
+                      {gradeSaving ? __('Saving…', 'sikshya') : __('Save grade', 'sikshya')}
                     </ButtonPrimary>
                   </div>
                 ) : (
@@ -1289,17 +1290,17 @@ export function GradebookPage(props: {
               }
             >
               {drillBusy ? (
-                <p className="text-sm text-slate-500">Loading…</p>
+                <p className="text-sm text-slate-500">{__('Loading…', 'sikshya')}</p>
               ) : drillErr ? (
                 <ApiErrorPanel
                   error={drillErr}
-                  title="Could not load details"
+                  title={__('Could not load details', 'sikshya')}
                   onRetry={
                     drillCtx ? () => void loadDrilldown(drillCtx.user, drillCtx.item, drillCtx.courseId) : undefined
                   }
                 />
               ) : !drillData ? (
-                <p className="text-sm text-slate-500">No data.</p>
+                <p className="text-sm text-slate-500">{__('No data.', 'sikshya')}</p>
               ) : drillData.item_type === 'quiz' ? (
                 <div className="space-y-3">
                   <div>
@@ -1312,10 +1313,10 @@ export function GradebookPage(props: {
                     <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
                       <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-slate-800">
                         <tr>
-                          <th className="px-4 py-2.5">Attempt</th>
-                          <th className="px-4 py-2.5">Score</th>
-                          <th className="px-4 py-2.5">Status</th>
-                          <th className="px-4 py-2.5">Completed</th>
+                          <th className="px-4 py-2.5">{__('Attempt', 'sikshya')}</th>
+                          <th className="px-4 py-2.5">{__('Score', 'sikshya')}</th>
+                          <th className="px-4 py-2.5">{__('Status', 'sikshya')}</th>
+                          <th className="px-4 py-2.5">{__('Completed', 'sikshya')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -1363,7 +1364,7 @@ export function GradebookPage(props: {
                           className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                           value={gradeInput}
                           onChange={(e) => setGradeInput(e.target.value)}
-                          placeholder="e.g. 92"
+                          placeholder={__('e.g. 92', 'sikshya')}
                         />
                         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                           Leave blank to derive from rubric scores when every criterion has a value; otherwise clears the
@@ -1373,7 +1374,7 @@ export function GradebookPage(props: {
                       {(drillData as DrillAssignment).rubric_criteria &&
                       (drillData as DrillAssignment).rubric_criteria!.length > 0 ? (
                         <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-900/40">
-                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Rubric scores</p>
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{__('Rubric scores', 'sikshya')}</p>
                           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                             Enter points per row (0–max). When all rows are filled and overall grade is empty, the total
                             percent is calculated from weights.
@@ -1399,13 +1400,13 @@ export function GradebookPage(props: {
                         </div>
                       ) : null}
                       <div className="sm:col-span-2">
-                        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">Feedback</label>
+                        <label className="block text-sm font-medium text-slate-800 dark:text-slate-200">{__('Feedback', 'sikshya')}</label>
                         <textarea
                           className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                           rows={6}
                           value={feedbackInput}
                           onChange={(e) => setFeedbackInput(e.target.value)}
-                          placeholder="Notes for the learner…"
+                          placeholder={__('Notes for the learner…', 'sikshya')}
                         />
                       </div>
                       <div className="sm:col-span-2 grid gap-1 text-xs text-slate-500 dark:text-slate-400">

@@ -47,7 +47,7 @@ class LessonService
         $id = $request->get_param('id');
         $post = get_post($id);
         if (!$post || $post->post_type !== 'sikshya_lesson') {
-            return new WP_REST_Response(['error' => 'Lesson not found'], 404);
+            return new WP_REST_Response(['error' => __('Lesson not found', 'sikshya')], 404);
         }
         return new WP_REST_Response($this->formatLesson($post));
     }
@@ -73,7 +73,7 @@ class LessonService
         $id = $request->get_param('id');
         $result = wp_delete_post($id, true);
         if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to delete lesson'], 400);
+            return new WP_REST_Response(['error' => __('Failed to delete lesson', 'sikshya')], 400);
         }
         return new WP_REST_Response(['success' => true]);
     }
