@@ -54,11 +54,21 @@
   --sikshya-gray-800: #1f2937;
   --sikshya-gray-900: #0f172a;
 
-  /* Brand */
-  --sikshya-primary: #2563eb;
-  --sikshya-primary-hover: #1d4ed8;
-  --sikshya-primary-border: rgba(37, 99, 235, 0.25);
-  --sikshya-primary-bg: rgba(37, 99, 235, 0.12);
+  /* Brand — derived from the actual Sikshya logo.
+     - primary = the navy used for the "SIKSHYA" wordmark
+     - accent  = the deep purple used for the "LMS" suffix
+     Keep the two-color system consistent everywhere in admin + frontend. */
+  --sikshya-primary: #2c5ba8;
+  --sikshya-primary-hover: #1f4585;
+  --sikshya-primary-border: rgba(44, 91, 168, 0.25);
+  --sikshya-primary-bg: rgba(44, 91, 168, 0.12);
+  --sikshya-primary-light: #e8f0fa;
+
+  --sikshya-accent: #7a2e80;
+  --sikshya-accent-hover: #5e2266;
+  --sikshya-accent-border: rgba(122, 46, 128, 0.25);
+  --sikshya-accent-bg: rgba(122, 46, 128, 0.12);
+  --sikshya-accent-light: #f5e8f5;
 
   /* Shadows */
   --sikshya-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
@@ -70,3 +80,9 @@
   --sikshya-transition-normal: 160ms ease;
 }
 
+
+/* Brand-tinted checkbox + radio accent (matches logo primary navy). */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #2c5ba8;
+}

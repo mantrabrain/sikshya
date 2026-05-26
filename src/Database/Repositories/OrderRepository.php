@@ -139,6 +139,26 @@ class OrderRepository
         return $row ?: null;
     }
 
+    /**
+     * Locks the order row for the duration of the surrounding transaction.
+     *
+     * Concurrent webhook deliveries (Stripe retries on 5xx, PayPal IPN retries) can race on
+     * the same order. Pairing this with an explicit `START TRANSACTION` / `COMMIT` in the caller
+     * guarantees a single winner — the second caller blocks until the first commits, then re-reads
+     * the row, sees `status = 'paid'`, and exits via the idempotency guard.
+     *
+     * Requires InnoDB (Sikshya tables are InnoDB by default) and that the caller manages the
+     * surrounding transaction. Outside a transaction this still works but has no locking effect.
+     */
+    public function findByIdForUpdate(int $id): ?object
+    {
+        global $wpdb;
+
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->orders} WHERE id = %d FOR UPDATE", $id));
+
+        return $row ?: null;
+    }
+
     public function findByGatewayIntent(string $gateway, string $intent_id): ?object
     {
         global $wpdb;

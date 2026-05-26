@@ -2,9 +2,12 @@
 
 namespace Sikshya\Services;
 
-use Sikshya\Core\Plugin;
+use Sikshya\Blocks\ContentHasSikshyaBlock;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Constants\Taxonomies;
+use Sikshya\Core\Plugin;
 use Sikshya\Frontend\Site\PublicPageUrls;
+use Sikshya\Shortcodes\AuthShortcodes;
 
 /**
  * Frontend Asset Management Service
@@ -63,13 +66,19 @@ class FrontendAssetsService
             SIKSHYA_VERSION
         );
 
-        // Course listings (archive, taxonomy, shortcodes/blocks that render cards)
-        wp_enqueue_style(
-            'sikshya-course-listing',
-            $this->plugin->getAssetUrl('css/course-listing.css'),
-            ['sikshya-public-ds', 'sikshya-frontend'],
-            SIKSHYA_VERSION
-        );
+        if ($this->shouldEnqueueCourseListingStyles()) {
+            wp_enqueue_style(
+                'sikshya-course-listing',
+                $this->plugin->getAssetUrl('css/course-listing.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                SIKSHYA_VERSION
+            );
+        }
+
+        if ($this->shouldEnqueueAuthAssets()) {
+            AuthShortcodes::registerPublicScript();
+            wp_enqueue_script('sikshya-auth-public');
+        }
 
         if (is_singular(PostTypes::COURSE)) {
             wp_enqueue_style(
@@ -138,6 +147,34 @@ class FrontendAssetsService
         if (!empty($custom_js)) {
             echo '<script type="text/javascript">' . esc_html($custom_js) . '</script>';
         }
+    }
+
+    private function shouldEnqueueCourseListingStyles(): bool
+    {
+        if (is_post_type_archive(PostTypes::COURSE)) {
+            return true;
+        }
+
+        if (is_tax([Taxonomies::COURSE_CATEGORY, Taxonomies::COURSE_TAG])) {
+            return true;
+        }
+
+        if (is_page('sikshya-courses')) {
+            return true;
+        }
+
+        return ContentHasSikshyaBlock::hasCoursesListing();
+    }
+
+    private function shouldEnqueueAuthAssets(): bool
+    {
+        if (PublicPageUrls::isCurrentVirtualPage('checkout')
+            || PublicPageUrls::isCurrentVirtualPage('login')
+        ) {
+            return true;
+        }
+
+        return ContentHasSikshyaBlock::hasAuth();
     }
 
     /**

@@ -41,7 +41,7 @@ final class AuthShortcodes
         self::registerPublicScript();
     }
 
-    private static function registerPublicScript(): void
+    public static function registerPublicScript(): void
     {
         if (!defined('SIKSHYA_PLUGIN_FILE') || !defined('SIKSHYA_VERSION')) {
             return;
@@ -80,6 +80,37 @@ final class AuthShortcodes
     }
 
     /**
+     * @param array<string, mixed> $atts Raw attributes (shortcode or block).
+     * @return array{redirect_to: string}
+     */
+    public static function normalizeLoginAtts(array $atts): array
+    {
+        return shortcode_atts(
+            [
+                'redirect_to' => '',
+            ],
+            $atts,
+            'sikshya_login'
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $atts Raw attributes (shortcode or block).
+     * @return array{type: string, redirect_to: string}
+     */
+    public static function normalizeRegistrationAtts(array $atts): array
+    {
+        return shortcode_atts(
+            [
+                'type' => 'student',
+                'redirect_to' => '',
+            ],
+            $atts,
+            'sikshya_registration'
+        );
+    }
+
+    /**
      * @param array<string, mixed> $atts
      */
     public static function renderLogin($atts = []): string
@@ -90,13 +121,7 @@ final class AuthShortcodes
 
         self::enqueuePublicScript();
 
-        $a = shortcode_atts(
-            [
-                'redirect_to' => '',
-            ],
-            is_array($atts) ? $atts : [],
-            'sikshya_login'
-        );
+        $a = self::normalizeLoginAtts(is_array($atts) ? $atts : []);
 
         $redirect_to = self::resolveRedirectTo((string) ($a['redirect_to'] ?? ''));
         $err = self::getFlash('login');
@@ -107,7 +132,7 @@ final class AuthShortcodes
 
         $ajax_url = esc_url(admin_url('admin-ajax.php'));
         $out = '';
-        $out .= '<div class="sikshya-auth sikshya-auth--login" data-sikshya-auth-ajax="1" data-sikshya-auth-kind="login" data-sikshya-ajax-url="' . esc_attr($ajax_url) . '" data-sikshya-login-action="sikshya_ajax_auth_login" data-sikshya-auth-redirect-to="' . esc_attr($redirect_to) . '">';
+        $out .= '<div class="sikshya-auth sikshya-auth--login sik-f-scope" data-sikshya-auth-ajax="1" data-sikshya-auth-kind="login" data-sikshya-ajax-url="' . esc_attr($ajax_url) . '" data-sikshya-login-action="sikshya_ajax_auth_login" data-sikshya-auth-redirect-to="' . esc_attr($redirect_to) . '">';
         $out .= '<div class="sikshya-auth__messages" role="region" aria-live="polite" aria-relevant="additions text"' . ($err === '' ? ' hidden' : '') . '>';
         if ($err !== '') {
             $out .= '<div class="sikshya-notice sikshya-notice--error" role="alert">' . esc_html($err) . '</div>';
@@ -150,14 +175,7 @@ final class AuthShortcodes
 
         self::enqueuePublicScript();
 
-        $a = shortcode_atts(
-            [
-                'type' => 'student',
-                'redirect_to' => '',
-            ],
-            is_array($atts) ? $atts : [],
-            'sikshya_registration'
-        );
+        $a = self::normalizeRegistrationAtts(is_array($atts) ? $atts : []);
 
         $type = sanitize_key((string) ($a['type'] ?? 'student'));
         if (!in_array($type, ['instructor', 'student'], true)) {
@@ -172,7 +190,7 @@ final class AuthShortcodes
 
         $ajax_url = esc_url(admin_url('admin-ajax.php'));
         $out = '';
-        $out .= '<div class="sikshya-auth sikshya-auth--register" data-sikshya-auth-ajax="1" data-sikshya-auth-kind="register" data-sikshya-ajax-url="' . esc_attr($ajax_url) . '" data-sikshya-register-action="sikshya_ajax_auth_register" data-sikshya-auth-redirect-to="' . esc_attr($redirect_to) . '">';
+        $out .= '<div class="sikshya-auth sikshya-auth--register sik-f-scope" data-sikshya-auth-ajax="1" data-sikshya-auth-kind="register" data-sikshya-ajax-url="' . esc_attr($ajax_url) . '" data-sikshya-register-action="sikshya_ajax_auth_register" data-sikshya-auth-redirect-to="' . esc_attr($redirect_to) . '">';
         $out .= '<div class="sikshya-auth__messages" role="region" aria-live="polite" aria-relevant="additions text"' . ($err === '' ? ' hidden' : '') . '>';
         if ($err !== '') {
             $out .= '<div class="sikshya-notice sikshya-notice--error" role="alert">' . esc_html($err) . '</div>';

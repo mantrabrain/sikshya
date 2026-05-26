@@ -128,9 +128,11 @@ Sikshya registers the shortcodes below. Paste them into any page, post, or widge
 
 **Quick reference**
 
-* `[sikshya_courses]` — Grid or list of published courses (same card UI as the catalog).
-* `[sikshya_login]` — Sign-in form (Sikshya auth handler; errors stay on the same page).
-* `[sikshya_registration]` — Create a Sikshya student account; optional instructor intent submits a pending teaching application.
+* **Sikshya Courses** block (or `[sikshya_courses]`) — Grid or list of published courses (same card UI as the catalog).
+* **Sikshya Login** block (or `[sikshya_login]`) — Sign-in form (Sikshya auth handler; errors stay on the same page).
+* **Sikshya Registration** block (or `[sikshya_registration]`) — Create a Sikshya student account; optional instructor intent submits a pending teaching application.
+
+In the block editor, open the **Sikshya** block category or search for “Sikshya”. Each block exposes the same settings as the matching shortcode attributes in the sidebar; front-end output is identical to the shortcode.
 
 **`[sikshya_courses]`**
 
@@ -316,7 +318,7 @@ It is designed for broad theme compatibility. If layouts clash, test with a defa
 
 = Does Sikshya work with the block editor? =
 
-Yes. In the WordPress block editor, use Shortcode blocks for `[sikshya_courses]`, `[sikshya_login]`, and `[sikshya_registration]`; Sikshya course pages and learner templates work alongside block-based pages and standard WordPress themes.
+Yes. Use the native **Sikshya** blocks (Courses, Login, Registration) or legacy Shortcode blocks with `[sikshya_courses]`, `[sikshya_login]`, and `[sikshya_registration]` — settings and output match. Sikshya course pages and learner templates work alongside block-based pages and standard WordPress themes.
 
 = How do I sell courses? =
 

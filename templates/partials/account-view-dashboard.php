@@ -109,7 +109,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                     <div class="sik-acc-dash-card-grid">
                         <a class="sik-acc-dash-card" href="<?php echo esc_url($page_model->getUrls()->getLearningUrl()); ?>">
                             <div class="sik-acc-dash-card__top">
-                                <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--blue" aria-hidden="true">▣</span>
+                                <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--blue" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('bookOpen'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                                 <?php if ($enrollment_n > 0) : ?>
                                     <span class="sik-acc-dash-card__badge" title="<?php esc_attr_e('Enrolled courses', 'sikshya'); ?>"><?php echo esc_html((string) $enrollment_n); ?></span>
                                 <?php endif; ?>
@@ -120,7 +120,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                         </a>
                         <a class="sik-acc-dash-card" href="<?php echo esc_url($page_model->getUrls()->getPaymentsUrl()); ?>">
                             <div class="sik-acc-dash-card__top">
-                                <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--green" aria-hidden="true">≡</span>
+                                <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--green" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('shoppingCart'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                                 <?php if ($orders_n > 0) : ?>
                                     <span class="sik-acc-dash-card__badge" title="<?php esc_attr_e('Orders', 'sikshya'); ?>"><?php echo esc_html((string) $orders_n); ?></span>
                                 <?php endif; ?>
@@ -150,7 +150,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                         </a>
                         <a class="sik-acc-dash-card sik-acc-dash-card--wide" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
                             <div class="sik-acc-dash-card__top">
-                                <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--amber" aria-hidden="true">▤</span>
+                                <span class="sik-acc-dash-card__icon sik-acc-dash-card__icon--amber" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('course'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                             </div>
                             <h3 class="sik-acc-dash-card__title"><?php echo esc_html(sprintf(__('Browse %s', 'sikshya'), strtolower($label_courses))); ?></h3>
                             <p class="sik-acc-dash-card__desc"><?php echo esc_html(sprintf(__('Discover new %s in the public catalog.', 'sikshya'), strtolower($label_courses))); ?></p>

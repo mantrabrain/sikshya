@@ -7,23 +7,49 @@ body {
   margin: 0;
 }
 
+/**
+ * Brand/accent tokens on both the React root and `.sikshya-admin-theme` so
+ * portaled UI (modals/toasts on `document.body`) can use Tailwind `brand-*`
+ * and `accent-*` utilities (e.g. Pro upgrade gradient cards).
+ */
+#sikshya-admin-root,
+.sikshya-admin-theme {
+  /**
+   * Admin "brand" palette — Sikshya logo PRIMARY navy.
+   * Used for primary CTAs, links, focus rings, neutral brand surfaces.
+   */
+  --sikshya-brand-50-rgb: 240 245 251;
+  --sikshya-brand-100-rgb: 232 240 250;
+  --sikshya-brand-200-rgb: 200 216 238;
+  --sikshya-brand-300-rgb: 168 192 226;
+  --sikshya-brand-400-rgb: 114 153 203;
+  --sikshya-brand-500-rgb: 44 91 168;
+  --sikshya-brand-600-rgb: 38 78 141;
+  --sikshya-brand-700-rgb: 31 69 133;
+  --sikshya-brand-800-rgb: 26 58 110;
+  --sikshya-brand-900-rgb: 20 46 87;
+  --sikshya-brand-950-rgb: 14 32 62;
+
+  /**
+   * Admin "accent" palette — Sikshya logo SECONDARY purple ("LMS" wordmark color).
+   * Used for Pro / upgrade surfaces, premium pills, accent badges.
+   * Base 600 = #7a2e80 (logo accent).
+   */
+  --sikshya-accent-50-rgb: 251 245 251;
+  --sikshya-accent-100-rgb: 245 232 245;
+  --sikshya-accent-200-rgb: 235 213 237;
+  --sikshya-accent-300-rgb: 217 190 220;
+  --sikshya-accent-400-rgb: 197 163 201;
+  --sikshya-accent-500-rgb: 162 110 167;
+  --sikshya-accent-600-rgb: 122 46 128;
+  --sikshya-accent-700-rgb: 94 34 102;
+  --sikshya-accent-800-rgb: 74 26 81;
+  --sikshya-accent-900-rgb: 58 20 45;
+  --sikshya-accent-950-rgb: 40 15 31;
+}
+
 #sikshya-admin-root {
   min-height: calc(100vh - 32px);
-  /**
-   * Default admin “brand” palette (matches the historical Sikshya blue ramp).
-   * White label can override these at runtime via inline styles (see `adminBrandTokens.ts`).
-   */
-  --sikshya-brand-50-rgb: 239 246 255;
-  --sikshya-brand-100-rgb: 219 234 254;
-  --sikshya-brand-200-rgb: 191 219 254;
-  --sikshya-brand-300-rgb: 147 197 253;
-  --sikshya-brand-400-rgb: 96 165 250;
-  --sikshya-brand-500-rgb: 59 130 246;
-  --sikshya-brand-600-rgb: 37 99 235;
-  --sikshya-brand-700-rgb: 29 78 216;
-  --sikshya-brand-800-rgb: 30 64 175;
-  --sikshya-brand-900-rgb: 30 58 138;
-  --sikshya-brand-950-rgb: 23 37 84;
 }
 
 /**
@@ -98,13 +124,13 @@ body.admin-bar:not(.sikshya-react-shell) #sikshya-admin-root:has(.sikshya-cert-b
   height: 40px;
   border-radius: 50%;
   border: 3px solid #e2e8f0;
-  border-top-color: #3b82f6;
+  border-top-color: #5078b7;
   animation: sikshya-admin-boot-spin 0.75s linear infinite;
 }
 
 .dark .sikshya-admin-boot-spinner {
   border-color: #334155;
-  border-top-color: #60a5fa;
+  border-top-color: #a8c3e3;
 }
 
 .sikshya-admin-boot-loader {
@@ -232,7 +258,13 @@ body.admin-bar:not(.sikshya-react-shell) .sikshya-admin-boot-loader:not(.sikshya
 .settings-legacy-html .button-primary,
 .settings-legacy-html input[type='submit'].button-primary,
 .settings-legacy-html button[type='submit'].button-primary {
-  border-color: rgb(37 99 235); /* brand-ish */
-  background: rgb(37 99 235);
+  border-color: rgb(44 91 168); /* brand-ish */
+  background: rgb(44 91 168);
   color: white;
+}
+
+/* Brand-tinted checkbox + radio accent (matches logo primary navy). */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #2c5ba8;
 }

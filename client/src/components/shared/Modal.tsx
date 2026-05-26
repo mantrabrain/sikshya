@@ -8,8 +8,8 @@ type Props = {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
-  /** Narrow dialog vs comfortable form width */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Narrow dialog vs comfortable form width (`comfortable` = between md and lg). */
+  size?: 'sm' | 'md' | 'comfortable' | 'lg' | 'xl';
 };
 
 /** Monotonic id so nested modals only consume Escape on the topmost layer. */
@@ -82,11 +82,19 @@ export function Modal({ open, title, description, onClose, children, footer, siz
   }
 
   const maxW =
-    size === 'sm' ? 'max-w-md' : size === 'lg' ? 'max-w-4xl' : size === 'xl' ? 'max-w-6xl' : 'max-w-lg';
+    size === 'sm'
+      ? 'max-w-md'
+      : size === 'comfortable'
+        ? 'max-w-2xl'
+        : size === 'lg'
+          ? 'max-w-4xl'
+          : size === 'xl'
+            ? 'max-w-6xl'
+            : 'max-w-lg';
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100090] flex items-center justify-center p-4 sm:p-6"
+      className="sikshya-admin-theme fixed inset-0 z-[100090] flex items-center justify-center p-4 sm:p-6"
       role="presentation"
     >
       <button

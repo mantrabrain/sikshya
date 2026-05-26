@@ -3,7 +3,7 @@ import { AddonEnablePanel } from './AddonEnablePanel';
 import { FeaturePreviewSkeleton } from './FeaturePreviewSkeleton';
 import { PlanUpgradeOverlay } from './PlanUpgradeOverlay';
 import { PREMIUM_GATE_VIEWPORT_MIN_H, PremiumGatedSurface } from './PremiumGatedSurface';
-import { getLicensing } from '../lib/licensing';
+import { sikshyaPricingUrl } from '../lib/upgradeUrl';
 import type { GatedWorkspaceMode, SikshyaReactConfig } from '../types';
 
 type PreviewVariant = 'form' | 'table' | 'cards' | 'generic';
@@ -51,8 +51,11 @@ export function GatedFeatureWorkspace(props: Props) {
     return <>{children}</>;
   }
 
-  const lic = getLicensing(config);
-  const upgradeUrl = lic?.upgradeUrl;
+  // Always route the addon-off "Upgrade" CTA to the canonical Sikshya LMS
+  // pricing page with UTM tracking. Carrying the featureId in utm_term lets
+  // mantrabrain.com analytics attribute clicks back to the specific feature
+  // gate that triggered them.
+  const upgradeUrl = sikshyaPricingUrl('addon-enable-upgrade', featureId);
 
   return (
     <div className={`relative isolate w-full max-w-none ${PREMIUM_GATE_VIEWPORT_MIN_H}`}>
@@ -88,8 +91,8 @@ export function GatedFeatureWorkspace(props: Props) {
       ) : null}
 
       {mode === 'pending-addon' ? (
-        <div className="absolute inset-0 z-20 flex min-h-full w-full flex-col items-center justify-center bg-gradient-to-b from-amber-50/95 via-white/90 to-amber-100/80 p-6 backdrop-blur-sm dark:from-amber-950/90 dark:via-stone-950/85 dark:to-amber-950/80">
-          <div className="rounded-2xl border border-amber-300/80 bg-gradient-to-r from-amber-50 to-yellow-50 px-5 py-4 text-sm font-semibold text-amber-950 shadow-lg shadow-amber-900/10 ring-1 ring-amber-200/60 dark:border-amber-700/50 dark:from-amber-950/80 dark:to-stone-900 dark:text-amber-100 dark:ring-amber-800/40">
+        <div className="absolute inset-0 z-20 flex min-h-full w-full flex-col items-center justify-center bg-white/85 p-6 backdrop-blur-sm dark:bg-slate-950/85">
+          <div className="rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm font-medium text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
             Loading add-on status…
           </div>
         </div>

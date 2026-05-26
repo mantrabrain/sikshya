@@ -5,7 +5,7 @@ const BRAND_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as c
 
 type Rgb = { r: number; g: number; b: number };
 
-const DEFAULT_ACCENT_HEX = '#2563eb';
+const DEFAULT_ACCENT_HEX = '#2c5ba8';
 
 function clamp255(n: number): number {
   return Math.max(0, Math.min(255, Math.round(n)));

@@ -101,11 +101,12 @@ body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-
 body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-checkout-page__body,
 body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-order-page__masthead-inner,
 body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-order-page__body,
-body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-login-page__shell {
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-login-page__shell,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-course-lp__masthead-inner {
   max-width: none;
 }
 
-/* Shared masthead band + content rail (cart / checkout / order — single source) */
+/* Commerce masthead band (cart / checkout / order) */
 .sikshya-cart-page__masthead,
 .sikshya-checkout-page__masthead,
 .sikshya-order-page__masthead {
@@ -124,6 +125,24 @@ body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-
   margin-right: auto;
   padding-left: var(--sikshya-public-content-padding-inline);
   padding-right: var(--sikshya-public-content-padding-inline);
+}
+
+/* Course LP + discovery masthead (single course, archive, category, tag) */
+.sikshya-course-lp__masthead {
+  background: transparent;
+  border-bottom: 1px solid var(--sik-f-border);
+  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
+  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
+}
+
+.sikshya-course-lp__masthead-inner {
+  width: 100%;
+  max-width: var(--sikshya-public-content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--sikshya-public-content-padding-inline);
+  padding-right: var(--sikshya-public-content-padding-inline);
+  box-sizing: border-box;
 }
 
 /* Hero Section */
@@ -649,9 +668,34 @@ body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-
   }
 }
 
-/* Public LMS shell (single course, cart, checkout, learn, …) */
-.sikshya-public {
-  padding: var(--sikshya-spacing-8) 0 var(--sikshya-spacing-16);
+/* Public LMS shell (single course, cart, checkout, archives, …) */
+.sikshya-public:not(.sikshya-learning-shell):not(.sikshya-account-page) {
+  width: 100%;
+  max-width: var(--sikshya-public-content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  padding: 0 0 var(--sikshya-spacing-16);
+}
+
+/*
+ * LP / discovery pages: top spacing comes from .sikshya-course-lp__masthead only.
+ * (Without this, .sikshya-public’s old top padding stacked above the masthead on archives.)
+ */
+.sikshya-public.sikshya-course-lp,
+.sikshya-public.sikshya-archive-courses {
+  padding-top: 0;
+}
+
+/* Shortcodes / small embeds without a page masthead. */
+.sikshya-public.sikshya-shortcode-courses,
+.sikshya-public.sikshya-courses-browse {
+  padding-top: var(--sikshya-spacing-8);
+}
+
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-public,
+body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-account-page) .sikshya-course-catalog.sikshya-public {
+  max-width: none;
 }
 
 .sikshya-container--narrow {

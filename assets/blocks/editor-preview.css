@@ -1,0 +1,64 @@
+/**
+ * Sikshya block editor — minimal preview fixes (front-end CSS does the layout).
+ *
+ * Loaded in the editor canvas iframe via wp_enqueue_block_style / enqueue_block_assets.
+ * Scoped to `.sikshya-block-editor-preview` so Gutenberg chrome is untouched.
+ *
+ * @package Sikshya
+ */
+
+/* Tokens on preview roots when :root from design-system is not inherited. */
+.sikshya-block-editor-preview.sik-f-scope,
+.sikshya-block-editor-preview .sikshya-block-editor-canvas.sik-f-scope {
+  font-family: var(--sikshya-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  color: var(--sik-f-text, #1f2937);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sikshya-block-editor-preview,
+.sikshya-block-editor-preview .sikshya-block-editor-canvas {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sikshya-block-editor-preview *,
+.sikshya-block-editor-preview *::before,
+.sikshya-block-editor-preview *::after {
+  box-sizing: border-box;
+}
+
+/* ServerSideRender wrapper — avoid “disabled” grey preview. */
+.sikshya-block-editor-preview .components-disabled {
+  opacity: 1;
+}
+
+.sikshya-block-editor-preview .components-placeholder {
+  margin: 0;
+  min-height: 100px;
+  box-shadow: none;
+}
+
+/* Trim vertical padding inside the narrow editor column only. */
+.sikshya-block-editor-preview .sikshya-public {
+  padding: var(--sikshya-spacing-4, 1rem) 0;
+  margin: 0;
+  background: transparent;
+}
+
+/* Auth: match login virtual page card shell in the editor preview. */
+.sikshya-block-editor-preview .sikshya-block-editor-canvas--auth-card {
+  max-width: 26rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sikshya-block-editor-preview .sikshya-block-editor-canvas--auth-card .sikshya-auth {
+  margin: 0;
+}
+
+.sikshya-block-editor-preview .sikshya-archive-courses__empty,
+.sikshya-block-editor-preview .sikshya-archive-courses__empty-text {
+  margin: 0;
+}

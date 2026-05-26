@@ -10,8 +10,8 @@
   --sik-acc-border: #e2e8f0;
   --sik-acc-text: #0f172a;
   --sik-acc-muted: #64748b;
-  --sik-acc-brand: #2563eb;
-  --sik-acc-brand-hover: #1d4ed8;
+  --sik-acc-brand: #2c5ba8;
+  --sik-acc-brand-hover: #1f4585;
   --sik-acc-sidebar: #ffffff;
   --sik-acc-success: #059669;
   --sik-acc-success-bg: #ecfdf5;
@@ -51,7 +51,7 @@
   outline: none;
 }
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline: 3px solid rgba(44, 91, 168, 0.35);
   outline-offset: 2px;
 }
 
@@ -105,7 +105,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-skip-link:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.45);
+  outline: 3px solid rgba(44, 91, 168, 0.45);
   outline-offset: 2px;
 }
 
@@ -259,33 +259,39 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 
 .sik-acc-nav a.is-active {
   color: var(--sik-acc-brand);
-  background: #eff6ff;
+  background: #f5f8fc;
   border-left-color: var(--sik-acc-brand);
   font-weight: 620;
 }
 
 .sik-acc-nav__icon {
-  width: 1.48rem;
-  height: 1.48rem;
+  width: 1.6rem;
+  height: 1.6rem;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  opacity: 0.9;
-  font-size: 0.78rem;
-  line-height: 1;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   color: #475569;
   flex-shrink: 0;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+/* Inline SVG inside the pill — sized so there's a 4px halo around the glyph,
+   matching the React admin sidebar icon proportion. */
+.sik-acc-nav__icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  stroke-width: 1.75;
 }
 
 .sik-acc-nav a:hover .sik-acc-nav__icon,
 .sik-acc-nav a:focus-visible .sik-acc-nav__icon,
 .sik-acc-nav a.is-active .sik-acc-nav__icon {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: #f5f8fc;
+  border-color: #e8f0fa;
   color: var(--sik-acc-brand);
 }
 
@@ -540,7 +546,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   border-radius: var(--sik-acc-radius);
   padding: 1.5rem 1.75rem;
   margin: 0;
-  background: linear-gradient(120deg, #2563eb 0%, #4f46e5 45%, #7c3aed 100%);
+  background: linear-gradient(120deg, #2c5ba8 0%, #5e2266 45%, #7a2e80 100%);
   color: #fff;
   box-shadow: var(--sik-acc-shadow-md);
 }
@@ -648,7 +654,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-stat--total::before {
-  background: #7c3aed;
+  background: #7a2e80;
 }
 
 .sik-acc-dash-stat__value {
@@ -740,7 +746,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-card__icon--blue {
-  background: #eff6ff;
+  background: #f5f8fc;
   color: var(--sik-acc-brand);
 }
 
@@ -755,8 +761,8 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-card__icon--violet {
-  background: #f5f3ff;
-  color: #6d28d9;
+  background: #fbf5fb;
+  color: #7a2e80;
 }
 
 .sik-acc-dash-card__icon--amber {
@@ -867,7 +873,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   width: 2rem;
   height: 2rem;
   border-radius: var(--sik-acc-radius-sm);
-  background: #eff6ff;
+  background: #f5f8fc;
   color: var(--sik-acc-brand);
   display: flex;
   align-items: center;
@@ -1077,13 +1083,29 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   width: 2rem;
   height: 2rem;
   border-radius: var(--sik-acc-radius-sm);
-  background: #eff6ff;
+  background: #f5f8fc;
   color: var(--sik-acc-brand);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
   flex-shrink: 0;
+}
+
+.sik-acc-shortcut__icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.75;
+  display: block;
+}
+
+/* Inline SVGs inside the larger dashboard / library stat pills. The pills are
+   2.5rem (40px) square; SVG at 20px gives a comfortable 10px halo. */
+.sik-acc-dash-card__icon svg,
+.sik-acc-lib-card__icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.75;
+  display: block;
 }
 
 .sik-acc-shortcut__title {
@@ -1272,7 +1294,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-lib-card__icon--blue {
-  background: #eff6ff;
+  background: #f5f8fc;
   color: var(--sik-acc-brand);
 }
 
@@ -1321,7 +1343,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #2c5ba8, #7a2e80);
   color: #fff;
   font-size: 0.875rem;
   font-weight: 700;
@@ -1680,8 +1702,8 @@ a.sik-acc-cal__title:hover {
 .sik-acc-textarea:focus,
 .sik-acc-select:focus {
   outline: none;
-  border-color: rgba(37, 99, 235, 0.55);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: rgba(44, 91, 168, 0.55);
+  box-shadow: 0 0 0 3px rgba(44, 91, 168, 0.12);
 }
 
 .sik-acc-form-actions {
@@ -1899,9 +1921,9 @@ a.sik-acc-cal__title:hover {
 }
 
 .sik-acc-notice--pending {
-  border-color: rgba(37, 99, 235, 0.28);
-  background: #eff6ff;
-  color: #1d4ed8;
+  border-color: rgba(44, 91, 168, 0.28);
+  background: #f5f8fc;
+  color: #1f4585;
 }
 
 .sik-acc-notice__close {
@@ -1967,9 +1989,9 @@ a.sik-acc-cal__title:hover {
 }
 
 .sik-acc-callout--info {
-  border-color: rgba(37, 99, 235, 0.28);
+  border-color: rgba(44, 91, 168, 0.28);
   background: rgba(239, 246, 255, 0.95);
-  color: #1e3a8a;
+  color: #142e57;
 }
 
 .sik-acc-callout--warning {

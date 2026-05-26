@@ -133,7 +133,7 @@ $label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plu
                                     }
                                     ?>
                                     <div class="sik-acc-lib-card sik-acc-lib-card--static">
-                                        <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--blue" aria-hidden="true">★</div>
+                                        <div class="sik-acc-lib-card__icon sik-acc-lib-card__icon--blue" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('star'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></div>
                                         <div class="sik-acc-lib-card__num"><?php echo esc_html($value); ?></div>
                                         <div class="sik-acc-lib-card__lbl"><?php echo esc_html($label); ?></div>
                                         <?php if ($hint !== '') : ?>
@@ -216,7 +216,7 @@ $label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plu
                     <div class="sik-acc-shortcuts">
                         <?php if ($manage_url !== '') : ?>
                             <a class="sik-acc-shortcut" href="<?php echo esc_url($manage_url); ?>">
-                                <span class="sik-acc-shortcut__icon" aria-hidden="true">▦</span>
+                                <span class="sik-acc-shortcut__icon" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('pencil'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                                 <div>
                                     <p class="sik-acc-shortcut__title"><?php esc_html_e('Manage my courses', 'sikshya'); ?></p>
                                     <p class="sik-acc-shortcut__desc"><?php esc_html_e('Edit lessons, pricing, curriculum, and publish updates.', 'sikshya'); ?></p>
@@ -225,7 +225,7 @@ $label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plu
                         <?php endif; ?>
                         <?php if ($add_url !== '') : ?>
                             <a class="sik-acc-shortcut" href="<?php echo esc_url($add_url); ?>">
-                                <span class="sik-acc-shortcut__icon" aria-hidden="true">+</span>
+                                <span class="sik-acc-shortcut__icon" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('plusCircle'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                                 <div>
                                     <p class="sik-acc-shortcut__title"><?php esc_html_e('Add new course', 'sikshya'); ?></p>
                                     <p class="sik-acc-shortcut__desc"><?php esc_html_e('Start a new course draft and build content.', 'sikshya'); ?></p>
@@ -233,7 +233,7 @@ $label_enrollments = function_exists('sikshya_label_plural') ? sikshya_label_plu
                             </a>
                         <?php endif; ?>
                         <a class="sik-acc-shortcut" href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
-                            <span class="sik-acc-shortcut__icon" aria-hidden="true">▤</span>
+                            <span class="sik-acc-shortcut__icon" aria-hidden="true"><?php echo \Sikshya\Helpers\Icons::inline('chapterStack'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                             <div>
                                 <p class="sik-acc-shortcut__title"><?php esc_html_e('Browse courses', 'sikshya'); ?></p>
                                 <p class="sik-acc-shortcut__desc"><?php esc_html_e('See the public catalog as learners do.', 'sikshya'); ?></p>

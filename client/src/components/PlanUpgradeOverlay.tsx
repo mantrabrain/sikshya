@@ -1,8 +1,12 @@
 import { useId } from 'react';
-import { appViewHref } from '../lib/appUrl';
-import { getCatalogEntry, getLicensing, requiredPlanLabelForFeature } from '../lib/licensing';
+import { getCatalogEntry, requiredPlanLabelForFeature } from '../lib/licensing';
+import { sikshyaPricingUrl } from '../lib/upgradeUrl';
 import type { SikshyaReactConfig } from '../types';
-import { PREMIUM_LOCK_CARD_CLASS, PremiumGatedSurface } from './PremiumGatedSurface';
+import {
+  PREMIUM_HERO_GRADIENT_CLASS,
+  PREMIUM_LOCK_CARD_CLASS,
+  PremiumGatedSurface,
+} from './PremiumGatedSurface';
 
 type Props = {
   config: SikshyaReactConfig;
@@ -12,44 +16,69 @@ type Props = {
   description: string;
 };
 
-function sellingBullets(fullDescription: string): [string, string] {
-  const cleaned = fullDescription.trim();
-  const sentences = cleaned
+type ValueRow = {
+  title: string;
+  detail: string;
+};
+
+/**
+ * Build a 4-row value grid from the catalog description. If the description has
+ * multiple sentences we use them; otherwise we fall back to category-generic
+ * Pro benefits so the grid always feels populated.
+ */
+function buildValueRows(fullDescription: string): ValueRow[] {
+  const sentences = fullDescription
+    .trim()
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
     .filter((s) => s.length > 8);
-  if (sentences.length >= 2) {
-    return [sentences[0], sentences[1]];
-  }
-  if (sentences.length === 1) {
-    return [
-      sentences[0],
-      'Upgrade to the right plan to turn this on for your site—no guesswork.',
-    ];
-  }
-  return [
-    'This capability is part of the Pro add-on—unlock it when your plan includes it.',
-    'Compare plans and upgrade in one click. You can also enable modules from Addons after upgrading.',
+
+  const generic: ValueRow[] = [
+    { title: 'Full feature access', detail: 'Use this module without any limits.' },
+    { title: 'Priority support', detail: 'Direct email support from our team.' },
+    { title: 'Regular updates', detail: 'New features and improvements as they ship.' },
+    { title: 'Self-hosted, no SaaS', detail: 'Runs on your WordPress — your data stays with you.' },
   ];
+
+  const rows: ValueRow[] = [];
+  for (let i = 0; i < Math.min(2, sentences.length); i++) {
+    const s = sentences[i];
+    const words = s.split(/\s+/);
+    const titleWords = words.slice(0, Math.min(6, Math.max(3, Math.floor(words.length / 3))));
+    const titleText = titleWords.join(' ').replace(/[.,;:]$/, '');
+    const detailText = words.slice(titleWords.length).join(' ').replace(/^[,;:]\s*/, '') || s;
+    rows.push({ title: titleText, detail: detailText });
+  }
+  for (const g of generic) {
+    if (rows.length >= 4) break;
+    if (!rows.some((r) => r.title.toLowerCase() === g.title.toLowerCase())) {
+      rows.push(g);
+    }
+  }
+  return rows.slice(0, 4);
 }
 
 /**
- * Plan-gate overlay: full-bleed premium surface, conversion-focused copy, dialog semantics.
- * @see docs/AI_ADDON_PREMIUM_UX_IMPLEMENTATION_BLUEPRINT.md Part D
+ * Plan-gate upgrade screen — feels like a real upgrade pitch. Brand-gradient
+ * hero header (purple-led, since "Upgrade" surfaces use the logo accent purple
+ * across the product), value-grid of 4 highlights, and a strong purple CTA.
  */
 export function PlanUpgradeOverlay(props: Props) {
   const { config, featureId, featureTitle, description } = props;
-  const lic = getLicensing(config);
   const brandName = config.branding?.pluginName?.trim() || 'Sikshya';
   const entry = getCatalogEntry(config, featureId);
   const title = entry?.label || featureTitle;
   const body = (entry?.description && entry.description.trim()) || description;
   const plan = requiredPlanLabelForFeature(config, featureId);
-  const upgradeHref =
-    config.brandLinks?.upgradeUrl || lic?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya/#pricing';
+  // Both upgrade CTAs route to the canonical Sikshya LMS pricing page with
+  // UTM tags so the campaign analytics on mantrabrain.com can distinguish
+  // primary "Upgrade to {Plan}" clicks from secondary "See pricing" clicks
+  // and attribute them back to the specific feature that triggered the gate.
+  const upgradeHref = sikshyaPricingUrl('upgrade-cta', featureId);
+  const seePlansHref = sikshyaPricingUrl('see-plans', featureId);
   const titleId = useId();
   const descId = useId();
-  const [bulletA, bulletB] = sellingBullets(body);
+  const valueRows = buildValueRows(body);
 
   return (
     <PremiumGatedSurface>
@@ -59,30 +88,32 @@ export function PlanUpgradeOverlay(props: Props) {
         aria-describedby={descId}
         className={PREMIUM_LOCK_CARD_CLASS}
       >
-        <div
-          className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-to-br from-yellow-300/25 to-amber-600/10 blur-2xl dark:from-amber-500/15 dark:to-yellow-600/5"
-          aria-hidden
-        />
-        <div className="relative px-6 pb-7 pt-8 sm:px-8 sm:pb-8 sm:pt-9">
-          <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
-            <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-950 ring-1 ring-amber-300/60 dark:border-amber-500/40 dark:from-amber-950/90 dark:via-amber-900/70 dark:to-amber-950/90 dark:text-amber-100 dark:ring-amber-700/50">
-              <span
-                className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.9)]"
-                aria-hidden
-              />
-              {brandName} Pro
-            </span>
+        {/* Hero — purple-led gradient (logo accent → darker accent → navy edge) */}
+        <div className={`relative overflow-hidden ${PREMIUM_HERO_GRADIENT_CLASS} px-7 pt-8 pb-7 sm:px-9 sm:pt-9 sm:pb-8`}>
+          {/* Subtle decorative radials */}
+          <div
+            className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/[0.07] blur-2xl"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -left-12 -bottom-12 h-48 w-48 rounded-full bg-white/[0.05] blur-3xl"
+            aria-hidden
+          />
 
-            <div className="mt-5 flex w-full flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
+          <div className="relative">
+            {/* Lock + Pro badge */}
+            <div className="flex items-center gap-2.5">
               <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-700 shadow-lg shadow-amber-900/35 ring-2 ring-amber-200/80 dark:from-amber-400 dark:via-yellow-600 dark:to-amber-800 dark:ring-amber-700/50"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/15 ring-1 ring-inset ring-white/25 backdrop-blur-sm"
                 aria-hidden
               >
-                <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg
+                  className="h-[18px] w-[18px] text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -90,64 +121,95 @@ export function PlanUpgradeOverlay(props: Props) {
                   />
                 </svg>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-amber-900/80 dark:text-amber-200/90">
-                  Included on <span className="text-amber-700 dark:text-amber-300">{plan}</span> plan
-                </p>
-                <h2
-                  id={titleId}
-                  className="mt-1.5 text-xl font-bold leading-snug tracking-tight text-stone-900 dark:text-amber-50 sm:text-2xl"
-                >
-                  Unlock {title}
-                </h2>
-              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
+                {brandName} Pro · {plan}
+              </span>
             </div>
 
-            <p id={descId} className="mt-5 text-sm leading-relaxed text-stone-700 dark:text-amber-100/85">
+            {/* Title — smaller, like the earlier version */}
+            <h2
+              id={titleId}
+              className="mt-5 text-xl font-bold leading-snug tracking-tight text-white sm:text-[1.375rem]"
+            >
+              Unlock {title}
+            </h2>
+            <p
+              id={descId}
+              className="mt-2 text-[14px] leading-relaxed text-white/85"
+            >
               {body}
             </p>
-
-            <ul className="mt-5 w-full space-y-2.5 text-left text-sm text-stone-800 dark:text-amber-50/90">
-              <li className="flex gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-200 text-amber-900 dark:bg-amber-800/90 dark:text-amber-100">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </span>
-                <span>{bulletA}</span>
-              </li>
-              <li className="flex gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-200 text-amber-900 dark:bg-amber-800/90 dark:text-amber-100">
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </span>
-                <span>{bulletB}</span>
-              </li>
-            </ul>
-
-            <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-              <a
-                href={upgradeHref}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 px-6 py-3 text-center text-base font-semibold text-white shadow-lg shadow-amber-900/35 transition hover:from-amber-500 hover:via-yellow-400 hover:to-amber-500 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-stone-900"
-              >
-                View plans &amp; upgrade
-              </a>
-              <a
-                href={appViewHref(config, 'addons')}
-                className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-xl border border-amber-300/90 bg-white/95 px-5 py-3 text-center text-sm font-semibold text-amber-950 shadow-sm transition hover:bg-amber-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:border-amber-700/60 dark:bg-stone-900/90 dark:text-amber-100 dark:hover:bg-stone-800 dark:focus-visible:ring-offset-stone-900"
-              >
-                Manage add-ons
-              </a>
-            </div>
-
-            <p className="mt-6 max-w-md text-center text-xs leading-relaxed text-stone-600 dark:text-amber-200/70 sm:text-left">
-              You’re seeing a preview of this screen. Upgrade your plan to activate this feature—your data stays safe and nothing
-              changes until you’re ready.
-            </p>
           </div>
+        </div>
+
+        {/* Value grid */}
+        <div className="px-7 pt-6 pb-2 sm:px-9 sm:pt-7">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            What you unlock
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3">
+            {valueRows.map((row, i) => (
+              <div
+                key={i}
+                className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3.5 dark:border-slate-800 dark:bg-slate-800/40"
+              >
+                <span
+                  className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-100 text-accent-700 dark:bg-accent-950/60 dark:text-accent-300"
+                  aria-hidden
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">
+                    {row.title}
+                  </div>
+                  <div className="mt-0.5 text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400">
+                    {row.detail}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Action band — purple "Upgrade to {plan}" CTA */}
+        <div className="px-7 pt-6 pb-7 sm:px-9 sm:pb-8">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+            <a
+              href={upgradeHref}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-[14.5px] font-semibold text-white shadow-sm transition hover:bg-accent-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+            >
+              Upgrade to {plan}
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </a>
+            <a
+              href={seePlansHref}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-[14px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+            >
+              See pricing
+            </a>
+          </div>
+          <p className="mt-4 flex items-center gap-2 text-[12.5px] text-slate-500 dark:text-slate-400">
+            <svg
+              className="h-4 w-4 shrink-0 text-emerald-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            14-day refund · Cancel anytime · Existing data stays exactly as it is
+          </p>
         </div>
       </div>
     </PremiumGatedSurface>

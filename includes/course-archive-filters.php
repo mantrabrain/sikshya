@@ -468,6 +468,7 @@ function sikshya_course_settings_body_class(array $classes): array
     if (is_singular(\Sikshya\Constants\PostTypes::COURSE)) {
         $layout = \Sikshya\Services\CourseFrontendSettings::singleLayout();
         $classes[] = 'sikshya-course-layout--' . $layout;
+        $classes[] = 'sikshya-course-page';
     }
 
     /*
@@ -487,6 +488,16 @@ function sikshya_course_settings_body_class(array $classes): array
     if ($course_listing_shell && !is_singular(\Sikshya\Constants\PostTypes::COURSE)) {
         $single_layout = \Sikshya\Services\CourseFrontendSettings::singleLayout();
         $classes[]     = 'sikshya-course-layout--' . $single_layout;
+        $classes[]     = 'sikshya-course-page';
+    }
+
+    if (is_tax(
+        [
+            \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+            \Sikshya\Constants\Taxonomies::COURSE_TAG,
+        ]
+    )) {
+        $classes[] = 'sikshya-course-taxonomy';
     }
 
     if (is_post_type_archive(\Sikshya\Constants\PostTypes::COURSE)) {

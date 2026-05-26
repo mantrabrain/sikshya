@@ -73,7 +73,7 @@ if (import.meta.env.DEV && !window.sikshyaReact) {
       isProActive: false,
       siteTier: 'free',
       siteTierLabel: 'Free',
-      upgradeUrl: 'https://mantrabrain.com/plugins/sikshya/#pricing',
+      upgradeUrl: 'https://mantrabrain.com/plugins/sikshya-lms/pricing/',
       featureStates: {},
       /** Minimal rows so `isFeatureEnabled` + overlays behave like production in Vite dev */
       catalog: [

@@ -124,6 +124,7 @@ class Admin
         AdminMarketingNoticeService::init();
         add_action('admin_init', [$this, 'initAdmin']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
+        CourseCategoryAdminRedirects::register();
         add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectLegacyWizardAdminUrl'], 0);
         add_action('admin_init', [$this->controllers['setup_wizard'], 'maybeRedirectToWizard'], 1);
         // Process wizard form POSTs (save/skip) before any output, so redirects work cleanly.

@@ -7,6 +7,7 @@ import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListSearchToolbar, type SortFieldOption } from '../components/shared/list/ListSearchToolbar';
 import { InlineRowActions } from '../components/shared/list/InlineRowActions';
+import type { RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { DEFAULT_LIST_PER_PAGE, ListPaginationBar } from '../components/shared/list/ListPaginationBar';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
@@ -17,6 +18,8 @@ import { QuillField } from '../components/shared/QuillField';
 import type { Column } from '../components/shared/DataTable';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useWpTermCollection } from '../hooks/useWpTermCollection';
+import { useAdminRouting } from '../lib/adminRouting';
+import { courseCategoryViewHref } from '../lib/courseCategoryViewHref';
 import type { SikshyaReactConfig, WpTerm } from '../types';
 
 const TAXONOMY = 'sikshya_course_category';
@@ -42,8 +45,15 @@ type WpMediaFrame = {
 
 export function CourseCategoriesPage(props: { embedded?: boolean; config: SikshyaReactConfig; title: string; subtitle: string }) {
   const { config, title, subtitle } = props;
+  const { route } = useAdminRouting();
   const { confirm, alert: alertDialog } = useSikshyaDialog();
   const toast = useTopRightToast(4200);
+
+  const categoryIdFromUrl = useMemo(() => {
+    const raw = route.query.category_id || route.query.term_id || '';
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }, [route.query.category_id, route.query.term_id]);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [name, setName] = useState('');
@@ -92,6 +102,13 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
     setImagePreview(null);
     setFormError(null);
   }, []);
+
+  useEffect(() => {
+    if (categoryIdFromUrl <= 0) {
+      return;
+    }
+    setSelectedId(categoryIdFromUrl);
+  }, [categoryIdFromUrl]);
 
   useEffect(() => {
     if (selectedId === null) {
@@ -238,66 +255,77 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
         id: 'name',
         header: 'Category',
         sortKey: 'name',
-        render: (t) => (
-          <div className="max-w-md">
-            <button
-              type="button"
-              onClick={() => {
+        render: (t) => {
+          const rowActions: RowActionItem[] = [];
+          const viewHref = courseCategoryViewHref(t, config);
+          if (viewHref) {
+            rowActions.push({
+              key: 'view',
+              label: 'View category',
+              href: viewHref,
+              external: true,
+            });
+          }
+          rowActions.push(
+            {
+              key: 'edit',
+              label: 'Edit in form',
+              onClick: () => {
                 setSelectedId(t.id);
-              }}
-              className={`text-left font-semibold ${
-                selectedId === t.id
-                  ? 'text-brand-700 dark:text-brand-300'
-                  : 'text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300'
-              }`}
-            >
-              {t.name}
-            </button>
-            <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{t.slug}</div>
-            <InlineRowActions
-              ariaLabel={`Actions for ${t.name}`}
-              items={[
-                {
-                  key: 'edit',
-                  label: 'Edit in form',
-                  onClick: () => {
-                    setSelectedId(t.id);
-                  },
-                },
-                {
-                  key: 'delete',
-                  label: 'Delete',
-                  danger: true,
-                  onClick: () =>
-                    void (async () => {
-                      const ok = await confirm({
-                        title: 'Delete category?',
-                        message: `Delete category “${t.name}”?`,
-                        variant: 'danger',
-                        confirmLabel: 'Delete',
-                      });
-                      if (!ok) {
-                        return;
-                      }
-                      try {
-                        await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.courseCategory(t.id));
-                        if (selectedId === t.id) {
-                          startNew();
-                        }
-                        bumpList();
-                        toast.success('Category deleted', 'The category was removed.');
-                      } catch (e) {
-                        await alertDialog({
-                          title: 'Could not delete category',
-                          message: getErrorSummary(e),
-                        });
-                      }
-                    })(),
-                },
-              ]}
-            />
-          </div>
-        ),
+              },
+            },
+            {
+              key: 'delete',
+              label: 'Delete',
+              danger: true,
+              onClick: () =>
+                void (async () => {
+                  const ok = await confirm({
+                    title: 'Delete category?',
+                    message: `Delete category “${t.name}”?`,
+                    variant: 'danger',
+                    confirmLabel: 'Delete',
+                  });
+                  if (!ok) {
+                    return;
+                  }
+                  try {
+                    await getSikshyaApi().delete(SIKSHYA_ENDPOINTS.admin.courseCategory(t.id));
+                    if (selectedId === t.id) {
+                      startNew();
+                    }
+                    bumpList();
+                    toast.success('Category deleted', 'The category was removed.');
+                  } catch (e) {
+                    await alertDialog({
+                      title: 'Could not delete category',
+                      message: getErrorSummary(e),
+                    });
+                  }
+                })(),
+            }
+          );
+
+          return (
+            <div className="max-w-md">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedId(t.id);
+                }}
+                className={`text-left font-semibold ${
+                  selectedId === t.id
+                    ? 'text-brand-700 dark:text-brand-300'
+                    : 'text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300'
+                }`}
+              >
+                {t.name}
+              </button>
+              <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{t.slug}</div>
+              <InlineRowActions ariaLabel={`Actions for ${t.name}`} items={rowActions} />
+            </div>
+          );
+        },
       },
       {
         id: 'count',
@@ -307,7 +335,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
         render: (t) => (typeof t.count === 'number' ? t.count : '—'),
       },
     ],
-    [selectedId, bumpList, startNew, confirm, alertDialog]
+    [selectedId, bumpList, startNew, confirm, alertDialog, config]
   );
 
   const emptyContent = (

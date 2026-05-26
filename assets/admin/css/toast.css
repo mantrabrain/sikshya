@@ -131,12 +131,12 @@
 }
 
 .sikshya-toast.info {
-    background: #eff6ff;
-    border-color: #bfdbfe;
+    background: #f5f8fc;
+    border-color: #e8f0fa;
 }
 
 .sikshya-toast.info .sikshya-toast-icon {
-    background: #3b82f6;
+    background: #5078b7;
     color: #ffffff;
 }
 
@@ -222,7 +222,7 @@
     
     .sikshya-toast.info {
         background: #0c4a6e;
-        border-color: #1e40af;
+        border-color: #1f4585;
     }
     
     .sikshya-toast-title {

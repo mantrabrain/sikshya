@@ -12,7 +12,18 @@
 .sikshya-archive-courses__header {
   display: grid;
   gap: var(--sikshya-spacing-2);
-  margin-bottom: var(--sikshya-spacing-8);
+  margin-bottom: 0;
+}
+
+/* Match single course LP title in masthead */
+.sikshya-course-lp__masthead .sikshya-archive-courses__title {
+  margin: 0 0 var(--sikshya-spacing-3);
+  font-size: clamp(1.375rem, 2.2vw, 2rem);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--sik-f-text-heading, var(--sikshya-gray-900));
+  max-width: 48rem;
 }
 
 .sikshya-archive-courses__title {
@@ -60,40 +71,51 @@
   color: var(--sikshya-gray-600);
 }
 
+.sikshya-course-lp__masthead .sikshya-archive-courses__results {
+  margin-bottom: 0;
+}
+
+/* Breadcrumb — same as .sikshya-course-lp__breadcrumb on single course */
+.sikshya-discovery-breadcrumb,
+.sikshya-course-lp__masthead .sikshya-discovery-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  font-size: var(--sikshya-font-size-sm);
+  margin-bottom: var(--sikshya-spacing-4);
+  color: var(--sik-f-text-muted, var(--sikshya-gray-600));
+}
+
+.sikshya-discovery-breadcrumb__link {
+  color: var(--sik-f-text-muted, var(--sikshya-gray-600));
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-discovery-breadcrumb__link:hover,
+.sikshya-discovery-breadcrumb__link:focus-visible {
+  color: var(--sikshya-primary);
+  text-decoration: underline;
+}
+
+.sikshya-discovery-breadcrumb__current {
+  font-weight: 600;
+  color: var(--sik-f-text-heading, var(--sikshya-gray-900));
+}
+
+.sikshya-discovery-breadcrumb__sep {
+  color: var(--sikshya-gray-400);
+  user-select: none;
+  font-weight: 400;
+}
+
 /* Category / tag taxonomy — same shell as catalog; no sidebar */
 .sikshya-taxonomy-courses__header {
   display: grid;
   gap: var(--sikshya-spacing-2);
-  margin-bottom: var(--sikshya-spacing-6);
-}
-
-.sikshya-taxonomy-courses__breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sikshya-spacing-2);
-  font-size: var(--sikshya-font-size-sm);
-  color: var(--sikshya-gray-600);
-}
-
-.sikshya-taxonomy-courses__crumb {
-  color: var(--sikshya-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.sikshya-taxonomy-courses__crumb:hover {
-  text-decoration: underline;
-}
-
-.sikshya-taxonomy-courses__crumb--current {
-  color: var(--sikshya-gray-700);
-  font-weight: 600;
-}
-
-.sikshya-taxonomy-courses__crumb-sep {
-  color: var(--sikshya-gray-400);
-  user-select: none;
+  margin-bottom: 0;
 }
 
 .sikshya-taxonomy-courses__description {
@@ -562,8 +584,8 @@
 }
 
 .sikshya-course-card:focus-within {
-  border-color: var(--sikshya-primary);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14), var(--sikshya-shadow-lg);
+  border-color: var(--sikshya-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--sikshya-accent) 14%, transparent), var(--sikshya-shadow-lg);
 }
 
 .sikshya-course-card a:focus-visible {
@@ -1138,6 +1160,20 @@ a.sikshya-course-category:focus-visible {
   max-width: 100%;
   justify-content: center;
   box-sizing: border-box;
+}
+
+/* Course grid CTAs — logo secondary (accent purple), not primary navy. */
+.sikshya-course-card-actions .sikshya-btn--primary {
+  background: var(--sikshya-accent);
+  color: var(--sikshya-white);
+  border-color: transparent;
+}
+
+.sikshya-course-card-actions .sikshya-btn--primary:hover,
+.sikshya-course-card-actions .sikshya-btn--primary:focus-visible {
+  background: var(--sikshya-accent-dark);
+  color: var(--sikshya-white);
+  border-color: transparent;
 }
 
 /* Wider primary CTAs (Buy now / Enroll now / Continue learning) vs outline View course */

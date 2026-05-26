@@ -26,6 +26,7 @@ use Sikshya\Services\InvoiceIssuanceService;
 use Sikshya\Addons\AddonManager;
 use Sikshya\Frontend\Site\InstructorAccountView;
 use Sikshya\Frontend\Site\InstructorApplicationView;
+use Sikshya\Blocks\BlocksRegistrar;
 use Sikshya\Shortcodes\CoursesShortcode;
 use Sikshya\Shortcodes\AuthShortcodes;
 
@@ -290,6 +291,7 @@ final class Plugin
         \Sikshya\Frontend\Site\CourseRatingPrompt::init();
         CoursesShortcode::init();
         AuthShortcodes::init();
+        BlocksRegistrar::init($this);
 
         // Hook into WordPress
         do_action('sikshya_init', $this);

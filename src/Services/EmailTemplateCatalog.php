@@ -233,7 +233,7 @@ final class EmailTemplateCatalog
                         ['label' => esc_html__('Certificate #', 'sikshya'), 'value' => '{{certificate_number}}'],
                     ])
                     . '<p style="margin:24px 0 0;text-align:center;">'
-                    . '<a href="{{certificate_url}}" style="display:inline-block;padding:14px 28px;background:#7c3aed;color:#ffffff;text-decoration:none;font-weight:600;border-radius:10px;">'
+                    . '<a href="{{certificate_url}}" style="display:inline-block;padding:14px 28px;background:#7a2e80;color:#ffffff;text-decoration:none;font-weight:600;border-radius:10px;">'
                     . esc_html__('View certificate →', 'sikshya')
                     . '</a></p>'
                 ),

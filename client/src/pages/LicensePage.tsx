@@ -107,7 +107,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
   const toast = useTopRightToast(4000);
   const [debugOpen, setDebugOpen] = useState(false);
   const [debugData, setDebugData] = useState<DebugPayload | null>(null);
-  const upgradeUrl = config.licensing?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya/#pricing';
+  const upgradeUrl = config.licensing?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya-lms/pricing/';
 
   const load = useCallback(async () => {
     setLoading(true);

@@ -167,19 +167,6 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
       config={config}
       title={title}
       subtitle="Course health, learners, and shortcuts in one place"
-      pageActions={
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            disabled={refreshBusy}
-            onClick={() => void refreshOverview()}
-            className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-          >
-            {refreshBusy ? 'Refreshing…' : 'Refresh data'}
-          </button>
-          <ButtonPrimary onClick={() => setCreateOpen(true)}>+ New course</ButtonPrimary>
-        </div>
-      }
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
       <div className="w-full min-w-0 space-y-8">

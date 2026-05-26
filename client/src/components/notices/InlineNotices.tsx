@@ -84,7 +84,7 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
   return (
     <div
       className="relative overflow-hidden rounded-[10px] border border-slate-200/90 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
-      style={{ borderLeftWidth: 4, borderLeftColor: '#2563eb' }}
+      style={{ borderLeftWidth: 4, borderLeftColor: '#2c5ba8' }}
     >
       <button
         type="button"
@@ -97,8 +97,8 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
       <div className="flex flex-wrap items-start justify-between gap-4 p-4 pr-10">
         <div className="flex min-w-0 flex-1 gap-3">
           <div
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#2563eb]"
-            style={{ background: '#eff6ff' }}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#2c5ba8]"
+            style={{ background: '#f5f8fc' }}
             aria-hidden
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -129,7 +129,9 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
 
 function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss: () => void }) {
   const primary = notice.actions?.[0];
-  const ctaUrl = primary?.url || 'https://mantrabrain.com/plugins/sikshya/#pricing';
+  const ctaUrl =
+    primary?.url ||
+    'https://mantrabrain.com/plugins/sikshya-lms/pricing/?utm_source=sikshya&utm_medium=admin&utm_campaign=upgrade-gate&utm_content=buy-pro-strip';
   const ctaLabel = primary?.label || 'Upgrade to Pro';
   const orderCount = typeof notice.order_count === 'number' ? notice.order_count : 0;
 

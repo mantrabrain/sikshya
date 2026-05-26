@@ -16,47 +16,57 @@ $paged = (int) $ctx['paged'];
 
 $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+
+$courses_archive_url = get_post_type_archive_link(PostTypes::COURSE);
+
+$breadcrumb_items = [
+    [
+        'label' => __('Home', 'sikshya'),
+        'url' => home_url('/'),
+    ],
+    [
+        'label' => $label_courses,
+        'url' => is_string($courses_archive_url) ? $courses_archive_url : '',
+    ],
+    [
+        'label' => (string) single_term_title('', false),
+    ],
+];
 ?>
 
-<div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--tag">
-    <div class="sikshya-container">
-        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <header class="sikshya-taxonomy-courses__header">
-            <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
-                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(get_post_type_archive_link(PostTypes::COURSE)); ?>">
+<div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--tag sik-f-scope">
+    <header class="sikshya-course-lp__masthead">
+        <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
+            <div class="sikshya-taxonomy-courses__header sikshya-archive-courses__header">
+                <?php
+                $items = $breadcrumb_items;
+                require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+                ?>
+
+                <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
+
+                <?php if (term_description()) : ?>
+                    <div class="sikshya-archive-courses__desc sikshya-taxonomy-courses__description">
+                        <?php echo term_description(); ?>
+                    </div>
+                <?php endif; ?>
+
+                <p class="sikshya-archive-courses__results" role="status">
                     <?php
                     echo esc_html(sprintf(
-                        /* translators: %s: plural label (e.g. Courses) */
-                        __('%s Tags', 'sikshya'),
-                        $label_courses
+                        _n('%1$d %2$s found', '%1$d %3$s found', $found, 'sikshya'),
+                        (int) $found,
+                        strtolower($label_course),
+                        strtolower($label_courses)
                     ));
                     ?>
-                </a>
-                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <span class="sikshya-taxonomy-courses__crumb sikshya-taxonomy-courses__crumb--current"><?php single_term_title(); ?></span>
-            </nav>
+                </p>
+            </div>
+        </div>
+    </header>
 
-            <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
-
-            <?php if (term_description()) : ?>
-                <div class="sikshya-archive-courses__desc sikshya-taxonomy-courses__description">
-                    <?php echo term_description(); ?>
-                </div>
-            <?php endif; ?>
-
-            <p class="sikshya-archive-courses__results" role="status">
-                <?php
-                echo esc_html(sprintf(
-                    _n('%1$d %2$s found', '%1$d %3$s found', $found, 'sikshya'),
-                    (int) $found,
-                    strtolower($label_course),
-                    strtolower($label_courses)
-                ));
-                ?>
-            </p>
-        </header>
+    <div class="sikshya-container">
+        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
 
         <?php if (have_posts()) : ?>
             <div class="sikshya-course-grid sikshya-course-grid--cols-3">
@@ -94,9 +104,10 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 <p class="sikshya-archive-courses__empty-text">
                     <?php
                     echo esc_html(sprintf(
-                        /* translators: %s: plural label (e.g. courses) */
-                        __('No %s use this tag yet.', 'sikshya'),
-                        strtolower($label_courses)
+                        /* translators: 1: plural label (e.g. courses), 2: tag name */
+                        __('No %1$s tagged "%2$s" yet.', 'sikshya'),
+                        strtolower($label_courses),
+                        (string) single_term_title('', false)
                     ));
                     ?>
                 </p>

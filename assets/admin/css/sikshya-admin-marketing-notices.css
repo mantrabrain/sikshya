@@ -78,13 +78,13 @@
 }
 
 .sikshya-notice-card--review {
-  border-left-color: #2563eb;
+  border-left-color: #2c5ba8;
   background: #ffffff;
 }
 
 .sikshya-notice-card--review .sikshya-notice-card__icon {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f5f8fc;
+  color: #2c5ba8;
 }
 
 .sikshya-notice-card--review .sikshya-notice-card__row {

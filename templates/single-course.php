@@ -251,48 +251,43 @@ while (have_posts()) :
                                 ));
                                 ?>
                             </h2>
-                            <p class="sikshya-course-lp__curriculum-meta">
-                                <?php
-                                $chapters_n = (int) ($curriculum_stats['chapters'] ?? 0);
-                                $lessons_n = (int) ($curriculum_stats['lessons'] ?? 0);
-                                $items_n = (int) ($curriculum_stats['items'] ?? 0);
-                                $section_part = sprintf(
-                                    _n('%s section', '%s sections', $chapters_n, 'sikshya'),
-                                    number_format_i18n($chapters_n)
-                                );
-                                if ($lessons_n > 0) {
-                                    $second_part = sprintf(
-                                        _n('%s lecture', '%s lectures', $lessons_n, 'sikshya'),
-                                        number_format_i18n($lessons_n)
+                            <div class="sikshya-course-lp__curriculum-head-actions">
+                                <div class="sikshya-course-lp__curriculum-meta">
+                                    <?php
+                                    $chapters_n = (int) ($curriculum_stats['chapters'] ?? 0);
+                                    $lessons_n = (int) ($curriculum_stats['lessons'] ?? 0);
+                                    $items_n = (int) ($curriculum_stats['items'] ?? 0);
+                                    $section_part = sprintf(
+                                        _n('%s section', '%s sections', $chapters_n, 'sikshya'),
+                                        number_format_i18n($chapters_n)
                                     );
-                                } else {
-                                    $second_part = sprintf(
-                                        _n('%s item', '%s items', $items_n, 'sikshya'),
-                                        number_format_i18n($items_n)
-                                    );
-                                }
-                                echo esc_html(
-                                    sprintf(
-                                        /* translators: 1: sections phrase, 2: lectures/items phrase */
-                                        __('%1$s · %2$s', 'sikshya'),
-                                        $section_part,
-                                        $second_part
-                                    )
-                                );
-                                ?>
-                                <?php if ($page_model->getDurationLabel() !== '') : ?>
-                                    <span class="sikshya-course-lp__curriculum-meta-sep">·</span>
-                                    <span><?php echo esc_html(sprintf(__('Est. %s hours total', 'sikshya'), $page_model->getDurationLabel())); ?></span>
-                                <?php endif; ?>
-                            </p>
-                            <button
-                                type="button"
-                                class="sikshya-btn sikshya-btn--outline sikshya-btn--sm"
-                                data-sikshya-toggle-all-chapters
-                                aria-controls="sikshya-course-curriculum-accordion"
-                            >
-                                <?php esc_html_e('Expand all', 'sikshya'); ?>
-                            </button>
+                                    if ($lessons_n > 0) {
+                                        $second_part = sprintf(
+                                            _n('%s lecture', '%s lectures', $lessons_n, 'sikshya'),
+                                            number_format_i18n($lessons_n)
+                                        );
+                                    } else {
+                                        $second_part = sprintf(
+                                            _n('%s item', '%s items', $items_n, 'sikshya'),
+                                            number_format_i18n($items_n)
+                                        );
+                                    }
+                                    ?>
+                                    <span class="sikshya-course-lp__pill"><?php echo esc_html($section_part); ?></span>
+                                    <span class="sikshya-course-lp__pill"><?php echo esc_html($second_part); ?></span>
+                                    <?php if ($page_model->getDurationLabel() !== '') : ?>
+                                        <span class="sikshya-course-lp__pill"><?php echo esc_html(sprintf(__('Est. %s hours total', 'sikshya'), $page_model->getDurationLabel())); ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="sikshya-btn sikshya-btn--outline sikshya-btn--sm"
+                                    data-sikshya-toggle-all-chapters
+                                    aria-controls="sikshya-course-curriculum-accordion"
+                                >
+                                    <?php esc_html_e('Expand all', 'sikshya'); ?>
+                                </button>
+                            </div>
                         </div>
                         <div class="sikshya-course-lp__accordion" id="sikshya-course-curriculum-accordion">
                             <?php foreach ($curriculum as $block) : ?>
@@ -313,7 +308,7 @@ while (have_posts()) :
                                         </span>
                                         <span class="sikshya-course-lp__chapter-row">
                                             <span class="sikshya-course-lp__chapter-title"><?php echo esc_html($chapter->post_title); ?></span>
-                                            <span class="sikshya-course-lp__chapter-count">
+                                            <span class="sikshya-course-lp__pill sikshya-course-lp__chapter-count">
                                                 <?php
                                                 echo esc_html(
                                                     sprintf(
@@ -391,13 +386,13 @@ while (have_posts()) :
                                                         <?php if ($can_open && $item_url !== '') : ?>
                                                             <a class="sikshya-course-lp__outline-link" href="<?php echo esc_url($item_url); ?>">
                                                                 <span class="sikshya-course-lp__outline-title"><?php echo esc_html($item->post_title); ?></span>
-                                                                <span class="sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
+                                                                <span class="sikshya-course-lp__pill sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
                                                             </a>
                                                         <?php else : ?>
                                                             <span class="sikshya-course-lp__outline-locked" title="<?php echo esc_attr__('Enroll to unlock this content.', 'sikshya'); ?>">
                                                                 <span class="sikshya-course-lp__outline-locked-text">
                                                                     <span class="sikshya-course-lp__outline-title"><?php echo esc_html($item->post_title); ?></span>
-                                                                    <span class="sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
+                                                                    <span class="sikshya-course-lp__pill sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
                                                                 </span>
                                                                 <?php if (function_exists('sikshya_curriculum_lock_icon_html')) : ?>
                                                                     <span class="sikshya-course-lp__outline-lockIcon" aria-hidden="true">

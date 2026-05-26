@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sikshya/courses",
+  "version": "1.0.0",
+  "title": "Sikshya Courses",
+  "category": "sikshya",
+  "description": "Grid or list of published courses (same card UI as the catalog).",
+  "keywords": ["sikshya", "courses", "catalog", "lms"],
+  "textdomain": "sikshya",
+  "attributes": {
+    "per_page": {
+      "type": "number",
+      "default": 9
+    },
+    "columns": {
+      "type": "number",
+      "default": 0
+    },
+    "view": {
+      "type": "string",
+      "default": "grid",
+      "enum": ["grid", "list"]
+    },
+    "category": {
+      "type": "string",
+      "default": ""
+    },
+    "tag": {
+      "type": "string",
+      "default": ""
+    },
+    "search": {
+      "type": "string",
+      "default": ""
+    },
+    "orderby": {
+      "type": "string",
+      "default": "date",
+      "enum": ["date", "title", "price"]
+    },
+    "order": {
+      "type": "string",
+      "default": "desc",
+      "enum": ["asc", "desc"]
+    },
+    "pagination": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "multiple": true
+  },
+  "example": {
+    "attributes": {
+      "per_page": 3,
+      "view": "grid"
+    }
+  }
+}

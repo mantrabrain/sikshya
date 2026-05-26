@@ -9,14 +9,14 @@ function NavBadge({ badge }: { badge: NavItemBadge }) {
   const isOff = badge === 'off';
   return (
     <span
-      className={`ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+      className={`ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
         isOff
-          ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
-          : 'bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-100'
+          ? 'bg-slate-100 text-slate-600 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700'
+          : 'bg-accent-50 text-accent-700 ring-accent-200 dark:bg-accent-950/40 dark:text-accent-300 dark:ring-accent-900/60'
       }`}
-      title={isOff ? 'Addon is turned off in Addons' : 'Upgrade your plan to unlock'}
+      title={isOff ? 'Addon is turned off in Addons' : 'Pro feature — upgrade to unlock'}
     >
-      {isOff ? 'Off' : 'Upgrade'}
+      {isOff ? 'Off' : 'Pro'}
     </span>
   );
 }
@@ -309,10 +309,10 @@ export function Sidebar({
           </span>
           {proPluginVersion ? (
             <span
-              className={`inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium leading-none tracking-tight shadow-sm ${
+              className={`inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium leading-none tracking-tight ${
                 proLicensed
-                  ? 'border-emerald-200/80 bg-emerald-50 text-emerald-900 shadow-emerald-900/[0.04] dark:border-emerald-800/70 dark:bg-emerald-950/55 dark:text-emerald-100 dark:shadow-none'
-                  : 'border-amber-200/80 bg-amber-50 text-amber-950 shadow-amber-900/[0.04] dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-50 dark:shadow-none'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/70 dark:bg-emerald-950/55 dark:text-emerald-100'
+                  : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200'
               }`}
               title={
                 proLicensed
@@ -322,16 +322,16 @@ export function Sidebar({
             >
               <span
                 className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                  proLicensed ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-amber-500 dark:bg-amber-400'
+                  proLicensed ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-slate-400 dark:bg-slate-500'
                 }`}
                 aria-hidden
               />
-              <span className={proLicensed ? 'text-emerald-800 dark:text-emerald-100' : 'text-amber-900 dark:text-amber-100'}>
+              <span className={proLicensed ? 'text-emerald-800 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-200'}>
                 Pro
               </span>
               <span
                 className={`tabular-nums ${
-                  proLicensed ? 'text-emerald-700/85 dark:text-emerald-200/90' : 'text-amber-800/90 dark:text-amber-200/90'
+                  proLicensed ? 'text-emerald-700/85 dark:text-emerald-200/90' : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 v{proPluginVersion}

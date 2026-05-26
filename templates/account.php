@@ -6,6 +6,7 @@
  */
 
 use Sikshya\Core\Plugin;
+use Sikshya\Helpers\Icons;
 use Sikshya\Services\Frontend\AccountPageService;
 
 $plugin = Plugin::getInstance();
@@ -49,19 +50,19 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
         <nav class="sik-acc-nav" aria-label="<?php esc_attr_e('Primary', 'sikshya'); ?>">
             <p class="sik-acc-nav__label"><?php esc_html_e('Learn', 'sikshya'); ?></p>
             <a class="<?php echo $view === 'dashboard' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getDashboardUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">⌂</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('dashboard'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — Icons::inline outputs trusted, hard-coded SVG ?></span>
                 <?php esc_html_e('Overview', 'sikshya'); ?>
             </a>
             <a class="<?php echo $view === 'learning' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getLearningUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▦</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('bookOpen'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                 <?php esc_html_e('My learning', 'sikshya'); ?>
             </a>
             <a href="<?php echo esc_url($page_model->getUrls()->getLearnHubUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▶</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('chapterStack'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                 <?php esc_html_e('Learning hub', 'sikshya'); ?>
             </a>
             <a class="<?php echo $view === 'quiz-attempts' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getQuizAttemptsUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">◎</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('clipboardList'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                 <?php
                 echo esc_html(sprintf(
                     /* translators: %s: singular label (e.g. Quiz) */
@@ -71,11 +72,11 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                 ?>
             </a>
             <a class="<?php echo $view === 'profile' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getProfileUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">⚙</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('userCircle'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                 <?php esc_html_e('Profile & security', 'sikshya'); ?>
             </a>
             <a href="<?php echo esc_url($page_model->getUrls()->getCoursesUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">▥</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('course'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                 <?php echo esc_html($label_courses); ?>
             </a>
             <?php
@@ -90,7 +91,7 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                 <?php esc_html_e('View order history, receipts, and invoices.', 'sikshya'); ?>
             </p>
             <a class="<?php echo $view === 'payments' ? 'is-active' : ''; ?>" href="<?php echo esc_url($page_model->getUrls()->getPaymentsUrl()); ?>">
-                <span class="sik-acc-nav__icon" aria-hidden="true">≡</span>
+                <span class="sik-acc-nav__icon" aria-hidden="true"><?php echo Icons::inline('shoppingCart'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?></span>
                 <?php esc_html_e('My orders & payments', 'sikshya'); ?>
             </a>
             <?php

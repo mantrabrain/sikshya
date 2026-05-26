@@ -227,7 +227,7 @@ export const CERT_PAGE_SWATCHES: readonly string[] = [
   '#fecdd3',
   '#fda4af',
   '#e9d5ff',
-  '#c4b5fd',
+  '#d9bedc',
   '#7dd3fc',
   '#6ee7b7',
   '#94a3b8',
@@ -448,7 +448,7 @@ export function getCertificatePageDecoGradient(decoId: string): string | null {
     minimalFrame:
       'linear-gradient(90deg, #eef2f6 0%, #ffffff 10%, #ffffff 90%, #eef2f6 100%)',
     dawn: 'linear-gradient(160deg, #fff1f2 0%, #ffffff 50%, #e0e7ff 100%)',
-    sky: 'linear-gradient(180deg, #bfdbfe 0%, #f0f9ff 45%, #f8fafc 100%)',
+    sky: 'linear-gradient(180deg, #e8f0fa 0%, #f0f9ff 45%, #f8fafc 100%)',
     cream: 'linear-gradient(180deg, #fff7ed 0%, #fffbeb 40%, #ffffff 100%)',
     rose: 'linear-gradient(135deg, #fce7f3 0%, #ffffff 55%, #fae8ff 100%)',
     forest: 'linear-gradient(160deg, #d1fae5 0%, #f0fdf4 100%)',
@@ -457,11 +457,11 @@ export function getCertificatePageDecoGradient(decoId: string): string | null {
     gold: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #ffffff 100%)',
     mint: 'linear-gradient(180deg, #ccfbf1 0%, #f0fdfa 100%)',
     aurora: 'linear-gradient(200deg, #c7d2fe 0%, #e0e7ff 30%, #fce7f3 70%, #f0f9ff 100%)',
-    plum: 'linear-gradient(165deg, #e9d5ff 0%, #faf5ff 50%, #f5f3ff 100%)',
+    plum: 'linear-gradient(165deg, #e9d5ff 0%, #faf5ff 50%, #fbf5fb 100%)',
     slate: 'linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)',
     coral: 'linear-gradient(160deg, #ffe4e6 0%, #fff1f2 100%)',
     sea: 'linear-gradient(200deg, #a5f3fc 0%, #e0f2fe 50%, #f0f9ff 100%)',
-    dusk: 'linear-gradient(195deg, #4c1d95 0%, #7c3aed 35%, #312e81 100%)',
+    dusk: 'linear-gradient(195deg, #4a1a51 0%, #7a2e80 35%, #4a1a51 100%)',
   };
   return g[decoId] || null;
 }

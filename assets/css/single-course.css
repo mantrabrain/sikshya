@@ -11,9 +11,17 @@
    ------------------------------------------------------------------------- */
 
 .sikshya-single-course.sikshya-course-lp.sik-f-scope.sikshya-public {
+  width: 100%;
+  max-width: var(--sikshya-public-content-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
   padding-top: 0;
   background-color: transparent;
   min-height: 100%;
+}
+
+body.sikshya-course-layout--fullwidth .sikshya-single-course.sikshya-course-lp.sik-f-scope.sikshya-public {
+  max-width: none;
 }
 
 .sikshya-container--course {
@@ -26,15 +34,8 @@
 }
 
 /* -------------------------------------------------------------------------
-   Masthead (light, editorial — not a dark marketing band)
+   Masthead (light band — base layout in frontend.css)
    ------------------------------------------------------------------------- */
-
-.sikshya-course-lp__masthead {
-  background: var(--sik-f-surface-muted);
-  border-bottom: 1px solid var(--sik-f-border);
-  padding: clamp(var(--sikshya-spacing-6), 4vw, var(--sikshya-spacing-10)) 0;
-  margin-bottom: clamp(var(--sikshya-spacing-6), 3vw, var(--sikshya-spacing-10));
-}
 
 .sikshya-course-lp__masthead-inner {
   max-width: var(--sikshya-public-content-max-width);
@@ -480,22 +481,54 @@
 
 .sikshya-course-lp__curriculum-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--sikshya-spacing-4);
+  gap: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
   margin-bottom: var(--sikshya-spacing-4);
 }
 
-.sikshya-course-lp__curriculum-meta {
-  margin: 0;
-  font-size: var(--sikshya-font-size-sm);
-  color: var(--sik-f-text-muted);
-  line-height: 1.5;
+.sikshya-course-lp__curriculum-head .sikshya-course-lp__heading {
+  margin-bottom: 0;
 }
 
-.sikshya-course-lp__curriculum-meta-sep {
-  margin: 0 0.35rem;
-  color: var(--sikshya-gray-400);
+.sikshya-course-lp__curriculum-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sikshya-spacing-2) var(--sikshya-spacing-3);
+  margin-left: auto;
+}
+
+.sikshya-course-lp__curriculum-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.sikshya-course-lp__pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--sik-f-border-strong);
+  background: var(--sik-f-surface);
+  font-size: var(--sikshya-font-size-xs);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--sik-f-text);
+  white-space: nowrap;
+}
+
+/* Header stats pills — on white panel */
+.sikshya-course-lp__curriculum-meta .sikshya-course-lp__pill {
+  color: var(--sik-f-text);
+  background: var(--sik-f-surface-muted);
+  border-color: var(--sik-f-border);
 }
 
 .sikshya-course-lp__accordion {
@@ -523,18 +556,31 @@
   padding: var(--sikshya-spacing-3) var(--sikshya-spacing-4);
   font-weight: 600;
   font-size: var(--sikshya-font-size-sm);
+  line-height: 1.45;
   color: var(--sik-f-text-heading);
-  background: var(--sik-f-surface-muted);
+  background: color-mix(in srgb, var(--sikshya-primary-light) 55%, var(--sik-f-surface));
   transition: var(--sikshya-transition-fast);
 }
 
+/* Lecture-count pill on tinted chapter bar — higher contrast */
+.sikshya-course-lp__chapter-summary .sikshya-course-lp__pill {
+  color: var(--sikshya-primary-dark);
+  background: rgb(255 255 255 / 0.82);
+  border-color: color-mix(in srgb, var(--sikshya-primary) 16%, var(--sik-f-border-strong));
+}
+
 .sikshya-course-lp__chapter-summary:hover {
-  background: var(--sik-f-surface-subtle);
+  background: color-mix(in srgb, var(--sikshya-primary-light) 72%, var(--sik-f-surface));
+}
+
+details[open] > .sikshya-course-lp__chapter-summary {
+  background: color-mix(in srgb, var(--sikshya-primary-light) 82%, var(--sik-f-surface));
+  border-bottom: 1px solid color-mix(in srgb, var(--sikshya-primary) 10%, var(--sik-f-border));
 }
 
 .sikshya-course-lp__chapter-summary:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--sikshya-primary-light);
+  box-shadow: inset 0 0 0 2px var(--sikshya-primary);
 }
 
 .sikshya-course-lp__chapter-summary::-webkit-details-marker,
@@ -549,7 +595,7 @@
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;
-  color: var(--sik-f-text-muted);
+  color: var(--sikshya-primary-dark);
   transition: transform 0.2s ease;
 }
 
@@ -565,7 +611,7 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
   display: flex;
   flex: 1;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--sikshya-spacing-2);
   min-width: 0;
@@ -577,11 +623,7 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
 }
 
 .sikshya-course-lp__chapter-count {
-  font-size: var(--sikshya-font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--sik-f-text-muted);
+  flex-shrink: 0;
 }
 
 .sikshya-course-lp__outline {
@@ -603,17 +645,21 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
   align-items: flex-start;
   gap: 0.65rem;
   padding: var(--sikshya-spacing-2) 0;
-  border-bottom: 1px solid var(--sikshya-gray-100);
+  border-bottom: 1px solid var(--sik-f-border);
 }
 
 .sikshya-course-lp__outline-item:last-child {
   border-bottom: none;
 }
 
-/* Free-preview rows: same accent as outline link hover — text only, no bar/background. */
-.sikshya-course-lp__outline-item--preview .sikshya-course-lp__outline-title,
+.sikshya-course-lp__outline-item--preview .sikshya-course-lp__outline-title {
+  color: var(--sikshya-primary-dark);
+}
+
 .sikshya-course-lp__outline-item--preview .sikshya-course-lp__outline-type {
-  color: var(--sikshya-primary);
+  color: var(--sikshya-primary-dark);
+  background: color-mix(in srgb, var(--sikshya-primary-light) 75%, var(--sik-f-surface));
+  border-color: color-mix(in srgb, var(--sikshya-primary) 18%, var(--sik-f-border-strong));
 }
 
 .sikshya-course-lp__outline-icon {
@@ -654,9 +700,11 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
 
 .sikshya-course-lp__outline-locked-text {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sikshya-spacing-2);
   min-width: 0;
 }
 
@@ -682,19 +730,30 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
 .sikshya-course-lp__outline-title {
   font-weight: 600;
   font-size: var(--sikshya-font-size-sm);
-  color: var(--sik-f-text);
+  line-height: 1.45;
+  color: var(--sik-f-text-heading);
 }
 
 .sikshya-course-lp__outline-locked .sikshya-course-lp__outline-title {
+  color: var(--sikshya-gray-700);
+}
+
+.sikshya-course-lp__outline-item--locked .sikshya-course-lp__outline-type {
   color: var(--sik-f-text-muted);
+  background: var(--sik-f-surface-muted);
 }
 
 .sikshya-course-lp__outline-type {
-  font-size: var(--sikshya-font-size-xs);
+  flex-shrink: 0;
+  padding: 0.16rem 0.5rem;
+  font-size: 0.6875rem;
   font-weight: 600;
+  line-height: 1.3;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--sik-f-text-muted);
+  color: var(--sik-f-text);
+  background: var(--sik-f-surface-muted);
+  border-color: var(--sik-f-border-strong);
 }
 
 .sikshya-course-lp__empty {

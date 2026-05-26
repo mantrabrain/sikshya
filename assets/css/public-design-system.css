@@ -9,10 +9,15 @@
  */
 
 :root {
-  /* Brand */
-  --sikshya-primary: #6366f1;
-  --sikshya-primary-dark: #4f46e5;
-  --sikshya-primary-light: #818cf8;
+  /* Brand — matches Sikshya logo (navy wordmark + purple “LMS” accent). */
+  --sikshya-primary: #2c5ba8;
+  --sikshya-primary-dark: #1f4585;
+  --sikshya-primary-light: #e8f0fa;
+  /* Secondary accent (logo purple) — course CTAs, Pro surfaces, etc. */
+  --sikshya-accent: #7a2e80;
+  --sikshya-accent-dark: #5e2266;
+  --sikshya-accent-light: #f5e8f5;
+  /* Utility “secondary” (amber) — featured badges, highlights. */
   --sikshya-secondary: #f59e0b;
   --sikshya-secondary-dark: #d97706;
   --sikshya-success: #10b981;
@@ -187,8 +192,8 @@
 
 .sik-f-badge--primary {
   border-color: transparent;
-  background: rgb(99 102 241 / 0.12);
-  color: var(--sikshya-primary-dark);
+  background: color-mix(in srgb, var(--sikshya-accent) 12%, transparent);
+  color: var(--sikshya-accent-dark);
 }
 
 .sik-f-muted {

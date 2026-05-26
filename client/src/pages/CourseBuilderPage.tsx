@@ -13,6 +13,7 @@ import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { CreateCourseModal } from '../components/shared/CreateCourseModal';
+import { Modal } from '../components/shared/Modal';
 import { WPMediaPickerField } from '../components/shared/WPMediaPickerField';
 import { CourseBuilderSkeleton, SkeletonLine } from '../components/shared/Skeleton';
 import { TopRightToast, useTopRightToast } from '../components/shared/TopRightToast';
@@ -413,7 +414,7 @@ function ContentDripCourseBuilderGateInput(props: { config: SikshyaReactConfig; 
   const mode = resolveGatedWorkspaceMode(featureOk, addon.enabled, addon.loading);
   const lic = getLicensing(config);
   const upgradeUrl =
-    lic?.upgradeUrl || config.brandLinks?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya/#pricing';
+    lic?.upgradeUrl || config.brandLinks?.upgradeUrl || 'https://mantrabrain.com/plugins/sikshya-lms/pricing/';
   const catalog = getCatalogEntry(config, 'content_drip');
   const featureTitle = catalog?.label || 'Content drip & scheduled unlock';
   const [enableBusy, setEnableBusy] = useState(false);
@@ -1152,11 +1153,6 @@ function AddChapterModal(props: {
 }) {
   const { open, title, onTitleChange, onClose, onSubmit, busy } = props;
   const inputRef = useRef<HTMLInputElement>(null);
-  const onCloseRef = useRef(onClose);
-
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
 
   useEffect(() => {
     if (!open) {
@@ -1165,67 +1161,29 @@ function AddChapterModal(props: {
     const t = window.setTimeout(() => {
       inputRef.current?.focus();
       inputRef.current?.select();
-    }, 50);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onCloseRef.current();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener('keydown', onKey);
-    };
+    }, 80);
+    return () => window.clearTimeout(t);
   }, [open]);
 
-  if (!open) {
-    return null;
-  }
+  const handleClose = () => {
+    if (!busy) {
+      onClose();
+    }
+  };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-4 backdrop-blur-[2px] sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="sikshya-add-chapter-title"
-    >
-      <button
-        type="button"
-        className="absolute inset-0 z-0 cursor-default"
-        aria-label="Close"
-        onClick={onClose}
-      />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-        <h2 id="sikshya-add-chapter-title" className="text-lg font-semibold text-slate-900 dark:text-white">
-          Add a chapter
-        </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          A chapter is a section of your course (for example “Getting started” or “Week 2”). Put lessons and quizzes inside it from
-          the outline.
-        </p>
-        <label htmlFor="sikshya-new-chapter-title" className={`${FIELD_LABEL} mt-5`}>
-          Chapter name
-        </label>
-        <input
-          ref={inputRef}
-          id="sikshya-new-chapter-title"
-          type="text"
-          className={FIELD_INPUT}
-          placeholder="e.g. Introduction or Module 1"
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              onSubmit();
-            }
-          }}
-        />
-        <div className="mt-6 flex flex-wrap justify-end gap-2">
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Add a chapter"
+      description='A chapter is a section of your course (for example "Getting started" or "Week 2"). Put lessons and quizzes inside it from the outline.'
+      size="sm"
+      footer={
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            onClick={onClose}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            onClick={handleClose}
             disabled={busy}
           >
             Cancel
@@ -1234,8 +1192,29 @@ function AddChapterModal(props: {
             {busy ? 'Adding…' : 'Add chapter'}
           </ButtonPrimary>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <label htmlFor="sikshya-new-chapter-title" className={FIELD_LABEL}>
+        Chapter name
+      </label>
+      <input
+        ref={inputRef}
+        id="sikshya-new-chapter-title"
+        type="text"
+        className={`${FIELD_INPUT} mt-1.5`}
+        placeholder="e.g. Introduction or Module 1"
+        value={title}
+        onChange={(e) => onTitleChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!busy && title.trim()) {
+              onSubmit();
+            }
+          }
+        }}
+      />
+    </Modal>
   );
 }
 
@@ -1767,7 +1746,12 @@ function CourseBuilderEditor({
       } else {
         toast.success('Saved', msg);
       }
-      bootstrap.refetch();
+      // Reflect the saved status locally instead of re-fetching the entire
+      // bootstrap. The full refetch was wiping every input back to the server's
+      // version on every save click, causing a visible "markup refresh" and
+      // dropping any in-flight edits the user hadn't blurred yet. Local state
+      // already matches what we just POSTed; we only need to flip the status.
+      setValues((prev) => ({ ...prev, course_status: status }));
     } catch (e) {
       toast.error(getApiErrorToastTitle(e), getToastMessageForApiFailure(e));
     } finally {
@@ -2178,6 +2162,32 @@ function CourseBuilderEditor({
                 <div className="min-w-0 flex-1" />
               )}
               <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-100/80 pt-2 sm:border-t-0 sm:pt-0">
+                {/* Current status pill — gives the user an unmistakable signal
+                    of whether the course is currently a draft or published.
+                    Without this, the Save-draft and Publish buttons look
+                    identical regardless of state. */}
+                {(() => {
+                  const currentStatus = String(values.course_status ?? 'draft').toLowerCase();
+                  const isPublished = currentStatus === 'publish';
+                  return (
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                        isPublished
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-950/40 dark:text-emerald-300'
+                          : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300'
+                      }`}
+                      title={isPublished ? 'This course is published and visible to learners' : 'This course is a draft — not visible to learners'}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          isPublished ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-slate-400 dark:bg-slate-500'
+                        }`}
+                        aria-hidden
+                      />
+                      {isPublished ? 'Published' : 'Draft'}
+                    </span>
+                  );
+                })()}
                 {previewUrl ? (
                   <a
                     href={previewUrl}
@@ -2189,24 +2199,32 @@ function CourseBuilderEditor({
                     Preview
                   </a>
                 ) : null}
-                <button
-                  type="button"
-                  disabled={saving || bootstrap.loading || !bootstrap.data}
-                  onClick={() => onSave('draft')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                >
-                  <NavIcon name="iconSaveDraft" className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                  {saving ? 'Saving…' : 'Save draft'}
-                </button>
-                <ButtonPrimary
-                  type="button"
-                  disabled={saving || bootstrap.loading || !bootstrap.data}
-                  onClick={() => onSave('publish')}
-                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5"
-                >
-                  <NavIcon name="iconPublish" className="h-4 w-4 text-white/90" />
-                  {saving ? 'Publishing…' : 'Publish'}
-                </ButtonPrimary>
+                {(() => {
+                  const currentStatus = String(values.course_status ?? 'draft').toLowerCase();
+                  const isPublished = currentStatus === 'publish';
+                  return (
+                    <>
+                      <button
+                        type="button"
+                        disabled={saving || bootstrap.loading || !bootstrap.data}
+                        onClick={() => onSave('draft')}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      >
+                        <NavIcon name="iconSaveDraft" className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                        {saving ? 'Saving…' : isPublished ? 'Switch to draft' : 'Save draft'}
+                      </button>
+                      <ButtonPrimary
+                        type="button"
+                        disabled={saving || bootstrap.loading || !bootstrap.data}
+                        onClick={() => onSave('publish')}
+                        className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5"
+                      >
+                        <NavIcon name="iconPublish" className="h-4 w-4 text-white/90" />
+                        {saving ? 'Publishing…' : isPublished ? 'Update' : 'Publish'}
+                      </ButtonPrimary>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -2238,25 +2256,21 @@ function CourseBuilderEditor({
                         published
                       </div>
                     </div>
-                    <div className="mt-3 rounded-xl border border-slate-200/80 bg-white/70 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900/55">
-                      <label
-                        htmlFor="sikshya-cb-curriculum-outline-full-height"
-                        className="flex cursor-pointer items-center gap-2.5"
-                      >
-                        <input
-                          id="sikshya-cb-curriculum-outline-full-height"
-                          type="checkbox"
-                          checked={curriculumOutlineFullHeight}
-                          onChange={(e) => setCurriculumOutlineFullHeightPersisted(e.target.checked)}
-                          className="h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:focus:ring-brand-400/25"
-                        />
-                        <span className="min-w-0 text-xs font-semibold leading-snug text-slate-800 dark:text-slate-100">
-                          {curriculumOutlineFullHeight
-                            ? 'Outline: page scroll'
-                            : 'Outline: panel scroll'}
-                        </span>
-                      </label>
-                    </div>
+                    <label
+                      htmlFor="sikshya-cb-curriculum-outline-full-height"
+                      className="mt-2 flex cursor-pointer items-center gap-2"
+                    >
+                      <input
+                        id="sikshya-cb-curriculum-outline-full-height"
+                        type="checkbox"
+                        checked={curriculumOutlineFullHeight}
+                        onChange={(e) => setCurriculumOutlineFullHeightPersisted(e.target.checked)}
+                        className="h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:focus:ring-brand-400/25"
+                      />
+                      <span className="min-w-0 text-[11.5px] font-medium leading-snug text-slate-500 dark:text-slate-400">
+                        {curriculumOutlineFullHeight ? 'Outline: page scroll' : 'Outline: panel scroll'}
+                      </span>
+                    </label>
                   </div>
                   <div
                     className={
@@ -2431,7 +2445,9 @@ function CourseBuilderEditor({
                                 }}
                               >
                                 <span
-                                  className="flex h-10 w-5 shrink-0 select-none items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200"
+                                  className={`flex h-10 w-5 shrink-0 select-none items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 ${
+                                    chapterRowDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'
+                                  }`}
                                   aria-hidden
                                 >
                                   <NavIcon name="dragHandle" className="h-4 w-4" />
@@ -2572,7 +2588,9 @@ function CourseBuilderEditor({
                                               >
                                                 <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-2 py-1">
                                                   <span
-                                                    className="flex h-8 w-5 shrink-0 select-none items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200"
+                                                    className={`flex h-8 w-5 shrink-0 select-none items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 ${
+                                                      contentRowDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'
+                                                    }`}
                                                     aria-hidden
                                                   >
                                                     <NavIcon name="dragHandle" className="h-4 w-4" />

@@ -2,7 +2,6 @@
 
 namespace Sikshya\Frontend;
 use Sikshya\Core\Plugin;
-use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
 use Sikshya\Database\Repositories\OrderRepository;
@@ -23,6 +22,8 @@ use Sikshya\Frontend\Controllers\ProgressController;
 use Sikshya\Frontend\Controllers\CertificateController;
 use Sikshya\Frontend\Controllers\DiscussionController;
 use Sikshya\Frontend\Controllers\AssignmentController;
+use Sikshya\Blocks\ContentHasSikshyaBlock;
+use Sikshya\Shortcodes\AuthShortcodes;
 
 /**
  * Frontend Management Class
@@ -83,6 +84,7 @@ class Frontend
         add_action('wp_head', [$this, 'addFrontendMeta']);
         add_action('wp_footer', [$this, 'addFrontendFooter']);
         add_action('admin_bar_menu', [$this, 'addSikshyaAdminBarLinks'], 80);
+        add_action('admin_bar_menu', [$this, 'customizeTaxonomyAdminBarEdit'], 999);
         // Run on init (before template output) so redirects/cookies are not broken by theme notices.
         add_action('init', [CartStorage::class, 'registerHooks'], 12);
         add_action('init', [CartFormHandler::class, 'maybeHandle'], 20);
@@ -120,13 +122,13 @@ class Frontend
                 if ($pt === PostTypes::COURSE) {
                     $label = __('Edit course', 'sikshya');
                     // New admin UI: course builder.
-                    $href = ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $post_id]);
+                    $href = \Sikshya\Admin\ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $post_id]);
                 } elseif ($pt === PostTypes::LESSON) {
                     $label = __('Edit lesson', 'sikshya');
                     // New admin UI: edit within course builder curriculum tab.
                     $cid = LessonCourseLink::resolvedCourseIdForLesson($post_id);
                     if ($cid > 0) {
-                        $href = ReactAdminConfig::reactAppUrl('add-course', [
+                        $href = \Sikshya\Admin\ReactAdminConfig::reactAppUrl('add-course', [
                             'course_id' => (string) $cid,
                             'tab' => 'curriculum',
                         ]);
@@ -135,7 +137,7 @@ class Frontend
                     $label = __('Edit quiz', 'sikshya');
                     $cid = \Sikshya\Services\LessonCourseLink::resolvedCourseIdForQuiz($post_id);
                     if ($cid > 0) {
-                        $href = ReactAdminConfig::reactAppUrl('add-course', [
+                        $href = \Sikshya\Admin\ReactAdminConfig::reactAppUrl('add-course', [
                             'course_id' => (string) $cid,
                             'tab' => 'curriculum',
                         ]);
@@ -144,7 +146,7 @@ class Frontend
                     $label = __('Edit assignment', 'sikshya');
                     $cid = \Sikshya\Services\LessonCourseLink::resolvedCourseIdForAssignment($post_id);
                     if ($cid > 0) {
-                        $href = ReactAdminConfig::reactAppUrl('add-course', [
+                        $href = \Sikshya\Admin\ReactAdminConfig::reactAppUrl('add-course', [
                             'course_id' => (string) $cid,
                             'tab' => 'curriculum',
                         ]);
@@ -152,7 +154,7 @@ class Frontend
                 } elseif ($pt === PostTypes::CERTIFICATE) {
                     $label = __('Edit certificate', 'sikshya');
                     // Certificates are managed in the React admin "Certificates" section.
-                    $href = ReactAdminConfig::reactAppUrl('certificates');
+                    $href = \Sikshya\Admin\ReactAdminConfig::reactAppUrl('certificates');
                 }
                 $bar->add_node([
                     'id' => 'sikshya-edit-current',
@@ -172,16 +174,52 @@ class Frontend
             return;
         }
 
-        // Course archive page (quick link to course list).
+        // Course archive page (quick link to React course list).
         if (is_post_type_archive(PostTypes::COURSE) && current_user_can('edit_posts')) {
             $bar->add_node([
                 'id' => 'sikshya-edit-courses',
                 'parent' => 'site-name',
                 'title' => __('Edit courses', 'sikshya'),
-                'href' => admin_url('edit.php?post_type=' . PostTypes::COURSE),
+                'href' => \Sikshya\Admin\ReactAdminConfig::reactAppUrl('courses'),
             ]);
             return;
         }
+    }
+
+    /**
+     * Replace WordPress core "Edit Course Category" admin-bar link (runs after core at priority 80).
+     *
+     * @param \WP_Admin_Bar $bar Admin bar.
+     */
+    public function customizeTaxonomyAdminBarEdit($bar): void
+    {
+        if (!is_admin_bar_showing() || is_admin()) {
+            return;
+        }
+        if (!$bar instanceof \WP_Admin_Bar) {
+            return;
+        }
+        if (!is_tax(Taxonomies::COURSE_CATEGORY)) {
+            return;
+        }
+
+        $term = get_queried_object();
+        if (!$term instanceof \WP_Term || !current_user_can('edit_term', (int) $term->term_id, $term->taxonomy)) {
+            return;
+        }
+
+        $href = \Sikshya\Admin\ReactAdminConfig::reactAppUrl('course-categories', [
+            'category_id' => (string) (int) $term->term_id,
+        ]);
+
+        $bar->add_node([
+            'id' => 'edit',
+            'title' => __('Edit course category', 'sikshya'),
+            'href' => $href,
+        ]);
+
+        $bar->remove_node('sikshya-edit-current');
+        $bar->remove_node('sikshya-edit-current-top');
     }
 
     /**
@@ -258,13 +296,19 @@ class Frontend
             $this->plugin->version
         );
 
-        // Course listings (archive, taxonomy, shortcodes/blocks that render cards)
-        wp_enqueue_style(
-            'sikshya-course-listing',
-            $this->plugin->getAssetUrl('css/course-listing.css'),
-            ['sikshya-public-ds', 'sikshya-frontend'],
-            $this->plugin->version
-        );
+        if ($this->shouldEnqueueCourseListingStyles()) {
+            wp_enqueue_style(
+                'sikshya-course-listing',
+                $this->plugin->getAssetUrl('css/course-listing.css'),
+                ['sikshya-public-ds', 'sikshya-frontend'],
+                $this->plugin->version
+            );
+        }
+
+        if ($this->shouldEnqueueAuthAssets()) {
+            AuthShortcodes::registerPublicScript();
+            wp_enqueue_script('sikshya-auth-public');
+        }
 
         if (is_singular(PostTypes::COURSE)) {
             wp_enqueue_style(
@@ -896,8 +940,14 @@ class Frontend
             $classes[] = 'sikshya-course-archive';
         }
 
+        if (is_tax([Taxonomies::COURSE_CATEGORY, Taxonomies::COURSE_TAG])) {
+            $classes[] = 'sikshya-course-taxonomy';
+            $classes[] = 'sikshya-course-page';
+        }
+
         if (PublicPageUrls::isCourseCategoryRootRequest() && CourseFrontendSettings::areCategoriesEnabled()) {
             $classes[] = 'sikshya-course-category-index';
+            $classes[] = 'sikshya-course-page';
         }
 
         foreach (['cart' => 'sikshya-cart-page', 'checkout' => 'sikshya-checkout-page', 'order' => 'sikshya-order-page', 'account' => 'sikshya-account-page', 'learn' => 'sikshya-learn-page', 'login' => 'sikshya-login-page'] as $k => $class) {
@@ -909,6 +959,34 @@ class Frontend
         if (!empty($classes)) {
             echo '<script>document.body.className += " ' . esc_attr(implode(' ', $classes)) . '";</script>';
         }
+    }
+
+    private function shouldEnqueueCourseListingStyles(): bool
+    {
+        if (is_post_type_archive(PostTypes::COURSE)) {
+            return true;
+        }
+
+        if (is_tax([Taxonomies::COURSE_CATEGORY, Taxonomies::COURSE_TAG])) {
+            return true;
+        }
+
+        if (is_page('sikshya-courses')) {
+            return true;
+        }
+
+        return ContentHasSikshyaBlock::hasCoursesListing();
+    }
+
+    private function shouldEnqueueAuthAssets(): bool
+    {
+        if (PublicPageUrls::isCurrentVirtualPage('checkout')
+            || PublicPageUrls::isCurrentVirtualPage('login')
+        ) {
+            return true;
+        }
+
+        return ContentHasSikshyaBlock::hasAuth();
     }
 
     /**

@@ -34,8 +34,8 @@ body.sikshya-setup-wizard-body #wpbody-content {
   --text-2: rgb(30 41 59);         /* slate-800 */
   --muted: rgb(100 116 139);       /* slate-500 */
   --muted-2: rgb(148 163 184);     /* slate-400 */
-  --primary: rgb(37 99 235);       /* blue-600 */
-  --primary-2: rgb(29 78 216);     /* blue-700 */
+  --primary: rgb(44 91 168);       /* blue-600 */
+  --primary-2: rgb(31 69 133);     /* blue-700 */
   --primary-soft: rgb(239 246 255);/* blue-50 */
   --primary-ring: rgba(37, 99, 235, 0.18);
   --success: rgb(22 163 74);       /* green-600 */
@@ -1153,7 +1153,7 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
  * “Finish setup”, but with enough visual weight to read as a CTA. */
 .sikshya-setup__btn--secondary {
   background: #ffffff;
-  color: var(--primary-strong, rgb(29 78 216));
+  color: var(--primary-strong, rgb(31 69 133));
   border: 1px solid rgb(147 197 253); /* blue-300 */
   box-shadow: 0 10px 20px -18px rgba(37, 99, 235, 0.35), 0 1px 0 rgb(15 23 42 / 4%);
 }
@@ -1161,7 +1161,7 @@ a.sikshya-setup__rail-step:hover .sikshya-setup__rail-label {
 .sikshya-setup__btn--secondary:hover {
   background: rgb(239 246 255);
   border-color: var(--primary);
-  color: var(--primary-strong, rgb(29 78 216));
+  color: var(--primary-strong, rgb(31 69 133));
 }
 
 .sikshya-setup__btn--secondary:focus,

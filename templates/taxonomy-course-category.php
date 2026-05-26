@@ -22,61 +22,75 @@ $queried = get_queried_object();
 $category_cover = ($queried instanceof \WP_Term && function_exists('sikshya_course_category_featured_image_url'))
     ? sikshya_course_category_featured_image_url($queried, 'large')
     : '';
+
+$categories_index_label = sprintf(
+    /* translators: %s: plural label (e.g. Courses) */
+    __('%s categories', 'sikshya'),
+    $label_courses
+);
+
+$breadcrumb_items = [
+    [
+        'label' => __('Home', 'sikshya'),
+        'url' => home_url('/'),
+    ],
+    [
+        'label' => $categories_index_label,
+        'url' => PublicPageUrls::courseCategoryIndexUrl(),
+    ],
+    [
+        'label' => (string) single_term_title('', false),
+    ],
+];
 ?>
 
-<div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--category">
-    <div class="sikshya-container">
-        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <header class="sikshya-taxonomy-courses__header">
-            <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
-                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(PublicPageUrls::courseCategoryIndexUrl()); ?>">
+<div class="sikshya-public sikshya-archive-courses sikshya-taxonomy-courses sikshya-taxonomy-courses--category sik-f-scope">
+    <header class="sikshya-course-lp__masthead">
+        <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
+            <div class="sikshya-taxonomy-courses__header sikshya-archive-courses__header">
+                <?php
+                $items = $breadcrumb_items;
+                require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+                ?>
+
+                <?php if ($category_cover !== '') : ?>
+                    <div class="sikshya-taxonomy-courses__cover">
+                        <img
+                            src="<?php echo esc_url($category_cover); ?>"
+                            alt=""
+                            class="sikshya-taxonomy-courses__cover-img"
+                            loading="lazy"
+                            decoding="async"
+                            width="1200"
+                            height="480"
+                        />
+                    </div>
+                <?php endif; ?>
+
+                <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
+
+                <?php if (term_description()) : ?>
+                    <div class="sikshya-archive-courses__desc sikshya-taxonomy-courses__description">
+                        <?php echo term_description(); ?>
+                    </div>
+                <?php endif; ?>
+
+                <p class="sikshya-archive-courses__results" role="status">
                     <?php
                     echo esc_html(sprintf(
-                        /* translators: %s: plural label (e.g. Courses) */
-                        __('%s categories', 'sikshya'),
-                        $label_courses
+                        _n('%1$d %2$s found', '%1$d %3$s found', $found, 'sikshya'),
+                        (int) $found,
+                        strtolower($label_course),
+                        strtolower($label_courses)
                     ));
                     ?>
-                </a>
-                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <span class="sikshya-taxonomy-courses__crumb sikshya-taxonomy-courses__crumb--current"><?php single_term_title(); ?></span>
-            </nav>
+                </p>
+            </div>
+        </div>
+    </header>
 
-            <?php if ($category_cover !== '') : ?>
-                <div class="sikshya-taxonomy-courses__cover">
-                    <img
-                        src="<?php echo esc_url($category_cover); ?>"
-                        alt=""
-                        class="sikshya-taxonomy-courses__cover-img"
-                        loading="lazy"
-                        decoding="async"
-                        width="1200"
-                        height="480"
-                    />
-                </div>
-            <?php endif; ?>
-
-            <h1 class="sikshya-archive-courses__title"><?php single_term_title(); ?></h1>
-
-            <?php if (term_description()) : ?>
-                <div class="sikshya-archive-courses__desc sikshya-taxonomy-courses__description">
-                    <?php echo term_description(); ?>
-                </div>
-            <?php endif; ?>
-
-            <p class="sikshya-archive-courses__results" role="status">
-                <?php
-                echo esc_html(sprintf(
-                    _n('%1$d %2$s found', '%1$d %3$s found', $found, 'sikshya'),
-                    (int) $found,
-                    strtolower($label_course),
-                    strtolower($label_courses)
-                ));
-                ?>
-            </p>
-        </header>
+    <div class="sikshya-container">
+        <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
 
         <?php if (have_posts()) : ?>
             <div class="sikshya-course-grid sikshya-course-grid--cols-3">

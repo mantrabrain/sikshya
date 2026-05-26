@@ -5,6 +5,7 @@ namespace Sikshya\Services;
 use Sikshya\Database\Repositories\CourseRepository;
 use Sikshya\Database\Repositories\EnrollmentRepository;
 use Sikshya\Database\Repositories\ProgressRepository;
+use Sikshya\Services\Enrollment\EnrollmentValidator;
 use WP_Query;
 
 class CourseService
@@ -12,6 +13,7 @@ class CourseService
     private CourseRepository $courseRepository;
     private EnrollmentRepository $enrollmentRepository;
     private ProgressRepository $progressRepository;
+    private EnrollmentValidator $enrollmentValidator;
 
     /**
      * @param CourseRepository|null $courseRepository Shared instance from the plugin container when available.
@@ -21,6 +23,7 @@ class CourseService
         $this->courseRepository = $courseRepository ?? new CourseRepository();
         $this->enrollmentRepository = new EnrollmentRepository();
         $this->progressRepository = new ProgressRepository();
+        $this->enrollmentValidator = new EnrollmentValidator($this->courseRepository, $this->enrollmentRepository);
     }
 
     public function getAllCourses(array $args = []): array
@@ -122,62 +125,9 @@ class CourseService
 
     public function enrollUser(int $user_id, int $course_id, array $enrollment_data = []): int
     {
-        // Check if course exists
-        $course = $this->courseRepository->findById($course_id);
-        if (!$course) {
-            throw new \InvalidArgumentException('Course not found');
-        }
+        $this->enrollmentValidator->assertCanEnroll($user_id, $course_id, $enrollment_data);
 
-        /**
-         * Allow add-ons to prevent enrollment (e.g. subscription-only access).
-         *
-         * Return true to allow, false to block, or WP_Error for a message.
-         */
-        $allowed = apply_filters('sikshya_can_enroll_user_in_course', true, $user_id, $course_id, $enrollment_data);
-        if ($allowed instanceof \WP_Error) {
-            throw new \InvalidArgumentException($allowed->get_error_message());
-        }
-        if ($allowed === false) {
-            throw new \InvalidArgumentException('Enrollment is not allowed for this course');
-        }
-
-        $this->assertEnrollmentScheduleAllowsSignup($course_id);
-
-        // Check if user is already enrolled
-        $existing_enrollment = $this->enrollmentRepository->findByUserAndCourse($user_id, $course_id);
-        if ($existing_enrollment) {
-            throw new \InvalidArgumentException('User is already enrolled in this course');
-        }
-
-        $max_courses = (int) Settings::get('max_courses_per_student', 0);
-        if ($max_courses > 0) {
-            $active = $this->enrollmentRepository->countActiveEnrollmentsForUser($user_id);
-            if ($active >= $max_courses) {
-                throw new \InvalidArgumentException(
-                    __('You are enrolled in the maximum number of courses allowed on this site.', 'sikshya')
-                );
-            }
-        }
-
-        // Check course capacity
-        $course_cap = (int) $this->courseRepository->getMeta($course_id, '_sikshya_max_students', true);
-        $global_cap = (int) Settings::get('max_students_per_course', 0);
-        $max_students = 0;
-        if ($global_cap > 0 && $course_cap > 0) {
-            $max_students = min($global_cap, $course_cap);
-        } elseif ($global_cap > 0) {
-            $max_students = $global_cap;
-        } else {
-            $max_students = $course_cap;
-        }
-        if ($max_students > 0) {
-            $current_enrollments = $this->enrollmentRepository->countByCourse($course_id);
-            if ($current_enrollments >= $max_students) {
-                throw new \InvalidArgumentException('Course is at maximum capacity');
-            }
-        }
-
-        // Create enrollment
+        // Create enrollment.
         $enrollment_data['user_id'] = $user_id;
         $enrollment_data['course_id'] = $course_id;
         $enrollment_data['status'] = $enrollment_data['status'] ?? 'enrolled';
@@ -185,13 +135,9 @@ class CourseService
         $enrollment_id = $this->enrollmentRepository->create($enrollment_data);
 
         if ($enrollment_id) {
-            // Initialize progress tracking
             $this->progressRepository->initializeProgress($user_id, $course_id);
-
-            // Update enrollment count
             $this->updateEnrollmentCount($course_id);
 
-            // Trigger enrollment event
             do_action('sikshya_user_enrolled', $user_id, $course_id, $enrollment_id);
         }
 
@@ -355,58 +301,4 @@ class CourseService
         return $this->courseRepository->setMeta($course_id, '_sikshya_featured', $featured ? '1' : '0');
     }
 
-    /**
-     * Block new enrollments outside the course schedule and (when enabled) site default enrollment window.
-     */
-    private function assertEnrollmentScheduleAllowsSignup(int $course_id): void
-    {
-        $start_raw = $this->courseRepository->getMeta($course_id, '_sikshya_enrollment_start_date', true);
-        $end_raw = $this->courseRepository->getMeta($course_id, '_sikshya_enrollment_end_date', true);
-        $start_ts = $this->parseEnrollmentBoundaryToTimestamp($start_raw, false);
-        $end_ts = $this->parseEnrollmentBoundaryToTimestamp($end_raw, true);
-
-        $periods_on = Settings::isTruthy(Settings::get('enable_enrollment_periods', '0'));
-        if ($periods_on && $start_ts === 0 && $end_ts === 0) {
-            $gs = (string) Settings::get('default_enrollment_start', '');
-            $ge = (string) Settings::get('default_enrollment_end', '');
-            $start_ts = $gs !== '' ? strtotime($gs) : 0;
-            $end_ts = $ge !== '' ? strtotime($ge) : 0;
-        }
-
-        if ($start_ts === 0 && $end_ts === 0) {
-            return;
-        }
-
-        $now = (int) current_time('timestamp');
-        if ($start_ts > 0 && $now < $start_ts) {
-            throw new \InvalidArgumentException(
-                __('Enrollment has not opened yet for this course.', 'sikshya')
-            );
-        }
-        if ($end_ts > 0 && $now > $end_ts) {
-            throw new \InvalidArgumentException(
-                __('Enrollment is closed for this course.', 'sikshya')
-            );
-        }
-    }
-
-    /**
-     * @param mixed $value Stored date (Y-m-d) or datetime string.
-     */
-    private function parseEnrollmentBoundaryToTimestamp($value, bool $end_of_day): int
-    {
-        if ($value === '' || $value === null) {
-            return 0;
-        }
-        $s = trim((string) $value);
-        if ($s === '') {
-            return 0;
-        }
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $s)) {
-            $s .= $end_of_day ? ' 23:59:59' : ' 00:00:00';
-        }
-        $t = strtotime($s);
-
-        return $t ? (int) $t : 0;
-    }
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sikshya/login",
+  "version": "1.0.0",
+  "title": "Sikshya Login",
+  "category": "sikshya",
+  "description": "Sign-in form (Sikshya auth handler; errors stay on the same page).",
+  "keywords": ["sikshya", "login", "sign in", "auth"],
+  "textdomain": "sikshya",
+  "attributes": {
+    "redirect_to": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "multiple": false
+  }
+}

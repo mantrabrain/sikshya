@@ -41,7 +41,7 @@ $pdf_mode = isset($_GET['pdf']) && (string) $_GET['pdf'] === '1';
         @page{size:A4;margin:12mm}
         :root{
             --ink:#0f172a;--muted:#475569;--subtle:#64748b;--line:#e2e8f0;--line2:#f1f5f9;
-            --card:#ffffff;--bg:#ffffff;--accent:#2563eb;
+            --card:#ffffff;--bg:#ffffff;--accent:#2c5ba8;
         }
         *{box-sizing:border-box}
         body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:20px;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}

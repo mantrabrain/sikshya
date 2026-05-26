@@ -45,15 +45,24 @@ final class CoursesShortcode
     }
 
     /**
-     * @param array<string, mixed> $atts
+     * Normalize shortcode/block attributes to the internal shape used by {@see render()}.
+     *
+     * @param array<string, mixed> $atts Raw attributes (shortcode or block).
+     * @return array<string, mixed>
      */
-    public static function render($atts = []): string
+    public static function normalizeAtts(array $atts): array
     {
-        if (!function_exists('sikshya_render_course_card')) {
-            return '';
+        if (isset($atts['pagination'])) {
+            if (is_bool($atts['pagination'])) {
+                $atts['pagination'] = $atts['pagination'] ? '1' : '0';
+            } elseif ($atts['pagination'] === 0 || $atts['pagination'] === '0' || $atts['pagination'] === false) {
+                $atts['pagination'] = '0';
+            } elseif ($atts['pagination'] === 1 || $atts['pagination'] === '1' || $atts['pagination'] === true) {
+                $atts['pagination'] = '1';
+            }
         }
 
-        $a = shortcode_atts(
+        return shortcode_atts(
             [
                 'per_page' => 9,
                 'columns' => 0,
@@ -65,9 +74,21 @@ final class CoursesShortcode
                 'order' => 'desc',
                 'pagination' => 1,
             ],
-            is_array($atts) ? $atts : [],
+            $atts,
             'sikshya_courses'
         );
+    }
+
+    /**
+     * @param array<string, mixed> $atts
+     */
+    public static function render($atts = []): string
+    {
+        if (!function_exists('sikshya_render_course_card')) {
+            return '';
+        }
+
+        $a = self::normalizeAtts(is_array($atts) ? $atts : []);
 
         $per_page = (int) $a['per_page'];
         if ($per_page < 1) {
@@ -159,7 +180,7 @@ final class CoursesShortcode
 
         ob_start();
 
-        echo '<div class="sikshya-public sikshya-shortcode-courses">';
+        echo '<div class="sikshya-public sikshya-shortcode-courses sik-f-scope">';
 
         if ($q->have_posts()) {
             echo '<div class="' . esc_attr($grid_classes) . '">';

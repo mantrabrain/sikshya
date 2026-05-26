@@ -282,7 +282,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
   const upgradeUrl =
     data?.licensing?.upgradeUrl ||
     config.licensing?.upgradeUrl ||
-    'https://mantrabrain.com/plugins/sikshya/#pricing';
+    'https://mantrabrain.com/plugins/sikshya-lms/pricing/';
 
   const licensing = data?.licensing;
   const isProActive = licensing?.isProActive === true;

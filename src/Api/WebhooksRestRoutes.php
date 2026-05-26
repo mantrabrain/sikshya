@@ -40,7 +40,7 @@ class WebhooksRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'stripe'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [self::class, 'hasStripeSignature'],
             ],
         ]);
 
@@ -48,7 +48,7 @@ class WebhooksRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'paypal'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [self::class, 'hasPaypalSignature'],
             ],
         ]);
 
@@ -57,9 +57,50 @@ class WebhooksRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'paypalIpn'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [self::class, 'hasIpnPayload'],
             ],
         ]);
+    }
+
+    /**
+     * Permission precheck for the Stripe webhook route.
+     *
+     * Stripe always sends `Stripe-Signature`. A request without it is either misconfigured
+     * or a probe; turn it away at the routing layer so the route callback doesn't even run.
+     * Full HMAC verification (constant-time, with timestamp tolerance) still happens in
+     * {@see self::verifyStripeSignature()} inside the callback.
+     */
+    public static function hasStripeSignature(): bool
+    {
+        return isset($_SERVER['HTTP_STRIPE_SIGNATURE']) && (string) $_SERVER['HTTP_STRIPE_SIGNATURE'] !== '';
+    }
+
+    /**
+     * Permission precheck for the PayPal webhook route — requires the full set of PayPal
+     * signature headers. Full cryptographic verify still runs in
+     * {@see self::verifyPayPalSignature()} inside the callback.
+     */
+    public static function hasPaypalSignature(): bool
+    {
+        foreach (['HTTP_PAYPAL_TRANSMISSION_ID', 'HTTP_PAYPAL_TRANSMISSION_TIME', 'HTTP_PAYPAL_TRANSMISSION_SIG', 'HTTP_PAYPAL_CERT_URL', 'HTTP_PAYPAL_AUTH_ALGO'] as $header) {
+            if (!isset($_SERVER[$header]) || (string) $_SERVER[$header] === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Permission precheck for the PayPal IPN route — IPN posts form-encoded params with no
+     * signature header, so we just require POST body. The cmd=_notify-validate round-trip
+     * to PayPal (already fail-closed) does the real verification.
+     */
+    public static function hasIpnPayload(WP_REST_Request $request): bool
+    {
+        $params = $request->get_body_params();
+
+        return is_array($params) && $params !== [];
     }
 
     public function stripe(WP_REST_Request $request): WP_REST_Response

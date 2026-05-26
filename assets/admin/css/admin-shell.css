@@ -30,7 +30,7 @@ body.sikshya-lms-admin .sikshya-header h1 .sikshya-header-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--sikshya-primary, #2563eb);
+  color: var(--sikshya-primary, #2c5ba8);
 }
 
 body.sikshya-lms-admin .sikshya-header h1 .sikshya-header-icon svg {
@@ -44,7 +44,7 @@ body.sikshya-lms-admin .sikshya-settings-tab .dashicons {
   font-size: 1.25em;
   line-height: 1;
   vertical-align: middle;
-  color: var(--sikshya-primary, #2563eb);
+  color: var(--sikshya-primary, #2c5ba8);
 }
 
 body.sikshya-lms-admin .sikshya-btn .dashicons {
@@ -65,7 +65,7 @@ body.sikshya-lms-admin .sikshya-settings-tab .dashicons {
 body.sikshya-lms-admin .sikshya-btn:focus-visible,
 body.sikshya-lms-admin .sikshya-settings-tab:focus-visible,
 body.sikshya-lms-admin .sikshya-quick-action:focus-visible {
-  outline: 2px solid var(--sikshya-primary, #2563eb);
+  outline: 2px solid var(--sikshya-primary, #2c5ba8);
   outline-offset: 2px;
 }
 
@@ -79,7 +79,7 @@ body.sikshya-lms-admin .sikshya-admin-footer {
 }
 
 body.sikshya-lms-admin .sikshya-admin-footer a {
-  color: var(--sikshya-primary, #2563eb);
+  color: var(--sikshya-primary, #2c5ba8);
 }
 
 @keyframes sikshya-dashicon-spin {
@@ -120,4 +120,10 @@ body.sikshya-lms-admin .sikshya-progress-hint {
   font-size: 13px;
   line-height: 1.5;
   color: var(--sikshya-gray-600, #4b5563);
+}
+
+/* Brand-tinted checkbox + radio accent (matches logo primary navy). */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #2c5ba8;
 }

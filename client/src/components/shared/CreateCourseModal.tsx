@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { getErrorSummary } from '../../api/errors';
 import { appViewHref } from '../../lib/appUrl';
 import { useAdminRouting } from '../../lib/adminRouting';
 import { createDraftCourse } from '../../lib/createCourse';
 import { slugFromTitle } from '../../lib/slugFromTitle';
+import { sikshyaPricingUrl } from '../../lib/upgradeUrl';
 import type { SikshyaReactConfig } from '../../types';
 import { isFeatureEnabled } from '../../lib/licensing';
 import { useAddonEnabled } from '../../hooks/useAddons';
@@ -19,23 +20,27 @@ type Props = {
 
 type CourseKind = 'regular' | 'bundle';
 
-/**
- * Shared “new course” flow: title → draft post via REST → redirect to course builder (edit mode).
- */
+const FIELD_LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
+const FIELD_HINT = 'mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400';
+const FIELD_INPUT =
+  'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
+
 export function CreateCourseModal({ config, open, onClose }: Props) {
   const { navigateHref } = useAdminRouting();
   const [kind, setKind] = useState<CourseKind>('regular');
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [slugManual, setSlugManual] = useState(false);
+  const [slugEditing, setSlugEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const slugInputRef = useRef<HTMLInputElement>(null);
   const bundlesFeatureOk = isFeatureEnabled(config, 'course_bundles');
   const bundlesAddon = useAddonEnabled('course_bundles');
   const courseLower = termLower(config, 'course');
+  const courseTitle = term(config, 'course');
   const coursesLower = termLower(config, 'courses');
-  const lessonsLower = termLower(config, 'lessons');
-  const quizzesLower = termLower(config, 'quizzes');
+  const brandName = config.branding?.pluginName?.trim() || 'Sikshya';
 
   const canUseBundles = useMemo(() => {
     if (!bundlesFeatureOk) return false;
@@ -46,12 +51,12 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
   const siteRoot = config.siteUrl.replace(/\/$/, '');
   const courseBase = (config.permalinks && config.permalinks.rewrite_base_course) || 'courses';
   const coursePostType = (config.postTypes && config.postTypes.course) || 'sik_course';
+  const effectiveSlug = slug.trim() || 'your-course';
   const permalinkPreview = (() => {
-    const s = slug.trim() || '…';
     if (config.plainPermalinks) {
-      return `${siteRoot}/?post_type=${encodeURIComponent(coursePostType)}&name=${encodeURIComponent(s)}`;
+      return `${siteRoot}/?post_type=${coursePostType}&name=${effectiveSlug}`;
     }
-    return `${siteRoot}/${encodeURIComponent(courseBase)}/${encodeURIComponent(s)}/`;
+    return `${siteRoot}/${courseBase}/${effectiveSlug}/`;
   })();
 
   useEffect(() => {
@@ -60,23 +65,29 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
       setTitle('');
       setSlug('');
       setSlugManual(false);
+      setSlugEditing(false);
       setError(null);
       setSubmitting(false);
     }
   }, [open]);
 
-  // If bundle selection becomes unavailable (addon disabled), fall back safely.
   useEffect(() => {
-    if (kind === 'bundle' && !canUseBundles) {
-      setKind('regular');
+    if (!slugEditing) {
+      return;
     }
-  }, [canUseBundles, kind]);
+    const t = window.setTimeout(() => {
+      slugInputRef.current?.focus();
+      slugInputRef.current?.select();
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [slugEditing]);
 
   const reset = () => {
     setKind('regular');
     setTitle('');
     setSlug('');
     setSlugManual(false);
+    setSlugEditing(false);
     setError(null);
     setSubmitting(false);
   };
@@ -97,7 +108,6 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
       const id = await createDraftCourse(title, { slug: slug.trim() || undefined, kind: safeKind });
       const extra: Record<string, string> = { course_id: String(id) };
       if (safeKind === 'bundle') {
-        // Show bundle UI immediately even if meta propagation is delayed.
         extra.force_bundle_ui = '1';
       }
       const url = appViewHref(config, 'add-course', extra);
@@ -108,179 +118,407 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     }
   };
 
+  const upgradeHref = sikshyaPricingUrl('addon-enable-upgrade', 'course_bundles');
+
+  const finishSlugEdit = () => {
+    setSlugEditing(false);
+    if (!slug.trim() && title.trim()) {
+      setSlug(slugFromTitle(title));
+      setSlugManual(false);
+    }
+  };
+
+  const regularCourseLabel = `Regular ${courseTitle}`;
+  const courseBundleLabel = `${courseTitle} bundle`;
+  const titlePlaceholder =
+    kind === 'bundle' && canUseBundles ? 'e.g. Full Stack Bootcamp' : 'e.g. WordPress for Beginners';
+  const nameFieldLabel =
+    kind === 'bundle' && canUseBundles ? `${courseBundleLabel} name` : `${courseTitle} name`;
+
   return (
     <Modal
       open={open}
       onClose={handleClose}
-      title={`Create a new ${courseLower}`}
-      description={
-        kind === 'bundle'
-          ? `Bundles sell several ${coursesLower} for one price. You will set price, included ${coursesLower}, and catalog visibility next.`
-          : `Start with a name and web address. You will add ${lessonsLower}, price, and media in the ${courseLower} builder next.`
-      }
-      size="md"
+      title={`Create your ${courseLower}`}
+      description="Pick a format, add a name, and you're ready to build content."
+      size="comfortable"
       footer={
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={submitting}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            Cancel
-          </button>
-          <ButtonPrimary type="submit" form="sikshya-create-course-form" disabled={submitting}>
-            {submitting ? 'Creating…' : kind === 'bundle' ? 'Create bundle & open builder' : 'Create & open builder'}
-          </ButtonPrimary>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <DraftIcon />
+            Starts as a draft — nothing is public until you publish.
+          </p>
+          <div className="flex shrink-0 items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={submitting}
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              Cancel
+            </button>
+            <ButtonPrimary
+              type="submit"
+              form="sikshya-create-course-form"
+              disabled={submitting || !title.trim()}
+              className="px-5 py-2.5"
+            >
+              {submitting ? 'Creating…' : 'Create & continue'}
+            </ButtonPrimary>
+          </div>
         </div>
       }
     >
-      <form id="sikshya-create-course-form" onSubmit={onSubmit} className="space-y-4">
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">What are you creating?</legend>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Choose now — the builder opens with the right layout (full {courseLower} vs streamlined bundle).
+      <form id="sikshya-create-course-form" onSubmit={onSubmit} className="space-y-5">
+        <section>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Choose a format</h3>
+          <p className={`${FIELD_HINT} mt-0.5`}>
+            {canUseBundles
+              ? `Click a card to select — ${regularCourseLabel} or ${courseBundleLabel}.`
+              : `Click a card to select. With ${brandName} Pro, you can choose ${courseBundleLabel} too.`}
           </p>
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <label
-              className={`flex cursor-pointer flex-col rounded-xl border p-3 text-left transition ${
-                kind === 'regular'
-                  ? 'border-brand-500 bg-brand-50/80 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/30'
-                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <input type="radio" name="sik-course-kind" checked={kind === 'regular'} onChange={() => setKind('regular')} disabled={submitting} className="h-4 w-4" />
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">Regular {courseLower}</span>
-              </span>
-              <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
-                {term(config, 'lessons')}, {quizzesLower}, curriculum, drip, and all {courseLower} options.
-              </span>
-            </label>
-            <label
-              className={`flex flex-col rounded-xl border p-3 text-left transition ${
-                kind === 'bundle'
-                  ? 'border-brand-500 bg-brand-50/80 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/30'
-                  : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'
-              } ${canUseBundles && !submitting ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-600' : 'cursor-not-allowed opacity-75'}`}
-              title={
-                canUseBundles
-                  ? undefined
-                  : bundlesAddon.loading
-                    ? 'Checking add-on status…'
-                    : `Enable the Course Bundles add-on to create ${coursesLower} bundles.`
-              }
-            >
-              <span className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="sik-course-kind"
-                  checked={kind === 'bundle'}
-                  onChange={() => setKind('bundle')}
-                  disabled={submitting || !canUseBundles}
-                  className="h-4 w-4"
-                />
-                <span className="text-sm font-semibold text-slate-900 dark:text-white">{term(config, 'course')} bundle</span>
-                {!canUseBundles ? (
-                  <span className="ml-1 inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
-                    Pro
-                  </span>
-                ) : null}
-              </span>
-              <span className="mt-1 pl-6 text-xs text-slate-600 dark:text-slate-400">
-                Package existing {coursesLower}. Builder shows only bundle page + pricing (no curriculum tab).
-              </span>
-              {!canUseBundles ? (
-                <span className="mt-2 pl-6 text-xs text-slate-500 dark:text-slate-400">
-                  {bundlesAddon.loading
-                    ? 'Checking add-on status…'
-                    : (
-                        <>
-                          Enable it in{' '}
-                          <a
-                            href={appViewHref(config, 'addons')}
-                            className="font-semibold text-brand-700 underline underline-offset-2 hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200"
-                          >
-                            Addons
-                          </a>
-                          .
-                        </>
-                      )}
-                </span>
-              ) : null}
-            </label>
+          <div className="mt-2.5 grid grid-cols-2 gap-2.5" role="radiogroup" aria-label={`${courseTitle} format`}>
+            <FormatChoiceCard
+              selected={kind === 'regular'}
+              onSelect={() => setKind('regular')}
+              disabled={submitting}
+              icon={<RegularIcon />}
+              title={regularCourseLabel}
+              description={`One ${courseLower} with lessons, videos, and quizzes.`}
+            />
+            {canUseBundles ? (
+              <FormatChoiceCard
+                selected={kind === 'bundle'}
+                onSelect={() => setKind('bundle')}
+                disabled={submitting}
+                icon={<BundleIcon />}
+                title={courseBundleLabel}
+                description={`Package existing ${coursesLower} and sell them with one checkout.`}
+              />
+            ) : (
+              <BundleFormatCardLocked
+                bundleLabel={courseBundleLabel}
+                brandName={brandName}
+                coursesLower={coursesLower}
+                upgradeHref={upgradeHref}
+                loading={bundlesAddon.loading}
+              />
+            )}
           </div>
-        </fieldset>
+        </section>
 
-        <div>
-          <label htmlFor="sikshya-new-course-title" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            {kind === 'bundle' ? 'Bundle name' : 'Working title'}
-          </label>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            You can rename anytime. This becomes the public page title.
-          </p>
+        <section className="border-t border-slate-100 pt-5 dark:border-slate-800">
+          <div>
+            <label htmlFor="sikshya-new-course-title" className={FIELD_LABEL}>
+              {nameFieldLabel}
+            </label>
+            <input
+              id="sikshya-new-course-title"
+              type="text"
+              name="title"
+              required
+              autoComplete="off"
+              maxLength={200}
+              value={title}
+              onChange={(e) => {
+                const v = e.target.value;
+                setTitle(v);
+                if (!slugManual) {
+                  setSlug(v.trim() ? slugFromTitle(v) : '');
+                }
+              }}
+              placeholder={titlePlaceholder}
+              disabled={submitting}
+              autoFocus
+              className={`${FIELD_INPUT} mt-1.5`}
+            />
+          </div>
+
+          <div className="mt-4">
+            <span className={FIELD_LABEL}>Permalink</span>
+            <p className={`${FIELD_HINT} mt-0.5`}>The web address where learners open this {courseLower}.</p>
+            <PermalinkField
+              editing={slugEditing}
+              url={permalinkPreview}
+              slug={slug}
+              disabled={submitting}
+              inputRef={slugInputRef}
+              onStartEdit={() => setSlugEditing(true)}
+              onFinishEdit={finishSlugEdit}
+              onSlugChange={(v) => {
+                setSlugManual(true);
+                setSlug(v);
+              }}
+            />
+          </div>
+        </section>
+
+        {error ? (
+          <div
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+            role="alert"
+          >
+            {error}
+          </div>
+        ) : null}
+      </form>
+    </Modal>
+  );
+}
+
+function PermalinkField({
+  editing,
+  url,
+  slug,
+  disabled,
+  inputRef,
+  onStartEdit,
+  onFinishEdit,
+  onSlugChange,
+}: {
+  editing: boolean;
+  url: string;
+  slug: string;
+  disabled?: boolean;
+  inputRef: RefObject<HTMLInputElement | null>;
+  onStartEdit: () => void;
+  onFinishEdit: () => void;
+  onSlugChange: (slug: string) => void;
+}) {
+  if (editing) {
+    return (
+      <div className="mt-2">
+        <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:focus-within:border-brand-500">
           <input
-            id="sikshya-new-course-title"
-            type="text"
-            name="title"
-            required
-            autoComplete="off"
-            maxLength={200}
-            value={title}
-            onChange={(e) => {
-              const v = e.target.value;
-              setTitle(v);
-              if (!slugManual) {
-                setSlug(v.trim() ? slugFromTitle(v) : '');
-              }
-            }}
-            placeholder={kind === 'bundle' ? 'e.g. Full Stack Web Dev Bundle' : 'e.g. WordPress for Beginners'}
-            disabled={submitting}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
-          />
-        </div>
-        <div>
-          <label htmlFor="sikshya-new-course-slug" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            URL slug
-          </label>
-          <p className="mt-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
-            {permalinkPreview}
-          </p>
-          <input
+            ref={inputRef}
             id="sikshya-new-course-slug"
             type="text"
             name="slug"
             autoComplete="off"
             maxLength={180}
             value={slug}
+            disabled={disabled}
+            aria-label="Customize permalink"
             onChange={(e) => {
-              setSlugManual(true);
               const v = e.target.value
                 .toLowerCase()
                 .replace(/\s+/g, '-')
                 .replace(/[^a-z0-9-]/g, '');
-              setSlug(v);
+              onSlugChange(v);
             }}
-            placeholder="url-slug"
-            disabled={submitting}
-            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                onFinishEdit();
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                onFinishEdit();
+              }
+            }}
+            className="min-w-0 flex-1 border-0 bg-transparent px-3 py-2.5 font-mono text-xs text-slate-900 outline-none focus:ring-0 dark:text-white"
           />
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Fills in from the title automatically — change it if you want a shorter link. If that address is taken, WordPress may add
-            -2, -3, etc.
-          </p>
+          <button
+            type="button"
+            onClick={onFinishEdit}
+            disabled={disabled}
+            className="flex shrink-0 items-center self-stretch border-l border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-brand-700 transition hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800/80 dark:text-brand-300 dark:hover:bg-brand-950/40"
+          >
+            Done
+          </button>
         </div>
-        {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200" role="alert">
-            {error}
-          </div>
-        ) : null}
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Your {kind === 'bundle' ? 'bundle' : courseLower} is saved as a{' '}
-          <strong className="font-medium text-slate-700 dark:text-slate-300">draft</strong> until you publish
-          from the builder.
+        <p className="mt-1.5 truncate font-mono text-[11px] text-slate-400 dark:text-slate-500" title={url}>
+          Preview: {url}
         </p>
-      </form>
-    </Modal>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 flex items-center gap-2" title={url}>
+      <GlobeIcon />
+      <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-600 dark:text-slate-400">{url}</span>
+      <button
+        type="button"
+        onClick={onStartEdit}
+        disabled={disabled}
+        className="shrink-0 text-xs font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 disabled:opacity-50 dark:text-brand-300"
+      >
+        Edit link
+      </button>
+    </div>
+  );
+}
+
+function FormatChoiceCard({
+  selected,
+  onSelect,
+  disabled,
+  icon,
+  title,
+  description,
+}: {
+  selected: boolean;
+  onSelect: () => void;
+  disabled?: boolean;
+  icon: ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      aria-pressed={selected}
+      aria-label={`${title}. ${description}${selected ? ' Selected.' : ''}`}
+      className={`relative flex w-full cursor-pointer items-start gap-2.5 rounded-lg border px-2.5 py-2.5 text-left transition disabled:cursor-not-allowed disabled:opacity-60 ${
+        selected
+          ? 'border-brand-500 bg-brand-50/50 ring-2 ring-brand-500/25 dark:border-brand-500 dark:bg-brand-950/25'
+          : 'border-slate-200 bg-white hover:border-brand-300 hover:bg-slate-50/80 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
+      }`}
+    >
+      <SelectionCheck selected={selected} />
+      <span
+        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
+          selected
+            ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300'
+            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+        }`}
+        aria-hidden
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1 pr-5">
+        <span className="block text-[13px] font-semibold leading-tight text-slate-900 dark:text-white">{title}</span>
+        <span className="mt-1 block text-[11px] leading-snug text-slate-500 dark:text-slate-400">{description}</span>
+      </span>
+    </button>
+  );
+}
+
+function BundleFormatCardLocked({
+  bundleLabel,
+  brandName,
+  coursesLower,
+  upgradeHref,
+  loading,
+}: {
+  bundleLabel: string;
+  brandName: string;
+  coursesLower: string;
+  upgradeHref: string;
+  loading: boolean;
+}) {
+  return (
+    <div
+      className="flex w-full items-start gap-2.5 rounded-lg border border-dashed border-slate-200 bg-slate-50/60 px-2.5 py-2.5 dark:border-slate-700 dark:bg-slate-800/25"
+      role="group"
+      aria-label={`${bundleLabel} — ${brandName} Pro`}
+    >
+      <span
+        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-200/70 text-slate-400 dark:bg-slate-700"
+        aria-hidden
+      >
+        <BundleIcon className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-center gap-1">
+          <span className="text-[13px] font-semibold text-slate-600 dark:text-slate-300">{bundleLabel}</span>
+          <span className="rounded bg-accent-100 px-1 py-px text-[9px] font-bold uppercase text-accent-800 dark:bg-accent-950/50 dark:text-accent-300">
+            Pro
+          </span>
+        </span>
+        <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+          Package existing {coursesLower} —{' '}
+          {loading ? (
+            <span>checking plan…</span>
+          ) : (
+            <a
+              href={upgradeHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-accent-700 hover:underline dark:text-accent-300"
+            >
+              Upgrade to Pro to select
+            </a>
+          )}
+        </p>
+      </span>
+    </div>
+  );
+}
+
+function SelectionCheck({ selected }: { selected: boolean }) {
+  return (
+    <span
+      className={`absolute right-2 top-2.5 flex h-4 w-4 items-center justify-center rounded-full border ${
+        selected
+          ? 'border-brand-600 bg-brand-600 text-white'
+          : 'border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-800'
+      }`}
+      aria-hidden
+    >
+      {selected ? (
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-2.5 w-2.5">
+          <path
+            fillRule="evenodd"
+            d="M16.7 5.3a1 1 0 010 1.4l-7.4 7.4a1 1 0 01-1.4 0L3.3 9.5a1 1 0 011.4-1.4L8.6 12l6.7-6.7a1 1 0 011.4 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+      ) : null}
+    </span>
+  );
+}
+
+function RegularIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden>
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 7h7M9 11h5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function BundleIcon({ className = 'h-4 w-4' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className} aria-hidden>
+      <path
+        d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3.27 6.96L12 12.01l8.73-5.05" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 22.08V12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg
+      className="h-4 w-4 shrink-0 text-slate-400"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 21a9 9 0 100-18 9 9 0 000 18zM3.6 9h16.8M3.6 15h16.8M12 3c2.2 2.5 3.4 5.6 3.4 9s-1.2 6.5-3.4 9M12 3c-2.2 2.5-3.4 5.6-3.4 9s1.2 6.5 3.4 9"
+      />
+    </svg>
+  );
+}
+
+function DraftIcon() {
+  return (
+    <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
   );
 }

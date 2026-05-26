@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "sikshya/registration",
+  "version": "1.0.0",
+  "title": "Sikshya Registration",
+  "category": "sikshya",
+  "description": "Create a Sikshya student account; instructor intent submits a pending teaching application.",
+  "keywords": ["sikshya", "register", "sign up", "auth", "instructor"],
+  "textdomain": "sikshya",
+  "attributes": {
+    "type": {
+      "type": "string",
+      "default": "student",
+      "enum": ["student", "instructor"]
+    },
+    "redirect_to": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"],
+    "multiple": false
+  }
+}

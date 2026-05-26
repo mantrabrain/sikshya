@@ -2656,9 +2656,6 @@ export function ChapterEditor(props: ContentEditorProps) {
                 />
               </div>
               <div>
-                <label className={LABEL} htmlFor="sik-ch-body">
-                  Description / intro
-                </label>
                 <QuillField
                   label="Description / intro"
                   value={content}
@@ -3002,7 +2999,7 @@ export function CertificateEditor(props: ContentEditorProps) {
     .title{font-weight:700;font-size:14px;letter-spacing:.02em}
     .sub{margin-top:6px;font-size:12px;color:#64748b;line-height:1.45}
     .bar{margin-top:14px;height:8px;background:#eef2ff;position:relative;overflow:hidden}
-    .bar:before{content:"";position:absolute;left:-40%;top:0;bottom:0;width:40%;background:#6366f1;animation:move 1.1s ease-in-out infinite}
+    .bar:before{content:"";position:absolute;left:-40%;top:0;bottom:0;width:40%;background:#7a2e80;animation:move 1.1s ease-in-out infinite}
     @keyframes move{0%{left:-40%}100%{left:100%}}
   </style>
 </head>

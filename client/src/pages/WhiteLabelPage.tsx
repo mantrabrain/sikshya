@@ -311,7 +311,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   <div className="mt-2 flex items-center gap-3">
                     <input
                       type="color"
-                      value={opts.frontend_accent || '#6366f1'}
+                      value={opts.frontend_accent || '#7a2e80'}
                       onChange={(e) => setOpts((p) => ({ ...p, frontend_accent: e.target.value }))}
                       className="h-10 w-16 cursor-pointer rounded border border-slate-200 dark:border-slate-700"
                     />
@@ -320,7 +320,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       value={opts.frontend_accent || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, frontend_accent: e.target.value }))}
                       className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                      placeholder="#6366f1"
+                      placeholder="#7a2e80"
                     />
                   </div>
                 </label>
@@ -349,7 +349,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                 <div className="mt-2 flex items-center gap-3">
                   <input
                     type="color"
-                    value={opts.login_accent_color || '#2563eb'}
+                    value={opts.login_accent_color || '#2c5ba8'}
                     onChange={(e) => setOpts((p) => ({ ...p, login_accent_color: e.target.value }))}
                     className="h-10 w-16 cursor-pointer rounded border border-slate-200 dark:border-slate-700"
                   />
@@ -358,7 +358,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     value={opts.login_accent_color || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, login_accent_color: e.target.value }))}
                     className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
-                    placeholder="#2563eb"
+                    placeholder="#2c5ba8"
                   />
                 </div>
               </label>
@@ -582,7 +582,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       <div className="mt-2 flex items-center gap-3">
                         <input
                           type="color"
-                          value={(courseOverrides.frontend_accent as string) || '#6366f1'}
+                          value={(courseOverrides.frontend_accent as string) || '#7a2e80'}
                           onChange={(e) => setCourseOverrides((p) => ({ ...p, frontend_accent: e.target.value }))}
                           className="h-10 w-16 cursor-pointer rounded border border-slate-200 dark:border-slate-700"
                         />

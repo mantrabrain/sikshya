@@ -228,9 +228,13 @@ export type WpTerm = {
   taxonomy?: string;
   count?: number;
   description?: string;
+  /** WordPress REST: public term archive URL (`get_term_link`). */
+  link?: string;
   /** Sikshya REST field: course category featured image attachment ID. */
   sikshya_category_image_id?: number;
   /** Sikshya REST field: course category featured image URL (thumbnail). */
   sikshya_category_image_url?: string;
+  /** Sikshya REST field: public category archive URL. */
+  sikshya_category_view_url?: string;
 };
 

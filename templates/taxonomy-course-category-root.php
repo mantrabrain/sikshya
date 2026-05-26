@@ -28,32 +28,46 @@ $page_title = sprintf(
     __('%s categories', 'sikshya'),
     $label_courses
 );
+
+$breadcrumb_items = [
+    [
+        'label' => __('Home', 'sikshya'),
+        'url' => home_url('/'),
+    ],
+    [
+        'label' => $page_title,
+    ],
+];
 ?>
 
-<div class="sikshya-public sikshya-archive-courses sikshya-course-category-index">
+<div class="sikshya-public sikshya-archive-courses sikshya-course-category-index sik-f-scope">
+    <header class="sikshya-course-lp__masthead">
+        <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
+            <div class="sikshya-taxonomy-courses__header sikshya-archive-courses__header">
+                <?php
+                $items = $breadcrumb_items;
+                require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+                ?>
+
+                <h1 class="sikshya-archive-courses__title"><?php echo esc_html($page_title); ?></h1>
+
+                <p class="sikshya-archive-courses__tip">
+                    <?php
+                    echo esc_html(
+                        sprintf(
+                            /* translators: %s: plural label for courses (lowercase) */
+                            __('Browse by topic, then open a category to see %s.', 'sikshya'),
+                            strtolower($label_courses)
+                        )
+                    );
+                    ?>
+                </p>
+            </div>
+        </div>
+    </header>
+
     <div class="sikshya-container">
         <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <header class="sikshya-taxonomy-courses__header">
-            <nav class="sikshya-taxonomy-courses__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a class="sikshya-taxonomy-courses__crumb" href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
-                <span class="sikshya-taxonomy-courses__crumb-sep" aria-hidden="true">/</span>
-                <span class="sikshya-taxonomy-courses__crumb sikshya-taxonomy-courses__crumb--current"><?php echo esc_html($page_title); ?></span>
-            </nav>
-
-            <h1 class="sikshya-archive-courses__title"><?php echo esc_html($page_title); ?></h1>
-
-            <p class="sikshya-archive-courses__tip">
-                <?php
-                echo esc_html(
-                    sprintf(
-                        /* translators: %s: plural label for courses (lowercase) */
-                        __('Browse by topic, then open a category to see %s.', 'sikshya'),
-                        strtolower($label_courses)
-                    )
-                );
-                ?>
-            </p>
-        </header>
 
         <?php if (is_wp_error($terms) || empty($terms)) : ?>
             <div class="sikshya-archive-courses__empty">

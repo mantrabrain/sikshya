@@ -183,6 +183,32 @@ class Api
                 ],
             ]
         );
+        register_rest_field(
+            \Sikshya\Constants\Taxonomies::COURSE_CATEGORY,
+            'sikshya_category_view_url',
+            [
+                'get_callback' => static function ($term): string {
+                    $tid = 0;
+                    if (is_array($term)) {
+                        $tid = isset($term['id']) ? (int) $term['id'] : 0;
+                    } elseif (is_object($term) && isset($term->term_id)) {
+                        $tid = (int) $term->term_id;
+                    }
+                    if ($tid <= 0) {
+                        return '';
+                    }
+                    $link = get_term_link($tid, \Sikshya\Constants\Taxonomies::COURSE_CATEGORY);
+
+                    return is_wp_error($link) ? '' : (string) $link;
+                },
+                'schema' => [
+                    'description' => 'Public course category archive URL.',
+                    'type' => 'string',
+                    'format' => 'uri',
+                    'context' => ['view', 'edit'],
+                ],
+            ]
+        );
 
         // Preview URL for unpublished course/lesson/quiz/assignment posts.
         // WP Core's REST exposes `link` (the public permalink) but never a

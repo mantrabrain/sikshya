@@ -20,26 +20,45 @@ $paged = (int) $ctx['paged'];
 
 $label_course = function_exists('sikshya_label') ? sikshya_label('course', __('Course', 'sikshya'), 'frontend') : __('Course', 'sikshya');
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+
+$breadcrumb_items = [
+    [
+        'label' => __('Home', 'sikshya'),
+        'url' => home_url('/'),
+    ],
+    [
+        'label' => $label_courses,
+    ],
+];
 ?>
 
 <div
-    class="sikshya-public sikshya-archive-courses"
+    class="sikshya-public sikshya-archive-courses sik-f-scope"
     data-sikshya-archive-layout="<?php echo esc_attr($archive_layout); ?>"
 >
+    <header class="sikshya-course-lp__masthead">
+        <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
+            <div class="sikshya-archive-courses__header">
+                <?php
+                $items = $breadcrumb_items;
+                require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+                ?>
+                <h1 class="sikshya-archive-courses__title"><?php post_type_archive_title(); ?></h1>
+                <?php the_archive_description('<div class="sikshya-archive-courses__desc">', '</div>'); ?>
+                <p class="sikshya-archive-courses__tip">
+                    <?php
+                    esc_html_e(
+                        'Open a course to see the full outline. Paid courses: add to cart, then checkout while signed in. Free courses usually enroll in one click after you log in.',
+                        'sikshya'
+                    );
+                    ?>
+                </p>
+            </div>
+        </div>
+    </header>
+
     <div class="sikshya-container">
         <?php require __DIR__ . '/partials/course-cart-flash.php'; ?>
-        <header class="sikshya-archive-courses__header">
-            <h1 class="sikshya-archive-courses__title"><?php post_type_archive_title(); ?></h1>
-            <?php the_archive_description('<div class="sikshya-archive-courses__desc">', '</div>'); ?>
-            <p class="sikshya-archive-courses__tip">
-                <?php
-                esc_html_e(
-                    'Open a course to see the full outline. Paid courses: add to cart, then checkout while signed in. Free courses usually enroll in one click after you log in.',
-                    'sikshya'
-                );
-                ?>
-            </p>
-        </header>
 
         <div class="sikshya-archive-courses__layout<?php echo $show_sidebar ? '' : ' sikshya-archive-courses__layout--no-sidebar'; ?>">
             <?php if ($show_sidebar) : ?>

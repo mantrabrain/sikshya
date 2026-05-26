@@ -13,6 +13,11 @@ use Sikshya\Admin\CourseBuilder\BundleBuilderFieldFilter;
 use Sikshya\Admin\CourseBuilder\CourseBuilderManager;
 use Sikshya\Admin\Controllers\ReportController;
 use Sikshya\Admin\ReactAdminConfig;
+use Sikshya\Api\Admin\AbstractAdminRestController;
+use Sikshya\Api\Admin\CouponRoutes;
+use Sikshya\Api\Admin\InstructorApplicationRoutes;
+use Sikshya\Api\Admin\SetupWizardRoutes;
+use Sikshya\Api\Admin\TaxonomyRoutes;
 use Sikshya\Commerce\CheckoutService;
 use Sikshya\Commerce\PaymentGatewayRegistry;
 use Sikshya\Commerce\OrderFulfillmentService;
@@ -48,14 +53,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class AdminRestRoutes
+/**
+ * Admin REST coordinator.
+ *
+ * Historically a 3,481-line god-class. Being split into domain-bounded subclasses of
+ * {@see AbstractAdminRestController} one piece at a time (started 2026-05-14). The shared
+ * permission helpers (staff backend, manage_options, certificate-edit, tools) now live on
+ * the base. Domains extracted so far: see `register()` for the `new XxxRoutes(...)` calls.
+ */
+class AdminRestRoutes extends AbstractAdminRestController
 {
-    private Plugin $plugin;
-
-    public function __construct(Plugin $plugin)
-    {
-        $this->plugin = $plugin;
-    }
 
     public function register(): void
     {
@@ -250,27 +257,6 @@ class AdminRestRoutes
             ],
         ]);
 
-        register_rest_route($namespace, '/taxonomies/course-category', [
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'saveCategory'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/taxonomies/course-category/(?P<id>\d+)', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'getCourseCategory'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-            ],
-            [
-                'methods' => WP_REST_Server::DELETABLE,
-                'callback' => [$this, 'deleteCategory'],
-                'permission_callback' => [$this, 'permissionAdmin'],
-            ],
-        ]);
-
         register_rest_route($namespace, '/settings/schema', [
             [
                 'methods' => WP_REST_Server::READABLE,
@@ -324,22 +310,6 @@ class AdminRestRoutes
             [
                 'methods' => WP_REST_Server::CREATABLE,
                 'callback' => [$this, 'toolsAction'],
-                'permission_callback' => [$this, 'permissionTools'],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/admin/setup-wizard/step', [
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'saveSetupWizardStep'],
-                'permission_callback' => [$this, 'permissionTools'],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/admin/setup-wizard/sample-import', [
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'importSetupWizardSample'],
                 'permission_callback' => [$this, 'permissionTools'],
             ],
         ]);
@@ -447,63 +417,6 @@ class AdminRestRoutes
                         'type' => 'integer',
                         'required' => true,
                         'minimum' => 1,
-                    ],
-                ],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/admin/instructor-applications', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'listInstructorApplications'],
-                'permission_callback' => [$this, 'permissionInstructorApplications'],
-                'args' => [
-                    'page' => [
-                        'type' => 'integer',
-                        'default' => 1,
-                        'minimum' => 1,
-                    ],
-                    'per_page' => [
-                        'type' => 'integer',
-                        'default' => 20,
-                        'minimum' => 1,
-                        'maximum' => 100,
-                    ],
-                    'status' => [
-                        'type' => 'string',
-                        'sanitize_callback' => 'sanitize_key',
-                    ],
-                    'search' => [
-                        'type' => 'string',
-                        'sanitize_callback' => 'sanitize_text_field',
-                    ],
-                ],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/admin/instructor-applications/(?P<id>\\d+)/approve', [
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'approveInstructorApplication'],
-                'permission_callback' => [$this, 'permissionInstructorApplications'],
-                'args' => [
-                    'id' => [
-                        'required' => true,
-                        'sanitize_callback' => 'absint',
-                    ],
-                ],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/admin/instructor-applications/(?P<id>\\d+)/reject', [
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'rejectInstructorApplication'],
-                'permission_callback' => [$this, 'permissionInstructorApplications'],
-                'args' => [
-                    'id' => [
-                        'required' => true,
-                        'sanitize_callback' => 'absint',
                     ],
                 ],
             ],
@@ -700,26 +613,11 @@ class AdminRestRoutes
             ],
         ]);
 
-        register_rest_route($namespace, '/admin/coupons', [
-            [
-                'methods' => WP_REST_Server::READABLE,
-                'callback' => [$this, 'getAdminCoupons'],
-                'permission_callback' => [$this, 'permissionSalesCommerce'],
-            ],
-            [
-                'methods' => WP_REST_Server::CREATABLE,
-                'callback' => [$this, 'createAdminCoupon'],
-                'permission_callback' => [$this, 'permissionSalesCommerce'],
-            ],
-        ]);
-
-        register_rest_route($namespace, '/admin/coupons/(?P<id>\\d+)', [
-            [
-                'methods' => WP_REST_Server::EDITABLE,
-                'callback' => [$this, 'patchAdminCoupon'],
-                'permission_callback' => [$this, 'permissionSalesCommerce'],
-            ],
-        ]);
+        // Domain controllers extracted during the 2026-05 split.
+        (new CouponRoutes($this->plugin))->register();
+        (new InstructorApplicationRoutes($this->plugin))->register();
+        (new SetupWizardRoutes($this->plugin))->register();
+        (new TaxonomyRoutes($this->plugin))->register();
     }
 
     /**
@@ -785,188 +683,6 @@ class AdminRestRoutes
     }
 
     /**
-     * LMS staff backend (cookie + nonce or JWT): matches {@see AdminBackendAccess::canAccessStaffBackend()}.
-     *
-     * @return bool|WP_Error
-     */
-    public function permissionReactApp(WP_REST_Request $request)
-    {
-        if (AdminBackendAccess::canAccessStaffBackend()) {
-            return true;
-        }
-
-        $jwt = JwtAuthService::bearerFromRequest($request);
-        if ($jwt === '') {
-            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
-        }
-
-        $svc = $this->plugin->getService('jwtAuth');
-        if (!$svc instanceof JwtAuthService) {
-            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
-        }
-
-        $uid = $svc->validateToken($jwt);
-        if (is_wp_error($uid)) {
-            return $uid;
-        }
-
-        wp_set_current_user((int) $uid);
-
-        return AdminBackendAccess::canAccessStaffBackend()
-            ? true
-            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
-    }
-
-    /**
-     * Site administrator only (payments, orders, coupons, Sikshya settings in wp-admin).
-     *
-     * @return bool|WP_Error
-     */
-    public function permissionManageOptions(WP_REST_Request $request)
-    {
-        if (AdminBackendAccess::canManageSalesAndSettings()) {
-            return true;
-        }
-
-        $jwt = JwtAuthService::bearerFromRequest($request);
-        if ($jwt === '') {
-            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
-        }
-
-        $svc = $this->plugin->getService('jwtAuth');
-        if (!$svc instanceof JwtAuthService) {
-            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
-        }
-
-        $uid = $svc->validateToken($jwt);
-        if (is_wp_error($uid)) {
-            return $uid;
-        }
-
-        wp_set_current_user((int) $uid);
-
-        return AdminBackendAccess::canManageSalesAndSettings()
-            ? true
-            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
-    }
-
-    /**
-     * Same as {@see self::permissionManageOptions()} — commerce UI is `manage_options` only.
-     *
-     * @return bool|WP_Error
-     */
-    public function permissionSalesCommerce(WP_REST_Request $request)
-    {
-        return $this->permissionManageOptions($request);
-    }
-
-    /**
-     * Logged-in staff (cookie + nonce) or valid JWT; {@see AdminBackendAccess::canAccessStaffBackend()}.
-     *
-     * @return bool|WP_Error
-     */
-    public function permissionAdmin(WP_REST_Request $request)
-    {
-        if (AdminBackendAccess::canAccessStaffBackend()) {
-            return true;
-        }
-
-        $jwt = JwtAuthService::bearerFromRequest($request);
-        if ($jwt === '') {
-            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
-        }
-
-        $svc = $this->plugin->getService('jwtAuth');
-        if (!$svc instanceof JwtAuthService) {
-            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
-        }
-
-        $uid = $svc->validateToken($jwt);
-        if (is_wp_error($uid)) {
-            return $uid;
-        }
-
-        wp_set_current_user((int) $uid);
-
-        return AdminBackendAccess::canAccessStaffBackend()
-            ? true
-            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
-    }
-
-    /**
-     * Certificate preview: allow course builder admins, or any user who can edit that certificate
-     * (wp-admin with cookie+nonce, without manage_sikshya / course caps).
-     *
-     * @return bool|WP_Error
-     */
-    public function permissionAdminOrCanEditCertificate(WP_REST_Request $request)
-    {
-        if (AdminBackendAccess::canAccessStaffBackend()) {
-            return true;
-        }
-
-        $id = (int) $request->get_param('id');
-        if ($id > 0) {
-            $post = get_post($id);
-            if (
-                $post
-                && $post->post_type === PostTypes::CERTIFICATE
-                && current_user_can('edit_post', $id)
-            ) {
-                return true;
-            }
-        }
-
-        $jwt = JwtAuthService::bearerFromRequest($request);
-        if ($jwt === '') {
-            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
-        }
-
-        $svc = $this->plugin->getService('jwtAuth');
-        if (!$svc instanceof JwtAuthService) {
-            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
-        }
-
-        $uid = $svc->validateToken($jwt);
-        if (is_wp_error($uid)) {
-            return $uid;
-        }
-
-        wp_set_current_user((int) $uid);
-
-        if (AdminBackendAccess::canAccessStaffBackend()) {
-            return true;
-        }
-
-        if ($id > 0) {
-            $post = get_post($id);
-            if (
-                $post
-                && $post->post_type === PostTypes::CERTIFICATE
-                && current_user_can('edit_post', $id)
-            ) {
-                return true;
-            }
-        }
-
-        return new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
-    }
-
-    /**
-     * Maintainer tools (export/import, cache, diagnostics) — administrators only.
-     *
-     * @return bool|WP_Error
-     */
-    public function permissionTools()
-    {
-        if (current_user_can('manage_options')) {
-            return true;
-        }
-
-        return new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
-    }
-
-    /**
      * Single aggregate counts for post-type list tabs (replaces N parallel wp/v2 requests).
      *
      * @return WP_REST_Response|WP_Error
@@ -1025,16 +741,6 @@ class AdminRestRoutes
             ],
             200
         );
-    }
-
-    private function jsonBody(WP_REST_Request $request): array
-    {
-        $p = $request->get_json_params();
-        if (is_array($p)) {
-            return $p;
-        }
-        $b = $request->get_body_params();
-        return is_array($b) ? $b : [];
     }
 
     private function curriculumActions(): ?CourseCurriculumActions
@@ -1715,80 +1421,6 @@ class AdminRestRoutes
         );
     }
 
-    /**
-     * Auto-save a single setup wizard step (drives “Next” + shareable ?step= URLs).
-     */
-    public function saveSetupWizardStep(WP_REST_Request $request)
-    {
-        $params = $request->get_json_params();
-        if (!is_array($params)) {
-            $params = [];
-        }
-        $step = isset($params['step']) ? absint($params['step']) : 0;
-        if ($step < 1 || $step > 5) {
-            return new WP_Error(
-                'invalid_step',
-                __('Choose a valid step (1–5).', 'sikshya'),
-                ['status' => 400]
-            );
-        }
-        $r = SetupWizardController::processStep($step, $params, $this->plugin);
-        if (!$r['success']) {
-            return new WP_REST_Response(
-                [
-                    'success' => false,
-                    'errors' => $r['errors'],
-                ],
-                400
-            );
-        }
-        $next_url = $step < 5
-            ? SetupWizardController::adminUrl($step + 1)
-            : SetupWizardController::doneUrl();
-        $messages = [
-            1 => __('You can continue to the next page.', 'sikshya'),
-            2 => __('Your public page words are saved.', 'sikshya'),
-            3 => __('Your currency settings are saved.', 'sikshya'),
-            4 => __('Your lesson link style is saved.', 'sikshya'),
-            5 => __('Sikshya is ready to use.', 'sikshya'),
-        ];
-
-        return new WP_REST_Response(
-            [
-                'success' => true,
-                'message' => $messages[ $step ] ?? '',
-                'next_url' => $next_url,
-            ],
-            200
-        );
-    }
-
-    /**
-     * Setup wizard "Add sample course" button.
-     *
-     * Triggers a one-shot import of the bundled `default` sample pack and
-     * stashes the result in a per-user transient so the celebration screen
-     * can summarize what was created. Returns a normalized payload to the JS
-     * caller so the inline UI can render success / failure immediately.
-     */
-    public function importSetupWizardSample(WP_REST_Request $request): WP_REST_Response
-    {
-        unset($request);
-
-        $payload = SetupWizardController::importBundledSampleCourse($this->plugin);
-
-        return new WP_REST_Response(
-            [
-                'success' => (bool) $payload['success'],
-                'message' => (string) $payload['message'],
-                'data' => [
-                    'counts' => isset($payload['counts']) && is_array($payload['counts']) ? $payload['counts'] : [],
-                ],
-            ],
-            $payload['success'] ? 200 : 400
-        );
-    }
-
     public function toolsAction(WP_REST_Request $request): WP_REST_Response
     {
         $p = $this->jsonBody($request);
@@ -1985,61 +1617,6 @@ class AdminRestRoutes
         return $out;
     }
 
-    public function getCourseCategory(WP_REST_Request $request): WP_REST_Response
-    {
-        $svc = $this->plugin->getService('categoryService');
-        if (!$svc instanceof CategoryService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
-        }
-
-        $id = (int) $request->get_param('id');
-        $r = $svc->get($id);
-        if (empty($r['ok'])) {
-            $code = ($r['code'] ?? '') === 'not_found' ? 404 : 403;
-
-            return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], $code);
-        }
-
-        return new WP_REST_Response(['success' => true, 'data' => $r['data'] ?? []], 200);
-    }
-
-    public function saveCategory(WP_REST_Request $request): WP_REST_Response
-    {
-        $svc = $this->plugin->getService('categoryService');
-        if (!$svc instanceof CategoryService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
-        }
-
-        $r = $svc->save($this->jsonBody($request));
-        if (empty($r['ok'])) {
-            return new WP_REST_Response(
-                ['success' => false, 'message' => $r['message'] ?? '', 'errors' => $r['errors'] ?? null],
-                400
-            );
-        }
-
-        return new WP_REST_Response(
-            ['success' => true, 'message' => $r['message'] ?? '', 'data' => $r['data'] ?? []],
-            200
-        );
-    }
-
-    public function deleteCategory(WP_REST_Request $request): WP_REST_Response
-    {
-        $svc = $this->plugin->getService('categoryService');
-        if (!$svc instanceof CategoryService) {
-            return new WP_REST_Response(['success' => false, 'message' => 'Service unavailable'], 500);
-        }
-
-        $id = (int) $request->get_param('id');
-        $r = $svc->delete($id);
-        if (empty($r['ok'])) {
-            return new WP_REST_Response(['success' => false, 'message' => $r['message'] ?? ''], 400);
-        }
-
-        return new WP_REST_Response(['success' => true, 'message' => $r['message'] ?? ''], 200);
-    }
-
     /**
      * Live dashboard payload (same shape as {@see ReactAdminConfig::dashboardInitialData()}).
      */
@@ -2176,80 +1753,6 @@ class AdminRestRoutes
             ],
             200
         );
-    }
-
-    /**
-     * @return bool|WP_Error
-     */
-    public function permissionInstructorApplications(WP_REST_Request $request)
-    {
-        if (current_user_can('manage_sikshya') || current_user_can('manage_options')) {
-            return true;
-        }
-
-        $jwt = JwtAuthService::bearerFromRequest($request);
-        if ($jwt === '') {
-            return new WP_Error('rest_forbidden', __('Authentication required', 'sikshya'), ['status' => 401]);
-        }
-
-        $svc = $this->plugin->getService('jwtAuth');
-        if (!$svc instanceof JwtAuthService) {
-            return new WP_Error('rest_forbidden', __('JWT unavailable', 'sikshya'), ['status' => 500]);
-        }
-
-        $uid = $svc->validateToken($jwt);
-        if (is_wp_error($uid)) {
-            return $uid;
-        }
-
-        wp_set_current_user((int) $uid);
-
-        return current_user_can('manage_sikshya') || current_user_can('manage_options')
-            ? true
-            : new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
-    }
-
-    public function listInstructorApplications(WP_REST_Request $request): WP_REST_Response
-    {
-        $page = max(1, (int) $request->get_param('page'));
-        $per_page = max(1, min(100, (int) $request->get_param('per_page')));
-        $status = (string) $request->get_param('status');
-        $search = (string) $request->get_param('search');
-
-        $svc = new InstructorApplicationsService();
-        $out = $svc->listForRest($page, $per_page, $status, $search);
-
-        return new WP_REST_Response($out, 200);
-    }
-
-    public function approveInstructorApplication(WP_REST_Request $request): WP_REST_Response
-    {
-        $id = (int) $request->get_param('id');
-        $svc = new InstructorApplicationsService();
-        $res = $svc->approve($id);
-        if (is_wp_error($res)) {
-            return new WP_REST_Response(
-                ['ok' => false, 'message' => $res->get_error_message()],
-                (int) ($res->get_error_data()['status'] ?? 400)
-            );
-        }
-
-        return new WP_REST_Response(['ok' => true, 'message' => __('Instructor approved.', 'sikshya')], 200);
-    }
-
-    public function rejectInstructorApplication(WP_REST_Request $request): WP_REST_Response
-    {
-        $id = (int) $request->get_param('id');
-        $svc = new InstructorApplicationsService();
-        $res = $svc->reject($id);
-        if (is_wp_error($res)) {
-            return new WP_REST_Response(
-                ['ok' => false, 'message' => $res->get_error_message()],
-                (int) ($res->get_error_data()['status'] ?? 400)
-            );
-        }
-
-        return new WP_REST_Response(['ok' => true, 'message' => __('Application rejected.', 'sikshya')], 200);
     }
 
     /**
@@ -3301,140 +2804,6 @@ class AdminRestRoutes
             ['ok' => true, 'message' => __('Order marked paid and enrollments created.', 'sikshya')],
             200
         );
-    }
-
-    /**
-     * Coupon codes (basic CRUD list + create).
-     */
-    public function getAdminCoupons(WP_REST_Request $request): WP_REST_Response
-    {
-        $repo = new \Sikshya\Database\Repositories\CouponRepository();
-        if (!$repo->tableExists()) {
-            return new WP_REST_Response(
-                [
-                    'ok' => true,
-                    'coupons' => [],
-                    'table_missing' => true,
-                ],
-                200
-            );
-        }
-
-        $rows = $repo->findAll(200, 0);
-        $out = [];
-        foreach ($rows as $row) {
-            $out[] = [
-                'id' => (int) $row->id,
-                'code' => (string) $row->code,
-                'discount_type' => (string) $row->discount_type,
-                'discount_value' => (float) $row->discount_value,
-                'max_uses' => (int) $row->max_uses,
-                'used_count' => (int) $row->used_count,
-                'expires_at' => $row->expires_at ?? null,
-                'status' => (string) $row->status,
-            ];
-        }
-
-        return new WP_REST_Response(['ok' => true, 'coupons' => $out], 200);
-    }
-
-    /**
-     * Create a coupon (admin UI).
-     */
-    public function createAdminCoupon(WP_REST_Request $request): WP_REST_Response
-    {
-        $repo = new \Sikshya\Database\Repositories\CouponRepository();
-        if (!$repo->tableExists()) {
-            return new WP_REST_Response(
-                ['ok' => false, 'message' => __('Coupons table not installed.', 'sikshya')],
-                500
-            );
-        }
-
-        $params = $request->get_json_params();
-        if (!is_array($params)) {
-            $params = $request->get_body_params();
-        }
-
-        $code = isset($params['code']) ? (string) $params['code'] : '';
-        if (trim($code) === '') {
-            return new WP_REST_Response(['ok' => false, 'message' => __('Code is required.', 'sikshya')], 400);
-        }
-
-        $id = $repo->createAdminCoupon(
-            [
-                'code' => $code,
-                'discount_type' => $params['discount_type'] ?? 'percent',
-                'discount_value' => $params['discount_value'] ?? 0,
-                'max_uses' => $params['max_uses'] ?? 0,
-                'expires_at' => $params['expires_at'] ?? null,
-                'status' => $params['status'] ?? 'active',
-            ]
-        );
-
-        if ($id <= 0) {
-            return new WP_REST_Response(['ok' => false, 'message' => __('Could not create coupon.', 'sikshya')], 500);
-        }
-
-        return new WP_REST_Response(['ok' => true, 'id' => $id], 201);
-    }
-
-    /**
-     * Update coupon basics (code, discount, limits, status).
-     */
-    public function patchAdminCoupon(WP_REST_Request $request): WP_REST_Response
-    {
-        $id = (int) $request->get_param('id');
-        if ($id <= 0) {
-            return new WP_REST_Response(['ok' => false, 'message' => __('Invalid coupon id.', 'sikshya')], 400);
-        }
-
-        $repo = new \Sikshya\Database\Repositories\CouponRepository();
-        if (!$repo->tableExists()) {
-            return new WP_REST_Response(
-                ['ok' => false, 'message' => __('Coupons table not installed.', 'sikshya')],
-                500
-            );
-        }
-
-        $params = $request->get_json_params();
-        if (!is_array($params)) {
-            $params = $request->get_body_params();
-        }
-        if (!is_array($params)) {
-            $params = [];
-        }
-
-        $data = [];
-        if (array_key_exists('code', $params)) {
-            $data['code'] = (string) $params['code'];
-        }
-        if (array_key_exists('discount_type', $params)) {
-            $data['discount_type'] = $params['discount_type'];
-        }
-        if (array_key_exists('discount_value', $params)) {
-            $data['discount_value'] = $params['discount_value'];
-        }
-        if (array_key_exists('max_uses', $params)) {
-            $data['max_uses'] = $params['max_uses'];
-        }
-        if (array_key_exists('expires_at', $params)) {
-            $data['expires_at'] = $params['expires_at'];
-        }
-        if (array_key_exists('status', $params)) {
-            $data['status'] = $params['status'];
-        }
-
-        if ($data === []) {
-            return new WP_REST_Response(['ok' => false, 'message' => __('Nothing to update.', 'sikshya')], 400);
-        }
-
-        $ok = $repo->updateAdminCoupon($id, $data);
-        if (!$ok) {
-            return new WP_REST_Response(['ok' => false, 'message' => __('Could not update coupon.', 'sikshya')], 500);
-        }
-
-        return new WP_REST_Response(['ok' => true, 'id' => $id], 200);
     }
 
     /**

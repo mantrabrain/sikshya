@@ -32,102 +32,129 @@ final class OrderFulfillmentService
 
     /**
      * Idempotent fulfillment for a paid order.
+     *
+     * Concurrent gateway redeliveries (Stripe/PayPal both retry on 5xx) used to race on the
+     * check-then-act idempotency guard, occasionally double-enrolling and writing duplicate
+     * payment rows. The row is now locked via `SELECT … FOR UPDATE` inside an explicit
+     * transaction so a second caller blocks until the first commits, then sees `status='paid'`
+     * and short-circuits.
      */
     public function fulfillPaidOrder(int $order_id): bool
     {
-        $order = $this->orders->findById($order_id);
-        if (!$order) {
-            return false;
-        }
+        global $wpdb;
 
-        if ($order->status === 'paid') {
-            return true;
-        }
+        // Heavy lifting (enroll, payment row, user provisioning) happens inside the transaction
+        // so a rollback on error leaves no half-applied state.
+        $wpdb->query('START TRANSACTION');
 
-        $items = $this->orders->getItems($order_id);
-        $has_line = false;
-        foreach ($items as $row) {
-            if ((int) ($row->course_id ?? 0) > 0) {
-                $has_line = true;
-                break;
-            }
-        }
-        if (!$has_line) {
-            return false;
-        }
-
-        $user_id = (int) $order->user_id;
-        if ($user_id <= 0) {
-            // Guest checkout: ensure an actual WP user exists before fulfilling.
-            $user_id = $this->ensureGuestStudentUser($order_id, $order);
-        }
-        if ($user_id <= 0) {
-            return false;
-        }
-
-        $auto_enroll = Settings::isTruthy(Settings::get('auto_enroll', true));
-
-        foreach ($items as $item) {
-            $course_id = (int) $item->course_id;
-            if ($course_id <= 0) {
-                continue;
+        try {
+            $order = $this->orders->findByIdForUpdate($order_id);
+            if (!$order) {
+                $wpdb->query('ROLLBACK');
+                return false;
             }
 
-            if ($auto_enroll) {
-                try {
-                    $this->courseService->enrollUser(
-                        $user_id,
-                        $course_id,
-                        [
-                            'payment_method' => (string) $order->gateway,
-                            'amount' => (float) $item->line_total,
-                            'transaction_id' => (string) ($order->gateway_intent_id ?? ''),
-                        ]
-                    );
-                } catch (\InvalidArgumentException $e) {
-                    // Already enrolled or invalid — continue.
+            if ($order->status === 'paid') {
+                $wpdb->query('COMMIT');
+                return true;
+            }
+
+            $items = $this->orders->getItems($order_id);
+            $has_line = false;
+            foreach ($items as $row) {
+                if ((int) ($row->course_id ?? 0) > 0) {
+                    $has_line = true;
+                    break;
                 }
             }
+            if (!$has_line) {
+                $wpdb->query('ROLLBACK');
+                return false;
+            }
 
-            if ($this->payments->tableExists()) {
-                $meta = [];
-                if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
-                    $decoded = json_decode($order->meta, true);
-                    if (is_array($decoded)) {
-                        $meta = $decoded;
+            $user_id = (int) $order->user_id;
+            if ($user_id <= 0) {
+                // Guest checkout: ensure an actual WP user exists before fulfilling.
+                $user_id = $this->ensureGuestStudentUser($order_id, $order);
+            }
+            if ($user_id <= 0) {
+                $wpdb->query('ROLLBACK');
+                return false;
+            }
+
+            $auto_enroll = Settings::isTruthy(Settings::get('auto_enroll', true));
+
+            foreach ($items as $item) {
+                $course_id = (int) $item->course_id;
+                if ($course_id <= 0) {
+                    continue;
+                }
+
+                if ($auto_enroll) {
+                    try {
+                        $this->courseService->enrollUser(
+                            $user_id,
+                            $course_id,
+                            [
+                                'payment_method' => (string) $order->gateway,
+                                'amount' => (float) $item->line_total,
+                                'transaction_id' => (string) ($order->gateway_intent_id ?? ''),
+                            ]
+                        );
+                    } catch (\InvalidArgumentException $e) {
+                        // Already enrolled or invalid — continue.
                     }
                 }
-                $payment_meta = isset($meta['payment']) && is_array($meta['payment']) ? $meta['payment'] : [];
-                $tx = '';
-                if (isset($payment_meta['transaction_id']) && is_string($payment_meta['transaction_id'])) {
-                    $tx = (string) $payment_meta['transaction_id'];
-                }
-                if ($tx === '') {
-                    $tx = (string) ($order->gateway_intent_id ?? '');
-                }
-                $gw_resp = isset($payment_meta['gateway_response']) ? $payment_meta['gateway_response'] : null;
 
-                $this->payments->create(
-                    [
-                        'user_id' => $user_id,
-                        'course_id' => $course_id,
-                        'amount' => (float) $item->line_total,
-                        'currency' => (string) $order->currency,
-                        'payment_method' => (string) $order->gateway,
-                        'transaction_id' => $tx,
-                        'status' => 'completed',
-                        'charge_kind' => 'checkout',
-                        'payment_date' => current_time('mysql'),
-                        'gateway_response' => $gw_resp !== null ? $gw_resp : ['order_id' => $order_id],
-                    ]
-                );
+                if ($this->payments->tableExists()) {
+                    $meta = [];
+                    if (isset($order->meta) && is_string($order->meta) && $order->meta !== '') {
+                        $decoded = json_decode($order->meta, true);
+                        if (is_array($decoded)) {
+                            $meta = $decoded;
+                        }
+                    }
+                    $payment_meta = isset($meta['payment']) && is_array($meta['payment']) ? $meta['payment'] : [];
+                    $tx = '';
+                    if (isset($payment_meta['transaction_id']) && is_string($payment_meta['transaction_id'])) {
+                        $tx = (string) $payment_meta['transaction_id'];
+                    }
+                    if ($tx === '') {
+                        $tx = (string) ($order->gateway_intent_id ?? '');
+                    }
+                    $gw_resp = isset($payment_meta['gateway_response']) ? $payment_meta['gateway_response'] : null;
+
+                    $this->payments->create(
+                        [
+                            'user_id' => $user_id,
+                            'course_id' => $course_id,
+                            'amount' => (float) $item->line_total,
+                            'currency' => (string) $order->currency,
+                            'payment_method' => (string) $order->gateway,
+                            'transaction_id' => $tx,
+                            'status' => 'completed',
+                            'charge_kind' => 'checkout',
+                            'payment_date' => current_time('mysql'),
+                            'gateway_response' => $gw_resp !== null ? $gw_resp : ['order_id' => $order_id],
+                        ]
+                    );
+                }
             }
-        }
 
-        $this->orders->updateOrder($order_id, ['status' => 'paid']);
+            $this->orders->updateOrder($order_id, ['status' => 'paid']);
+
+            $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+
+            throw $e;
+        }
 
         /**
          * Fired after an order is fulfilled and marked paid.
+         *
+         * Hook fires post-commit so addons (commissions, notifications, revenue share)
+         * observe a committed state and don't see writes that may yet be rolled back.
          *
          * Pro / Scale modules may attach revenue share, commissions, etc.
          */

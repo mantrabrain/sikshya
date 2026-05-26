@@ -1321,7 +1321,7 @@ function ModerationThreadPanel(props: {
             {/* Root message — learn-style bubble */}
             <section
               className="rounded-[17px] border border-slate-200/80 bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/60 dark:border-slate-600/60 dark:bg-slate-900/85 dark:ring-white/5"
-              style={{ borderLeftWidth: 3, borderLeftColor: '#2563eb' }}
+              style={{ borderLeftWidth: 3, borderLeftColor: '#2c5ba8' }}
             >
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 text-xs">
                 <span className="font-bold text-slate-900 dark:text-white">
