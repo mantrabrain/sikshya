@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Sikshya LMS – LMS Course Builder, Online Courses & eLearning
- * Plugin URI: https://mantrabrain.com/plugins/sikshya/
+ * Plugin URI: https://mantrabrain.com/plugins/sikshya-lms/
  * Description: A comprehensive WordPress Learning Management System plugin with modern SaaS design and enterprise-level architecture.
- * Version: 1.1.3
+ * Version: 1.0.4
  * Author: MantraBrain
  * Author URI: https://mantrabrain.com
  * License: GPL v2 or later
@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('SIKSHYA_VERSION', '1.1.6');
+define('SIKSHYA_VERSION', '1.0.4');
 define('SIKSHYA_PLUGIN_FILE', __FILE__);
 define('SIKSHYA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SIKSHYA_PLUGIN_URL', plugin_dir_url(__FILE__));

@@ -290,12 +290,18 @@ while (have_posts()) :
                                 </div>
                                 <button
                                     type="button"
-                                    class="sikshya-btn sikshya-btn--outline sikshya-btn--sm"
+                                    class="sikshya-btn sikshya-btn--outline sikshya-btn--sm sikshya-course-lp__toggleAll"
                                     data-sikshya-toggle-all-chapters
                                     aria-controls="sikshya-course-curriculum-accordion"
                                     aria-expanded="false"
                                 >
-                                    <?php esc_html_e('Expand all', 'sikshya'); ?>
+                                    <svg class="sikshya-course-lp__toggleAll-icon sikshya-course-lp__toggleAll-icon--expand" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M7 9l5-5 5 5M7 15l5 5 5-5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <svg class="sikshya-course-lp__toggleAll-icon sikshya-course-lp__toggleAll-icon--collapse" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M7 5l5 5 5-5M7 19l5-5 5 5" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span class="sikshya-course-lp__toggleAll-label"><?php esc_html_e('Expand all', 'sikshya'); ?></span>
                                 </button>
                             </div>
                         </div>
@@ -450,10 +456,15 @@ while (have_posts()) :
                               return list.length > 0;
                             }
 
+                            var labelEl = btn.querySelector('.sikshya-course-lp__toggleAll-label');
                             function syncLabel() {
                               var list = chapters();
                               var allOpen = isAllOpen(list);
-                              btn.textContent = allOpen ? LABEL_COLLAPSE : LABEL_EXPAND;
+                              if (labelEl) {
+                                labelEl.textContent = allOpen ? LABEL_COLLAPSE : LABEL_EXPAND;
+                              } else {
+                                btn.textContent = allOpen ? LABEL_COLLAPSE : LABEL_EXPAND;
+                              }
                               btn.setAttribute('aria-expanded', allOpen ? 'true' : 'false');
                             }
 

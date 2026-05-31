@@ -240,7 +240,13 @@ export function EmailDeliverySettings(props: Props) {
           </SectionShell>
         ) : null}
 
-        <div className="relative isolate min-h-[280px] overflow-hidden rounded-2xl">
+        {/* min-h must accommodate the full PlanUpgradeOverlay card (~640px:
+          * hero ~220px + value grid ~280px + footer CTAs ~120px + outer
+          * PremiumGatedSurface padding ~32px). The overlay centers itself
+          * with `items-center justify-center`, so a parent that's too short
+          * would clip both top and bottom — leaving only the middle of the
+          * upgrade card visible. */}
+        <div className="relative isolate min-h-[680px] overflow-hidden rounded-2xl">
           <div
             className={`rounded-2xl border border-slate-200/80 bg-slate-100/80 p-6 dark:border-slate-800 dark:bg-slate-900/40 ${
               advancedOk ? '' : 'opacity-[0.65]'
@@ -320,31 +326,25 @@ export function EmailDeliverySettings(props: Props) {
           ) : null}
         </div>
 
-        <div className="relative isolate min-h-[320px] w-full overflow-hidden">
-          <div className={`rounded-2xl ${advancedOk ? '' : 'opacity-[0.65]'}`}>
-            <SectionShell
-              title={brandingSection?.title || __('Global HTML Branding', 'sikshya')}
-              description={
-                brandingSection?.description ||
-                __('Optional HTML that wraps every Sikshya email — requires Growth or higher.', 'sikshya')
-              }
-              icon={brandingSection?.icon}
-            >
-              <div className="grid gap-6 lg:grid-cols-2">{fieldsOf('email_html_branding').map(renderField)}</div>
-            </SectionShell>
-          </div>
-          {!advancedOk && !emailAdvancedAddon.loading ? (
-            !featureOn ? (
-              <PlanUpgradeOverlay
-                config={config}
-                featureId="email_advanced_customization"
-                featureTitle={__('SMTP & branded HTML email templates', 'sikshya')}
-                description={__('Edit global header and footer HTML for every transactional email.', 'sikshya')}
-              />
-            ) : (
-              <EmailAddonDisabledOverlay config={config} />
-            )
-          ) : null}
+        {/* Branding fields share the same `email_advanced_customization`
+          * gate as the SMTP section above. The SMTP section already shows
+          * the PlanUpgradeOverlay covering both feature areas — surfacing
+          * a second identical overlay here was redundant chrome and made
+          * the page feel heavier than it is. Just mute the fields with
+          * opacity-65 to signal they're gated; the upgrade context is
+          * already established by the overlay above + the page-level
+          * "Growth or higher" banner near the top of this view. */}
+        <div className={`rounded-2xl ${advancedOk ? '' : 'opacity-[0.65] pointer-events-none select-none'}`}>
+          <SectionShell
+            title={brandingSection?.title || __('Global HTML Branding', 'sikshya')}
+            description={
+              brandingSection?.description ||
+              __('Optional HTML that wraps every Sikshya email — requires Growth or higher.', 'sikshya')
+            }
+            icon={brandingSection?.icon}
+          >
+            <div className="grid gap-6 lg:grid-cols-2">{fieldsOf('email_html_branding').map(renderField)}</div>
+          </SectionShell>
         </div>
       </div>
     </div>

@@ -23,7 +23,7 @@ msgstr ""
 #: client/src/App.tsx:254
 #: client/src/pages/DashboardPage.tsx:320
 #: client/src/pages/ToolsPage.tsx:271
-#: client/src/pages/content-editors/editors.tsx:1011
+#: client/src/pages/content-editors/editors.tsx:1052
 #: client/src/pages/hubs/HubPages.tsx:97
 msgid "Questions"
 msgstr ""
@@ -224,13 +224,13 @@ msgid "Payments"
 msgstr ""
 
 #: client/src/App.tsx:393
-#: client/src/pages/EnrollmentDetailsPage.tsx:186
+#: client/src/pages/EnrollmentDetailsPage.tsx:184
 msgid "Payment"
 msgstr ""
 
 #: client/src/App.tsx:397
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:65
-#: client/src/pages/EnrollmentDetailsPage.tsx:151
+#: client/src/pages/EnrollmentDetailsPage.tsx:149
 #: client/src/pages/LicensePage.tsx:472
 #: client/src/pages/hubs/HubPages.tsx:306
 msgid "Email"
@@ -278,9 +278,9 @@ msgid "Dashboard"
 msgstr ""
 
 #: client/src/App.tsx:441
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:810
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:814
 #: client/src/pages/AddonsPage.tsx:476
-#: client/src/pages/content-editors/editors.tsx:1010
+#: client/src/pages/content-editors/editors.tsx:1051
 msgid "Settings"
 msgstr ""
 
@@ -299,9 +299,9 @@ msgstr ""
 
 #: client/src/App.tsx:461
 #: client/src/components/shared/AddContentTypePickerModal.tsx:89
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:809
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:813
 #: client/src/pages/DiscussionsPage.tsx:874
-#: client/src/pages/content-editors/editors.tsx:1009
+#: client/src/pages/content-editors/editors.tsx:1050
 msgid "Content"
 msgstr ""
 
@@ -460,58 +460,54 @@ msgstr ""
 msgid "Completion certificates"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:255
+#: client/src/components/EmailDeliverySettings.tsx:261
 msgid "SMTP Settings (Optional)"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:266
+#: client/src/components/EmailDeliverySettings.tsx:272
 msgid "Test delivery"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:269
+#: client/src/components/EmailDeliverySettings.tsx:275
 msgid ""
 "Sends a short HTML message using your From / Reply-To settings, optional "
 "SMTP when enabled, and branded header and footer when configured."
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:276
+#: client/src/components/EmailDeliverySettings.tsx:282
 msgid "Recipient (optional)"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:283
+#: client/src/components/EmailDeliverySettings.tsx:289
 msgid "Defaults to your WordPress account email"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:288
+#: client/src/components/EmailDeliverySettings.tsx:294
 #: client/src/pages/ReportsPage.tsx:931
 #: client/src/pages/SettingsPage.tsx:929
 msgid "Sending…"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:288
+#: client/src/components/EmailDeliverySettings.tsx:294
 msgid "Send test email"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:312
+#: client/src/components/EmailDeliverySettings.tsx:317
+msgid "SMTP & branded HTML email templates"
+msgstr ""
+
+#: client/src/components/EmailDeliverySettings.tsx:318
 msgid ""
 "Route mail through your provider with SMTP and unlock global HTML wrappers "
 "around every transactional email."
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:326
+#: client/src/components/EmailDeliverySettings.tsx:339
 msgid "Global HTML Branding"
 msgstr ""
 
-#: client/src/components/EmailDeliverySettings.tsx:329
-msgid "Optional HTML that wraps every Sikshya email — requires Growth or higher."
-msgstr ""
-
-#: client/src/components/EmailDeliverySettings.tsx:341
-msgid "SMTP & branded HTML email templates"
-msgstr ""
-
 #: client/src/components/EmailDeliverySettings.tsx:342
-msgid "Edit global header and footer HTML for every transactional email."
+msgid "Optional HTML that wraps every Sikshya email — requires Growth or higher."
 msgstr ""
 
 #: client/src/components/EmailDeliverySettings.tsx:92
@@ -692,7 +688,7 @@ msgid "%1$s (free) %2$s"
 msgstr ""
 
 #: client/src/components/Sidebar.tsx:302
-#: client/src/pages/EnrollmentDetailsPage.tsx:193
+#: client/src/pages/EnrollmentDetailsPage.tsx:191
 msgid "Free"
 msgstr ""
 
@@ -883,14 +879,14 @@ msgid "Custom templates can use manual or automation triggers."
 msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:387
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1452
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1456
 #: client/src/pages/CouponsPage.tsx:456
 #: client/src/pages/CourseTeamPage.tsx:931
 #: client/src/pages/EmailMarketingPage.tsx:804
-#: client/src/pages/EnrollmentDetailsPage.tsx:168
+#: client/src/pages/EnrollmentDetailsPage.tsx:166
 #: client/src/pages/EnrollmentsPage.tsx:361
 #: client/src/pages/GradebookPage.tsx:1311
-#: client/src/pages/InstructorApplicationsPage.tsx:155
+#: client/src/pages/InstructorApplicationsPage.tsx:154
 #: client/src/pages/IntegrationsPage.tsx:661
 #: client/src/pages/IssuedCertificatesPage.tsx:100
 #: client/src/pages/MarketplacePage.tsx:703
@@ -903,7 +899,7 @@ msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:390
 #: client/src/pages/EmailMarketingPage.tsx:705
-#: client/src/pages/InstructorApplicationsPage.tsx:114
+#: client/src/pages/InstructorApplicationsPage.tsx:113
 #: client/src/pages/MarketplacePage.tsx:371
 #: client/src/pages/ReportsPage.tsx:787
 #: client/src/pages/SubscriptionsProPage.tsx:686
@@ -911,7 +907,7 @@ msgid "Active"
 msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:390
-#: client/src/pages/InstructorApplicationsPage.tsx:116
+#: client/src/pages/InstructorApplicationsPage.tsx:115
 #: client/src/pages/SubscriptionsProPage.tsx:687
 msgid "Inactive"
 msgstr ""
@@ -1050,7 +1046,7 @@ msgid "Half"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:406
-#: client/src/pages/content-editors/editors.tsx:1197
+#: client/src/pages/content-editors/editors.tsx:1238
 msgid "Add"
 msgstr ""
 
@@ -1097,7 +1093,7 @@ msgid "Edit field"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:522
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1140
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1144
 #: client/src/components/shared/WPMediaPickerField.tsx:187
 #: client/src/pages/CourseTeamPage.tsx:409
 #: client/src/pages/ReviewDetailPage.tsx:107
@@ -1107,7 +1103,7 @@ msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:528
 #: client/src/pages/CourseTeamPage.tsx:928
-#: client/src/pages/EnrollmentDetailsPage.tsx:199
+#: client/src/pages/EnrollmentDetailsPage.tsx:197
 #: client/src/pages/ReportsPage.tsx:1045
 msgid "ID"
 msgstr ""
@@ -1263,7 +1259,7 @@ msgid "Turn this on in Addons to use it."
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:220
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:747
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:751
 #: client/src/components/shared/ConfirmDialog.tsx:30
 #: client/src/components/shared/CreateCertificateModal.tsx:84
 #: client/src/components/shared/CreateCourseModal.tsx:181
@@ -1301,12 +1297,12 @@ msgid "Learners see this in the course outline. You can rename it later."
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:45
-#: client/src/pages/content-editors/editors.tsx:529
+#: client/src/pages/content-editors/editors.tsx:542
 msgid "Text lesson"
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:46
-#: client/src/pages/content-editors/editors.tsx:530
+#: client/src/pages/content-editors/editors.tsx:543
 msgid "Video lesson"
 msgstr ""
 
@@ -1352,230 +1348,235 @@ msgstr ""
 msgid "H5P interactive"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1015
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1001
+#: client/src/pages/content-editors/editors.tsx:1874
+msgid "Check every option that should be marked correct."
+msgstr ""
+
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1019
 msgid "Correct"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1027
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1031
 msgid "Option %d"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1053
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1057
 msgid "+ Add option"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1060
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1064
 msgid "Correct answer"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1062
-#: client/src/pages/content-editors/editors.tsx:1897
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1066
+#: client/src/pages/content-editors/editors.tsx:1938
 msgid "Learners choose between true and false."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1069
-#: client/src/pages/content-editors/editors.tsx:1904
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1073
+#: client/src/pages/content-editors/editors.tsx:1945
 msgid "True"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1070
-#: client/src/pages/content-editors/editors.tsx:1905
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1074
+#: client/src/pages/content-editors/editors.tsx:1946
 msgid "False"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1078
-#: client/src/pages/content-editors/editors.tsx:1912
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1082
+#: client/src/pages/content-editors/editors.tsx:1953
 msgid "Accepted answer(s)"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1079
-#: client/src/pages/content-editors/editors.tsx:1912
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1083
+#: client/src/pages/content-editors/editors.tsx:1953
 msgid "Expected answer"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1083
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1087
 msgid ""
 "Separate multiple correct spellings with | (pipe). Comparison is "
 "case-insensitive."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1087
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1091
 msgid "Case-insensitive match. Use | between alternative correct answers."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1099
-#: client/src/pages/content-editors/editors.tsx:1924
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1103
+#: client/src/pages/content-editors/editors.tsx:1965
 msgid "e.g. Paris|paris"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1100
-#: client/src/pages/content-editors/editors.tsx:1924
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1104
+#: client/src/pages/content-editors/editors.tsx:1965
 msgid "e.g. photosynthesis"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1108
-#: client/src/pages/content-editors/editors.tsx:1930
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1112
+#: client/src/pages/content-editors/editors.tsx:1971
 msgid "Steps / items"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1111
-#: client/src/pages/content-editors/editors.tsx:1931
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1115
+#: client/src/pages/content-editors/editors.tsx:1972
 msgid "Edit labels, then arrange the correct order (top = first)."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1126
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1130
 msgid "Item %d"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1153
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1157
 msgid "+ Add item"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1156
-#: client/src/pages/content-editors/editors.tsx:1974
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1160
+#: client/src/pages/content-editors/editors.tsx:2015
 msgid "Correct order"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1173
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1177
 msgid "Up"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1181
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1185
 msgid "Down"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1191
-#: client/src/pages/content-editors/editors.tsx:2007
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1195
+#: client/src/pages/content-editors/editors.tsx:2048
 msgid "Matching pairs"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1194
-#: client/src/pages/content-editors/editors.tsx:2008
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1198
+#: client/src/pages/content-editors/editors.tsx:2049
 msgid "For each prompt on the left, choose the matching answer column index."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1203
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1207
 msgid "Prompt %d"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1214
-#: client/src/pages/content-editors/editors.tsx:2024
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1218
+#: client/src/pages/content-editors/editors.tsx:2065
 msgid "Left column text"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1219
-#: client/src/pages/content-editors/editors.tsx:2029
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1223
+#: client/src/pages/content-editors/editors.tsx:2070
 msgid "Matches answer"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1243
-#: client/src/pages/content-editors/editors.tsx:2052
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1247
+#: client/src/pages/content-editors/editors.tsx:2093
 msgid "Answer column"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1258
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1262
 msgid "Answer %d"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1272
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1276
 msgid "+ Add prompt"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1279
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1283
 msgid "+ Add answer"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1286
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1290
 msgid ""
 "Essays are graded manually. Use the explanation field below for model "
 "answers or staff notes."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1299
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1303
 msgid "Explanation / feedback (optional)"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1302
-#: client/src/pages/content-editors/editors.tsx:2106
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1306
+#: client/src/pages/content-editors/editors.tsx:2147
 msgid "Shown after grading or kept for instructors. Stored as post content."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1311
-#: client/src/pages/content-editors/editors.tsx:2109
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1315
+#: client/src/pages/content-editors/editors.tsx:2150
 msgid "Optional explanation for learners or grading notes…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1324
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1328
 msgid "Question library"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1327
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1331
 msgid "Pick an existing question instead of creating a new one."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1338
-#: client/src/pages/content-editors/editors.tsx:1147
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1342
+#: client/src/pages/content-editors/editors.tsx:1188
 msgid "Search questions…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1347
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1351
 #: client/src/components/shared/MultiCoursePicker.tsx:285
 #: client/src/components/shared/list/BulkActionsBar.tsx:83
 msgid "%d selected"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1348
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1352
 msgid "Select multiple to add at once"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1357
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1361
 msgid "Select all"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1365
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1369
 msgid "Clear"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1374
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1378
 msgid "Could not load question library"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1380
-#: client/src/pages/content-editors/editors.tsx:1172
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1384
+#: client/src/pages/content-editors/editors.tsx:1213
 msgid "Loading questions…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1426
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1430
 msgid "No questions found."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1435
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1439
 #: client/src/pages/GradingPage.tsx:415
 msgid "Points"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1438
-#: client/src/pages/content-editors/editors.tsx:2121
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1442
+#: client/src/pages/content-editors/editors.tsx:2162
 msgid "Awarded when the answer is correct (auto-graded types only)."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1455
-#: client/src/pages/content-editors/editors.tsx:2136
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1459
+#: client/src/pages/content-editors/editors.tsx:2177
 msgid "Draft stays hidden from learners until published."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1458
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1462
 #: client/src/components/shared/list/EntityListView.tsx:37
 #: client/src/pages/CourseBuilderPage.tsx:2545
 #: client/src/pages/GradebookPage.tsx:869
-#: client/src/pages/content-editors/editors.tsx:3394
+#: client/src/pages/content-editors/editors.tsx:3435
 msgid "Draft"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1459
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:1463
 #: client/src/components/shared/list/EntityListView.tsx:36
 #: client/src/pages/CourseBuilderPage.tsx:2545
-#: client/src/pages/content-editors/editors.tsx:3395
+#: client/src/pages/content-editors/editors.tsx:3436
 msgid "Published"
 msgstr ""
 
@@ -1616,21 +1617,21 @@ msgstr ""
 msgid "Learner types a short text response."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:726
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:730
 msgid "Edit question"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:726
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:730
 msgid "New question"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:729
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:733
 msgid ""
 "Update this question in your library. Changes apply everywhere this "
 "question is used."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:733
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:737
 msgid ""
 "Same authoring flow as Content library → Questions. Add to this quiz when "
 "you are ready."
@@ -1644,11 +1645,11 @@ msgstr ""
 msgid "A short prompt with a missing word or phrase."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:762
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:766
 msgid "Add selected"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:768
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:772
 #: client/src/pages/AddonSettingsPage.tsx:318
 #: client/src/pages/ContentDripPage.tsx:1016
 #: client/src/pages/CouponsPage.tsx:700
@@ -1671,11 +1672,11 @@ msgstr ""
 #: client/src/pages/SocialLoginPage.tsx:310
 #: client/src/pages/SubscriptionsProPage.tsx:617
 #: client/src/pages/WhiteLabelPage.tsx:625
-#: client/src/pages/content-editors/editors.tsx:3209
+#: client/src/pages/content-editors/editors.tsx:3250
 msgid "Saving…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:769
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:773
 #: client/src/components/shared/CreateCourseModal.tsx:189
 #: client/src/pages/BundlesPage.tsx:268
 #: client/src/pages/IntegrationsPage.tsx:975
@@ -1686,38 +1687,38 @@ msgstr ""
 msgid "Creating…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:771
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:775
 #: client/src/pages/ContentDripPage.tsx:593
 #: client/src/pages/SettingsPage.tsx:975
 #: client/src/pages/SubscriptionsProPage.tsx:617
 msgid "Save changes"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:772
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:776
 msgid "Create and add to quiz"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:781
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:785
 msgid "Could not load question"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:792
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:796
 msgid "Could not save question"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:792
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:796
 msgid "Could not create question"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:799
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:803
 msgid "Loading question…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:806
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:810
 msgid "Edit question sections"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:806
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:810
 msgid "New question sections"
 msgstr ""
 
@@ -1725,12 +1726,12 @@ msgstr ""
 msgid "Matching"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:821
-#: client/src/pages/content-editors/editors.tsx:2160
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:825
+#: client/src/pages/content-editors/editors.tsx:2201
 msgid "Question type"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:824
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:828
 msgid ""
 "Each type shows different fields — multiple choice, matching, essay, and so "
 "on."
@@ -1740,45 +1741,45 @@ msgstr ""
 msgid "Pair items from two columns."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:843
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:847
 msgid "Select question type"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:848
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:852
 msgid "Answers depend on the chosen type."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:849
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:853
 msgid "Choose the format first — it will unlock the right answer fields."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:861
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:865
 msgid "Question text"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:863
-#: client/src/pages/content-editors/editors.tsx:1714
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:867
+#: client/src/pages/content-editors/editors.tsx:1755
 msgid "What the learner sees (plain text or short HTML)."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:868
-#: client/src/pages/content-editors/editors.tsx:1719
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:872
+#: client/src/pages/content-editors/editors.tsx:1760
 msgid "Enter the question stem…"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:880
-#: client/src/pages/content-editors/editors.tsx:1731
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:884
+#: client/src/pages/content-editors/editors.tsx:1772
 msgid "Choose a question type to continue"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:882
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:886
 msgid ""
 "Once you pick a type, Sikshya will show the right answer fields (options, "
 "matching pairs, ordering, etc.)."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:89
-#: client/src/pages/content-editors/editors.tsx:2703
+#: client/src/pages/content-editors/editors.tsx:2744
 msgid "Ordering"
 msgstr ""
 
@@ -1786,25 +1787,25 @@ msgstr ""
 msgid "Reorder items into the correct sequence."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:902
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:906
 msgid "• Pro"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:909
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:913
 msgid "Advanced question types are available in Advanced Quiz."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:917
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:921
 msgid "Advanced Quiz"
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:930
-#: client/src/pages/content-editors/editors.tsx:1769
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:934
+#: client/src/pages/content-editors/editors.tsx:1810
 msgid "At least two options; mark the correct one."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:96
-#: client/src/pages/content-editors/editors.tsx:2442
+#: client/src/pages/content-editors/editors.tsx:2483
 msgid "Essay"
 msgstr ""
 
@@ -1812,14 +1813,9 @@ msgstr ""
 msgid "Long-form response, typically manually graded."
 msgstr ""
 
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:994
-#: client/src/pages/content-editors/editors.tsx:1832
+#: client/src/components/shared/AddQuestionAuthoringModal.tsx:998
+#: client/src/pages/content-editors/editors.tsx:1873
 msgid "Answer choices"
-msgstr ""
-
-#: client/src/components/shared/AddQuestionAuthoringModal.tsx:997
-#: client/src/pages/content-editors/editors.tsx:1833
-msgid "Check every option that should be marked correct."
 msgstr ""
 
 #: client/src/components/shared/ApiErrorPanel.tsx:14
@@ -2172,7 +2168,7 @@ msgid "Remove file"
 msgstr ""
 
 #: client/src/components/shared/WPMediaPickerField.tsx:196
-#: client/src/pages/content-editors/editors.tsx:2444
+#: client/src/pages/content-editors/editors.tsx:2485
 msgid "URL"
 msgstr ""
 
@@ -2224,7 +2220,7 @@ msgstr ""
 #: client/src/components/shared/list/BulkActionsBar.tsx:66
 #: client/src/lib/wpPostStatusRowActions.ts:60
 #: client/src/pages/CourseBuilderPage.tsx:3205
-#: client/src/pages/content-editors/editors.tsx:3205
+#: client/src/pages/content-editors/editors.tsx:3246
 msgid "Publish"
 msgstr ""
 
@@ -2265,7 +2261,7 @@ msgid "Select all on this page"
 msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:35
-#: client/src/pages/InstructorApplicationsPage.tsx:112
+#: client/src/pages/InstructorApplicationsPage.tsx:111
 #: client/src/pages/MarketplacePage.tsx:672
 #: client/src/pages/PaymentsPage.tsx:280
 #: client/src/pages/ReportsPage.tsx:783
@@ -2274,7 +2270,7 @@ msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:38
 #: client/src/pages/DiscussionsPage.tsx:202
-#: client/src/pages/InstructorApplicationsPage.tsx:113
+#: client/src/pages/InstructorApplicationsPage.tsx:112
 #: client/src/pages/MarketplacePage.tsx:673
 #: client/src/pages/PaymentsPage.tsx:266
 #: client/src/pages/ReviewDetailPage.tsx:200
@@ -2297,7 +2293,7 @@ msgid "Scheduled"
 msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:40
-#: client/src/pages/content-editors/editors.tsx:3396
+#: client/src/pages/content-editors/editors.tsx:3437
 msgid "Private"
 msgstr ""
 
@@ -2548,7 +2544,7 @@ msgstr ""
 #: client/src/pages/BundlesPage.tsx:155
 #: client/src/pages/CalendarPage.tsx:163
 #: client/src/pages/DiscussionsPage.tsx:672
-#: client/src/pages/EnrollmentDetailsPage.tsx:77
+#: client/src/pages/EnrollmentDetailsPage.tsx:75
 #: client/src/pages/ReportsPage.tsx:550
 msgid "Refresh"
 msgstr ""
@@ -2594,7 +2590,7 @@ msgstr ""
 
 #: client/src/pages/ActivityLogPage.tsx:348
 #: client/src/pages/MarketplacePage.tsx:519
-#: client/src/pages/content-editors/editors.tsx:661
+#: client/src/pages/content-editors/editors.tsx:702
 msgid "e.g. 12"
 msgstr ""
 
@@ -2615,13 +2611,13 @@ msgstr ""
 #: client/src/pages/CourseBuilderPage.tsx:2044
 #: client/src/pages/EmailMarketingPage.tsx:301
 #: client/src/pages/EmailPage.tsx:110
-#: client/src/pages/InstructorApplicationsPage.tsx:78
+#: client/src/pages/InstructorApplicationsPage.tsx:77
 #: client/src/pages/IntegrationsPage.tsx:267
 #: client/src/pages/PrerequisitesPage.tsx:594
 #: client/src/pages/SettingsPage.tsx:668
 #: client/src/pages/SocialLoginPage.tsx:64
 #: client/src/pages/WhiteLabelPage.tsx:130
-#: client/src/pages/content-editors/editors.tsx:2959
+#: client/src/pages/content-editors/editors.tsx:3000
 msgid "Saved"
 msgstr ""
 
@@ -2959,7 +2955,7 @@ msgstr ""
 #: client/src/pages/DiscussionsPage.tsx:818
 #: client/src/pages/GradebookPage.tsx:1286
 #: client/src/pages/GradingPage.tsx:242
-#: client/src/pages/InstructorApplicationsPage.tsx:140
+#: client/src/pages/InstructorApplicationsPage.tsx:139
 #: client/src/pages/IntegrationsPage.tsx:980
 #: client/src/pages/IssuedCertificatesPage.tsx:84
 #: client/src/pages/MarketplacePage.tsx:689
@@ -3391,7 +3387,7 @@ msgstr ""
 #: client/src/pages/DiscussionsPage.tsx:879
 #: client/src/pages/EmailTemplatesListPage.tsx:226
 #: client/src/pages/EnrollmentsPage.tsx:364
-#: client/src/pages/InstructorApplicationsPage.tsx:158
+#: client/src/pages/InstructorApplicationsPage.tsx:157
 #: client/src/pages/IssuedCertificatesPage.tsx:101
 #: client/src/pages/MarketplacePage.tsx:705
 #: client/src/pages/OrdersPage.tsx:547
@@ -4110,7 +4106,7 @@ msgid "Order item"
 msgstr ""
 
 #: client/src/pages/CourseTeamPage.tsx:930
-#: client/src/pages/EnrollmentDetailsPage.tsx:192
+#: client/src/pages/EnrollmentDetailsPage.tsx:190
 #: client/src/pages/MarketplacePage.tsx:701
 #: client/src/pages/PaymentsPage.tsx:302
 msgid "Amount"
@@ -4454,7 +4450,7 @@ msgstr ""
 #: client/src/pages/PaymentDetailsPage.tsx:137
 #: client/src/pages/PaymentsPage.tsx:205
 #: client/src/pages/PrerequisitesPage.tsx:788
-#: client/src/pages/content-editors/editors.tsx:3209
+#: client/src/pages/content-editors/editors.tsx:3250
 msgid "Save"
 msgstr ""
 
@@ -4474,7 +4470,7 @@ msgid "Moved to trash (moderator rejection, not spam)."
 msgstr ""
 
 #: client/src/pages/DiscussionsPage.tsx:209
-#: client/src/pages/InstructorApplicationsPage.tsx:115
+#: client/src/pages/InstructorApplicationsPage.tsx:114
 #: client/src/pages/MarketplacePage.tsx:676
 msgid "Rejected"
 msgstr ""
@@ -4756,7 +4752,7 @@ msgid "HTTP"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:806
-#: client/src/pages/InstructorApplicationsPage.tsx:153
+#: client/src/pages/InstructorApplicationsPage.tsx:152
 #: client/src/pages/SubscriptionsProPage.tsx:1113
 msgid "User"
 msgstr ""
@@ -4795,7 +4791,7 @@ msgid "Leave empty for recent site-wide enrollments"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:897
-#: client/src/pages/InstructorApplicationsPage.tsx:190
+#: client/src/pages/InstructorApplicationsPage.tsx:189
 #: client/src/pages/ScormH5pWorkspacePage.tsx:252
 msgid "Working…"
 msgstr ""
@@ -4908,7 +4904,7 @@ msgid "View (locked)"
 msgstr ""
 
 #: client/src/pages/EmailTemplatesListPage.tsx:322
-#: client/src/pages/EnrollmentDetailsPage.tsx:170
+#: client/src/pages/EnrollmentDetailsPage.tsx:168
 msgid "Edit"
 msgstr ""
 
@@ -4930,15 +4926,15 @@ msgid ""
 "one to appear here, check that the relevant add-on is active."
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:115
+#: client/src/pages/EnrollmentDetailsPage.tsx:113
 msgid "Enrolled in"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:131
+#: client/src/pages/EnrollmentDetailsPage.tsx:129
 msgid "Progress"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:149
+#: client/src/pages/EnrollmentDetailsPage.tsx:147
 #: client/src/pages/GradebookPage.tsx:1023
 #: client/src/pages/IssuedCertificatesPage.tsx:96
 #: client/src/pages/OrdersPage.tsx:340
@@ -4946,46 +4942,46 @@ msgstr ""
 msgid "Learner"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:152
+#: client/src/pages/EnrollmentDetailsPage.tsx:150
 msgid "Username"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:154
+#: client/src/pages/EnrollmentDetailsPage.tsx:152
 msgid "User profile"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:160
+#: client/src/pages/EnrollmentDetailsPage.tsx:158
 msgid "Open in WP admin →"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:167
+#: client/src/pages/EnrollmentDetailsPage.tsx:165
 msgid "Title"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:177
+#: client/src/pages/EnrollmentDetailsPage.tsx:175
 msgid "Open in course builder →"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:188
+#: client/src/pages/EnrollmentDetailsPage.tsx:186
 #: client/src/pages/MarketplacePage.tsx:702
 msgid "Method"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:189
+#: client/src/pages/EnrollmentDetailsPage.tsx:187
 msgid "— (free or manual)"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:195
+#: client/src/pages/EnrollmentDetailsPage.tsx:193
 msgid "Transaction"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:200
+#: client/src/pages/EnrollmentDetailsPage.tsx:198
 #: client/src/pages/EnrollmentsPage.tsx:362
 #: client/src/pages/ReportsPage.tsx:786
 msgid "Enrolled"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:202
+#: client/src/pages/EnrollmentDetailsPage.tsx:200
 #: client/src/pages/EnrollmentsPage.tsx:325
 #: client/src/pages/GradebookPage.tsx:1312
 #: client/src/pages/PaymentsPage.tsx:267
@@ -4993,27 +4989,27 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:205
+#: client/src/pages/EnrollmentDetailsPage.tsx:203
 msgid "Notes"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:56
+#: client/src/pages/EnrollmentDetailsPage.tsx:54
 msgid "Missing enrollment id."
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:74
+#: client/src/pages/EnrollmentDetailsPage.tsx:72
 msgid "Back to enrollments"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:84
+#: client/src/pages/EnrollmentDetailsPage.tsx:82
 msgid "Could not load enrollment"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:90
+#: client/src/pages/EnrollmentDetailsPage.tsx:88
 msgid "Loading enrollment…"
 msgstr ""
 
-#: client/src/pages/EnrollmentDetailsPage.tsx:94
+#: client/src/pages/EnrollmentDetailsPage.tsx:92
 msgid "Enrollment not found."
 msgstr ""
 
@@ -5047,7 +5043,7 @@ msgstr ""
 
 #: client/src/pages/EnrollmentsPage.tsx:386
 #: client/src/pages/GradebookPage.tsx:991
-#: client/src/pages/InstructorApplicationsPage.tsx:184
+#: client/src/pages/InstructorApplicationsPage.tsx:183
 msgid "Open WP user"
 msgstr ""
 
@@ -5259,7 +5255,7 @@ msgid "Learner, email, course…"
 msgstr ""
 
 #: client/src/pages/GradebookPage.tsx:867
-#: client/src/pages/InstructorApplicationsPage.tsx:156
+#: client/src/pages/InstructorApplicationsPage.tsx:155
 #: client/src/pages/ReviewsPage.tsx:307
 msgid "Submitted"
 msgstr ""
@@ -5381,51 +5377,51 @@ msgstr ""
 msgid "A+"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:127
+#: client/src/pages/InstructorApplicationsPage.tsx:126
 msgid "Name or email…"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:137
+#: client/src/pages/InstructorApplicationsPage.tsx:136
 msgid "Could not load applications"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:144
+#: client/src/pages/InstructorApplicationsPage.tsx:143
 msgid "No applications"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:145
+#: client/src/pages/InstructorApplicationsPage.tsx:144
 msgid ""
 "When learners submit the instructor form on the account page or shortcode, "
 "they appear here."
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:154
+#: client/src/pages/InstructorApplicationsPage.tsx:153
 msgid "Headline"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:190
+#: client/src/pages/InstructorApplicationsPage.tsx:189
 #: client/src/pages/MarketplacePage.tsx:724
 msgid "Approve"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:196
+#: client/src/pages/InstructorApplicationsPage.tsx:195
 #: client/src/pages/MarketplacePage.tsx:730
 msgid "Reject"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:203
+#: client/src/pages/InstructorApplicationsPage.tsx:202
 msgid "Application actions"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:78
+#: client/src/pages/InstructorApplicationsPage.tsx:77
 msgid "Approved."
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:78
+#: client/src/pages/InstructorApplicationsPage.tsx:77
 msgid "Rejected."
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:81
+#: client/src/pages/InstructorApplicationsPage.tsx:80
 #: client/src/pages/PrerequisitesPage.tsx:286
 #: client/src/pages/content-editors/editors.tsx:238
 msgid "Request failed"
@@ -8128,7 +8124,7 @@ msgid "Drag a tile to the canvas, or use quick add for the same block."
 msgstr ""
 
 #: client/src/pages/content-editors/CertificateVisualBuilder.tsx:2248
-#: client/src/pages/content-editors/editors.tsx:1176
+#: client/src/pages/content-editors/editors.tsx:1217
 msgid "Library"
 msgstr ""
 
@@ -8950,374 +8946,378 @@ msgstr ""
 msgid "Program completed"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1034
+#: client/src/pages/content-editors/editors.tsx:1020
+msgid "Quiz editor sections"
+msgstr ""
+
+#: client/src/pages/content-editors/editors.tsx:1030
+msgid "Quiz editor"
+msgstr ""
+
+#: client/src/pages/content-editors/editors.tsx:1075
 msgid "Shown in the course outline and at the top of the quiz for learners."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1040
+#: client/src/pages/content-editors/editors.tsx:1081
 msgid "e.g. Module 1 checkpoint"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1048
+#: client/src/pages/content-editors/editors.tsx:1089
 msgid "What students see before starting the quiz…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1057
+#: client/src/pages/content-editors/editors.tsx:1098
 msgid ""
 "Optional image for quiz cards or outlines when your theme supports featured "
 "images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1062
+#: client/src/pages/content-editors/editors.tsx:1103
 msgid "Grading & timing"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1062
+#: client/src/pages/content-editors/editors.tsx:1103
 msgid "How the quiz is scored and constrained for learners."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1068
+#: client/src/pages/content-editors/editors.tsx:1109
 msgid "Use 0 for no time limit."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1082
+#: client/src/pages/content-editors/editors.tsx:1123
 msgid "Based on total points across questions."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1097
+#: client/src/pages/content-editors/editors.tsx:1138
 msgid "Minimum 1."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1109
+#: client/src/pages/content-editors/editors.tsx:1150
 msgid "Draft hides the quiz from learners until you publish."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1168
+#: client/src/pages/content-editors/editors.tsx:1209
 msgid "Could not load questions"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1197
+#: client/src/pages/content-editors/editors.tsx:1238
 msgid "Added"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1211
+#: client/src/pages/content-editors/editors.tsx:1252
 msgid "Selected in this quiz"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1241
+#: client/src/pages/content-editors/editors.tsx:1282
 msgid "Drag to reorder"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1251
+#: client/src/pages/content-editors/editors.tsx:1292
 msgid "Edit this question in the same form as New question"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1572
+#: client/src/pages/content-editors/editors.tsx:1613
 msgid "Question saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1640
+#: client/src/pages/content-editors/editors.tsx:1681
 msgid "Question editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1649
+#: client/src/pages/content-editors/editors.tsx:1690
 msgid "Question editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2101
+#: client/src/pages/content-editors/editors.tsx:2142
 msgid ""
 "Optional image shown with the question in supported themes or future quiz "
 "layouts."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2307
+#: client/src/pages/content-editors/editors.tsx:2348
 msgid "Assignment saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2334
+#: client/src/pages/content-editors/editors.tsx:2375
 msgid "Assignment editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2343
+#: client/src/pages/content-editors/editors.tsx:2384
 msgid "Assignment editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2386
+#: client/src/pages/content-editors/editors.tsx:2427
 msgid "e.g. Week 3 project brief"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2395
+#: client/src/pages/content-editors/editors.tsx:2436
 msgid "Task description, deliverables, and grading criteria…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2404
+#: client/src/pages/content-editors/editors.tsx:2445
 msgid ""
 "Optional image for assignment lists or course outlines when your theme "
 "supports featured images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2409
+#: client/src/pages/content-editors/editors.tsx:2450
 msgid "Submission"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2409
+#: client/src/pages/content-editors/editors.tsx:2450
 msgid "Scheduling and what learners submit."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2416
+#: client/src/pages/content-editors/editors.tsx:2457
 msgid "Optional. Uses your site timezone."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2423
+#: client/src/pages/content-editors/editors.tsx:2464
 msgid "Maximum score when graded."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2441
+#: client/src/pages/content-editors/editors.tsx:2482
 msgid "Choose how learners submit…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2443
+#: client/src/pages/content-editors/editors.tsx:2484
 msgid "File upload"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2581
+#: client/src/pages/content-editors/editors.tsx:2622
 msgid "Chapter saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2608
+#: client/src/pages/content-editors/editors.tsx:2649
 msgid "Chapter editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2617
+#: client/src/pages/content-editors/editors.tsx:2658
 msgid "Chapter editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2652
+#: client/src/pages/content-editors/editors.tsx:2693
 msgid "e.g. Getting started"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2660
+#: client/src/pages/content-editors/editors.tsx:2701
 msgid "Optional text shown above the lessons in this chapter…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2669
+#: client/src/pages/content-editors/editors.tsx:2710
 msgid ""
 "Optional banner or icon for this chapter in the course outline when your "
 "theme supports featured images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2674
+#: client/src/pages/content-editors/editors.tsx:2715
 msgid "Placement"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2674
+#: client/src/pages/content-editors/editors.tsx:2715
 msgid "Which course outline this chapter belongs to."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2693
+#: client/src/pages/content-editors/editors.tsx:2734
 msgid "Choose a course…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2703
+#: client/src/pages/content-editors/editors.tsx:2744
 msgid "Lower numbers appear first in the course outline."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2718
+#: client/src/pages/content-editors/editors.tsx:2759
 msgid "Publishing"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2911
+#: client/src/pages/content-editors/editors.tsx:2952
 msgid "Saved, but could not reload"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2955
+#: client/src/pages/content-editors/editors.tsx:2996
 msgid "Some settings could not be saved"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2959
+#: client/src/pages/content-editors/editors.tsx:3000
 msgid "Certificate published"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3128
+#: client/src/pages/content-editors/editors.tsx:3169
 msgid "Certificate editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3147
+#: client/src/pages/content-editors/editors.tsx:3188
 msgid ""
 "This is a default template included with Sikshya. It cannot be deleted, but "
 "you can duplicate or edit it."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3182
+#: client/src/pages/content-editors/editors.tsx:3223
 msgid ""
 "Open the public verification/preview link (uses this certificate’s preview "
 "hash)."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3191
+#: client/src/pages/content-editors/editors.tsx:3232
 msgid ""
 "Opens an internal layout preview window. Save once to enable the public "
 "preview link."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3205
+#: client/src/pages/content-editors/editors.tsx:3246
 msgid "Publishing…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3229
+#: client/src/pages/content-editors/editors.tsx:3270
 msgid "Certificate Builder"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3230
+#: client/src/pages/content-editors/editors.tsx:3271
 msgid ""
 "Design printable, verifiable certificates with templates, QR codes, and "
 "verification links."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3232
+#: client/src/pages/content-editors/editors.tsx:3273
 msgid "Certificate Builder is not enabled"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3233
+#: client/src/pages/content-editors/editors.tsx:3274
 msgid "Turn on the Advanced certificates add-on to use the certificate builder."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3311
+#: client/src/pages/content-editors/editors.tsx:3352
 msgid "Saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3364
+#: client/src/pages/content-editors/editors.tsx:3405
 msgid "Entry title"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3377
+#: client/src/pages/content-editors/editors.tsx:3418
 msgid "HTML or plain text…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3392
+#: client/src/pages/content-editors/editors.tsx:3433
 msgid "Draft hides this item from public views until you publish."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:404
+#: client/src/pages/content-editors/editors.tsx:415
 msgid "Lesson saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:445
+#: client/src/pages/content-editors/editors.tsx:458
 msgid "Lesson editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:454
+#: client/src/pages/content-editors/editors.tsx:467
 msgid "Lesson editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:469
+#: client/src/pages/content-editors/editors.tsx:482
 msgid "hr"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:469
+#: client/src/pages/content-editors/editors.tsx:482
 msgid "min"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:498
+#: client/src/pages/content-editors/editors.tsx:511
 msgid "e.g. Installing WordPress"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:511
+#: client/src/pages/content-editors/editors.tsx:524
 msgid "One or two sentences about this lesson"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:534
+#: client/src/pages/content-editors/editors.tsx:547
 msgid "Live class (Pro)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:535
+#: client/src/pages/content-editors/editors.tsx:548
 msgid "Live class (Pro · addon off)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:538
+#: client/src/pages/content-editors/editors.tsx:551
 msgid "Live class (requires Sikshya Pro)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:543
+#: client/src/pages/content-editors/editors.tsx:556
 msgid "SCORM package (Pro)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:544
+#: client/src/pages/content-editors/editors.tsx:557
 msgid "SCORM package (Pro · addon off)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:547
+#: client/src/pages/content-editors/editors.tsx:560
 msgid "SCORM package (requires Sikshya Pro)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:552
+#: client/src/pages/content-editors/editors.tsx:565
 msgid "H5P interactive (Pro)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:553
+#: client/src/pages/content-editors/editors.tsx:566
 msgid "H5P interactive (Pro · addon off)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:556
+#: client/src/pages/content-editors/editors.tsx:569
 msgid "H5P interactive (requires Sikshya Pro)"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:564
+#: client/src/pages/content-editors/editors.tsx:577
 msgid ""
 "Optional cover image for lesson lists and course outlines when your theme "
 "supports featured images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:612
+#: client/src/pages/content-editors/editors.tsx:618
+msgid "Paste the full transcript text here…"
+msgstr ""
+
+#: client/src/pages/content-editors/editors.tsx:653
 msgid "Optional notes under the video…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:612
+#: client/src/pages/content-editors/editors.tsx:653
 msgid "Your lesson content…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:622
+#: client/src/pages/content-editors/editors.tsx:663
 msgid ""
 "Controls whether this lesson is visible to learners when the course is "
 "published."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:642
+#: client/src/pages/content-editors/editors.tsx:683
 msgid "Pending review"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:661
+#: client/src/pages/content-editors/editors.tsx:702
 msgid "e.g. 1.5"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:667
+#: client/src/pages/content-editors/editors.tsx:708
 msgid "Free preview"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:668
+#: client/src/pages/content-editors/editors.tsx:709
 msgid ""
 "When enabled, this lesson can be opened by visitors who are not enrolled "
 "(useful for demo lessons)."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:679
+#: client/src/pages/content-editors/editors.tsx:720
 msgid "Allow free preview"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:767
+#: client/src/pages/content-editors/editors.tsx:808
 msgid "Add the required fields (usually title) to enable saving."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:939
+#: client/src/pages/content-editors/editors.tsx:980
 msgid "Quiz saved."
-msgstr ""
-
-#: client/src/pages/content-editors/editors.tsx:979
-msgid "Quiz editor sections"
-msgstr ""
-
-#: client/src/pages/content-editors/editors.tsx:989
-msgid "Quiz editor"
 msgstr ""
 
 #: client/src/pages/hubs/HubPages.tsx:117

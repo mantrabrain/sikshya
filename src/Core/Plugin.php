@@ -531,7 +531,7 @@ final class Plugin
             'description' => 'A comprehensive WordPress Learning Management System plugin',
             'author' => 'Sikshya Team',
             'author_url' => 'https://mantrabrain.com',
-            'plugin_url' => 'https://mantrabrain.com/plugins/sikshya/',
+            'plugin_url' => 'https://mantrabrain.com/plugins/sikshya-lms/',
             'support_url' => $support,
             'documentation_url' => $docs,
         ];

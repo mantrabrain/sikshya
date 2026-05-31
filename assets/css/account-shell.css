@@ -454,7 +454,13 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   padding: 1.05rem var(--sik-acc-page-pad-x);
   background: var(--sik-acc-surface);
   border-bottom: 1px solid var(--sik-acc-border);
-  overflow: hidden;
+  /* IMPORTANT: do NOT set `overflow: hidden` here — the user-menu
+   * dropdown is positioned absolutely below the topbar (`top: 100% + 8px`)
+   * and would be clipped by an overflow-hidden parent. Position is also
+   * `relative` so it can serve as a stacking-context anchor for the
+   * dropdown z-index. */
+  position: relative;
+  z-index: 50;
 }
 
 .sik-acc-topbar__titles {
@@ -496,40 +502,54 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.25rem 0.35rem;
-  border-radius: var(--sik-acc-radius-sm);
+  /* Tighter padding — the button is now just the avatar circle, not
+   * the avatar + name + email + caret combo. */
+  padding: 2px;
+  border-radius: 9999px;
   border: 1px solid transparent;
   background: transparent;
   color: inherit;
   cursor: pointer;
   font: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.sik-acc-user-btn:hover {
-  background: var(--sik-acc-slate-50);
+.sik-acc-user-btn:hover,
+.sik-acc-user-btn[aria-expanded="true"] {
+  background: transparent;
   border-color: var(--sik-acc-border);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sik-acc-text, #0f172a) 6%, transparent);
 }
 
-.sik-acc-user-caret {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--sik-acc-muted);
-  opacity: 0.9;
+.sik-acc-user-btn:focus-visible {
+  outline: 2px solid var(--sik-acc-primary, #2c5ba8);
+  outline-offset: 2px;
+}
+
+/* Hide name + email + caret on the trigger so only the avatar shows. */
+.sik-acc-user-btn .sik-acc-user__meta,
+.sik-acc-user-btn .sik-acc-user-caret {
+  display: none;
 }
 
 .sik-acc-user-dropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 210px;
+  min-width: 240px;
   padding: 0.4rem;
   border-radius: var(--sik-acc-radius);
   border: 1px solid var(--sik-acc-border);
   background: var(--sik-acc-surface);
   box-shadow: var(--sik-acc-shadow-md);
   display: none;
-  z-index: 40;
+  /* High z-index so the dropdown floats above any subsequent
+   * content sections (sidebar, content cards, etc.). The topbar
+   * itself has z-index: 50 and is `position: relative`, so this
+   * 9999 is interpreted within that stacking context — guaranteed
+   * to sit above everything else on the page. */
+  z-index: 9999;
+  isolation: isolate;
 }
 
 .sik-acc-user-menu.is-open .sik-acc-user-dropdown {
@@ -2008,6 +2028,13 @@ a.sik-acc-cal__title:hover {
   border-radius: var(--sik-acc-radius-sm);
   border: 1px solid var(--sik-acc-border);
   background: var(--sik-acc-slate-50);
+}
+
+/* When the JS hasn't populated a status message yet (initial load, no
+ * submit), keep the pill invisible — otherwise an empty bordered chip
+ * sits next to the submit button and reads as a broken UI element. */
+.sik-acc-form-status:empty {
+  display: none;
 }
 
 .sik-acc-form-status--ok {

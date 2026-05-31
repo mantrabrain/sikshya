@@ -57,7 +57,7 @@ final class ProUpgradeAdminNudge
      */
     public static function upgradeUrl(): string
     {
-        $default = 'https://mantrabrain.com/plugins/sikshya/#pricing';
+        $default = 'https://mantrabrain.com/plugins/sikshya-lms/#pricing';
         $from_commercial = apply_filters('sikshya_commercial_upgrade_url', $default);
         $base = is_string($from_commercial) && $from_commercial !== '' ? $from_commercial : $default;
 

@@ -47,9 +47,7 @@ export function EnrollmentDetailsPage(props: { config: SikshyaReactConfig; title
   const enrollmentId = useMemo(() => parseInt(route.query?.id || '0', 10) || 0, [route.query]);
 
   const student = term(config, 'student');
-  const studentLower = termLower(config, 'student');
   const course = term(config, 'course');
-  const courseLower = termLower(config, 'course');
   const enrollmentLower = termLower(config, 'enrollment');
 
   const loader = useCallback(async () => {

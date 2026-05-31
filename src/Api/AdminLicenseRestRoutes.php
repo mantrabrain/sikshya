@@ -157,7 +157,7 @@ final class AdminLicenseRestRoutes
              * Commercial add-on PHP is loaded (filter) — kept as `pro_plugin_active` for admin shell compatibility.
              */
             'pro_plugin_active' => self::is_extension_runtime_active(),
-            'upgrade_url' => (string) ($lic['upgradeUrl'] ?? 'https://mantrabrain.com/plugins/sikshya/#pricing'),
+            'upgrade_url' => (string) ($lic['upgradeUrl'] ?? 'https://mantrabrain.com/plugins/sikshya-lms/#pricing'),
             'site_tier' => (string) ($lic['siteTier'] ?? 'free'),
             'site_tier_label' => (string) ($lic['siteTierLabel'] ?? ''),
         ];

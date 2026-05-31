@@ -1,17 +1,24 @@
-# Excluded from WordPress.org SVN deploy (10up/action-wordpress-plugin-deploy).
-# Same spirit as .gitattributes export-ignore — do NOT list resources/js; source ships with the plugin.
+# Excluded from WordPress.org SVN deploy (10up/action-wordpress-plugin-deploy)
+# and from the production zip built by build.sh.
+#
+# Rule of thumb: anything that's NOT needed at runtime on a customer's site
+# belongs here. The shippable artifact must contain only the PHP runtime,
+# compiled assets under assets/, the production vendor/ (installed via
+# `composer install --no-dev`), templates/, includes/, languages/, and
+# the WP plugin header file.
 
-# VCS / CI
+# ── VCS / CI ──────────────────────────────────────────────────────────
 .git
 .github
 .gitignore
 .gitattributes
 .distignore
 
-# WordPress.org repo assets (banner, screenshots) — action uploads these separately
+# WordPress.org repo banner / screenshots (action uploads these separately)
 .wordpress-org
 
-# Node / Composer dev metadata — vendor is not deployed to WordPress.org (built in release workflow)
+# ── Node / Composer dev metadata ──────────────────────────────────────
+# vendor/ IS shipped (production install runs in build.sh first)
 node_modules
 package.json
 package-lock.json
@@ -20,42 +27,85 @@ pnpm-lock.yaml
 npm-debug.log*
 composer.json
 composer.lock
+composer.phar
 
-# Tooling & tests
+# ── PHP test infrastructure ───────────────────────────────────────────
+tests
 phpcs.xml
 phpcs.xml.dist
 phpunit.xml
 phpunit.xml.dist
+phpunit.integration.xml
 .phpunit.result.cache
-tests
-scripts
-docs
+.phpunit-integration.result.cache
 
-# Build config (built assets already under assets/dist and assets/admin/dist)
+# ── Playwright / E2E test infrastructure ──────────────────────────────
+e2e
+tests-e2e
+playwright.config.ts
+playwright-report
+test-results
+playwright
+
+# ── Vite / lint / type-check configs ──────────────────────────────────
+# NOTE: `client/` (React TypeScript source) IS shipped — required by GPL
+# (provide source alongside compiled binaries) and by the WordPress.org
+# "no obfuscated code" rule. The compiled output in `assets/admin/react/`
+# is loaded at runtime; the source in `client/` is the corresponding
+# human-readable form. `*.map` files ARE shipped for the same reason —
+# source maps let users debug what they receive.
 vite.config.ts
+vite.config.js
+vite
 tsconfig.json
 tsconfig.node.json
 tailwind.config.js
+tailwind.config.cjs
 postcss.config.js
+postcss.config.cjs
 babel.config.cjs
-vite
+babel.config.js
 eslint.config.js
+.eslintrc
+.eslintrc.json
+.eslintrc.cjs
 .prettierrc
 .prettierrc.json
 prettier.config.js
 
-# Local / release helpers
+# ── Build artifacts (NOT source maps — those ship) ────────────────────
+build
+builder
+compat-report
+assets/.vite
+.vite
+
+# ── Build / release helpers ───────────────────────────────────────────
 build.sh
 copy.sh
-build
-*.map
-assets/.vite
 scripts
-tests
-docs
 
-# GitHub / internal only
+# ── Internal documentation (not for end users) ────────────────────────
+docs
 README.md
+AUDIT_REGRESSION_TESTS.md
+SERVER_SIDE_HARDENING.md
 UNUSED_SETTINGS_ANALYSIS.md
+CHANGELOG.md
+CONTRIBUTING.md
+DEVELOPMENT.md
+
+# ── Local config / OS junk ────────────────────────────────────────────
 .env
 .env.*
+.idea
+.vscode
+.editorconfig
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.bak
+*.swp
+*.swo
+*~

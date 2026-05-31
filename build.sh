@@ -60,36 +60,107 @@ EXCLUDE_FILE="$(mktemp)"
 trap 'rm -rf "${STAGE_PARENT}"; rm -f "${EXCLUDE_FILE}"' EXIT
 
 cat >"${EXCLUDE_FILE}" <<'EOF'
-build/
-builder/
-.wordpress-org/
+# This list MUST stay in sync with .distignore (10up/action-wordpress-plugin-deploy
+# uses .distignore; build.sh uses this. Same rules, different file formats.)
+#
+# Anything that is NOT needed at runtime on a customer's site belongs here.
+
+# VCS / CI
 .git/
 .github/
-docs/
 .gitignore
 .gitattributes
+.distignore
+.wordpress-org/
+
+# Node / Composer dev metadata (vendor/ is included — composer install --no-dev ran above)
 node_modules/
-client/
 package.json
 package-lock.json
-vite.config.ts
-tsconfig.json
-tailwind.config.js
-postcss.config.js
-babel.config.cjs
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log*
+composer.json
+composer.lock
+composer.phar
+
+# PHP test infrastructure
 tests/
+phpcs.xml
+phpcs.xml.dist
 phpunit.xml
 phpunit.xml.dist
+phpunit.integration.xml
 .phpunit.result.cache
+.phpunit-integration.result.cache
+
+# Playwright / E2E test infrastructure
+e2e/
+tests-e2e/
+playwright.config.ts
+playwright-report/
+test-results/
+playwright/
+
+# Vite / lint / type-check configs
+# NOTE: `client/` (React TypeScript source) IS shipped — required by GPL
+# (provide source alongside compiled binaries) and the WordPress.org
+# "no obfuscated code" rule. `*.map` source maps ARE also shipped so
+# users can debug what they receive.
+vite.config.ts
+vite.config.js
+tsconfig.json
+tsconfig.node.json
+tailwind.config.js
+tailwind.config.cjs
+postcss.config.js
+postcss.config.cjs
+babel.config.cjs
+babel.config.js
+eslint.config.js
+.eslintrc
+.eslintrc.json
+.eslintrc.cjs
+.prettierrc
+.prettierrc.json
+prettier.config.js
+
+# Build artifacts (NOT source maps — those ship)
+build/
+builder/
+compat-report/
+.vite/
+assets/.vite/
+
+# Build / release helpers
+build.sh
+copy.sh
+scripts/
+
+# Internal documentation (not for end users)
+docs/
+README.md
+AUDIT_REGRESSION_TESTS.md
+SERVER_SIDE_HARDENING.md
+UNUSED_SETTINGS_ANALYSIS.md
+CHANGELOG.md
+CONTRIBUTING.md
+DEVELOPMENT.md
+
+# Local config / OS junk
 .env
 .env.*
-*.log
+.idea/
+.vscode/
+.editorconfig
 .DS_Store
 Thumbs.db
 desktop.ini
-*.map
-scripts/
-build.sh
+*.log
+*.bak
+*.swp
+*.swo
+*~
 EOF
 
 echo "==> Staging plugin into ${PLUGIN_SLUG}/"

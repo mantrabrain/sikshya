@@ -508,7 +508,7 @@ final class AdminMarketingNoticeService
 
     private static function defaultUpgradeUrl(): string
     {
-        $default = 'https://mantrabrain.com/plugins/sikshya/#pricing';
+        $default = 'https://mantrabrain.com/plugins/sikshya-lms/#pricing';
         $url = apply_filters('sikshya_commercial_upgrade_url', $default);
 
         return is_string($url) && $url !== '' ? esc_url_raw($url) : esc_url_raw($default);

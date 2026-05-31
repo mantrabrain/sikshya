@@ -570,6 +570,31 @@ body.sikshya-course-layout--fullwidth .sikshya-single-course.sikshya-course-lp.s
   background: var(--sik-f-surface);
 }
 
+/* "Expand / Collapse all" button + its swap icons.
+ *
+ * Two SVGs ship in the markup (unfold-more, unfold-less); we show only
+ * the one that matches the current `aria-expanded` state. The label text
+ * is wrapped in its own span so the JS can swap it without wiping the
+ * SVG markup. Icons use stroke-currentColor so they inherit the button
+ * text colour for free across hover / focus / disabled states. */
+.sikshya-course-lp__toggleAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sikshya-course-lp__toggleAll-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  display: none;
+}
+
+.sikshya-course-lp__toggleAll[aria-expanded="false"] .sikshya-course-lp__toggleAll-icon--expand,
+.sikshya-course-lp__toggleAll[aria-expanded="true"]  .sikshya-course-lp__toggleAll-icon--collapse {
+  display: inline-block;
+}
+
 .sikshya-course-lp__chapter {
   border-bottom: 1px solid var(--sik-f-border);
 }
