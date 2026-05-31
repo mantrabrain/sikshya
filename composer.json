@@ -11,10 +11,10 @@
     ],
     "require": {
         "php": ">=7.4",
-        "composer/installers": "^2.0",
         "firebase/php-jwt": "^6.10"
     },
     "require-dev": {
+        "composer/installers": "^2.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
         "fakerphp/faker": "^1.0",
         "mockery/mockery": "^1.0",

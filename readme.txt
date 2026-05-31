@@ -5,7 +5,7 @@ Tags: lms, online courses, elearning, learning management system, course builder
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,15 @@ Sikshya outputs normal WordPress pages and URLs. Use clear course titles, excerp
 6. Learner experience — lesson view with curriculum sidebar, progress, and resume-friendly layout for enrolled students.
 
 == Changelog ==
+
+= 1.0.5 - 2026-05-31 =
+**Vendor + readme hygiene**
+* Composer: `composer/installers` moved from `require` to `require-dev` — it's a Composer build-time plugin, not a runtime dependency, so it had no business shipping to customer sites. The runtime `require` list is now just PHP 7.4+ and `firebase/php-jwt ^6.10` — the bare minimum the plugin actually uses at runtime.
+* Build pipeline: `build.sh` already ran `composer install --no-dev --optimize-autoloader` before zipping, but the working tree now also reflects production-only deps; a fresh checkout's `vendor/` weighs in at ~716 KB instead of the previous 78 MB.
+* Readme: full restructure with a marketing-funnel section order — "Why choose Sikshya?" promoted above the fold; Pro CTA → catalog → competitor comparisons → developer reference flow; new "Compatible with your stack" callout naming Gutenberg, Elementor, Divi; 4 new FAQs (page-builder compatibility, migration from LearnDash/Tutor/LearnPress, mobile-responsiveness, GDPR).
+* Readme: all **36** distinct feature pages on `mantrabrain.com/plugins/sikshya-lms/` are now deep-linked (Free Course Builder, Video & Text Lessons, Quizzes, Course Certificates, Native Checkout + 31 Pro add-ons), each with feature-specific UTM campaign so analytics attribute click-throughs back to the originating section.
+* Readme: documentation host migrated from `docs.mantrabrain.com/sikshya-wordpress-plugin/` to `sikshya.mantrabrain.com/docs/`; product page URL aligned with `/plugins/sikshya-lms/` and "Explore Pro" + "Pricing & plans" CTAs route directly to `/pricing/`.
+* Known issue: `firebase/php-jwt ^6.10` has a low-severity advisory (CVE-2025-45769, "weak encryption"). The fix requires a major bump to v7.x — slated for the next release after we verify the API delta against `JwtAuthService`.
 
 = 1.0.4 - 2026-05-31 =
 **Learn page — production sprint**
