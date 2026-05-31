@@ -888,7 +888,7 @@ export function SettingsPage(props: { embedded?: boolean; config: SikshyaReactCo
                                     if (f.key === 'allow_usage_tracking') {
                                       const enabled = isTruthyCheckboxValue(draft['allow_usage_tracking']);
                                       const collectUrl =
-                                        'https://docs.mantrabrain.com/sikshya-wordpress-plugin/which-types-of-data-are-being-tracked/';
+                                        'https://sikshya.mantrabrain.com/docs/which-types-of-data-are-being-tracked/';
                                       out.push(
                                         <div key="usage-info" className="lg:col-span-2">
                                           <div className="rounded-xl border border-slate-200/70 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">

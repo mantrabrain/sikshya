@@ -522,7 +522,7 @@ final class Plugin
     public function getPluginInfo(): array
     {
         $links = function_exists('sikshya_brand_links') ? sikshya_brand_links() : [];
-        $docs = isset($links['documentationUrl']) ? (string) $links['documentationUrl'] : 'https://docs.mantrabrain.com/sikshya-wordpress-plugin/';
+        $docs = isset($links['documentationUrl']) ? (string) $links['documentationUrl'] : 'https://sikshya.mantrabrain.com/docs/';
         $support = isset($links['supportUrl']) ? (string) $links['supportUrl'] : 'https://support.sikshya.com';
 
         $info = [

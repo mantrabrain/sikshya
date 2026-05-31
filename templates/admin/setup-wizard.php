@@ -383,7 +383,7 @@ $progress_pct = (int) round($initial_step / $total_steps * 100);
                             <?php esc_html_e('No personal or learner details—only technical signals.', 'sikshya'); ?>
                             <a
                                 class="sikshya-setup__inline-link"
-                                href="<?php echo esc_url('https://docs.mantrabrain.com/sikshya-wordpress-plugin/which-types-of-data-are-being-tracked/'); ?>"
+                                href="<?php echo esc_url('https://sikshya.mantrabrain.com/docs/which-types-of-data-are-being-tracked/'); ?>"
                                 target="_blank"
                                 rel="noopener"
                             >
