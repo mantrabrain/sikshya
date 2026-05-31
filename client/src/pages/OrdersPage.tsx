@@ -407,7 +407,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
               onChange={(e) => setCouponCode(e.target.value)}
               disabled={creating}
               placeholder={__('e.g. SAVE10', 'sikshya')}
-              className="mt-1 w-full max-w-md rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
+              className="mt-1 block w-full max-w-md rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </label>
 
@@ -479,7 +479,7 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
           <label className="block text-sm text-slate-700 dark:text-slate-200">
             Status
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
               value={editStatus}
               onChange={(e) => setEditStatus(e.target.value as any)}
               disabled={markBusyId !== null}
@@ -607,16 +607,14 @@ export function OrdersPage(props: { config: SikshyaReactConfig; title: string; e
                       <td className="px-5 py-3.5">
                         <span className="uppercase text-slate-700 dark:text-slate-300">{r.gateway || '—'}</span>
                         {r.gateway_intent_id ? (
-                          <div className="mt-0.5 max-w-[180px] truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                          <div className="mt-0.5 max-w-[180px] truncate font-mono text-xs text-slate-500 dark:text-slate-400">
                             {r.gateway_intent_id}
                           </div>
                         ) : null}
                         {r.subscription?.is_subscription_checkout ? (
-                          <div className="mt-1 inline-flex max-w-[220px] flex-col gap-0.5">
-                            <span className="w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 dark:bg-amber-950/70 dark:text-amber-50">
-                              Subscription
-                            </span>
-                            <span className="text-[11px] text-slate-600 dark:text-slate-400">
+                          <div className="mt-1 inline-flex max-w-[220px] flex-col items-start gap-1">
+                            <StatusBadge tone="warning" label={__('Subscription', 'sikshya')} size="xs" caseStyle="as-is" />
+                            <span className="text-xs text-slate-600 dark:text-slate-400">
                               {r.subscription.plan_name ||
                                 (r.subscription.plan_id ? `Plan #${r.subscription.plan_id}` : 'Plan')}
                               {r.subscription.interval_unit ? ` · ${r.subscription.interval_unit}` : ''}

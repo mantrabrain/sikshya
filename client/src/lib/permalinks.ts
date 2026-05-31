@@ -7,7 +7,25 @@ export function getPermalinkSlug(key: string, fallback: string): string {
   return s || fallback;
 }
 
-/** Settings → Permalinks: slug fields that get a live “Open” preview link next to the label. */
+/**
+ * Settings → Permalinks: slug fields that get a live "Open" preview link
+ * next to the label.
+ *
+ * Only virtual pages with a real, generically-openable URL (cart, checkout,
+ * account, learn hub, order list) plus the two real taxonomy/post-archive
+ * bases (course post type + course-category taxonomy) get a preview link.
+ *
+ * Excluded on purpose:
+ *  - Lesson / Quiz / Assignment bases — those post types are not
+ *    publicly_queryable; the base only drives the learn-player URL segment
+ *    (/learn/<base>/<id>/<slug>), so there is no standalone page to open.
+ *  - Certificate base — public certificates open with a unique verification
+ *    code (/certificates/<code>/), not the bare base, so a generic preview
+ *    would land on a 404.
+ *  - Author / instructor base — needs a specific instructor slug appended;
+ *    the bare /author/ URL is a WP-core archive and not a Sikshya surface,
+ *    so previewing the field by itself doesn't help.
+ */
 export const PERMALINK_SETTINGS_PREVIEW_KEYS = new Set([
   'permalink_cart',
   'permalink_checkout',
@@ -15,11 +33,6 @@ export const PERMALINK_SETTINGS_PREVIEW_KEYS = new Set([
   'permalink_learn',
   'permalink_order',
   'rewrite_base_course',
-  'rewrite_base_lesson',
-  'rewrite_base_quiz',
-  'rewrite_base_assignment',
-  'rewrite_base_certificate',
-  'rewrite_base_author',
   'rewrite_tax_course_category',
 ]);
 
@@ -69,19 +82,14 @@ export function previewUrlForPermalinkField(fieldKey: string, draft: Record<stri
     return `${site}/${encodeURI(base)}/`;
   }
 
-  const pt =
-    fieldKey === 'rewrite_base_course'
-      ? cfg.postTypes?.course || 'sikshya_course'
-      : fieldKey === 'rewrite_base_lesson'
-        ? cfg.postTypes?.lesson || 'sikshya_lesson'
-        : fieldKey === 'rewrite_base_quiz'
-          ? cfg.postTypes?.quiz || 'sikshya_quiz'
-          : fieldKey === 'rewrite_base_assignment'
-            ? cfg.postTypes?.assignment || 'sikshya_assignment'
-            : '';
-
-  if (pt) {
-    if (plain || fieldKey !== 'rewrite_base_course') {
+  // Course is the only standalone-CPT URL we still preview; lesson/quiz/
+  // assignment bases no longer have public URLs (their post types are
+  // registered with publicly_queryable: false — the base only drives the
+  // learn-player URL segment), so callers won't see a preview link for
+  // those keys (they're filtered out of PERMALINK_SETTINGS_PREVIEW_KEYS).
+  if (fieldKey === 'rewrite_base_course') {
+    const pt = cfg.postTypes?.course || 'sikshya_course';
+    if (plain) {
       return `${site}/?post_type=${encodeURIComponent(pt)}`;
     }
     const slug = slugFromDraft(draft, fieldKey);

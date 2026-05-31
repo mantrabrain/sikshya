@@ -40,7 +40,7 @@ export function ApiErrorPanel({ error, onRetry, title = __('Something went wrong
         )}
       </p>
       <div className="mt-3 max-h-48 overflow-auto rounded-lg border border-red-200/80 bg-white p-3">
-        <pre className="whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed text-slate-800">
+        <pre className="whitespace-pre-wrap break-all font-mono text-xs leading-relaxed text-slate-800">
           {report.fullText}
         </pre>
       </div>

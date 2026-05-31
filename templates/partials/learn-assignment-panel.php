@@ -181,6 +181,39 @@ $file_multiple = $xf === 0 || $xf > 1;
                         }
                         ?>
                         <span class="sikshya-learnNotes__composerLabel" id="<?php echo esc_attr($file_input_id); ?>-label"><?php esc_html_e('Upload file(s)', 'sikshya'); ?></span>
+                        <?php
+                        // Plain-text allowed-extensions + max-size hint. The `accept` attribute
+                        // is invisible to most learners; this paragraph surfaces the same info.
+                        $hint_parts = [];
+                        if ($ext_raw !== '') {
+                            $exts_clean = array_filter(array_map(static function ($e) {
+                                return ltrim(strtolower(trim((string) $e)), '.');
+                            }, explode(',', $ext_raw)));
+                            if ($exts_clean !== []) {
+                                $hint_parts[] = sprintf(
+                                    /* translators: %s: comma-separated list of file extensions */
+                                    __('Allowed: %s', 'sikshya'),
+                                    implode(', ', $exts_clean)
+                                );
+                            }
+                        }
+                        $cap_mb = (int) get_post_meta($aid_files, '_sikshya_assignment_max_file_size', true);
+                        if ($cap_mb <= 0 && class_exists('\\Sikshya\\Admin\\Settings\\Settings')) {
+                            $cap_mb = (int) \Sikshya\Admin\Settings\Settings::get('assignment_max_file_size', 0);
+                        }
+                        if ($cap_mb > 0) {
+                            $hint_parts[] = sprintf(
+                                /* translators: %d: maximum file size in megabytes */
+                                __('Max %d MB per file', 'sikshya'),
+                                $cap_mb
+                            );
+                        }
+                        if ($hint_parts !== []) :
+                            ?>
+                            <p class="sikshya-assignment__file-help sikshya-muted sikshya-zeroMargin" style="margin:4px 0 8px;font-size:12px;">
+                                <?php echo esc_html(implode(' · ', $hint_parts)); ?>
+                            </p>
+                        <?php endif; ?>
                         <div
                             class="sikshya-assignmentDropzone"
                             data-sikshya-dropzone
@@ -246,7 +279,7 @@ $file_multiple = $xf === 0 || $xf > 1;
                         <button type="submit" class="sikshya-btn sikshya-btn--primary" data-sikshya-assignment-submit>
                             <?php echo esc_html($submission ? __('Submit again', 'sikshya') : __('Submit assignment', 'sikshya')); ?>
                         </button>
-                        <span class="sikshya-muted" data-sikshya-assignment-status style="font-size:12px;margin-left:8px;"></span>
+                        <span class="sikshya-muted" data-sikshya-assignment-status style="font-size:12px;margin-left:8px;" role="status" aria-live="polite" aria-atomic="true"></span>
                     </div>
                 </form>
             </div>

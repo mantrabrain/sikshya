@@ -118,6 +118,36 @@ class SettingsManager
     }
 
     /**
+     * Apply each field's schema-defined `sanitize_callback` to the values
+     * about to be persisted. The schema is the only place sanitization is
+     * documented per setting (sanitize_text_field, sanitize_textarea_field,
+     * intval, esc_url_raw, etc.), but until now `saveSetting()` ignored it
+     * and stored raw input — opening stored-XSS and type-confusion risk
+     * whenever any handler called `Settings::set()` with attacker-controlled
+     * input. This helper centralises the sanitization so every settings
+     * write goes through it.
+     *
+     * @param string               $tab    Tab slug (`general`, `email`, etc.).
+     * @param array<string, mixed> $values Field key => raw value pairs already
+     *                                     filtered to known-good field keys.
+     * @return array<string, mixed>        Sanitized values ready for persistence.
+     */
+    private function applyFieldSanitization(string $tab, array $values): array
+    {
+        foreach ($values as $key => $value) {
+            $field = $this->findFieldInTab($tab, $key);
+            if (!$field) {
+                continue;
+            }
+            $cb = $field['sanitize_callback'] ?? null;
+            if ($cb && is_callable($cb)) {
+                $values[$key] = call_user_func($cb, $value);
+            }
+        }
+        return $values;
+    }
+
+    /**
      * Find a field definition within a tab (first match).
      *
      * @return array<string, mixed>|null
@@ -284,6 +314,13 @@ class SettingsManager
                 $settings_to_save[$key] = $field['default'] ?? '';
             }
         }
+
+        // Run the schema-declared sanitize_callback on each field BEFORE the
+        // locked-field strip + persistence. Until this step was added, raw
+        // values landed in wp_options unchanged — meaning a setting like
+        // `from_name` or `bank_transfer_instructions` could carry HTML / CRLF
+        // that later flowed into email headers or rendered templates.
+        $settings_to_save = $this->applyFieldSanitization($tab, $settings_to_save);
 
         $settings_to_save = $this->stripLockedFieldsOnSave($tab, $settings_to_save);
 
@@ -701,6 +738,11 @@ class SettingsManager
                     $to_save[$key] = $value;
                 }
             }
+
+            // Apply the same per-field sanitization that the interactive tab
+            // save uses, so a JSON import can never bypass the schema's
+            // sanitize_callback by going through a different code path.
+            $to_save = $this->applyFieldSanitization($tab_key, $to_save);
 
             $to_save = $this->stripLockedFieldsOnSave($tab_key, $to_save);
             $expected_writes += count($to_save);
@@ -2802,7 +2844,7 @@ class SettingsManager
                         'key' => 'rewrite_base_lesson',
                         'type' => 'text',
                         'label' => __('Lesson base', 'sikshya'),
-                        'description' => __('Single lesson addresses contain this word.', 'sikshya'),
+                        'description' => __('Used inside the learn-player URL: /learn/<lesson-base>/<id>/<slug>/. Lessons have no standalone page.', 'sikshya'),
                         'placeholder' => __('lessons', 'sikshya'),
                         'default' => $defaults['rewrite_base_lesson'],
                         'sanitize_callback' => 'sanitize_title',
@@ -2812,7 +2854,7 @@ class SettingsManager
                         'key' => 'rewrite_base_quiz',
                         'type' => 'text',
                         'label' => __('Quiz base', 'sikshya'),
-                        'description' => __('Single quiz addresses contain this word.', 'sikshya'),
+                        'description' => __('Used inside the learn-player URL: /learn/<quiz-base>/<id>/<slug>/. Quizzes have no standalone page.', 'sikshya'),
                         'placeholder' => __('quizzes', 'sikshya'),
                         'default' => $defaults['rewrite_base_quiz'],
                         'sanitize_callback' => 'sanitize_title',
@@ -2822,7 +2864,7 @@ class SettingsManager
                         'key' => 'rewrite_base_assignment',
                         'type' => 'text',
                         'label' => __('Assignment base', 'sikshya'),
-                        'description' => __('Single assignment URLs contain this word.', 'sikshya'),
+                        'description' => __('Used inside the learn-player URL: /learn/<assignment-base>/<id>/<slug>/. Assignments have no standalone page.', 'sikshya'),
                         'placeholder' => __('assignments', 'sikshya'),
                         'default' => $defaults['rewrite_base_assignment'],
                         'sanitize_callback' => 'sanitize_title',

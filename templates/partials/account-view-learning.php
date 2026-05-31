@@ -49,7 +49,62 @@ $render_enrollment_row = static function ($row) use ($certs_by_course): void {
     </tr>
     <?php
 };
+$resume_card = $page_model->getResumeCard();
 ?>
+            <?php if (is_array($resume_card) && !empty($resume_card['resume_url'])) : ?>
+                <?php
+                $resume_total = (int) ($resume_card['lesson_total'] ?? 0);
+                $resume_done = (int) ($resume_card['lessons_completed'] ?? 0);
+                $resume_pct = max(0, min(100, (int) ($resume_card['progress_percent'] ?? 0)));
+                $resume_is_resume = !empty($resume_card['is_resume']);
+                $resume_cta = $resume_is_resume
+                    ? __('Continue learning', 'sikshya')
+                    : __('Start learning', 'sikshya');
+                $resume_intro = $resume_is_resume
+                    ? __('Pick up where you left off', 'sikshya')
+                    : __('Ready when you are', 'sikshya');
+                $resume_course_title = (string) ($resume_card['course_title'] ?? '');
+                $resume_lesson_title = (string) ($resume_card['lesson_title'] ?? '');
+                ?>
+                <section class="sik-acc-resume" aria-label="<?php echo esc_attr(__('Continue where you left off', 'sikshya')); ?>">
+                    <div class="sik-acc-resume__meta">
+                        <p class="sik-acc-resume__eyebrow"><?php echo esc_html($resume_intro); ?></p>
+                        <h2 class="sik-acc-resume__title"><?php echo esc_html($resume_course_title); ?></h2>
+                        <?php if ($resume_lesson_title !== '') : ?>
+                            <p class="sik-acc-resume__lesson">
+                                <?php echo esc_html(sprintf(
+                                    /* translators: %s: lesson title */
+                                    __('Next up: %s', 'sikshya'),
+                                    $resume_lesson_title
+                                )); ?>
+                            </p>
+                        <?php endif; ?>
+                        <?php if ($resume_total > 0) : ?>
+                            <div class="sik-acc-resume__progress" role="progressbar"
+                                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?php echo esc_attr((string) $resume_pct); ?>">
+                                <div class="sik-acc-resume__progress-bar">
+                                    <span class="sik-acc-resume__progress-fill" style="width: <?php echo esc_attr((string) $resume_pct); ?>%"></span>
+                                </div>
+                                <p class="sik-acc-resume__progress-text">
+                                    <?php echo esc_html(sprintf(
+                                        /* translators: 1: percent, 2: completed lesson count, 3: total lesson count */
+                                        __('%1$d%% complete · %2$d of %3$d lessons', 'sikshya'),
+                                        $resume_pct,
+                                        $resume_done,
+                                        $resume_total
+                                    )); ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="sik-acc-resume__actions">
+                        <a class="sik-acc-resume__cta" href="<?php echo esc_url((string) $resume_card['resume_url']); ?>">
+                            <?php echo esc_html($resume_cta); ?>
+                        </a>
+                    </div>
+                </section>
+            <?php endif; ?>
+
             <section class="sik-acc-panel" aria-label="<?php echo esc_attr(sprintf(__('Ongoing %s', 'sikshya'), strtolower($label_courses))); ?>">
                 <div class="sik-acc-panel__head">
                     <div class="sik-acc-panel__title-block">

@@ -6,7 +6,7 @@ import { __ } from '../../../lib/i18n';
 export type ColumnToggleDef = { id: string; label: string };
 
 const btnClass =
-  'inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700';
+  'inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:focus-visible:ring-offset-slate-900';
 
 /**
  * Sikshya-style column visibility popover (checkboxes per toggleable column).
@@ -52,7 +52,7 @@ export function ColumnVisibilityMenu({
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <input
                     type="checkbox"
-                    className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800"
+                    className="h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-1 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-900"
                     checked={visibility[c.id] ?? true}
                     onChange={(e) => onChange(c.id, e.target.checked)}
                   />

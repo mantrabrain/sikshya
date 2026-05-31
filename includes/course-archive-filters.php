@@ -115,6 +115,10 @@ function sikshya_course_archive_pre_get_posts(\WP_Query $query): void
         );
     }
 
+    if (!empty($filters['instructor']) && (int) $filters['instructor'] > 0) {
+        $query->set('author', (int) $filters['instructor']);
+    }
+
     $level_block = [];
     if ($filters['level'] !== '') {
         $level_block = [
@@ -328,6 +332,7 @@ function sikshya_course_archive_get_filter_request(): array
     $cat = '';
     $level = '';
     $price = '';
+    $instructor = 0;
     if ($filters_on) {
         $cat = isset($get['sikshya_cat']) ? sanitize_title((string) $get['sikshya_cat']) : '';
         if ($cat === '') {
@@ -346,6 +351,8 @@ function sikshya_course_archive_get_filter_request(): array
         if ($price === 'all' || $price === '') {
             $price = '';
         }
+
+        $instructor = isset($get['sikshya_instructor']) ? absint($get['sikshya_instructor']) : 0;
     }
 
     $sort = isset($get['sikshya_sort']) ? sanitize_key((string) $get['sikshya_sort']) : 'date_desc';
@@ -369,6 +376,7 @@ function sikshya_course_archive_get_filter_request(): array
         'category_slug' => $cat,
         'level' => $level,
         'price' => $price,
+        'instructor' => $instructor,
         'sort' => $sort,
         'view' => $view,
         'per_page' => $per_page,
@@ -397,6 +405,9 @@ function sikshya_course_archive_get_preserved_query_args(): array
     }
     if ($f['price'] !== '') {
         $out['sikshya_price'] = $f['price'];
+    }
+    if (!empty($f['instructor']) && (int) $f['instructor'] > 0) {
+        $out['sikshya_instructor'] = (string) (int) $f['instructor'];
     }
     if ($f['sort'] !== 'date_desc') {
         $out['sikshya_sort'] = $f['sort'];
@@ -434,6 +445,9 @@ function sikshya_course_archive_build_url(array $overrides = []): string
     }
     if ($f['price'] !== '') {
         $args['sikshya_price'] = $f['price'];
+    }
+    if (!empty($f['instructor']) && (int) $f['instructor'] > 0) {
+        $args['sikshya_instructor'] = (string) (int) $f['instructor'];
     }
     if (($f['sort'] ?? 'date_desc') !== 'date_desc') {
         $args['sikshya_sort'] = $f['sort'];

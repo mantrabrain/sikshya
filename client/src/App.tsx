@@ -48,6 +48,9 @@ const EmailTemplateEditPage = lazy(() =>
 const EnrollmentsPage = lazy(() =>
   import('./pages/EnrollmentsPage').then((m) => ({ default: m.EnrollmentsPage }))
 );
+const EnrollmentDetailsPage = lazy(() =>
+  import('./pages/EnrollmentDetailsPage').then((m) => ({ default: m.EnrollmentDetailsPage }))
+);
 const GenericPlaceholderPage = lazy(() =>
   import('./pages/GenericPlaceholderPage').then((m) => ({ default: m.GenericPlaceholderPage }))
 );
@@ -148,6 +151,7 @@ function prefetchAdminChunks(): void {
     void import('./pages/PaymentsPage');
     void import('./pages/PaymentDetailsPage');
     void import('./pages/EnrollmentsPage');
+    void import('./pages/EnrollmentDetailsPage');
     void import('./pages/AddonsPage');
     void import('./pages/EmailPage');
   });
@@ -379,6 +383,8 @@ function RoutedApp() {
       );
     case 'enrollments':
       return <EnrollmentsPage embedded config={config} title={T.enrollments} />;
+    case 'enrollment-detail':
+      return <EnrollmentDetailsPage embedded config={config} title={__('Enrollment', 'sikshya')} />;
     case 'reports':
       return <ReportsHubPage embedded config={config} title={__('Reports', 'sikshya')} />;
     case 'payments':

@@ -174,13 +174,13 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
     >
       <CreateCourseModal config={config} open={createOpen} onClose={() => setCreateOpen(false)} />
       <div className="w-full min-w-0 space-y-8">
-        <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-brand-600 via-brand-600 to-indigo-700 px-6 py-8 text-white shadow-lg dark:border-slate-800 dark:from-brand-700 dark:via-brand-800 dark:to-slate-900">
+        <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-brand-600 via-brand-600 to-accent-700 px-6 py-8 text-white shadow-lg dark:border-slate-800 dark:from-brand-700 dark:via-brand-800 dark:to-slate-900">
           <div
             className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-indigo-400/20 blur-2xl"
+            className="pointer-events-none absolute -bottom-20 left-1/3 h-48 w-48 rounded-full bg-accent-400/20 blur-2xl"
             aria-hidden
           />
           <div className="relative">
@@ -203,7 +203,7 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
 
         {licensing && !licensing.isProActive ? (
           <section
-            className="rounded-2xl border border-indigo-200/90 bg-indigo-50/90 px-4 py-3 text-sm text-indigo-950 shadow-sm dark:border-indigo-900/50 dark:bg-indigo-950/50 dark:text-indigo-100"
+            className="rounded-2xl border border-accent-200/90 bg-accent-50/90 px-4 py-3 text-sm text-accent-950 shadow-sm dark:border-accent-900/50 dark:bg-accent-950/50 dark:text-accent-100"
             aria-label={__('Advanced LMS capabilities', 'sikshya')}
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -216,7 +216,7 @@ export function DashboardPage(props: { embedded?: boolean; config: SikshyaReactC
                 href={licensing.upgradeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 rounded-xl bg-indigo-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-800 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+                className="shrink-0 rounded-xl bg-accent-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-800 dark:bg-accent-600 dark:hover:bg-accent-500"
               >
                 View plans
               </a>

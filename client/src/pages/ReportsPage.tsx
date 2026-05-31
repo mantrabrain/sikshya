@@ -5,6 +5,8 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { FormInput, FormSelect, FormLabel } from '../components/shared/form';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useAddonEnabled } from '../hooks/useAddons';
 import { isFeatureEnabled, resolveGatedWorkspaceMode } from '../lib/licensing';
@@ -490,7 +492,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         title={`${c} enrollments`}
                       />
                     </div>
-                    <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{label}</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</span>
                   </div>
                 );
               })}
@@ -552,56 +554,61 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
 
         <div className="mt-4 grid gap-3 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Search', 'sikshya')}</label>
-            <input
+            <FormLabel variant="eyebrow" htmlFor="rep-attempts-search">{__('Search', 'sikshya')}</FormLabel>
+            <FormInput
+              id="rep-attempts-search"
               value={attemptsSearch}
               onChange={(e) => setAttemptsSearch(e.target.value)}
               placeholder={__('Learner name/email, quiz, course…', 'sikshya')}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="mt-1"
             />
           </div>
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Status', 'sikshya')}</label>
-            <select
+            <FormLabel variant="eyebrow" htmlFor="rep-attempts-status">{__('Status', 'sikshya')}</FormLabel>
+            <FormSelect
+              id="rep-attempts-status"
               value={attemptsStatus}
               onChange={(e) => setAttemptsStatus(e.target.value as typeof attemptsStatus)}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="mt-1"
             >
               <option value="all">{__('All', 'sikshya')}</option>
               <option value="completed">{__('Completed', 'sikshya')}</option>
               <option value="in_progress">{__('In progress', 'sikshya')}</option>
               <option value="passed">{__('Passed', 'sikshya')}</option>
               <option value="failed">{__('Failed', 'sikshya')}</option>
-            </select>
+            </FormSelect>
           </div>
           <div className="lg:col-span-1">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('User ID', 'sikshya')}</label>
-            <input
+            <FormLabel variant="eyebrow" htmlFor="rep-attempts-user">{__('User ID', 'sikshya')}</FormLabel>
+            <FormInput
+              id="rep-attempts-user"
               value={attemptsUserId}
               onChange={(e) => setAttemptsUserId(e.target.value.replace(/[^\d]/g, ''))}
               placeholder="#"
               inputMode="numeric"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="mt-1"
             />
           </div>
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Course ID', 'sikshya')}</label>
-            <input
+            <FormLabel variant="eyebrow" htmlFor="rep-attempts-course">{__('Course ID', 'sikshya')}</FormLabel>
+            <FormInput
+              id="rep-attempts-course"
               value={attemptsCourseId}
               onChange={(e) => setAttemptsCourseId(e.target.value.replace(/[^\d]/g, ''))}
               placeholder="#"
               inputMode="numeric"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="mt-1"
             />
           </div>
           <div className="lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{__('Quiz ID', 'sikshya')}</label>
-            <input
+            <FormLabel variant="eyebrow" htmlFor="rep-attempts-quiz">{__('Quiz ID', 'sikshya')}</FormLabel>
+            <FormInput
+              id="rep-attempts-quiz"
               value={attemptsQuizId}
               onChange={(e) => setAttemptsQuizId(e.target.value.replace(/[^\d]/g, ''))}
               placeholder="#"
               inputMode="numeric"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none ring-0 placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+              className="mt-1"
             />
           </div>
         </div>
@@ -643,15 +650,11 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                     <td className="px-4 py-3 tabular-nums">{typeof r.attempts_remaining === 'number' ? r.attempts_remaining : '—'}</td>
                     <td className="px-4 py-3 tabular-nums">{Number.isFinite(r.score) ? String(r.score) : '—'}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${
-                          r.is_locked
-                            ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
-                            : 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200'
-                        }`}
-                      >
-                        {r.is_locked ? 'Locked' : r.status || '—'}
-                      </span>
+                      <StatusBadge
+                        tone={r.is_locked ? 'neutral' : 'success'}
+                        label={r.is_locked ? __('Locked', 'sikshya') : r.status || '—'}
+                        size="xs"
+                      />
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500 dark:text-slate-400">{r.completed_at || '—'}</td>
                     <td className="px-4 py-3 text-right">
@@ -720,7 +723,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         title={__('Summary is one row of headline metrics. Enrollments and quiz attempts export individual rows (subject to your row cap).', 'sikshya')}
                         value={expType}
                         onChange={(e) => setExpType(e.target.value as typeof expType)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       >
                         <option value="summary">{__('Site summary (headline metrics)', 'sikshya')}</option>
                         <option value="enrollments">{__('Enrollments (one row per seat)', 'sikshya')}</option>
@@ -738,7 +741,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         placeholder={__('Any', 'sikshya')}
                         inputMode="numeric"
                         disabled={expType === 'summary'}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       />
                     </label>
                     <label className="block lg:col-span-2">
@@ -751,7 +754,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         value={expDateFrom}
                         onChange={(e) => setExpDateFrom(e.target.value)}
                         disabled={expType === 'summary'}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       />
                     </label>
                     <label className="block lg:col-span-2">
@@ -764,7 +767,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         value={expDateTo}
                         onChange={(e) => setExpDateTo(e.target.value)}
                         disabled={expType === 'summary'}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       />
                     </label>
                     <label className="block lg:col-span-2">
@@ -775,7 +778,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                         value={expStatus}
                         onChange={(e) => setExpStatus(e.target.value)}
                         disabled={expType === 'summary'}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       >
                         <option value="">{__('All', 'sikshya')}</option>
                         {expType === 'enrollments' ? (
@@ -811,7 +814,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                               ? 'Learner name, email, login, or course title…'
                               : 'Learner, quiz title, or course title…'
                           }
-                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         />
                       </label>
                       {expType === 'quiz_attempts' ? (
@@ -825,7 +828,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                               onChange={(e) => setExpUserId(e.target.value.replace(/[^\d]/g, ''))}
                               placeholder={__('Any', 'sikshya')}
                               inputMode="numeric"
-                              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                             />
                           </label>
                           <label className="block lg:col-span-3">
@@ -837,7 +840,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                               onChange={(e) => setExpQuizId(e.target.value.replace(/[^\d]/g, ''))}
                               placeholder={__('Any', 'sikshya')}
                               inputMode="numeric"
-                              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                             />
                           </label>
                         </>
@@ -943,7 +946,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       type="text"
                       value={enterpriseRecipients}
                       onChange={(e) => setEnterpriseRecipients(e.target.value)}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder={__('ceo@company.com, it@company.com', 'sikshya')}
                     />
                   </label>
@@ -954,7 +957,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                     <select
                       value={enterpriseDow}
                       onChange={(e) => setEnterpriseDow(Number(e.target.value))}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     >
                       <option value={0}>{__('Sunday', 'sikshya')}</option>
                       <option value={1}>{__('Monday', 'sikshya')}</option>
@@ -972,7 +975,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                     <select
                       value={enterpriseHour}
                       onChange={(e) => setEnterpriseHour(Number(e.target.value))}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     >
                       {Array.from({ length: 24 }).map((_, i) => (
                         <option key={i} value={i}>
@@ -1001,7 +1004,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       <input
                         value={scheduleLabel}
                         onChange={(e) => setScheduleLabel(e.target.value)}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                        className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         placeholder={__('Weekly executive summary', 'sikshya')}
                       />
                     </label>
@@ -1010,7 +1013,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       <select
                         value={scheduleFrequency}
                         onChange={(e) => setScheduleFrequency(e.target.value as typeof scheduleFrequency)}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                        className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       >
                         <option value="daily">{__('Daily', 'sikshya')}</option>
                         <option value="weekly">{__('Weekly', 'sikshya')}</option>
@@ -1022,7 +1025,7 @@ export function ReportsPage(props: { config: SikshyaReactConfig; title: string; 
                       <select
                         value={scheduleReportType}
                         onChange={(e) => setScheduleReportType(e.target.value as typeof scheduleReportType)}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950"
+                        className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       >
                         <option value="executive_summary">{__('Executive summary', 'sikshya')}</option>
                       </select>

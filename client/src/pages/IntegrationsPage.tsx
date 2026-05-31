@@ -530,7 +530,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                     <select
                       value={whEvent}
                       onChange={(e) => setWhEvent(e.target.value)}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                     >
                       {WEBHOOK_EVENTS.map((ev) => (
                         <option key={ev.value} value={ev.value}>
@@ -549,7 +549,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       value={whUrl}
                       onChange={(e) => setWhUrl(e.target.value)}
                       placeholder="https://hooks.zapier.com/…"
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     />
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       Paste the exact URL from Zapier, Make.com, or your developer. We only accept HTTPS in production
@@ -566,7 +566,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       value={whSecret}
                       onChange={(e) => setWhSecret(e.target.value)}
                       placeholder={__('Same secret you configure in Zapier', 'sikshya')}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     />
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       If you set this, we add an <span className="font-mono">{__('X-Sikshya-Signature', 'sikshya')}</span> header so the
@@ -766,7 +766,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       value={keyLabel}
                       onChange={(e) => setKeyLabel(e.target.value)}
                       placeholder={__('e.g. Zapier read-only', 'sikshya')}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     />
                   </div>
                   <div>
@@ -783,7 +783,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                                 const on = e.target.checked;
                                 setKeyScopes((prev) => (on ? [...prev, s.value] : prev.filter((x) => x !== s.value)));
                               }}
-                              className="mt-0.5"
+                              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-900"
                             />
                             <span className="min-w-0">
                               <span className="block font-semibold text-slate-900 dark:text-white">{s.title}</span>
@@ -805,7 +805,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                       max={3650}
                       value={keyExpiryDays}
                       onChange={(e) => setKeyExpiryDays(Math.max(1, Math.min(3650, Number(e.target.value) || 90)))}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     />
                   </div>
                   <ButtonPrimary type="submit" disabled={keyBusy}>
@@ -934,7 +934,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                             value={appName}
                             onChange={(e) => setAppName(e.target.value)}
                             placeholder={__('e.g. Mobile app', 'sikshya')}
-                            className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                            className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                           />
                         </div>
                         <div>
@@ -943,7 +943,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                             value={appRedirect}
                             onChange={(e) => setAppRedirect(e.target.value)}
                             placeholder="https://yourapp.com/oauth/callback"
-                            className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-950"
+                            className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                           />
                         </div>
                         <div>
@@ -960,7 +960,7 @@ export function IntegrationsPage(props: { config: SikshyaReactConfig; title: str
                                       const on = e.target.checked;
                                       setAppScopes((prev) => (on ? [...prev, s.value] : prev.filter((x) => x !== s.value)));
                                     }}
-                                    className="mt-0.5"
+                                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-900"
                                   />
                                   <span className="min-w-0">
                                     <span className="block font-semibold text-slate-900 dark:text-white">{s.title}</span>

@@ -796,7 +796,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                 <select
                   value={modalLessonId}
                   onChange={(e) => setModalLessonId(Number(e.target.value))}
-                  className="mt-1 w-full shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  className="mt-1 block w-full shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 >
                   <option value={0}>{modalLessonsQ.loading ? __('Loading…', 'sikshya') : __('— Select —', 'sikshya')}</option>
                   {modalLessons.map((l) => (
@@ -851,7 +851,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
                               />
                               <span className="min-w-0">
                                 <span className="block truncate font-medium text-slate-900 dark:text-white">{l.title}</span>
-                                <span className="block text-[11px] text-slate-500 dark:text-slate-400">Lesson #{l.id}</span>
+                                <span className="block text-xs text-slate-500 dark:text-slate-400">Lesson #{l.id}</span>
                               </span>
                             </label>
                           );
@@ -999,7 +999,7 @@ export function PrerequisitesPage(props: { config: SikshyaReactConfig; title: st
           </ListPanel>
 
           {/* What is this page? — disambiguation block */}
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
+          <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-4 text-xs text-brand-900 dark:border-brand-900/40 dark:bg-brand-950/40 dark:text-brand-200">
             <p className="font-semibold">{__('What this page does', 'sikshya')}</p>
             <p className="mt-1 leading-relaxed">
               These are <strong>{__('access rules', 'sikshya')}</strong> the LMS enforces. They are different from the marketing

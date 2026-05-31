@@ -8,6 +8,7 @@ import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPaginationBar, DEFAULT_LIST_PER_PAGE } from '../components/shared/list/ListPaginationBar';
 import { BulkActionsBar } from '../components/shared/list/BulkActionsBar';
 import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
@@ -190,34 +191,22 @@ function buildThreadModerationMenuItems(
   return items;
 }
 
+// Both pills delegate to the shared StatusBadge — tone mapping captures the
+// domain semantics (approved/pending/spam/reject) without per-page color
+// strings. Tooltips are preserved via a wrapping span with `title`.
 function StatusPill({ status }: { status: ThreadStatus }) {
   if (status === 'approved') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
-        Approved
-      </span>
-    );
+    return <StatusBadge tone="success" label={__('Approved', 'sikshya')} />;
   }
   if (status === 'pending') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
-        Pending
-      </span>
-    );
+    return <StatusBadge tone="warning" label={__('Pending', 'sikshya')} />;
   }
   if (status === 'spam') {
-    return (
-      <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">
-        Spam
-      </span>
-    );
+    return <StatusBadge tone="danger" label={__('Spam', 'sikshya')} />;
   }
   return (
-    <span
-      className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-800 dark:bg-slate-700 dark:text-slate-200"
-      title={__('Moved to trash (moderator rejection, not spam).', 'sikshya')}
-    >
-      Rejected
+    <span title={__('Moved to trash (moderator rejection, not spam).', 'sikshya')}>
+      <StatusBadge tone="neutral" label={__('Rejected', 'sikshya')} />
     </span>
   );
 }
@@ -226,39 +215,35 @@ function AttentionPill({ attention }: { attention: ThreadAttention }) {
   if (attention === 'moderate') {
     return (
       <span
-        className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-900/35 dark:text-amber-100"
         title={__('Approve or reject the thread before it is fully visible to learners.', 'sikshya')}
       >
-        Moderation first
+        <StatusBadge tone="warning" label={__('Moderation first', 'sikshya')} />
       </span>
     );
   }
   if (attention === 'reply') {
     return (
       <span
-        className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-900 dark:bg-violet-900/45 dark:text-violet-100"
         title={__('The latest approved reply is not from course staff—or there are no replies yet. Open and post an instructor/admin answer.', 'sikshya')}
       >
-        Reply needed
+        <StatusBadge tone="premium" label={__('Reply needed', 'sikshya')} />
       </span>
     );
   }
   if (attention === 'spam') {
     return (
       <span
-        className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200"
         title={__('This thread is spam or was moved to trash and is hidden from learners.', 'sikshya')}
       >
-        Rejected thread
+        <StatusBadge tone="neutral" label={__('Rejected thread', 'sikshya')} />
       </span>
     );
   }
   return (
     <span
-      className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900 dark:bg-emerald-900/35 dark:text-emerald-100"
       title={__('The most recent approved reply is from someone who can moderate this course (or there is nothing else to answer right now).', 'sikshya')}
     >
-      Staff up to date
+      <StatusBadge tone="success" label={__('Staff up to date', 'sikshya')} />
     </span>
   );
 }
@@ -274,25 +259,18 @@ const ATTENTION_OPTIONS: Array<{ value: AttentionFilter; label: string }> = [
 function TypeTag({ type }: { type: ThreadType }) {
   const isQa = type === 'qa';
   return (
-    <span
-      className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-        isQa
-          ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200'
-          : 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200'
-      }`}
-    >
-      {isQa ? __('Q&A', 'sikshya') : __('Discussion', 'sikshya')}
-    </span>
+    <StatusBadge
+      tone={isQa ? 'premium' : 'info'}
+      label={isQa ? __('Q&A', 'sikshya') : __('Discussion', 'sikshya')}
+      size="xs"
+      caseStyle="as-is"
+    />
   );
 }
 
 function PostTypeLabel({ type }: { type: string }) {
-  const t = type === 'sik_lesson' ? 'Lesson' : type === 'sik_quiz' ? 'Quiz' : type || 'Content';
-  return (
-    <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-      {t}
-    </span>
-  );
+  const t = type === 'sik_lesson' ? __('Lesson', 'sikshya') : type === 'sik_quiz' ? __('Quiz', 'sikshya') : type || __('Content', 'sikshya');
+  return <StatusBadge tone="neutral" label={t} size="xs" caseStyle="as-is" />;
 }
 
 const DISCUSSIONS_BULK_OPTIONS = [
@@ -748,7 +726,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     setFilterContentType(e.target.value as ContentTypeFilter);
                     setPage(1);
                   }}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 >
                   {CONTENT_TYPE_OPTIONS.map((o) => (
                     <option key={o.value || 'all'} value={o.value}>
@@ -765,7 +743,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     setFilterThreadType(e.target.value as ThreadTypeFilter);
                     setPage(1);
                   }}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 >
                   {THREAD_TYPE_OPTIONS.map((o) => (
                     <option key={o.value || 'all'} value={o.value}>
@@ -782,7 +760,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     setStatus(e.target.value as StatusFilter);
                     setPage(1);
                   }}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 >
                   {STATUS_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -799,7 +777,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     setFilterAttention(e.target.value as AttentionFilter);
                     setPage(1);
                   }}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   title={__('Triage threads by whether you should moderate or reply as staff.', 'sikshya')}
                 >
                   {ATTENTION_OPTIONS.map((o) => (
@@ -817,7 +795,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     placeholder={__('Author, email, or content text…', 'sikshya')}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </label>
                 <ButtonPrimary type="submit">{__('Apply', 'sikshya')}</ButtonPrimary>
@@ -980,7 +958,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
                         <td className="min-w-[10.5rem] max-w-[14rem] px-5 py-3.5 align-top">
                           <div className="flex flex-col gap-1">
                             <AttentionPill attention={attention} />
-                            <span className="text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+                            <span className="text-xs leading-snug text-slate-500 dark:text-slate-400">
                               {attention === 'moderate'
                                 ? 'Approve or reject first.'
                                 : attention === 'reply'
@@ -1131,7 +1109,7 @@ export function DiscussionsPage(props: { embedded?: boolean; config: SikshyaReac
               rows={6}
               value={editingDraft}
               onChange={(e) => setEditingDraft(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+              className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </Modal>
         ) : null}
@@ -1195,7 +1173,7 @@ function ModerationThreadPanel(props: {
 
   if (collapsed && collapsibleRail) {
     return (
-      <div className="flex h-full min-h-0 w-full flex-col items-center gap-4 border-transparent bg-gradient-to-b from-[#f8fafc] to-white py-5 dark:from-slate-900 dark:to-slate-950">
+      <div className="flex h-full min-h-0 w-full flex-col items-center gap-4 border-transparent bg-gradient-to-b from-slate-50 to-white py-5 dark:from-slate-900 dark:to-slate-950">
         <button
           type="button"
           aria-label={__('Expand thread panel', 'sikshya')}
@@ -1208,7 +1186,7 @@ function ModerationThreadPanel(props: {
         </button>
         <div className="flex flex-1 items-center justify-center px-1" aria-hidden>
           <span
-            className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500"
+            className="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500"
             style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
           >
             Thread
@@ -1321,19 +1299,18 @@ function ModerationThreadPanel(props: {
           <div className="space-y-4">
             {/* Root message — learn-style bubble */}
             <section
-              className="rounded-[17px] border border-slate-200/80 bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/60 dark:border-slate-600/60 dark:bg-slate-900/85 dark:ring-white/5"
-              style={{ borderLeftWidth: 3, borderLeftColor: '#2c5ba8' }}
+              className="rounded-2xl border border-slate-200/80 border-l-[3px] border-l-brand-600 bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200/60 dark:border-slate-600/60 dark:border-l-brand-500 dark:bg-slate-900/85 dark:ring-white/5"
             >
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 text-xs">
                 <span className="font-bold text-slate-900 dark:text-white">
                   {detailRow.author.name || `User #${detailRow.author.id}`}
                 </span>
-                <time className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <time className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                   {formatPostDate(detailRow.created_at)}
                 </time>
               </div>
               {detailRow.author.email ? (
-                <div className="mb-2 text-[11px] text-slate-500 dark:text-slate-400">{detailRow.author.email}</div>
+                <div className="mb-2 text-xs text-slate-500 dark:text-slate-400">{detailRow.author.email}</div>
               ) : null}
               {editingId === detailRow.id ? (
                 <EditingArea
@@ -1344,7 +1321,7 @@ function ModerationThreadPanel(props: {
                   onSave={onSaveEditing}
                 />
               ) : (
-                <p className="whitespace-pre-line text-[13px] leading-relaxed text-slate-800 dark:text-slate-100">
+                <p className="whitespace-pre-line text-xs leading-relaxed text-slate-800 dark:text-slate-100">
                   {detailRow.content}
                 </p>
               )}
@@ -1353,7 +1330,7 @@ function ModerationThreadPanel(props: {
             {/* Replies */}
             <section className="space-y-2">
               <div className="flex items-center justify-between px-0.5">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                   Replies ({detailRow.replies.length})
                 </span>
               </div>
@@ -1372,7 +1349,7 @@ function ModerationThreadPanel(props: {
                       aria-hidden
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
+                      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
                         <span className="font-bold text-slate-800 dark:text-slate-100">
                           {reply.author.name || `User #${reply.author.id}`}
                         </span>
@@ -1395,7 +1372,7 @@ function ModerationThreadPanel(props: {
                           onSave={onSaveEditing}
                         />
                       ) : (
-                        <p className="whitespace-pre-line text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">
+                        <p className="whitespace-pre-line text-xs leading-relaxed text-slate-700 dark:text-slate-200">
                           {reply.content}
                         </p>
                       )}
@@ -1436,7 +1413,7 @@ function ModerationThreadPanel(props: {
       {detailRow?.can_moderate ? (
         <footer className="shrink-0 border-t border-slate-200/90 bg-white/95 px-4 py-3 dark:border-slate-700 dark:bg-slate-950/95">
           <div className="rounded-[22px] border border-slate-200/80 bg-slate-50/90 p-2 dark:border-slate-600 dark:bg-slate-900/50">
-            <label className="mb-2 block px-2 text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <label className="mb-2 block px-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Reply as instructor
             </label>
             <textarea
@@ -1444,7 +1421,7 @@ function ModerationThreadPanel(props: {
               value={replyDraft}
               onChange={(e) => onReplyDraftChange(e.target.value)}
               placeholder={__('Type your reply…', 'sikshya')}
-              className="mb-3 w-full rounded-[14px] border border-transparent bg-white px-3 py-2.5 text-sm text-slate-900 shadow-inner shadow-slate-200/80 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:ring-brand-400/25"
+              className="mb-3 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
             <div className="flex justify-end px-1 pb-1">
               <ButtonPrimary
@@ -1495,7 +1472,7 @@ function EditingArea({
         rows={4}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+        className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
       />
       <div className="flex justify-end gap-2">
         <ButtonSecondary type="button" onClick={onCancel} disabled={busy}>

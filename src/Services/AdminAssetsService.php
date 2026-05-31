@@ -98,14 +98,14 @@ class AdminAssetsService
                 'sikshya-react-admin',
                 $this->plugin->getAssetUrl('admin/react/sikshya-admin.css'),
                 [],
-                (string) filemtime($react_css)
+                $this->cachedAssetVersion($react_css)
             );
         }
         wp_register_script(
             'sikshya-react-admin',
             $this->plugin->getAssetUrl('admin/react/sikshya-admin.js'),
             ['wp-i18n'],
-            file_exists($react_js) ? (string) filemtime($react_js) : SIKSHYA_VERSION,
+            file_exists($react_js) ? $this->cachedAssetVersion($react_js) : SIKSHYA_VERSION,
             true
         );
 
@@ -116,6 +116,38 @@ class AdminAssetsService
             SIKSHYA_VERSION
         );
 
+    }
+
+    /**
+     * Return a stable cache-buster for a built admin asset without hitting `filemtime()` on every
+     * admin page load. We persist computed values in the `_sikshya_asset_version` option (autoloaded
+     * with the rest of WP options, so reads are effectively free) and only recompute when the
+     * stored stamp's plugin version differs from the running `SIKSHYA_VERSION`.
+     *
+     * After a plugin upgrade the option is rebuilt on first hit (one `filemtime()` + one
+     * `update_option()` per asset), then stays stable. Missing files fall through to
+     * `SIKSHYA_VERSION` so the registration always carries some version.
+     */
+    private function cachedAssetVersion(string $absPath): string
+    {
+        static $runtime = null;
+        if ($runtime === null) {
+            $stored = get_option('_sikshya_asset_version', null);
+            if (is_array($stored) && ($stored['plugin'] ?? null) === SIKSHYA_VERSION) {
+                $runtime = $stored;
+            } else {
+                $runtime = ['plugin' => SIKSHYA_VERSION, 'files' => []];
+            }
+        }
+        if (isset($runtime['files'][$absPath])) {
+            return $runtime['files'][$absPath];
+        }
+        $version = file_exists($absPath) ? (string) filemtime($absPath) : SIKSHYA_VERSION;
+        $runtime['files'][$absPath] = $version;
+        // Persist outside the autoload set — admin pages will pick it up on the next request.
+        update_option('_sikshya_asset_version', $runtime, false);
+
+        return $version;
     }
 
     /**

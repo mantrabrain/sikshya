@@ -244,7 +244,10 @@ class CourseController
         $template_path = $this->plugin->getTemplatePath($template . '.php');
 
         if (file_exists($template_path)) {
-            extract($data);
+            // EXTR_SKIP — defensive: never overwrite a local in this scope
+            // (`$template_path`, `$template`, `$data`, `$this`). See the same
+            // pattern in `Sikshya\Core\View::render` for the full rationale.
+            extract($data, EXTR_SKIP);
             include $template_path;
         } else {
             // Fallback to default template
@@ -257,7 +260,7 @@ class CourseController
         $template_path = $this->plugin->getTemplatePath('default/' . $template . '.php');
 
         if (file_exists($template_path)) {
-            extract($data);
+            extract($data, EXTR_SKIP);
             include $template_path;
         } else {
             echo '<p>' . __('Template not found', 'sikshya') . '</p>';

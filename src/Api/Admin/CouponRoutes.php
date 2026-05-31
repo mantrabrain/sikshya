@@ -49,6 +49,64 @@ final class CouponRoutes extends AbstractAdminRestController
                 'permission_callback' => [$this, 'permissionSalesCommerce'],
             ],
         ]);
+
+        register_rest_route($namespace, '/admin/coupons/checkout-toggle', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getCheckoutToggle'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
+            ],
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'setCheckoutToggle'],
+                'permission_callback' => [$this, 'permissionSalesCommerce'],
+            ],
+        ]);
+    }
+
+    /**
+     * Current state of the storefront `enable_coupons` flag.
+     *
+     * Returned alongside a tiny envelope the React admin can read without
+     * touching the full settings tab payload.
+     */
+    public function getCheckoutToggle(WP_REST_Request $request): WP_REST_Response
+    {
+        unset($request);
+        $enabled = \Sikshya\Services\Settings::isTruthy(
+            \Sikshya\Services\Settings::get('enable_coupons', false)
+        );
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'enabled' => $enabled,
+            ],
+            200
+        );
+    }
+
+    /**
+     * Flip the storefront `enable_coupons` flag without disturbing other
+     * payment-tab settings. Body: `{ "enabled": true|false }`.
+     */
+    public function setCheckoutToggle(WP_REST_Request $request): WP_REST_Response
+    {
+        $body = $request->get_json_params();
+        if (!is_array($body)) {
+            $body = $request->get_body_params();
+        }
+        $enabled = !empty($body['enabled']);
+
+        \Sikshya\Services\Settings::set('enable_coupons', $enabled ? '1' : '0');
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'enabled' => $enabled,
+            ],
+            200
+        );
     }
 
     /**

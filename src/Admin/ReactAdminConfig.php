@@ -486,10 +486,12 @@ final class ReactAdminConfig
         }
 
         if (current_user_can('manage_options')) {
+            // `puzzle` is the universal symbol for "modular plugin pieces"
+            // — clearer than `sparkles` which reads as AI-generated content.
             $items[] = [
                 'id' => 'addons',
                 'label' => __('Addons', 'sikshya'),
-                'icon' => 'sparkles',
+                'icon' => 'puzzle',
                 'href' => self::reactAppUrl('addons'),
             ];
         }

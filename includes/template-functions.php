@@ -1463,9 +1463,12 @@ function sikshya_is_user_enrolled_in_course(int $course_id, int $user_id = 0): b
     if ($user_id <= 0 || $course_id <= 0) {
         return false;
     }
-    $courses = new \Sikshya\Services\CourseService();
-
-    return $courses->isUserEnrolled($user_id, $course_id);
+    // Route through the request-scoped cache so course-archive pages that
+    // pre-warm (`UserCourseStateCache::warm($uid, $course_ids)`) get O(1)
+    // lookups instead of one DB call per card. Cold callers (single-course
+    // pages, admin tools) still get a single-row fetch via the cache's
+    // miss-fallback path.
+    return \Sikshya\Frontend\Site\UserCourseStateCache::isEnrolled($user_id, $course_id);
 }
 
 /**
@@ -1480,18 +1483,10 @@ function sikshya_is_user_completed_course(int $course_id, int $user_id = 0): boo
     if ($user_id <= 0 || $course_id <= 0) {
         return false;
     }
-
-    static $cache = [];
-    $k = $user_id . ':' . $course_id;
-    if (array_key_exists($k, $cache)) {
-        return (bool) $cache[$k];
-    }
-
-    $repo = new \Sikshya\Database\Repositories\EnrollmentRepository();
-    $row = $repo->findByUserAndCourse($user_id, $course_id);
-    $cache[$k] = $row && isset($row->status) && (string) $row->status === 'completed';
-
-    return (bool) $cache[$k];
+    // Shared cache replaces the previous per-function `static $cache` —
+    // archive pages that pre-warm get a memory hit; single-page callers
+    // still get the same lazy single-row fetch via the cache's miss path.
+    return \Sikshya\Frontend\Site\UserCourseStateCache::isCompleted($user_id, $course_id);
 }
 
 /**
@@ -1506,24 +1501,10 @@ function sikshya_get_user_course_certificate_download_url(int $course_id, int $u
     if ($user_id <= 0 || $course_id <= 0) {
         return '';
     }
-
-    static $cache = [];
-    $k = $user_id . ':' . $course_id;
-    if (array_key_exists($k, $cache)) {
-        return (string) $cache[$k];
-    }
-
-    // Respect global setting used by LearnerCertificateService.
-    if (class_exists(\Sikshya\Services\Settings::class) && !\Sikshya\Services\Settings::isTruthy(\Sikshya\Services\Settings::get('students_can_download_certificates', '1'))) {
-        $cache[$k] = '';
-        return '';
-    }
-
-    $repo = new \Sikshya\Database\Repositories\CertificateRepository();
-    $row = $repo->findByUserAndCourse($user_id, $course_id);
-    $cache[$k] = $row ? (string) ($row->download_url ?? '') : '';
-
-    return (string) $cache[$k];
+    // Shared cache handles both the "students can download" setting check
+    // and the per-(user, course) row lookup. Same backward-compat fallback
+    // as the other two helpers — uncached callers still get a single fetch.
+    return \Sikshya\Frontend\Site\UserCourseStateCache::certificateDownloadUrl($user_id, $course_id);
 }
 
 /**
@@ -1615,7 +1596,9 @@ function sikshya_outline_type_key_from_post_type(string $post_type): string
 /**
  * Shared SVG open tag for curriculum type icons — matches Learn sidebar drawing box.
  *
- * @param string $variant `learn`: 18px row icon. `course`: 20px accordion row on single course LP.
+ * @param string $variant `learn` and `course` both render at 20px so all three
+ *                        curriculum surfaces (admin builder, single-course landing,
+ *                        learn sidebar) draw the same glyph at the same size.
  *
  * @return string Attributes snippet (starts with space for concatenation).
  */
@@ -1627,7 +1610,7 @@ function sikshya_curriculum_type_icon_svg_open_attrs(string $variant): string
         return ' class="sikshya-course-lp__type-svg sikshya-curriculum-type-svg" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
     }
 
-    return ' class="sikshya-curriculum-type-svg" viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
+    return ' class="sikshya-curriculum-type-svg" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"';
 }
 
 /**
@@ -1651,51 +1634,66 @@ function sikshya_curriculum_outline_row_type_icon_html(
     $a = sikshya_curriculum_type_icon_svg_open_attrs($variant);
     $body = '';
 
+    /*
+     * Content-type icon set. KEEP IN SYNC with:
+     *   - assets/admin/icons/icons.json  (React admin glyph dictionary)
+     *   - client/src/components/NavIcon.tsx  (inline TSX bodies for video + live)
+     *   - templates/partials/learn-icons.php (lesson-shell header icons)
+     * One viewBox (0 0 24 24), 1.75px primary stroke, 1.5px detail stroke,
+     * rounded caps + joins, currentColor only. Distinctive silhouettes per type.
+     */
     switch ($outline_type_key) {
         case 'lesson':
             switch ($lesson_type_key) {
                 case 'video':
-                    // Learn shell "play-video" glyph.
-                    $body = '<rect x="4" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor"/>';
+                    // Rounded screen + centred filled play triangle.
+                    $body = '<rect x="3" y="5.5" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M10 9.5v5l5-2.5-5-2.5z" fill="currentColor"/>';
 
                     break;
                 case 'audio':
-                    $body = '<path d="M11 5L6 9H3v6h3l5 4V5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 8.5a4 4 0 010 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a7 7 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+                    // Headphones arc — universal "listen".
+                    $body = '<path d="M4 13a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M4 13v4a2 2 0 0 0 2 2h1v-7H5a1 1 0 0 0-1 1zM20 13v4a2 2 0 0 1-2 2h-1v-7h2a1 1 0 0 1 1 1z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>';
 
                     break;
                 case 'live':
-                    $body = '<rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11h10M7 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+                    // Broadcast signal radiating from a central dot.
+                    $body = '<circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M8 8a5 5 0 0 0 0 8M16 8a5 5 0 0 1 0 8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M5 5a9 9 0 0 0 0 14M19 5a9 9 0 0 1 0 14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>';
 
                     break;
                 case 'scorm':
-                    $body = '<path d="M12 2l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>';
+                    // Stacked layers — kept; stroke normalised.
+                    $body = '<path d="M12 3l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M3 13l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>';
 
                     break;
                 case 'h5p':
-                    $body = '<path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                    // Puzzle piece — kept; stroke normalised.
+                    $body = '<path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>';
 
                     break;
                 case 'lesson':
                 case 'text':
                 default:
-                    // Learn shell "doc" glyph for text/read lessons.
-                    $body = '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                    // Page with folded corner + 2 text lines.
+                    $body = '<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M14 3v3.5A1.5 1.5 0 0 0 15.5 8H19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M8.5 13h7M8.5 16.5h4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';
 
                     break;
             }
 
             break;
         case 'quiz':
-            $body = '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+            // Circle silhouette with a "?" inside — distinct from assignment.
+            $body = '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M9.4 9.4a2.6 2.6 0 1 1 3.85 2.27c-.78.4-1.25 1.05-1.25 1.93v.4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17" r="0.9" fill="currentColor"/>';
 
             break;
         case 'assignment':
-            $body = '<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+            // Square page silhouette with a bold check inside — distinct from quiz.
+            $body = '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3h11A1.5 1.5 0 0 1 19 4.5v15A1.5 1.5 0 0 1 17.5 21h-11A1.5 1.5 0 0 1 5 19.5v-15z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 
             break;
         case 'content':
         default:
-            $body = '<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+            // Default falls back to the text-lesson glyph (page + lines).
+            $body = '<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8l-5-5z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M14 3v3.5A1.5 1.5 0 0 0 15.5 8H19" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M8.5 13h7M8.5 16.5h4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';
 
             break;
     }
@@ -1803,6 +1801,12 @@ function sikshya_enroll_paid_course_as_admin(int $course_id): int
     }
     $uid = get_current_user_id();
     try {
+        // CourseService::enrollUser() rejects paid courses by default; the
+        // admin-bypass flow is the explicit opt-out, so we must hand it the
+        // `bypass_price_check` flag here. Without it, every "Enroll without
+        // purchase" click throws InvalidArgumentException → caller sees the
+        // generic "Could not complete enrollment" flash. The flag is stripped
+        // from the persisted row inside enrollUser().
         $eid = (int) $courseService->enrollUser($uid, $course_id, [
             'payment_method' => 'admin_bypass',
             'amount' => 0,
@@ -1812,6 +1816,7 @@ function sikshya_enroll_paid_course_as_admin(int $course_id): int
                 __('Administrator enrollment without purchase (user %d).', 'sikshya'),
                 $uid
             ),
+            'bypass_price_check' => true,
         ]);
 
         return $eid > 0 ? $eid : 0;

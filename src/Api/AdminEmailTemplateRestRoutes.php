@@ -301,7 +301,10 @@ final class AdminEmailTemplateRestRoutes
 
         $sample = $mailer->buildSampleMergeContext();
         $subject_done = EmailTemplateMerge::apply($subject, $sample);
-        $inner = EmailTemplateMerge::apply($html, $sample);
+        // Body preview is rendered as HTML — escape merge values so the
+        // preview reflects what an actual email send would produce
+        // (post-`applyHtml` sanitisation in EmailNotificationService).
+        $inner = EmailTemplateMerge::applyHtml($html, $sample);
         $wrapped = $mailer->previewWrapHtml($inner);
 
         return new WP_REST_Response(

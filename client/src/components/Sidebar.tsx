@@ -10,7 +10,7 @@ function NavBadge({ badge }: { badge: NavItemBadge }) {
   const isOff = badge === 'off';
   return (
     <span
-      className={`ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${
+      className={`ml-2 shrink-0 rounded-md px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ring-1 ring-inset ${
         isOff
           ? 'bg-slate-100 text-slate-600 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700'
           : 'bg-accent-50 text-accent-700 ring-accent-200 dark:bg-accent-950/40 dark:text-accent-300 dark:ring-accent-900/60'
@@ -74,7 +74,7 @@ function ChildLink({
   return (
     <a
       href={item.href}
-      className={`flex w-full items-center gap-3 rounded-lg py-2 pl-3 pr-2 text-[13px] font-medium transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-lg py-2 pl-3 pr-2 text-xs font-medium transition-colors ${
         active
           ? 'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100/80 dark:bg-brand-950/40 dark:text-brand-300 dark:ring-brand-900/50'
           : brandedChrome
@@ -123,7 +123,7 @@ function NavBlock({
         <button
           type="button"
           onClick={() => setOpen((o) => ({ ...o, [item.id]: !expanded }))}
-          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
             childBranch
               ? brandedChrome
                 ? 'bg-current/8 text-inherit'
@@ -286,7 +286,7 @@ export function Sidebar({
         </div>
         <div className="mt-2.5 flex min-w-0 flex-wrap items-center gap-1.5">
           <span
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium leading-none tracking-tight shadow-sm ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium leading-none tracking-tight shadow-sm ${
               brandedChrome
                 ? 'border-white/15 bg-black/[0.12] text-inherit shadow-black/10 dark:border-white/10 dark:bg-white/[0.08]'
                 : 'border-slate-200/90 bg-white text-slate-600 shadow-slate-900/[0.04] dark:border-slate-600/80 dark:bg-slate-800/90 dark:text-slate-300 dark:shadow-none'
@@ -310,7 +310,7 @@ export function Sidebar({
           </span>
           {proPluginVersion ? (
             <span
-              className={`inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium leading-none tracking-tight ${
+              className={`inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium leading-none tracking-tight ${
                 proLicensed
                   ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/70 dark:bg-emerald-950/55 dark:text-emerald-100'
                   : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200'

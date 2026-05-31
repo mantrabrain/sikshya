@@ -174,7 +174,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     type="text"
                     value={opts.brand_name || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, brand_name: e.target.value }))}
-                    className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    className="mt-2 block w-full max-w-xl rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     placeholder={__('Acme Academy LMS', 'sikshya')}
                   />
                 </label>
@@ -188,7 +188,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     type="text"
                     value={opts.brand_short_name || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, brand_short_name: e.target.value }))}
-                    className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    className="mt-2 block w-full max-w-xl rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     placeholder={__('Acme', 'sikshya')}
                   />
                 </label>
@@ -254,7 +254,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   type="text"
                   value={opts.plugin_name || ''}
                   onChange={(e) => setOpts((p) => ({ ...p, plugin_name: e.target.value }))}
-                  className="mt-2 w-full max-w-xl rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-2 block w-full max-w-xl rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   placeholder={__('Acme Academy LMS', 'sikshya')}
                 />
               </label>
@@ -320,7 +320,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="text"
                       value={opts.frontend_accent || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, frontend_accent: e.target.value }))}
-                      className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       placeholder={__('#7a2e80', 'sikshya')}
                     />
                   </div>
@@ -337,7 +337,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                   rows={4}
                   value={opts.admin_footer_html || ''}
                   onChange={(e) => setOpts((p) => ({ ...p, admin_footer_html: e.target.value }))}
-                  className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   placeholder={__('<p>© Acme Academy</p>', 'sikshya')}
                 />
               </label>
@@ -358,7 +358,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                     type="text"
                     value={opts.login_accent_color || ''}
                     onChange={(e) => setOpts((p) => ({ ...p, login_accent_color: e.target.value }))}
-                    className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                    className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                     placeholder={__('#2c5ba8', 'sikshya')}
                   />
                 </div>
@@ -382,7 +382,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="text"
                       value={opts.topbar_bg || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, topbar_bg: e.target.value }))}
-                      className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       placeholder={__('#ffffff', 'sikshya')}
                     />
                   </div>
@@ -404,7 +404,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="text"
                       value={opts.topbar_text || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, topbar_text: e.target.value }))}
-                      className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       placeholder={__('#0f172a', 'sikshya')}
                     />
                   </div>
@@ -426,7 +426,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="text"
                       value={opts.sidebar_bg || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, sidebar_bg: e.target.value }))}
-                      className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       placeholder={__('#ffffff', 'sikshya')}
                     />
                   </div>
@@ -448,7 +448,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="text"
                       value={opts.sidebar_text || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, sidebar_text: e.target.value }))}
-                      className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       placeholder={__('#475569', 'sikshya')}
                     />
                   </div>
@@ -492,7 +492,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                             terminology: { ...(p.terminology || {}), [k]: e.target.value },
                           }))
                         }
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         placeholder=""
                       />
                     </label>
@@ -512,7 +512,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="url"
                       value={opts.documentation_url || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, documentation_url: e.target.value }))}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder="https://docs.yoursite.com"
                     />
                   </label>
@@ -522,7 +522,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="url"
                       value={opts.support_url || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, support_url: e.target.value }))}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder="https://support.yoursite.com"
                     />
                   </label>
@@ -532,7 +532,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       type="url"
                       value={opts.upgrade_url || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, upgrade_url: e.target.value }))}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder="https://yoursite.com/pricing"
                     />
                   </label>
@@ -553,7 +553,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                       min={0}
                       value={courseId ? String(courseId) : ''}
                       onChange={(e) => setCourseId(Number(e.target.value || 0))}
-                      className="mt-2 w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-2 w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       placeholder={__('123', 'sikshya')}
                     />
                   </label>
@@ -575,7 +575,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                         type="text"
                         value={(courseOverrides.brand_name as string) || ''}
                         onChange={(e) => setCourseOverrides((p) => ({ ...p, brand_name: e.target.value }))}
-                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                        className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       />
                     </label>
                     <label className="block text-sm">
@@ -591,7 +591,7 @@ export function WhiteLabelPage(props: { config: SikshyaReactConfig; title: strin
                           type="text"
                           value={(courseOverrides.frontend_accent as string) || ''}
                           onChange={(e) => setCourseOverrides((p) => ({ ...p, frontend_accent: e.target.value }))}
-                          className="w-40 rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-slate-700 dark:bg-slate-950"
+                          className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                         />
                       </div>
                     </label>

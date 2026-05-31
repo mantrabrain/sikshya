@@ -142,7 +142,7 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
             <label className="block text-sm text-slate-700 dark:text-slate-200">
               Status
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={editStatus}
                 onChange={(e) => setEditStatus(e.target.value)}
                 disabled={saving}
@@ -182,7 +182,7 @@ export function PaymentDetailsPage(props: { config: SikshyaReactConfig; title: s
                 {(p.payment_method || '—').toUpperCase()}
               </div>
               {p.transaction_id ? (
-                <div className="mt-1 truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="mt-1 truncate font-mono text-xs text-slate-500 dark:text-slate-400">
                   {p.transaction_id}
                 </div>
               ) : null}

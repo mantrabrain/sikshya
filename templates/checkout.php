@@ -82,15 +82,16 @@ $checkout_js_config = apply_filters('sikshya_checkout_js_config', $checkout_js_c
     <script>
       window.sikshyaCheckoutConfig = <?php echo wp_json_encode($checkout_js_config); ?>;
     </script>
-    <header class="sikshya-checkout-page__masthead">
-        <div class="sikshya-checkout-page__masthead-inner">
-            <nav class="sikshya-checkout-page__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a href="<?php echo esc_url($u->getHomeUrl()); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
-                <span class="sikshya-checkout-page__bc-sep" aria-hidden="true">›</span>
-                <a href="<?php echo esc_url($u->getCartUrl()); ?>"><?php esc_html_e('Cart', 'sikshya'); ?></a>
-                <span class="sikshya-checkout-page__bc-sep" aria-hidden="true">›</span>
-                <span class="sikshya-checkout-page__breadcrumb-current"><?php esc_html_e('Checkout', 'sikshya'); ?></span>
-            </nav>
+    <header class="sikshya-course-lp__masthead">
+        <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
+            <?php
+            $items = [
+                ['label' => __('Home', 'sikshya'), 'url' => $u->getHomeUrl()],
+                ['label' => __('Cart', 'sikshya'), 'url' => $u->getCartUrl()],
+                ['label' => __('Checkout', 'sikshya')],
+            ];
+            require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+            ?>
             <h1 class="sikshya-checkout-page__title"><?php esc_html_e('Checkout', 'sikshya'); ?></h1>
             <p class="sikshya-checkout-page__lead">
                 <?php if ($page_model->isEmpty()) : ?>

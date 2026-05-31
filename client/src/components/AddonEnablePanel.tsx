@@ -97,7 +97,7 @@ export function AddonEnablePanel(props: {
                 />
               </svg>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
               {__('Add-on', 'sikshya')}
             </span>
           </div>
@@ -105,7 +105,7 @@ export function AddonEnablePanel(props: {
           <h2 className="mt-5 text-xl font-bold leading-snug tracking-tight text-white sm:text-[1.375rem]">
             {title}
           </h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-white/85">
+          <p className="mt-2 text-sm leading-relaxed text-white/85">
             {description}
           </p>
         </div>
@@ -149,7 +149,7 @@ export function AddonEnablePanel(props: {
           ) : null}
         </div>
 
-        <p className="mt-5 flex items-center gap-2 text-[13px] text-slate-500 dark:text-slate-400">
+        <p className="mt-5 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <svg
             className="h-4 w-4 shrink-0 text-emerald-500"
             fill="none"

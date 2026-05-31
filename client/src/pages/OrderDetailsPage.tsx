@@ -173,7 +173,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
             <label className="block text-sm text-slate-700 dark:text-slate-200">
               Status
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={editStatus}
                 onChange={(e) => setEditStatus(e.target.value as any)}
                 disabled={saving}
@@ -201,7 +201,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
                 {(order.gateway || '—').toUpperCase()}
               </div>
               {order.gateway_intent_id ? (
-                <div className="mt-1 truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="mt-1 truncate font-mono text-xs text-slate-500 dark:text-slate-400">
                   {order.gateway_intent_id}
                 </div>
               ) : null}
@@ -397,7 +397,7 @@ export function OrderDetailsPage(props: { config: SikshyaReactConfig; title: str
               <div className="mt-3 space-y-1 text-sm">
                 {order.dynamic_fields_display.map((it) => (
                   <div key={it.id} className="flex gap-3">
-                    <div className="min-w-[220px] text-[12px] font-semibold text-slate-700 dark:text-slate-200">
+                    <div className="min-w-[220px] text-xs font-semibold text-slate-700 dark:text-slate-200">
                       {it.label || it.id}
                     </div>
                     <div className="text-slate-800 dark:text-slate-200">{String(it.value ?? '') || '—'}</div>

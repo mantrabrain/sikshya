@@ -296,27 +296,22 @@ class Course
     public function setMeta(string $key, $value): bool
     {
         if (!$this->post) {
-            error_log('Sikshya Course Model: setMeta failed - no post object for key: ' . $key);
             return false;
         }
 
-        error_log('Sikshya Course Model: setMeta called for key: ' . $key . ' with value: ' . print_r($value, true));
-
         $result = update_post_meta($this->id, $key, $value);
-        error_log('Sikshya Course Model: update_post_meta result for key ' . $key . ': ' . var_export($result, true));
 
-        // update_post_meta can return false if the value is the same as existing value
-        // or if there's an actual error. We need to check if the meta was actually set
+        // update_post_meta returns false both for "row unchanged" (value
+        // identical to existing) and for actual write failure. Re-read the
+        // stored value to distinguish: if the persisted value now matches
+        // what we asked to write, treat it as success.
         $current_value = get_post_meta($this->id, $key, true);
 
         if ($result !== false || $current_value == $value) {
             $this->meta[$key] = $value;
-            error_log('Sikshya Course Model: Meta updated successfully for key: ' . $key);
             return true;
-        } else {
-            error_log('Sikshya Course Model: Meta update failed for key: ' . $key);
-            return false;
         }
+        return false;
     }
 
     /**

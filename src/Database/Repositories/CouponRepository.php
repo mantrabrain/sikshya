@@ -50,15 +50,36 @@ class CouponRepository
         return $row;
     }
 
-    public function incrementUsedCount(int $coupon_id): void
+    /**
+     * Atomically increment the coupon's redemption counter, refusing the
+     * increment when `max_uses` has already been reached. Returns `true` when
+     * the row was bumped, `false` when the cap was hit (i.e. `affected_rows`
+     * is 0).
+     *
+     * Why this isn't a bare `SET used_count = used_count + 1`: the previous
+     * implementation TOCTOU-raced under concurrent checkouts. Two parallel
+     * uses of a `max_uses = 1` coupon would both pass the pre-check in
+     * {@see findActiveByCode()}, then both bump the counter past the cap.
+     * The condition `(max_uses = 0 OR used_count < max_uses)` makes the
+     * check + bump a single row-level operation MySQL serialises for us.
+     */
+    public function incrementUsedCount(int $coupon_id): bool
     {
         global $wpdb;
-        $wpdb->query(
+        // The expires_at guard closes the same TOCTOU window as the max_uses
+        // check: a coupon validated seconds before expiry must not still be
+        // bumpable a few seconds later when checkout actually completes.
+        $rows = $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$this->coupons} SET used_count = used_count + 1 WHERE id = %d",
+                "UPDATE {$this->coupons} SET used_count = used_count + 1
+                 WHERE id = %d
+                   AND (max_uses = 0 OR used_count < max_uses)
+                   AND (expires_at IS NULL OR expires_at >= NOW())",
                 $coupon_id
             )
         );
+
+        return (int) $rows === 1;
     }
 
     public function recordRedemption(int $coupon_id, int $user_id, int $order_id): void

@@ -184,10 +184,10 @@ export function WpEntityListPage(props: {
               >
                 <span className="inline-flex items-center gap-2">
                   {isLessonList ? (
-                    <span className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    <span className="flex h-5 w-5 items-center justify-center text-slate-500 dark:text-slate-400">
                       <NavIcon
                         name={navIconForCurriculumRow('lesson', String(meta?._sikshya_lesson_type ?? ''))}
-                        className="h-4 w-4"
+                        className="h-5 w-5"
                       />
                     </span>
                   ) : null}

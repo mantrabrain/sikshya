@@ -94,7 +94,7 @@ export function TriggerEventSelect(props: Props) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{selected.title}</span>
-            <code className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+            <code className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-600 dark:bg-slate-900 dark:text-slate-300">
               {selected.badgeLabel}
             </code>
           </div>
@@ -141,7 +141,7 @@ export function TriggerEventSelect(props: Props) {
                       {opt.title}
                     </span>
                     <code
-                      className={`rounded-md px-1.5 py-0.5 font-mono text-[11px] font-medium ${
+                      className={`rounded-md px-1.5 py-0.5 font-mono text-xs font-medium ${
                         isActive
                           ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200'
                           : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'

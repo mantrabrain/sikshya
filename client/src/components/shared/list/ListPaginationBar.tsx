@@ -40,7 +40,7 @@ function buildPageNumbers(current: number, total: number, delta = 2): Array<numb
 }
 
 const pageBtnBase =
-  'min-w-[2.25rem] shrink-0 rounded-lg border px-2.5 py-1.5 text-sm font-medium shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40';
+  'min-w-[2.25rem] shrink-0 rounded-lg border px-2.5 py-1.5 text-sm font-medium shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50';
 const pageBtnIdle =
   'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700';
 const pageBtnActive = 'border-brand-500 bg-brand-50 text-brand-800 dark:border-brand-500 dark:bg-brand-950/40 dark:text-brand-200';

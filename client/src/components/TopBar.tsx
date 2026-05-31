@@ -3,6 +3,7 @@ import { SHELL_HEADER_MIN_CLASS } from '../constants/shellChrome';
 import type { SikshyaShellUser } from '../types';
 import { __ } from '../lib/i18n';
 import { NavIcon } from './NavIcon';
+import { GlobalSearchPalette } from './GlobalSearchPalette';
 
 type Props = {
   title: string;
@@ -86,6 +87,7 @@ export function TopBar({
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+          <GlobalSearchPalette />
           <a
             href={wpIndex}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
@@ -114,7 +116,7 @@ export function TopBar({
           <button
             type="button"
             onClick={onToggleDark}
-            className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:text-slate-400 dark:hover:bg-slate-800"
             aria-label={isDark ? __('Light mode', 'sikshya') : __('Dark mode', 'sikshya')}
           >
             <NavIcon name={isDark ? 'sun' : 'moon'} className="h-5 w-5" />

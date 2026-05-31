@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useShellState } from '../context/ShellStateContext';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { ButtonSecondary } from '../components/shared/buttons';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
@@ -21,6 +23,8 @@ type AddonRow = {
   dependencies: string[];
   enabled: boolean;
   licenseOk: boolean;
+  /** Deep link to the addon's documentation page (computed server-side). */
+  docsUrl?: string;
 };
 
 type AddonsResponse = {
@@ -87,34 +91,9 @@ function addonImportanceRank(id: string): number {
   return i === -1 ? ADDON_IMPORTANCE_ORDER.length : i;
 }
 
-function tierBadge(tier: AddonTier): { label: string; className: string } {
-  if (tier === 'scale') {
-    return {
-      label: 'Scale',
-      className:
-        'bg-purple-50 text-purple-800 ring-1 ring-purple-200 dark:bg-purple-950/40 dark:text-purple-200 dark:ring-purple-900/40',
-    };
-  }
-  if (tier === 'pro') {
-    return {
-      label: 'Growth',
-      className:
-        'bg-brand-50 text-brand-800 ring-1 ring-brand-200 dark:bg-brand-950/40 dark:text-brand-200 dark:ring-brand-900/40',
-    };
-  }
-  if (tier === 'starter') {
-    return {
-      label: 'Starter',
-      className:
-        'bg-amber-50 text-amber-900 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:text-amber-100 dark:ring-amber-900/40',
-    };
-  }
-  return {
-    label: 'Free',
-    className:
-      'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-900/40',
-  };
-}
+// NOTE: the local tierBadge() helper used to live here; it was replaced by
+// `<StatusBadge tier={...} />` from shared/list/StatusBadge.tsx so a single
+// change updates every tier pill across the admin.
 
 function addonRequiresPlanLabel(tier: AddonTier): string {
   if (tier === 'scale') return 'Scale';
@@ -173,10 +152,10 @@ function AddonDescriptionWithHelp(props: { addonId: string; label: string; descr
         <div
           id={panelId}
           role="tooltip"
-          className="pointer-events-none invisible absolute left-0 top-full z-50 -mt-1 w-full max-w-[min(calc(100vw-2rem),24rem)] max-h-[min(70vh,24rem)] translate-y-1 overflow-y-auto rounded-2xl border border-slate-300/90 bg-white p-4 text-left text-[13px] leading-relaxed text-slate-900 opacity-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition duration-150 group-hover/addonhelp:visible group-hover/addonhelp:translate-y-0 group-hover/addonhelp:opacity-100 group-hover/addonhelp:pointer-events-auto group-focus-within/addonhelp:visible group-focus-within/addonhelp:translate-y-0 group-focus-within/addonhelp:opacity-100 group-focus-within/addonhelp:pointer-events-auto dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
+          className="pointer-events-none invisible absolute left-0 top-full z-50 -mt-1 w-full max-w-[min(calc(100vw-2rem),24rem)] max-h-[min(70vh,24rem)] translate-y-1 overflow-y-auto rounded-2xl border border-slate-300/90 bg-white p-4 text-left text-xs leading-relaxed text-slate-900 opacity-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] transition duration-150 group-hover/addonhelp:visible group-hover/addonhelp:translate-y-0 group-hover/addonhelp:opacity-100 group-hover/addonhelp:pointer-events-auto group-focus-within/addonhelp:visible group-focus-within/addonhelp:translate-y-0 group-focus-within/addonhelp:opacity-100 group-focus-within/addonhelp:pointer-events-auto dark:border-slate-500 dark:bg-slate-900 dark:text-slate-100 dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
         >
           <div className="mb-3 border-b border-slate-200 pb-2 dark:border-slate-600">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
               About this add-on
             </p>
           </div>
@@ -369,6 +348,95 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
     }
   };
 
+  // Recommended bundles — curated starter packs to jump-start common configurations.
+  // Each addon ID must exist in the catalog; locked addons (license) are skipped at apply-time.
+  const RECOMMENDED_BUNDLES: { id: string; label: string; tagline: string; addonIds: string[] }[] = [
+    {
+      id: 'starter',
+      label: __('Starter pack', 'sikshya'),
+      tagline: __('Just selling courses', 'sikshya'),
+      addonIds: ['coupons_advanced', 'email_advanced_customization', 'certificates_advanced'],
+    },
+    {
+      id: 'growth',
+      label: __('Growth pack', 'sikshya'),
+      tagline: __('Scaling a paid LMS business', 'sikshya'),
+      addonIds: [
+        'subscriptions',
+        'coupons_advanced',
+        'content_drip',
+        'prerequisites',
+        'gradebook',
+        'certificates_advanced',
+        'multi_instructor',
+        'email_marketing',
+      ],
+    },
+    {
+      id: 'enterprise',
+      label: __('Enterprise pack', 'sikshya'),
+      tagline: __('Multi-site, reports, audit log, white-label', 'sikshya'),
+      addonIds: [
+        'enterprise_reports',
+        'multilingual_enterprise',
+        'multisite_scale',
+        'activity_log',
+        'white_label',
+        'webhooks',
+        'public_api_keys',
+      ],
+    },
+  ];
+
+  const applyBundle = async (bundleId: string) => {
+    const bundle = RECOMMENDED_BUNDLES.find((b) => b.id === bundleId);
+    if (!bundle) return;
+    const allAddons: AddonRow[] = Array.isArray(data?.addons) ? data!.addons : [];
+
+    setBulkBusy(true);
+    setError(null);
+    toast.clear();
+    let enabled = 0;
+    let skipped = 0;
+    try {
+      for (const id of bundle.addonIds) {
+        const row = allAddons.find((a) => a.id === id);
+        if (!row || row.enabled) continue;
+        if (addonLicenseLocked(row)) {
+          skipped++;
+          continue;
+        }
+        const res = await getSikshyaApi().post<AddonsResponse>(
+          SIKSHYA_ENDPOINTS.admin.addonsEnable(id),
+          {}
+        );
+        setData(res);
+        enabled++;
+      }
+      if (enabled > 0) {
+        await refreshShell();
+        toast.success(
+          __('Bundle applied', 'sikshya'),
+          skipped > 0
+            ? `${bundle.label}: ${enabled} enabled, ${skipped} need a higher plan.`
+            : `${bundle.label}: ${enabled} add-on(s) enabled.`
+        );
+      } else if (skipped > 0) {
+        toast.info(
+          __('Plan required', 'sikshya'),
+          `${bundle.label} needs a higher Sikshya Pro plan to enable its add-ons.`
+        );
+      } else {
+        toast.info(__('Already on', 'sikshya'), `${bundle.label}: every add-on is already enabled.`);
+      }
+    } catch (e) {
+      setError(e);
+      toast.error(__('Bundle failed', 'sikshya'), getErrorSummary(e));
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <EmbeddableShell
       embedded={props.embedded}
@@ -410,7 +478,7 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
         </ul>
         <p className="mt-2 text-xs text-sky-900/85 dark:text-sky-200/85">
           Tip: in filters and badges, <span className="font-semibold">{__('Growth', 'sikshya')}</span> is the catalog name for the mid-tier
-          Pro plan (technical tier <code className="rounded bg-white/60 px-1 py-0.5 text-[11px] dark:bg-slate-900/60">{__('pro', 'sikshya')}</code>
+          Pro plan (technical tier <code className="rounded bg-white/60 px-1 py-0.5 text-xs dark:bg-slate-900/60">{__('pro', 'sikshya')}</code>
           ). <span className="font-semibold">{__('Scale', 'sikshya')}</span> is the highest tier.
         </p>
       </div>
@@ -452,6 +520,41 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
         </div>
       ) : null}
 
+      <div
+        className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        data-testid="addons-recommended-bundles"
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              {__('Recommended starter packs', 'sikshya')}
+            </h3>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {__('Pick a pack that matches your goal — we’ll flip on the add-ons that map to it.', 'sikshya')}
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {RECOMMENDED_BUNDLES.map((bundle) => (
+            <button
+              key={bundle.id}
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => void applyBundle(bundle.id)}
+              className="group rounded-xl border border-slate-200 bg-slate-50/80 p-3 text-left transition hover:border-brand-300 hover:bg-brand-50/60 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-brand-700 dark:hover:bg-slate-800"
+            >
+              <div className="text-sm font-semibold text-slate-900 group-hover:text-brand-800 dark:text-white dark:group-hover:text-brand-200">
+                {bundle.label}
+              </div>
+              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{bundle.tagline}</div>
+              <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                {bundle.addonIds.length} {__('add-ons', 'sikshya')}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-2">
@@ -460,27 +563,23 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                 type="checkbox"
                 checked={allVisibleSelected}
                 onChange={(e) => setAllVisibleSelected(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800"
+                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800"
               />
               {t('Select visible')}
             </label>
 
-            <button
-              type="button"
+            <ButtonSecondary
               disabled={bulkBusy || selectedIds.length === 0}
               onClick={() => void bulkUpdate('enable')}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
               {t('Enable selected')}
-            </button>
-            <button
-              type="button"
+            </ButtonSecondary>
+            <ButtonSecondary
               disabled={bulkBusy || selectedIds.length === 0}
               onClick={() => void bulkUpdate('disable')}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
             >
               {t('Disable selected')}
-            </button>
+            </ButtonSecondary>
 
             <span className="ml-1 text-sm text-slate-500 dark:text-slate-400">
               {t('Showing')}{' '}
@@ -551,7 +650,6 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
       ) : (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {rows.map((a) => {
-            const badge = tierBadge(a.tier);
             const locked = addonLicenseLocked(a);
             const busy = busyId === a.id || bulkBusy;
             const isSelected = !!selected[a.id];
@@ -578,17 +676,15 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                             return next;
                           })
                         }
-                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800"
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800"
                         aria-label={`Select ${a.label}`}
                       />
                       <div className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900 dark:text-white">
                         {a.label}
                       </div>
-                      <span
-                        className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.className}`}
-                      >
-                        {badge.label}
-                      </span>
+                      <div className="shrink-0">
+                        <StatusBadge tier={a.tier as 'free' | 'starter' | 'pro' | 'scale'} size="xs" />
+                      </div>
                     </div>
 
                     {a.description ? (
@@ -601,18 +697,31 @@ export function AddonsPage(props: { embedded?: boolean; config: SikshyaReactConf
                     ) : null}
 
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {a.group || 'general'}
                       </span>
                       {a.dependencies?.length ? (
-                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                           Depends: {a.dependencies.length}
                         </span>
                       ) : null}
                       {locked ? (
-                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:ring-amber-900/40">
+                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:ring-amber-900/40">
                           Requires {addonRequiresPlanLabel(a.tier)}
                         </span>
+                      ) : null}
+                      {a.docsUrl ? (
+                        <a
+                          href={a.docsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-800 ring-1 ring-sky-200 hover:bg-sky-100 dark:bg-sky-950/30 dark:text-sky-200 dark:ring-sky-900/40 dark:hover:bg-sky-950/50"
+                          title={__('Open the documentation page for this add-on', 'sikshya')}
+                          data-testid={`addon-docs-link-${a.id}`}
+                        >
+                          {__('Docs', 'sikshya')}
+                          <span aria-hidden="true">↗</span>
+                        </a>
                       ) : null}
                     </div>
                   </div>

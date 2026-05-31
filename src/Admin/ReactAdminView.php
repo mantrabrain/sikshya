@@ -53,11 +53,19 @@ final class ReactAdminView
         /*
          * Boot splash styles live in the enqueued `sikshya-react-admin` bundle (`client/src/index.css`) so the same
          * `.sikshya-admin-boot-loader` / `.sikshya-admin-boot-spinner` classes match React `Suspense` fallbacks (single UI).
+         * The same rules are also inlined below so the splash is centered the *moment* HTML paints — before the
+         * bundled CSS finishes downloading.
          */
 
         echo '<div class="wrap sikshya-react-wrap" style="margin:0;max-width:none;padding:0;">';
         echo '<div id="sikshya-admin-root">';
         if (!$skip_boot_loader) {
+            echo '<style id="sikshya-admin-boot-loader-inline">'
+                . '.sikshya-admin-boot-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;margin:0;box-sizing:border-box;background:#f8fafc;color:#64748b;font-size:13px;line-height:1.4;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:calc(100vh - 46px);width:100%}'
+                . '.sikshya-admin-boot-spinner{box-sizing:border-box;width:40px;height:40px;border-radius:50%;border:3px solid #e2e8f0;border-top-color:#5078b7;animation:sikshya-admin-boot-spin .75s linear infinite;display:block}'
+                . '@keyframes sikshya-admin-boot-spin{to{transform:rotate(360deg)}}'
+                . '.sikshya-admin-boot-loader .screen-reader-text{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}'
+                . '</style>';
             echo '<div class="sikshya-admin-boot-loader" role="status" aria-busy="true" aria-live="polite">';
             echo '<span class="sikshya-admin-boot-spinner" aria-hidden="true"></span>';
             echo '<span class="screen-reader-text">' . esc_html__('Loading Sikshya…', 'sikshya') . '</span>';

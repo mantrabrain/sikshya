@@ -153,6 +153,15 @@ while (have_posts()) :
                         </strong>
                     </span>
                 <?php endif; ?>
+                <?php
+                $student_count = $page_model->getStudentCount();
+                if ($student_count > 0) :
+                ?>
+                    <span class="sikshya-course-lp__stat">
+                        <?php esc_html_e('Students', 'sikshya'); ?>
+                        <strong><?php echo esc_html(number_format_i18n($student_count)); ?></strong>
+                    </span>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -388,6 +397,9 @@ while (have_posts()) :
                                                             <a class="sikshya-course-lp__outline-link" href="<?php echo esc_url($item_url); ?>">
                                                                 <span class="sikshya-course-lp__outline-title"><?php echo esc_html($item->post_title); ?></span>
                                                                 <span class="sikshya-course-lp__pill sikshya-course-lp__outline-type"><?php echo esc_html($label); ?></span>
+                                                                <?php if ($item_is_previewable && !$page_model->isEnrolled()) : ?>
+                                                                    <span class="sikshya-course-lp__pill sikshya-course-lp__pill--preview"><?php esc_html_e('Free preview', 'sikshya'); ?></span>
+                                                                <?php endif; ?>
                                                             </a>
                                                         <?php else : ?>
                                                             <span class="sikshya-course-lp__outline-locked" title="<?php echo esc_attr__('Enroll to unlock this content.', 'sikshya'); ?>">
@@ -658,6 +670,15 @@ while (have_posts()) :
                                 <a class="sikshya-btn sikshya-btn--sm sikshya-btn--primary sikshya-course-lp__btn-full" href="<?php echo esc_url($urls->getLoginUrl()); ?>"><?php esc_html_e('Log in to enroll', 'sikshya'); ?></a>
                             <?php endif; ?>
                         </div>
+
+                        <?php
+                        $preview_url = !$page_model->isEnrolled() ? $page_model->getFirstPreviewableUrl() : '';
+                        if ($preview_url !== '') :
+                        ?>
+                            <a class="sikshya-course-lp__preview-link" href="<?php echo esc_url($preview_url); ?>">
+                                <?php esc_html_e('Watch a free preview', 'sikshya'); ?>
+                            </a>
+                        <?php endif; ?>
 
                         <?php if ($page_model->getMoneyBackText() !== '' && $page_model->isPaid() && !$page_model->isEnrolled()) : ?>
                             <p class="sikshya-course-lp__guarantee"><?php echo esc_html($page_model->getMoneyBackText()); ?></p>

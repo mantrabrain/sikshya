@@ -281,67 +281,26 @@ final class QuizService
     }
 
     /**
+     * Thin delegating shim. Real grading logic lives in {@see QuizGrader} so this class and
+     * {@see \Sikshya\Api\Learner\QuizRoutes} share a single implementation across all 8
+     * question types.
+     *
+     * @param mixed $answer
      * @return array{correct: bool}
      */
-    private function evaluateAnswer(string $type, string $correct, mixed $answer): array
+    private function evaluateAnswer(string $type, string $correct, $answer): array
     {
-        $c = trim($correct);
-
-        if ($type === 'essay') {
-            return ['correct' => false];
-        }
-
-        if ($type === 'multiple_choice' || $type === 'true_false') {
-            $a = $this->normalizeScalarAnswer($answer);
-            return ['correct' => strcasecmp($a, $c) === 0];
-        }
-
-        if ($type === 'short_answer' || $type === 'fill_blank') {
-            $u = is_string($answer) ? trim($answer) : '';
-            if ($u === '') {
-                return ['correct' => false];
-            }
-            $opts = array_map('trim', explode('|', $c));
-            $ul = strtolower($u);
-            foreach ($opts as $o) {
-                if ($o !== '' && strtolower($o) === $ul) {
-                    return ['correct' => true];
-                }
-            }
-            return ['correct' => false];
-        }
-
-        if ($type === 'multiple_response') {
-            $exp = json_decode($c, true);
-            if (!is_array($exp)) {
-                return ['correct' => false];
-            }
-            $user = is_array($answer) ? $answer : (is_string($answer) ? json_decode($answer, true) : []);
-            if (!is_array($user)) {
-                return ['correct' => false];
-            }
-            $exp = array_values(array_unique(array_map('strval', $exp)));
-            $user = array_values(array_unique(array_map('strval', $user)));
-            sort($exp);
-            sort($user);
-            return ['correct' => $exp === $user];
-        }
-
-        return ['correct' => false];
+        return QuizGrader::evaluate($type, $correct, $answer);
     }
 
-    private function normalizeScalarAnswer(mixed $answer): string
+    /**
+     * Thin delegating shim. See {@see QuizGrader::normalizeScalarAnswer()}.
+     *
+     * @param mixed $answer
+     */
+    private function normalizeScalarAnswer($answer): string
     {
-        if (is_bool($answer)) {
-            return $answer ? 'true' : 'false';
-        }
-        if (is_numeric($answer)) {
-            return (string) $answer;
-        }
-        if (is_string($answer)) {
-            return trim($answer);
-        }
-        return '';
+        return QuizGrader::normalizeScalarAnswer($answer);
     }
 }
 

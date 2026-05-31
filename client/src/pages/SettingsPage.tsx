@@ -157,7 +157,7 @@ function PaymentSettingsTab(props: {
       <button
         type="button"
         onClick={() => setOpen((o) => (o === id ? null : id))}
-        className={`w-full rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 ${
+        className={`w-full rounded-2xl border px-4 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
           selected
             ? 'border-brand-200 bg-white shadow-sm dark:border-brand-900/60 dark:bg-slate-900'
             : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-900'
@@ -183,9 +183,9 @@ function PaymentSettingsTab(props: {
                 <div className="truncate text-sm font-semibold text-slate-900 dark:text-white">{title}</div>
                 {badge ? (
                   <span
-                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
                       badge === 'PRO'
-                        ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
+                        ? 'bg-accent-100 text-accent-700 dark:bg-accent-950/40 dark:text-accent-200'
                         : badge === 'TEST'
                           ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-200'
                           : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200'
@@ -503,7 +503,7 @@ function SectionCard({
           <span
             className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg ${
               locked
-                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200'
+                ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/40 dark:text-accent-200'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
             }`}
           >
@@ -513,7 +513,7 @@ function SectionCard({
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
               {locked ? (
-                <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-200">
+                <span className="inline-flex items-center gap-1 rounded-md bg-accent-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-accent-700 dark:bg-accent-900/50 dark:text-accent-200">
                   <span aria-hidden>★</span> Pro
                 </span>
               ) : null}
@@ -522,7 +522,7 @@ function SectionCard({
               <p className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{description}</p>
             ) : null}
             {locked ? (
-              <p className="mt-2 text-xs leading-relaxed text-violet-700 dark:text-violet-200">
+              <p className="mt-2 text-xs leading-relaxed text-accent-700 dark:text-accent-200">
                 {lockedReason || 'Turn on the matching addon to edit these settings.'}
                 {onUpgrade ? (
                   <>

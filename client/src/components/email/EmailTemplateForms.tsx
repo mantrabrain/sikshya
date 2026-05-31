@@ -235,8 +235,8 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
             />
             <p className={HELP}>
               {__('Use merge tags for dynamic recipients. Examples:', 'sikshya')}{' '}
-              <code className="text-[11px]">{'{{student_email}}'}</code>,{' '}
-              <code className="text-[11px]">{'{{instructor_email}}'}</code>, <code className="text-[11px]">{'{{admin_email}}'}</code>
+              <code className="text-xs">{'{{student_email}}'}</code>,{' '}
+              <code className="text-xs">{'{{instructor_email}}'}</code>, <code className="text-xs">{'{{admin_email}}'}</code>
             </p>
           </label>
           <label className="block">
@@ -276,7 +276,7 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
                   key={tag}
                   type="button"
                   onClick={() => void copyToClipboard(tag)}
-                  className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-medium text-sky-900 hover:bg-sky-100 dark:bg-sky-950/50 dark:text-sky-200 dark:hover:bg-sky-900/40"
+                  className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-900 hover:bg-sky-100 dark:bg-sky-950/50 dark:text-sky-200 dark:hover:bg-sky-900/40"
                 >
                   {tag}
                 </button>
@@ -291,7 +291,7 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
               <div className="flex justify-between gap-2">
                 <dt className="text-slate-500">{__('Event', 'sikshya')}</dt>
                 <dd>
-                  <span className="rounded-md bg-violet-100 px-2 py-0.5 font-mono text-[10px] text-violet-900 dark:bg-violet-950/50 dark:text-violet-200">
+                  <span className="rounded-md bg-violet-100 px-2 py-0.5 font-mono text-xs text-violet-900 dark:bg-violet-950/50 dark:text-violet-200">
                     {editing.event}
                   </span>
                 </dd>
@@ -306,11 +306,11 @@ export function EmailTemplateEditorPanel(props: EditorProps) {
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-slate-500">{__('Audience', 'sikshya')}</dt>
-                <dd className="font-mono text-[10px] text-slate-700 dark:text-slate-300">{editing.recipient}</dd>
+                <dd className="font-mono text-xs text-slate-700 dark:text-slate-300">{editing.recipient}</dd>
               </div>
               <div className="flex flex-col gap-1">
                 <dt className="text-slate-500">{__('Send to', 'sikshya')}</dt>
-                <dd className="break-all font-mono text-[10px] text-slate-800 dark:text-slate-200">{recipientTo}</dd>
+                <dd className="break-all font-mono text-xs text-slate-800 dark:text-slate-200">{recipientTo}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-slate-500">{__('Type', 'sikshya')}</dt>

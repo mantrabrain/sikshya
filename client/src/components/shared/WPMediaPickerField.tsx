@@ -50,7 +50,7 @@ type Props = {
 };
 
 const THUMB_BTN =
-  'group relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35';
+  'group relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40';
 
 /**
  * Opens the native WordPress media modal (`wp.media`).
@@ -142,7 +142,7 @@ export function WPMediaPickerField(props: Props) {
             ) : (
               <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 bg-slate-50 px-1 dark:bg-slate-800/80">
                 <NavIcon name="clipboard" className="h-5 w-5 text-slate-400 dark:text-slate-500" />
-                <span className="max-w-full truncate px-0.5 text-[9px] font-medium text-slate-500 dark:text-slate-400">
+                <span className="max-w-full truncate px-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                   {__('File', 'sikshya')}
                 </span>
               </div>

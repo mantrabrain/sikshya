@@ -643,21 +643,61 @@
 }
 
 .sikshya-learnSidebar__head {
-  height: var(--sikshya-learn-railhead-h);
-  padding: 0 var(--sikshya-learn-railhead-pad);
+  /* Was fixed-height single-line. Now stacks course title + "Course content"
+   * kicker, so let it grow vertically with a comfortable two-line layout. */
+  min-height: var(--sikshya-learn-railhead-h);
+  padding: 10px var(--sikshya-learn-railhead-pad);
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
   border-bottom: 1px solid var(--sikshya-learn-border);
   background: var(--sikshya-learn-surface);
 }
 
+/* Course title — primary text; truncated on overflow with full title shown
+ * via the `title` attribute. Tighter font-size than the old heading so the
+ * two-line header stays compact in a 400px-wide drawer. */
 .sikshya-learnSidebar__heading {
-  margin: 0;
-  font-size: var(--sikshya-learn-fs-15);
-  font-weight: 800;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 700;
   line-height: 1.3;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: var(--sikshya-learn-text);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Course title link — inherits the heading's color; underline appears on
+ * hover/focus only to keep the header calm by default. */
+.sikshya-learnSidebar__courseLink {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.sikshya-learnSidebar__courseLink:hover,
+.sikshya-learnSidebar__courseLink:focus-visible {
+  color: var(--sikshya-learn-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* "Course content" kicker — small muted uppercase label under the title. */
+.sikshya-learnSidebar__kicker {
+  font-size: var(--sikshya-learn-fs-11);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sikshya-learn-muted);
+  line-height: 1.2;
 }
 
 .sikshya-sidebarAction {
@@ -1064,10 +1104,12 @@
   position: static;
   top: auto;
   overflow: visible;
-  background-color: var(--sikshya-learn-surface);
+  /* Transparent strip — the bar reads as a thin separator under the tabs,
+   * not a white card that bleeds past where the tab buttons end. */
+  background-color: transparent;
   margin-bottom: 0;
   border-bottom-color: var(--sikshya-learn-border);
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+  box-shadow: none;
 }
 
 /* Sidebar / compact discussion tabs reuse .sikshya-tabsBar but are not direct children — keep unobtrusive layering */
@@ -1483,7 +1525,7 @@
   background: transparent;
 }
 
-@media (max-width: 479px) {
+@media (max-width: 480px) {
   .sikshya-learning-shell--lesson .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active,
   .sikshya-learning-shell--quiz .sikshya-tabPanel[data-sikshya-panel="discussion"].is-active {
     min-height: min(420px, calc(100dvh - 120px));
@@ -2376,18 +2418,14 @@
   align-self: center;
 }
 
-/* Non-interactive reserve when Pro Discussion/Q&A center control is absent */
+/* Spacer is rendered when no Pro addon (Discussion / Q&A) hooks the dock's
+ * center slot. The previous treatment drew a visible 40%-wide translucent
+ * rectangle as a "reserved space" indicator — confusing dead chrome for end
+ * users. Hidden now: flex layout already spreads prev / next to the edges
+ * without it. When a Pro addon injects real content, the addon's element
+ * (matched by the sibling rule above) renders normally. */
 .sikshya-learnContentNav__spacer {
-  display: block;
-  width: min(40%, 300px);
-  max-width: 100%;
-  align-self: stretch;
-  min-height: calc(var(--sikshya-learn-content-nav-h) - 24px);
-  border-radius: var(--sikshya-learn-radius-12);
-  background: rgba(15, 23, 42, 0.04);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  pointer-events: none;
-  flex: 0 0 auto;
+  display: none;
 }
 
 @media (max-width: 1023px) {
@@ -2469,10 +2507,13 @@
   text-align: right;
 }
 
-/* Learn hub ( /learn/ ) */
+/* Learn hub ( /learn/ ) and bundle learn shell course grid.
+ * `auto-fit` (not auto-fill) so when a bundle has only 2 courses the cards
+ * EXPAND to fill the available row instead of leaving a giant empty gap
+ * on the right side of the column. */
 .sikshya-learnHubGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 18px;
   margin-top: 18px;
 }
@@ -2619,9 +2660,12 @@
   line-height: 1.2;
 }
 
+/* Vertical gap between sections matches the column's horizontal 22px
+ * padding so the visual rhythm above / below / left / right of any section
+ * (header bar, video band, tabs panel) is symmetric. */
 .sikshya-contentSection {
-  margin-top: 24px;
-  margin-bottom: 24px;
+  margin-top: 22px;
+  margin-bottom: 22px;
 }
 
 .sikshya-contentSection:first-child {
@@ -2805,8 +2849,20 @@
   padding: 0;
 }
 
+/* The 22px section margin already provides the vertical gap between sections.
+ * Removing the panel's extra padding-top so the gap above the panel equals
+ * the gap on the left/right of the panel (column padding 22px) — symmetric
+ * rhythm above / below / left / right of every section. */
 .sikshya-learning-shell .sikshya-learnContent .sikshya-contentPanel--plain {
-  padding-top: var(--sikshya-learn-railhead-pad);
+  padding-top: 0;
+}
+
+/* BUT: inside a tab panel the strip above (.sikshya-tabsBar) has margin-bottom:0
+ * on the lesson surface, so the body would sit flush against the tabs underline.
+ * Add the same 22px breathing room here so the gap from tabs strip to content
+ * matches the gap from the column edges to the content. */
+.sikshya-learning-shell .sikshya-learnContent .sikshya-tabPanel > .sikshya-contentPanel--plain {
+  padding-top: 22px;
 }
 
 .sikshya-learning-shell .sikshya-learnContent .sikshya-contentPanel--header {
@@ -2853,6 +2909,45 @@
   .sikshya-learning-shell--quiz .sikshya-learnContent .sikshya-contentPanel--header,
   .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContent .sikshya-contentPanel--header {
     top: calc(var(--sikshya-learn-top-offset) + (var(--sikshya-learn-topbar-h) * var(--sikshya-learn-topbar-visible)));
+  }
+}
+
+/* -----------------------------------------------------------------------
+ * Mobile lesson/quiz header — hide non-essentials, keep the 52px row
+ *
+ * On desktop the header is a fixed 52px row showing icon + title +
+ * chapter + 5 meta pills (Assessment / N questions / N min / Pass% /
+ * Attempts) on the left, plus focus toggle + timer + Start-quiz on
+ * the right. On a 430px phone all of that cannot fit, so the inner
+ * row wrapped to 2-3 lines while the panel stayed at 52px height
+ * with `align-items: center`, causing the top of the wrapped content
+ * to render ABOVE the panel's content-box and get clipped behind the
+ * sticky topbar (z-index 50 > panel z-index 44).
+ *
+ * Fix: keep the panel at 52px and HIDE the non-essential chrome on
+ * mobile so the single-row layout still fits. Kept visible: title,
+ * timer (critical for quiz), Start-quiz button (the primary CTA).
+ * Hidden: the 5 meta pills (info is in the quiz body), the chapter
+ * inline label (already in sidebar), and the focus-mode toggle (not
+ * meaningful on a phone — there's no sidebar to hide).
+ * --------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* The 5 quiz meta pills (Assessment, N questions, N min, Pass%,
+   * Attempts) — same info shows in the quiz intro body below. */
+  .sikshya-contentPanel--header .sikshya-learnHeader__metaInline {
+    display: none;
+  }
+
+  /* Chapter "Chapter 1" inline pill next to the title — visible in the
+   * sidebar outline already. */
+  .sikshya-contentPanel--header .sikshya-learnHeader__chapterInline {
+    display: none;
+  }
+
+  /* Focus-mode toggle — the action collapses the desktop sidebar, which
+   * is already a drawer on mobile, so the button is redundant. */
+  .sikshya-contentPanel--header .sikshya-learnHeader__focusBtn {
+    display: none;
   }
 }
 
@@ -3302,12 +3397,25 @@
   left: 50%;
   transform: translateX(-50%);
   width: min(360px, calc(100vw - 32px));
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  /* Solid, opaque card — was rgba(255,255,255,0.96) which blended into
+   * the page content underneath, making the popover read as a faint
+   * overlay rather than a confident floating card. */
+  background: var(--sikshya-learn-surface, #ffffff);
+  border: 1px solid rgba(15, 23, 42, 0.16);
   border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  /* Stronger shadow so the card visually detaches from the topbar. */
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08),
+              0 18px 40px rgba(15, 23, 42, 0.18);
   padding: 12px 12px;
-  z-index: 60;
+  /* Bumped high so the popover always sits above any page chrome. The
+   * topbar has `backdrop-filter` which creates a stacking context — the
+   * popover (descendant) is still bounded by that context, but the
+   * higher z-index ensures it tops everything WITHIN the topbar layer
+   * (active tab indicator, badges, etc.). */
+  z-index: 200;
+  /* New stacking context so internal sub-elements never bleed through
+   * (e.g. the bar fill gradient with overflow tricks). */
+  isolation: isolate;
 }
 
 .sikshya-progressPopover[hidden] {
@@ -3420,6 +3528,13 @@
   line-height: 1.28;
   letter-spacing: -0.02em;
   color: var(--sikshya-learn-text);
+  /* Long titles must truncate so they never push the focus / mark-complete
+   * action cluster off-screen on narrow viewports. Full title still
+   * available via the browser tooltip from the parent's `title` attribute. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sikshya-learnMetaRow {
@@ -3664,19 +3779,30 @@
   margin-top: 12px;
 }
 
+/* All four note-card buttons (Edit / Save / Cancel / Delete) inherit the
+ * .sikshya-btn .sikshya-btn--outline base so they share the same height,
+ * padding rhythm, border weight, and border-radius. Tone modifiers below
+ * only change colour. */
 .sikshya-learnNotes__btn {
   font-size: 12px;
   padding: 6px 12px;
+  min-height: 32px;
 }
 
+/* Muted tone (e.g. Cancel) — keeps the outline shape, softens the label. */
 .sikshya-learnNotes__btn--muted {
-  background: transparent !important;
+  color: var(--sikshya-learn-muted) !important;
 }
 
+/* Danger tone (Delete) — outline shape preserved, border + label go red. */
 .sikshya-learnNotes__btn--danger {
-  background: transparent !important;
   color: #b91c1c !important;
   border-color: rgba(185, 28, 28, 0.35) !important;
+}
+.sikshya-learnNotes__btn--danger:hover {
+  background: rgba(185, 28, 28, 0.06) !important;
+  border-color: rgba(185, 28, 28, 0.5) !important;
+  color: #b91c1c !important;
 }
 
 .sikshya-learnNotes__composer {
@@ -4070,7 +4196,46 @@
 .sikshya-ordering__controls {
   display: flex;
   flex-shrink: 0;
-  gap: 4px;
+  gap: 8px;
+}
+
+/* Move-up / move-down need a comfortable touch target — current
+ * `.sikshya-btn--sm` (8px/12px padding with a glyph) renders ~28px,
+ * below WCAG 2.5.5 spacing comfort. Lock to 36px square with a calm
+ * hover surface so they read as a button cluster, not a glyph. */
+.sikshya-learning-shell .sikshya-ordering__up,
+.sikshya-learning-shell .sikshya-ordering__down {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: var(--sikshya-learn-radius-8);
+  background: var(--sikshya-learn-surface-2);
+  color: var(--sikshya-learn-text);
+  border: 1px solid var(--sikshya-learn-border);
+  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+}
+
+.sikshya-learning-shell .sikshya-ordering__up:hover,
+.sikshya-learning-shell .sikshya-ordering__down:hover {
+  background: var(--sikshya-learn-accent-wash, var(--sikshya-learn-surface-2));
+  border-color: var(--sikshya-learn-primary);
+}
+
+.sikshya-learning-shell .sikshya-ordering__up:active,
+.sikshya-learning-shell .sikshya-ordering__down:active {
+  transform: translateY(1px);
+}
+
+.sikshya-learning-shell .sikshya-ordering__up:disabled,
+.sikshya-learning-shell .sikshya-ordering__down:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .sikshya-matching {
@@ -4140,6 +4305,99 @@
   margin-top: 12px;
 }
 
+/* Per-type score breakdown rendered inside the results card. Each row is
+ * one question type ("Multiple choice", "Essay", …) with a calm
+ * "earned/total · pct%" detail. Helps learners see strengths vs. gaps. */
+.sikshya-quizResults__breakdown {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-10);
+  background: var(--sikshya-learn-surface-2);
+}
+
+.sikshya-quizResults__breakdownHead {
+  margin: 0 0 8px;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 700;
+  letter-spacing: var(--sikshya-learn-tracking-tight);
+  color: var(--sikshya-learn-muted-strong, var(--sikshya-learn-muted));
+  text-transform: uppercase;
+}
+
+.sikshya-quizResults__breakdownRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: var(--sikshya-learn-fs-14);
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-quizResults__breakdownRow + .sikshya-quizResults__breakdownRow {
+  border-top: 1px dashed color-mix(in srgb, var(--sikshya-learn-border) 80%, transparent);
+}
+
+.sikshya-quizResults__breakdownLabel {
+  font-weight: 600;
+}
+
+.sikshya-quizResults__breakdownDetail {
+  color: var(--sikshya-learn-muted-strong, var(--sikshya-learn-muted));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Per-question explanation injected after grading on "Review answers".
+ * Calm tinted disclosure so it reads as supplemental, not a correction. */
+.sikshya-quizQ__explanation {
+  margin-top: 10px;
+  border: 1px solid color-mix(in srgb, var(--sikshya-learn-primary) 22%, var(--sikshya-learn-border));
+  background: color-mix(in srgb, var(--sikshya-learn-primary) 5%, var(--sikshya-learn-surface));
+  border-radius: var(--sikshya-learn-radius-10);
+}
+
+.sikshya-quizQ__explanationSummary {
+  cursor: pointer;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: var(--sikshya-learn-fs-13);
+  color: var(--sikshya-learn-primary);
+  list-style: none;
+}
+
+.sikshya-quizQ__explanationSummary::-webkit-details-marker { display: none; }
+
+.sikshya-quizQ__explanationBody {
+  padding: 0 12px 12px;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.6;
+  color: var(--sikshya-learn-text);
+}
+
+/* Validation error variant: shown when validateForm() flags unanswered
+ * questions on submit. Calm warning surface, not a hard red — we don't
+ * want to scold; we want to nudge the learner back to the question. */
+.sikshya-quiz-result--error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--sikshya-learn-radius-12);
+  border: 1px solid color-mix(in srgb, var(--sikshya-learn-warn, #d97706) 35%, var(--sikshya-learn-border));
+  background: color-mix(in srgb, var(--sikshya-learn-warn, #d97706) 8%, var(--sikshya-learn-surface));
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-quiz-result--error .sikshya-quiz-result__heading {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.sikshya-quiz-result--error .sikshya-quiz-result__missing {
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-13);
+  color: var(--sikshya-learn-muted-strong, var(--sikshya-learn-muted));
+}
+
 .sikshya-quizResults {
   padding: 14px 14px;
   border-radius: var(--sikshya-learn-radius-12);
@@ -4193,45 +4451,132 @@
   margin-top: 10px;
 }
 
+/* --- Tab strip — polished underline pattern ---------------------------
+ * DESIGN INVARIANTS (all four must hold simultaneously):
+ *   1) The full-width 2px gray baseline is ALWAYS visible across the
+ *      whole strip, including the area to the right of the last tab.
+ *   2) The active tab's 2px brand underline REPLACES the gray under it
+ *      (no double line, no thickness step-up).
+ *   3) No state change reflows text — only `color` and the indicator's
+ *      color animate.
+ *   4) Works whether the strip's overflow is `visible` (desktop) or
+ *      `auto` (mobile horizontal-scroll).
+ *
+ * IMPLEMENTATION:
+ *   - Gray baseline is a REAL `border-bottom` on the strip. Borders are
+ *     painted as part of the element's own box, so they cannot be
+ *     neutralized by the strip's own overflow setting.
+ *   - Active indicator is a child `::after` pseudo positioned at the
+ *     button's bottom with `bottom: -2px`, so it sits ON TOP of the
+ *     strip's border-bottom band. On desktop (overflow:visible) this
+ *     renders fine. On mobile the strip's overflow is `clip`+margin (set
+ *     below in the mobile media-query block) so the indicator survives.
+ *
+ * TYPOGRAPHY:
+ *   - SINGLE `font-weight: 550` across all states (active uses color,
+ *     not weight) so text width never changes between states.
+ *   - `font-synthesis: none` blocks UA from auto-bolding on focus.
+ *   - 14px size matches Coursera / Notion / Linear at this density.
+ */
 .sikshya-tabsBar {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  border-bottom: 1px solid var(--sikshya-learn-border);
-  margin-bottom: 16px;
+  gap: 2px;
+  background: transparent;
+  /* The "main gray border" the user can see across the full strip width.
+   * Real border (not a pseudo) — paints with the strip's own box, so
+   * cannot be neutralized by overflow clipping. */
+  border-bottom: 2px solid var(--sikshya-learn-border);
+  margin-bottom: 18px;
   padding-bottom: 0;
 }
 
 .sikshya-tabBtn {
+  position: relative;
   appearance: none;
   border: 0;
   background: transparent;
-  margin-bottom: -1px;
-  padding: 11px 14px;
-  font-size: var(--sikshya-learn-fs-13);
-  font-weight: 700;
+  margin-bottom: 0;
+  padding: 11px 16px;
+  font-size: var(--sikshya-learn-fs-14, 14px);
+  font-weight: 550;
+  font-synthesis: none;
+  letter-spacing: 0.005em;
+  line-height: 1.4;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  border-radius: var(--sikshya-learn-radius-8) var(--sikshya-learn-radius-8) 0 0;
   color: var(--sikshya-learn-muted);
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  transition: color 160ms ease;
 }
 
-.sikshya-tabBtn:hover {
+/* The 2px active/hover indicator lives inside the button at its bottom
+ * edge — directly ABOVE the strip's 2px gray border-bottom. Both lines
+ * stay visible: gray spans the full strip width as the baseline, and the
+ * brand indicator stacks just above it under the active tab. */
+.sikshya-tabBtn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;             /* inside the button, just above the gray strip border */
+  height: 2px;
+  background: transparent;
+  pointer-events: none;
+  transition: background-color 160ms ease;
+}
+
+.sikshya-tabBtn:hover:not(.is-active) {
   color: var(--sikshya-learn-text);
-  background: var(--sikshya-learn-accent-wash);
+}
+
+.sikshya-tabBtn:hover:not(.is-active)::after {
+  background-color: color-mix(in srgb, var(--sikshya-learn-primary) 45%, transparent);
 }
 
 .sikshya-tabBtn.is-active {
-  border-bottom-color: var(--sikshya-learn-primary);
   color: var(--sikshya-learn-primary);
-  font-weight: 800;
-  background: linear-gradient(180deg, rgba(44, 91, 168, 0.07) 0%, transparent 100%);
+}
+
+.sikshya-tabBtn.is-active::after {
+  background-color: var(--sikshya-learn-primary);
+}
+
+/* Suppress the UA-default focus outline on mouse-click. Browsers paint a
+ * subtle ring on `:focus` even when the standard signals it as
+ * non-keyboard interaction; we only want the focus chrome to appear when
+ * a keyboard user actually tabs to it (handled by `:focus-visible`). */
+.sikshya-tabBtn:focus {
+  outline: none;
 }
 
 .sikshya-tabBtn:focus-visible {
+  /* Inset outline so the focus ring lives inside the tab and doesn't
+   * cut through the strip's bottom border. */
   outline: 2px solid var(--sikshya-learn-focus);
-  outline-offset: 2px;
+  outline-offset: -2px;
+  border-radius: var(--sikshya-learn-radius-6, 6px);
+}
+
+/* Pressed state (mousedown). Without this rule the browser may flash its
+ * own default pressed shading between click and class-swap. Underline is
+ * painted via the same `::after` pseudo so there is zero geometry shift
+ * between pressed / hover / active. */
+.sikshya-tabBtn:active {
+  color: var(--sikshya-learn-primary);
+}
+
+.sikshya-tabBtn:active::after {
+  background-color: var(--sikshya-learn-primary);
+}
+
+/* Belt-and-suspenders: WebKit's tap-highlight + button inner-border can
+ * still leak through on iOS / Android. */
+.sikshya-tabBtn {
+  -webkit-tap-highlight-color: transparent;
+}
+.sikshya-tabBtn::-moz-focus-inner {
+  border: 0;
+  padding: 0;
 }
 
 .sikshya-tabPanel {
@@ -4443,6 +4788,99 @@
   width: 100%;
 }
 
+/* Calm "couldn't load this media" fallback — emitted hidden alongside every
+ * video/audio embed; revealed by `learn.js` on a player `error` event.
+ *
+ * IMPORTANT: scope `display:flex` to `:not([hidden])` so the `hidden` HTML
+ * attribute keeps its UA default of `display:none`. Setting `display:flex`
+ * unconditionally would override `[hidden]` and flash the fallback on
+ * first paint before the player has had a chance to load. */
+.sikshya-lesson-embed__fallback[hidden] {
+  display: none !important;
+}
+
+.sikshya-lesson-embed__fallback:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: var(--sikshya-learn-surface-2);
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-10);
+  color: var(--sikshya-learn-text);
+  font-size: var(--sikshya-learn-fs-14);
+}
+
+.sikshya-lesson-embed__fallback-msg {
+  margin: 0;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-lesson-embed__fallback-link {
+  font-weight: 600;
+  color: var(--sikshya-learn-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sikshya-lesson-embed__fallback-link:hover,
+.sikshya-lesson-embed__fallback-link:focus-visible {
+  color: var(--sikshya-learn-primary-strong, var(--sikshya-learn-primary));
+}
+
+/* Optional transcript disclosure, rendered below video/audio embeds when
+ * `_sikshya_lesson_transcript_url` or `_sikshya_lesson_transcript_text`
+ * is set. Closed-by-default; opens to a calm reading panel. */
+.sikshya-lesson-transcript {
+  margin-top: 14px;
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-10);
+  background: var(--sikshya-learn-surface-2);
+}
+
+.sikshya-lesson-transcript__summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--sikshya-learn-text);
+  list-style: none;
+  position: relative;
+}
+
+.sikshya-lesson-transcript__summary::-webkit-details-marker { display: none; }
+
+.sikshya-lesson-transcript__summary::after {
+  content: '▾';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transition: transform 160ms ease;
+  color: var(--sikshya-learn-muted);
+}
+
+.sikshya-lesson-transcript[open] .sikshya-lesson-transcript__summary::after {
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.sikshya-lesson-transcript__body,
+.sikshya-lesson-transcript__download {
+  padding: 0 14px 14px;
+  margin: 0;
+  font-size: var(--sikshya-learn-fs-14);
+  line-height: 1.65;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-lesson-transcript__download a {
+  font-weight: 600;
+  color: var(--sikshya-learn-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /*
  * SCORM/H5P player (Pro) — mounted via `sikshya_lesson_above_tabs`; keep iframe from collapsing in flex layouts.
  */
@@ -4454,6 +4892,29 @@
 
 .sikshya-learnContent .sikshya-contentSection--lessonInteractive .sik-player__frame {
   min-height: min(72vh, 560px);
+}
+
+/* On phones the desktop `min(72vh, 560px)` is the wrong rhythm — the SCORM/
+ * H5P shell pushes the rest of the lesson off-screen. Clamp it down to a
+ * comfortable in-page block on small viewports so learners can still see
+ * the tabs + body content below the player without an awkward jump. */
+@media (max-width: 768px) {
+  .sikshya-learnContent .sikshya-contentSection--lessonInteractive .sik-player__frame {
+    min-height: min(56vh, 420px);
+  }
+}
+
+/* Live class — the Join button cluster lives in `.sik-live-lesson__actions`.
+ * Pro CSS lays it out as a row; on phones it overflows. Wrap + stack. */
+@media (max-width: 640px) {
+  .sikshya-learning-shell .sik-live-lesson__actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .sikshya-learning-shell .sik-live-lesson__actions > .sik-live-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 }
 
 .sikshya-learnContent .sikshya-contentSection--lessonInteractive .sik-player__iframe {
@@ -4673,7 +5134,9 @@
   flex: 1;
   min-width: 0;
   display: flex;
-  align-items: flex-start;
+  /* Center-align so completed (filled circle) and todo (empty circle) indicators
+   * and the content-type icon share a baseline regardless of internal sizes. */
+  align-items: center;
   gap: 12px;
   padding: 12px 8px 12px var(--sikshya-learn-space-16);
   text-decoration: none;
@@ -4710,24 +5173,30 @@
   display: block;
 }
 
+/* Indicators (todo circle, completed check) and the content-type icon all render
+ * at 20x20 so the row layout is stable across completed/todo states and the
+ * content icon doesn't shift horizontally between rows. Full opacity + the
+ * shared --sikshya-learn-muted token gives parity with single-course + admin. */
 .sikshya-curriculumOutline__itemIcon {
   flex: 0 0 auto;
-  margin-top: 2px;
+  width: 20px;
+  height: 20px;
   color: var(--sikshya-learn-muted);
-  opacity: 0.95;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sikshya-curriculumOutline__itemIcon svg {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
 .sikshya-curriculumOutline__check {
   flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  margin-top: 3px;
+  width: 18px;
+  height: 18px;
   border-radius: 999px;
   border: 2px solid var(--sikshya-curriculum-check-todo);
   background: var(--sikshya-learn-surface);
@@ -4738,18 +5207,21 @@
 }
 
 .sikshya-curriculumOutline__check.is-done {
-  border-color: transparent;
+  /* Strip border entirely so the 20px width = content area = SVG size.
+   * Leaving the 2px transparent border in place was making the content area
+   * 16x16 and the SVG render slightly inset, making the green disc visually
+   * smaller than the empty 20px ring. */
+  border: 0;
   background: transparent;
   color: var(--sikshya-learn-success);
-  overflow: visible;
-  width: 25px;
-  height: 25px;
-  margin-top: 0px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
 }
 
 .sikshya-curriculumOutline__check.is-done svg {
-  width: 25px;
-  height: 25px;
+  width: 18px;
+  height: 18x;
   display: block;
 }
 
@@ -5147,5 +5619,953 @@
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
+}
+
+/* ============================================================
+ * Course-mode polish (learn shell course landing)
+ * ----------------------------------------------------------
+ * Cleans up the visual when a learner lands on `?p=COURSE` in
+ * the learn shell — manual excerpt becomes a lead paragraph
+ * separate from the body, empty-content state gets a soft
+ * notice instead of a blank panel, and addon-contributed
+ * blocks under `sikshya_learn_after_hero` inherit the
+ * comfortable content-column padding rhythm.
+ * ============================================================ */
+.sikshya-learnCoursesumLead {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--sikshya-learn-text-muted, #475569);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--sikshya-learn-border);
+}
+
+.sikshya-learnCoursesumEmpty {
+  margin: 0;
+  padding: 1.25rem 0;
+  text-align: center;
+  color: var(--sikshya-learn-text-muted, #64748b);
+  font-style: italic;
+}
+
+/* Calendar teaser + any other addon block that hooks into
+ * sikshya_learn_after_hero now lives INSIDE .sikshya-learnContentCol.
+ * Make sure those blocks share the content column's horizontal
+ * rhythm so they line up with the panels below them. */
+.sikshya-learnContentCol > .sik-cal-teaser,
+.sikshya-learnContentCol > [class*='sik-cal-teaser'],
+.sikshya-learnContentCol > .sikshya-learnAfterHero {
+  margin: 18px 22px 0;
+  padding: 14px 16px;
+  background: var(--sikshya-learn-surface);
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-12);
+  box-shadow: var(--sikshya-learn-shadow-panel);
+}
+
+@media (max-width: 1023px) {
+  .sikshya-learnContentCol > .sik-cal-teaser,
+  .sikshya-learnContentCol > [class*='sik-cal-teaser'],
+  .sikshya-learnContentCol > .sikshya-learnAfterHero {
+    margin: 16px 14px 0;
+  }
+}
+
+/* Extras row at the bottom of the learn content column — CSV exports,
+ * activity log, certificate shortcuts. Pre-fix these were inside
+ * .sikshya-learnSidebar and looked unstyled. */
+.sikshya-learnContentExtras {
+  display: grid;
+  gap: 16px;
+  margin: 24px 22px calc(var(--sikshya-learn-content-nav-h) + 32px);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .sikshya-learnContentExtras {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.sikshya-learnContentExtras:empty {
+  display: none;
+}
+
+/* Each direct child becomes a uniform card. Catches the legacy widgets
+ * that ship with `.sik-acc-panel`, `.sikshya-learnSidebarAct`,
+ * `.sikshya-learnExport`, and plain divs. */
+.sikshya-learnContentExtras > * {
+  background: var(--sikshya-learn-surface);
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: var(--sikshya-learn-radius-12);
+  padding: 16px 18px;
+  box-shadow: var(--sikshya-learn-shadow-panel);
+  margin: 0;
+}
+
+.sikshya-learnContentExtras > * > :first-child {
+  margin-top: 0;
+}
+.sikshya-learnContentExtras > * > :last-child {
+  margin-bottom: 0;
+}
+
+/* Strip the inline border/margin hacks the legacy widgets carried so they
+ * don't double up with the container styling above. */
+.sikshya-learnContentExtras .sikshya-learnSidebarAct,
+.sikshya-learnContentExtras .sik-acc-panel,
+.sikshya-learnContentExtras .sik-acc-activity {
+  border-top: 0 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  border-width: 0 !important;
+  background: transparent !important;
+}
+
+.sikshya-learnContentExtras h2,
+.sikshya-learnContentExtras h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sikshya-learn-text);
+}
+
+.sikshya-learnContentExtras p {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--sikshya-learn-text-muted, #475569);
+}
+
+.sikshya-learnContentExtras button,
+.sikshya-learnContentExtras .sik-acc-btn,
+.sikshya-learnContentExtras .sikshya-learner-export-btn {
+  display: inline-flex;
+  align-items: center;
+  margin: 4px 6px 0 0;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--sikshya-learn-surface-muted, #f1f5f9);
+  color: var(--sikshya-learn-text);
+  border: 1px solid var(--sikshya-learn-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.sikshya-learnContentExtras button:hover,
+.sikshya-learnContentExtras .sik-acc-btn:hover {
+  background: var(--sikshya-learn-border);
+}
+
+/* =========================================================
+ * Sikshya Learn — Distraction-Free Rework (additive only)
+ * =========================================================
+ * Drives:
+ *   - Skip link
+ *   - New layout / drawer / pill tokens; stronger muted contrast
+ *   - Sidebar rail mode (`html.sikshya-sidebarCollapsed`)
+ *   - More toggle + off-canvas drawer (`html.sikshya-moreOpen`)
+ *   - Focus mode body class (`html.sikshya-focusMode`)
+ *   - Topbar auto-hide on scroll (`html.sikshya-chromeHidden`)
+ *   - Floating Mark-Complete pill (threshold-fade-in)
+ *   - Per-content-type variants (text reading well, audio sticky bar)
+ *   - Inert legacy footer
+ * Pro-addon compat: only NEW selectors; no existing rules edited.
+ * ========================================================= */
+
+:root {
+  /* Stronger muted text for small-size states (notes meta, announcement meta).
+   * Used by `.sikshya-muted--strong` and `.sikshya-learnNotes__hint`. */
+  --sikshya-learn-muted-strong: #475569;
+  /* Floating Mark-complete pill tokens. Used by `.sikshya-learnCompletePill`. */
+  --sikshya-learn-pill-bg: var(--sikshya-learn-primary);
+  --sikshya-learn-pill-text: #ffffff;
+  --sikshya-learn-pill-shadow: 0 6px 20px rgba(44, 91, 168, 0.28), 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+/* --- Skip link ---------------------------------------------------------- */
+.sikshya-skipLink {
+  position: absolute;
+  left: 12px;
+  top: -64px;
+  z-index: 1100;
+  background: var(--sikshya-learn-surface);
+  color: var(--sikshya-learn-text);
+  padding: 10px 14px;
+  border-radius: var(--sikshya-learn-radius-8);
+  box-shadow: var(--sikshya-learn-shadow-md);
+  font-weight: 600;
+  font-size: var(--sikshya-learn-fs-14);
+  text-decoration: none;
+  transition: top 120ms ease;
+}
+.sikshya-skipLink:focus,
+.sikshya-skipLink:focus-visible {
+  top: 12px;
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+
+/* --- Sidebar hide (desktop): defer to legacy `.sikshya-sidebarCollapsed`
+ * rules at lines ~559-571 which set flex-basis/width to 0. The earlier
+ * "rail mode" override (72px sliver) caused the hamburger toggle to feel
+ * unresponsive — the sidebar didn't appear to hide because a rail was
+ * still visible. Removed; full hide restored.
+ *
+ * The content well needs to actually reflow into the freed space when
+ * collapsed; this rule un-clamps the content column padding so the prose
+ * recenters cleanly across the available width.
+ */
+@media (min-width: 1024px) {
+  html.sikshya-sidebarCollapsed .sikshya-learnContentCol {
+    margin-left: 0;
+  }
+  html.sikshya-sidebarCollapsed .sikshya-learnSidebar {
+    transition: flex-basis 180ms ease, width 180ms ease, padding 180ms ease;
+  }
+}
+
+/* --- Overview-well: top-of-content reading slab ------------------------ */
+.sikshya-contentSection--overview {
+  padding-top: 8px;
+}
+/* (Removed) `.sikshya-overviewWell` rules — stragglers from the reverted
+ * More-drawer rework. The Overview content now uses the normal tab-panel
+ * + contentPanel--plain stack and fills the column edge-to-edge like the
+ * other tab panels. */
+
+/* --- Focus mode -------------------------------------------------------- */
+html.sikshya-focusMode .sikshya-learnTopbar,
+html.sikshya-focusMode .sikshya-learnSidebar,
+html.sikshya-focusMode .sikshya-learnOverlay,
+html.sikshya-focusMode .sikshya-learnHeader__chapterInline,
+html.sikshya-focusMode .sikshya-learnHeader__typeIcon,
+html.sikshya-focusMode .sikshya-learnContentNav__center > :not(.sikshya-learnContentNav__spacer) {
+  display: none !important;
+}
+html.sikshya-focusMode .sikshya-learnMain {
+  --sikshya-learn-topbar-h: 0px;
+  --sikshya-learn-sidebar-w-current: 0px;
+}
+html.sikshya-focusMode .sikshya-learnContentNav {
+  background: rgba(255, 255, 255, 0.92);
+  /* Dock was moved outside .sikshya-learning-app, so it no longer inherits
+   * the --sikshya-learn-sidebar-w-current: 0px override that focus mode
+   * sets on .sikshya-learnMain. Force left: 0 here so the dock spans the
+   * full viewport width in focus mode (no leftover 400px gutter from the
+   * sidebar variable on desktop). */
+  left: 0 !important;
+}
+
+/* Focus mode — keep tabs bar at the prose-readable width instead of letting
+ * it stretch full-width across the freed-up content area (sidebar + topbar
+ * are hidden so the column gets wider). The tabs strip looking massively
+ * wide than the body looks unbalanced; clamp it to the same reading rhythm. */
+html.sikshya-focusMode .sikshya-learnContent > .sikshya-tabsSection {
+  max-width: var(--sikshya-learn-prose-max);
+  margin-inline: auto;
+}
+html.sikshya-focusMode .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar {
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+/* Focus button — pressed state + icon swap. */
+.sikshya-learnHeader__focusBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: var(--sikshya-learn-muted-strong);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.sikshya-learnHeader__focusBtn:hover {
+  background: var(--sikshya-learn-hover);
+  color: var(--sikshya-learn-text);
+}
+.sikshya-learnHeader__focusBtn:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+.sikshya-learnHeader__focusBtn-exit {
+  display: none;
+}
+html.sikshya-focusMode .sikshya-learnHeader__focusBtn {
+  color: var(--sikshya-learn-primary);
+  background: var(--sikshya-learn-accent-wash);
+  border-color: var(--sikshya-learn-accent-wash-2);
+}
+html.sikshya-focusMode .sikshya-learnHeader__focusBtn-enter {
+  display: none;
+}
+html.sikshya-focusMode .sikshya-learnHeader__focusBtn-exit {
+  display: inline-flex;
+}
+
+/* --- Floating Mark-Complete pill --------------------------------------- */
+.sikshya-learnCompletePill {
+  position: fixed;
+  right: 14px;
+  bottom: calc(var(--sikshya-learn-content-nav-h) + 14px);
+  z-index: 75;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: var(--sikshya-learn-fs-13);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--sikshya-learn-pill-text);
+  background: var(--sikshya-learn-pill-bg);
+  border: none;
+  border-radius: 999px;
+  box-shadow: var(--sikshya-learn-pill-shadow);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.sikshya-learnCompletePill .sikshya-btn__icon svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+.sikshya-learnCompletePill[hidden] {
+  display: none;
+}
+.sikshya-learnCompletePill.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.sikshya-learnCompletePill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sikshya-learn-pill-shadow), 0 0 0 4px rgba(44, 91, 168, 0.22);
+}
+.sikshya-learnCompletePill:focus-visible {
+  outline: 2px solid var(--sikshya-learn-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .sikshya-learnCompletePill {
+    right: 10px;
+    bottom: calc(var(--sikshya-learn-content-nav-h) + 10px);
+    padding: 5px 10px;
+    font-size: var(--sikshya-learn-fs-12);
+  }
+}
+
+/* --- Topbar auto-hide on scroll-down ----------------------------------- */
+.sikshya-learnTopbar {
+  transition: transform 220ms ease, opacity 220ms ease;
+  will-change: transform;
+}
+html.sikshya-chromeHidden:not(.sikshya-focusMode) .sikshya-learnTopbar {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Per-content-type variants ----------------------------------------- */
+/* (Removed) `.sikshya-overviewWell` size bump for text lessons — class no
+ * longer rendered after the reverted More-drawer rework. */
+.sikshya-learning-shell--type-text .sikshya-learnHeader__typeIcon {
+  display: none;
+}
+.sikshya-learning-shell--type-audio .sikshya-lesson-embed--audio {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  background: var(--sikshya-learn-surface);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--sikshya-learn-border);
+}
+
+/* --- Stronger muted token on small-text states ------------------------- */
+.sikshya-muted--strong,
+.sikshya-learnNotes__hint,
+.sikshya-learnNotes__meta,
+.sikshya-announce__meta {
+  color: var(--sikshya-learn-muted-strong);
+}
+
+/* --- Inert legacy footer (defensive) ----------------------------------- */
+.sikshya-learning-footer:empty {
+  display: none;
+}
+
+/* =========================================================
+ * Sikshya Learn — Responsive Refinements (any-device polish)
+ * =========================================================
+ * Mobile-first additive fixes. No existing selectors edited.
+ *
+ *   1. New touch-min token (Apple HIG 44px)
+ *   2. Tab strip: 44px touch target + horizontal scroll (kills
+ *      wrap-to-2-rows that stole vertical space on phones)
+ *   3. Topbar progress: keep visible on mobile (compact bar)
+ *   4. Prose well + body typography: clamp() so large screens
+ *      use available space and small screens stay comfortable
+ *   5. Mark-complete pill: respects safe-area-inset-bottom
+ *   6. Curriculum row + dock: 44px touch target on mobile
+ *   7. Sidebar drawer + skip-link: respect safe-area on
+ *      notched phones (left + bottom insets)
+ *   8. prefers-reduced-motion: kill animations for users who
+ *      opted out at OS level
+ *   9. Wide screens (1600px+): content well sits comfortably
+ *      without stretching past the prose-readable width
+ * ========================================================= */
+
+:root {
+  /* Minimum touch target (Apple HIG / WCAG 2.5.5 Target Size). */
+  --sikshya-learn-touch-min: 44px;
+}
+
+/* --- 0a. CRITICAL: zero the sidebar width var on mobile ----------------
+ * The base CSS var `--sikshya-learn-sidebar-w-current` is set to 400px
+ * globally (line 19) and only reset to 0 for hub mode (line 104), desktop
+ * collapsed state (line 114), and focus mode. There's no mobile reset, so
+ * on mobile lesson/quiz the var stays at 400px and:
+ *   - the fixed dock at line 2333 (left: var(...)) shifts 400px right,
+ *     pushing prev / next off-screen on every viewport < 768px;
+ *   - the content padding-left calc at line 2282 inflates by 400px (the
+ *     mobile media-query override at line 2287 only resets `.sikshya-learnMain
+ *     > .sikshya-learnContent` — not the var itself).
+ * Reset the var to 0 on mobile so the dock spans the full width and the
+ * padding calculations behave naturally. */
+@media (max-width: 1023px) {
+  .sikshya-learning-shell--lesson,
+  .sikshya-learning-shell--quiz,
+  .sikshya-learning-shell--learn {
+    --sikshya-learn-sidebar-w-current: 0px;
+  }
+}
+
+/* --- 0c. CRITICAL: collapse grid/flex layouts to block on mobile -------
+ * `.sikshya-learnLayout` is a CSS grid with `grid-template-rows: auto
+ * minmax(0, 1fr)` (line 201-206 + 187-191) and `.sikshya-learning-app`
+ * is `display: flex; flex-direction: column` (line 170-171). Both are
+ * designed for a viewport-locked desktop two-pane layout. On mobile they
+ * keep capping content height to one viewport — even when overflow is
+ * visible, the grid 1fr row only takes its share of viewport space. That
+ * makes content past the first 1fr's worth essentially unreachable.
+ *
+ * Forcing `display: block` on mobile turns the whole shell into ordinary
+ * document flow: topbar (sticky), then main, then content, then dock
+ * (position: fixed). Everything scrolls naturally with body. */
+@media (max-width: 1023px) {
+  .sikshya-learning-shell--lesson .sikshya-learning-app,
+  .sikshya-learning-shell--quiz .sikshya-learning-app,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learning-app,
+  .sikshya-learning-shell--lesson .sikshya-learnLayout,
+  .sikshya-learning-shell--quiz .sikshya-learnLayout,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnLayout,
+  .sikshya-learning-shell--lesson .sikshya-learnMain,
+  .sikshya-learning-shell--quiz .sikshya-learnMain,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnMain,
+  .sikshya-learning-shell--lesson .sikshya-learnContentCol,
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContentCol {
+    display: block !important;
+    min-height: auto !important;
+    max-height: none !important;
+    flex: none !important;
+  }
+}
+
+/* --- 0d. CRITICAL: restore document scroll on mobile ------------------
+ * Two existing rules conspire to clip mobile content:
+ *   - Lines 167-176 lock `.sikshya-learning-app` to `max-height: 100dvh;
+ *     overflow: hidden` so the desktop curriculum rail can't stretch.
+ *   - Lines 179-183 (`.admin-bar.sikshya-learning-shell--X ...`) hard-cap
+ *     it to `calc(100dvh - 32px)` for logged-in admins. THIS has 0,3,0
+ *     specificity, which beat my earlier 0,2,0 mobile override — meaning
+ *     when the WP admin bar is showing, content was still clipped on
+ *     mobile.
+ * Mobile has no in-flow sidebar (it's an off-canvas drawer), so neither
+ * lock makes sense. !important nukes both — mobile uses natural document
+ * scroll regardless of admin-bar / future class additions. */
+@media (max-width: 1023px) {
+  .sikshya-learning-shell--lesson .sikshya-learning-app,
+  .sikshya-learning-shell--quiz .sikshya-learning-app,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learning-app {
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: 100dvh;
+  }
+  .sikshya-learning-shell--lesson .sikshya-learnContentCol > .sikshya-learnContent,
+  .sikshya-learning-shell--quiz .sikshya-learnContentCol > .sikshya-learnContent,
+  .sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContentCol > .sikshya-learnContent {
+    overflow: visible !important;
+    -webkit-overflow-scrolling: auto;
+  }
+  .sikshya-learnMain {
+    overflow: visible !important;
+    min-height: 0;
+  }
+  .sikshya-learnContentCol {
+    overflow: visible !important;
+  }
+  /* Bottom dock (position:fixed, 72px tall) covers the bottom of the
+   * scrollable area. We need enough padding-bottom so the last paragraph
+   * sits ABOVE the dock — not behind it. */
+  
+  /* Belt + suspenders: an actual block-level pseudo-element at the end of
+   * the lesson section. The padding-bottom above SHOULD be enough on its
+   * own, but if some other rule wins the cascade, this physical spacer
+   * still guarantees the last paragraph has room above the fixed dock.
+   * Pseudo-elements aren't affected by padding overrides. */
+  .sikshya-learnContent::after {
+    content: '';
+    display: block;
+    height: calc(var(--sikshya-learn-content-nav-h) + 32px + env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    pointer-events: none;
+  }
+  /* Document scroll target: ONLY html scrolls. Setting overflow-y on both
+   * html and body creates two scrollports — Safari mobile positions
+   * `position: fixed` elements relative to body in that case, not the
+   * viewport, which puts the dock below the visible area. Single scroll
+   * port on html keeps fixed-positioning anchored to viewport. */
+  html.sikshya-learning-shell {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto !important;
+    min-height: 100dvh;
+  }
+  body.sikshya-learning-shell {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 100dvh;
+  }
+  /* MAXIMUM-FORCE dock visibility on mobile.
+   * Specificity bumped to 0,2,2 (html + body element + 2 classes) so this
+   * beats every existing rule. Every property the dock needs to render is
+   * forced with !important — display, position, anchor, size, z-index,
+   * visibility, opacity, transform, background. If after this CSS file
+   * loads the dock STILL isn't visible, the element isn't in the DOM at
+   * all (PHP didn't render it) — and the bug is in the template or model. */
+  html body.sikshya-learning-shell--lesson .sikshya-learnContentNav,
+  html body.sikshya-learning-shell--quiz .sikshya-learnContentNav,
+  html body.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContentNav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 72px !important;
+    max-height: none !important;
+    /* z-index 1100 sits above all in-flow elements (top stacking value in
+     * this stylesheet is around 80). Above-1100 reserved for full-screen
+     * modals / system overlays. Was previously 999999 — paranoia from the
+     * dock-debugging session; not needed now that the dock is a direct
+     * child of <body>. */
+    z-index: 1100 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    background: var(--sikshya-learn-surface) !important;
+    border-top: 1px solid var(--sikshya-learn-border) !important;
+  }
+}
+
+/* --- 1. Tab strip: touch-friendly + horizontal scroll -----------------
+ * CSS spec quirk: when one overflow axis is non-visible the OTHER axis
+ * cannot remain `visible` — UA promotes it to `auto`/`clip`. The old
+ * `overflow-x: auto / overflow-y: visible` therefore silently clipped
+ * the buttons' bottom 2px (where the active brand underline lives),
+ * making the indicator invisible.
+ *
+ * Fix: only apply horizontal scrolling on narrow screens where it's
+ * actually needed. On desktop / tablet the tabs fit on one row (or wrap
+ * via the base rule) and the strip keeps its default `overflow: visible`
+ * so the active indicator can paint over the strip's border-bottom.
+ */
+@media (max-width: 640px) {
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    /* Space inside the strip so snapped tabs aren't hidden under the
+     * edge-fade overlay (the overlay sits on the section, ~28px wide). */
+    scroll-padding-inline: 28px;
+    scrollbar-width: none;
+  }
+
+  /* Scroll-affordance fades on the leading + trailing edges of the
+   * tabs strip — signals "more tabs here, scroll to reveal" without
+   * needing a visible scrollbar. Positioned on the SECTION (not the
+   * scrolling strip itself) so the fades stay pinned to the viewport
+   * edges instead of scrolling with the tabs.
+   *
+   * pointer-events: none keeps them visual-only — touches always pass
+   * through to the tabs underneath. */
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection {
+    position: relative;
+  }
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection::before,
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection::after,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection::before,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    /* Cover the strip itself (text band + border-bottom) but stop above
+     * the tab panels below. ~46px = 14px text * 1.4 line-height + 11px
+     * top + 11px bottom + 2px border. */
+    height: 46px;
+    width: 28px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection::before,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection::before {
+    left: 0;
+    background: linear-gradient(
+      to right,
+      var(--sikshya-learn-surface, #fff) 35%,
+      transparent
+    );
+  }
+  .sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection::after,
+  .sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection::after {
+    right: 0;
+    background: linear-gradient(
+      to left,
+      var(--sikshya-learn-surface, #fff) 35%,
+      transparent
+    );
+  }
+}
+.sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar::-webkit-scrollbar,
+.sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+.sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar > .sikshya-tabBtn,
+.sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-tabsSection > .sikshya-tabsBar > .sikshya-tabBtn {
+  flex-shrink: 0;
+  min-height: var(--sikshya-learn-touch-min);
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+
+/* --- 2. Topbar progress visible on mobile (compact) -------------------
+ * Compact chip in the centre of the topbar; full popover stays available
+ * via tap. The desktop layout is unchanged. */
+@media (max-width: 640px) {
+  .sikshya-learnTopbar__middle {
+    display: flex !important;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  .sikshya-learnHeader__progressBtn {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .sikshya-learnHeader__progressCount {
+    display: none;
+  }
+  .sikshya-learnHeader__progressBar {
+    width: 56px;
+  }
+}
+
+/* --- 2b. Mobile sticky behaviour: content header stays, topbar scrolls
+ *
+ * GOAL: on mobile the main learn topbar (Sikshya brand + progress + Exit)
+ * scrolls away with the page; the content header panel (lesson / quiz
+ * title + pills + Start button) takes over as the persistent sticky
+ * header — and ONLY that panel sticks, not the whole content section.
+ *
+ * WHY THE SECTION-LEVEL STICKY WAS WRONG:
+ *   The wrapping `.sikshya-contentSection` actually contains MULTIPLE
+ *   sibling panels: the header card, the quiz-intro card ("Ready when
+ *   you are"), and the quiz-form panel. Putting sticky on the section
+ *   makes ALL of that stick together — the quiz body content gets
+ *   glued to the header. Wrong.
+ *
+ * FIX:
+ *   `position: sticky` on `.sikshya-contentPanel--header` only. The
+ *   containing block is the section, which IS tall enough (header +
+ *   intro + form combined) so sticky has plenty of pin range — the
+ *   header stays stuck while the intro + form content scrolls past
+ *   underneath it.
+ *
+ * Topbar stays static so it scrolls away with the page.
+ * --------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Main topbar scrolls away with the page. Use `relative` (NOT
+   * `static`) so the topbar's `backdrop-filter` stacking context can
+   * be lifted above the sticky content header below — otherwise the
+   * progress popover (a descendant) gets visually pinned below the
+   * sticky `.sikshya-contentPanel--header` (z-index 44) and the tabs
+   * strip, even with its own z-index: 200 inside the topbar context.
+   *
+   * `position: relative` keeps the element in normal flow (so it scrolls
+   * away with the page exactly like `static` would) but allows z-index
+   * to apply. `isolation: isolate` forces a clean stacking context
+   * separately from `will-change`/`backdrop-filter` so the high z-index
+   * is actually honoured. */
+  .sikshya-learnTopbar {
+    position: relative !important;
+    top: auto !important;
+    z-index: 9999 !important;
+    isolation: isolate;
+  }
+
+  /* Compact stats in the progress popover so "Completed / Remaining /
+   * Total" all fit in a single row on phones. The base rule sets a
+   * 2-column grid (which wraps Total to a second row); the desktop rule
+   * promotes to 3 columns only at 1024px+. Force 3 columns at all
+   * mobile widths so the stat trio stays on one line. */
+  .sikshya-progressPopover__grid {
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 6px !important;
+  }
+  .sikshya-progressPopover__stat {
+    padding: 6px 4px !important;
+    text-align: center;
+  }
+  .sikshya-progressPopover__k {
+    font-size: 10px !important;
+    letter-spacing: 0.02em;
+  }
+  .sikshya-progressPopover__v {
+    font-size: 14px !important;
+  }
+
+  /* Only the header panel sticks — its sibling panels (intro / form)
+   * stay in normal flow and scroll past underneath. Several belt-and-
+   * suspenders here:
+   *   - HTML+body in selector → 0,5,2 specificity (cannot be beaten
+   *     by another author rule short of !important on a higher-spec
+   *     selector that doesn't exist in this file).
+   *   - -webkit-sticky fallback for iOS Safari 12 and below.
+   *   - !important on every sticky-relevant property so the cascade
+   *     order never matters.
+   *   - The parent `.sikshya-contentSection` is FORCED to
+   *     `display: block` and `overflow: visible` so neither flex/grid
+   *     nor an inherited clip can break sticky's containing block.
+   *   - Solid white background so the sticky panel doesn't appear
+   *     translucent when scrolled content passes beneath it. */
+  /* THE ROOT CAUSE on the lesson page:
+   *   `.sikshya-contentPanel--header` lives inside a `.sikshya-contentSection`
+   *   that contains ONLY the header panel — the lesson player and tabs
+   *   live in SIBLING `.sikshya-contentSection` blocks, not inside the
+   *   same one. So `position: sticky` on the panel has ZERO stickable
+   *   range: its containing block (the parent section) is the same
+   *   height as the panel itself.
+   *
+   * THE FIX:
+   *   Collapse the wrapping section out of the layout tree with
+   *   `display: contents`. The header panel then becomes a direct
+   *   visual child of `.sikshya-learnContent` (which is tall — it
+   *   wraps every section on the page). Sticky now has the full
+   *   content column as its stickable range — pins on scroll, stays
+   *   pinned all the way through the lesson body / quiz body / tabs.
+   *
+   *   Works for the quiz page too (the section there wraps header +
+   *   intro + form): all three panels become direct children of
+   *   learnContent, the header pins as the user scrolls past intro
+   *   and form, and the existing tab panels continue to scroll past
+   *   underneath as expected.
+   *
+   *   `display: contents` was a real risk before 2022 (screen readers
+   *   stripped roles); modern Chromium / Safari / Firefox all preserve
+   *   ARIA correctly on display: contents now, so this is safe.
+   *
+   *   `:has(> .sikshya-contentPanel--header)` scopes the collapse to
+   *   ONLY the section that contains the header — other sections (the
+   *   lesson player, the interactive player, the tabs strip wrapper)
+   *   keep their normal block layout untouched. */
+  body.sikshya-learning-shell--lesson .sikshya-learnContent > .sikshya-contentSection:has(> .sikshya-contentPanel--header),
+  body.sikshya-learning-shell--quiz .sikshya-learnContent > .sikshya-contentSection:has(> .sikshya-contentPanel--header),
+  body.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContent > .sikshya-contentSection:has(> .sikshya-contentPanel--header) {
+    display: contents !important;
+  }
+
+  /* True sticky on the panel — in flow until the threshold, pinned at
+   * top: 0 once scrolled past. */
+  body.sikshya-learning-shell--lesson .sikshya-learnContent .sikshya-contentPanel--header,
+  body.sikshya-learning-shell--quiz .sikshya-learnContent .sikshya-contentPanel--header,
+  body.sikshya-learning-shell--learn:not(.sikshya-learning-shell--hub) .sikshya-learnContent .sikshya-contentPanel--header {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 44 !important;
+    background: var(--sikshya-learn-surface) !important;
+    box-shadow: 0 4px 12px -8px rgba(15, 23, 42, 0.18);
+  }
+}
+
+/* Progress popover: never clip on the smallest phones. */
+@media (max-width: 380px) {
+  .sikshya-progressPopover {
+    width: calc(100vw - 24px);
+    max-width: 320px;
+    right: 12px;
+  }
+}
+
+/* --- 3. (Removed) Prose-well fluid expansion -------------------------- *
+ * Originally clamped `.sikshya-tabPanel .sikshya-contentPanel--plain` to
+ * 52-68rem and centered it. That created visible gaps on each side because
+ * the sticky header bar (.sikshya-contentPanel--header) uses negative
+ * margins to bleed through `.sikshya-learnContent`'s 22px column padding,
+ * but the prose panel inside the tab was centered with a clamp width —
+ * inconsistent edges. Reverted: panels now fill the column edge-to-edge
+ * matching the header bar. The column's own 22px padding gives breathing
+ * room on every surface. Long-form readability on ultra-wide screens is
+ * still managed by `--sikshya-learn-prose-max` (legacy) applied inside
+ * specific prose blocks, not at the panel level. */
+
+/* --- 4. Fluid body typography ----------------------------------------- */
+.sikshya-learning-shell {
+  font-size: clamp(15px, calc(13px + 0.18vw), 17px);
+}
+.sikshya-learnHeader__title {
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.5rem);
+  line-height: 1.3;
+}
+
+/* --- 5. Mark-complete pill: safe-area inset (size set in base rule) -- */
+.sikshya-learnCompletePill {
+  bottom: calc(var(--sikshya-learn-content-nav-h) + 14px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 640px) {
+  .sikshya-learnCompletePill {
+    bottom: calc(var(--sikshya-learn-content-nav-h) + 10px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* --- 6. Curriculum row + dock: 44px touch target ---------------------- */
+@media (max-width: 1023px) {
+  .sikshya-curriculumOutline__row {
+    min-height: var(--sikshya-learn-touch-min);
+  }
+  .sikshya-learnDock__btn {
+    min-height: var(--sikshya-learn-touch-min);
+  }
+}
+
+/* Dock label tightening on smallest phones (so prev/next still readable). */
+@media (max-width: 480px) {
+  .sikshya-learnDock__btn {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .sikshya-learnDock__title {
+    font-size: 12px;
+  }
+  .sikshya-learnDock__kicker {
+    font-size: 10px;
+  }
+}
+
+/* --- 7. Safe-area awareness (notch / home-indicator phones) ----------- */
+.sikshya-learnSidebar {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.sikshya-learnContentNav {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (max-width: 640px) {
+  .sikshya-skipLink {
+    padding: 12px 16px;
+    font-size: var(--sikshya-learn-fs-14);
+  }
+}
+
+/* --- 8. prefers-reduced-motion: respect OS setting -------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .sikshya-learnTopbar,
+  .sikshya-learnCompletePill,
+  .sikshya-learnSidebar,
+  .sikshya-tabBtn,
+  .sikshya-learnDock__btn,
+  .sikshya-iconBtn,
+  .sikshya-skipLink {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* --- 9. (Removed) Ultra-wide section padding -------------------------- *
+ * Previously added `padding-inline: 32px` on `.sikshya-contentSection` at
+ * 1600px+ which created a 32px gap that the header bar's `-22px` negative
+ * margin (designed to bleed through the column's 22px padding) couldn't
+ * cancel. Reverted: header / tab strip / panels all touch the column
+ * padding edges consistently at every viewport width. */
+
+/* --- 10. Hamburger icon swap: ☰ → × when drawer is open --------------- */
+/* Both glyphs sit in the same button; CSS toggles which is visible based on
+ * the state classes that learn.js puts on the <html> element:
+ *   - sikshya-outlineOpen      → mobile drawer is OPEN
+ *   - sikshya-sidebarCollapsed → desktop sidebar is collapsed (hidden)
+ * Show × when sidebar/drawer is visible (i.e. a close affordance);
+ * show ☰ when it's hidden (i.e. an open affordance). */
+.sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuOpen,
+.sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+/* Default state (drawer closed on mobile, sidebar visible on desktop): */
+.sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuClose {
+  display: none;
+}
+/* On desktop the sidebar is visible by default, so the hamburger means
+ * "click to collapse" — show the X. */
+@media (min-width: 1024px) {
+  .sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuOpen {
+    display: none;
+  }
+  .sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuClose {
+    display: inline-flex;
+  }
+  /* When the desktop sidebar is collapsed, flip back to ☰ (means "open"). */
+  html.sikshya-sidebarCollapsed .sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuOpen {
+    display: inline-flex;
+  }
+  html.sikshya-sidebarCollapsed .sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuClose {
+    display: none;
+  }
+}
+/* On mobile, swap when the drawer is open. */
+html.sikshya-outlineOpen .sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuOpen {
+  display: none;
+}
+html.sikshya-outlineOpen .sikshya-iconBtn--menuToggle .sikshya-iconBtn__menuClose {
+  display: inline-flex;
+}
+
+/* --- Mobile drawer ↔ dock overlap fix ---------------------------------
+ * On mobile the curriculum drawer is `position: fixed; bottom: 0` and the
+ * dock is also `position: fixed; bottom: 0`. They overlap at the bottom,
+ * hiding the last curriculum items behind the dock.
+ * Padding-bottom on the inner scroll area pushes the list content up so
+ * the last items clear the dock. */
+@media (max-width: 1023px) {
+  .sikshya-learnSidebar__scroll {
+    padding-bottom: calc(var(--sikshya-learn-content-nav-h) + 16px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 

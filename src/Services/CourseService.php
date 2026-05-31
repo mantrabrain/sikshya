@@ -125,6 +125,27 @@ class CourseService
 
     public function enrollUser(int $user_id, int $course_id, array $enrollment_data = []): int
     {
+        // Defense-in-depth price check: any caller that hasn't explicitly
+        // opted out (admin manual enrol, paid-checkout fulfilment) must be
+        // enrolling into a free course. This closes the TOCTOU window
+        // between an external "is this free?" check and the actual write
+        // here — even if a concurrent admin action raises the price between
+        // the two, we refuse to grant free access to a now-paid course.
+        $bypassPriceCheck = !empty($enrollment_data['bypass_price_check']);
+        if (!$bypassPriceCheck) {
+            $price = (float) $this->getCoursePrice($course_id);
+            $sale = (float) $this->getCourseSalePrice($course_id);
+            $effective = $sale > 0.00001 ? $sale : $price;
+            if ($effective > 0.00001) {
+                throw new \InvalidArgumentException(
+                    __('This course requires payment. Please complete checkout.', 'sikshya')
+                );
+            }
+        }
+        // The flag is an internal control signal — never persist it onto the
+        // enrolment row.
+        unset($enrollment_data['bypass_price_check']);
+
         $this->enrollmentValidator->assertCanEnroll($user_id, $course_id, $enrollment_data);
 
         // Create enrollment.
@@ -185,6 +206,49 @@ class CourseService
         }
 
         return $result;
+    }
+
+    /**
+     * Force-unenrol a learner because a payment was refunded.
+     *
+     * Bypasses the self-service gates {@see self::unenrollUser()} enforces
+     * (the `allow_unenroll` setting and the `unenroll_deadline_days` window) —
+     * a refund is an authorised reversal from the merchant side, not a
+     * learner-initiated drop, so neither gate applies. Returns false if the
+     * learner wasn't enrolled in the first place (idempotent: re-running
+     * refund processing on an already-refunded order is a no-op, not an error).
+     *
+     * The same downstream side-effects as `unenrollUser()` fire:
+     *   - Progress rows for this user+course are deleted.
+     *   - Enrollment count meta on the course post is decremented.
+     *   - `sikshya_user_unenrolled` action fires with a `refund` reason flag
+     *     so listeners (email notifications, audit log, Pro analytics) can
+     *     distinguish refund-driven removals from self-service drops.
+     */
+    public function forceUnenrollForRefund(int $user_id, int $course_id, int $order_id = 0): bool
+    {
+        $enrollment = $this->enrollmentRepository->findByUserAndCourse($user_id, $course_id);
+        if (!$enrollment) {
+            return false;
+        }
+        $ok = (bool) $this->enrollmentRepository->delete((int) $enrollment->id);
+        if (!$ok) {
+            return false;
+        }
+        $this->progressRepository->deleteProgress($user_id, $course_id);
+        $this->updateEnrollmentCount($course_id);
+
+        /**
+         * Fires after a refund-driven unenrolment.
+         *
+         * @param int $user_id   Learner whose enrolment was reversed.
+         * @param int $course_id Course they lost access to.
+         * @param string $reason 'refund' so listeners can distinguish from self-drop.
+         * @param int $order_id  Order that was refunded (0 if not provided).
+         */
+        do_action('sikshya_user_unenrolled', $user_id, $course_id, 'refund', $order_id);
+
+        return true;
     }
 
     public function getCourseProgress(int $user_id, int $course_id): array

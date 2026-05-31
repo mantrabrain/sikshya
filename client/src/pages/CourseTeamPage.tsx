@@ -4,6 +4,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
@@ -436,7 +437,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
       embedded={props.embedded}
       config={config}
       title={title}
-      subtitle={__('Assign co-instructors and revenue weights per course (Pro Multi-instructor). Open from Course → Course staff, or use Manage staff on any course row. Global visibility: Add-ons → Multi-instructor.', 'sikshya')}
+      subtitle={__('Per-course operations: pick which instructors are on the team, set revenue-share weights, and review earnings. Global behaviour (where the team shows up, default weights) lives in Add-ons → Multi-instructor settings.', 'sikshya')}
     >
       <GatedFeatureWorkspace
         mode={mode}
@@ -482,7 +483,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
               {pickedCourseSummary ? (
                 <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-brand-200 bg-brand-50/90 px-3 py-1.5 text-xs font-medium text-brand-900 dark:border-brand-900/50 dark:bg-brand-950/40 dark:text-brand-100">
                   <span className="truncate">{pickedCourseSummary.title}</span>
-                  <span className="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-[10px] text-brand-800 dark:bg-slate-900/60 dark:text-brand-200">
+                  <span className="shrink-0 rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-xs text-brand-800 dark:bg-slate-900/60 dark:text-brand-200">
                     #{pickedCourseSummary.cid}
                   </span>
                   <a
@@ -528,7 +529,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                           }}
                         >
                           <span className="min-w-0 font-medium text-slate-800 dark:text-slate-100">{c.title}</span>
-                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             {c.id}
                           </span>
                         </button>
@@ -590,12 +591,12 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                           <span className="min-w-0">
                             <span className="block font-medium text-slate-800 dark:text-slate-100">{u.name}</span>
                             {u.email ? (
-                              <span className="mt-0.5 block truncate text-[11px] text-slate-500 dark:text-slate-400">
+                              <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400">
                                 {u.email}
                               </span>
                             ) : null}
                           </span>
-                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             {u.id}
                           </span>
                         </button>
@@ -711,7 +712,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                                 <div className="truncate font-medium text-slate-900 dark:text-white">
                                   {r.course_title || `Course #${r.course_id}`}
                                 </div>
-                                <div className="mt-0.5 font-mono text-[11px] text-slate-500 dark:text-slate-400">#{r.course_id}</div>
+                                <div className="mt-0.5 font-mono text-xs text-slate-500 dark:text-slate-400">#{r.course_id}</div>
                               </div>
                             </td>
                           ) : null}
@@ -728,8 +729,8 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                                 <div className="truncate font-medium text-slate-900 dark:text-white">
                                   {r.display_name || `User #${r.user_id}`}
                                   {isAuthor ? (
-                                    <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                      Author
+                                    <span className="ml-2 inline-block align-middle">
+                                      <StatusBadge tone="neutral" label={__('Author', 'sikshya')} size="xs" caseStyle="as-is" />
                                     </span>
                                   ) : null}
                                 </div>
@@ -741,9 +742,11 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                           </td>
                           <td className="px-5 py-3.5">
                             {isGlobal ? (
-                              <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                {r.role === 'lead' ? __('Lead', 'sikshya') : __('Co-instructor', 'sikshya')}
-                              </span>
+                              <StatusBadge
+                                tone="neutral"
+                                label={r.role === 'lead' ? __('Lead', 'sikshya') : __('Co-instructor', 'sikshya')}
+                                caseStyle="as-is"
+                              />
                             ) : (
                               <select
                                 value={rowRoleDraft[r.user_id] ?? 'co_instructor'}
@@ -774,7 +777,7 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                                     step="0.01"
                                     min={0}
                                     max={100}
-                                    className="w-28 rounded-lg border border-slate-200 px-2 py-1.5 tabular-nums dark:border-slate-700 dark:bg-slate-950"
+                                    className="w-28 rounded-xl border border-slate-200 bg-white px-2 py-1.5 tabular-nums text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                                     value={rowShareDraft[r.user_id] ?? ''}
                                     onChange={(e) =>
                                       setRowShareDraft((prev) => ({ ...prev, [r.user_id]: e.target.value }))
@@ -892,10 +895,10 @@ export function CourseTeamPage(props: { embedded?: boolean; config: SikshyaReact
                           <span className="min-w-0">
                             <span className="block font-medium text-slate-800 dark:text-slate-100">{u.name}</span>
                             {u.email ? (
-                              <span className="mt-0.5 block truncate text-[11px] text-slate-500">{u.email}</span>
+                              <span className="mt-0.5 block truncate text-xs text-slate-500">{u.email}</span>
                             ) : null}
                           </span>
-                          <span className="shrink-0 font-mono text-[11px] text-slate-500">{u.id}</span>
+                          <span className="shrink-0 font-mono text-xs text-slate-500">{u.id}</span>
                         </button>
                       ))
                     ) : (

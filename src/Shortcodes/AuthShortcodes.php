@@ -159,7 +159,23 @@ final class AuthShortcodes
         $out .= '</div>';
 
         $out .= '<div class="sikshya-auth__actions"><button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-auth__submit">' . esc_html__('Sign in', 'sikshya') . '</button></div>';
-        $out .= '</form></div>';
+        $out .= '</form>';
+
+        /**
+         * Action: emit content AFTER the Sikshya login form (inside its
+         * outer wrapper). Used by the SocialLogin Pro addon to render
+         * "Continue with Google / Facebook" buttons. Output is captured
+         * via ob_start so callers can `echo` content as if rendering
+         * inline.
+         *
+         * @param array<string, mixed> $atts The shortcode attributes.
+         * @param string               $redirect_to The resolved redirect URL.
+         */
+        ob_start();
+        do_action('sikshya_auth_after_login_form', $a, $redirect_to);
+        $out .= (string) ob_get_clean();
+
+        $out .= '</div>';
 
         return $out;
     }
@@ -221,7 +237,22 @@ final class AuthShortcodes
             ? esc_html__('Create account & apply to teach', 'sikshya')
             : esc_html__('Create account', 'sikshya');
         $out .= '<div class="sikshya-auth__actions"><button type="submit" class="sikshya-btn sikshya-btn--primary sikshya-auth__submit">' . $label . '</button></div>';
-        $out .= '</form></div>';
+        $out .= '</form>';
+
+        /**
+         * Action: emit content AFTER the Sikshya registration form. Mirrors
+         * sikshya_auth_after_login_form — SocialLogin uses this to render
+         * "Sign up with Google / Facebook" buttons.
+         *
+         * @param array<string, mixed> $atts        Shortcode attributes.
+         * @param string               $redirect_to Resolved redirect URL.
+         * @param string               $type        'student' or 'instructor'.
+         */
+        ob_start();
+        do_action('sikshya_auth_after_registration_form', $a, $redirect_to, $type);
+        $out .= (string) ob_get_clean();
+
+        $out .= '</div>';
 
         return $out;
     }

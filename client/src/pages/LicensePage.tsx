@@ -3,6 +3,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ApiError, getErrorSummary, getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { ButtonPrimary } from '../components/shared/buttons';
+import { Spinner as SharedSpinner } from '../components/shared/Spinner';
 import { NavIcon } from '../components/NavIcon';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { useShellState } from '../context/ShellStateContext';
@@ -548,7 +549,7 @@ export function LicensePage(props: { embedded?: boolean; config: SikshyaReactCon
                 ) : null}
               </div>
               {debugData ? (
-                <pre className="mt-3 max-h-80 overflow-auto rounded-xl border border-purple-100 bg-white p-3 text-[11px] leading-relaxed text-slate-800 dark:border-purple-900/50 dark:bg-slate-950 dark:text-slate-100">
+                <pre className="mt-3 max-h-80 overflow-auto rounded-xl border border-purple-100 bg-white p-3 text-xs leading-relaxed text-slate-800 dark:border-purple-900/50 dark:bg-slate-950 dark:text-slate-100">
                   {JSON.stringify(debugData, null, 2)}
                 </pre>
               ) : (
@@ -568,21 +569,18 @@ const Oe = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const Inp =
   'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
 
+// Spinner variants delegate to the shared `<Spinner>` component. Kept as
+// thin wrappers so the dozens of existing call sites on this page keep
+// working without one-by-one renames. New code should import Spinner
+// directly from `components/shared/Spinner`.
 function Spinner() {
-  return (
-    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white align-[-2px]" />
-  );
+  return <SharedSpinner variant="on-primary" className="mr-2" />;
 }
 
 function SpinnerLight() {
-  return (
-    <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-500/30 border-t-white align-[-2px]" />
-  );
+  return <SharedSpinner variant="neutral" className="mr-2" />;
 }
 
-/** Visible on light / outline buttons (white spinner is invisible on white backgrounds). */
 function SpinnerNeutral() {
-  return (
-    <span className="mr-2 inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-slate-300 border-t-brand-600 align-[-2px] dark:border-slate-600 dark:border-t-brand-400" />
-  );
+  return <SharedSpinner variant="on-light" className="mr-2" />;
 }

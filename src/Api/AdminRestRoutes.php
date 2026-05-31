@@ -16,6 +16,7 @@ use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Api\Admin\AbstractAdminRestController;
 use Sikshya\Api\Admin\CouponRoutes;
 use Sikshya\Api\Admin\InstructorApplicationRoutes;
+use Sikshya\Api\Admin\SearchRoutes;
 use Sikshya\Api\Admin\SetupWizardRoutes;
 use Sikshya\Api\Admin\TaxonomyRoutes;
 use Sikshya\Commerce\CheckoutService;
@@ -402,6 +403,22 @@ class AdminRestRoutes extends AbstractAdminRestController
             ],
         ]);
 
+        // Single enrollment detail — feeds the Enrollment Details React page.
+        register_rest_route($namespace, '/admin/enrollments/(?P<id>\d+)', [
+            [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$this, 'getAdminEnrollmentDetail'],
+                'permission_callback' => [$this, 'permissionAdmin'],
+                'args' => [
+                    'id' => [
+                        'type' => 'integer',
+                        'required' => true,
+                        'minimum' => 1,
+                    ],
+                ],
+            ],
+        ]);
+
         register_rest_route($namespace, '/admin/enrollments/manual', [
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -616,6 +633,7 @@ class AdminRestRoutes extends AbstractAdminRestController
         // Domain controllers extracted during the 2026-05 split.
         (new CouponRoutes($this->plugin))->register();
         (new InstructorApplicationRoutes($this->plugin))->register();
+        (new SearchRoutes($this->plugin))->register();
         (new SetupWizardRoutes($this->plugin))->register();
         (new TaxonomyRoutes($this->plugin))->register();
     }
@@ -999,6 +1017,24 @@ class AdminRestRoutes extends AbstractAdminRestController
         $course_status = isset($params['course_status']) ? (string) $params['course_status'] : 'draft';
         unset($params['course_status']);
 
+        // IDOR guard: `permissionAdmin` only checks staff-backend access, which
+        // grants every LMS-staff role (including instructors) blanket entry.
+        // Without an explicit per-post ownership check here, instructor A
+        // could `POST` with instructor B's course_id and rewrite the post.
+        // `current_user_can('edit_post', $id)` honours WP's post-author cap
+        // mapping so site admins (`edit_others_posts`) still pass.
+        $editing_course_id = isset($params['course_id']) ? (int) $params['course_id'] : 0;
+        if ($editing_course_id > 0 && !current_user_can('edit_post', $editing_course_id)) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'message' => __('You are not allowed to edit this course.', 'sikshya'),
+                    'code' => 'forbidden',
+                ],
+                403
+            );
+        }
+
         $service = $this->plugin->getService('courseBuilder');
         if (!$service instanceof CourseBuilderService) {
             return new WP_REST_Response(
@@ -1056,6 +1092,16 @@ class AdminRestRoutes extends AbstractAdminRestController
                 [
                     'success' => false,
                     'message' => __('Subscription courses require Sikshya Pro (licensed) and the Subscriptions add-on.', 'sikshya'),
+                ],
+                400
+            );
+        }
+
+        if ($type === 'bundle' && (!TierCapabilities::feature('course_bundles') || !Addons::isEnabled('course_bundles'))) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'message' => __('Course bundles require Sikshya Pro (licensed) and the Course Bundles add-on.', 'sikshya'),
                 ],
                 400
             );
@@ -1657,6 +1703,28 @@ class AdminRestRoutes extends AbstractAdminRestController
     }
 
     /**
+     * Single enrollment detail with learner + course labels.
+     */
+    public function getAdminEnrollmentDetail(WP_REST_Request $request): WP_REST_Response
+    {
+        $id = (int) $request->get_param('id');
+        $repo = new AdminTablesRepository();
+        $enrollment = $repo->enrollmentById($id);
+
+        if ($enrollment === null) {
+            return new WP_REST_Response(
+                ['success' => false, 'message' => __('Enrollment not found.', 'sikshya')],
+                404
+            );
+        }
+
+        return new WP_REST_Response(
+            ['success' => true, 'enrollment' => $enrollment],
+            200
+        );
+    }
+
+    /**
      * Paginated enrollments with learner and course labels for the React admin.
      */
     public function getAdminEnrollments(WP_REST_Request $request): WP_REST_Response
@@ -1736,6 +1804,10 @@ class AdminRestRoutes extends AbstractAdminRestController
                     'status' => 'enrolled',
                     'payment_method' => 'manual',
                     'amount' => 0.0,
+                    // Admin manual enrolment is an authorised grant — skip the
+                    // service-layer price guard so admins can enrol learners
+                    // into paid courses (comped seats, support tickets, etc).
+                    'bypass_price_check' => true,
                 ]
             );
         } catch (\Exception $e) {
@@ -1805,6 +1877,20 @@ class AdminRestRoutes extends AbstractAdminRestController
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d LIMIT 1", $id));
         if (!$row) {
             return new WP_REST_Response(['ok' => false, 'code' => 'not_found', 'message' => __('Attempt not found.', 'sikshya')], 404);
+        }
+
+        // IDOR guard: the staff-backend permission lets all LMS-staff roles
+        // (including instructors) reach this endpoint. Without verifying that
+        // the attempt's course belongs to the current user, instructor A
+        // could reset timers on instructor B's learners' attempts. Use the
+        // attempt row's stored course_id and let WP's post-author cap mapping
+        // decide (site admins with `edit_others_posts` still pass).
+        $attempt_course_id = (int) ($row->course_id ?? 0);
+        if ($attempt_course_id > 0 && !current_user_can('edit_post', $attempt_course_id)) {
+            return new WP_REST_Response(
+                ['ok' => false, 'code' => 'forbidden', 'message' => __('You are not allowed to manage attempts on this course.', 'sikshya')],
+                403
+            );
         }
 
         $ok = false !== $wpdb->update(

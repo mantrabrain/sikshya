@@ -148,7 +148,13 @@ final class LessonLearnContent
             return '';
         }
 
-        return '<div class="sikshya-lesson-embed sikshya-lesson-embed--video">' . $embed . '</div>';
+        // Hidden fallback element revealed by `learn.js` when the player
+        // emits an `error` event (broken file, mixed-content blocked iframe,
+        // private embed). Without this, learners see only a blank box.
+        $fallback = self::embedFallbackHtml($url);
+
+        return '<div class="sikshya-lesson-embed sikshya-lesson-embed--video">' . $embed . $fallback . '</div>'
+            . self::transcriptDisclosureHtml($lesson_id);
     }
 
     private static function audioBlock(int $lesson_id): string
@@ -170,12 +176,67 @@ final class LessonLearnContent
             get_the_title($lesson_id)
         );
 
+        $fallback = self::embedFallbackHtml($url);
+
         return '<div class="sikshya-lesson-embed sikshya-lesson-embed--audio">'
             . '<audio controls playsinline preload="metadata" src="'
             . esc_url($url)
             . '" title="'
             . esc_attr($title)
-            . '"></audio></div>';
+            . '"></audio>'
+            . $fallback
+            . '</div>'
+            . self::transcriptDisclosureHtml($lesson_id);
+    }
+
+    /**
+     * Optional transcript disclosure. Renders nothing when neither
+     * `_sikshya_lesson_transcript_url` nor `_sikshya_lesson_transcript_text`
+     * is set, so the field stays invisible until an instructor adds one.
+     */
+    private static function transcriptDisclosureHtml(int $lesson_id): string
+    {
+        $url = trim((string) get_post_meta($lesson_id, '_sikshya_lesson_transcript_url', true));
+        $text = (string) get_post_meta($lesson_id, '_sikshya_lesson_transcript_text', true);
+        if ($url === '' && trim($text) === '') {
+            return '';
+        }
+        $body = '';
+        if ($url !== '') {
+            $body .= '<p class="sikshya-lesson-transcript__download">'
+                . '<a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">'
+                . esc_html__('Download transcript', 'sikshya')
+                . '</a></p>';
+        }
+        if (trim($text) !== '') {
+            $body .= '<div class="sikshya-lesson-transcript__body">'
+                . sikshya_render_rich_text($text)
+                . '</div>';
+        }
+        return '<details class="sikshya-lesson-transcript">'
+            . '<summary class="sikshya-lesson-transcript__summary">'
+            . esc_html__('Transcript', 'sikshya')
+            . '</summary>'
+            . $body
+            . '</details>';
+    }
+
+    /**
+     * Hidden-by-default fallback notice + external link. Revealed by `learn.js`
+     * when the in-page player can't load (broken URL, blocked iframe, etc.).
+     */
+    private static function embedFallbackHtml(string $url): string
+    {
+        return '<div class="sikshya-lesson-embed__fallback" hidden role="alert">'
+            . '<p class="sikshya-lesson-embed__fallback-msg">'
+            . esc_html__('We couldn’t load this media here.', 'sikshya')
+            . '</p>'
+            . '<a class="sikshya-lesson-embed__fallback-link" href="'
+            . esc_url($url)
+            . '" target="_blank" rel="noopener noreferrer">'
+            . esc_html__('Open it in a new tab', 'sikshya')
+            . '</a>'
+            . '</div>';
     }
 
     /**

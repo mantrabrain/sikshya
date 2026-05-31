@@ -162,7 +162,7 @@ export function PrerequisiteLockDetailPopover(props: {
         className="rounded-xl border border-slate-200 bg-white py-2 pl-3 pr-2 shadow-xl ring-1 ring-black/5 dark:border-slate-600 dark:bg-slate-900 dark:ring-white/10"
       >
         <p className="border-b border-slate-100 pb-2 pr-1 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:text-slate-100">
-          <span className="block text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <span className="block text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {title}
           </span>
           <span className="mt-0.5 block truncate">{courseTitle}</span>
@@ -227,7 +227,7 @@ export function PrerequisiteLockDetailPopover(props: {
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="cursor-pointer border-b border-dotted border-current text-left font-medium text-slate-800 underline-offset-2 hover:text-indigo-700 dark:text-slate-100 dark:hover:text-indigo-300"
+          className="cursor-pointer border-b border-dotted border-current text-left font-medium text-slate-800 underline-offset-2 hover:text-brand-700 dark:text-slate-100 dark:hover:text-brand-300"
           aria-expanded={open}
         >
           {label}

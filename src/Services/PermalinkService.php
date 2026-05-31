@@ -274,13 +274,57 @@ final class PermalinkService
         }
 
         // Learn player routes (distraction-free UI):
-        // /learn/lesson/{lesson-slug}
-        // /learn/quiz/{quiz-slug}
-        // /learn/assignment/{assignment-slug}
+        // /{learn}/{lesson-base}/{lesson-slug}
+        // /{learn}/{quiz-base}/{quiz-slug}
+        // /{learn}/{assignment-base}/{assignment-slug}
+        //
+        // The {lesson/quiz/assignment}-base segments come from the user-
+        // configurable rewrite_base_* permalink settings. The post types
+        // themselves no longer expose standalone URLs (publicly_queryable
+        // is false in PostTypeService) — these bases are kept around solely
+        // to drive the learn-player URL structure, so admins can rename
+        // them (e.g. lessons → videos) without breaking the player.
         $learn_slug = self::sanitizeSlug($p['permalink_learn'] ?? 'learn');
         $learn_re   = preg_quote($learn_slug, '/');
 
-        // New: /learn/{type}/{public_id}/{slug}
+        $defaults = self::defaults();
+        $lesson_base     = self::sanitizeSlug($p['rewrite_base_lesson']     ?? $defaults['rewrite_base_lesson']);
+        $quiz_base       = self::sanitizeSlug($p['rewrite_base_quiz']       ?? $defaults['rewrite_base_quiz']);
+        $assignment_base = self::sanitizeSlug($p['rewrite_base_assignment'] ?? $defaults['rewrite_base_assignment']);
+
+        // Map each configured base back to the canonical content type used
+        // internally (lesson/quiz/assignment) so handlers don't have to
+        // re-resolve the renamed segment.
+        $type_alts = [
+            $lesson_base     => 'lesson',
+            $quiz_base       => 'quiz',
+            $assignment_base => 'assignment',
+        ];
+        foreach ($type_alts as $base => $canonical_type) {
+            $base_re = preg_quote($base, '/');
+
+            // New: /learn/{base}/{public_id}/{slug}
+            if (self::learnUsePublicId()) {
+                add_rewrite_rule(
+                    '^' . $learn_re . '/' . $base_re . '/([^/]+)/([^/]+)/?$',
+                    'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=' . $canonical_type . '&' . self::LEARN_PUBLIC_ID_VAR . '=$matches[1]&' . self::LEARN_SLUG_VAR . '=$matches[2]',
+                    'top'
+                );
+            }
+
+            // Legacy: /learn/{base}/{slug}
+            add_rewrite_rule(
+                '^' . $learn_re . '/' . $base_re . '/([^/]+)/?$',
+                'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=' . $canonical_type . '&' . self::LEARN_SLUG_VAR . '=$matches[1]',
+                'top'
+            );
+        }
+
+        // Backward compatibility: keep the literal lesson|quiz|assignment
+        // segments routable so existing bookmarks / shared links keep working
+        // even after an admin renames a base. The rules above (configured
+        // bases) win because they're added in order, but these stay as a
+        // safety net for content authored before the rename.
         if (self::learnUsePublicId()) {
             add_rewrite_rule(
                 '^' . $learn_re . '/(lesson|quiz|assignment)/([^/]+)/([^/]+)/?$',
@@ -288,8 +332,6 @@ final class PermalinkService
                 'top'
             );
         }
-
-        // Legacy: /learn/{type}/{slug}
         add_rewrite_rule(
             '^' . $learn_re . '/(lesson|quiz|assignment)/([^/]+)/?$',
             'index.php?' . self::QUERY_VAR . '=learn&' . self::LEARN_TYPE_VAR . '=$matches[1]&' . self::LEARN_SLUG_VAR . '=$matches[2]',

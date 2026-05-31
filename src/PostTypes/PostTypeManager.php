@@ -26,12 +26,12 @@ if (!defined('ABSPATH')) {
 class PostTypeManager
 {
     /**
-     * Initialize the post type manager
+     * Post-type + taxonomy registration is owned by {@see PostTypeService} on the boot path.
+     * This class is kept solely for its REST-accessible meta registrations, hooked here so the
+     * block editor and admin React shell can read/write course pricing + type metas via wp/v2.
      */
     public function __construct()
     {
-        add_action('init', [$this, 'registerPostTypes']);
-        add_action('init', [$this, 'registerTaxonomies']);
         add_action('init', [$this, 'registerRestAccessiblePostMeta'], 20);
     }
 
@@ -124,10 +124,12 @@ class PostTypeManager
 
         // Course (sik_course) — list tables + React admin.
         $str_meta(PostTypes::COURSE, '_sikshya_course_price');
+        $str_meta(PostTypes::COURSE, '_sikshya_course_sale_price');
         $str_meta(PostTypes::COURSE, '_sikshya_course_duration');
         $str_meta(PostTypes::COURSE, '_sikshya_course_level');
         // Legacy sample / theme keys (mirror into canonical keys on save is optional; REST exposes for read).
         $str_meta(PostTypes::COURSE, '_sikshya_price');
+        $str_meta(PostTypes::COURSE, '_sikshya_sale_price');
         $str_meta(PostTypes::COURSE, '_sikshya_duration');
         $str_meta(PostTypes::COURSE, '_sikshya_difficulty');
 
@@ -192,12 +194,20 @@ class PostTypeManager
         $str_meta(PostTypes::LESSON, '_sikshya_lesson_video_url');
         // Lesson: free preview toggle.
         $str_meta(PostTypes::LESSON, '_sikshya_is_free');
+        // Lesson: optional transcript (URL or rich text) shown beside the
+        // video/audio player. Helps learners + meets WCAG audio captioning
+        // when a .vtt isn't available.
+        $str_meta(PostTypes::LESSON, '_sikshya_lesson_transcript_url');
+        $str_meta(PostTypes::LESSON, '_sikshya_lesson_transcript_text');
 
         // Question (sik_question).
         $str_meta(PostTypes::QUESTION, '_sikshya_question_type');
         $int_meta(PostTypes::QUESTION, '_sikshya_question_points');
         $string_array_meta(PostTypes::QUESTION, '_sikshya_question_options');
         $str_meta(PostTypes::QUESTION, '_sikshya_question_correct_answer');
+        // Optional learner-facing explanation shown after the quiz is graded
+        // ("Review answers"). Helps turn each question into a learning moment.
+        $str_meta(PostTypes::QUESTION, '_sikshya_question_explanation');
 
         // Assignment (sik_assignment).
         $str_meta(PostTypes::ASSIGNMENT, '_sikshya_assignment_due_date');

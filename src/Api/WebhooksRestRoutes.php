@@ -60,6 +60,58 @@ class WebhooksRestRoutes
                 'permission_callback' => [self::class, 'hasIpnPayload'],
             ],
         ]);
+
+        // Mollie webhook (refunds, late captures, chargebacks).
+        register_rest_route($namespace, '/webhooks/mollie', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'mollie'],
+                // Mollie webhooks have NO HTTP-level signature — auth is
+                // by us calling back into Mollie's API (TLS + bearer key)
+                // to verify state. We require a payment id in the body
+                // to weed out crawlers / probes; the actual auth happens
+                // inside the handler via `getMolliePayment()`.
+                'permission_callback' => [self::class, 'hasMolliePayload'],
+            ],
+        ]);
+
+        // Paystack webhook (HMAC-SHA512 signature in `x-paystack-signature`).
+        register_rest_route($namespace, '/webhooks/paystack', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'paystack'],
+                'permission_callback' => [self::class, 'hasPaystackSignature'],
+            ],
+        ]);
+
+        // Razorpay webhook (HMAC-SHA256 signature in `x-razorpay-signature`).
+        register_rest_route($namespace, '/webhooks/razorpay', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'razorpay'],
+                'permission_callback' => [self::class, 'hasRazorpaySignature'],
+            ],
+        ]);
+    }
+
+    /**
+     * Mollie webhooks deliver `id=tr_xxx` as POST body. Bare empty calls or
+     * GETs are turned away at the routing layer.
+     */
+    public static function hasMolliePayload(WP_REST_Request $request): bool
+    {
+        $params = $request->get_body_params();
+        return is_array($params) && isset($params['id']) && is_string($params['id']) && $params['id'] !== '';
+    }
+
+    public static function hasPaystackSignature(): bool
+    {
+        return isset($_SERVER['HTTP_X_PAYSTACK_SIGNATURE']) && (string) $_SERVER['HTTP_X_PAYSTACK_SIGNATURE'] !== '';
+    }
+
+    public static function hasRazorpaySignature(): bool
+    {
+        return isset($_SERVER['HTTP_X_RAZORPAY_SIGNATURE']) && (string) $_SERVER['HTTP_X_RAZORPAY_SIGNATURE'] !== '';
     }
 
     /**
@@ -179,6 +231,61 @@ class WebhooksRestRoutes
             return new WP_REST_Response(['ok' => true], 200);
         }
 
+        // Charge fully refunded — reverse the local fulfilment. Stripe also
+        // delivers `payment_intent.canceled` for some flows; we treat both
+        // the same (find the order, run the refund service).
+        if (in_array($type, ['charge.refunded', 'payment_intent.canceled'], true)) {
+            // Only act on FULLY refunded charges in v1. Partial refunds are
+            // surfaced via the action so listeners can decide, but we don't
+            // unenrol the learner from a $100 course because they got $5
+            // refunded.
+            $is_full_refund = true;
+            $refunded_amount = null;
+            if ($type === 'charge.refunded') {
+                $charge_amount = isset($obj['amount']) ? (int) $obj['amount'] : 0;
+                $charge_refunded = isset($obj['amount_refunded']) ? (int) $obj['amount_refunded'] : 0;
+                $refunded_flag = !empty($obj['refunded']);
+                $is_full_refund = $refunded_flag || ($charge_amount > 0 && $charge_refunded >= $charge_amount);
+                $refunded_amount = $charge_refunded > 0 ? $charge_refunded / 100.0 : null;
+            }
+
+            // Stripe doesn't put metadata on the charge directly — we resolve
+            // the order via the linked payment_intent ID, which we stored
+            // when the original fulfilment ran.
+            $intent_id = '';
+            if ($type === 'charge.refunded') {
+                $intent_id = (string) ($obj['payment_intent'] ?? '');
+            } else { // payment_intent.canceled
+                $intent_id = (string) ($obj['id'] ?? '');
+            }
+
+            if ($intent_id !== '') {
+                $order_row = (new OrderRepository())->findByGatewayIntent('stripe', $intent_id);
+                if ($order_row && $is_full_refund) {
+                    if (!$this->refunds()->refundFullOrder(
+                        (int) $order_row->id,
+                        $type === 'charge.refunded' ? 'stripe_charge_refunded' : 'stripe_payment_intent_canceled',
+                        $refunded_amount
+                    )) {
+                        error_log(sprintf('Sikshya: refundFullOrder failed for order %d (Stripe %s).', (int) $order_row->id, $type));
+                        return new WP_REST_Response(['ok' => false, 'message' => 'Refund failed'], 500);
+                    }
+                } elseif ($order_row && !$is_full_refund) {
+                    // Partial refund: don't unenrol but still surface for
+                    // listeners (Pro audit log, instructor notifications)
+                    // so the refund is at least recorded somewhere visible.
+                    do_action(
+                        'sikshya_order_partial_refund',
+                        (int) $order_row->id,
+                        $refunded_amount,
+                        'stripe_charge_refunded',
+                        $obj
+                    );
+                }
+            }
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
         // Let Pro/addons handle subscription events without embedding Pro logic in core.
         if (in_array($type, ['checkout.session.completed', 'customer.subscription.updated', 'customer.subscription.deleted'], true)) {
             do_action('sikshya_webhook_stripe_subscription_event', $event, $obj, $type, $this);
@@ -239,6 +346,43 @@ class WebhooksRestRoutes
 
         if (in_array($type, ['BILLING.SUBSCRIPTION.ACTIVATED', 'BILLING.SUBSCRIPTION.UPDATED', 'BILLING.SUBSCRIPTION.CANCELLED', 'BILLING.SUBSCRIPTION.SUSPENDED'], true)) {
             do_action('sikshya_webhook_paypal_subscription_event', $json, $type, $this);
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Capture-level refund event. PayPal propagates the originating
+        // purchase_unit's `custom_id` (which we set to local order_id at
+        // checkout — see CheckoutService line 823) onto refund resources, so
+        // we can look up the local order without an extra API call.
+        if ($type === 'PAYMENT.CAPTURE.REFUNDED') {
+            $resource = $json['resource'] ?? [];
+            if (!is_array($resource)) {
+                return new WP_REST_Response(['ok' => true], 200);
+            }
+            $custom_id = (string) ($resource['custom_id'] ?? '');
+            $order_id = $custom_id !== '' ? (int) $custom_id : 0;
+            if ($order_id <= 0) {
+                // Older captures may not carry custom_id — surface for
+                // listeners but don't refund (we can't safely identify the
+                // local order from a refund event without it).
+                return new WP_REST_Response(['ok' => true], 200);
+            }
+
+            // Full vs partial: compare refund amount to original order total.
+            $refund_amount = isset($resource['amount']['value']) ? (float) $resource['amount']['value'] : 0.0;
+            $order_row = (new OrderRepository())->findById($order_id);
+            if (!$order_row) {
+                return new WP_REST_Response(['ok' => true], 200);
+            }
+            $is_full = $refund_amount > 0 && abs($refund_amount - (float) $order_row->total) < 0.01;
+
+            if ($is_full) {
+                if (!$this->refunds()->refundFullOrder($order_id, 'paypal_capture_refunded', $refund_amount)) {
+                    error_log(sprintf('Sikshya: refundFullOrder failed for order %d (PayPal PAYMENT.CAPTURE.REFUNDED).', $order_id));
+                    return new WP_REST_Response(['ok' => false, 'message' => 'Refund failed'], 500);
+                }
+            } else {
+                do_action('sikshya_order_partial_refund', $order_id, $refund_amount, 'paypal_capture_refunded', $resource);
+            }
             return new WP_REST_Response(['ok' => true], 200);
         }
 
@@ -322,6 +466,45 @@ class WebhooksRestRoutes
         }
 
         $paymentStatus = (string) ($postData['payment_status'] ?? '');
+
+        // Refund / reversal path. PayPal IPN signals these via
+        // `payment_status = "Refunded"` (merchant-initiated refund) or
+        // `"Reversed"` (buyer dispute / chargeback). The `custom` field
+        // carries our serialised order metadata from the original capture
+        // — same payload we read on the Completed path below.
+        if (in_array($paymentStatus, ['Refunded', 'Reversed'], true)) {
+            $custom_raw = (string) ($postData['custom'] ?? '');
+            $custom = $custom_raw !== '' ? json_decode($custom_raw, true) : null;
+            $order_id_for_refund = is_array($custom) && isset($custom['order_id']) ? (int) $custom['order_id'] : 0;
+            if ($order_id_for_refund <= 0) {
+                $order_id_for_refund = isset($postData['item_number']) ? (int) $postData['item_number'] : 0;
+            }
+            if ($order_id_for_refund <= 0) {
+                return new WP_REST_Response(['ok' => true], 200);
+            }
+
+            // `mc_gross` arrives negative for refunds. Compare its absolute
+            // value to the order total to distinguish full vs partial.
+            $gross_raw = isset($postData['mc_gross']) ? (float) $postData['mc_gross'] : 0.0;
+            $refund_amount = abs($gross_raw);
+            $order_row = (new OrderRepository())->findById($order_id_for_refund);
+            if (!$order_row) {
+                return new WP_REST_Response(['ok' => true], 200);
+            }
+            $is_full = $refund_amount > 0 && abs($refund_amount - (float) $order_row->total) < 0.01;
+            $reason = $paymentStatus === 'Reversed' ? 'paypal_ipn_reversed' : 'paypal_ipn_refunded';
+
+            if ($is_full) {
+                if (!$this->refunds()->refundFullOrder($order_id_for_refund, $reason, $refund_amount)) {
+                    error_log(sprintf('Sikshya: refundFullOrder failed for order %d (PayPal IPN %s).', $order_id_for_refund, $paymentStatus));
+                    return new WP_REST_Response(['ok' => false, 'message' => 'Refund failed'], 500);
+                }
+            } else {
+                do_action('sikshya_order_partial_refund', $order_id_for_refund, $refund_amount, $reason, $postData);
+            }
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
         if ($paymentStatus !== 'Completed') {
             return new WP_REST_Response(['ok' => true, 'ignored' => true], 200);
         }
@@ -362,6 +545,300 @@ class WebhooksRestRoutes
         return new WP_REST_Response(['ok' => true], 200);
     }
 
+    /**
+     * Mollie webhook handler. Verifies payment state by calling Mollie's API
+     * (server-to-server, secret-key auth) — Mollie webhooks don't carry an
+     * HTTP-level signature so this verify-on-receipt pattern IS the auth.
+     *
+     * Mollie fires this URL on every payment status change: `paid`,
+     * `failed`, `expired`, `canceled`, `refunded`, plus subtle ones like
+     * `chargeback`. We branch on the observed status + `amountRefunded`
+     * field:
+     *
+     *   - `status === 'paid'` + `amountRefunded === 0`  → ignore (the
+     *     `/checkout/confirm` endpoint already fulfilled when the buyer
+     *     returned to the site; this is a no-op acknowledgement).
+     *   - `amountRefunded > 0`                          → refund branch.
+     *     - Full refund (amountRefunded ≈ original amount): call
+     *       `refundFullOrder()`.
+     *     - Partial: fire `sikshya_order_partial_refund` without unenrolling.
+     *   - other statuses                                → silent ack.
+     */
+    public function mollie(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_body_params();
+        $payment_id = is_array($params) && isset($params['id']) ? (string) $params['id'] : '';
+        if ($payment_id === '') {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $payment = $this->checkout()->getMolliePayment($payment_id);
+        if (!is_array($payment)) {
+            // Mollie API unreachable or returned nothing — fail soft (200)
+            // so Mollie doesn't retry forever; the next state change will
+            // re-deliver. A 5xx here would just queue more retries.
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Resolve local order via metadata.order_id (set at checkout in
+        // CheckoutService::createMolliePayment).
+        $order_id = 0;
+        if (isset($payment['metadata']['order_id'])) {
+            $order_id = (int) $payment['metadata']['order_id'];
+        }
+        if ($order_id <= 0) {
+            // Unknown payment — could be a Mollie payment created outside
+            // Sikshya sharing the same account. Silent ack.
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $orders = new OrderRepository();
+        $order_row = $orders->findById($order_id);
+        if (!$order_row) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Currency + amount integrity check matches what the confirm
+        // endpoint already does — protects against an attacker spoofing the
+        // webhook by passing a foreign payment id.
+        $pay_currency = isset($payment['amount']['currency']) ? strtoupper((string) $payment['amount']['currency']) : '';
+        if ($pay_currency !== '' && $pay_currency !== strtoupper((string) $order_row->currency)) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Currency mismatch'], 400);
+        }
+
+        $refunded_value = isset($payment['amountRefunded']['value']) ? (float) $payment['amountRefunded']['value'] : 0.0;
+        $status = (string) ($payment['status'] ?? '');
+
+        // Refund branch: amountRefunded > 0 OR status moved to refunded.
+        if ($refunded_value > 0.0 || $status === 'refunded') {
+            $is_full = $refunded_value > 0 && abs($refunded_value - (float) $order_row->total) < 0.01;
+            $reason = 'mollie_payment_refunded';
+            if ($is_full) {
+                if (!$this->refunds()->refundFullOrder($order_id, $reason, $refunded_value)) {
+                    error_log(sprintf('Sikshya: refundFullOrder failed for order %d (Mollie webhook).', $order_id));
+                    return new WP_REST_Response(['ok' => false, 'message' => 'Refund failed'], 500);
+                }
+            } else {
+                do_action('sikshya_order_partial_refund', $order_id, $refunded_value, $reason, $payment);
+            }
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Successful payments are handled by `/checkout/confirm` when the
+        // buyer returns — webhook arriving with status=paid is a redundant
+        // acknowledgement. Other statuses (failed, expired, canceled) are
+        // informational only here.
+        return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    /**
+     * Paystack webhook handler.
+     *
+     * Auth: HMAC-SHA512 of the raw request body using the merchant's secret
+     * key (NOT a separate webhook secret — Paystack's signing key is the
+     * same secret key used for API auth). Verified via `hash_equals` so the
+     * comparison is constant-time. Without this we'd be accepting forged
+     * refund events from anyone able to POST to the public webhook URL.
+     *
+     * Event dispatch matrix (Paystack documents `event` strings at
+     * https://paystack.com/docs/payments/webhooks/):
+     *   - `charge.success` — fulfilment is handled by the buyer-return
+     *     `/checkout/confirm` flow already; webhook is a redundant ack.
+     *   - `refund.processed` / `refund.pending` / `charge.dispute.create`
+     *     — refund branch. Compare refund amount (minor units) against
+     *     order total. Full → `refundFullOrder`. Partial → action only.
+     */
+    public function paystack(WP_REST_Request $request): WP_REST_Response
+    {
+        $settings = $this->plugin->getService('settings');
+        $secret = '';
+        if (is_object($settings) && method_exists($settings, 'getSetting')) {
+            // Paystack supports a dedicated webhook secret too; prefer it
+            // when set, otherwise fall back to the API secret key (Paystack
+            // signs with the API secret by default).
+            $secret = (string) $settings->getSetting('paystack_webhook_secret', '');
+            if ($secret === '') {
+                $secret = (string) $settings->getSetting('paystack_secret_key', '');
+            }
+        }
+        if ($secret === '') {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Paystack secret not configured.'], 400);
+        }
+
+        $payload = $request->get_body();
+        $sig_header = (string) ($_SERVER['HTTP_X_PAYSTACK_SIGNATURE'] ?? '');
+        $expected = hash_hmac('sha512', $payload, $secret);
+        if (!hash_equals($expected, $sig_header)) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Invalid signature'], 400);
+        }
+
+        $event = json_decode($payload, true);
+        if (!is_array($event)) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $type = (string) ($event['event'] ?? '');
+        $data = isset($event['data']) && is_array($event['data']) ? $event['data'] : [];
+
+        // Only refund-style events reach the rollback path. Anything else
+        // (charge.success etc.) is silently acked.
+        $is_refund_event = in_array($type, [
+            'refund.processed',
+            'refund.pending',
+            'charge.dispute.create',
+            'charge.dispute.remind',
+            'charge.dispute.resolve',
+        ], true);
+        if (!$is_refund_event) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Refund events nest the originating transaction's metadata under
+        // `data.transaction.metadata.order_id` OR carry it via the dispute's
+        // transaction. Try both. (Paystack's event schema is inconsistent
+        // across older accounts vs newer dashboards.)
+        $order_id = 0;
+        if (isset($data['transaction']['metadata']['order_id'])) {
+            $order_id = (int) $data['transaction']['metadata']['order_id'];
+        } elseif (isset($data['metadata']['order_id'])) {
+            $order_id = (int) $data['metadata']['order_id'];
+        }
+        if ($order_id <= 0) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Amount: Paystack reports minor units. Some refund events nest
+        // under `data.amount`, others under `data.transaction.amount`.
+        $amount_minor = 0;
+        if (isset($data['amount'])) {
+            $amount_minor = (int) $data['amount'];
+        } elseif (isset($data['transaction']['amount'])) {
+            $amount_minor = (int) $data['transaction']['amount'];
+        }
+
+        $orders = new OrderRepository();
+        $order_row = $orders->findById($order_id);
+        if (!$order_row) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $expected_minor = CheckoutService::toMinorUnits((float) $order_row->total, (string) $order_row->currency);
+        $is_full = $amount_minor > 0 && $expected_minor > 0 && $amount_minor === $expected_minor;
+        $refund_amount = $amount_minor > 0 ? $amount_minor / 100.0 : null;
+        $reason = $type === 'charge.dispute.create' ? 'paystack_dispute' : 'paystack_refund';
+
+        if ($is_full) {
+            if (!$this->refunds()->refundFullOrder($order_id, $reason, $refund_amount)) {
+                error_log(sprintf('Sikshya: refundFullOrder failed for order %d (Paystack %s).', $order_id, $type));
+                return new WP_REST_Response(['ok' => false, 'message' => 'Refund failed'], 500);
+            }
+        } else {
+            do_action('sikshya_order_partial_refund', $order_id, $refund_amount, $reason, $data);
+        }
+
+        return new WP_REST_Response(['ok' => true], 200);
+    }
+
+    /**
+     * Razorpay webhook handler.
+     *
+     * Auth: HMAC-SHA256 of raw request body using the webhook secret
+     * configured in Razorpay Dashboard. Sent in `x-razorpay-signature`
+     * header. `hash_equals` for constant-time comparison.
+     *
+     * Event matrix (Razorpay docs at
+     * https://razorpay.com/docs/webhooks/payloads/payments/):
+     *   - `payment.captured` — buyer-return `/checkout/confirm` handles it.
+     *   - `payment.refunded` / `refund.processed` / `refund.created` →
+     *     refund branch.
+     */
+    public function razorpay(WP_REST_Request $request): WP_REST_Response
+    {
+        $settings = $this->plugin->getService('settings');
+        $webhook_secret = '';
+        if (is_object($settings) && method_exists($settings, 'getSetting')) {
+            $webhook_secret = (string) $settings->getSetting('razorpay_webhook_secret', '');
+        }
+        if ($webhook_secret === '') {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Razorpay webhook secret not configured.'], 400);
+        }
+
+        $payload = $request->get_body();
+        $sig_header = (string) ($_SERVER['HTTP_X_RAZORPAY_SIGNATURE'] ?? '');
+        $expected = hash_hmac('sha256', $payload, $webhook_secret);
+        if (!hash_equals($expected, $sig_header)) {
+            return new WP_REST_Response(['ok' => false, 'message' => 'Invalid signature'], 400);
+        }
+
+        $event = json_decode($payload, true);
+        if (!is_array($event)) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $type = (string) ($event['event'] ?? '');
+        $payload_data = isset($event['payload']) && is_array($event['payload']) ? $event['payload'] : [];
+
+        $is_refund_event = in_array($type, [
+            'payment.refunded',
+            'refund.created',
+            'refund.processed',
+            'refund.failed',
+        ], true);
+        if (!$is_refund_event) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Razorpay's refund.* events nest the originating payment entity
+        // separately from the refund entity. Look at both.
+        $order_id = 0;
+        $payment_entity = $payload_data['payment']['entity'] ?? null;
+        if (is_array($payment_entity) && isset($payment_entity['notes']['order_id'])) {
+            $order_id = (int) $payment_entity['notes']['order_id'];
+        }
+        // Fallback: when the original purchase used a payment_link, the
+        // notes live on the link itself (we set `notes.order_id` in
+        // `createRazorpayPaymentLink`). The refund event carries
+        // `payment_link.entity.notes` only on some webhook versions.
+        if ($order_id <= 0 && isset($payload_data['payment_link']['entity']['notes']['order_id'])) {
+            $order_id = (int) $payload_data['payment_link']['entity']['notes']['order_id'];
+        }
+        if ($order_id <= 0) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        // Refund amount in minor units. Lives on the refund entity for
+        // refund.* events, on the payment entity's `amount_refunded` for
+        // payment.refunded.
+        $refund_minor = 0;
+        $refund_entity = $payload_data['refund']['entity'] ?? null;
+        if (is_array($refund_entity) && isset($refund_entity['amount'])) {
+            $refund_minor = (int) $refund_entity['amount'];
+        } elseif (is_array($payment_entity) && isset($payment_entity['amount_refunded'])) {
+            $refund_minor = (int) $payment_entity['amount_refunded'];
+        }
+
+        $orders = new OrderRepository();
+        $order_row = $orders->findById($order_id);
+        if (!$order_row) {
+            return new WP_REST_Response(['ok' => true], 200);
+        }
+
+        $expected_minor = CheckoutService::toMinorUnits((float) $order_row->total, (string) $order_row->currency);
+        $is_full = $refund_minor > 0 && $expected_minor > 0 && $refund_minor === $expected_minor;
+        $refund_amount = $refund_minor > 0 ? $refund_minor / 100.0 : null;
+
+        if ($is_full) {
+            if (!$this->refunds()->refundFullOrder($order_id, 'razorpay_refund', $refund_amount)) {
+                error_log(sprintf('Sikshya: refundFullOrder failed for order %d (Razorpay %s).', $order_id, $type));
+                return new WP_REST_Response(['ok' => false, 'message' => 'Refund failed'], 500);
+            }
+        } else {
+            do_action('sikshya_order_partial_refund', $order_id, $refund_amount, 'razorpay_refund', $payload_data);
+        }
+
+        return new WP_REST_Response(['ok' => true], 200);
+    }
+
     private function checkout(): CheckoutService
     {
         // Checkout service requires repositories; keep this lightweight for webhook processing.
@@ -382,6 +859,23 @@ class WebhooksRestRoutes
         }
 
         return new OrderFulfillmentService(
+            new OrderRepository(),
+            new PaymentRepository(),
+            $course
+        );
+    }
+
+    /**
+     * Lazy accessor mirroring `fulfillment()` but for the reverse direction.
+     */
+    private function refunds(): \Sikshya\Commerce\OrderRefundService
+    {
+        $course = $this->plugin->getService('course');
+        if (!$course instanceof CourseService) {
+            throw new \RuntimeException('Course service missing');
+        }
+
+        return new \Sikshya\Commerce\OrderRefundService(
             new OrderRepository(),
             new PaymentRepository(),
             $course

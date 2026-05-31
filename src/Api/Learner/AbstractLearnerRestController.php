@@ -135,7 +135,9 @@ abstract class AbstractLearnerRestController
         if ($now_completed) {
             $issue = new CertificateIssuanceService();
             $issued_id = $issue->issueIfEnabled($user_id, $course_id);
-            do_action('sikshya_course_completed', $user_id, $course_id);
+            // Extra positional arg (enrollment_id) is additive — existing
+            // listeners declaring `accepted_args = 2` continue to work.
+            do_action('sikshya_course_completed', $user_id, $course_id, (int) $row->id);
             if ($issued_id) {
                 do_action('sikshya_certificate_issued', $user_id, $course_id, $issued_id);
             }

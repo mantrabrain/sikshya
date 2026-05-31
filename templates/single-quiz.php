@@ -43,64 +43,19 @@ while (have_posts()) {
     <link rel="stylesheet" href="<?php echo $learn_href; ?>">
 </head>
 <body class="sikshya-learning-shell sikshya-learning-shell--quiz">
+<a class="sikshya-skipLink" href="#sikshya-learn-content"><?php esc_html_e('Skip to quiz content', 'sikshya'); ?></a>
 <div class="sikshya-learning-app">
-    <?php
-    if (!function_exists('sikshya_learn_icon')) {
-        /**
-         * @return string
-         */
-        function sikshya_learn_icon(string $name): string
-        {
-            switch ($name) {
-                case 'menu':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'x':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'exit-learn':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'chevron-up':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'chevron-right':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'chevron-left':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'book':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'clipboard':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'doc':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'audio':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M11 5L6 9H3v6h3l5 4V5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 8.5a4 4 0 010 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a7 7 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'folder':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
-                case 'assignment':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'chevron-down':
-                    return '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'play-video':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="4" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor"/></svg>';
-                case 'live':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11h10M7 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'layers':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
-                case 'puzzle':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'check':
-                    return '<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" focusable="false"><path d="M5.5 12.5l2.5 2.5 6.5-8" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'lock':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M7 11V8a5 5 0 0110 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.5 11h11A2.5 2.5 0 0120 13.5v6A2.5 2.5 0 0117.5 22h-11A2.5 2.5 0 014 19.5v-6A2.5 2.5 0 016.5 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
-                default:
-                    return '';
-            }
-        }
-    }
-    ?>
+    <?php require_once __DIR__ . '/partials/learn-icons.php'; ?>
     <div class="sikshya-learnLayout">
         <header class="sikshya-learnTopbar" role="banner">
             <div class="sikshya-learnTopbar__left">
-                <button class="sikshya-iconBtn" type="button" aria-label="<?php echo esc_attr__('Menu', 'sikshya'); ?>" data-sikshya-toggle-outline>
-                    <?php echo sikshya_learn_icon('menu'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <button class="sikshya-iconBtn sikshya-iconBtn--menuToggle" type="button" aria-label="<?php echo esc_attr__('Menu', 'sikshya'); ?>" data-sikshya-toggle-outline>
+                    <span class="sikshya-iconBtn__menuOpen" aria-hidden="true">
+                        <?php echo sikshya_learn_icon('menu'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </span>
+                    <span class="sikshya-iconBtn__menuClose" aria-hidden="true">
+                        <?php echo sikshya_learn_icon('x'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </span>
                 </button>
                 <a class="sikshya-learnTopbar__brand" href="<?php echo esc_url(home_url('/')); ?>">
                     <?php echo esc_html(get_bloginfo('name')); ?>
@@ -271,7 +226,23 @@ while (have_posts()) {
             <aside class="sikshya-learnSidebar" aria-label="<?php echo esc_attr(sprintf(__('%s content', 'sikshya'), $label_course)); ?>" data-sikshya-outline<?php echo $page_model->isLearnCurriculumSidebarScrollable() ? ' data-sik-curriculum-scroll="1"' : ''; ?>>
                 <div class="sikshya-learnSidebar__inner">
                     <div class="sikshya-learnSidebar__head">
-                        <h2 class="sikshya-learnSidebar__heading">
+                        <?php
+                        $sidebar_course_post = $page_model->getCourse();
+                        $sidebar_course_title = $sidebar_course_post instanceof WP_Post ? (string) get_the_title($sidebar_course_post) : '';
+                        $sidebar_course_url = $sidebar_course_post instanceof WP_Post ? get_permalink($sidebar_course_post) : '';
+                        ?>
+                        <?php if ($sidebar_course_title !== '') : ?>
+                            <h2 class="sikshya-learnSidebar__heading sikshya-zeroMargin" title="<?php echo esc_attr($sidebar_course_title); ?>">
+                                <?php if ($sidebar_course_url !== '') : ?>
+                                    <a class="sikshya-learnSidebar__courseLink" href="<?php echo esc_url($sidebar_course_url); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr(sprintf(__('%s (opens in a new tab)', 'sikshya'), $sidebar_course_title)); ?>">
+                                        <?php echo esc_html($sidebar_course_title); ?>
+                                    </a>
+                                <?php else : ?>
+                                    <?php echo esc_html($sidebar_course_title); ?>
+                                <?php endif; ?>
+                            </h2>
+                        <?php endif; ?>
+                        <p class="sikshya-learnSidebar__kicker sikshya-zeroMargin">
                             <?php
                             echo esc_html(sprintf(
                                 /* translators: %s: singular label (e.g. Course) */
@@ -279,7 +250,7 @@ while (have_posts()) {
                                 $label_course
                             ));
                             ?>
-                        </h2>
+                        </p>
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
@@ -305,7 +276,7 @@ while (have_posts()) {
             </aside>
 
             <div class="sikshya-learnContentCol">
-            <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
+            <section id="sikshya-learn-content" class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
                 <?php if ($page_model->hasError()) : ?>
                     <div class="sikshya-contentSection sikshya-contentSection--centered">
                         <div class="sikshya-contentPanel sikshya-contentPanel--emptyState" role="alert" aria-live="polite">
@@ -388,6 +359,21 @@ while (have_posts()) {
                                         </div>
                                     </div>
                                     <div class="sikshya-learnHeader__actions">
+                                        <button
+                                            type="button"
+                                            class="sikshya-iconBtn sikshya-learnHeader__focusBtn"
+                                            data-sikshya-focus-toggle
+                                            aria-pressed="false"
+                                            aria-label="<?php echo esc_attr__('Focus mode (F)', 'sikshya'); ?>"
+                                            title="<?php echo esc_attr__('Focus mode (F)', 'sikshya'); ?>"
+                                        >
+                                            <span class="sikshya-learnHeader__focusBtn-enter" aria-hidden="true">
+                                                <?php echo sikshya_learn_icon('focus'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                            </span>
+                                            <span class="sikshya-learnHeader__focusBtn-exit" aria-hidden="true">
+                                                <?php echo sikshya_learn_icon('focus-exit'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                            </span>
+                                        </button>
                                         <?php if ($duration_mins > 0) : ?>
                                             <div class="sikshya-quizTimer" data-sikshya-quiz-timer aria-live="polite">
                                                 <span class="sikshya-quizTimer__label"><?php esc_html_e('Time left', 'sikshya'); ?></span>
@@ -591,11 +577,11 @@ while (have_posts()) {
 
                     <div class="sikshya-tabsSection" aria-label="<?php esc_attr_e('Tabs', 'sikshya'); ?>">
                         <div class="sikshya-tabsBar" role="tablist">
-                            <button type="button" class="sikshya-tabBtn is-active" data-sikshya-tab="overview"><?php esc_html_e('Overview', 'sikshya'); ?></button>
-                            <button type="button" class="sikshya-tabBtn" data-sikshya-tab="resources"><?php esc_html_e('Resources', 'sikshya'); ?></button>
-                            <button type="button" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
-                            <button type="button" class="sikshya-tabBtn" data-sikshya-tab="notes"><?php esc_html_e('Notes', 'sikshya'); ?></button>
-                            <button type="button" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
+                            <button type="button" id="sikshya-quiz-tab-overview" role="tab" aria-controls="sikshya-quiz-panel-overview" aria-selected="true" class="sikshya-tabBtn is-active" data-sikshya-tab="overview"><?php esc_html_e('Overview', 'sikshya'); ?></button>
+                            <button type="button" id="sikshya-quiz-tab-resources" role="tab" aria-controls="sikshya-quiz-panel-resources" aria-selected="false" tabindex="-1" class="sikshya-tabBtn" data-sikshya-tab="resources"><?php esc_html_e('Resources', 'sikshya'); ?></button>
+                            <button type="button" id="sikshya-quiz-tab-instructions" role="tab" aria-controls="sikshya-quiz-panel-instructions" aria-selected="false" tabindex="-1" class="sikshya-tabBtn" data-sikshya-tab="instructions"><?php esc_html_e('Instructions', 'sikshya'); ?></button>
+                            <button type="button" id="sikshya-quiz-tab-notes" role="tab" aria-controls="sikshya-quiz-panel-notes" aria-selected="false" tabindex="-1" class="sikshya-tabBtn" data-sikshya-tab="notes"><?php esc_html_e('Notes', 'sikshya'); ?></button>
+                            <button type="button" id="sikshya-quiz-tab-announcements" role="tab" aria-controls="sikshya-quiz-panel-announcements" aria-selected="false" tabindex="-1" class="sikshya-tabBtn" data-sikshya-tab="announcements"><?php esc_html_e('Announcements', 'sikshya'); ?></button>
                             <?php
                             /**
                              * Extra tab buttons in the learner content chrome.
@@ -604,10 +590,10 @@ while (have_posts()) {
                             do_action('sikshya_learn_tabs_bar_append', $page_model->toLegacyViewArray(), $page_model);
                             ?>
                             <?php if ($page_model->isCourseFeatureReviews()) : ?>
-                                <button type="button" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
+                                <button type="button" id="sikshya-quiz-tab-reviews" role="tab" aria-controls="sikshya-quiz-panel-reviews" aria-selected="false" tabindex="-1" class="sikshya-tabBtn" data-sikshya-tab="reviews"><?php esc_html_e('Reviews', 'sikshya'); ?></button>
                             <?php endif; ?>
                         </div>
-                        <div class="sikshya-tabPanel is-active" data-sikshya-panel="overview">
+                        <div class="sikshya-tabPanel is-active" data-sikshya-panel="overview" id="sikshya-quiz-panel-overview" role="tabpanel" aria-labelledby="sikshya-quiz-tab-overview">
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <?php if (trim((string) get_the_content()) !== '') : ?>
                                     <?php the_content(); ?>
@@ -644,7 +630,7 @@ while (have_posts()) {
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div class="sikshya-tabPanel" data-sikshya-panel="resources">
+                        <div class="sikshya-tabPanel" data-sikshya-panel="resources" id="sikshya-quiz-panel-resources" role="tabpanel" aria-labelledby="sikshya-quiz-tab-resources" hidden>
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Downloads', 'sikshya'); ?></h3>
                                 <?php
@@ -673,7 +659,12 @@ while (have_posts()) {
                                             $url = isset($r['url']) ? esc_url_raw((string) $r['url']) : '';
                                             $aid = isset($r['attachment_id']) ? absint($r['attachment_id']) : 0;
                                             if ($url === '' && $aid > 0) {
-                                                $url = wp_get_attachment_url($aid) ?: '';
+                                                // Signed proxy URL bound to the current learner — same
+                                                // protection as the lesson template. Filterable.
+                                                $url = \Sikshya\Security\AttachmentTokenService::signedUrlFor(
+                                                    $aid,
+                                                    (int) get_current_user_id()
+                                                );
                                             }
                                             if ($url === '') {
                                                 continue;
@@ -689,7 +680,7 @@ while (have_posts()) {
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div class="sikshya-tabPanel" data-sikshya-panel="instructions">
+                        <div class="sikshya-tabPanel" data-sikshya-panel="instructions" id="sikshya-quiz-panel-instructions" role="tabpanel" aria-labelledby="sikshya-quiz-tab-instructions" hidden>
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Instructions', 'sikshya'); ?></h3>
                                 <ul class="sikshya-learnList">
@@ -699,7 +690,7 @@ while (have_posts()) {
                                 </ul>
                             </div>
                         </div>
-                        <div class="sikshya-tabPanel" data-sikshya-panel="notes">
+                        <div class="sikshya-tabPanel" data-sikshya-panel="notes" id="sikshya-quiz-panel-notes" role="tabpanel" aria-labelledby="sikshya-quiz-tab-notes" hidden>
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain sikshya-learnNotes" data-sikshya-notes-shell>
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('My notes', 'sikshya'); ?></h3>
                                 <p class="sikshya-learnNotes__hint sikshya-muted"><?php esc_html_e('Private to you — add as many short notes as you need while taking this quiz.', 'sikshya'); ?></p>
@@ -718,12 +709,12 @@ while (have_posts()) {
                                         <button type="button" class="sikshya-btn sikshya-btn--outline" data-sikshya-note-add>
                                             <?php esc_html_e('Add note', 'sikshya'); ?>
                                         </button>
-                                        <span class="sikshya-muted" data-sikshya-note-status style="font-size:12px;"></span>
+                                        <span class="sikshya-muted" data-sikshya-note-status style="font-size:12px;" role="status" aria-live="polite" aria-atomic="true"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="sikshya-tabPanel" data-sikshya-panel="announcements">
+                        <div class="sikshya-tabPanel" data-sikshya-panel="announcements" id="sikshya-quiz-panel-announcements" role="tabpanel" aria-labelledby="sikshya-quiz-tab-announcements" hidden>
                             <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                 <h3 class="sikshya-learnH3"><?php esc_html_e('Announcements', 'sikshya'); ?></h3>
                                 <?php
@@ -769,7 +760,7 @@ while (have_posts()) {
                         do_action('sikshya_learn_tab_panels_append', $page_model->toLegacyViewArray(), $page_model);
                         ?>
                         <?php if ($page_model->isCourseFeatureReviews()) : ?>
-                            <div class="sikshya-tabPanel" data-sikshya-panel="reviews">
+                            <div class="sikshya-tabPanel" data-sikshya-panel="reviews" id="sikshya-quiz-panel-reviews" role="tabpanel" aria-labelledby="sikshya-quiz-tab-reviews" hidden>
                                 <div class="sikshya-contentPanel sikshya-contentPanel--plain">
                                     <h3 class="sikshya-learnH3"><?php esc_html_e('Reviews', 'sikshya'); ?></h3>
                                     <p class="sikshya-zeroMargin"><?php esc_html_e('Reviews are enabled for this course, but the reviews UI is not available yet.', 'sikshya'); ?></p>
@@ -1081,6 +1072,73 @@ while (have_posts()) {
     </div>
     <footer class="sikshya-learning-footer" aria-hidden="true"></footer>
 </div>
+<script>
+/* Quiz-shell distraction-free hooks: Focus mode + scroll-aware topbar.
+ * Mirrors the lesson-shell behavior (see assets/js/learn.js sections 9 & 11)
+ * so Focus mode works identically across all content types. Inline because
+ * the quiz shell already inlines its own client and doesn't load learn.js.
+ * Guards: keystroke handler bails when typing inside form controls so quiz
+ * text-answer typing stays unaffected.
+ */
+(function () {
+  var root = document.documentElement;
+  var FOCUS_KEY = 'sikshya:learn:focus';
+  var focusBtn = document.querySelector('[data-sikshya-focus-toggle]');
+  function setFocusMode(isOn, persist) {
+    root.classList.toggle('sikshya-focusMode', !!isOn);
+    if (focusBtn) focusBtn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+    if (persist) {
+      try {
+        if (isOn) window.localStorage.setItem(FOCUS_KEY, '1');
+        else window.localStorage.removeItem(FOCUS_KEY);
+      } catch (_) { /* ignore */ }
+    }
+  }
+  try {
+    if (window.localStorage.getItem(FOCUS_KEY) === '1') setFocusMode(true, false);
+  } catch (_) { /* ignore */ }
+  if (focusBtn) {
+    focusBtn.addEventListener('click', function () {
+      setFocusMode(!root.classList.contains('sikshya-focusMode'), true);
+    });
+  }
+  function isFormFocus() {
+    var el = document.activeElement;
+    if (!el || el === document.body) return false;
+    var tag = (el.tagName || '').toLowerCase();
+    if (tag === 'textarea' || tag === 'input' || tag === 'select') return true;
+    return !!el.isContentEditable;
+  }
+  window.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (isFormFocus()) return;
+    var k = (e.key || '').toLowerCase();
+    if (k === 'f') {
+      setFocusMode(!root.classList.contains('sikshya-focusMode'), true);
+      e.preventDefault();
+    } else if (k === 'escape' && root.classList.contains('sikshya-focusMode')) {
+      setFocusMode(false, true);
+    }
+  });
+
+  /* Scroll-aware topbar (chrome auto-hide). */
+  var lastY = 0, ticking = false;
+  function apply() {
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    var down = y > lastY;
+    if (y < 200) root.classList.remove('sikshya-chromeHidden');
+    else if (down && Math.abs(y - lastY) > 6) root.classList.add('sikshya-chromeHidden');
+    else if (!down && Math.abs(y - lastY) > 6) root.classList.remove('sikshya-chromeHidden');
+    lastY = y;
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(apply);
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>
 

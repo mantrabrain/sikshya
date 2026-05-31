@@ -238,6 +238,28 @@ class QuizAttemptRepository
         return (int) $wpdb->insert_id;
     }
 
+    /**
+     * Persist the learner's in-progress answers as a JSON snapshot on the
+     * attempt row. Called from the auto-save REST endpoint; lets the form
+     * hydrate after a refresh / accidental tab close.
+     *
+     * Returns false on a no-op (no matching row) so the route can 4xx; true
+     * on a successful update — including updates that matched a row but
+     * didn't change any value (wpdb returns 0 in that case).
+     */
+    public function savePartialAnswers(int $attempt_id, int $user_id, string $answers_json): bool
+    {
+        global $wpdb;
+        $result = $wpdb->update(
+            $this->attempts_table,
+            ['auto_save_data' => $answers_json],
+            ['id' => $attempt_id, 'user_id' => $user_id, 'status' => 'in_progress'],
+            ['%s'],
+            ['%d', '%d', '%s']
+        );
+        return $result !== false;
+    }
+
     public function addItem(int $attempt_id, int $question_id, ?string $answer, bool $is_correct, float $points_earned): int
     {
         global $wpdb;

@@ -101,6 +101,57 @@ $label_quiz = function_exists('sikshya_label') ? sikshya_label('quiz', __('Quiz'
                     </div>
                 </section>
 
+                <?php
+                $achievements = $page_model->getAchievements();
+                if (!empty($achievements)) :
+                ?>
+                <section class="sik-acc-dash-section" aria-labelledby="sik-acc-dash-badges-heading">
+                    <header class="sik-acc-dash-section__head">
+                        <h2 id="sik-acc-dash-badges-heading" class="sik-acc-dash-section__title"><?php esc_html_e('Achievements', 'sikshya'); ?></h2>
+                        <p class="sik-acc-dash-section__sub">
+                            <?php
+                            echo esc_html(sprintf(
+                                /* translators: %d: number of earned achievements */
+                                _n(
+                                    'You have earned %d badge so far.',
+                                    'You have earned %d badges so far.',
+                                    (int) $page_model->getAchievementsCount(),
+                                    'sikshya'
+                                ),
+                                (int) $page_model->getAchievementsCount()
+                            ));
+                            ?>
+                        </p>
+                    </header>
+                    <ul class="sik-acc-dash-badges">
+                        <?php foreach ($achievements as $badge) : ?>
+                            <?php
+                            $badge_type = (string) ($badge['type'] ?? '');
+                            $badge_name = (string) ($badge['name'] ?? '');
+                            $badge_desc = (string) ($badge['description'] ?? '');
+                            $badge_date = (string) ($badge['earned_date'] ?? '');
+                            $badge_ts = $badge_date !== '' ? strtotime($badge_date) : false;
+                            $badge_date_label = $badge_ts ? wp_date(get_option('date_format'), $badge_ts) : '';
+                            ?>
+                            <li class="sik-acc-dash-badge sik-acc-dash-badge--<?php echo esc_attr(sanitize_html_class($badge_type)); ?>">
+                                <span class="sik-acc-dash-badge__glyph" aria-hidden="true">
+                                    <?php echo \Sikshya\Helpers\Icons::inline('badge'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — trusted SVG ?>
+                                </span>
+                                <div class="sik-acc-dash-badge__body">
+                                    <p class="sik-acc-dash-badge__name"><?php echo esc_html($badge_name); ?></p>
+                                    <?php if ($badge_desc !== '') : ?>
+                                        <p class="sik-acc-dash-badge__desc"><?php echo esc_html($badge_desc); ?></p>
+                                    <?php endif; ?>
+                                    <?php if ($badge_date_label !== '') : ?>
+                                        <p class="sik-acc-dash-badge__date"><?php echo esc_html(sprintf(__('Earned %s', 'sikshya'), $badge_date_label)); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </section>
+                <?php endif; ?>
+
                 <section class="sik-acc-dash-section" aria-labelledby="sik-acc-dash-actions-heading">
                     <header class="sik-acc-dash-section__head">
                         <h2 id="sik-acc-dash-actions-heading" class="sik-acc-dash-section__title"><?php esc_html_e('Go to', 'sikshya'); ?></h2>

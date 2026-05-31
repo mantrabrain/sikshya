@@ -150,9 +150,16 @@ final class PublicPageUrls
      * Learn player URL for course content (lesson/quiz/assignment).
      *
      * Pretty permalinks:
-     * - when public id enabled: /learn/lesson/{public_id}/{slug}
-     * - when disabled:          /learn/lesson/{slug}
+     * - when public id enabled: /{learn}/{lesson-base}/{public_id}/{slug}
+     * - when disabled:          /{learn}/{lesson-base}/{slug}
      * Plain permalinks:  /?sikshya_page=learn&sikshya_learn_type=lesson&sikshya_learn_slug={slug}
+     *
+     * The `{lesson-base}` segment comes from the user-configurable
+     * `rewrite_base_lesson` / `rewrite_base_quiz` / `rewrite_base_assignment`
+     * permalink settings — so when an admin renames `lessons` to `videos`,
+     * generated learn URLs become `/learn/videos/<id>/<slug>/` and the
+     * matching rewrite rule (registered in PermalinkService) routes back to
+     * the canonical `lesson` type.
      */
     public static function learnContent(string $type, string $slug, string $public_id = ''): string
     {
@@ -182,13 +189,25 @@ final class PublicPageUrls
             return add_query_arg($args, home_url('/'));
         }
 
+        // Map the canonical content type to the admin's configured URL base.
+        // Unknown types fall back to the type literal so callers still get a
+        // working URL even if they pass something custom.
+        $p = PermalinkService::get();
+        $defaults = PermalinkService::defaults();
+        $segment_map = [
+            'lesson'     => PermalinkService::sanitizeSlug($p['rewrite_base_lesson']     ?? $defaults['rewrite_base_lesson']),
+            'quiz'       => PermalinkService::sanitizeSlug($p['rewrite_base_quiz']       ?? $defaults['rewrite_base_quiz']),
+            'assignment' => PermalinkService::sanitizeSlug($p['rewrite_base_assignment'] ?? $defaults['rewrite_base_assignment']),
+        ];
+        $segment = $segment_map[$type] ?? $type;
+
         $base = untrailingslashit(self::url('learn'));
 
         if ($use_pid && $public_id !== '') {
-            return user_trailingslashit($base . '/' . rawurlencode($type) . '/' . rawurlencode($public_id) . '/' . rawurlencode($slug));
+            return user_trailingslashit($base . '/' . rawurlencode($segment) . '/' . rawurlencode($public_id) . '/' . rawurlencode($slug));
         }
 
-        return user_trailingslashit($base . '/' . rawurlencode($type) . '/' . rawurlencode($slug));
+        return user_trailingslashit($base . '/' . rawurlencode($segment) . '/' . rawurlencode($slug));
     }
 
     /**

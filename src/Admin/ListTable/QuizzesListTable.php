@@ -4,6 +4,7 @@ namespace Sikshya\Admin\ListTable;
 
 use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Services\LessonCourseLink;
 
 /**
  * Quizzes List Table
@@ -113,333 +114,341 @@ class QuizzesListTable extends AbstractListTable
     }
 
     /**
-     * Get items for the table
+     * Get items for the table.
      *
-     * @return array
+     * Returns a list of `WP_Post` rows for the QUIZ post type. The original
+     * list-table prototype used hand-rolled SQL against meta keys that the
+     * plugin doesn't actually persist (`_sikshya_quiz_type`,
+     * `_sikshya_questions_count`); the *real* schema lives on a different
+     * set of meta keys (`_sikshya_quiz_course`, `_sikshya_quiz_questions`,
+     * `_sikshya_quiz_time_limit`). We use `WP_Query` so the meta lookup
+     * stays compatible with WP's caching layer, post type registration, and
+     * any filter that hooks into archive queries (e.g. translation plugins).
+     *
+     * Per-row decoration (course title, questions count, duration) is
+     * derived from post meta inside the column renderers, not joined in
+     * the listing query — admin pages list at most `per_page` (20) items so
+     * the extra meta lookups are bounded and benefit from WP's object cache.
+     *
+     * @return array<int, \WP_Post>
      */
     public function get_items(): array
     {
-        // For demo purposes, return dummy data
-        return $this->getDummyData();
+        $args = [
+            'post_type'      => PostTypes::QUIZ,
+            'post_status'    => $this->getStatusFilter(),
+            'posts_per_page' => $this->get_items_per_page($this->config['per_page']),
+            'paged'          => $this->get_pagenum(),
+            'orderby'        => $this->getOrderBy(),
+            'order'          => $this->getOrder(),
+            's'              => $this->getSearchTerm(),
+        ];
 
-        // TODO: Implement actual database query
-        /*
-        global $wpdb;
-
-        $per_page = $this->get_items_per_page();
-        $current_page = $this->get_pagenum();
-        $offset = ($current_page - 1) * $per_page;
-
-        $where_clauses = [];
-        $args = [];
-
-        // Apply filters
-        if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
-            $where_clauses[] = 'p.post_status = %s';
-            $args[] = sanitize_text_field($_GET['status']);
+        $author = $this->getInstructorFilter();
+        if ($author) {
+            $args['author'] = $author;
         }
 
-        if (!empty($_GET['course']) && $_GET['course'] !== 'all') {
-            $where_clauses[] = 'pm_course.meta_value = %d';
-            $args[] = intval($_GET['course']);
+        $meta_query = [];
+        $course_filter = $this->getCourseFilter();
+        if ($course_filter > 0) {
+            $meta_query[] = [
+                'key'   => '_sikshya_quiz_course',
+                'value' => $course_filter,
+                'type'  => 'NUMERIC',
+            ];
+        }
+        if (!empty($meta_query)) {
+            $args['meta_query'] = $meta_query;
         }
 
-        if (!empty($_GET['type']) && $_GET['type'] !== 'all') {
-            $where_clauses[] = 'pm_type.meta_value = %s';
-            $args[] = sanitize_text_field($_GET['type']);
-        }
+        $query = new \WP_Query($args);
 
-        if (!empty($_GET['instructor']) && $_GET['instructor'] !== 'all') {
-            $where_clauses[] = 'p.post_author = %d';
-            $args[] = intval($_GET['instructor']);
-        }
+        $this->total_items_cache = (int) $query->found_posts;
 
-        $where_sql = '';
-        if (!empty($where_clauses)) {
-            $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
-        }
-
-        $query = "
-            SELECT
-                p.*,
-                pm_course.meta_value as course_id,
-                pm_type.meta_value as quiz_type,
-                pm_questions.meta_value as questions_count,
-                pm_duration.meta_value as duration,
-                u.display_name as instructor_name
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm_course ON p.ID = pm_course.post_id AND pm_course.meta_key = '_sikshya_course_id'
-            LEFT JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id AND pm_type.meta_key = '_sikshya_quiz_type'
-            LEFT JOIN {$wpdb->postmeta} pm_questions ON p.ID = pm_questions.post_id AND pm_questions.meta_key = '_sikshya_questions_count'
-            LEFT JOIN {$wpdb->postmeta} pm_duration ON p.ID = pm_duration.post_id AND pm_duration.meta_key = '_sikshya_duration'
-            LEFT JOIN {$wpdb->users} u ON p.post_author = u.ID
-            WHERE p.post_type = %s
-            {$where_sql}
-            ORDER BY p.post_date DESC
-            LIMIT %d OFFSET %d
-        ";
-
-        $args = array_merge([PostTypes::QUIZ], $args, [$per_page, $offset]);
-
-        if (!empty($args)) {
-            $results = $wpdb->get_results($wpdb->prepare($query, $args));
-        } else {
-            $results = $wpdb->get_results($query);
-        }
-
-        return $results ?: [];
-        */
+        return $query->posts;
     }
 
     /**
-     * Get total number of items
+     * Get total number of items for pagination.
+     *
+     * Reuses the count cached on the most recent `get_items()` call so we
+     * don't run the same query twice. If the table is rendered without
+     * `get_items()` running first (defensive), fall back to a lightweight
+     * `WP_Query` with `fields => 'ids'` and the same filters applied.
      *
      * @return int
      */
     public function get_total_items(): int
     {
-        // For demo purposes, return dummy count
-        return count($this->getDummyData());
-
-        // TODO: Implement actual count query
-        /*
-        global $wpdb;
-
-        $where_clauses = [];
-        $args = [];
-
-        // Apply filters
-        if (!empty($_GET['status']) && $_GET['status'] !== 'all') {
-            $where_clauses[] = 'p.post_status = %s';
-            $args[] = sanitize_text_field($_GET['status']);
+        if ($this->total_items_cache !== null) {
+            return $this->total_items_cache;
         }
 
-        if (!empty($_GET['course']) && $_GET['course'] !== 'all') {
-            $where_clauses[] = 'pm_course.meta_value = %d';
-            $args[] = intval($_GET['course']);
-        }
-
-        if (!empty($_GET['type']) && $_GET['type'] !== 'all') {
-            $where_clauses[] = 'pm_type.meta_value = %s';
-            $args[] = sanitize_text_field($_GET['type']);
-        }
-
-        if (!empty($_GET['instructor']) && $_GET['instructor'] !== 'all') {
-            $where_clauses[] = 'p.post_author = %d';
-            $args[] = intval($_GET['instructor']);
-        }
-
-        $where_sql = '';
-        if (!empty($where_clauses)) {
-            $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
-        }
-
-        $query = "
-            SELECT COUNT(*)
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm_course ON p.ID = pm_course.post_id AND pm_course.meta_key = '_sikshya_course_id'
-            LEFT JOIN {$wpdb->postmeta} pm_type ON p.ID = pm_type.post_id AND pm_type.meta_key = '_sikshya_quiz_type'
-            WHERE p.post_type = %s
-            {$where_sql}
-        ";
-
-        $args = array_merge([PostTypes::QUIZ], $args);
-
-        if (!empty($args)) {
-            return (int) $wpdb->get_var($wpdb->prepare($query, $args));
-        } else {
-            return (int) $wpdb->get_var($query);
-        }
-        */
-    }
-
-    /**
-     * Get dummy data for demonstration
-     *
-     * @return array
-     */
-    private function getDummyData(): array
-    {
-        return [
-            (object) [
-                'ID' => 1,
-                'post_title' => 'JavaScript Fundamentals Quiz',
-                'post_status' => 'publish',
-                'post_date' => '2024-01-15 10:30:00',
-                'post_author' => 1,
-                'course_id' => 1,
-                'course_title' => 'Web Development Basics',
-                'quiz_type' => 'multiple_choice',
-                'questions_count' => 15,
-                'duration' => 30,
-                'instructor_name' => 'John Smith',
-            ],
-            (object) [
-                'ID' => 2,
-                'post_title' => 'CSS Layout Techniques',
-                'post_status' => 'publish',
-                'post_date' => '2024-01-14 14:20:00',
-                'post_author' => 2,
-                'course_id' => 2,
-                'course_title' => 'Advanced CSS',
-                'quiz_type' => 'true_false',
-                'questions_count' => 10,
-                'duration' => 20,
-                'instructor_name' => 'Sarah Johnson',
-            ],
-            (object) [
-                'ID' => 3,
-                'post_title' => 'React Hooks Assessment',
-                'post_status' => 'draft',
-                'post_date' => '2024-01-13 09:15:00',
-                'post_author' => 1,
-                'course_id' => 3,
-                'course_title' => 'React Development',
-                'quiz_type' => 'multiple_choice',
-                'questions_count' => 20,
-                'duration' => 45,
-                'instructor_name' => 'John Smith',
-            ],
-            (object) [
-                'ID' => 4,
-                'post_title' => 'Database Design Principles',
-                'post_status' => 'publish',
-                'post_date' => '2024-01-12 16:45:00',
-                'post_author' => 3,
-                'course_id' => 4,
-                'course_title' => 'Database Management',
-                'quiz_type' => 'essay',
-                'questions_count' => 5,
-                'duration' => 60,
-                'instructor_name' => 'Mike Wilson',
-            ],
-            (object) [
-                'ID' => 5,
-                'post_title' => 'Git Version Control',
-                'post_status' => 'pending',
-                'post_date' => '2024-01-11 11:30:00',
-                'post_author' => 2,
-                'course_id' => 5,
-                'course_title' => 'Version Control Systems',
-                'quiz_type' => 'fill_blank',
-                'questions_count' => 12,
-                'duration' => 25,
-                'instructor_name' => 'Sarah Johnson',
-            ],
-            (object) [
-                'ID' => 6,
-                'post_title' => 'Python Data Structures',
-                'post_status' => 'publish',
-                'post_date' => '2024-01-10 13:20:00',
-                'post_author' => 4,
-                'course_id' => 6,
-                'course_title' => 'Python Programming',
-                'quiz_type' => 'multiple_choice',
-                'questions_count' => 18,
-                'duration' => 35,
-                'instructor_name' => 'Emily Davis',
-            ],
-            (object) [
-                'ID' => 7,
-                'post_title' => 'API Design Best Practices',
-                'post_status' => 'draft',
-                'post_date' => '2024-01-09 15:10:00',
-                'post_author' => 1,
-                'course_id' => 7,
-                'course_title' => 'API Development',
-                'quiz_type' => 'essay',
-                'questions_count' => 8,
-                'duration' => 50,
-                'instructor_name' => 'John Smith',
-            ],
-            (object) [
-                'ID' => 8,
-                'post_title' => 'Mobile App Testing',
-                'post_status' => 'publish',
-                'post_date' => '2024-01-08 10:45:00',
-                'post_author' => 5,
-                'course_id' => 8,
-                'course_title' => 'Mobile Development',
-                'quiz_type' => 'true_false',
-                'questions_count' => 14,
-                'duration' => 28,
-                'instructor_name' => 'David Brown',
-            ],
+        $args = [
+            'post_type'      => PostTypes::QUIZ,
+            'post_status'    => $this->getStatusFilter(),
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            's'              => $this->getSearchTerm(),
+            'no_found_rows'  => false,
         ];
+
+        $author = $this->getInstructorFilter();
+        if ($author) {
+            $args['author'] = $author;
+        }
+
+        $course_filter = $this->getCourseFilter();
+        if ($course_filter > 0) {
+            $args['meta_query'] = [[
+                'key'   => '_sikshya_quiz_course',
+                'value' => $course_filter,
+                'type'  => 'NUMERIC',
+            ]];
+        }
+
+        $query = new \WP_Query($args);
+        $this->total_items_cache = (int) $query->found_posts;
+
+        return $this->total_items_cache;
     }
 
     /**
-     * Get courses list for filter
+     * @var int|null Cached found-rows count from the last items query.
+     */
+    private $total_items_cache = null;
+
+    /**
+     * Get courses list for filter dropdown.
      *
-     * @return array
+     * @return array<int|string, string>
      */
     private function getCoursesList(): array
     {
-        return [
-            1 => 'Web Development Basics',
-            2 => 'Advanced CSS',
-            3 => 'React Development',
-            4 => 'Database Management',
-            5 => 'Version Control Systems',
-            6 => 'Python Programming',
-            7 => 'API Development',
-            8 => 'Mobile Development',
-        ];
+        $options = ['' => __('All Courses', 'sikshya')];
+
+        $course_ids = get_posts([
+            'post_type'      => PostTypes::COURSE,
+            'post_status'    => ['publish', 'draft', 'private', 'pending'],
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'fields'         => 'ids',
+            'suppress_filters' => false,
+        ]);
+
+        foreach ($course_ids as $course_id) {
+            $options[(int) $course_id] = get_the_title((int) $course_id);
+        }
+
+        return $options;
     }
 
     /**
-     * Get instructors list for filter
+     * Get instructors list for filter dropdown.
      *
-     * @return array
+     * @return array<int|string, string>
      */
     private function getInstructorsList(): array
     {
-        return [
-            1 => 'John Smith',
-            2 => 'Sarah Johnson',
-            3 => 'Mike Wilson',
-            4 => 'Emily Davis',
-            5 => 'David Brown',
-        ];
+        $options = ['' => __('All Instructors', 'sikshya')];
+
+        $users = get_users([
+            'role__in' => ['administrator', 'sikshya_instructor', 'instructor'],
+            'orderby'  => 'display_name',
+            'fields'   => ['ID', 'display_name'],
+        ]);
+
+        foreach ($users as $user) {
+            $options[(int) $user->ID] = $user->display_name;
+        }
+
+        return $options;
     }
 
     /**
-     * Get quiz type name
+     * Sanitise the `status` filter from the request.
      *
-     * @param string $type
-     * @return string
+     * @return array<int, string>|string
+     */
+    private function getStatusFilter()
+    {
+        $allowed = ['publish', 'draft', 'private', 'pending'];
+        $status  = sanitize_key((string) ($_GET['status'] ?? $_GET['post_status'] ?? ''));
+
+        if ($status === '' || !in_array($status, $allowed, true)) {
+            return $allowed;
+        }
+
+        return $status;
+    }
+
+    /**
+     * Sanitise the `instructor` filter from the request.
+     *
+     * @return int 0 when unset/invalid.
+     */
+    private function getInstructorFilter(): int
+    {
+        return max(0, intval($_GET['instructor'] ?? 0));
+    }
+
+    /**
+     * Sanitise the `course` filter from the request.
+     *
+     * @return int 0 when unset/invalid.
+     */
+    private function getCourseFilter(): int
+    {
+        return max(0, intval($_GET['course'] ?? 0));
+    }
+
+    /**
+     * Sanitise the search term.
+     */
+    private function getSearchTerm(): string
+    {
+        return sanitize_text_field((string) ($_GET['s'] ?? ''));
+    }
+
+    /**
+     * Sanitise the orderby parameter against an allow-list.
+     */
+    private function getOrderBy(): string
+    {
+        $orderby = sanitize_key((string) ($_GET['orderby'] ?? 'date'));
+        $allowed = ['title', 'created', 'date', 'modified'];
+        if ($orderby === 'created') {
+            $orderby = 'date';
+        }
+        return in_array($orderby, $allowed, true) ? $orderby : 'date';
+    }
+
+    /**
+     * Sanitise the order direction.
+     */
+    private function getOrder(): string
+    {
+        $order = strtoupper((string) ($_GET['order'] ?? 'DESC'));
+        return in_array($order, ['ASC', 'DESC'], true) ? $order : 'DESC';
+    }
+
+    /**
+     * Map an internal lesson/quiz-content type slug to a display label.
+     *
+     * Quizzes don't have a single "type" — questions inside a quiz can mix
+     * multiple_choice/true_false/essay/etc. The filter dropdown lets admins
+     * find quizzes whose question pool includes a given type, but a quiz
+     * row in the list table shows "Quiz" as the category. This helper is
+     * kept for backwards compat with any caller that resolves a label
+     * from a slug.
      */
     private function getQuizTypeName(string $type): string
     {
         $types = [
-            'multiple_choice' => __('Multiple Choice', 'sikshya'),
-            'true_false' => __('True/False', 'sikshya'),
-            'fill_blank' => __('Fill in the Blank', 'sikshya'),
-            'essay' => __('Essay', 'sikshya'),
+            'multiple_choice'   => __('Multiple Choice', 'sikshya'),
+            'true_false'        => __('True/False', 'sikshya'),
+            'multiple_response' => __('Multiple Response', 'sikshya'),
+            'fill_blank'        => __('Fill in the Blank', 'sikshya'),
+            'short_answer'      => __('Short Answer', 'sikshya'),
+            'essay'             => __('Essay', 'sikshya'),
+            'ordering'          => __('Ordering', 'sikshya'),
+            'matching'          => __('Matching', 'sikshya'),
         ];
 
-        return $types[$type] ?? $type;
+        return $types[$type] ?? __('Quiz', 'sikshya');
     }
 
     /**
-     * Default column handler
+     * Resolve the parent course ID for a quiz post.
      *
-     * @param object $item
-     * @param string $column_key
-     * @return string
+     * Delegates to `LessonCourseLink::resolvedCourseIdForQuiz` so this table
+     * stays in lock-step with Learn / REST / admin-bar callers that already
+     * use the canonical resolver. The canonical resolver memoises results
+     * per-request, so iterating `per_page` (20) rows here stays cheap.
+     */
+    private function resolveCourseId(int $quiz_id): int
+    {
+        return LessonCourseLink::resolvedCourseIdForQuiz($quiz_id);
+    }
+
+    /**
+     * Count questions assigned to a quiz.
+     *
+     * Reads the `_sikshya_quiz_questions` array (list of question IDs).
+     * Returns 0 for quizzes that have never had questions assigned.
+     */
+    private function getQuestionsCount(int $quiz_id): int
+    {
+        $stored = get_post_meta($quiz_id, '_sikshya_quiz_questions', true);
+        if (is_array($stored)) {
+            return count($stored);
+        }
+        return 0;
+    }
+
+    /**
+     * Get the configured time limit (in minutes) for a quiz, or 0 if unset.
+     */
+    private function getDuration(int $quiz_id): int
+    {
+        return (int) get_post_meta($quiz_id, '_sikshya_quiz_time_limit', true);
+    }
+
+    /**
+     * Delete a quiz post (used by bulk-delete).
+     */
+    protected function delete_item($id): bool
+    {
+        $post = get_post((int) $id);
+        if (!$post || $post->post_type !== PostTypes::QUIZ) {
+            return false;
+        }
+        return wp_delete_post((int) $id, true) !== false;
+    }
+
+    /**
+     * Update a quiz post status (used by bulk publish/draft).
+     */
+    protected function update_item_status($id, $status): bool
+    {
+        $post = get_post((int) $id);
+        if (!$post || $post->post_type !== PostTypes::QUIZ) {
+            return false;
+        }
+        $allowed = ['publish', 'draft', 'private', 'pending'];
+        if (!in_array($status, $allowed, true)) {
+            return false;
+        }
+        $result = wp_update_post(['ID' => (int) $id, 'post_status' => $status], true);
+        return !is_wp_error($result);
+    }
+
+    /**
+     * Default column handler.
+     *
+     * The list-table item is a `WP_Post`; derived facts (course title,
+     * question count, time limit, instructor) are looked up on demand via
+     * post meta / user queries. Admin pages list at most `per_page` (20)
+     * rows so the extra lookups are bounded.
+     *
+     * @param \WP_Post $item
+     * @param string   $column_key
      */
     protected function column_default($item, $column_key): string
     {
         switch ($column_key) {
             case 'questions':
-                return '<span class="sikshya-questions-count">' . esc_html($item->questions_count) . '</span>';
+                return '<span class="sikshya-questions-count">' . esc_html((string) $this->getQuestionsCount((int) $item->ID)) . '</span>';
             case 'duration':
-                return '<span class="sikshya-duration">' . esc_html($item->duration) . ' min</span>';
+                $duration = $this->getDuration((int) $item->ID);
+                return '<span class="sikshya-duration">' . esc_html((string) $duration) . ' ' . esc_html__('min', 'sikshya') . '</span>';
             case 'status':
-                $status_class = 'sikshya-status-' . $item->post_status;
-                return '<span class="sikshya-status-badge ' . esc_attr($status_class) . '">' . esc_html(ucfirst($item->post_status)) . '</span>';
+                $status_class = 'sikshya-status-' . sanitize_html_class((string) $item->post_status);
+                return '<span class="sikshya-status-badge ' . esc_attr($status_class) . '">' . esc_html(ucfirst((string) $item->post_status)) . '</span>';
             case 'created':
-                return '<span class="sikshya-date">' . esc_html(date('M j, Y', strtotime($item->post_date))) . '</span>';
+                return '<span class="sikshya-date">' . esc_html(mysql2date(get_option('date_format', 'M j, Y'), (string) $item->post_date)) . '</span>';
             default:
                 return '';
         }
@@ -448,34 +457,38 @@ class QuizzesListTable extends AbstractListTable
     /**
      * Column: Checkbox
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function column_cb($item): string
     {
         return sprintf(
             '<input type="checkbox" name="item[]" value="%s" />',
-            $item->ID
+            esc_attr((string) $item->ID)
         );
     }
 
     /**
      * Column: Title
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnTitle($item): string
     {
-        $title = $item->post_title;
+        $quiz_id   = (int) $item->ID;
+        $course_id = $this->resolveCourseId($quiz_id);
+        $title     = (string) $item->post_title;
+        if ($title === '') {
+            $title = __('(no title)', 'sikshya');
+        }
+
         $edit_url = ReactAdminConfig::reactAppUrl('add-course', [
-            'course_id' => (string) $item->course_id,
+            'course_id' => (string) $course_id,
             'tab' => 'curriculum',
         ]);
 
         $delete_url = wp_nonce_url(
-            ReactAdminConfig::reactAppUrl('quizzes', ['action' => 'delete', 'id' => (string) $item->ID]),
-            'delete-quiz_' . $item->ID
+            ReactAdminConfig::reactAppUrl('quizzes', ['action' => 'delete', 'id' => (string) $quiz_id]),
+            'delete-quiz_' . $quiz_id
         );
 
         $row_actions = '<div class="row-actions">';
@@ -502,7 +515,9 @@ class QuizzesListTable extends AbstractListTable
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
 
-        $output = '<div class="sikshya-quiz-title-wrapper">';
+        $questions_count = $this->getQuestionsCount($quiz_id);
+
+        $output  = '<div class="sikshya-quiz-title-wrapper">';
         $output .= '<div class="sikshya-quiz-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
@@ -515,8 +530,12 @@ class QuizzesListTable extends AbstractListTable
             esc_html($title)
         );
         $output .= sprintf(
-            '<div class="sikshya-questions-count">%s questions</div>',
-            esc_html($item->questions_count)
+            '<div class="sikshya-questions-count">%s</div>',
+            esc_html(sprintf(
+                /* translators: %d: number of questions in the quiz */
+                _n('%d question', '%d questions', $questions_count, 'sikshya'),
+                $questions_count
+            ))
         );
         $output .= '</div>';
         $output .= '</div>';
@@ -529,50 +548,62 @@ class QuizzesListTable extends AbstractListTable
     /**
      * Column: Course
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnCourse($item): string
     {
-        if (!empty($item->course_title)) {
-            $output = '<div class="sikshya-course-info">';
-            $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-            $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>';
-            $output .= '</svg>';
-            $output .= sprintf(
-                '<a href="%s">%s</a>',
-                esc_url(ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $item->course_id])),
-                esc_html($item->course_title)
-            );
-            $output .= '</div>';
-            return $output;
+        $course_id = $this->resolveCourseId((int) $item->ID);
+        if ($course_id <= 0) {
+            return '<span class="sikshya-no-course">' . esc_html__('No Course', 'sikshya') . '</span>';
         }
-        return '<span class="sikshya-no-course">' . __('No Course', 'sikshya') . '</span>';
+
+        $course_title = (string) get_the_title($course_id);
+        if ($course_title === '') {
+            $course_title = __('(no title)', 'sikshya');
+        }
+
+        $output  = '<div class="sikshya-course-info">';
+        $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>';
+        $output .= '</svg>';
+        $output .= sprintf(
+            '<a href="%s">%s</a>',
+            esc_url(ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $course_id])),
+            esc_html($course_title)
+        );
+        $output .= '</div>';
+        return $output;
     }
 
     /**
      * Column: Type
      *
-     * @param object $item
-     * @return string
+     * A quiz aggregates many questions of varying types, so a single "type"
+     * doesn't really exist at the quiz level. We display the dominant
+     * question type if one is detectable (questions_count > 0), otherwise
+     * a generic "Quiz" label. Question types are read from each question's
+     * `_sikshya_question_type` meta.
+     *
+     * @param \WP_Post $item
      */
     protected function columnType($item): string
     {
-        $type_name = $this->getQuizTypeName($item->quiz_type);
-        $type_icons = [
-            'multiple_choice' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
-            'true_false' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
-            'fill_blank' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
-            'essay' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>'
-        ];
+        $stored = get_post_meta((int) $item->ID, '_sikshya_quiz_questions', true);
+        $type   = '';
+        if (is_array($stored) && !empty($stored)) {
+            $first_qid = (int) reset($stored);
+            if ($first_qid > 0) {
+                $type = sanitize_key((string) get_post_meta($first_qid, '_sikshya_question_type', true));
+            }
+        }
 
-        $icon_path = $type_icons[$item->quiz_type] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
+        $type_name = $this->getQuizTypeName($type);
 
-        $output = '<div class="sikshya-quiz-type">';
+        $output  = '<div class="sikshya-quiz-type">';
         $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-        $output .= $icon_path;
+        $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
         $output .= '</svg>';
-        $output .= sprintf('<span>%s</span>', $type_name);
+        $output .= sprintf('<span>%s</span>', esc_html($type_name));
         $output .= '</div>';
 
         return $output;
@@ -581,79 +612,86 @@ class QuizzesListTable extends AbstractListTable
     /**
      * Column: Questions
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnQuestions($item): string
     {
-        if (!empty($item->questions_count)) {
-            return sprintf('<span class="sikshya-questions">%s</span>', esc_html($item->questions_count));
+        $count = $this->getQuestionsCount((int) $item->ID);
+        if ($count > 0) {
+            return sprintf('<span class="sikshya-questions">%s</span>', esc_html((string) $count));
         }
-        return '<span class="sikshya-no-questions">' . __('0', 'sikshya') . '</span>';
+        return '<span class="sikshya-no-questions">0</span>';
     }
 
     /**
      * Column: Duration
      *
-     * @param object $item
-     * @return string
+     * Reads the quiz time limit (in minutes) from `_sikshya_quiz_time_limit`.
+     *
+     * @param \WP_Post $item
      */
     protected function columnDuration($item): string
     {
-        if (!empty($item->duration)) {
-            $output = '<div class="sikshya-duration-wrapper">';
-            $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-            $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
-            $output .= '</svg>';
-            $output .= sprintf('<span class="sikshya-duration">%s min</span>', esc_html($item->duration));
-            $output .= '</div>';
-            return $output;
+        $duration = $this->getDuration((int) $item->ID);
+        if ($duration <= 0) {
+            return '<span class="sikshya-no-duration">' . esc_html__('Not set', 'sikshya') . '</span>';
         }
-        return '<span class="sikshya-no-duration">' . __('Not set', 'sikshya') . '</span>';
+
+        $output  = '<div class="sikshya-duration-wrapper">';
+        $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        $output .= '</svg>';
+        $output .= sprintf(
+            '<span class="sikshya-duration">%s %s</span>',
+            esc_html((string) $duration),
+            esc_html__('min', 'sikshya')
+        );
+        $output .= '</div>';
+        return $output;
     }
 
     /**
      * Column: Instructor
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnInstructor($item): string
     {
-        if (!empty($item->instructor_name)) {
-            $output = '<div class="sikshya-instructors">';
-            $output .= sprintf(
-                '<div class="sikshya-instructor">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    <span>%s</span>
-                </div>',
-                esc_html($item->instructor_name)
-            );
-            $output .= '</div>';
-            return $output;
+        $user = $item->post_author ? get_user_by('id', (int) $item->post_author) : null;
+        if (!$user) {
+            return '<span class="sikshya-no-instructor">' . esc_html__('Unknown', 'sikshya') . '</span>';
         }
-        return '<span class="sikshya-no-instructor">' . __('Unknown', 'sikshya') . '</span>';
+
+        $output  = '<div class="sikshya-instructors">';
+        $output .= sprintf(
+            '<div class="sikshya-instructor">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>%s</span>
+            </div>',
+            esc_html((string) $user->display_name)
+        );
+        $output .= '</div>';
+        return $output;
     }
 
     /**
      * Column: Status
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnStatus($item): string
     {
         $status_labels = [
             'publish' => __('Published', 'sikshya'),
-            'draft' => __('Draft', 'sikshya'),
+            'draft'   => __('Draft', 'sikshya'),
             'private' => __('Private', 'sikshya'),
             'pending' => __('Pending Review', 'sikshya'),
         ];
 
-        $status_class = 'sikshya-status-' . $item->post_status;
-        $status_text = $status_labels[$item->post_status] ?? $item->post_status;
+        $status_class = 'sikshya-status-' . sanitize_html_class((string) $item->post_status);
+        $status_text  = $status_labels[$item->post_status] ?? (string) $item->post_status;
 
         return sprintf(
             '<span class="sikshya-status-badge %s">%s</span>',
@@ -665,18 +703,20 @@ class QuizzesListTable extends AbstractListTable
     /**
      * Column: Created Date
      *
-     * @param object $item
-     * @return string
+     * Uses WP's locale-aware date formatting so the admin date matches the
+     * site's configured `date_format` (instead of a hard-coded English one).
+     *
+     * @param \WP_Post $item
      */
     protected function columnCreated($item): string
     {
-        $date = new \DateTime($item->post_date);
-        $date_format = 'M j, Y';
+        $date_format = get_option('date_format', 'M j, Y');
+        $time_format = get_option('time_format', 'g:i a');
 
         return sprintf(
             '<span title="%s">%s</span>',
-            esc_attr($date->format('F j, Y g:i A')),
-            esc_html($date->format($date_format))
+            esc_attr(mysql2date($date_format . ' ' . $time_format, (string) $item->post_date)),
+            esc_html(mysql2date($date_format, (string) $item->post_date))
         );
     }
 

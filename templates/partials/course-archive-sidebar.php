@@ -37,6 +37,21 @@ if ($cats_on) {
 }
 
 $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural('course', 'courses', __('Courses', 'sikshya'), 'frontend') : __('Courses', 'sikshya');
+
+// Instructor options — anyone who has authored at least one published course.
+$instructor_options = get_users(
+    [
+        'capability__in' => ['edit_posts'],
+        'has_published_posts' => [PostTypes::COURSE],
+        'fields' => ['ID', 'display_name'],
+        'number' => 200,
+        'orderby' => 'display_name',
+        'order' => 'ASC',
+    ]
+);
+if (!is_array($instructor_options)) {
+    $instructor_options = [];
+}
 ?>
 
 <aside class="sikshya-archive-filters" aria-label="<?php echo esc_attr(sprintf(__('Filter %s', 'sikshya'), strtolower($label_courses))); ?>">
@@ -110,6 +125,20 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
                 </label>
             </div>
         </div>
+
+        <?php if (!empty($instructor_options)) : ?>
+        <div class="sikshya-archive-filters__group">
+            <label class="sikshya-archive-filters__label" for="sikshya-filter-instructor"><?php esc_html_e('Instructor', 'sikshya'); ?></label>
+            <select class="sikshya-archive-filters__select" id="sikshya-filter-instructor" name="sikshya_instructor" onchange="this.form.submit()">
+                <option value=""><?php esc_html_e('Any instructor', 'sikshya'); ?></option>
+                <?php foreach ($instructor_options as $u) : ?>
+                    <option value="<?php echo esc_attr((string) $u->ID); ?>" <?php selected((int) $f['instructor'], (int) $u->ID); ?>>
+                        <?php echo esc_html((string) $u->display_name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php endif; ?>
 
         <div class="sikshya-archive-filters__group">
             <span class="sikshya-archive-filters__label"><?php esc_html_e('Price', 'sikshya'); ?></span>

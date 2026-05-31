@@ -10,6 +10,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { DataTable, type Column } from '../components/shared/DataTable';
 import { SkeletonCard } from '../components/shared/Skeleton';
+import { ListEmptyState } from '../components/shared/list';
 import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
 import { AddonSettingsPage } from './AddonSettingsPage';
@@ -307,7 +308,7 @@ function PackageLibrary({ config }: { config: SikshyaReactConfig }) {
               setPage(1);
             }}
             placeholder={__('Search packages…', 'sikshya')}
-            className="w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+            className="w-64 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
           />
           <span className="ml-auto text-xs text-slate-500">{total} package{total === 1 ? '' : 's'}</span>
         </div>
@@ -483,7 +484,7 @@ function ReportsPanel({ config }: { config: SikshyaReactConfig }) {
           </label>
           <input
             id="scorm-course-id"
-            className="w-40 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+            className="w-40 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
             value={courseId}
             onChange={(e) => setCourseId(e.target.value.replace(/[^0-9]/g, ''))}
             placeholder={__('e.g. 142', 'sikshya')}
@@ -505,9 +506,14 @@ function ReportsPanel({ config }: { config: SikshyaReactConfig }) {
         ) : error ? (
           <ApiErrorPanel error={error} title={__('Could not load report', 'sikshya')} onRetry={() => refetch()} />
         ) : !data || data.lessons.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500 dark:border-slate-700">
-            No interactive lessons (with managed packages) found for this course yet.
-          </div>
+          <ListEmptyState
+            compact
+            title={__('No interactive lessons yet', 'sikshya')}
+            description={__(
+              'This course has no SCORM or H5P lessons (with managed packages) yet. Attach a package on a lesson to start collecting attempt data.',
+              'sikshya'
+            )}
+          />
         ) : (
           <>
             <ul className="mb-4 grid gap-3 text-sm sm:grid-cols-4">

@@ -94,7 +94,7 @@ function ruleRowId(r: Rule): number {
 }
 
 const dripToolbarSelectClass =
-  'rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200';
+  'rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200';
 
 export function ContentDripPage(props: { config: SikshyaReactConfig; title: string; embedded?: boolean }) {
   const { config, title, embedded } = props;
@@ -647,7 +647,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                           setEditorScope(next);
                           if (next === 'course') setEditorLessonId(0);
                         }}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       >
                         <option value="course">{__('Whole course', 'sikshya')}</option>
                         <option value="lesson">{__('Specific lesson', 'sikshya')}</option>
@@ -663,7 +663,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                         value={editorLessonId}
                         onChange={(e) => setEditorLessonId(Number(e.target.value))}
                         disabled={editorScope !== 'lesson' || editorCourseId <= 0}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       >
                         <option value={0}>
                           {editorCourseId <= 0
@@ -692,7 +692,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       <select
                         value={editorRuleType}
                         onChange={(e) => setEditorRuleType(e.target.value as DripRuleType)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       >
                         <option value="delay_days">{__('After enrollment (days)', 'sikshya')}</option>
                         <option value="date">{__('On a fixed date', 'sikshya')}</option>
@@ -711,7 +711,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                           step={1}
                           value={editorDelayDays}
                           onChange={(e) => setEditorDelayDays(e.target.value)}
-                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         />
                       </label>
                       <FieldHint />
@@ -869,7 +869,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
           {/* Disambiguation: this is the LMS-enforced schedule, not a content
               author's "release notes" field. Mirrors the equivalent block on
               PrerequisitesPage so the two screens read as a pair. */}
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
+          <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-4 text-xs text-brand-900 dark:border-brand-900/40 dark:bg-brand-950/40 dark:text-brand-200">
             <p className="font-semibold">{__('What this page does', 'sikshya')}</p>
             <p className="mt-1 leading-relaxed">
               These rules <strong>{__('actually block access', 'sikshya')}</strong> to a lesson until the unlock condition is met. A learner
@@ -933,7 +933,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                 ) : (
                   <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
-                      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Next run
                       </dt>
                       <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
@@ -941,7 +941,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       </dd>
                     </div>
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
-                      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Schedule addon
                       </dt>
                       <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
@@ -949,7 +949,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       </dd>
                     </div>
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
-                      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Lesson unlock email
                       </dt>
                       <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
@@ -963,7 +963,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       </dd>
                     </div>
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
-                      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Course-wide unlock email
                       </dt>
                       <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">
@@ -977,7 +977,7 @@ export function ContentDripPage(props: { config: SikshyaReactConfig; title: stri
                       </dd>
                     </div>
                     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-900/60">
-                      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <dt className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         Digest email (multi-lesson unlock)
                       </dt>
                       <dd className="mt-0.5 font-medium text-slate-900 dark:text-white">

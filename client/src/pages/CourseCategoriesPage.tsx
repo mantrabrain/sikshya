@@ -246,7 +246,7 @@ export function CourseCategoriesPage(props: { embedded?: boolean; config: Sikshy
               {src ? (
                 <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
               ) : (
-                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">—</span>
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">—</span>
               )}
             </div>
           );

@@ -77,13 +77,13 @@ export function ConfirmDialog({
   const danger = variant === 'danger';
   const primaryBtn =
     danger && !isAlert
-      ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500/30 dark:bg-red-600 dark:hover:bg-red-500'
+      ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500/40 dark:bg-red-600 dark:hover:bg-red-500'
       : [
           // Fallback first: if `brand` tokens are not present in the compiled CSS
           // the button should still remain visible (avoid white-on-white).
-          'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-500/30 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white',
+          'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-500/40 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white',
           // Preferred brand styling (overrides fallback when available).
-          'bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/30 dark:bg-brand-500 dark:hover:bg-brand-400',
+          'bg-brand-600 hover:bg-brand-700 focus:ring-brand-500/40 dark:bg-brand-500 dark:hover:bg-brand-400',
         ].join(' ');
 
   return (

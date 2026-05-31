@@ -290,6 +290,9 @@ class EnrollmentController
                 'payment_method' => $payment_method,
                 'amount' => $final_price,
                 'status' => 'completed',
+                // Payment just succeeded; skip the service-layer free-only
+                // guard so we don't reject the enrolment for a paid course.
+                'bypass_price_check' => true,
             ]);
 
             if ($enrollment_id) {

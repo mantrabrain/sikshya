@@ -112,6 +112,34 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
   const rows = data?.coupons ?? [];
   const tableMissing = Boolean(data?.table_missing);
 
+  // Storefront `enable_coupons` flag — coupons silently drop at checkout when off.
+  const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(null);
+  const [checkoutToggleBusy, setCheckoutToggleBusy] = useState(false);
+  useEffect(() => {
+    void (async () => {
+      try {
+        const r = await getSikshyaApi().get<{ enabled?: boolean }>(
+          SIKSHYA_ENDPOINTS.admin.couponsCheckoutToggle
+        );
+        setCheckoutEnabled(Boolean(r?.enabled));
+      } catch {
+        setCheckoutEnabled(null);
+      }
+    })();
+  }, []);
+  const enableCouponsAtCheckout = async () => {
+    setCheckoutToggleBusy(true);
+    try {
+      const r = await getSikshyaApi().post<{ enabled?: boolean }>(
+        SIKSHYA_ENDPOINTS.admin.couponsCheckoutToggle,
+        { enabled: true }
+      );
+      setCheckoutEnabled(Boolean(r?.enabled));
+    } finally {
+      setCheckoutToggleBusy(false);
+    }
+  };
+
   useEffect(() => {
     if (!advCouponId || !advEnabled) return;
     setAdvLoading(true);
@@ -317,6 +345,30 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
         </div>
       ) : null}
 
+      {checkoutEnabled === false ? (
+        <div
+          className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100"
+          data-testid="coupons-checkout-disabled-banner"
+        >
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold">{__('Coupons are off at checkout', 'sikshya')}</div>
+            <div className="mt-0.5 text-xs opacity-90">
+              {__(
+                'Codes won’t apply at checkout until you switch this on. Existing codes here will still show in this list, but learners can’t redeem them.',
+                'sikshya'
+              )}
+            </div>
+          </div>
+          <ButtonPrimary
+            type="button"
+            disabled={checkoutToggleBusy}
+            onClick={() => void enableCouponsAtCheckout()}
+          >
+            {checkoutToggleBusy ? __('Enabling…', 'sikshya') : __('Enable coupons', 'sikshya')}
+          </ButtonPrimary>
+        </div>
+      ) : null}
+
       <div className="mb-5">
         <HorizontalEditorTabs
           tabs={tabs}
@@ -373,7 +425,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={__('Search code…', 'sikshya')}
-                className="w-56 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="w-56 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
               />
               <ButtonPrimary type="button" onClick={beginCreate} disabled={tableMissing}>
                 Create coupon
@@ -469,7 +521,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   placeholder={__('SAVE10', 'sikshya')}
                 />
               </label>
@@ -478,7 +530,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                 <select
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value as 'percent' | 'fixed')}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 >
                   <option value="percent">{__('Percent off', 'sikshya')}</option>
                   <option value="fixed">{__('Fixed amount', 'sikshya')}</option>
@@ -492,7 +544,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                   min="0"
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 />
               </label>
               <label className="block text-sm">
@@ -502,7 +554,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                   min="0"
                   value={maxUses}
                   onChange={(e) => setMaxUses(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 />
               </label>
               <DateTimePickerField
@@ -553,7 +605,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                           value={advMin}
                           onChange={(e) => setAdvMin(e.target.value)}
                           placeholder={__('0 = none', 'sikshya')}
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         />
                       </label>
                       <label className="block text-sm">
@@ -565,7 +617,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                           value={advMaxSub}
                           onChange={(e) => setAdvMaxSub(e.target.value)}
                           placeholder={__('0 = none', 'sikshya')}
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         />
                       </label>
                       <label className="block text-sm sm:col-span-2">
@@ -587,7 +639,7 @@ export function CouponsPage(props: { embedded?: boolean; config: SikshyaReactCon
                           min={0}
                           value={advPerUser}
                           onChange={(e) => setAdvPerUser(e.target.value)}
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         />
                       </label>
                       <label className="flex items-center gap-2 text-sm sm:col-span-2">

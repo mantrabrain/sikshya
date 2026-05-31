@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { getConfig } from '../config/env';
 import type { SikshyaReactConfig } from '../types';
 import { appViewHref } from './appUrl';
@@ -77,10 +77,20 @@ export function parseAdminRoute(baseConfig: SikshyaReactConfig | null | undefine
   return { page, query };
 }
 
+/**
+ * Returns a non-empty message to block navigation (used to prompt the user),
+ * or `null` to let navigation proceed. Pages register a blocker while they
+ * have unsaved work — clicking any in-app link (or calling navigateHref) then
+ * surfaces the user's preferred message before throwing away their edits.
+ */
+export type NavigationBlocker = () => string | null;
+
 type Ctx = {
   route: AdminRoute;
   navigateView: (view: string, extra?: Record<string, string>, opts?: { replace?: boolean }) => void;
   navigateHref: (href: string, opts?: { replace?: boolean }) => void;
+  /** Register a blocker; returns the unregister function. */
+  registerNavigationBlocker: (blocker: NavigationBlocker) => () => void;
 };
 
 const AdminRoutingContext = createContext<Ctx | null>(null);
@@ -103,7 +113,12 @@ export function useAdminRouting(): Ctx {
     const navigateView: Ctx['navigateView'] = (view, extra, opts) => {
       navigateHref(appViewHref(base, view, extra || {}), opts);
     };
-    return { route, navigateHref, navigateView };
+    return {
+      route,
+      navigateHref,
+      navigateView,
+      registerNavigationBlocker: () => () => undefined,
+    };
   }
   return ctx;
 }
@@ -117,9 +132,39 @@ export function AdminRoutingProvider({
 }) {
   const safeBaseConfig = baseConfig ?? getConfig();
   const [route, setRoute] = useState<AdminRoute>(() => parseAdminRoute(safeBaseConfig));
+  const blockersRef = useRef<Set<NavigationBlocker>>(new Set());
+
+  const registerNavigationBlocker = useCallback((blocker: NavigationBlocker) => {
+    blockersRef.current.add(blocker);
+    return () => {
+      blockersRef.current.delete(blocker);
+    };
+  }, []);
+
+  /**
+   * Walks every registered blocker. The first one that returns a non-empty
+   * string triggers a native confirm with that message; returning `false`
+   * aborts navigation entirely.
+   */
+  const passesBlockers = useCallback(() => {
+    for (const blocker of blockersRef.current) {
+      const message = blocker();
+      if (message) {
+        // eslint-disable-next-line no-alert
+        const proceed = window.confirm(message);
+        if (!proceed) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }, []);
 
   const navigateHref = useCallback(
     (href: string, opts?: { replace?: boolean }) => {
+      if (!passesBlockers()) {
+        return;
+      }
       const nextRoute = parseAdminRoute(safeBaseConfig, href);
       const nextUrl = new URL(href, window.location.href);
 
@@ -130,7 +175,7 @@ export function AdminRoutingProvider({
       }
       setRoute(nextRoute);
     },
-    [safeBaseConfig]
+    [safeBaseConfig, passesBlockers]
   );
 
   const navigateView = useCallback(
@@ -142,10 +187,30 @@ export function AdminRoutingProvider({
   );
 
   useEffect(() => {
-    const onPopState = () => setRoute(parseAdminRoute(safeBaseConfig));
+    const onPopState = () => {
+      // Browser back/forward: the URL has already changed. If a blocker says
+      // no, push the previous URL back so the user stays where they were.
+      if (!passesBlockers()) {
+        const current = parseAdminRoute(safeBaseConfig);
+        // current still reflects the *previous* (pre-popstate) route in state.
+        // Re-push the matching URL to undo the popstate.
+        try {
+          window.history.pushState({}, '', window.location.href.replace(window.location.search, `?${new URLSearchParams({
+            page: 'sikshya',
+            view: current.page,
+            ...current.query,
+          }).toString()}`));
+        } catch {
+          /* if URL rewriting fails, fall back to letting the navigation through */
+          setRoute(parseAdminRoute(safeBaseConfig));
+        }
+        return;
+      }
+      setRoute(parseAdminRoute(safeBaseConfig));
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [safeBaseConfig]);
+  }, [safeBaseConfig, passesBlockers]);
 
   useEffect(() => {
     // Intercept in-app clicks so navigation stays SPA, but only for Sikshya React routes.
@@ -179,7 +244,10 @@ export function AdminRoutingProvider({
     return () => document.removeEventListener('click', onClick, true);
   }, [navigateHref]);
 
-  const value = useMemo<Ctx>(() => ({ route, navigateView, navigateHref }), [route, navigateView, navigateHref]);
+  const value = useMemo<Ctx>(
+    () => ({ route, navigateView, navigateHref, registerNavigationBlocker }),
+    [route, navigateView, navigateHref, registerNavigationBlocker]
+  );
 
   return <AdminRoutingContext.Provider value={value}>{children}</AdminRoutingContext.Provider>;
 }

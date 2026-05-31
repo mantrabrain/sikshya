@@ -106,7 +106,25 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
     setSubmitting(true);
     try {
       const safeKind: CourseKind = kind === 'bundle' && !canUseBundles ? 'regular' : kind;
-      const id = await createDraftCourse(title, { slug: slug.trim() || undefined, kind: safeKind });
+      const requestedSlug = slug.trim();
+      const { id, slug: finalSlug } = await createDraftCourse(title, {
+        slug: requestedSlug || undefined,
+        kind: safeKind,
+      });
+      // If the user explicitly typed a slug and the server stored a different
+      // one (collision → suffix, or character sanitization), leave a one-shot
+      // flash message for the builder to surface — otherwise their URL has
+      // silently changed under them.
+      if (requestedSlug && finalSlug && finalSlug !== requestedSlug) {
+        try {
+          window.sessionStorage.setItem(
+            `sikshya_course_builder_slug_notice_${id}`,
+            JSON.stringify({ requested: requestedSlug, final: finalSlug })
+          );
+        } catch {
+          /* private mode / quota — fall through */
+        }
+      }
       const extra: Record<string, string> = { course_id: String(id) };
       if (safeKind === 'bundle') {
         extra.force_bundle_ui = '1';
@@ -158,7 +176,7 @@ export function CreateCourseModal({ config, open, onClose }: Props) {
               type="button"
               onClick={handleClose}
               disabled={submitting}
-              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               {__('Cancel', 'sikshya')}
             </button>
@@ -352,7 +370,7 @@ function PermalinkField({
             {__('Done', 'sikshya')}
           </button>
         </div>
-        <p className="mt-1.5 truncate font-mono text-[11px] text-slate-400 dark:text-slate-500" title={url}>
+        <p className="mt-1.5 truncate font-mono text-xs text-slate-400 dark:text-slate-500" title={url}>
           {sprintf(__('Preview: %s', 'sikshya'), url)}
         </p>
       </div>
@@ -367,7 +385,7 @@ function PermalinkField({
         type="button"
         onClick={onStartEdit}
         disabled={disabled}
-        className="shrink-0 text-xs font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 disabled:opacity-50 dark:text-brand-300"
+        className="shrink-0 text-xs font-semibold text-brand-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:text-brand-300"
       >
         {__('Edit link', 'sikshya')}
       </button>
@@ -419,8 +437,8 @@ function FormatChoiceCard({
         {icon}
       </span>
       <span className="min-w-0 flex-1 pr-5">
-        <span className="block text-[13px] font-semibold leading-tight text-slate-900 dark:text-white">{title}</span>
-        <span className="mt-1 block text-[11px] leading-snug text-slate-500 dark:text-slate-400">{description}</span>
+        <span className="block text-xs font-semibold leading-tight text-slate-900 dark:text-white">{title}</span>
+        <span className="mt-1 block text-xs leading-snug text-slate-500 dark:text-slate-400">{description}</span>
       </span>
     </button>
   );
@@ -453,12 +471,12 @@ function BundleFormatCardLocked({
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-1">
-          <span className="text-[13px] font-semibold text-slate-600 dark:text-slate-300">{bundleLabel}</span>
-          <span className="rounded bg-accent-100 px-1 py-px text-[9px] font-bold uppercase text-accent-800 dark:bg-accent-950/50 dark:text-accent-300">
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{bundleLabel}</span>
+          <span className="rounded bg-accent-100 px-1 py-px text-xs font-bold uppercase text-accent-800 dark:bg-accent-950/50 dark:text-accent-300">
             Pro
           </span>
         </span>
-        <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-xs leading-snug text-slate-500 dark:text-slate-400">
           {sprintf(__('Package existing %s —', 'sikshya'), coursesLower)}{' '}
           {loading ? (
             <span>{__('checking plan…', 'sikshya')}</span>

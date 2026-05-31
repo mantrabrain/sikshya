@@ -128,8 +128,17 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
 
   const renderField = (name: string, def: FieldDef) => {
     const value = opts[name];
+    // Canonical form-control class: matches shared/form/FormInput so this page
+    // gets the same focus ring, dark-mode background, and disabled state as
+    // the rest of the admin. Kept as a string here (vs. <FormInput>) because
+    // the renderField switch is small and the constant version is the
+    // least-invasive migration.
     const inputClass =
-      'mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950';
+      'mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 ' +
+      'placeholder:text-slate-400 ' +
+      'focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ' +
+      'disabled:cursor-not-allowed disabled:opacity-50 ' +
+      'dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
 
     switch (def.type) {
       case 'bool':
@@ -139,7 +148,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
               type="checkbox"
               checked={Boolean(value)}
               onChange={(e) => setField(name, e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-900"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-900"
             />
             <span>
               <span className="font-medium text-slate-900 dark:text-white">{def.label}</span>
@@ -286,7 +295,7 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
           ) : null}
 
           {preformSection ? (
-            <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 text-xs text-indigo-900 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-200">
+            <div className="rounded-xl border border-brand-100 bg-brand-50/60 p-4 text-xs text-brand-900 dark:border-brand-900/40 dark:bg-brand-950/40 dark:text-brand-200">
               {preformSection}
             </div>
           ) : null}
@@ -322,14 +331,14 @@ export function AddonSettingsPage(props: AddonSettingsPageProps) {
               <ul className="mt-3 space-y-2 text-sm">
                 {nextSteps.map((step, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
+                    <span className="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-brand-100 text-xs font-semibold text-brand-700 dark:bg-brand-900/60 dark:text-brand-200">
                       {i + 1}
                     </span>
                     <span className="flex-1">
                       {step.href ? (
                         <a
                           href={step.href}
-                          className="font-medium text-indigo-600 hover:underline dark:text-indigo-300"
+                          className="font-medium text-brand-600 hover:underline dark:text-brand-300"
                         >
                           {step.label}
                         </a>

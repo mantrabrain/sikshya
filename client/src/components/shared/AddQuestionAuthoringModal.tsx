@@ -101,7 +101,7 @@ export const QUESTION_PICKER_TYPES: PickerOpt[] = [
 ];
 
 const FIELD =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
+  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
 const LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const HINT = 'mt-1 text-xs text-slate-500 dark:text-slate-400';
 
@@ -384,6 +384,10 @@ function buildCreateBody(params: {
       _sikshya_question_points: Math.max(0, points),
       _sikshya_question_options: optionsPayload,
       _sikshya_question_correct_answer: correctPayload,
+      // Mirror the explanation textarea to the dedicated meta key so the
+      // learn-page renderer can pick it up without depending on raw
+      // post_content (which doubles as instructor notes in some workflows).
+      _sikshya_question_explanation: content,
       ...buildProQuestionMeta(proQuestionValues),
     },
   };
@@ -742,7 +746,7 @@ export function AddQuestionAuthoringModal(props: Props) {
               type="button"
               onClick={onClose}
               disabled={busy}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               {__('Cancel', 'sikshya')}
             </button>
@@ -757,7 +761,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                   ids.forEach((id) => onPickExisting(id));
                   onClose();
                 }}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 {__('Add selected', 'sikshya')}
               </button>
@@ -830,7 +834,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                       <button
                         type="button"
                         id="sik-q-modal-type"
-                        className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-left text-sm text-slate-900 shadow-sm transition hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                        className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-left text-sm text-slate-900 shadow-sm transition hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                         aria-haspopup="listbox"
                         aria-expanded={Boolean(typeMenuPos)}
                         onClick={(e) => openTypeMenu(e.currentTarget)}
@@ -1412,7 +1416,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                                     onPickExisting(q.id);
                                     onClose();
                                   }}
-                                  className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                  className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                                 >
                                   {pickExistingLabel}
                                 </button>
@@ -1496,7 +1500,7 @@ export function AddQuestionAuthoringModal(props: Props) {
                     role="option"
                     aria-selected={active}
                     disabled={locked}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
                       active
                         ? 'bg-brand-50 text-brand-900 dark:bg-brand-950/40 dark:text-brand-100'
                         : locked
@@ -1520,14 +1524,14 @@ export function AddQuestionAuthoringModal(props: Props) {
                       <span className="flex flex-wrap items-center gap-2 text-sm font-semibold leading-snug">
                         <span>{t.label}</span>
                         {locked ? (
-                          <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
+                          <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:border-amber-700/70 dark:bg-amber-950/40 dark:text-amber-200">
                             Pro
                           </span>
                         ) : null}
                       </span>
                       <span className="mt-0.5 block text-xs leading-snug text-slate-500 dark:text-slate-400">{t.hint}</span>
                       {locked ? (
-                        <span className="mt-1 block text-[11px] font-medium text-amber-800 dark:text-amber-200">
+                        <span className="mt-1 block text-xs font-medium text-amber-800 dark:text-amber-200">
                           Enable Advanced Quiz add-on to use this type.
                         </span>
                       ) : null}

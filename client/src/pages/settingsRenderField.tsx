@@ -106,10 +106,10 @@ function LockedFieldOverlay(props: { f: SettingsField; children: ReactNode; clas
         {children}
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-200">
+        <span className="inline-flex items-center gap-1 rounded-md bg-accent-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-accent-700 dark:bg-accent-900/50 dark:text-accent-200">
           <span aria-hidden>★</span> Pro{planLabel ? ` • ${planLabel}` : ''}
         </span>
-        <span className="text-[11px] leading-snug text-violet-700/90 dark:text-violet-200/90">
+        <span className="text-xs leading-snug text-accent-700/90 dark:text-accent-200/90">
           {addonLabel ? (
             <>
               <span className="font-semibold">{__('Addon:', 'sikshya')}</span> {addonLabel} <span className="mx-1 opacity-70">•</span>
@@ -176,7 +176,7 @@ export function renderSettingsField(
         >
           <input
             type="checkbox"
-            className="mt-1 h-4 w-4"
+            className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:focus:ring-offset-slate-900"
             checked={checked}
             disabled={readOnly}
             onChange={(e) => onChangeGuard<boolean>((v) => setDraft((p) => ({ ...p, [k]: v ? '1' : '0' })))(e.target.checked)}
@@ -206,7 +206,7 @@ export function renderSettingsField(
         ) : null}
         <select
           id={k}
-          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           value={selectValue}
           disabled={readOnly}
           onChange={(e) => onChangeGuard<string>((v) => setDraft((p) => ({ ...p, [k]: v })))(e.target.value)}
@@ -251,7 +251,7 @@ export function renderSettingsField(
         <select
           id={k}
           multiple
-          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           value={selected}
           disabled={readOnly}
           onChange={(e) =>
@@ -273,7 +273,7 @@ export function renderSettingsField(
             {selected.map((v) => (
               <span
                 key={v}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[12px] font-semibold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
               >
                 {opts[v] || v}
                 {!readOnly ? (
@@ -335,7 +335,7 @@ export function renderSettingsField(
         <textarea
           id={k}
           rows={4}
-          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           value={fieldToStringValue(cur ?? f.default ?? '')}
           disabled={readOnly}
           onChange={(e) => onChangeGuard<string>((v) => setDraft((p) => ({ ...p, [k]: v })))(e.target.value)}
@@ -381,7 +381,7 @@ export function renderSettingsField(
         <input
           id={k}
           type={inputType}
-          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
           value={fieldToStringValue(cur ?? f.default ?? '')}
           disabled={readOnly}
           onChange={(e) => onChangeGuard<string>((v) => setDraft((p) => ({ ...p, [k]: v })))(e.target.value)}

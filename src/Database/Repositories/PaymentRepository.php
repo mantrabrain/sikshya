@@ -135,6 +135,28 @@ class PaymentRepository
         return $n > 0 ? $n : null;
     }
 
+    /**
+     * Mark every completed payment row attached to a given order as refunded.
+     *
+     * Payments are linked to orders indirectly: at fulfilment time we wrote
+     * `payment.transaction_id = order.gateway_intent_id`. Find rows by that
+     * link and flip status. Returns the number of rows updated (0 if no
+     * matching completed payment rows — already refunded, partially refunded
+     * by hand, etc.).
+     */
+    public function markRefundedByOrder(int $order_id, string $gateway_intent_id): int
+    {
+        global $wpdb;
+        if ($order_id <= 0 || $gateway_intent_id === '' || !$this->tableExists()) {
+            return 0;
+        }
+        $n = $wpdb->query($wpdb->prepare(
+            "UPDATE {$this->table_name} SET status = 'refunded' WHERE transaction_id = %s AND status = 'completed'",
+            $gateway_intent_id
+        ));
+        return $n === false ? 0 : (int) $n;
+    }
+
     public function deleteById(int $id): bool
     {
         if ($id <= 0 || !$this->tableExists()) {

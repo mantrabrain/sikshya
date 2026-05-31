@@ -127,6 +127,11 @@ final class ProgressRoutes extends AbstractLearnerRestController
         if (get_post_type($lesson_id) !== PostTypes::LESSON) {
             return $this->error('invalid_lesson', __('Invalid lesson.', 'sikshya'), 400);
         }
+        // The curriculum helper returns both draft and published lessons; reject
+        // here so a learner can't mark a draft/trashed lesson complete.
+        if (get_post_status($lesson_id) !== 'publish') {
+            return $this->error('lesson_unavailable', __('This lesson is no longer available.', 'sikshya'), 400);
+        }
 
         $allowed = LearnerCurriculumHelper::lessonIdsForCourse($course_id);
         if (!in_array($lesson_id, $allowed, true)) {

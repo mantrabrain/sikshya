@@ -12,3 +12,10 @@
 
 # Vite may emit this into outDir; production build removes it (see scripts/rm-admin-spa-html.mjs).
 assets/admin/react/index.html
+
+# Playwright artifacts and local env (never commit credentials or HTML reports).
+/e2e/.auth/
+/e2e/.env
+/test-results/
+/playwright-report/
+/playwright/.cache/

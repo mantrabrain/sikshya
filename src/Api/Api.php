@@ -621,6 +621,9 @@ class Api
         $auth_rest = new AuthRestRoutes($this->plugin);
         $auth_rest->register();
 
+        $attachment_proxy = new AttachmentProxyRoutes($this->plugin);
+        $attachment_proxy->register();
+
         $public_rest = new PublicRestRoutes($this->plugin);
         $public_rest->register();
 
@@ -629,6 +632,9 @@ class Api
 
         $checkout_rest = new CheckoutRestRoutes($this->plugin);
         $checkout_rest->register();
+
+        // Public health-check endpoint for uptime monitors.
+        (new HealthRoutes())->register();
 
         /**
          * Allow enabled add-ons to register additional REST routes.

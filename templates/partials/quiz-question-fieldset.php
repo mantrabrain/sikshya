@@ -111,8 +111,21 @@ if ($qtype === 'true_false' && $opts === []) {
 		<?php
 		$left  = isset($q['matching_left']) && is_array($q['matching_left']) ? array_values($q['matching_left']) : [];
 		$right = isset($q['matching_right']) && is_array($q['matching_right']) ? array_values($q['matching_right']) : [];
+		// Prefer the shuffled options structure (each carries its canonical
+		// `index` as the submit value) so the dropdown order doesn't leak the
+		// answer. Fall back to building option pairs from the flat canonical
+		// `matching_right` array for older cached payloads / external callers.
+		$right_options = isset($q['matching_right_options']) && is_array($q['matching_right_options'])
+			? $q['matching_right_options']
+			: array_map(
+				static function ($ri, $txt) {
+					return ['index' => (int) $ri, 'text' => (string) $txt];
+				},
+				array_keys($right),
+				array_values($right)
+			);
 		?>
-		<?php if ($left !== [] && $right !== []) : ?>
+		<?php if ($left !== [] && $right_options !== []) : ?>
 			<div class="sikshya-matching">
 				<?php foreach ($left as $i => $left_text) : ?>
 					<div class="sikshya-matching__row">
@@ -120,8 +133,15 @@ if ($qtype === 'true_false' && $opts === []) {
 						<div class="sikshya-matching__right">
 							<label class="sikshya-screen-reader-text"><?php esc_html_e('Match to', 'sikshya'); ?></label>
 							<select class="sikshya-matching__select" aria-label="<?php echo esc_attr__('Select match', 'sikshya'); ?>">
-								<?php foreach ($right as $ri => $r_text) : ?>
-									<option value="<?php echo esc_attr((string) (int) $ri); ?>"><?php echo esc_html((string) $r_text); ?></option>
+								<?php foreach ($right_options as $opt) : ?>
+									<?php
+									// `value` is the CANONICAL index — the grader compares the
+									// submitted map against the stored answer map in this same
+									// index space, so shuffling display order is grade-safe.
+									$opt_index = isset($opt['index']) ? (int) $opt['index'] : 0;
+									$opt_text  = isset($opt['text']) ? (string) $opt['text'] : '';
+									?>
+									<option value="<?php echo esc_attr((string) $opt_index); ?>"><?php echo esc_html($opt_text); ?></option>
 								<?php endforeach; ?>
 							</select>
 						</div>

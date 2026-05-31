@@ -7,6 +7,7 @@
 
 use Sikshya\Constants\PostTypes;
 use Sikshya\Constants\Taxonomies;
+use Sikshya\Frontend\Site\PublicPageUrls;
 
 sikshya_get_header();
 
@@ -14,12 +15,43 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
 
 $hide_empty = (bool) apply_filters('sikshya_course_category_index_hide_empty', true);
 
+/*
+ * Pagination — pull the current page off `paged` (works for both pretty
+ * permalinks like /course-category/page/2/ and the ?paged=2 fallback).
+ * Per-page count is filterable so sites with hundreds of categories can
+ * tune density without rewriting the template.
+ */
+$per_page = (int) apply_filters('sikshya_course_category_index_per_page', 12);
+$per_page = $per_page > 0 ? $per_page : 12;
+
+$current_page = max(1, (int) get_query_var('paged'));
+if ($current_page <= 1) {
+    $current_page = max(1, (int) get_query_var('page'));
+}
+
+$total_terms = (int) wp_count_terms(
+    [
+        'taxonomy' => Taxonomies::COURSE_CATEGORY,
+        'hide_empty' => $hide_empty,
+    ]
+);
+$max_pages = $per_page > 0 ? (int) ceil($total_terms / $per_page) : 1;
+if ($max_pages < 1) {
+    $max_pages = 1;
+}
+if ($current_page > $max_pages) {
+    $current_page = $max_pages;
+}
+$offset = ($current_page - 1) * $per_page;
+
 $terms = get_terms(
     [
         'taxonomy' => Taxonomies::COURSE_CATEGORY,
         'hide_empty' => $hide_empty,
         'orderby' => 'name',
         'order' => 'ASC',
+        'number' => $per_page,
+        'offset' => $offset,
     ]
 );
 
@@ -81,13 +113,25 @@ $breadcrumb_items = [
         <?php else : ?>
             <p class="sikshya-archive-courses__results" role="status">
                 <?php
-                echo esc_html(
-                    sprintf(
-                        /* translators: %d: number of categories */
-                        _n('%d category', '%d categories', count($terms), 'sikshya'),
-                        count($terms)
-                    )
-                );
+                if ($max_pages > 1) {
+                    echo esc_html(
+                        sprintf(
+                            /* translators: 1: total category count, 2: current page, 3: total pages */
+                            __('%1$d categories · page %2$d of %3$d', 'sikshya'),
+                            $total_terms,
+                            $current_page,
+                            $max_pages
+                        )
+                    );
+                } else {
+                    echo esc_html(
+                        sprintf(
+                            /* translators: %d: number of categories */
+                            _n('%d category', '%d categories', $total_terms, 'sikshya'),
+                            $total_terms
+                        )
+                    );
+                }
                 ?>
             </p>
 
@@ -131,6 +175,30 @@ $breadcrumb_items = [
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <?php if ($max_pages > 1) : ?>
+                <nav class="sikshya-pagination" aria-label="<?php echo esc_attr(sprintf(__('%s categories pagination', 'sikshya'), $label_courses)); ?>">
+                    <?php
+                    $category_root_url = PublicPageUrls::courseCategoryIndexUrl();
+                    $links = paginate_links(
+                        [
+                            'base' => trailingslashit($category_root_url) . 'page/%#%/',
+                            'format' => '?paged=%#%',
+                            'total' => $max_pages,
+                            'current' => $current_page,
+                            'mid_size' => 2,
+                            'end_size' => 1,
+                            'prev_text' => __('Previous', 'sikshya'),
+                            'next_text' => __('Next', 'sikshya'),
+                            'type' => 'list',
+                        ]
+                    );
+                    if (!empty($links)) {
+                        echo wp_kses_post($links);
+                    }
+                    ?>
+                </nav>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

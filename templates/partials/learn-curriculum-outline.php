@@ -128,14 +128,19 @@ if ($outline_blocks === []) {
                                 <?php
                                 if ($locked) {
                                     $aria_reason = $lock_reason !== '' ? $lock_reason : __('Locked', 'sikshya');
-                                    echo 'aria-label="' . esc_attr($item_title . ' — ' . $aria_reason) . '"';
+                                    echo 'aria-label="' . esc_attr($item_title . ' — ' . $aria_reason) . '" ';
+                                    // a11y: surface the disabled semantic so keyboard / screen-reader users
+                                    // know the locked item isn't actionable. Visual cue (.is-locked CSS)
+                                    // wasn't enough — assistive tech announces it as a normal link otherwise.
+                                    echo 'aria-disabled="true" ';
+                                    echo 'tabindex="-1" ';
                                 }
                                 ?>
                             >
                                 <span class="sikshya-curriculumOutline__check<?php echo $completed ? ' is-done' : ''; ?>" aria-hidden="true">
                                     <?php if ($completed) : ?>
-                                        <svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true" focusable="false">
-                                            <circle cx="12" cy="12" r="10" fill="currentColor"></circle>
+                                        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                                            <circle cx="12" cy="12" r="12" fill="currentColor"></circle>
                                             <path d="M8 12.5l2.5 2.5L16.5 9" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
                                         </svg>
                                     <?php endif; ?>

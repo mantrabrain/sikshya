@@ -238,6 +238,37 @@ final class AccountPageModel
     }
 
     /**
+     * Earned achievement entries for the current learner, newest first.
+     *
+     * Each row: ['type','name','description','badge_url','earned_date'].
+     *
+     * @return array<int, array<string, string>>
+     */
+    public function getAchievements(): array
+    {
+        $rows = $this->legacy['achievements'] ?? null;
+        return is_array($rows) ? array_values($rows) : [];
+    }
+
+    public function getAchievementsCount(): int
+    {
+        return (int) ($this->legacy['achievements_count'] ?? 0);
+    }
+
+    /**
+     * "Continue where you left off" hero-card payload.
+     *
+     * Null when there's nothing to resume (no ongoing enrollment, or no resolvable curriculum).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getResumeCard(): ?array
+    {
+        $card = $this->legacy['resume_card'] ?? null;
+        return is_array($card) ? $card : null;
+    }
+
+    /**
      * @return array<int, mixed>
      */
     public function getEnrollmentsOngoing(): array

@@ -1,49 +1,45 @@
 import iconsJson from '../../../assets/admin/icons/icons.json';
 
-type IconDef = { viewBox?: string; paths: string[] };
+/**
+ * Icon entries support two path-shapes:
+ *   - bare string: renders with the SVG-level defaults (stroke=currentColor,
+ *     fill=none, strokeWidth=1.75).
+ *   - object: per-path override for filled accents (play triangle, recording
+ *     dot, "?" tittle). Allows the JSON dictionary to be the sole source of
+ *     truth for glyphs that previously had to be inlined as TSX.
+ */
+type IconPath = string | { d: string; fill?: string; stroke?: string; strokeWidth?: number };
+type IconDef = { viewBox?: string; paths: IconPath[] };
 
-const icons = iconsJson as Record<string, IconDef>;
+const icons = iconsJson as unknown as Record<string, IconDef>;
 
 type Props = {
   name?: string;
   className?: string;
 };
 
-/**
- * Video lesson glyph matching `sikshya_curriculum_outline_row_type_icon_html()` (filled play in rounded rect).
+/*
+ * Curriculum content-type glyphs (video, live, quiz, assignment, text, audio,
+ * scorm, h5p) live ENTIRELY in `assets/admin/icons/icons.json` — single source
+ * of truth across PHP + React. KEEP IN SYNC with:
+ *   - includes/template-functions.php  (PHP curriculum row icon helper)
+ *   - templates/partials/learn-icons.php (lesson-shell header icons)
  */
-function SvgCurriculumLessonVideo({ className }: { className: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <rect
-        x="4"
-        y="5"
-        width="14"
-        height="14"
-        rx="2.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
 
-/** Live lesson glyph matching learn / single-course outline (monitor + strokes). */
-function SvgCurriculumLessonLive({ className }: { className: string }) {
+/**
+ * Drag handle (grip-vertical) — six filled dots in a 2x3 grid. Filled circles
+ * keep the glyph readable down to ~14px where the JSON `h.01` stroke pattern
+ * collapses into faint specks.
+ */
+function SvgDragHandle({ className }: { className: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth={2} />
-      <path d="M8 3v4M16 3v4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
-      <path d="M7 11h10M7 15h6" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+    <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden>
+      <circle cx="9" cy="6" r="1.6" />
+      <circle cx="15" cy="6" r="1.6" />
+      <circle cx="9" cy="12" r="1.6" />
+      <circle cx="15" cy="12" r="1.6" />
+      <circle cx="9" cy="18" r="1.6" />
+      <circle cx="15" cy="18" r="1.6" />
     </svg>
   );
 }
@@ -55,11 +51,8 @@ export function NavIcon({ name, className = 'h-5 w-5 shrink-0' }: Props) {
   if (!name) {
     return <span className={className} aria-hidden />;
   }
-  if (name === 'curriculumLessonVideo') {
-    return <SvgCurriculumLessonVideo className={className} />;
-  }
-  if (name === 'curriculumLessonLive') {
-    return <SvgCurriculumLessonLive className={className} />;
+  if (name === 'dragHandle') {
+    return <SvgDragHandle className={className} />;
   }
   const def = icons[name];
   if (!def?.paths?.length) {
@@ -77,9 +70,20 @@ export function NavIcon({ name, className = 'h-5 w-5 shrink-0' }: Props) {
       strokeLinejoin="round"
       aria-hidden
     >
-      {def.paths.map((d, i) => (
-        <path key={i} d={d} />
-      ))}
+      {def.paths.map((p, i) => {
+        if (typeof p === 'string') {
+          return <path key={i} d={p} />;
+        }
+        return (
+          <path
+            key={i}
+            d={p.d}
+            fill={p.fill ?? 'none'}
+            stroke={p.stroke ?? 'currentColor'}
+            strokeWidth={p.strokeWidth ?? 1.75}
+          />
+        );
+      })}
     </svg>
   );
 }

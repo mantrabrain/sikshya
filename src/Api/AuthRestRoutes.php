@@ -10,6 +10,7 @@ namespace Sikshya\Api;
 
 use Sikshya\Core\Plugin;
 use Sikshya\Frontend\Site\CartStorage;
+use Sikshya\Security\RegistrationRateLimiter;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -56,6 +57,81 @@ class AuthRestRoutes
                 'permission_callback' => [$this, 'requireRestNonce'],
             ],
         ]);
+
+        // Logout: bumps the user's JWT token-version meta, instantly
+        // invalidating every outstanding JWT for that user. Cookie-based
+        // session is also cleared via wp_logout(). Requires either a valid
+        // current JWT (Authorization: Bearer ...) OR a logged-in cookie
+        // session + nonce — `webLogoutPermission` accepts either.
+        register_rest_route($namespace, '/auth/logout', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'logout'],
+                'permission_callback' => [$this, 'logoutPermission'],
+            ],
+        ]);
+    }
+
+    /**
+     * Logout accepts either a valid JWT (mobile / API client) OR a logged-in
+     * cookie session backed by the REST nonce (web client). Either signal is
+     * sufficient — we're not granting any privileged action, we're just
+     * confirming the requester owns the session they're asking to end.
+     */
+    public function logoutPermission(WP_REST_Request $request)
+    {
+        // Path 1: Bearer JWT — let `JwtAuthService::validateToken()` decide.
+        $bearer = JwtAuthService::bearerFromRequest($request);
+        if ($bearer !== '') {
+            $jwt = $this->plugin->getService('jwtAuth');
+            if ($jwt instanceof JwtAuthService) {
+                $uid_or_err = $jwt->validateToken($bearer);
+                if (!is_wp_error($uid_or_err) && (int) $uid_or_err > 0) {
+                    return true;
+                }
+            }
+        }
+        // Path 2: cookie session + nonce.
+        if (is_user_logged_in()) {
+            return $this->requireRestNonce($request);
+        }
+        return new \WP_Error(
+            'sikshya_forbidden',
+            __('Authentication required.', 'sikshya'),
+            ['status' => 401]
+        );
+    }
+
+    public function logout(WP_REST_Request $request): WP_REST_Response
+    {
+        // Resolve the user from whichever auth path got us here.
+        $uid = 0;
+        $bearer = JwtAuthService::bearerFromRequest($request);
+        if ($bearer !== '') {
+            $jwt = $this->plugin->getService('jwtAuth');
+            if ($jwt instanceof JwtAuthService) {
+                $resolved = $jwt->validateToken($bearer);
+                if (!is_wp_error($resolved)) {
+                    $uid = (int) $resolved;
+                }
+            }
+        }
+        if ($uid <= 0 && is_user_logged_in()) {
+            $uid = (int) get_current_user_id();
+        }
+        if ($uid <= 0) {
+            return new WP_REST_Response(
+                ['success' => false, 'message' => __('Not signed in.', 'sikshya')],
+                401
+            );
+        }
+
+        // Invalidate every outstanding JWT for this user by bumping their
+        // token-version meta. The cookie session (if any) is also cleared.
+        JwtAuthService::revokeAllTokensForUser($uid);
+        wp_logout();
+
+        return new WP_REST_Response(['success' => true], 200);
     }
 
     /**
@@ -98,13 +174,54 @@ class AuthRestRoutes
             );
         }
 
+        // Brute-force / credential-stuffing protection: 5 fails in 15 min
+        // (per-(IP, username)) blocks further attempts. Filters available
+        // for sites that need to tune the policy — see LoginRateLimiter.
+        $ip = \Sikshya\Security\LoginRateLimiter::clientIp();
+        if (\Sikshya\Security\LoginRateLimiter::isBlocked($ip, $username)) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'code' => 'rate_limited',
+                    'message' => __('Too many failed attempts. Please try again later.', 'sikshya'),
+                ],
+                429
+            );
+        }
+
         $user = wp_authenticate($username, $password);
         if (is_wp_error($user)) {
+            \Sikshya\Security\LoginRateLimiter::recordFailure($ip, $username);
+            // Username enumeration defense: wp_authenticate returns distinct
+            // error codes for "no such user" (`invalid_username`) vs "wrong
+            // password" (`incorrect_password`). Surfacing either verbatim
+            // lets an attacker probe which accounts exist on the site by
+            // diffing the response. Collapse all credential-failure paths
+            // into a single generic message + opaque code, while still
+            // logging the real reason for admins via `error_log` when
+            // WP_DEBUG is on. Empty-input cases were already short-circuited
+            // above (HTTP 400) so they're not lumped in here.
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf(
+                    'Sikshya /auth/login auth failure for "%s": %s',
+                    is_string($username) ? $username : '',
+                    $user->get_error_code()
+                ));
+            }
             return new WP_REST_Response(
-                ['success' => false, 'message' => $user->get_error_message()],
+                [
+                    'success' => false,
+                    'code' => 'invalid_credentials',
+                    'message' => __('Invalid username or password.', 'sikshya'),
+                ],
                 401
             );
         }
+
+        // Auth succeeded — wipe the failed-attempt bucket so a legitimate
+        // user who fat-fingered their password 2–3× isn't left in a half-
+        // throttled state for the next 15 minutes.
+        \Sikshya\Security\LoginRateLimiter::clear($ip, $username);
 
         $jwt = $this->plugin->getService('jwtAuth');
         if (!$jwt instanceof JwtAuthService) {
@@ -145,6 +262,21 @@ class AuthRestRoutes
             );
         }
 
+        // Same brute-force guard as /auth/login — both endpoints hit
+        // wp_authenticate-equivalent code and would otherwise be free to
+        // enumerate at line rate.
+        $ip = \Sikshya\Security\LoginRateLimiter::clientIp();
+        if (\Sikshya\Security\LoginRateLimiter::isBlocked($ip, $username)) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'code' => 'rate_limited',
+                    'message' => __('Too many failed attempts. Please try again later.', 'sikshya'),
+                ],
+                429
+            );
+        }
+
         $user = wp_signon(
             [
                 'user_login' => $username,
@@ -155,12 +287,29 @@ class AuthRestRoutes
         );
 
         if (is_wp_error($user)) {
+            // Username-enumeration defense (mirrors /auth/login). wp_signon
+            // returns distinct error codes for unknown-user vs wrong-password
+            // — surface a generic 401 here so the response can't be diffed
+            // to confirm an account exists.
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf(
+                    'Sikshya /auth/web-login auth failure for "%s": %s',
+                    $username,
+                    $user->get_error_code()
+                ));
+            }
+            \Sikshya\Security\LoginRateLimiter::recordFailure($ip, $username);
             return new WP_REST_Response(
-                ['success' => false, 'message' => $user->get_error_message()],
+                [
+                    'success' => false,
+                    'code' => 'invalid_credentials',
+                    'message' => __('Invalid email or password.', 'sikshya'),
+                ],
                 401
             );
         }
 
+        \Sikshya\Security\LoginRateLimiter::clear($ip, $username);
         wp_set_current_user((int) $user->ID);
         wp_set_auth_cookie((int) $user->ID, true, is_ssl());
 
@@ -184,11 +333,29 @@ class AuthRestRoutes
             $params = [];
         }
 
+        // Anti-spam / anti-enumeration: throttle by client IP. Bypassed for
+        // authenticated staff to keep the React admin "Add user" flow snappy.
+        $ip = RegistrationRateLimiter::clientIp();
+        $isStaff = is_user_logged_in() && current_user_can('manage_options');
+        if (!$isStaff && RegistrationRateLimiter::isBlocked($ip)) {
+            return new WP_REST_Response(
+                [
+                    'success' => false,
+                    'code' => 'rate_limited',
+                    'message' => __('Too many registration attempts. Please try again later.', 'sikshya'),
+                ],
+                429
+            );
+        }
+
         $email = sanitize_email($params['email'] ?? '');
         $password = (string) ($params['password'] ?? '');
         $display_name = sanitize_text_field($params['display_name'] ?? '');
 
         if ($email === '' || !is_email($email) || $password === '') {
+            if (!$isStaff) {
+                RegistrationRateLimiter::recordAttempt($ip);
+            }
             return new WP_REST_Response(
                 ['success' => false, 'message' => __('Valid email and password required.', 'sikshya')],
                 400
@@ -196,6 +363,9 @@ class AuthRestRoutes
         }
 
         if (email_exists($email)) {
+            if (!$isStaff) {
+                RegistrationRateLimiter::recordAttempt($ip);
+            }
             return new WP_REST_Response(
                 ['success' => false, 'message' => __('An account with this email already exists. Please sign in.', 'sikshya')],
                 409
@@ -219,10 +389,17 @@ class AuthRestRoutes
 
         $user_id = wp_create_user($username, $password, $email);
         if (is_wp_error($user_id)) {
+            if (!$isStaff) {
+                RegistrationRateLimiter::recordAttempt($ip);
+            }
             return new WP_REST_Response(
                 ['success' => false, 'message' => $user_id->get_error_message()],
                 400
             );
+        }
+
+        if (!$isStaff) {
+            RegistrationRateLimiter::recordAttempt($ip);
         }
 
         if ($display_name !== '') {

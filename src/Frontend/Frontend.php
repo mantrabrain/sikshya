@@ -428,8 +428,16 @@ class Frontend
     private function enqueuePageSpecificAssets(): void
     {
         if (is_singular(PostTypes::COURSE)) {
-            wp_enqueue_script('sikshya-course-viewer');
-            wp_enqueue_style('sikshya-course-viewer');
+            // Note: there used to be `wp_enqueue_script('sikshya-course-viewer')`
+            // / `…-style` calls here, and the same pattern for `…-lesson-viewer`,
+            // `…-dashboard`, and `…-course-catalog` below. Those handles were
+            // never registered (no `wp_register_script`/`_style` call anywhere
+            // in the plugin) and the underlying JS/CSS files don't exist on
+            // disk. WP responded with `doing_it_wrong()` notices on every
+            // course/lesson view in production logs. The single-course and
+            // single-lesson templates are server-rendered today (Vite builds
+            // ship via `sikshya-frontend` already enqueued above), so the
+            // page-specific bundles are dead enqueues. Removed.
 
             wp_enqueue_script(
                 'sikshya-course-reviews',
@@ -447,21 +455,6 @@ class Frontend
                 'loading' => __('Loading…', 'sikshya'),
                 'youLabel' => __('You', 'sikshya'),
             ]);
-        }
-
-        if (is_singular(PostTypes::LESSON)) {
-            wp_enqueue_script('sikshya-lesson-viewer');
-            wp_enqueue_style('sikshya-lesson-viewer');
-        }
-
-        if (is_page('sikshya-dashboard')) {
-            wp_enqueue_script('sikshya-dashboard');
-            wp_enqueue_style('sikshya-dashboard');
-        }
-
-        if (is_page('sikshya-courses')) {
-            wp_enqueue_script('sikshya-course-catalog');
-            wp_enqueue_style('sikshya-course-catalog');
         }
 
         if (PublicPageUrls::isCurrentVirtualPage('checkout')) {
@@ -547,6 +540,16 @@ class Frontend
                     echo '<meta property="og:image" content="' . esc_url($thumbnail_url) . '" />';
                 }
             }
+        }
+
+        // Course archive FOUC prevention: a blocking inline script reads the
+        // learner's saved grid/list preference and sets a data attribute on
+        // <html> before the body paints. CSS rules in `course-listing.css`
+        // override the server-rendered class so the toggle never flickers.
+        if (is_post_type_archive(PostTypes::COURSE)) {
+            $admin_default = \Sikshya\Services\CourseFrontendSettings::archiveLayout();
+            $admin_default = ($admin_default === 'list') ? 'list' : 'grid';
+            echo "<script id=\"sikshya-archive-view-boot\">(function(){var v='" . esc_js($admin_default) . "';try{var s=window.localStorage.getItem('sikshya_course_archive_view');if(s==='list'||s==='grid'){v=s;}}catch(e){}document.documentElement.setAttribute('data-sikshya-archive-view',v);})();</script>";
         }
     }
 

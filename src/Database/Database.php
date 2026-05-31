@@ -15,6 +15,7 @@ use Sikshya\Database\Tables\CouponsTable;
 use Sikshya\Database\Tables\CouponRedemptionsTable;
 use Sikshya\Database\Tables\ReviewsTable;
 use Sikshya\Database\Tables\PaymentsTable;
+use Sikshya\Database\Tables\QuizAttemptsTable;
 use Sikshya\Services\EmailTemplateStore;
 
 /**
@@ -27,7 +28,7 @@ class Database
     /**
      * Current DB schema version.
      */
-    public const SCHEMA_VERSION = '1.9.0';
+    public const SCHEMA_VERSION = '1.10.0';
 
     /**
      * Plugin instance
@@ -62,13 +63,30 @@ class Database
     }
 
     /**
-     * Reserved for future upgrades.
+     * Run any pending incremental schema migrations and stamp the version.
      *
-     * v1.0.0: no incremental migrations are executed at runtime.
+     * Compares the stored DB version against {@see self::SCHEMA_VERSION} and
+     * runs each `migrateToXXX` step whose version is newer than the stored
+     * one. Idempotent: every migration step uses `IF NOT EXISTS` semantics
+     * (column-existence checks, dbDelta) so re-running is safe.
+     *
+     * Wired from {@see \Sikshya\Core\Plugin::onAdminInit()} so the upgrade
+     * runs lazily on admin requests rather than activation alone — this
+     * handles the case where a customer drops in a new plugin build and
+     * never re-activates (the more common deploy path in the wild).
      */
     public function maybeUpgrade(): void
     {
-        return;
+        $current = (string) Settings::getRaw('sikshya_db_version', '0.0.0');
+        if (version_compare($current, self::SCHEMA_VERSION, '>=')) {
+            return;
+        }
+
+        if (version_compare($current, '1.10.0', '<')) {
+            $this->migrateTo1100QuizAutoSave();
+        }
+
+        Settings::setRaw('sikshya_db_version', self::SCHEMA_VERSION);
     }
 
     /**
@@ -268,6 +286,28 @@ class Database
         $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN charge_kind varchar(32) NOT NULL DEFAULT 'checkout' AFTER status");
         // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $wpdb->query("ALTER TABLE `{$table}` ADD KEY charge_kind (charge_kind)");
+    }
+
+    /**
+     * Quiz attempts: add `auto_save_data` for mid-attempt answer snapshots
+     * (powers the new `POST /sikshya/v1/me/quiz-save` endpoint so a refresh
+     * doesn't wipe in-progress work).
+     */
+    private function migrateTo1100QuizAutoSave(): void
+    {
+        global $wpdb;
+        $table = QuizAttemptsTable::getTableName();
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            // Fresh install path is handled by `createTables()` → `createSql()`.
+            return;
+        }
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table identifier from helper
+        $has = $wpdb->get_results("SHOW COLUMNS FROM `{$table}` LIKE 'auto_save_data'");
+        if (is_array($has) && $has !== []) {
+            return;
+        }
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table identifier from helper
+        $wpdb->query("ALTER TABLE `{$table}` ADD COLUMN auto_save_data longtext NULL AFTER answers_data");
     }
 
     private function getEnrollmentsCreateSql(): string

@@ -30,15 +30,16 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
 ?>
 
 <div class="sikshya-public sikshya-order sikshya-order-page sik-f-scope">
-    <header class="sikshya-order-page__masthead">
-        <div class="sikshya-order-page__masthead-inner">
-            <nav class="sikshya-order-page__breadcrumb" aria-label="<?php esc_attr_e('Breadcrumb', 'sikshya'); ?>">
-                <a href="<?php echo esc_url($u->getHomeUrl()); ?>"><?php esc_html_e('Home', 'sikshya'); ?></a>
-                <span class="sikshya-order-page__bc-sep" aria-hidden="true">›</span>
-                <a href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('Account', 'sikshya'); ?></a>
-                <span class="sikshya-order-page__bc-sep" aria-hidden="true">›</span>
-                <span class="sikshya-order-page__breadcrumb-current"><?php esc_html_e('Order', 'sikshya'); ?></span>
-            </nav>
+    <header class="sikshya-course-lp__masthead">
+        <div class="sikshya-container sikshya-container--course sikshya-course-lp__masthead-inner">
+            <?php
+            $items = [
+                ['label' => __('Home', 'sikshya'), 'url' => $u->getHomeUrl()],
+                ['label' => __('Account', 'sikshya'), 'url' => $u->getAccountUrl()],
+                ['label' => __('Order', 'sikshya')],
+            ];
+            require __DIR__ . '/partials/course-discovery-breadcrumb.php';
+            ?>
             <h1 class="sikshya-order-page__title"><?php esc_html_e('Order details', 'sikshya'); ?></h1>
             <p class="sikshya-order-page__lead">
                 <?php if ($page_model->hasError()) : ?>

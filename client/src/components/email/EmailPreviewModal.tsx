@@ -95,7 +95,7 @@ export function EmailPreviewModal(props: Props) {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <div className="mb-4">
-            <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               <span aria-hidden>✉️</span>
               {__('Subject', 'sikshya')}
             </div>

@@ -100,7 +100,7 @@ export function RowActionsMenu({ items, ariaLabel }: { items: RowActionItem[]; a
         position: 'fixed',
         top: menuPos.top,
         right: menuPos.right,
-        zIndex: 10000,
+        zIndex: 100050,
       }}
       className="min-w-[12rem] rounded-xl border border-slate-200 bg-white py-1 shadow-lg ring-1 ring-black/5 dark:border-slate-700 dark:bg-slate-900 dark:ring-white/10"
     >
@@ -153,9 +153,9 @@ export function RowActionsMenu({ items, ariaLabel }: { items: RowActionItem[]; a
           aria-haspopup="menu"
           aria-label={ariaLabel}
           onClick={() => setOpen((o) => !o)}
-          className="inline-flex rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          className="inline-flex rounded-md p-1 text-slate-400 hover:bg-slate-200/70 hover:text-slate-700 dark:hover:bg-slate-700/60 dark:hover:text-slate-200"
         >
-          <NavIcon name="dotsVertical" className="h-5 w-5" />
+          <NavIcon name="dotsVertical" className="h-4 w-4" />
         </button>
       </div>
       {typeof document !== 'undefined' && menu ? createPortal(menu, document.body) : null}

@@ -531,6 +531,38 @@ body.sikshya-course-layout--fullwidth .sikshya-single-course.sikshya-course-lp.s
   border-color: var(--sik-f-border);
 }
 
+/* "Free preview" affordance on curriculum outline items. */
+.sikshya-course-lp__pill--preview {
+  color: rgb(var(--sikshya-brand-700-rgb, 60, 90, 140));
+  background: rgba(var(--sikshya-brand-500-rgb, 80, 120, 183), 0.12);
+  border-color: rgba(var(--sikshya-brand-500-rgb, 80, 120, 183), 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.65rem;
+}
+
+.sikshya-course-lp__preview-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgb(var(--sikshya-brand-700-rgb, 60, 90, 140));
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: background-color 150ms ease;
+}
+
+.sikshya-course-lp__preview-link:hover,
+.sikshya-course-lp__preview-link:focus-visible {
+  background: rgba(var(--sikshya-brand-500-rgb, 80, 120, 183), 0.1);
+  color: rgb(var(--sikshya-brand-800-rgb, 40, 70, 120));
+  text-decoration: none;
+}
+
 .sikshya-course-lp__accordion {
   border: 1px solid var(--sik-f-border);
   border-radius: var(--sikshya-radius-lg);
@@ -666,7 +698,6 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;
-  margin-top: 0.1rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -722,10 +753,9 @@ details[open] > .sikshya-course-lp__chapter-summary .sikshya-course-lp__chapter-
   color: var(--sikshya-primary);
 }
 
-.sikshya-course-lp__outline-item:has(.sikshya-course-lp__outline-link:hover) .sikshya-course-lp__outline-icon,
-.sikshya-course-lp__outline-item:has(.sikshya-course-lp__outline-link:focus-visible) .sikshya-course-lp__outline-icon {
-  color: var(--sikshya-primary);
-}
+/* No hover/focus tint on the content-type icon itself — keeps icon parity
+ * with learn-sidebar + admin builder (those don't tint the icon on hover).
+ * The row title still color-shifts on hover, providing the interaction cue. */
 
 .sikshya-course-lp__outline-title {
   font-weight: 600;

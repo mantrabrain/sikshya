@@ -74,7 +74,7 @@ import {
 import { __ } from '../../lib/i18n';
 
 const FIELD =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
+  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white';
 const LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const HINT = 'mt-1 text-xs text-slate-500 dark:text-slate-400';
 
@@ -313,6 +313,11 @@ export function LessonEditor(props: ContentEditorProps) {
   const [durationUnit, setDurationUnit] = useState<'min' | 'hr'>('min');
   const [lessonType, setLessonType] = useState('text');
   const [videoUrl, setVideoUrl] = useState('');
+  // Optional transcript shown beside the player on the Learn page — keep
+  // both an external file URL (downloadable) and a paste-in text (inline
+  // disclosure) for flexibility. Either, both, or neither may be set.
+  const [transcriptUrl, setTranscriptUrl] = useState('');
+  const [transcriptText, setTranscriptText] = useState('');
   const [isFreePreview, setIsFreePreview] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [editorTab, setEditorTab] = useState<'content' | 'settings'>('content');
@@ -336,6 +341,8 @@ export function LessonEditor(props: ContentEditorProps) {
       setDurationUnit('min');
       setLessonType('text');
       setVideoUrl('');
+      setTranscriptUrl('');
+      setTranscriptText('');
       setProValues(PRO_LESSON_DEFAULTS);
       return;
     }
@@ -365,6 +372,8 @@ export function LessonEditor(props: ContentEditorProps) {
     }
     setLessonType(String(readMeta(m, '_sikshya_lesson_type') ?? 'text') || 'text');
     setVideoUrl(String(readMeta(m, '_sikshya_lesson_video_url') ?? ''));
+    setTranscriptUrl(String(readMeta(m, '_sikshya_lesson_transcript_url') ?? ''));
+    setTranscriptText(String(readMeta(m, '_sikshya_lesson_transcript_text') ?? ''));
     setIsFreePreview(Boolean(readMeta(m, '_sikshya_is_free') === true || String(readMeta(m, '_sikshya_is_free') ?? '') === '1'));
     setProValues(readProLessonFromMeta(m));
   }, [editor.post, editor.isNew]);
@@ -388,6 +397,8 @@ export function LessonEditor(props: ContentEditorProps) {
         _sikshya_lesson_duration: duration,
         _sikshya_lesson_type: kind,
         _sikshya_lesson_video_url: kind === 'video' ? videoUrl.trim() : '',
+        _sikshya_lesson_transcript_url: transcriptUrl.trim(),
+        _sikshya_lesson_transcript_text: transcriptText,
         _sikshya_is_free: isFreePreview ? '1' : '0',
         ...buildProLessonMetaForKind(kind, proValues),
       },
@@ -428,6 +439,8 @@ export function LessonEditor(props: ContentEditorProps) {
     durationUnit,
     lessonType,
     videoUrl,
+    transcriptUrl,
+    transcriptText,
     isFreePreview,
     proValues,
   ]);
@@ -461,15 +474,15 @@ export function LessonEditor(props: ContentEditorProps) {
           </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
-              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusPillClass(status)}`}>
                 {status || 'draft'}
               </span>
               {durationValue?.trim() ? (
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
                   {`${durationValue.trim()} ${durationUnit === 'hr' ? __('hr', 'sikshya') : __('min', 'sikshya')}`}
                 </span>
               ) : null}
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
                 {lessonType === 'video'
                   ? 'Video'
                   : lessonType === 'live'
@@ -578,6 +591,34 @@ export function LessonEditor(props: ContentEditorProps) {
                   />
                 </div>
               ) : null}
+              {(lessonType === 'video' || lessonType === 'audio') ? (
+                <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/30">
+                  <label className={LABEL} htmlFor="sik-lesson-transcript-url">
+                    Transcript (optional)
+                  </label>
+                  <p className={HINT}>
+                    A transcript improves accessibility and helps learners who can&apos;t use audio. Provide a downloadable file URL, paste the text below, or both.
+                  </p>
+                  <input
+                    id="sik-lesson-transcript-url"
+                    className={FIELD}
+                    value={transcriptUrl}
+                    onChange={(e) => setTranscriptUrl(e.target.value)}
+                    placeholder="https://example.com/transcript.pdf"
+                  />
+                  <label className={`${LABEL} mt-3`} htmlFor="sik-lesson-transcript-text">
+                    Transcript text
+                  </label>
+                  <textarea
+                    id="sik-lesson-transcript-text"
+                    className={`${FIELD} font-mono`}
+                    rows={6}
+                    value={transcriptText}
+                    onChange={(e) => setTranscriptText(e.target.value)}
+                    placeholder={__('Paste the full transcript text here…', 'sikshya')}
+                  />
+                </div>
+              ) : null}
               {lessonType === 'live' ? (
                 <ProLessonLiveBlock values={proValues} onChange={setProValues} />
               ) : null}
@@ -588,24 +629,6 @@ export function LessonEditor(props: ContentEditorProps) {
                 <ProLessonH5pBlock values={proValues} onChange={setProValues} />
               ) : null}
               <div>
-                <label className={LABEL} htmlFor="sik-lesson-body">
-                  {lessonType === 'video'
-                    ? 'Transcript / notes'
-                    : lessonType === 'live'
-                    ? 'Briefing for the session'
-                    : lessonType === 'scorm' || lessonType === 'h5p'
-                    ? 'Notes below the SCORM/H5P player'
-                    : 'Lesson content'}
-                </label>
-                <p className={HINT}>
-                  {lessonType === 'video'
-                    ? 'Optional but recommended for accessibility and SEO.'
-                    : lessonType === 'live'
-                    ? 'Agenda, prep work, joining instructions — shown above the “Join live class” button.'
-                    : lessonType === 'scorm' || lessonType === 'h5p'
-                    ? 'Optional context in the Overview tab under the player (the package runs full-width above tabs, like video).'
-                    : 'Main instructional content (HTML supported).'}
-                </p>
                 <QuillField
                   label={
                     lessonType === 'video'
@@ -615,6 +638,15 @@ export function LessonEditor(props: ContentEditorProps) {
                         : lessonType === 'scorm' || lessonType === 'h5p'
                           ? 'Notes below the SCORM/H5P player'
                           : 'Lesson content'
+                  }
+                  help={
+                    lessonType === 'video'
+                      ? 'Optional but recommended for accessibility and SEO.'
+                      : lessonType === 'live'
+                        ? 'Agenda, prep work, joining instructions — shown above the “Join live class” button.'
+                        : lessonType === 'scorm' || lessonType === 'h5p'
+                          ? 'Optional context in the Overview tab under the player (the package runs full-width above tabs, like video).'
+                          : 'Main instructional content (HTML supported).'
                   }
                   value={content}
                   onChange={(html) => setContent(html)}
@@ -727,13 +759,13 @@ function EmbeddedSaveBar(props: { saving: boolean; entityLabel: string; canSave?
           type="button"
           disabled={saving || !canSave}
           onClick={onSave}
-          className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+          className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
         >
           {saving ? 'Saving…' : `Save ${entityLabel.toLowerCase()}`}
         </button>
       </div>
       {!canSave ? (
-        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">{__('Add the required fields (usually title) to enable saving.', 'sikshya')}</p>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{__('Add the required fields (usually title) to enable saving.', 'sikshya')}</p>
       ) : null}
     </div>
   );
@@ -753,7 +785,7 @@ function EditorActions(props: {
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6 dark:border-slate-800">
       <a
         href={backHref}
-        className="rounded-lg border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+        className="rounded-lg border border-slate-200/90 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
       >
         ← Back to list
       </a>
@@ -766,14 +798,14 @@ function EditorActions(props: {
           type="button"
           disabled={saving}
           onClick={onTrash}
-          className="rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:text-red-400 dark:hover:bg-red-950/30"
+          className="rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:text-red-400 dark:hover:bg-red-950/30"
         >
           Move to trash
         </button>
         ) : null}
       </div>
       {!canSave ? (
-        <p className="w-full text-[11px] text-slate-500 dark:text-slate-400">{__('Add the required fields (usually title) to enable saving.', 'sikshya')}</p>
+        <p className="w-full text-xs text-slate-500 dark:text-slate-400">{__('Add the required fields (usually title) to enable saving.', 'sikshya')}</p>
       ) : null}
     </div>
   );
@@ -1022,11 +1054,11 @@ export function QuizEditor(props: ContentEditorProps) {
           )}
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
-              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusPillClass(status)}`}>
                 {status || 'draft'}
               </span>
               {Number(timeLimit) > 0 ? (
-                <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-semibold text-indigo-800 ring-1 ring-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-200 dark:ring-indigo-900/40">
+                <span className="rounded-full bg-accent-50 px-2.5 py-1 text-xs font-semibold text-accent-800 ring-1 ring-accent-200 dark:bg-accent-950/40 dark:text-accent-200 dark:ring-accent-900/40">
                   {Number(timeLimit)} min
                 </span>
               ) : null}
@@ -1050,9 +1082,6 @@ export function QuizEditor(props: ContentEditorProps) {
                 />
               </div>
               <div>
-                <label className={LABEL} htmlFor="sik-quiz-desc">
-                  Instructions for students
-                </label>
                 <QuillField
                   label="Instructions for students"
                   value={content}
@@ -1162,14 +1191,14 @@ export function QuizEditor(props: ContentEditorProps) {
                   <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
                     <button
                       type="button"
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                       onClick={openAddQuestion}
                     >
                       + New question
                     </button>
                     <a
                       href={appViewHref(config, 'content-library', { tab: 'questions' })}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                     >
                       Manage library
                     </a>
@@ -1198,7 +1227,7 @@ export function QuizEditor(props: ContentEditorProps) {
                                 </span>
                                 <button
                                   type="button"
-                                  className={`shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 ${
+                                  className={`shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
                                     added
                                       ? 'border border-slate-200 text-slate-400 dark:border-slate-700 dark:text-slate-500'
                                       : 'bg-brand-600 text-white hover:bg-brand-700'
@@ -1259,7 +1288,7 @@ export function QuizEditor(props: ContentEditorProps) {
                                 </span>
                                 <button
                                   type="button"
-                                  className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                  className="shrink-0 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                                   title={__('Edit this question in the same form as New question', 'sikshya')}
                                   onClick={() => openEditQuestionInModal(qid)}
                                 >
@@ -1267,7 +1296,7 @@ export function QuizEditor(props: ContentEditorProps) {
                                 </button>
                                 <button
                                   type="button"
-                                  className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 dark:text-red-400 dark:hover:bg-red-950/30"
+                                  className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:text-red-400 dark:hover:bg-red-950/30"
                                   onClick={() => setQuizQuestionIds((prev) => prev.filter((x) => x !== qid))}
                                 >
                                   Remove
@@ -1670,16 +1699,16 @@ export function QuestionEditor(props: ContentEditorProps) {
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
-              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusPillClass(status)}`}>
                 {status || 'draft'}
               </span>
               {Number(points) > 0 ? (
-                <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-800 ring-1 ring-violet-200 dark:bg-violet-950/40 dark:text-violet-200 dark:ring-violet-900/40">
+                <span className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-800 ring-1 ring-violet-200 dark:bg-violet-950/40 dark:text-violet-200 dark:ring-violet-900/40">
                   {Number(points)} pts
                 </span>
               ) : null}
               {qType?.trim() ? (
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
                   {qType.replace(/_/g, ' ')}
                 </span>
               ) : null}
@@ -1698,7 +1727,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                   <button
                     type="button"
                     id="sik-q-type-content"
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-left text-sm text-slate-900 shadow-sm transition hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-left text-sm text-slate-900 shadow-sm transition hover:border-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                     aria-haspopup="listbox"
                     aria-expanded={Boolean(typeMenuPos)}
                     onClick={(e) => openTypeMenu(e.currentTarget)}
@@ -1763,7 +1792,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                             >
                               {t.label}
                               {locked ? (
-                                <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                                <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
                                   Pro
                                 </span>
                               ) : null}
@@ -2113,12 +2142,9 @@ export function QuestionEditor(props: ContentEditorProps) {
                 description={__('Optional image shown with the question in supported themes or future quiz layouts.', 'sikshya')}
               />
               <div>
-                <label className={LABEL} htmlFor="sik-q-body">
-                  Explanation / feedback (optional)
-                </label>
-                <p className={HINT}>{__('Shown after grading or kept for instructors. Stored as post content.', 'sikshya')}</p>
                 <QuillField
                   label="Explanation / feedback (optional)"
+                  help={__('Shown after grading or kept for instructors. Stored as post content.', 'sikshya')}
                   value={content}
                   onChange={(html) => setContent(html)}
                   placeholder={__('Optional explanation for learners or grading notes…', 'sikshya')}
@@ -2191,7 +2217,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                     aria-disabled={locked}
                     disabled={locked}
                     title={lockTitle}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30 ${
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
                       active
                         ? 'bg-brand-50 text-brand-900 dark:bg-brand-950/40 dark:text-brand-100'
                         : locked
@@ -2217,7 +2243,7 @@ export function QuestionEditor(props: ContentEditorProps) {
                       <span className="block text-sm font-semibold leading-snug">
                         {t.label}
                         {locked ? (
-                          <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                          <span className="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-200">
                             Pro
                           </span>
                         ) : null}
@@ -2367,19 +2393,19 @@ export function AssignmentEditor(props: ContentEditorProps) {
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
-              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusPillClass(status)}`}>
                 {status || 'draft'}
               </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                 {Math.max(0, Number.isFinite(apoints) ? apoints : 0)} pts
               </span>
               {due?.trim() ? (
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                   Due {due}
                 </span>
               ) : null}
               {atype?.trim() ? (
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                   {atype}
                 </span>
               ) : null}
@@ -2402,12 +2428,9 @@ export function AssignmentEditor(props: ContentEditorProps) {
                 />
               </div>
               <div>
-                <label className={LABEL} htmlFor="sik-as-body">
-                  Instructions & rubric
-                </label>
-                <p className={HINT}>What to submit, file types, length, and how you will grade (optional but clearer for learners).</p>
                 <QuillField
                   label="Instructions & rubric"
+                  help="What to submit, file types, length, and how you will grade (optional but clearer for learners)."
                   value={content}
                   onChange={(html) => setContent(html)}
                   placeholder={__('Task description, deliverables, and grading criteria…', 'sikshya')}
@@ -2644,11 +2667,11 @@ export function ChapterEditor(props: ContentEditorProps) {
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center justify-start gap-2 sm:justify-end">
-              <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillClass(status)}`}>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusPillClass(status)}`}>
                 {status || 'draft'}
               </span>
               {order > 0 ? (
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700">
                   Order {order}
                 </span>
               ) : null}
@@ -3156,12 +3179,12 @@ export function CertificateEditor(props: ContentEditorProps) {
                 >
                   ← Back
                 </a>
-                <span className="bg-slate-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                <span className="bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                   {status === 'publish' ? __('Published', 'sikshya') : __('Draft', 'sikshya')}
                 </span>
                 {isProtectedTemplate ? (
                   <span
-                    className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+                    className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
                     title={__('This is a default template included with Sikshya. It cannot be deleted, but you can duplicate or edit it.', 'sikshya')}
                   >
                     <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true">
@@ -3389,7 +3412,7 @@ export function DefaultContentEditor(props: ContentEditorProps) {
                 <textarea
                   id="sik-def-body"
                   rows={16}
-                  className={`${FIELD} min-h-[300px] w-full font-mono text-[13px]`}
+                  className={`${FIELD} min-h-[300px] w-full font-mono text-xs`}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder={__('HTML or plain text…', 'sikshya')}

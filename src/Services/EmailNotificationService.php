@@ -551,8 +551,13 @@ final class EmailNotificationService
         $subject = (string) ($merged['subject'] ?? '');
         $body = (string) ($merged['body_html'] ?? '');
 
+        // Subject is rendered plain-text; HTML-escaped entities would surface
+        // literally (`&amp;` etc.) so keep the raw substitution here.
         $subject = EmailTemplateMerge::apply($subject, $merge_context);
-        $inner = EmailTemplateMerge::apply($body, $merge_context);
+        // Body is HTML — escape every merge value so user-controlled inputs
+        // (learner display name, course title, instructor name) can't smuggle
+        // tags into a template that was already `wp_kses_post`'d at save-time.
+        $inner = EmailTemplateMerge::applyHtml($body, $merge_context);
         $html = $this->wrapHtml($inner);
 
         return $this->send($to, $subject, $html);
@@ -725,7 +730,16 @@ final class EmailNotificationService
         $headers = ['Content-Type: text/html; charset=UTF-8'];
 
         $from_email = trim((string) Settings::get('from_email', ''));
+        // wp_specialchars_decode reverses HTML-entity encoding (so the display
+        // name renders correctly), but does NOT strip CR/LF. Without this
+        // belt-and-suspenders step, a `from_name` that contains "\r\nBcc:
+        // attacker@evil.com" would inject an extra mail header.
         $from_name = trim(wp_specialchars_decode((string) Settings::get('from_name', ''), ENT_QUOTES));
+        $from_name = str_replace(["\r", "\n"], '', $from_name);
+        // `is_email()` rejects most CRLF-bearing addresses, but the value is
+        // also used as a raw header on the next line — strip newlines anyway
+        // so a future loosened validator can't quietly re-open the injection.
+        $from_email = str_replace(["\r", "\n"], '', $from_email);
         if ($from_email && is_email($from_email)) {
             if ($from_name !== '') {
                 $headers[] = 'From: ' . sprintf('%s <%s>', $from_name, $from_email);
@@ -735,6 +749,7 @@ final class EmailNotificationService
         }
 
         $reply = trim((string) Settings::get('reply_to_email', ''));
+        $reply = str_replace(["\r", "\n"], '', $reply);
         if ($reply && is_email($reply)) {
             $headers[] = 'Reply-To: ' . $reply;
         }
@@ -801,6 +816,87 @@ final class EmailNotificationService
     public static function registerHookListeners(self $mailer): void
     {
         CustomEmailTemplateHookDispatcher::register($mailer);
+
+        // Enrolment fan-out — learner confirmation + admin notice + lead instructor notice.
+        // All three templates share the `sikshya_user_enrolled` action; we attach one
+        // listener per template so an admin disabling "instructor notification" in
+        // settings doesn't silently break the other two. Each `send*` method
+        // short-circuits internally when its template's `email_*` toggle is off
+        // (see `EmailNotificationService::sendSystemTemplate`), so this listener
+        // is safe to attach unconditionally.
+        add_action(
+            'sikshya_user_enrolled',
+            static function ($user_id, $course_id, $enrollment_id = 0) use ($mailer): void {
+                unset($enrollment_id);
+                $uid = absint($user_id);
+                $cid = absint($course_id);
+                if ($uid <= 0 || $cid <= 0) {
+                    return;
+                }
+                $mailer->sendEnrollmentEmail($uid, $cid);
+                $mailer->sendAdminEnrollmentNotice($uid, $cid);
+                $mailer->sendInstructorEnrollmentNotice($uid, $cid);
+            },
+            10,
+            3
+        );
+
+        // Course completion confirmation. Fires from the learner REST progress
+        // recompute path AFTER the enrolment row is marked `completed`, so by
+        // the time this listener runs the learner's "completed at" timestamp
+        // is already persisted (the email's `{{completed_at}}` merge tag
+        // resolves correctly).
+        add_action(
+            'sikshya_course_completed',
+            static function ($user_id, $course_id) use ($mailer): void {
+                $uid = absint($user_id);
+                $cid = absint($course_id);
+                if ($uid <= 0 || $cid <= 0) {
+                    return;
+                }
+                $mailer->sendCourseCompletedEmail($uid, $cid);
+            },
+            10,
+            2
+        );
+
+        // Certificate issued — fires after `CertificateIssuanceService` has
+        // committed the row (so `verification_code` is real and resolvable).
+        // The full signature has 6 args (id, user, course, number, verification,
+        // template_post_id); we only need user_id + course_id + issued_id for
+        // the email context, so the closure's `accepted_args` is 3.
+        add_action(
+            'sikshya_certificate_row_created',
+            static function ($id, $user_id, $course_id) use ($mailer): void {
+                $iid = absint($id);
+                $uid = absint($user_id);
+                $cid = absint($course_id);
+                if ($uid <= 0 || $cid <= 0) {
+                    return;
+                }
+                $mailer->sendCertificateIssuedEmail($uid, $cid, $iid);
+            },
+            10,
+            3
+        );
+
+        // Welcome email — fires from WP core `user_register` when a learner
+        // account is created (manual signup, REST register, or auto-create
+        // during guest checkout). The hook is intentionally WP-native rather
+        // than a Sikshya-specific action so the email also covers signups
+        // that happen before any Sikshya-specific event has fired.
+        add_action(
+            'user_register',
+            static function ($user_id) use ($mailer): void {
+                $uid = absint($user_id);
+                if ($uid <= 0) {
+                    return;
+                }
+                $mailer->sendWelcomeEmail($uid);
+            },
+            10,
+            1
+        );
 
         add_action(
             'sikshya_course_qa_question_posted',

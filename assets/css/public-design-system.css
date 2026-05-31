@@ -23,7 +23,12 @@
   --sikshya-success: #10b981;
   --sikshya-warning: #f59e0b;
   --sikshya-error: #ef4444;
-  --sikshya-info: #3b82f6;
+  /* `info` aliased to brand navy so any consumer of the token stays on-brand.
+   * Previously `#3b82f6` (Tailwind blue-500), an off-brand colour. Today
+   * no CSS reads `var(--sikshya-info)` — keep the token defined so the set
+   * { success, warning, error, info } stays symmetric, but bind it to the
+   * navy so a future consumer doesn't reintroduce the blue-500 regression. */
+  --sikshya-info: #2c5ba8;
 
   /* Neutrals */
   --sikshya-white: #ffffff;
@@ -218,4 +223,32 @@
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
   border: 0 !important;
+}
+
+/* ─── Reduced-motion carve-out ─────────────────────────────────────────
+ * Blanket override scoped to the `.sikshya-public` namespace (i.e. every
+ * learner-facing page that loads this design system). For users who set
+ * the OS-level "reduce motion" preference, all transitions and animations
+ * collapse to a single frame so hover/focus/click changes are still
+ * *visible* but never *moving*. Page-specific stylesheets
+ * (learn.css, frontend.css, single-course.css) can still ship their own
+ * `@media (prefers-reduced-motion: reduce)` blocks for fine-grained
+ * exceptions; this one catches the long tail by default.
+ *
+ * Why `!important`: page-specific files commonly redeclare `transition`
+ * inside hover states (`:hover { transition: …; }`), and without the
+ * weight they would re-introduce motion for the reduced-motion user.
+ * Smooth-scroll behaviour is also reset so anchor-link jumps don't
+ * animate the viewport.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .sikshya-public,
+  .sikshya-public *,
+  .sikshya-public *::before,
+  .sikshya-public *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

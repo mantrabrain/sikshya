@@ -80,6 +80,25 @@ $breadcrumb_items = [
                 </p>
 
                 <?php if (have_posts()) : ?>
+                    <?php
+                    // Pre-warm the per-user enrolment + certificate cache for
+                    // every course on this page in two batched queries — was
+                    // 2 × N queries (one each per card) before. No-op for
+                    // anonymous visitors.
+                    $current_user_id_for_warm = (int) get_current_user_id();
+                    if ($current_user_id_for_warm > 0 && isset($GLOBALS['wp_query']) && !empty($GLOBALS['wp_query']->posts)) {
+                        $course_ids_on_page = array_filter(array_map(
+                            static fn ($p): int => isset($p->ID) ? (int) $p->ID : 0,
+                            (array) $GLOBALS['wp_query']->posts
+                        ));
+                        if ($course_ids_on_page !== []) {
+                            \Sikshya\Frontend\Site\UserCourseStateCache::warm(
+                                $current_user_id_for_warm,
+                                $course_ids_on_page
+                            );
+                        }
+                    }
+                    ?>
                     <div class="<?php echo esc_attr($grid_classes); ?>">
                         <?php
                         while (have_posts()) :

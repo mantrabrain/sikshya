@@ -36,7 +36,7 @@ function iconForAction(item: RowActionItem): string {
 }
 
 const wrapClass =
-  'inline-flex items-center gap-0.5 rounded px-0.5 py-0.5 text-[11px] font-normal text-slate-400 transition-colors hover:text-slate-600 focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-500/50 dark:text-slate-500 dark:hover:text-slate-300';
+  'inline-flex items-center gap-0.5 rounded px-0.5 py-0.5 text-xs font-normal text-slate-400 transition-colors hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-1 dark:text-slate-500 dark:hover:text-slate-300 dark:focus-visible:ring-offset-slate-900';
 
 const iconClass = 'h-3 w-3 shrink-0 opacity-70';
 

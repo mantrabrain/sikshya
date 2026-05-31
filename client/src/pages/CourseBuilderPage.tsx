@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { OVERLAY_Z_FOCUS_SURFACE } from '../lib/overlayLayers';
 import { AddonEnablePanel } from '../components/AddonEnablePanel';
 import { NavIcon } from '../components/NavIcon';
 import { getSikshyaApi, getWpApi, SIKSHYA_ENDPOINTS } from '../api';
@@ -39,18 +41,37 @@ import { __ } from '../lib/i18n';
 
 /** Shared field chrome — one place for focus rings and dark mode. */
 const FIELD_INPUT =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
+  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
 const FIELD_LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const FIELD_HINT = 'mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400';
 
 /** Same active styling as `Sidebar` top-level links (bluish brand tint + inset ring). */
 const BUILDER_NAV_ACTIVE =
   'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:ring-brand-900/40';
-/** Same as `Sidebar` `ChildLink` active (nested items). */
-const BUILDER_NAV_ACTIVE_NESTED =
-  'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100/80 dark:bg-brand-950/40 dark:text-brand-300 dark:ring-brand-900/50';
 const BUILDER_NAV_INACTIVE =
   'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/70';
+
+/**
+ * Curriculum chapter row — top-level "card" surface. Solid white at rest,
+ * darker slate hover, saturated brand-200 ground when selected. The chapter
+ * row is the surface that holds the chapter's lessons (rendered below with a
+ * different — slate-50 — tray background) so the two layers never look the same.
+ */
+const CURRICULUM_CHAPTER_ACTIVE =
+  'border-l-[4px] border-brand-500 bg-brand-100 text-brand-900 font-semibold dark:border-brand-400 dark:bg-brand-900/60 dark:text-brand-100';
+const CURRICULUM_CHAPTER_INACTIVE =
+  'border-l-[4px] border-transparent bg-white text-slate-800 hover:bg-slate-100 hover:text-slate-900 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white';
+
+/**
+ * Curriculum content row — nested item inside the chapter's slate tray.
+ * Transparent at rest, slate-200 hover, brand-100 ground when selected with a
+ * thinner brand-400 left stripe. Different brand shade from the chapter so
+ * the two read as parent and child even when both happen to be selected.
+ */
+const CURRICULUM_CONTENT_ACTIVE =
+  'border-l-[3px] border-brand-500 bg-brand-200 text-brand-900 font-semibold dark:border-brand-400 dark:bg-brand-900/70 dark:text-brand-100';
+const CURRICULUM_CONTENT_INACTIVE =
+  'border-l-[3px] border-transparent text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700/60 dark:hover:text-white';
 
 type TabSummary = { id: string; title: string; description: string };
 type UserOpt = { id: number; name: string };
@@ -115,6 +136,38 @@ function readCurriculumOutlineFullHeightPref(): boolean {
   }
   try {
     return window.localStorage.getItem(CURRICULUM_OUTLINE_FULL_HEIGHT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Persisted UI: curriculum tab takes over the viewport for distraction-free editing. */
+const CURRICULUM_FOCUS_MODE_KEY = 'sikshya_course_builder_curriculum_focus_mode';
+
+function readCurriculumFocusModePref(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(CURRICULUM_FOCUS_MODE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Per-course dismissal flag for the first-run "Quick start" banner. Stored
+ * locally so the user only sees the welcome guide while a course is fresh —
+ * once dismissed it stays gone even across page reloads.
+ */
+const QUICK_START_DISMISSED_PREFIX = 'sikshya_course_builder_quick_start_dismissed_';
+
+function readQuickStartDismissed(courseId: number): boolean {
+  if (typeof window === 'undefined' || !courseId) {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(`${QUICK_START_DISMISSED_PREFIX}${courseId}`) === '1';
   } catch {
     return false;
   }
@@ -498,7 +551,7 @@ function ContentDripCourseBuilderGateInput(props: { config: SikshyaReactConfig; 
         </a>
       </div>
       {courseId <= 0 ? (
-        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">{__('Save the course first to pre-select it on the drip screen.', 'sikshya')}</p>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{__('Save the course first to pre-select it on the drip screen.', 'sikshya')}</p>
       ) : null}
     </div>
   );
@@ -828,7 +881,7 @@ function FieldInput(props: {
         <input
           id={id}
           type="checkbox"
-          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-500 dark:bg-slate-800"
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/40 dark:border-slate-500 dark:bg-slate-800"
           checked={Boolean(value)}
           onChange={(e) => onChange(e.target.checked)}
         />
@@ -1183,7 +1236,7 @@ function AddChapterModal(props: {
         <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             onClick={handleClose}
             disabled={busy}
           >
@@ -1238,28 +1291,37 @@ function contentTypeToPostType(t: CurriculumContentItem['type']): string {
   return m[t];
 }
 
-function entityLabelForContent(t: CurriculumContentItem['type']): string {
-  const m: Record<CurriculumContentItem['type'], string> = {
-    lesson: 'Lesson',
-    quiz: 'Quiz',
-    assignment: 'Assignment',
-    question: 'Question',
-  };
-  return m[t];
+function entityLabelForContent(config: SikshyaReactConfig, t: CurriculumContentItem['type']): string {
+  switch (t) {
+    case 'lesson':
+      return term(config, 'lesson');
+    case 'quiz':
+      return term(config, 'quiz');
+    case 'assignment':
+      return term(config, 'assignment');
+    case 'question':
+      // No terminology override key for questions yet — they're an internal
+      // sub-entity of quizzes, not surfaced as a top-level taxonomy.
+      return 'Question';
+  }
 }
 
-function curriculumItemRightMeta(item: CurriculumContentItem): string {
+/**
+ * If the duration string is purely numeric ("13") append a "min" unit so it
+ * reads as "13 min" rather than a bare integer. Pre-formatted strings ("5:30",
+ * "1 hr 15 min") pass through untouched.
+ */
+function formatLessonDuration(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  if (/^\d+(\.\d+)?$/.test(trimmed)) return `${trimmed} min`;
+  return trimmed;
+}
+
+/** Numeric duration on the right of each row (or empty when the meta is missing). */
+function curriculumItemDurationText(item: CurriculumContentItem): string {
   if (item.type === 'lesson') {
-    const bits: string[] = [];
-    const lt = (item.meta?.lesson_type || '').toLowerCase();
-    const dur = (item.meta?.duration || '').trim();
-    if (dur) bits.push(dur);
-    if (lt === 'video') bits.push('Video');
-    else if (lt === 'live') bits.push('Live');
-    else if (lt === 'scorm') bits.push('SCORM');
-    else if (lt === 'h5p') bits.push('H5P');
-    else if (lt === 'text') bits.push('Text');
-    return bits.join(' • ');
+    return formatLessonDuration(String(item.meta?.duration || ''));
   }
   if (item.type === 'quiz') {
     const tl = Number(item.meta?.time_limit || 0) || 0;
@@ -1271,6 +1333,35 @@ function curriculumItemRightMeta(item: CurriculumContentItem): string {
   }
   return '';
 }
+
+type CurriculumItemPill = { label: string; tone: 'brand' | 'rose' | 'amber' | 'emerald' | 'accent' | 'slate' };
+
+/** Returns the content-type pill shown next to each row (label + tone). */
+function curriculumItemTypePill(config: SikshyaReactConfig, item: CurriculumContentItem): CurriculumItemPill {
+  if (item.type === 'quiz') return { label: term(config, 'quiz'), tone: 'amber' };
+  if (item.type === 'assignment') return { label: term(config, 'assignment'), tone: 'emerald' };
+  if (item.type === 'lesson') {
+    const lt = (item.meta?.lesson_type || '').toLowerCase();
+    // Technical media types (Video / Live / SCORM / H5P / Text) describe how
+    // the content is delivered, not the domain — keep these hard-coded.
+    if (lt === 'video') return { label: 'Video', tone: 'brand' };
+    if (lt === 'live') return { label: 'Live', tone: 'rose' };
+    if (lt === 'scorm') return { label: 'SCORM', tone: 'accent' };
+    if (lt === 'h5p') return { label: 'H5P', tone: 'accent' };
+    if (lt === 'text') return { label: 'Text', tone: 'slate' };
+    return { label: term(config, 'lesson'), tone: 'slate' };
+  }
+  return { label: '', tone: 'slate' };
+}
+
+const CURRICULUM_PILL_TONES: Record<CurriculumItemPill['tone'], string> = {
+  brand: 'bg-brand-50 text-brand-700 dark:bg-brand-950/40 dark:text-brand-300',
+  rose: 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300',
+  amber: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
+  emerald: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+  accent: 'bg-accent-50 text-accent-700 dark:bg-accent-950/40 dark:text-accent-300',
+  slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+};
 
 /** Short labels for the horizontal tab strip (full title stays in `title` tooltip). */
 function builderTabShortLabel(tabId: string, fallback: string): string {
@@ -1374,11 +1465,11 @@ function BuilderSectionMenu({
   return (
     <nav className="flex flex-col p-2 lg:sticky lg:top-4 lg:max-h-[min(80vh,calc(100vh-6rem))] lg:overflow-y-auto lg:p-3" aria-label={__('Form sections', 'sikshya')}>
       <div className="mb-3 flex items-center justify-between gap-2 px-2">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Sections
         </div>
         {total > 0 ? (
-          <span className="rounded-full bg-slate-200/80 px-2 py-0.5 text-[10px] font-medium tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+          <span className="rounded-full bg-slate-200/80 px-2 py-0.5 text-xs font-medium tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             {activeIndex >= 0 ? activeIndex + 1 : '–'} / {total}
           </span>
         ) : null}
@@ -1393,7 +1484,7 @@ function BuilderSectionMenu({
               <button
                 type="button"
                 onClick={() => onSelectSection(key)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 ${
+                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
                   active ? BUILDER_NAV_ACTIVE : BUILDER_NAV_INACTIVE
                 }`}
               >
@@ -1409,7 +1500,7 @@ function BuilderSectionMenu({
                 <span className="min-w-0 flex-1">
                   <span className="block leading-snug">{label}</span>
                   {section.section?.description ? (
-                    <span className="mt-0.5 line-clamp-2 text-[11px] font-normal text-slate-500 dark:text-slate-500">
+                    <span className="mt-0.5 line-clamp-2 text-xs font-normal text-slate-500 dark:text-slate-500">
                       {section.section.description}
                     </span>
                   ) : null}
@@ -1492,13 +1583,36 @@ function CourseBuilderEditor({
   title: string;
   courseId: number;
 }) {
-  const { navigateHref } = useAdminRouting();
+  const { navigateHref, registerNavigationBlocker } = useAdminRouting();
   const [activeTab, setActiveTab] = useState('course');
+  const courseLower = termLower(config, 'course');
   const [values, setValues] = useState<Record<string, unknown>>({});
+  /**
+   * True when the user has edited a field since the last successful save (or
+   * since bootstrap finished). Drives the `beforeunload` guard so closing the
+   * tab / refreshing / navigating away surfaces the native "leave site?" prompt
+   * instead of silently dropping the in-flight edits.
+   */
+  const [dirty, setDirty] = useState(false);
+  /**
+   * Ref-mirror of `dirty` for use inside the bootstrap effect, which must NOT
+   * re-run on every keystroke. Lets the bootstrap arrival handler ask "did the
+   * user already type something?" without subscribing to dirty changes.
+   */
+  const dirtyRef = useRef(dirty);
+  dirtyRef.current = dirty;
   const [curriculumTree, setCurriculumTree] = useState<CurriculumChapterTree[]>([]);
   const [curriculumLoading, setCurriculumLoading] = useState(false);
   const [curriculumError, setCurriculumError] = useState<unknown>(null);
   const [curriculumOutlineSaving, setCurriculumOutlineSaving] = useState(false);
+  /**
+   * Synchronous guard for outline-reorder persistence. `useState` updates are
+   * async, so two rapid drops in the same microtask can both read the previous
+   * `curriculumOutlineSaving` value (false) and both start a save — corrupting
+   * the snapshot/rollback logic in `persistCurriculumOutline`. The ref flips
+   * synchronously and is the authoritative in-flight signal.
+   */
+  const curriculumOutlinePersistInFlightRef = useRef(false);
   const [curriculumOutlineError, setCurriculumOutlineError] = useState<unknown>(null);
   const [openChapters, setOpenChapters] = useState<Record<number, boolean>>({});
   const [curriculumSelection, setCurriculumSelection] = useState<CurriculumSelection>(null);
@@ -1512,6 +1626,10 @@ function CourseBuilderEditor({
   const [addContentError, setAddContentError] = useState<unknown>(null);
   /** When true, outline uses page scroll; when false, outline scrolls inside the curriculum column. */
   const [curriculumOutlineFullHeight, setCurriculumOutlineFullHeight] = useState(readCurriculumOutlineFullHeightPref);
+  /** When true, the curriculum tab covers the entire viewport for distraction-free editing. */
+  const [curriculumFocusMode, setCurriculumFocusMode] = useState(readCurriculumFocusModePref);
+  /** Per-course dismissal of the "Quick start" welcome banner. Re-reads on bootstrap. */
+  const [quickStartDismissed, setQuickStartDismissed] = useState(false);
   const toast = useTopRightToast(5200);
   const { confirm: confirmDialog } = useSikshyaDialog();
   const [saving, setSaving] = useState(false);
@@ -1521,7 +1639,8 @@ function CourseBuilderEditor({
   }, []);
   const [openSectionKey, setOpenSectionKey] = useState<string | null>(null);
   const [chapterModalOpen, setChapterModalOpen] = useState(false);
-  const [newChapterTitle, setNewChapterTitle] = useState('New chapter');
+  const defaultNewChapterTitle = `New ${termLower(config, 'chapter')}`;
+  const [newChapterTitle, setNewChapterTitle] = useState(defaultNewChapterTitle);
   const [chapterModalBusy, setChapterModalBusy] = useState(false);
   const bootOnceRef = useRef(false);
 
@@ -1533,6 +1652,77 @@ function CourseBuilderEditor({
       /* ignore quota / private mode */
     }
   }, []);
+
+  const setCurriculumFocusModePersisted = useCallback((next: boolean) => {
+    setCurriculumFocusMode(next);
+    try {
+      window.localStorage.setItem(CURRICULUM_FOCUS_MODE_KEY, next ? '1' : '0');
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, []);
+
+  const dismissQuickStart = useCallback((cid: number) => {
+    setQuickStartDismissed(true);
+    if (!cid) return;
+    try {
+      window.localStorage.setItem(`${QUICK_START_DISMISSED_PREFIX}${cid}`, '1');
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, []);
+
+  // Treat focus mode as scoped to the curriculum tab — it visually applies only
+  // there, but the preference persists across tab switches and reloads.
+  const focusModeActive = curriculumFocusMode && activeTab === 'curriculum';
+
+  // Esc exits focus mode. Lock body scroll while the overlay covers the viewport.
+  useEffect(() => {
+    if (!focusModeActive) {
+      return;
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setCurriculumFocusModePersisted(false);
+      }
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [focusModeActive, setCurriculumFocusModePersisted]);
+
+  // Warn before the user accidentally leaves with unsaved field edits. Only
+  // armed while `dirty` is true so it stays out of the way during normal flow.
+  useEffect(() => {
+    if (!dirty) {
+      return;
+    }
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      // Modern browsers ignore the custom message but require `returnValue` to
+      // be set (any truthy value) to show their native prompt.
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [dirty]);
+
+  // SPA-level navigation guard (sidebar links, in-app anchors, browser back).
+  // Mirror of the beforeunload guard for navigation that stays inside the React
+  // shell — beforeunload only fires on real page unloads.
+  useEffect(() => {
+    if (!dirty) {
+      return;
+    }
+    const unregister = registerNavigationBlocker(() =>
+      __('You have unsaved changes in this course. Leave without saving?', 'sikshya')
+    );
+    return unregister;
+  }, [dirty, registerNavigationBlocker]);
 
   useEffect(() => {
     bootOnceRef.current = false;
@@ -1557,6 +1747,32 @@ function CourseBuilderEditor({
     if (!d) {
       return;
     }
+    // First-load tab selection still runs every time the server sends fresh
+    // data, but only on the very first arrival so a later Retry doesn't yank
+    // the user away from a tab they've already chosen.
+    if (!bootOnceRef.current) {
+      const req = String(config.query?.tab || '').trim();
+      const serverTabs = Array.isArray(d.tabs) ? d.tabs : [];
+      const hasReq = req !== '' && serverTabs.some((t) => t.id === req);
+      const preferredDefault = serverTabs.some((t) => t.id === 'discovery')
+        ? 'discovery'
+        : serverTabs[0]?.id || 'course';
+      setActiveTab(hasReq ? req : preferredDefault);
+      bootOnceRef.current = true;
+    }
+
+    // If a refetch arrived AFTER the user already typed something (e.g. the
+    // ApiErrorPanel "Retry" button after a transient network failure), keep
+    // their in-flight edits instead of clobbering them with the server's
+    // unchanged snapshot. They get a notice so the behaviour is explicit.
+    if (dirtyRef.current) {
+      toast.success(
+        __('Reloaded', 'sikshya'),
+        __('Your unsaved field edits were kept.', 'sikshya')
+      );
+      return;
+    }
+
     // Ensure course_type is always 'bundle' when the server confirms it,
     // OR when force_bundle_ui is set in the URL (newly-created bundle, meta just saved).
     const forcedBundle =
@@ -1568,19 +1784,88 @@ function CourseBuilderEditor({
       course_id: d.course_id,
       ...(forcedBundle ? { course_type: 'bundle' } : null),
     });
-    if (!bootOnceRef.current) {
-      const req = String(config.query?.tab || '').trim();
-      const serverTabs = Array.isArray(d.tabs) ? d.tabs : [];
-      const hasReq = req !== '' && serverTabs.some((t) => t.id === req);
-      const preferredDefault = serverTabs.some((t) => t.id === 'discovery')
-        ? 'discovery'
-        : serverTabs[0]?.id || 'course';
-      setActiveTab(hasReq ? req : preferredDefault);
-      bootOnceRef.current = true;
-    }
+    // Fresh snapshot from the server — nothing edited yet.
+    setDirty(false);
+    // toast is stable from useTopRightToast; not listed so this effect only
+    // re-runs on actual server data changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bootstrap.data, config.query?.tab]);
 
   const courseId = Number(values.course_id) || bootstrap.data?.course_id || 0;
+
+  // Refresh the quick-start dismissed flag when the resolved courseId changes
+  // — e.g. after CreateCourseModal redirects with a fresh course_id.
+  useEffect(() => {
+    setQuickStartDismissed(readQuickStartDismissed(courseId));
+  }, [courseId]);
+
+  // Strip `force_bundle_ui=1` from the URL once bootstrap has confirmed the
+  // canonical state. The flag is only needed for the first render right after
+  // CreateCourseModal redirects (before the REST bootstrap returns `is_bundle`).
+  // Leaving it in place forever causes a stale signal — if the user later
+  // switches the course type to regular, the URL still claims bundle and the
+  // bundle UI flips back on after a reload.
+  useEffect(() => {
+    if (!bootstrap.data) return;
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('force_bundle_ui')) {
+        url.searchParams.delete('force_bundle_ui');
+        window.history.replaceState({}, '', url.toString());
+      }
+    } catch {
+      /* URL mutation failed in some unusual host — non-fatal */
+    }
+  }, [bootstrap.data]);
+
+  // One-shot flash from CreateCourseModal: when the modal asked for slug "X"
+  // but WordPress stored "X-2" (collision) or "x-y-z" (sanitized), inform the
+  // user so they know their final public URL.
+  useEffect(() => {
+    if (!courseId || typeof window === 'undefined') return;
+    const key = `sikshya_course_builder_slug_notice_${courseId}`;
+    try {
+      const raw = window.sessionStorage.getItem(key);
+      if (!raw) return;
+      window.sessionStorage.removeItem(key);
+      const parsed = JSON.parse(raw) as { requested?: string; final?: string };
+      if (parsed.requested && parsed.final && parsed.requested !== parsed.final) {
+        toast.success(
+          __('URL adjusted', 'sikshya'),
+          `Requested "${parsed.requested}" was already taken or had unsupported characters — saved as "${parsed.final}".`
+        );
+      }
+    } catch {
+      /* malformed flash — discard */
+    }
+    // toast is stable; explicitly omit from deps to fire exactly once per courseId.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId]);
+
+  /**
+   * Silent refetch of the curriculum tree from the server. Use after operations
+   * that change chapter/lesson titles or statuses (embedded editor saves) so
+   * the outline reflects fresh data without a full builder bootstrap.
+   * Returns true on success, false on error — callers can ignore.
+   */
+  const refetchCurriculumTree = useCallback(async (): Promise<boolean> => {
+    if (!courseId) {
+      return false;
+    }
+    try {
+      const res = await getSikshyaApi().get<{ success: boolean; data?: { chapters: CurriculumChapterTree[] } }>(
+        SIKSHYA_ENDPOINTS.admin.courseCurriculumTree(courseId)
+      );
+      if (res.success && res.data?.chapters) {
+        setCurriculumTree(res.data.chapters);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }, [courseId]);
 
   useEffect(() => {
     if (activeTab !== 'curriculum' || !courseId) {
@@ -1704,6 +1989,7 @@ function CourseBuilderEditor({
       }
       return next;
     });
+    setDirty(true);
   };
 
   const onSave = async (status: string) => {
@@ -1715,6 +2001,9 @@ function CourseBuilderEditor({
         );
         return;
       }
+      // The embedded editor may have changed a chapter/lesson title or status —
+      // refresh the outline so the visible row matches the saved post.
+      void refetchCurriculumTree();
     }
     setSaving(true);
     try {
@@ -1741,8 +2030,16 @@ function CourseBuilderEditor({
         return;
       }
       const msg = res.message || 'Saved.';
+      const prevStatus = String(values.course_status ?? 'draft').toLowerCase();
       if (status === 'publish') {
         toast.success(__('Published', 'sikshya'), msg);
+      } else if (prevStatus === 'publish' && status !== 'publish') {
+        // Was visible to learners — now reverted to draft. Make the transition
+        // unambiguous so the user doesn't think the save was a no-op.
+        toast.success(
+          __('Unpublished', 'sikshya'),
+          __('Reverted to draft. Learners can no longer see this course.', 'sikshya')
+        );
       } else {
         toast.success(__('Saved', 'sikshya'), msg);
       }
@@ -1752,6 +2049,32 @@ function CourseBuilderEditor({
       // dropping any in-flight edits the user hadn't blurred yet. Local state
       // already matches what we just POSTed; we only need to flip the status.
       setValues((prev) => ({ ...prev, course_status: status }));
+      // Successful save → no pending edits to lose. The next field edit will
+      // re-arm the beforeunload guard.
+      setDirty(false);
+
+      // Slug reconciliation: WordPress may have suffixed / sanitized the slug
+      // we submitted. Read the post back and surface the actual final slug if
+      // it differs, so the user isn't stuck thinking their public URL is
+      // something it isn't. Best-effort: any failure here is swallowed.
+      const submittedSlug = String(payload.slug ?? '').trim();
+      if (submittedSlug && courseId) {
+        try {
+          const post = await getWpApi().get<{ slug?: string }>(
+            `/sik_course/${courseId}?context=edit`
+          );
+          const storedSlug = String(post?.slug ?? '').trim();
+          if (storedSlug && storedSlug !== submittedSlug) {
+            setValues((prev) => ({ ...prev, slug: storedSlug }));
+            toast.success(
+              __('URL adjusted', 'sikshya'),
+              `Requested "${submittedSlug}" was already taken or had unsupported characters — saved as "${storedSlug}".`
+            );
+          }
+        } catch {
+          /* reconciliation is non-fatal — local state stays as-is */
+        }
+      }
     } catch (e) {
       toast.error(getApiErrorToastTitle(e), getToastMessageForApiFailure(e));
     } finally {
@@ -1808,9 +2131,15 @@ function CourseBuilderEditor({
   curriculumTreeRef.current = curriculumTree;
 
   const persistCurriculumOutline = async (nextTree: CurriculumChapterTree[]) => {
-    if (!courseId || curriculumOutlineSaving) {
+    if (!courseId) {
       return;
     }
+    // Synchronous in-flight check: bail BEFORE flipping any React state so a
+    // second drop in the same microtask can't race past the async setState.
+    if (curriculumOutlinePersistInFlightRef.current) {
+      return;
+    }
+    curriculumOutlinePersistInFlightRef.current = true;
     setCurriculumOutlineSaving(true);
     setCurriculumOutlineError(null);
     const snapshot = cloneCurriculumTree(curriculumTreeRef.current);
@@ -1834,6 +2163,7 @@ function CourseBuilderEditor({
       setCurriculumTree(snapshot);
       setCurriculumOutlineError(e);
     } finally {
+      curriculumOutlinePersistInFlightRef.current = false;
       setCurriculumOutlineSaving(false);
     }
   };
@@ -1889,8 +2219,8 @@ function CourseBuilderEditor({
         if (curriculumSelection.kind === 'chapter') {
           const ch = curriculumTree.find((c) => c.id === curriculumSelection.chapterId);
           setEditorHeaderMeta({
-            title: ch?.title || 'Chapter',
-            subtitleBits: ['Chapter'],
+            title: ch?.title || term(config, 'chapter'),
+            subtitleBits: [term(config, 'chapter')],
           });
           return;
         }
@@ -1904,7 +2234,7 @@ function CourseBuilderEditor({
         }>(`/${restBase}/${item.id}?context=edit`);
         if (cancelled) return;
         const m = p.meta || {};
-        const bits: string[] = [entityLabelForContent(item.type)];
+        const bits: string[] = [entityLabelForContent(config, item.type)];
         if (item.type === 'lesson') {
           const lt = String(m['_sikshya_lesson_type'] ?? m['sikshya_lesson_type'] ?? '') || '';
           const dur = String(m['_sikshya_lesson_duration'] ?? m['sikshya_lesson_duration'] ?? '') || '';
@@ -1922,7 +2252,7 @@ function CourseBuilderEditor({
         }
 
         setEditorHeaderMeta({
-          title: item.title || `${entityLabelForContent(item.type)} #${item.id}`,
+          title: item.title || `${entityLabelForContent(config, item.type)} #${item.id}`,
           subtitleBits: bits,
           status: p.status || '',
         });
@@ -1932,8 +2262,12 @@ function CourseBuilderEditor({
           title:
             curriculumSelection.kind === 'content'
               ? curriculumSelection.item.title
-              : 'Chapter',
-          subtitleBits: [curriculumSelection.kind === 'content' ? entityLabelForContent(curriculumSelection.item.type) : 'Chapter'],
+              : term(config, 'chapter'),
+          subtitleBits: [
+            curriculumSelection.kind === 'content'
+              ? entityLabelForContent(config, curriculumSelection.item.type)
+              : term(config, 'chapter'),
+          ],
         });
       }
     };
@@ -1973,7 +2307,7 @@ function CourseBuilderEditor({
         setCurriculumSelection({ kind: 'chapter', chapterId: newChapterId });
       }
       setChapterModalOpen(false);
-      setNewChapterTitle('New chapter');
+      setNewChapterTitle(defaultNewChapterTitle);
     } catch (e) {
       if (preferToastForApiError(e)) {
         setChapterActionError(null);
@@ -2095,8 +2429,18 @@ function CourseBuilderEditor({
       <AddContentTypePickerModal
         open={addContentOpen}
         addonsHref={appViewHref(config, 'addons')}
-        contextLabel="Chapter"
-        contextValue={curriculumTree.find((c) => c.id === addContentChapterId)?.title ?? ''}
+        contextLabel={term(config, 'chapter')}
+        contextValue={(() => {
+          // Fall back to the chapter's position (e.g. "Chapter #3 (untitled)")
+          // when a brand-new chapter hasn't been renamed yet. An empty value
+          // makes the modal look like it lost its anchor.
+          const idx = curriculumTree.findIndex((c) => c.id === addContentChapterId);
+          const ch = idx >= 0 ? curriculumTree[idx] : undefined;
+          const title = (ch?.title ?? '').trim();
+          if (title) return title;
+          if (idx < 0) return '';
+          return `${term(config, 'chapter')} #${idx + 1} (untitled)`;
+        })()}
         contentType={addContentType}
         onContentTypeChange={(t) => {
           setAddContentType(t);
@@ -2123,9 +2467,23 @@ function CourseBuilderEditor({
       {bootstrap.error ? (
         <ApiErrorPanel error={bootstrap.error} onRetry={bootstrap.refetch} title={__('Could not load course', 'sikshya')} />
       ) : null}
-      {!bootstrap.loading && !bootstrap.error && bootstrap.data && (
-        <div className="rounded-xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="rounded-t-xl border-b border-slate-100 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-900/90">
+      {!bootstrap.loading && !bootstrap.error && bootstrap.data && (() => {
+        const builderNode = (
+        <div
+          className={
+            focusModeActive
+              ? 'sikshya-admin-theme fixed inset-0 flex flex-col overflow-hidden border-0 bg-white dark:bg-slate-900'
+              : 'rounded-xl border border-slate-200/70 bg-white dark:border-slate-800 dark:bg-slate-900'
+          }
+          style={focusModeActive ? { zIndex: OVERLAY_Z_FOCUS_SURFACE } : undefined}
+        >
+          <div
+            className={
+              focusModeActive
+                ? 'shrink-0 border-b border-slate-100 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-900/90'
+                : 'rounded-t-xl border-b border-slate-100 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-900/90'
+            }
+          >
             <div className="flex flex-col gap-3 px-2 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3">
               {tabs.length > 1 ? (
                 <nav
@@ -2142,7 +2500,7 @@ function CourseBuilderEditor({
                         type="button"
                         title={tab.description ? `${tab.title} — ${tab.description}` : tab.title}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`relative flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 sm:px-4 ${
+                        className={`relative flex shrink-0 items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 sm:px-4 ${
                           active
                             ? 'border-brand-600 text-brand-700 dark:border-brand-400 dark:text-brand-300'
                             : 'border-transparent text-slate-500 hover:border-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200'
@@ -2171,7 +2529,7 @@ function CourseBuilderEditor({
                   const isPublished = currentStatus === 'publish';
                   return (
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${
                         isPublished
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800/70 dark:bg-emerald-950/40 dark:text-emerald-300'
                           : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300'
@@ -2188,6 +2546,41 @@ function CourseBuilderEditor({
                     </span>
                   );
                 })()}
+                {dirty ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:border-amber-800/70 dark:bg-amber-950/40 dark:text-amber-300"
+                    title={__('You have unsaved field changes. Save draft or Publish to keep them.', 'sikshya')}
+                  >
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500 dark:bg-amber-400" aria-hidden />
+                    {__('Unsaved', 'sikshya')}
+                  </span>
+                ) : null}
+                {activeTab === 'curriculum' ? (
+                  <button
+                    type="button"
+                    onClick={() => setCurriculumFocusModePersisted(!curriculumFocusMode)}
+                    title={curriculumFocusMode ? __('Exit focus mode (Esc)', 'sikshya') : __('Focus mode — fill the screen with the curriculum builder', 'sikshya')}
+                    aria-pressed={curriculumFocusMode}
+                    className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 ${
+                      curriculumFocusMode
+                        ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100 dark:border-brand-700 dark:bg-brand-950/40 dark:text-brand-200 dark:hover:bg-brand-900/40'
+                        : 'border-slate-200/90 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {curriculumFocusMode ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                        <path d="M9 9H4M4 9v5M4 9l6 6M15 9h5M20 9v5M20 9l-6 6M15 15h5M20 15v-5M20 15l-6-6M9 15H4M4 15v-5M4 15l6-6" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                        <path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6" />
+                      </svg>
+                    )}
+                    <span className="hidden sm:inline">
+                      {curriculumFocusMode ? __('Exit focus', 'sikshya') : __('Focus', 'sikshya')}
+                    </span>
+                  </button>
+                ) : null}
                 {previewUrl ? (
                   <a
                     href={previewUrl}
@@ -2231,16 +2624,18 @@ function CourseBuilderEditor({
 
           <div
             className={`grid ${
-              activeTab === 'curriculum' ? 'min-h-[min(70vh,720px)]' : 'min-h-0'
-            } grid-cols-1 divide-y divide-slate-200 dark:divide-slate-800 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:divide-x lg:divide-y-0`}
+              focusModeActive ? 'min-h-0 flex-1 overflow-y-auto' : 'min-h-0'
+            } grid-cols-1 divide-y divide-slate-200 dark:divide-slate-800 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:divide-x lg:divide-y-0 xl:grid-cols-[minmax(320px,400px)_minmax(0,1fr)]`}
           >
             {/* Left: curriculum outline OR in-page section nav */}
             <aside
               className={`order-2 flex min-h-0 flex-col bg-slate-50/50 text-slate-900 dark:bg-slate-950/40 dark:text-slate-100 lg:order-none lg:shrink-0 ${
                 activeTab === 'curriculum'
-                  ? curriculumOutlineFullHeight
-                    ? 'lg:relative lg:self-start'
-                    : 'lg:sticky lg:top-4 lg:max-h-[calc(100vh-4.5rem)] lg:self-start'
+                  ? focusModeActive
+                    ? 'lg:relative lg:self-stretch'
+                    : curriculumOutlineFullHeight
+                      ? 'lg:relative lg:self-start'
+                      : 'lg:sticky lg:top-4 lg:max-h-[calc(100vh-4.5rem)] lg:self-start'
                   : 'lg:sticky lg:top-4 lg:self-start'
               }`}
             >
@@ -2248,10 +2643,10 @@ function CourseBuilderEditor({
                 <>
                   <div className="border-b border-slate-200/70 px-4 pb-3 pt-4 dark:border-slate-800">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                      <div className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                         {term(config, 'course')} outline
                       </div>
-                      <div className="shrink-0 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                      <div className="shrink-0 text-xs font-semibold text-slate-500 dark:text-slate-400">
                         {curriculumStats.publishedLessons}/{curriculumStats.totalLessons} {termLower(config, 'lessons')}{' '}
                         published
                       </div>
@@ -2265,7 +2660,7 @@ function CourseBuilderEditor({
                         type="checkbox"
                         checked={curriculumOutlineFullHeight}
                         onChange={(e) => setCurriculumOutlineFullHeightPersisted(e.target.checked)}
-                        className="h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-600 dark:bg-slate-800 dark:focus:ring-brand-400/25"
+                        className="h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:focus:ring-brand-400/25"
                       />
                       <span className="min-w-0 text-[11.5px] font-medium leading-snug text-slate-500 dark:text-slate-400">
                         {curriculumOutlineFullHeight ? __('Outline: page scroll', 'sikshya') : __('Outline: panel scroll', 'sikshya')}
@@ -2274,7 +2669,7 @@ function CourseBuilderEditor({
                   </div>
                   <div
                     className={
-                      curriculumOutlineFullHeight ? __('flex-1 px-4 pb-4', 'sikshya') : __('flex min-h-0 flex-1 flex-col px-4 pb-4', 'sikshya')
+                      curriculumOutlineFullHeight ? 'flex-1 pb-4' : 'flex min-h-0 flex-1 flex-col pb-4'
                     }
                   >
                     <div
@@ -2338,12 +2733,12 @@ function CourseBuilderEditor({
                       </div>
                     ) : null}
                     {curriculumOutlineSaving ? (
-                      <p className="mb-2 text-center text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                      <p className="mb-2 px-4 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
                         Saving outline…
                       </p>
                     ) : null}
                     {curriculumLoading ? (
-                      <ul className="space-y-3" aria-busy="true" aria-label={__('Loading curriculum', 'sikshya')}>
+                      <ul className="space-y-3 px-4" aria-busy="true" aria-label={__('Loading curriculum', 'sikshya')}>
                         {Array.from({ length: 4 }).map((_, i) => (
                           <li key={i}>
                             <SkeletonLine className="h-4 w-full max-w-[12rem]" />
@@ -2351,7 +2746,7 @@ function CourseBuilderEditor({
                         ))}
                       </ul>
                     ) : (
-                      <ol className="mt-3 space-y-3">
+                      <ol className="mt-2 divide-y divide-slate-100 dark:divide-slate-800">
                         {curriculumTree.map((ch, idx) => {
                           const expanded = openChapters[ch.id] !== false;
                           const outlineItems = curriculumOutlineItems(ch.contents);
@@ -2421,8 +2816,8 @@ function CourseBuilderEditor({
                               }}
                             >
                               <div
-                                className={`grid grid-cols-[1.25rem_1.75rem_minmax(0,1fr)] items-center rounded-lg px-3 transition-colors ${
-                                  chapterSelected ? BUILDER_NAV_ACTIVE : BUILDER_NAV_INACTIVE
+                                className={`grid cursor-pointer grid-cols-[1.25rem_1.75rem_minmax(0,1fr)] items-center pl-2 pr-3 transition-colors ${
+                                  chapterSelected ? CURRICULUM_CHAPTER_ACTIVE : CURRICULUM_CHAPTER_INACTIVE
                                 }`}
                                 draggable={chapterRowDraggable}
                                 onClick={() => setCurriculumSelection({ kind: 'chapter', chapterId: ch.id })}
@@ -2476,12 +2871,12 @@ function CourseBuilderEditor({
                                 </button>
                                 <div className="flex min-w-0 items-center justify-between gap-2 py-2 text-left text-sm">
                                   <div className="flex min-w-0 flex-1 items-center gap-2 text-left">
-                                    <span className="text-[11px] font-semibold tabular-nums text-brand-600 dark:text-brand-300">
+                                    <span className="text-xs font-semibold tabular-nums text-brand-600 dark:text-brand-300">
                                       {String(idx + 1).padStart(2, '0')}
                                     </span>
                                     <span className="min-w-0 flex-1 truncate font-medium leading-snug">{ch.title}</span>
                                   </div>
-                                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                     {chapterPublished}/{chapterTotal}
                                   </span>
                                   <div
@@ -2496,7 +2891,7 @@ function CourseBuilderEditor({
                                 </div>
                               </div>
                               {expanded ? (
-                                <div className="border-t border-slate-100 dark:border-slate-800">
+                                <div className="bg-slate-100/70 dark:bg-slate-800/40">
                                   <div className="px-3 pb-2 pt-1.5">
                                     <div className="min-w-0 space-y-0.5">
                                       {outlineItems.length > 0 ? (
@@ -2521,7 +2916,7 @@ function CourseBuilderEditor({
                                               },
                                               {
                                                 key: 'delete',
-                                                label: `Delete ${entityLabelForContent(item.type).toLowerCase()}`,
+                                                label: `Delete ${entityLabelForContent(config, item.type).toLowerCase()}`,
                                                 danger: true,
                                                 onClick: () => void permanentlyDeleteCurriculumPost(pt, item.id),
                                               },
@@ -2596,10 +2991,8 @@ function CourseBuilderEditor({
                                                     <NavIcon name="dragHandle" className="h-4 w-4" />
                                                   </span>
                                                   <div
-                                                    className={`flex min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm leading-snug transition-colors ${
-                                                      sel
-                                                        ? `${BUILDER_NAV_ACTIVE_NESTED} font-medium`
-                                                        : BUILDER_NAV_INACTIVE
+                                                    className={`flex min-w-0 cursor-pointer items-center gap-2 pl-2 py-1.5 text-left text-sm leading-snug transition-colors ${
+                                                      sel ? CURRICULUM_CONTENT_ACTIVE : CURRICULUM_CONTENT_INACTIVE
                                                     }`}
                                                   >
                                                     <button
@@ -2615,24 +3008,42 @@ function CourseBuilderEditor({
                                                       className="flex min-w-0 flex-1 items-center gap-2 text-left"
                                                     >
                                                       <span
-                                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+                                                        className={`flex h-5 w-5 shrink-0 items-center justify-center ${
                                                           sel
-                                                            ? 'bg-brand-100 text-brand-700 dark:bg-brand-950/80 dark:text-brand-300'
-                                                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200'
+                                                            ? 'text-brand-700 dark:text-brand-300'
+                                                            : 'text-slate-500 dark:text-slate-400'
                                                         }`}
                                                       >
                                                         <NavIcon
                                                           name={curriculumItemIcon(item)}
-                                                          className="h-4 w-4"
+                                                          className="h-5 w-5"
                                                         />
                                                       </span>
                                                       <span className="min-w-0 flex-1 truncate">{item.title}</span>
                                                     </button>
-                                                    {curriculumItemRightMeta(item) ? (
-                                                      <span className="hidden shrink-0 text-xs font-medium tabular-nums text-slate-500 dark:text-slate-400 sm:inline">
-                                                        {curriculumItemRightMeta(item)}
-                                                      </span>
-                                                    ) : null}
+                                                    {(() => {
+                                                      const dur = curriculumItemDurationText(item);
+                                                      const pill = curriculumItemTypePill(config, item);
+                                                      if (!dur && !pill.label) return null;
+                                                      return (
+                                                        <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+                                                          {dur ? (
+                                                            <span className="text-xs font-medium tabular-nums text-slate-500 dark:text-slate-400">
+                                                              {dur}
+                                                            </span>
+                                                          ) : null}
+                                                          {pill.label ? (
+                                                            <span
+                                                              className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ${
+                                                                CURRICULUM_PILL_TONES[pill.tone]
+                                                              }`}
+                                                            >
+                                                              {pill.label}
+                                                            </span>
+                                                          ) : null}
+                                                        </div>
+                                                      );
+                                                    })()}
                                                     <div className="shrink-0">
                                                       <RowActionsMenu items={contentActions} ariaLabel={__('Content actions', 'sikshya')} />
                                                     </div>
@@ -2716,7 +3127,7 @@ function CourseBuilderEditor({
                           );
                         })}
                         {!curriculumTree.length && !curriculumError && (
-                          <li className="rounded-xl border border-dashed border-slate-200 bg-white/50 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                          <li className="mx-4 rounded-xl border border-dashed border-slate-200 bg-white/50 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
                             <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{__('Start with a chapter', 'sikshya')}</p>
                             <p className="mx-auto mt-2 max-w-[16rem] text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                               Chapters are sections (like “Week 1”). Use “Add chapter” below, open the chapter, then “Add content”
@@ -2726,7 +3137,8 @@ function CourseBuilderEditor({
                         )}
                       </ol>
                     )}
-                    <div className="mt-4">
+                    </div>
+                    <div className="mt-3 shrink-0 px-4">
                       <ButtonPrimary
                         type="button"
                         disabled={!courseId || saving || curriculumLoading}
@@ -2735,13 +3147,12 @@ function CourseBuilderEditor({
                           if (!courseId) {
                             return;
                           }
-                          setNewChapterTitle('New chapter');
+                          setNewChapterTitle(defaultNewChapterTitle);
                           setChapterModalOpen(true);
                         }}
                       >
                         + Add chapter
                       </ButtonPrimary>
-                    </div>
                     </div>
                   </div>
                 </>
@@ -2757,6 +3168,76 @@ function CourseBuilderEditor({
 
             {/* Center: main editor */}
             <main className="order-1 min-w-0 bg-white px-3 py-5 sm:px-5 lg:order-none lg:px-6 lg:py-6 xl:px-8 dark:bg-slate-900">
+              {!quickStartDismissed && courseId ? (
+                <div className="mb-6 overflow-hidden rounded-xl border border-brand-100 bg-gradient-to-br from-brand-50/70 via-white to-slate-50 dark:border-brand-900/50 dark:from-brand-950/30 dark:via-slate-900 dark:to-slate-900/40">
+                  <div className="flex items-start gap-3 p-4 sm:p-5">
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white shadow-sm"
+                      aria-hidden
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                        <path d="M12 2l3 7h7l-5.5 4.5L19 22l-7-5-7 5 2.5-8.5L2 9h7l3-7z" />
+                      </svg>
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                        {__('Quick start', 'sikshya')}
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                        {__('Build your', 'sikshya')} {courseLower}{' '}
+                        {__('in four short steps. Save draft anytime — nothing publishes until you hit Publish.', 'sikshya')}
+                      </p>
+                      <ol className="mt-3 grid gap-1.5 text-[12.5px] leading-snug text-slate-700 dark:text-slate-200 sm:grid-cols-2">
+                        <li className="flex items-start gap-2">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 dark:bg-brand-900/60 dark:text-brand-200">1</span>
+                          <span><strong className="font-semibold">{__('Course details', 'sikshya')}</strong> — {__('name, slug, summary, cover image', 'sikshya')}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 dark:bg-brand-900/60 dark:text-brand-200">2</span>
+                          <span><strong className="font-semibold">{__('Curriculum', 'sikshya')}</strong> — {__('add chapters, then lessons, quizzes, assignments', 'sikshya')}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 dark:bg-brand-900/60 dark:text-brand-200">3</span>
+                          <span><strong className="font-semibold">{__('Pricing & access', 'sikshya')}</strong> — {__('set price, free preview, enrolment rules', 'sikshya')}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700 dark:bg-brand-900/60 dark:text-brand-200">4</span>
+                          <span><strong className="font-semibold">{__('Publish', 'sikshya')}</strong> — {__('make it visible to learners', 'sikshya')}</span>
+                        </li>
+                      </ol>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        {activeTab !== 'curriculum' ? (
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('curriculum')}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-brand-700"
+                          >
+                            {__('Go to Curriculum', 'sikshya')}
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3" aria-hidden>
+                              <path d="M11 4l5 6-5 6v-4H4V8h7V4z" />
+                            </svg>
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => dismissQuickStart(courseId)}
+                          className="text-xs font-medium text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+                        >
+                          {__('Got it, hide this', 'sikshya')}
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => dismissQuickStart(courseId)}
+                      aria-label={__('Dismiss quick-start guide', 'sikshya')}
+                      className="-mr-1 -mt-1 shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                    >
+                      <span className="block text-lg leading-none" aria-hidden>×</span>
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               {activeTab !== 'curriculum' && activeTabMeta?.description ? (
                 <div className="mb-6 rounded-xl border border-slate-100 bg-slate-50/90 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:bg-slate-800/45 dark:text-slate-300">
                   {activeTabMeta.description}
@@ -2785,7 +3266,7 @@ function CourseBuilderEditor({
                         postType: 'sik_chapter',
                         postId: curriculumSelection.chapterId,
                         backHref: builderBackHref,
-                        entityLabel: 'Chapter',
+                        entityLabel: term(config, 'chapter'),
                         embedded: true,
                         forcedCourseId: courseId,
                         exposeSave: registerEmbeddedSave,
@@ -2798,7 +3279,7 @@ function CourseBuilderEditor({
                         postType: contentTypeToPostType(curriculumSelection.item.type),
                         postId: curriculumSelection.item.id,
                         backHref: builderBackHref,
-                        entityLabel: entityLabelForContent(curriculumSelection.item.type),
+                        entityLabel: entityLabelForContent(config, curriculumSelection.item.type),
                         embedded: true,
                         exposeSave: registerEmbeddedSave,
                       })}
@@ -2827,7 +3308,7 @@ function CourseBuilderEditor({
                   >
                     <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                       {activeTabMeta ? (
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
                           {activeTabMeta.title}
                         </p>
                       ) : null}
@@ -2885,7 +3366,11 @@ function CourseBuilderEditor({
             </main>
           </div>
         </div>
-      )}
+        );
+        return focusModeActive && typeof document !== 'undefined'
+          ? createPortal(builderNode, document.body)
+          : builderNode;
+      })()}
     </EmbeddableShell>
   );
 }

@@ -5,24 +5,128 @@
  */
 
 :root {
+  /* =====================================================================
+   * Brand palette (Sikshya primary blue). Mirrors the admin React
+   * `brand-*` Tailwind scale (client/src/index.css :root). brand-500 is
+   * the canonical action color; brand-600 is the hover/pressed variant.
+   * ===================================================================== */
+  --sik-acc-brand-50:  #f0f5fb;
+  --sik-acc-brand-100: #e8f0fa;
+  --sik-acc-brand-200: #c8d8ee;
+  --sik-acc-brand-300: #a8c0e2;
+  --sik-acc-brand-400: #7299cb;
+  --sik-acc-brand-500: #2c5ba8;
+  --sik-acc-brand-600: #264e8d;
+  --sik-acc-brand-700: #1f4585;
+  --sik-acc-brand-800: #1a3a6e;
+  --sik-acc-brand-900: #142e57;
+  --sik-acc-brand-950: #0e203e;
+
+  /* =====================================================================
+   * Accent palette (Sikshya logo purple, secondary). Used for Pro /
+   * upgrade surfaces and premium pills. accent-600 = base.
+   * ===================================================================== */
+  --sik-acc-accent-50:  #fbf5fb;
+  --sik-acc-accent-100: #f5e8f5;
+  --sik-acc-accent-200: #ebd5ed;
+  --sik-acc-accent-300: #d9bedc;
+  --sik-acc-accent-400: #c5a3c9;
+  --sik-acc-accent-500: #a26ea7;
+  --sik-acc-accent-600: #7a2e80;
+  --sik-acc-accent-700: #5e2266;
+  --sik-acc-accent-800: #4a1a51;
+  --sik-acc-accent-900: #3a142d;
+  --sik-acc-accent-950: #280f1f;
+
+  /* =====================================================================
+   * Neutral palette (Tailwind slate). Borders, surfaces, body text.
+   * ===================================================================== */
+  --sik-acc-slate-50:  #f8fafc;
+  --sik-acc-slate-100: #f1f5f9;
+  --sik-acc-slate-200: #e2e8f0;
+  --sik-acc-slate-300: #cbd5e1;
+  --sik-acc-slate-400: #94a3b8;
+  --sik-acc-slate-500: #64748b;
+  --sik-acc-slate-600: #475569;
+  --sik-acc-slate-700: #334155;
+  --sik-acc-slate-800: #1e293b;
+  --sik-acc-slate-900: #0f172a;
+  --sik-acc-slate-950: #020617;
+
+  /* =====================================================================
+   * Status tones (mirror StatusBadge variants in the admin React).
+   * Each tone has a tinted background, a strong text color, and a
+   * darker text variant for paragraph copy inside an alert/banner.
+   * ===================================================================== */
+  --sik-acc-success-50:  #ecfdf5;  /* emerald-50  */
+  --sik-acc-success-600: #059669;  /* emerald-600 */
+  --sik-acc-success-700: #047857;  /* emerald-700 */
+  --sik-acc-success-800: #065f46;  /* emerald-800 */
+  --sik-acc-warning-50:  #fffbeb;  /* amber-50    */
+  --sik-acc-warning-600: #d97706;  /* amber-600   */
+  --sik-acc-warning-700: #b45309;  /* amber-700   */
+  --sik-acc-warning-800: #92400e;  /* amber-800   */
+  --sik-acc-danger-50:   #fef2f2;  /* red-50      */
+  --sik-acc-danger-600:  #dc2626;  /* red-600     */
+  --sik-acc-danger-700:  #b91c1c;  /* red-700     */
+  --sik-acc-danger-800:  #991b1b;  /* red-800     */
+  --sik-acc-info-50:     #f0f9ff;  /* sky-50      */
+  --sik-acc-info-600:    #0284c7;  /* sky-600     */
+  --sik-acc-info-700:    #0369a1;  /* sky-700     */
+  --sik-acc-info-800:    #075985;  /* sky-800     */
+
+  /* =====================================================================
+   * Semantic role tokens (preserve legacy aliases; map to canonical).
+   * ===================================================================== */
   --sik-acc-bg: #f4f6f9;
   --sik-acc-surface: #ffffff;
-  --sik-acc-border: #e2e8f0;
-  --sik-acc-text: #0f172a;
-  --sik-acc-muted: #64748b;
-  --sik-acc-brand: #2c5ba8;
-  --sik-acc-brand-hover: #1f4585;
+  --sik-acc-surface-muted: var(--sik-acc-slate-50);
+  --sik-acc-border: var(--sik-acc-slate-200);
+  --sik-acc-text: var(--sik-acc-slate-900);
+  --sik-acc-muted: var(--sik-acc-slate-500);
+  --sik-acc-brand: var(--sik-acc-brand-500);
+  --sik-acc-brand-hover: var(--sik-acc-brand-700);
   --sik-acc-sidebar: #ffffff;
-  --sik-acc-success: #059669;
-  --sik-acc-success-bg: #ecfdf5;
-  --sik-acc-radius: 12px;
-  --sik-acc-radius-sm: 8px;
-  --sik-acc-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --sik-acc-success: var(--sik-acc-success-600);
+  --sik-acc-success-bg: var(--sik-acc-success-50);
+
+  /* =====================================================================
+   * Radius scale — mirrors Tailwind rounded-lg / xl / 2xl.
+   * Legacy aliases preserved.
+   * ===================================================================== */
+  --sik-acc-radius-sm: 8px;   /* rounded-lg  */
+  --sik-acc-radius:    12px;  /* rounded-xl  */
+  --sik-acc-radius-lg: 16px;  /* rounded-2xl */
+  --sik-acc-radius-pill: 9999px;
+
+  /* =====================================================================
+   * Focus ring tokens — mirror admin React focus-visible:ring-brand-500/40.
+   * ===================================================================== */
+  --sik-acc-focus-ring: 0 0 0 3px rgba(44, 91, 168, 0.4);
+  --sik-acc-focus-ring-soft: 0 0 0 3px rgba(44, 91, 168, 0.2);
+
+  /* =====================================================================
+   * Shadow scale.
+   * ===================================================================== */
+  --sik-acc-shadow:    0 1px 3px rgba(15, 23, 42, 0.06);
   --sik-acc-shadow-md: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --sik-acc-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  /* =====================================================================
+   * Typography scale — mirrors Tailwind text-xs / sm / base / lg / xl.
+   * ===================================================================== */
+  --sik-acc-text-xs:   12px;
+  --sik-acc-text-sm:   14px;
+  --sik-acc-text-base: 16px;
+  --sik-acc-text-lg:   18px;
+  --sik-acc-text-xl:   20px;
+  --sik-acc-text-2xl:  24px;
+
+  /* Layout. */
   --sik-acc-sidebar-w: 292px;
   --sik-acc-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  /* Spacing scale (keeps UI rhythm consistent across partials/hooks) */
+  /* Spacing scale (keeps UI rhythm consistent across partials/hooks). */
   --sik-acc-space-6: 6px;
   --sik-acc-space-8: 8px;
   --sik-acc-space-10: 10px;
@@ -31,12 +135,10 @@
   --sik-acc-space-20: 20px;
   --sik-acc-space-24: 24px;
 
-  /* Main column: full width of content area with symmetric page gutters */
+  /* Main column. */
   --sik-acc-page-pad-x: clamp(16px, 3vw, 36px);
   --sik-acc-page-pad-y: clamp(16px, 2.4vw, 28px);
-  /* Full width inside `.sik-acc-main`; gutters come from `--sik-acc-page-pad-x` */
   --sik-acc-content-max: none;
-  /* Keep sidebar brand + topbar height perfectly aligned */
   --sik-acc-shell-header-h: 96px;
 }
 
@@ -46,12 +148,14 @@
   box-sizing: border-box;
 }
 
-/* Accessible focus ring (standalone shell, no theme styles) */
+/* Accessible focus ring (standalone shell, no theme styles).
+ * Matches the admin React focus-visible:ring-brand-500/40 visual weight
+ * so the learner-facing focus indicator reads the same as the admin's. */
 :where(a, button, input, select, textarea, [tabindex]):focus {
   outline: none;
 }
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid rgba(44, 91, 168, 0.35);
+  outline: 3px solid rgba(44, 91, 168, 0.4);
   outline-offset: 2px;
 }
 
@@ -142,7 +246,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-nav-toggle:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-nav-toggle__bars {
@@ -241,25 +345,25 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   padding: 0.63rem 1.3rem;
   font-size: 0.875rem;
   font-weight: 560;
-  color: #334155;
+  color: var(--sik-acc-slate-700);
   text-decoration: none;
   border-left: 3px solid transparent;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sik-acc-nav a:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
   color: var(--sik-acc-text);
 }
 
 .sik-acc-nav a:focus-visible {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
   color: var(--sik-acc-text);
 }
 
 .sik-acc-nav a.is-active {
   color: var(--sik-acc-brand);
-  background: #f5f8fc;
+  background: var(--sik-acc-brand-50);
   border-left-color: var(--sik-acc-brand);
   font-weight: 620;
 }
@@ -271,9 +375,9 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
+  background: var(--sik-acc-slate-50);
+  border: 1px solid var(--sik-acc-slate-200);
+  color: var(--sik-acc-slate-600);
   flex-shrink: 0;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
@@ -290,8 +394,8 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 .sik-acc-nav a:hover .sik-acc-nav__icon,
 .sik-acc-nav a:focus-visible .sik-acc-nav__icon,
 .sik-acc-nav a.is-active .sik-acc-nav__icon {
-  background: #f5f8fc;
-  border-color: #e8f0fa;
+  background: var(--sik-acc-brand-50);
+  border-color: var(--sik-acc-brand-100);
   color: var(--sik-acc-brand);
 }
 
@@ -402,7 +506,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-user-btn:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
   border-color: var(--sik-acc-border);
 }
 
@@ -445,7 +549,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-user-dropdown a:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-user {
@@ -513,7 +617,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-btn:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-btn--primary {
@@ -546,7 +650,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   border-radius: var(--sik-acc-radius);
   padding: 1.5rem 1.75rem;
   margin: 0;
-  background: linear-gradient(120deg, #2c5ba8 0%, #5e2266 45%, #7a2e80 100%);
+  background: linear-gradient(120deg, var(--sik-acc-brand-500) 0%, var(--sik-acc-accent-700) 45%, var(--sik-acc-accent-600) 100%);
   color: #fff;
   box-shadow: var(--sik-acc-shadow-md);
 }
@@ -613,6 +717,68 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   max-width: 42rem;
 }
 
+.sik-acc-dash-badges {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+.sik-acc-dash-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+  background: var(--sik-acc-surface);
+  border: 1px solid var(--sik-acc-border);
+  border-radius: var(--sik-acc-radius);
+  box-shadow: var(--sik-acc-shadow);
+}
+
+.sik-acc-dash-badge__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  color: rgb(var(--sikshya-brand-700-rgb, 60, 90, 140));
+  background: rgba(var(--sikshya-brand-500-rgb, 80, 120, 183), 0.12);
+}
+
+.sik-acc-dash-badge__glyph .sikshya-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.sik-acc-dash-badge__body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.sik-acc-dash-badge__name {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--sik-acc-text);
+}
+
+.sik-acc-dash-badge__desc,
+.sik-acc-dash-badge__date {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: var(--sik-acc-muted);
+  line-height: 1.45;
+}
+
+.sik-acc-dash-badge__date {
+  font-weight: 600;
+  color: rgb(var(--sikshya-brand-700-rgb, 60, 90, 140));
+}
+
 .sik-acc-dash-snapshot {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -654,7 +820,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-stat--total::before {
-  background: #7a2e80;
+  background: var(--sik-acc-accent-600);
 }
 
 .sik-acc-dash-stat__value {
@@ -706,7 +872,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--sik-acc-slate-300);
   box-shadow: var(--sik-acc-shadow-md);
 }
 
@@ -746,28 +912,28 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-card__icon--blue {
-  background: #f5f8fc;
+  background: var(--sik-acc-brand-50);
   color: var(--sik-acc-brand);
 }
 
 .sik-acc-dash-card__icon--green {
-  background: #ecfdf5;
+  background: var(--sik-acc-success-50);
   color: var(--sik-acc-success);
 }
 
 .sik-acc-dash-card__icon--slate {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--sik-acc-slate-100);
+  color: var(--sik-acc-slate-600);
 }
 
 .sik-acc-dash-card__icon--violet {
-  background: #fbf5fb;
-  color: #7a2e80;
+  background: var(--sik-acc-accent-50);
+  color: var(--sik-acc-accent-600);
 }
 
 .sik-acc-dash-card__icon--amber {
-  background: #fffbeb;
-  color: #b45309;
+  background: var(--sik-acc-warning-50);
+  color: var(--sik-acc-warning-700);
 }
 
 .sik-acc-dash-card__badge {
@@ -776,8 +942,8 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   font-variant-numeric: tabular-nums;
   padding: 0.2rem 0.5rem;
   border-radius: 9999px;
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--sik-acc-slate-100);
+  color: var(--sik-acc-slate-700);
   border: 1px solid var(--sik-acc-border);
 }
 
@@ -860,7 +1026,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-dash-shop-tile:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-dash-shop-tile:focus-visible {
@@ -873,7 +1039,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   width: 2rem;
   height: 2rem;
   border-radius: var(--sik-acc-radius-sm);
-  background: #f5f8fc;
+  background: var(--sik-acc-brand-50);
   color: var(--sik-acc-brand);
   display: flex;
   align-items: center;
@@ -954,6 +1120,120 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   overflow: hidden;
 }
 
+.sik-acc-resume {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--sikshya-brand-500-rgb, 80, 120, 183), 0.08),
+    rgba(var(--sikshya-accent-500-rgb, 80, 120, 183), 0.04)
+  );
+  border: 1px solid rgba(var(--sikshya-brand-500-rgb, 80, 120, 183), 0.18);
+  border-radius: var(--sik-acc-radius);
+  box-shadow: var(--sik-acc-shadow);
+}
+
+.sik-acc-resume__meta {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.sik-acc-resume__eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgb(var(--sikshya-brand-700-rgb, 60, 90, 140));
+}
+
+.sik-acc-resume__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--sik-acc-fg, var(--sik-acc-slate-900));
+}
+
+.sik-acc-resume__lesson {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--sik-acc-muted, var(--sik-acc-slate-600));
+}
+
+.sik-acc-resume__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.sik-acc-resume__progress-bar {
+  position: relative;
+  height: 0.45rem;
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sik-acc-resume__progress-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: rgb(var(--sikshya-brand-500-rgb, 80, 120, 183));
+  border-radius: inherit;
+  transition: width 220ms ease;
+}
+
+.sik-acc-resume__progress-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--sik-acc-muted, var(--sik-acc-slate-600));
+}
+
+.sik-acc-resume__actions {
+  flex: 0 0 auto;
+}
+
+.sik-acc-resume__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgb(var(--sikshya-brand-600-rgb, 60, 100, 165));
+  border-radius: 0.6rem;
+  text-decoration: none;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.sik-acc-resume__cta:hover,
+.sik-acc-resume__cta:focus-visible {
+  background: rgb(var(--sikshya-brand-700-rgb, 50, 90, 150));
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .sik-acc-resume {
+    padding: 1rem 1.1rem;
+  }
+  .sik-acc-resume__actions {
+    width: 100%;
+  }
+  .sik-acc-resume__cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .sik-acc-panel__head {
   display: flex;
   flex-wrap: wrap;
@@ -1013,7 +1293,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--sik-acc-muted);
-  background: #fafbfc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-table tr:last-child td {
@@ -1044,8 +1324,8 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-badge--muted {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--sik-acc-slate-100);
+  color: var(--sik-acc-slate-600);
   border-color: var(--sik-acc-border);
 }
 
@@ -1076,14 +1356,14 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-shortcut:hover {
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-shortcut__icon {
   width: 2rem;
   height: 2rem;
   border-radius: var(--sik-acc-radius-sm);
-  background: #f5f8fc;
+  background: var(--sik-acc-brand-50);
   color: var(--sik-acc-brand);
   display: flex;
   align-items: center;
@@ -1124,7 +1404,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   margin: 1rem 1.15rem 1.15rem;
   padding: 1rem;
   border-radius: var(--sik-acc-radius-sm);
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
   border: 1px solid var(--sik-acc-border);
 }
 
@@ -1278,7 +1558,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-lib-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--sik-acc-slate-300);
   box-shadow: var(--sik-acc-shadow-md);
 }
 
@@ -1294,18 +1574,18 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-lib-card__icon--blue {
-  background: #f5f8fc;
+  background: var(--sik-acc-brand-50);
   color: var(--sik-acc-brand);
 }
 
 .sik-acc-lib-card__icon--green {
-  background: #ecfdf5;
+  background: var(--sik-acc-success-50);
   color: var(--sik-acc-success);
 }
 
 .sik-acc-lib-card__icon--slate {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--sik-acc-slate-100);
+  color: var(--sik-acc-slate-600);
 }
 
 .sik-acc-lib-card__num {
@@ -1331,7 +1611,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 }
 
 .sik-acc-metric--link:hover {
-  border-color: #cbd5e1;
+  border-color: var(--sik-acc-slate-300);
 }
 
 .sik-acc-metric--link .sik-acc-metric__value {
@@ -1343,7 +1623,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #2c5ba8, #7a2e80);
+  background: linear-gradient(135deg, var(--sik-acc-brand-500), var(--sik-acc-accent-600));
   color: #fff;
   font-size: 0.875rem;
   font-weight: 700;
@@ -1369,7 +1649,7 @@ body.sikshya-account-shell:has(#sik-acc-nav-open:checked) {
 
 .sik-acc-code {
   font-size: 0.75rem;
-  background: #f1f5f9;
+  background: var(--sik-acc-slate-100);
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
   word-break: break-all;
@@ -1553,7 +1833,7 @@ a.sik-acc-cal__title:hover {
 }
 
 .sik-acc-list__score--fail {
-  color: #b91c1c;
+  color: var(--sik-acc-danger-700);
 }
 
 .sik-acc-list__score--muted {
@@ -1571,7 +1851,7 @@ a.sik-acc-cal__title:hover {
 .sik-acc-sub-card {
   padding: 1rem 1.15rem 1.15rem;
   border-top: 1px solid var(--sik-acc-border);
-  background: #fafbfc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-sub-card__row {
@@ -1683,7 +1963,7 @@ a.sik-acc-cal__title:hover {
 
 .sik-acc-input::placeholder,
 .sik-acc-textarea::placeholder {
-  color: #94a3b8;
+  color: var(--sik-acc-slate-400);
 }
 
 .sik-acc-textarea {
@@ -1727,19 +2007,19 @@ a.sik-acc-cal__title:hover {
   padding: 0.45rem 0.6rem;
   border-radius: var(--sik-acc-radius-sm);
   border: 1px solid var(--sik-acc-border);
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
 }
 
 .sik-acc-form-status--ok {
-  color: #065f46;
+  color: var(--sik-acc-success-800);
   border-color: rgba(5, 150, 105, 0.3);
-  background: #ecfdf5;
+  background: var(--sik-acc-success-50);
 }
 
 .sik-acc-form-status--err {
-  color: #991b1b;
+  color: var(--sik-acc-danger-800);
   border-color: rgba(220, 38, 38, 0.28);
-  background: #fef2f2;
+  background: var(--sik-acc-danger-50);
 }
 
 .sik-acc-lib-card--static {
@@ -1780,7 +2060,7 @@ a.sik-acc-cal__title:hover {
   text-transform: capitalize;
   border-radius: 9999px;
   border: 1px solid var(--sik-acc-border);
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
   color: var(--sik-acc-text);
 }
 
@@ -1791,14 +2071,14 @@ a.sik-acc-cal__title:hover {
 }
 
 .sik-acc-pill--danger {
-  background: #fef2f2;
+  background: var(--sik-acc-danger-50);
   border-color: rgba(185, 28, 28, 0.25);
-  color: #b91c1c;
+  color: var(--sik-acc-danger-700);
 }
 
 .sik-acc-pill--muted {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--sik-acc-slate-100);
+  color: var(--sik-acc-slate-600);
 }
 
 .sik-acc-panel__lead--tight {
@@ -1818,8 +2098,8 @@ a.sik-acc-cal__title:hover {
   padding: 0.55rem 0.7rem;
   border-radius: var(--sik-acc-radius-sm);
   border: 1px solid rgba(5, 150, 105, 0.3);
-  background: #ecfdf5;
-  color: #065f46;
+  background: var(--sik-acc-success-50);
+  color: var(--sik-acc-success-800);
   font-size: 0.8125rem;
   font-weight: 600;
   display: flex;
@@ -1910,20 +2190,20 @@ a.sik-acc-cal__title:hover {
 
 .sik-acc-notice--ok {
   border-color: rgba(5, 150, 105, 0.3);
-  background: #ecfdf5;
-  color: #065f46;
+  background: var(--sik-acc-success-50);
+  color: var(--sik-acc-success-800);
 }
 
 .sik-acc-notice--err {
   border-color: rgba(220, 38, 38, 0.28);
-  background: #fef2f2;
-  color: #991b1b;
+  background: var(--sik-acc-danger-50);
+  color: var(--sik-acc-danger-800);
 }
 
 .sik-acc-notice--pending {
   border-color: rgba(44, 91, 168, 0.28);
-  background: #f5f8fc;
-  color: #1f4585;
+  background: var(--sik-acc-brand-50);
+  color: var(--sik-acc-brand-700);
 }
 
 .sik-acc-notice__close {
@@ -1984,26 +2264,26 @@ a.sik-acc-cal__title:hover {
   font-weight: 500;
   border-radius: var(--sik-acc-radius-sm);
   border: 1px solid var(--sik-acc-border);
-  background: #f8fafc;
+  background: var(--sik-acc-slate-50);
   color: var(--sik-acc-text);
 }
 
 .sik-acc-callout--info {
   border-color: rgba(44, 91, 168, 0.28);
   background: rgba(239, 246, 255, 0.95);
-  color: #142e57;
+  color: var(--sik-acc-brand-900);
 }
 
 .sik-acc-callout--warning {
   border-color: rgba(217, 119, 6, 0.35);
-  background: #fffbeb;
-  color: #92400e;
+  background: var(--sik-acc-warning-50);
+  color: var(--sik-acc-warning-800);
 }
 
 .sik-acc-callout--success {
   border-color: rgba(5, 150, 105, 0.3);
   background: var(--sik-acc-success-bg);
-  color: #065f46;
+  color: var(--sik-acc-success-800);
 }
 
 .sik-acc-form-grid--instructor-apply {

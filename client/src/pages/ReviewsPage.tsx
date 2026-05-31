@@ -4,6 +4,7 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { HorizontalEditorTabs } from '../components/shared/HorizontalEditorTabs';
@@ -267,7 +268,7 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder={__('Search text, student, course…', 'sikshya')}
-            className="w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+            className="w-64 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
           />
           <ButtonPrimary type="submit">{__('Search', 'sikshya')}</ButtonPrimary>
           {search ? (
@@ -362,15 +363,10 @@ export function ReviewsPage(props: { embedded?: boolean; config: SikshyaReactCon
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
-                      {r.is_approved ? (
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
-                          Approved
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
-                          Pending
-                        </span>
-                      )}
+                      <StatusBadge
+                        tone={r.is_approved ? 'success' : 'warning'}
+                        label={r.is_approved ? __('Approved', 'sikshya') : __('Pending', 'sikshya')}
+                      />
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 text-right">
                       <RowActionsMenu items={actionsForRow(r)} ariaLabel={`Actions for review ${r.id}`} />

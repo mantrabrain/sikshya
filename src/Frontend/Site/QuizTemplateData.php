@@ -460,6 +460,30 @@ final class QuizTemplateData
             }
             $row['matching_left'] = $left;
             $row['matching_right'] = $right;
+
+            // Quiz-integrity: present the right-hand options in a SHUFFLED
+            // order so the correct pairing isn't given away by the stored
+            // order (the common authoring pattern lists pairs in order, i.e.
+            // left[i] ↔ right[i], which would let a learner "match by row").
+            //
+            // Crucially, each option keeps its CANONICAL index as the value
+            // the learner submits. The display order changes; the submitted
+            // index does not. That means the grader (`evaluateAnswer`,
+            // comparing index maps) needs ZERO changes and there's no
+            // permutation to reverse — eliminating any risk of breaking
+            // matching-question scoring.
+            //
+            // Filterable: a site that prefers a fixed order (e.g. an
+            // intentionally pedagogically-ordered list) can return false.
+            $shuffle = (bool) apply_filters('sikshya_shuffle_matching_options', true, $qid);
+            $right_options = [];
+            foreach ($right as $ri => $r_text) {
+                $right_options[] = ['index' => (int) $ri, 'text' => (string) $r_text];
+            }
+            if ($shuffle && count($right_options) > 1) {
+                shuffle($right_options);
+            }
+            $row['matching_right_options'] = $right_options;
         }
 
         if ($type === 'ordering' && $opts !== []) {
@@ -475,6 +499,30 @@ final class QuizTemplateData
     }
 
     /**
+     * Build the question view-rows for a quiz, honouring the
+     * `randomize_questions` setting.
+     *
+     * Question IDs are stored on the quiz as `_sikshya_quiz_questions`
+     * (an ordered array of question post IDs). When the
+     * `_sikshya_quiz_randomize_questions` toggle is on (legacy key
+     * `sikshya_quiz_randomize_questions` is also honoured — both are
+     * written by the Course Builder so we read whichever exists), the
+     * order is shuffled fresh on every render.
+     *
+     * **Important:** the shuffle is *display-only*. Each question's
+     * canonical ID stays the same, so the grader (`QuizRoutes::quizSubmit`)
+     * resolves the correct answer by ID regardless of position — no
+     * permutation reversing needed, no answer-leak risk (same property
+     * we used for the matching-question right-column shuffle in
+     * section T).
+     *
+     * Previously this method **read but did not apply** the setting:
+     * `QuizController::getQuizSettings` echoed `randomize_questions`
+     * back to the React admin so the toggle appeared to save, but
+     * `buildQuestionsForQuiz` always returned the stored order. End
+     * users enabled the option, observed no change, and concluded the
+     * feature was broken.
+     *
      * @return array<int, array<string, mixed>>
      */
     private static function buildQuestionsForQuiz(int $quiz_id): array
@@ -484,15 +532,46 @@ final class QuizTemplateData
             return [];
         }
 
+        // Normalise once so the shuffle and downstream lookups work on
+        // ints (not mixed string|int from older sample data).
+        $ids = array_values(array_filter(array_map('intval', $ids), static fn ($qid): bool => $qid > 0));
+
+        if (self::shouldRandomizeQuestions($quiz_id) && count($ids) > 1) {
+            shuffle($ids);
+        }
+
         $out = [];
 
         foreach ($ids as $qid) {
-            $row = self::buildQuestionViewRowForId((int) $qid);
+            $row = self::buildQuestionViewRowForId($qid);
             if ($row !== null) {
                 $out[] = $row;
             }
         }
 
         return $out;
+    }
+
+    /**
+     * Resolve the per-quiz "randomize questions" toggle.
+     *
+     * Reads the canonical prefixed key first, falls back to the legacy
+     * unprefixed key for back-compat with sample data and older imports.
+     * Treats any truthy scalar as enabled.
+     */
+    private static function shouldRandomizeQuestions(int $quiz_id): bool
+    {
+        $raw = get_post_meta($quiz_id, '_sikshya_quiz_randomize_questions', true);
+        if ($raw === '' || $raw === null) {
+            $raw = get_post_meta($quiz_id, 'sikshya_quiz_randomize_questions', true);
+        }
+        if (is_bool($raw)) {
+            return $raw;
+        }
+        if (is_string($raw)) {
+            $raw = strtolower(trim($raw));
+            return in_array($raw, ['1', 'true', 'yes', 'on'], true);
+        }
+        return (bool) $raw;
     }
 }

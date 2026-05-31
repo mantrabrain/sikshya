@@ -118,6 +118,64 @@ final class AdminTablesRepository
     }
 
     /**
+     * Single enrollment with learner + course labels, joined like the list query.
+     *
+     * @return array<string, mixed>|null Enrollment row or null when not found / table missing.
+     */
+    public function enrollmentById(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        global $wpdb;
+        $table = EnrollmentsTable::getTableName();
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) {
+            return null;
+        }
+
+        $users_table = $wpdb->users;
+        $posts_table = $wpdb->posts;
+        $course_type = PostTypes::COURSE;
+
+        $sql = "SELECT e.id, e.user_id, e.course_id, e.status, e.enrolled_date,
+                e.completed_date, e.payment_method, e.amount, e.transaction_id,
+                e.progress, e.notes,
+                u.display_name AS learner_name, u.user_email AS learner_email, u.user_login AS learner_login,
+                p.post_title AS course_title, p.post_status AS course_status
+            FROM {$table} e
+            LEFT JOIN {$users_table} u ON e.user_id = u.ID
+            LEFT JOIN {$posts_table} p ON e.course_id = p.ID AND p.post_type = %s
+            WHERE e.id = %d
+            LIMIT 1";
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- fragments validated above.
+        $row = $wpdb->get_row($wpdb->prepare($sql, $course_type, $id));
+
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row->id,
+            'user_id' => (int) $row->user_id,
+            'course_id' => (int) $row->course_id,
+            'status' => (string) $row->status,
+            'enrolled_date' => (string) $row->enrolled_date,
+            'completed_date' => (string) ($row->completed_date ?? ''),
+            'payment_method' => (string) ($row->payment_method ?? ''),
+            'transaction_id' => (string) ($row->transaction_id ?? ''),
+            'amount' => isset($row->amount) ? (float) $row->amount : 0.0,
+            'progress' => isset($row->progress) ? (float) $row->progress : 0.0,
+            'notes' => (string) ($row->notes ?? ''),
+            'learner_name' => (string) ($row->learner_name ?? ''),
+            'learner_email' => (string) ($row->learner_email ?? ''),
+            'learner_login' => (string) ($row->learner_login ?? ''),
+            'course_title' => (string) ($row->course_title ?? ''),
+            'course_status' => (string) ($row->course_status ?? ''),
+        ];
+    }
+
+    /**
      * @param array{
      *   per_page:int,
      *   page:int,

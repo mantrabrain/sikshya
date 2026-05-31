@@ -4,6 +4,8 @@ import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -130,6 +132,13 @@ function fmtCurrency(amount: number, currency: string): string {
   return `${amount.toFixed(2)} ${currency}`;
 }
 
+/**
+ * Marketplace status pill — delegates to shared StatusBadge. `status` is
+ * looked up in the canonical map (which already covers active/pending/paid/
+ * rejected/reversed/suspended/cancelled/accrued/approved) so the tone is
+ * picked correctly without per-page color logic. The translated `label`
+ * comes from the marketplace's own status-label maps.
+ */
 function StatusPill({ status, kind }: { status: string; kind: 'vendor' | 'commission' | 'withdrawal' }) {
   const label =
     kind === 'vendor'
@@ -138,20 +147,7 @@ function StatusPill({ status, kind }: { status: string; kind: 'vendor' | 'commis
       ? COMMISSION_STATUS_LABEL[status] || status
       : WITHDRAWAL_STATUS_LABEL[status] || status;
 
-  const tone =
-    status === 'active' || status === 'available' || status === 'paid' || status === 'approved'
-      ? 'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-900/50'
-      : status === 'pending' || status === 'accrued'
-      ? 'bg-amber-50 text-amber-800 ring-amber-100 dark:bg-amber-950/40 dark:text-amber-200 dark:ring-amber-900/50'
-      : status === 'rejected' || status === 'reversed' || status === 'suspended' || status === 'cancelled'
-      ? 'bg-rose-50 text-rose-700 ring-rose-100 dark:bg-rose-950/40 dark:text-rose-200 dark:ring-rose-900/50'
-      : 'bg-slate-50 text-slate-700 ring-slate-200 dark:bg-slate-800/60 dark:text-slate-200 dark:ring-slate-700';
-
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${tone}`}>
-      {label}
-    </span>
-  );
+  return <StatusBadge status={status} label={label} />;
 }
 
 function StatTile(props: { label: string; value: string; hint?: string }) {
@@ -415,7 +411,9 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
                 <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
                 <th className="px-4 py-3">Commission %</th>
                 <th className="px-4 py-3">{__('Joined', 'sikshya')}</th>
-                <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
+                <th className="w-12 px-4 py-3 text-right">
+                  <span className="sr-only">{__('Actions', 'sikshya')}</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -429,19 +427,28 @@ function VendorsPanel(props: { enabled: boolean; setToast: (t: { kind: 'success'
                   <td className="px-4 py-3"><StatusPill kind="vendor" status={r.status} /></td>
                   <td className="px-4 py-3 tabular-nums">{r.commission_override !== null && r.commission_override !== undefined ? `${r.commission_override.toFixed(2)} %` : <span className="text-slate-400">{__('default', 'sikshya')}</span>}</td>
                   <td className="px-4 py-3 text-slate-500">{r.created_at ? r.created_at.replace(' ', ' · ') : '—'}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      {r.status !== 'active' ? (
-                        <ButtonSecondary type="button" disabled={busy === r.id} onClick={() => void setVendorStatus(r, 'active')}>
-                          Activate
-                        </ButtonSecondary>
-                      ) : null}
-                      {r.status !== 'suspended' ? (
-                        <ButtonSecondary type="button" disabled={busy === r.id} onClick={() => void setVendorStatus(r, 'suspended')}>
-                          Suspend
-                        </ButtonSecondary>
-                      ) : null}
-                    </div>
+                  <td className="w-12 px-4 py-3 text-right">
+                    {(() => {
+                      const items: RowActionItem[] = [];
+                      if (r.status !== 'active') {
+                        items.push({
+                          key: 'activate',
+                          label: __('Activate', 'sikshya'),
+                          onClick: () => void setVendorStatus(r, 'active'),
+                          disabled: busy === r.id,
+                        });
+                      }
+                      if (r.status !== 'suspended') {
+                        items.push({
+                          key: 'suspend',
+                          label: __('Suspend', 'sikshya'),
+                          onClick: () => void setVendorStatus(r, 'suspended'),
+                          danger: true,
+                          disabled: busy === r.id,
+                        });
+                      }
+                      return <RowActionsMenu items={items} ariaLabel={__('Vendor actions', 'sikshya')} />;
+                    })()}
                   </td>
                 </tr>
               ))}
@@ -694,7 +701,9 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
                   <th className="px-4 py-3 text-right">{__('Amount', 'sikshya')}</th>
                   <th className="px-4 py-3">{__('Method', 'sikshya')}</th>
                   <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
-                  <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
+                  <th className="w-12 px-4 py-3 text-right">
+                  <span className="sr-only">{__('Actions', 'sikshya')}</span>
+                </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -705,24 +714,40 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
                     <td className="px-4 py-3 text-right tabular-nums">{fmtCurrency(r.amount, r.currency)}</td>
                     <td className="px-4 py-3 capitalize">{r.method?.replace(/_/g, ' ') || '—'}</td>
                     <td className="px-4 py-3"><StatusPill kind="withdrawal" status={r.status} /></td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        {r.status === 'pending' ? (
-                          <>
-                            <ButtonSecondary type="button" disabled={busy === r.id} onClick={() => void act(r.id, 'approve')}>
-                              Approve
-                            </ButtonSecondary>
-                            <ButtonSecondary type="button" disabled={busy === r.id} onClick={() => void act(r.id, 'reject')}>
-                              Reject
-                            </ButtonSecondary>
-                          </>
-                        ) : null}
-                        {(r.status === 'pending' || r.status === 'approved') ? (
-                          <ButtonPrimary type="button" disabled={busy === r.id} onClick={() => void act(r.id, 'mark-paid')}>
-                            Mark paid
-                          </ButtonPrimary>
-                        ) : null}
-                      </div>
+                    <td className="w-12 px-4 py-3 text-right">
+                      {(() => {
+                        const items: RowActionItem[] = [];
+                        if (r.status === 'pending') {
+                          items.push(
+                            {
+                              key: 'approve',
+                              label: __('Approve', 'sikshya'),
+                              onClick: () => void act(r.id, 'approve'),
+                              disabled: busy === r.id,
+                            },
+                            {
+                              key: 'reject',
+                              label: __('Reject', 'sikshya'),
+                              onClick: () => void act(r.id, 'reject'),
+                              danger: true,
+                              disabled: busy === r.id,
+                            }
+                          );
+                        }
+                        if (r.status === 'pending' || r.status === 'approved') {
+                          items.push({
+                            key: 'paid',
+                            label: __('Mark paid', 'sikshya'),
+                            onClick: () => void act(r.id, 'mark-paid'),
+                            disabled: busy === r.id,
+                          });
+                        }
+                        return items.length > 0 ? (
+                          <RowActionsMenu items={items} ariaLabel={__('Withdrawal actions', 'sikshya')} />
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))}
@@ -744,7 +769,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
               required
               value={adjustVendor}
               onChange={(e) => setAdjustVendor(e.target.value.replace(/[^0-9]/g, ''))}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
+              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </label>
           <label className="text-sm text-slate-600 dark:text-slate-400">
@@ -755,7 +780,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
               step="0.01"
               value={adjustAmount}
               onChange={(e) => setAdjustAmount(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
+              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </label>
           <label className="text-sm text-slate-600 dark:text-slate-400 sm:col-span-3">
@@ -765,7 +790,7 @@ function WithdrawalsPanel(props: { enabled: boolean; setToast: (t: { kind: 'succ
               value={adjustReason}
               onChange={(e) => setAdjustReason(e.target.value)}
               placeholder={__('e.g. Refund clawback for order #1234', 'sikshya')}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
+              className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
             />
           </label>
           <div className="sm:col-span-3">

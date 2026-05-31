@@ -4,6 +4,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { StatusBadge } from '../components/shared/list/StatusBadge';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { Modal } from '../components/shared/Modal';
@@ -359,40 +360,68 @@ export function EnrollmentsPage(props: { embedded?: boolean; config: SikshyaReac
                     <th className="px-5 py-3.5">{course}</th>
                     <th className="px-5 py-3.5">{__('Status', 'sikshya')}</th>
                     <th className="px-5 py-3.5">{__('Enrolled', 'sikshya')}</th>
+                    <th className="w-12 px-5 py-3.5 text-right">
+                      <span className="sr-only">{__('Actions', 'sikshya')}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {rows.map((r) => (
-                    <tr key={r.id} className="bg-white dark:bg-slate-900">
-                      <td className="px-5 py-3.5">
-                        <a
-                          href={`${adminBase}user-edit.php?user_id=${r.user_id}`}
-                          className="font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
-                        >
-                          {r.learner_name || `User #${r.user_id}`}
-                        </a>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">{r.learner_email || '—'}</div>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        {r.course_id > 0 ? (
+                  {rows.map((r) => {
+                    const rowActions: RowActionItem[] = [
+                      {
+                        key: 'view',
+                        label: __('View details', 'sikshya'),
+                        href: appViewHref(config, 'enrollment-detail', { id: String(r.id) }),
+                      },
+                    ];
+                    if (r.course_id > 0) {
+                      rowActions.push({
+                        key: 'course',
+                        label: __('Open course', 'sikshya'),
+                        href: appViewHref(config, 'add-course', { course_id: String(r.course_id) }),
+                      });
+                    }
+                    rowActions.push({
+                      key: 'user',
+                      label: __('Open WP user', 'sikshya'),
+                      href: `${adminBase}user-edit.php?user_id=${r.user_id}`,
+                      external: true,
+                    });
+                    return (
+                      <tr key={r.id} className="bg-white dark:bg-slate-900">
+                        <td className="px-5 py-3.5">
                           <a
-                            href={appViewHref(config, 'add-course', { course_id: String(r.course_id) })}
-                            className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+                            href={appViewHref(config, 'enrollment-detail', { id: String(r.id) })}
+                            className="font-semibold text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
                           >
-                            {r.course_title || `${course} #${r.course_id}`}
+                            {r.learner_name || `User #${r.user_id}`}
                           </a>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <StatusBadge status={r.status} />
-                      </td>
-                      <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-400">
-                        {formatPostDate(r.enrolled_date)}
-                      </td>
-                    </tr>
-                  ))}
+                          <div className="text-xs text-slate-500 dark:text-slate-400">{r.learner_email || '—'}</div>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          {r.course_id > 0 ? (
+                            <a
+                              href={appViewHref(config, 'add-course', { course_id: String(r.course_id) })}
+                              className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-400 dark:hover:text-brand-300"
+                            >
+                              {r.course_title || `${course} #${r.course_id}`}
+                            </a>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <StatusBadge status={r.status} />
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-400">
+                          {formatPostDate(r.enrolled_date)}
+                        </td>
+                        <td className="w-12 whitespace-nowrap px-5 py-3.5 text-right">
+                          <RowActionsMenu items={rowActions} ariaLabel={__('Enrollment actions', 'sikshya')} />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

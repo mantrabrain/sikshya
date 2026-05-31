@@ -228,7 +228,7 @@ export function QuizAdvancedWorkspacePage(props: {
                     </label>
                     <input
                       id="qa-pool-tag"
-                      className="w-56 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
+                      className="w-56 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       placeholder={__('e.g. unit-1', 'sikshya')}
@@ -282,7 +282,7 @@ export function QuizAdvancedWorkspacePage(props: {
                   </label>
                   <input
                     id="qb-new-name"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
+                    className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={newBankName}
                     onChange={(e) => setNewBankName(e.target.value)}
                     placeholder={__('e.g. Unit 1 review', 'sikshya')}
@@ -294,7 +294,7 @@ export function QuizAdvancedWorkspacePage(props: {
                   </label>
                   <input
                     id="qb-new-slug"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
+                    className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={newBankSlug}
                     onChange={(e) => setNewBankSlug(e.target.value)}
                     placeholder={__('Defaults from name', 'sikshya')}

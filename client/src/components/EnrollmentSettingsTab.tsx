@@ -47,7 +47,7 @@ function SectionShell(props: {
     <section
       className={`rounded-2xl border p-6 shadow-sm ${
         locked
-          ? 'border-violet-200 bg-violet-50/50 dark:border-violet-900/50 dark:bg-violet-950/25'
+          ? 'border-accent-200 bg-accent-50/50 dark:border-accent-900/50 dark:bg-accent-950/25'
           : 'border-slate-200/80 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/30'
       }`}
     >
@@ -56,7 +56,7 @@ function SectionShell(props: {
           <span
             className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg ${
               locked
-                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-200'
+                ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/40 dark:text-accent-200'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
             }`}
           >
@@ -66,7 +66,7 @@ function SectionShell(props: {
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
               {locked ? (
-                <span className="inline-flex items-center gap-1 rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-200">
+                <span className="inline-flex items-center gap-1 rounded-md bg-accent-100 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-accent-700 dark:bg-accent-900/50 dark:text-accent-200">
                   <span aria-hidden>★</span> {__('Pro', 'sikshya')}
                 </span>
               ) : null}
@@ -75,7 +75,7 @@ function SectionShell(props: {
               <p className="mt-1 text-xs leading-relaxed text-slate-400/90 dark:text-slate-500/80">{description}</p>
             ) : null}
             {locked ? (
-              <p className="mt-2 text-xs leading-relaxed text-violet-700 dark:text-violet-200">
+              <p className="mt-2 text-xs leading-relaxed text-accent-700 dark:text-accent-200">
                 {lockedReason || __('Turn on the matching addon to edit these settings.', 'sikshya')}
               </p>
             ) : null}
@@ -166,7 +166,7 @@ export function EnrollmentSettingsTab(props: Props) {
               key={t.id}
               type="button"
               onClick={() => setSub(t.id)}
-              className={`relative flex flex-1 items-center justify-center gap-2 px-3 pb-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 sm:flex-none sm:justify-start sm:px-4 ${
+              className={`relative flex flex-1 items-center justify-center gap-2 px-3 pb-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 sm:flex-none sm:justify-start sm:px-4 ${
                 sub === t.id
                   ? 'text-brand-600 dark:text-brand-400'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'

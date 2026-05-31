@@ -6,6 +6,7 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { DataTable, type Column } from '../components/shared/DataTable';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { DataTableSkeleton } from '../components/shared/Skeleton';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { FieldHint } from '../components/shared/FieldHint';
@@ -104,11 +105,7 @@ export function CalendarPage(props: { config: SikshyaReactConfig; title: string;
       {
         id: 'type',
         header: 'Type',
-        render: (r) => (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            {typeLabel(r.type)}
-          </span>
-        ),
+        render: (r) => <StatusBadge tone="neutral" label={typeLabel(r.type)} size="xs" />,
       },
       {
         id: 'title',

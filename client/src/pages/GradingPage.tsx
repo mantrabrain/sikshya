@@ -352,7 +352,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                 value={scaleName}
                 onChange={(e) => setScaleName(e.target.value)}
                 placeholder={__('e.g. Default A–F', 'sikshya')}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
               />
             </label>
 
@@ -373,7 +373,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                     value={scaleGpaLimit}
                     onChange={(e) => setScaleGpaLimit(e.target.value)}
                     disabled={!scaleUsePoints}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </label>
                 <label className="block text-sm text-slate-700 dark:text-slate-300">
@@ -382,7 +382,7 @@ export function GradingPage(props: { embedded?: boolean; config: SikshyaReactCon
                     value={scaleGpaSep}
                     onChange={(e) => setScaleGpaSep(e.target.value)}
                     disabled={!scaleUsePoints}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </label>
               </div>

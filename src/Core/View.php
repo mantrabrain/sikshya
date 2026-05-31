@@ -40,9 +40,17 @@ class View
             return;
         }
 
-        // Extract data to make variables available in template
+        // Extract data to make variables available in template.
+        //
+        // EXTR_SKIP: never overwrite a local in this scope (`$template_path`,
+        // `$template`, `$data`, `$this`). Today every caller passes a sane
+        // associative array, but `extract($data)` with no guard would
+        // silently clobber any local that happened to share a key name —
+        // a fragile-by-default pattern. If a future maintainer wires
+        // request data (`$_GET`/`$_POST`/REST params) into the `$data` array,
+        // this flag turns "silent variable injection" into "ignored".
         if (!empty($data)) {
-            extract($data);
+            extract($data, EXTR_SKIP);
         }
 
         // Include the template

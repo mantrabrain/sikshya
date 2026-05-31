@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary } from '../components/shared/buttons';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
 import { appViewHref } from '../lib/appUrl';
@@ -143,15 +144,19 @@ export function IssuedCertificatesPage(props: { config: SikshyaReactConfig; titl
                       )}
                     </td>
                     <td className="px-5 py-3.5 capitalize text-slate-700 dark:text-slate-300">{r.status}</td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="w-12 px-5 py-3.5 text-right">
                       {r.status === 'active' ? (
-                        <button
-                          type="button"
-                          onClick={() => revoke(r.id)}
-                          className="text-sm font-medium text-red-600 hover:text-red-800 dark:text-red-400"
-                        >
-                          Revoke
-                        </button>
+                        <RowActionsMenu
+                          items={[
+                            {
+                              key: 'revoke',
+                              label: __('Revoke', 'sikshya'),
+                              onClick: () => revoke(r.id),
+                              danger: true,
+                            } satisfies RowActionItem,
+                          ]}
+                          ariaLabel={__('Certificate actions', 'sikshya')}
+                        />
                       ) : (
                         <span className="text-xs text-slate-400">—</span>
                       )}

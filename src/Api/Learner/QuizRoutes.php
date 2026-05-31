@@ -100,6 +100,88 @@ final class QuizRoutes extends AbstractLearnerRestController
                 ],
             ],
         ]);
+
+        // Mid-attempt answer snapshot. Lets the form persist work so a
+        // refresh / accidental tab close doesn't wipe progress.
+        register_rest_route($namespace, '/me/quiz-save', [
+            [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$this, 'quizSave'],
+                'permission_callback' => [$this, 'requireLoginOrJwt'],
+                'args' => [
+                    'quiz_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'minimum' => 1,
+                        'sanitize_callback' => 'absint',
+                        'validate_callback' => 'rest_validate_request_arg',
+                    ],
+                    'attempt_id' => [
+                        'required' => true,
+                        'type' => 'integer',
+                        'minimum' => 1,
+                        'sanitize_callback' => 'absint',
+                        'validate_callback' => 'rest_validate_request_arg',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Save the learner's in-progress answers for an attempt without grading.
+     *
+     * Fires from the client every ~30s + after each answer change (debounced).
+     * Only updates rows that belong to the caller AND are still `in_progress`;
+     * silently no-ops if the attempt was already submitted (a late save from a
+     * stale tab shouldn't overwrite a finalized record).
+     */
+    public function quizSave(WP_REST_Request $request): WP_REST_Response
+    {
+        $params = $request->get_json_params();
+        if (!is_array($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $quiz_id = isset($params['quiz_id']) ? (int) $params['quiz_id'] : 0;
+        $attempt_id = isset($params['attempt_id']) ? (int) $params['attempt_id'] : 0;
+        $answers = isset($params['answers']) && is_array($params['answers']) ? $params['answers'] : [];
+
+        if ($quiz_id <= 0 || $attempt_id <= 0) {
+            return $this->error('invalid_quiz_save', __('Invalid auto-save payload.', 'sikshya'), 400);
+        }
+        if (get_post_type($quiz_id) !== PostTypes::QUIZ) {
+            return $this->error('invalid_quiz', __('Invalid quiz.', 'sikshya'), 400);
+        }
+
+        $uid = get_current_user_id();
+        $attempt_row = $this->quizAttempts->getAttemptForUser($attempt_id, $uid);
+        if (!$attempt_row || (int) $attempt_row->quiz_id !== $quiz_id) {
+            return $this->error('attempt_not_found', __('Attempt not found.', 'sikshya'), 404);
+        }
+        if ((string) $attempt_row->status !== 'in_progress') {
+            // Already finalized — treat as a polite no-op, not an error.
+            return new WP_REST_Response(['ok' => true, 'data' => ['saved' => false, 'reason' => 'finalized']], 200);
+        }
+
+        $payload = wp_json_encode($answers);
+        if ($payload === false) {
+            return $this->error('encode_failed', __('Could not encode answers.', 'sikshya'), 400);
+        }
+
+        $this->quizAttempts->savePartialAnswers($attempt_id, $uid, $payload);
+
+        return new WP_REST_Response(
+            [
+                'ok' => true,
+                'data' => [
+                    'saved' => true,
+                    'saved_at' => current_time('mysql'),
+                    'serverTime' => time(),
+                ],
+            ],
+            200
+        );
     }
 
     public function quizSubmit(WP_REST_Request $request): WP_REST_Response
@@ -118,6 +200,11 @@ final class QuizRoutes extends AbstractLearnerRestController
 
         if (get_post_type($quiz_id) !== PostTypes::QUIZ) {
             return $this->error('invalid_quiz', __('Invalid quiz.', 'sikshya'), 400);
+        }
+        // Reject submissions against unpublished/trashed quizzes so an admin
+        // unpublishing a quiz mid-attempt blocks further grading.
+        if (get_post_status($quiz_id) !== 'publish') {
+            return $this->error('quiz_unavailable', __('This quiz is no longer available.', 'sikshya'), 400);
         }
 
         $uid = get_current_user_id();
@@ -174,6 +261,24 @@ final class QuizRoutes extends AbstractLearnerRestController
         $correct_count = 0;
         $stored_answers = [];
 
+        // Prime the postmeta cache for every question in this attempt in a
+        // single SQL query. Each grading loop below reads 3 meta fields per
+        // question (`_sikshya_question_type`, `_sikshya_question_points`,
+        // `_sikshya_question_correct_answer`); the second loop reads the
+        // same fields again to populate per-question attempt rows. Without
+        // priming, that's 6 individual `SELECT meta_value FROM postmeta`
+        // queries per question per submit (cold cache) — 60 queries for a
+        // 10-question quiz, 600 for a 100-question one. After priming,
+        // every `get_post_meta` is an in-memory hash lookup. WP's caches
+        // are request-scoped so we only pay the SELECT once per submit.
+        $primable_qids = array_values(array_filter(array_map('intval', $question_ids), static fn (int $q): bool => $q > 0));
+        if ($primable_qids !== []) {
+            update_meta_cache('post', $primable_qids);
+        }
+
+        // Per-question result map for the post-submit breakdown. Captured
+        // during the grading loop so we don't re-evaluate downstream.
+        $per_question_results = [];
         foreach ($question_ids as $qid) {
             if ($qid <= 0) {
                 continue;
@@ -196,6 +301,14 @@ final class QuizRoutes extends AbstractLearnerRestController
                 }
             }
 
+            $per_question_results[(string) $qid] = [
+                'type' => $type,
+                // Essay isn't auto-graded, so `correct` is meaningless there.
+                'correct' => $type !== 'essay' ? (bool) $eval['correct'] : null,
+                'earned' => $earned,
+                'possible' => $points,
+            ];
+
             $stored_answers[$qid] = is_string($raw_answer) ? $raw_answer : wp_json_encode($raw_answer);
         }
 
@@ -206,6 +319,29 @@ final class QuizRoutes extends AbstractLearnerRestController
         }
 
         $passed = $score_percent >= $passing;
+
+        // ── Server-side time-limit enforcement ─────────────────────────────
+        // The client renders a countdown timer, but a malicious or curious
+        // learner can stop it (devtools, throttled tab, refresh) and submit
+        // hours later. Trust the server: compute elapsed seconds from the
+        // attempt's `started_at`, compare against the quiz's configured
+        // limit, and override the client-supplied `time_taken` + force
+        // failure when overtime is real. A 30-second grace window absorbs
+        // network jitter and clock skew.
+        $time_limit_minutes = (int) get_post_meta($quiz_id, '_sikshya_quiz_time_limit', true);
+        $server_time_taken = isset($params['time_taken']) ? (int) $params['time_taken'] : 0;
+        $time_expired = false;
+        if ($time_limit_minutes > 0 && $attempt_row && !empty($attempt_row->started_at)) {
+            $started_ts = strtotime((string) $attempt_row->started_at);
+            if ($started_ts > 0) {
+                $elapsed = max(0, time() - $started_ts);
+                $server_time_taken = $elapsed;
+                if ($elapsed > $time_limit_minutes * 60 + 30) {
+                    $time_expired = true;
+                    $passed = false;
+                }
+            }
+        }
 
         $attempt_status = $passed ? 'passed' : 'completed';
         $attempt_id = 0;
@@ -219,7 +355,8 @@ final class QuizRoutes extends AbstractLearnerRestController
                         'score' => $score_percent,
                         'total_questions' => count($question_ids),
                         'correct_answers' => $correct_count,
-                        'time_taken' => isset($params['time_taken']) ? (int) $params['time_taken'] : 0,
+                        // Server-measured elapsed seconds, not client-supplied.
+                        'time_taken' => $server_time_taken,
                         'status' => $attempt_status,
                         'completed_at' => current_time('mysql'),
                         'answers_data' => wp_json_encode($stored_answers),
@@ -238,7 +375,11 @@ final class QuizRoutes extends AbstractLearnerRestController
                     'score' => $score_percent,
                     'total_questions' => count($question_ids),
                     'correct_answers' => $correct_count,
-                    'time_taken' => isset($params['time_taken']) ? (int) $params['time_taken'] : 0,
+                    // No prior started_at exists for this synthetic attempt
+                    // (no `attempt/start` call was made), so honour the
+                    // server-elapsed if we computed one, else fall back to
+                    // the client-claimed value capped at the time limit.
+                    'time_taken' => $server_time_taken,
                     'status' => $attempt_status,
                     'started_at' => current_time('mysql'),
                     'completed_at' => current_time('mysql'),
@@ -265,6 +406,27 @@ final class QuizRoutes extends AbstractLearnerRestController
         $this->progress->markQuizComplete($uid, $course_id, $quiz_id, $score_percent);
         $this->syncEnrollmentProgress($uid, $course_id);
 
+        // Per-question explanations for the result view. Only included for
+        // questions the learner actually saw (the resolved grading list), so
+        // we never leak hints for skipped/unrendered questions.
+        $per_question_explanations = [];
+        foreach ($question_ids as $qid) {
+            if ($qid <= 0) {
+                continue;
+            }
+            $exp = (string) get_post_meta($qid, '_sikshya_question_explanation', true);
+            if ($exp === '') {
+                // Back-compat: older builds stored the explanation in post_content.
+                $post = get_post($qid);
+                if ($post && trim((string) $post->post_content) !== '') {
+                    $exp = (string) $post->post_content;
+                }
+            }
+            if ($exp !== '') {
+                $per_question_explanations[(string) $qid] = sikshya_render_rich_text($exp);
+            }
+        }
+
         return new WP_REST_Response(
             [
                 'ok' => true,
@@ -274,6 +436,16 @@ final class QuizRoutes extends AbstractLearnerRestController
                     'passing_score' => $passing,
                     'passed' => $passed,
                     'status' => $attempt_status,
+                    // True when the server detected the learner blew past the
+                    // configured time limit. The UI can surface "Time expired"
+                    // alongside the (now necessarily failing) result.
+                    'time_expired' => $time_expired,
+                    'time_taken' => $server_time_taken,
+                    'per_question_explanations' => (object) $per_question_explanations,
+                    // Per-question grading detail powers the "Score breakdown
+                    // by question type" panel in the results card. Cast to an
+                    // object so an empty list serializes as `{}` (not `[]`).
+                    'per_question_results' => (object) $per_question_results,
                 ],
             ],
             200
@@ -285,6 +457,9 @@ final class QuizRoutes extends AbstractLearnerRestController
         $quiz_id = (int) $request->get_param('quiz_id');
         if ($quiz_id <= 0 || get_post_type($quiz_id) !== PostTypes::QUIZ) {
             return $this->error('invalid_quiz', __('Invalid quiz.', 'sikshya'), 400);
+        }
+        if (get_post_status($quiz_id) !== 'publish') {
+            return $this->error('quiz_unavailable', __('This quiz is no longer available.', 'sikshya'), 400);
         }
 
         $uid = get_current_user_id();
@@ -313,6 +488,14 @@ final class QuizRoutes extends AbstractLearnerRestController
             }
         }
 
+        $auto_save_data = null;
+        if ($row && !empty($row->auto_save_data)) {
+            $decoded = json_decode((string) $row->auto_save_data, true);
+            if (is_array($decoded)) {
+                $auto_save_data = $decoded;
+            }
+        }
+
         return new WP_REST_Response(
             [
                 'ok' => true,
@@ -324,6 +507,7 @@ final class QuizRoutes extends AbstractLearnerRestController
                             'started_at_ts' => $started_at_ts,
                             'status' => (string) $row->status,
                             'attempt_number' => (int) $row->attempt_number,
+                            'auto_save_data' => $auto_save_data,
                         ]
                         : null,
                     'durationSeconds' => $duration_seconds,
@@ -343,6 +527,9 @@ final class QuizRoutes extends AbstractLearnerRestController
         $quiz_id = isset($params['quiz_id']) ? (int) $params['quiz_id'] : 0;
         if ($quiz_id <= 0 || get_post_type($quiz_id) !== PostTypes::QUIZ) {
             return $this->error('invalid_quiz', __('Invalid quiz.', 'sikshya'), 400);
+        }
+        if (get_post_status($quiz_id) !== 'publish') {
+            return $this->error('quiz_unavailable', __('This quiz is no longer available.', 'sikshya'), 400);
         }
 
         $uid = get_current_user_id();
@@ -371,7 +558,13 @@ final class QuizRoutes extends AbstractLearnerRestController
             );
         }
 
+        // Enforce the attempt cap before creating a new row so a learner can't
+        // open a stale UI and accumulate attempts they can never submit.
         $attempted = $this->quizAttempts->countAttemptsForUserQuiz($uid, $quiz_id);
+        $max = $this->getMaxQuizAttempts($quiz_id);
+        if ($max > 0 && $attempted >= $max) {
+            return $this->error('attempts_exhausted', __('No quiz attempts remaining.', 'sikshya'), 400);
+        }
         $attempt_id = $this->quizAttempts->createAttempt(
             [
                 'user_id' => $uid,
@@ -471,108 +664,25 @@ final class QuizRoutes extends AbstractLearnerRestController
     }
 
     /**
+     * Thin delegating shim. Real grading logic lives in {@see \Sikshya\Services\QuizGrader}
+     * so this class and {@see \Sikshya\Services\QuizService} share a single implementation.
+     *
+     * @param mixed $answer
      * @return array{correct: bool}
      */
-    private function evaluateAnswer(string $type, string $correct, mixed $answer): array
+    private function evaluateAnswer(string $type, string $correct, $answer): array
     {
-        $c = trim($correct);
-
-        if ($type === 'essay') {
-            return ['correct' => false];
-        }
-
-        if ($type === 'multiple_choice' || $type === 'true_false') {
-            $a = $this->normalizeScalarAnswer($answer);
-
-            return ['correct' => strcasecmp($a, $c) === 0];
-        }
-
-        if ($type === 'short_answer' || $type === 'fill_blank') {
-            $u = is_string($answer) ? trim($answer) : '';
-            if ($u === '') {
-                return ['correct' => false];
-            }
-            $opts = array_map('trim', explode('|', $c));
-            $ul = strtolower($u);
-            foreach ($opts as $o) {
-                if ($o !== '' && strtolower($o) === $ul) {
-                    return ['correct' => true];
-                }
-            }
-
-            return ['correct' => false];
-        }
-
-        if ($type === 'multiple_response') {
-            $exp = json_decode($c, true);
-            if (!is_array($exp)) {
-                return ['correct' => false];
-            }
-            $got = is_string($answer) ? json_decode($answer, true) : $answer;
-            if (!is_array($got)) {
-                return ['correct' => false];
-            }
-            $e = array_map('intval', $exp);
-            $g = array_map('intval', $got);
-            sort($e);
-            sort($g);
-
-            return ['correct' => $e === $g];
-        }
-
-        if ($type === 'ordering') {
-            $exp = json_decode($c, true);
-            if (!is_array($exp)) {
-                return ['correct' => false];
-            }
-            $got = is_string($answer) ? json_decode($answer, true) : $answer;
-            if (!is_array($got)) {
-                return ['correct' => false];
-            }
-            $e = array_map('intval', $exp);
-            $g = array_map('intval', $got);
-
-            return ['correct' => $e === $g];
-        }
-
-        if ($type === 'matching') {
-            $dec = json_decode($c, true);
-            if (!is_array($dec) || empty($dec['matching']) || !is_array($dec['matching'])) {
-                return ['correct' => false];
-            }
-            $exp_map = $dec['matching']['map'] ?? null;
-            if (!is_array($exp_map)) {
-                return ['correct' => false];
-            }
-            $exp_map = array_map('intval', $exp_map);
-            $got = is_string($answer) ? json_decode($answer, true) : $answer;
-            if (!is_array($got) || empty($got['map']) || !is_array($got['map'])) {
-                return ['correct' => false];
-            }
-            $gmap = array_map('intval', $got['map']);
-
-            return ['correct' => $exp_map === $gmap];
-        }
-
-        return ['correct' => false];
+        return \Sikshya\Services\QuizGrader::evaluate($type, $correct, $answer);
     }
 
     /**
-     * Normalize learner answer for choice / true-false (JSON may send int/bool).
+     * Thin delegating shim. See {@see \Sikshya\Services\QuizGrader::normalizeScalarAnswer()}.
+     *
+     * @param mixed $answer
      */
-    private function normalizeScalarAnswer(mixed $answer): string
+    private function normalizeScalarAnswer($answer): string
     {
-        if (is_string($answer)) {
-            return trim($answer);
-        }
-        if (is_bool($answer)) {
-            return $answer ? 'true' : 'false';
-        }
-        if (is_int($answer) || is_float($answer)) {
-            return (string) (int) $answer;
-        }
-
-        return '';
+        return \Sikshya\Services\QuizGrader::normalizeScalarAnswer($answer);
     }
 
     private function getMaxQuizAttempts(int $quiz_id): int

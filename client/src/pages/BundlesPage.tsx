@@ -246,7 +246,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                 value={titleInput}
                 onChange={(e) => setTitleInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') void onCreate(); }}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 placeholder={__('e.g. Photography Mastery Bundle', 'sikshya')}
                 disabled={creating}
               />
@@ -259,7 +259,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                 min="0"
                 value={priceInput}
                 onChange={(e) => setPriceInput(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 placeholder={__('0.00', 'sikshya')}
                 disabled={creating}
               />
@@ -308,11 +308,11 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                         <div className="flex items-center gap-2 font-medium text-slate-900 dark:text-white">
                           <span>{b.title}</span>
                           {!b.visible_in_listing ? (
-                            <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+                            <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
                               Unlisted
                             </span>
                           ) : null}
-                          <span className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-brand-700 dark:border-brand-900/50 dark:bg-brand-950/30 dark:text-brand-300">
+                          <span className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700 dark:border-brand-900/50 dark:bg-brand-950/30 dark:text-brand-300">
                             Bundle
                           </span>
                         </div>
@@ -371,7 +371,7 @@ export function BundlesPage(props: { embedded?: boolean; config: SikshyaReactCon
                             <input
                               readOnly
                               value={purchaseUrl}
-                              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 font-mono text-[11px] text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                              className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-2 py-1.5 font-mono text-xs text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
                               onFocus={(e) => e.target.select()}
                             />
                             <button

@@ -76,39 +76,13 @@
 }
 
 /* Breadcrumb — same as .sikshya-course-lp__breadcrumb on single course */
-.sikshya-discovery-breadcrumb,
+/* .sikshya-discovery-breadcrumb rules moved to frontend.css so that
+ * order/cart/checkout pages (which don't load course-listing.css) can use
+ * the shared breadcrumb partial. Selectors below kept here only as
+ * specificity overrides for masthead usage. */
 .sikshya-course-lp__masthead .sikshya-discovery-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.45rem;
   font-size: var(--sikshya-font-size-sm);
   margin-bottom: var(--sikshya-spacing-4);
-  color: var(--sik-f-text-muted, var(--sikshya-gray-600));
-}
-
-.sikshya-discovery-breadcrumb__link {
-  color: var(--sik-f-text-muted, var(--sikshya-gray-600));
-  text-decoration: none;
-  font-weight: 500;
-  transition: var(--sikshya-transition-fast);
-}
-
-.sikshya-discovery-breadcrumb__link:hover,
-.sikshya-discovery-breadcrumb__link:focus-visible {
-  color: var(--sikshya-primary);
-  text-decoration: underline;
-}
-
-.sikshya-discovery-breadcrumb__current {
-  font-weight: 600;
-  color: var(--sik-f-text-heading, var(--sikshya-gray-900));
-}
-
-.sikshya-discovery-breadcrumb__sep {
-  color: var(--sikshya-gray-400);
-  user-select: none;
-  font-weight: 400;
 }
 
 /* Category / tag taxonomy — same shell as catalog; no sidebar */
@@ -1382,6 +1356,8 @@ a.sikshya-course-category:focus-visible {
   padding: 0;
   margin: 0;
   justify-content: center;
+  border:none;
+  background:none;
 }
 
 .sikshya-pagination ul.page-numbers li {
@@ -1402,11 +1378,6 @@ a.sikshya-course-category:focus-visible {
   text-decoration: none;
   font-size: var(--sikshya-font-size-sm);
   transition: var(--sikshya-transition);
-}
-
-.sikshya-pagination .page-numbers:hover {
-  background: var(--sikshya-gray-50);
-  border-color: var(--sikshya-gray-400);
 }
 
 .sikshya-pagination .page-numbers.current {
@@ -1518,4 +1489,76 @@ a.sikshya-course-category:focus-visible {
     border: 1px solid var(--sikshya-gray-300);
   }
 }
+
+/* ----------------------------------------------------------------------
+ * Archive view FOUC prevention.
+ *
+ * A blocking inline script in <head> (Frontend::addFrontendMeta) reads the
+ * learner's saved preference from localStorage and sets
+ * `<html data-sikshya-archive-view="grid|list">` before the body paints.
+ *
+ * These rules override whatever class PHP server-rendered on
+ * `.sikshya-course-grid` and `.sikshya-archive-toolbar__view-btn` so the
+ * preferred layout is visible from the very first paint — no JS-driven
+ * class swap after DOMContentLoaded. The existing `--list` class rules
+ * are kept intact for non-JS users and for runtime toggles by frontend.js.
+ * ---------------------------------------------------------------------- */
+
+/* When user prefers LIST, force list layout regardless of server class. */
+html[data-sikshya-archive-view="list"] .sikshya-archive-courses .sikshya-course-grid {
+  grid-template-columns: 1fr;
+  gap: var(--sikshya-spacing-4);
+}
+
+html[data-sikshya-archive-view="list"] .sikshya-archive-courses .sikshya-course-card {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) minmax(260px, 1fr) minmax(220px, 280px);
+  grid-template-areas: "image primary aside";
+  align-items: stretch;
+  column-gap: var(--sikshya-spacing-5);
+}
+
+html[data-sikshya-archive-view="list"] .sikshya-archive-courses .sikshya-course-card-body {
+  display: contents;
+}
+
+html[data-sikshya-archive-view="list"] .sikshya-archive-courses .sikshya-course-card-image {
+  grid-area: image;
+}
+
+html[data-sikshya-archive-view="list"] .sikshya-archive-courses .sikshya-course-card-primary {
+  grid-area: primary;
+}
+
+/* When user prefers GRID, force grid layout regardless of server class. */
+html[data-sikshya-archive-view="grid"] .sikshya-archive-courses .sikshya-course-grid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--sikshya-spacing-6);
+}
+
+html[data-sikshya-archive-view="grid"] .sikshya-archive-courses .sikshya-course-card {
+  display: flex;
+  grid-template-columns: none;
+  grid-template-areas: none;
+}
+
+html[data-sikshya-archive-view="grid"] .sikshya-archive-courses .sikshya-course-card-body {
+  display: flex;
+}
+
+/* Toolbar view-toggle buttons: derive active state from html attribute so
+ * the hardcoded `is-active` on the grid button (in the server template)
+ * doesn't briefly highlight the wrong button. */
+html[data-sikshya-archive-view="list"] .sikshya-archive-toolbar__view-btn[data-sikshya-archive-view="grid"],
+html[data-sikshya-archive-view="grid"] .sikshya-archive-toolbar__view-btn[data-sikshya-archive-view="list"] {
+  background: transparent;
+  color: var(--sikshya-gray-700);
+}
+
+html[data-sikshya-archive-view="list"] .sikshya-archive-toolbar__view-btn[data-sikshya-archive-view="list"],
+html[data-sikshya-archive-view="grid"] .sikshya-archive-toolbar__view-btn[data-sikshya-archive-view="grid"] {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--sikshya-primary);
+}
+
 

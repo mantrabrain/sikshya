@@ -94,7 +94,86 @@ final class AdminAddonsRestRoutes
             'featureIds' => array_values(array_filter(array_map('sanitize_key', $addon->featureIds()))),
             'enabled' => $enabled,
             'licenseOk' => $license_ok,
+            'docsUrl' => self::docsUrlForAddon($id),
         ];
+    }
+
+    /**
+     * Documentation deep link for a specific addon section.
+     *
+     * Anchor IDs are taken verbatim from the live docs at
+     * `https://sikshya.mantrabrain.com/docs/third-party-integrations` — the
+     * markdown headings auto-generate slugs that don't 1:1 match the addon
+     * IDs (e.g. `coupons_advanced` → `#advanced-coupons-upsells`,
+     * `course_reviews` → `#course-reviews-ratings`), so a naive slugify of
+     * the addon id produces broken anchors. This explicit map is the source
+     * of truth.
+     *
+     * Sites that ship their own knowledge base can override:
+     *   - `sikshya_addons_docs_base_url` — change the base for ALL addons
+     *   - `sikshya_addons_docs_url_for_addon` — override per-addon URL
+     */
+    private static function docsUrlForAddon(string $id): string
+    {
+        $base = (string) apply_filters(
+            'sikshya_addons_docs_base_url',
+            'https://sikshya.mantrabrain.com/docs/',
+            $id
+        );
+        $base = rtrim($base, '/') . '/';
+
+        // addon id → [docs page slug, anchor fragment without `#`]
+        $map = [
+            // Build (curriculum & assets)
+            'course_bundles'              => ['third-party-integrations', 'course-bundles'],
+            'course_reviews'              => ['third-party-integrations', 'course-reviews-ratings'],
+            'community_discussions'       => ['third-party-integrations', 'course-discussions-qa'],
+            'multi_instructor'            => ['third-party-integrations', 'multi-instructor-co-authors'],
+            'instructor_dashboard'        => ['third-party-integrations', 'instructor-dashboard'],
+            'live_classes'                => ['third-party-integrations', 'live-classes-zoom-meet-classroom'],
+            'scorm_h5p_pro'               => ['third-party-integrations', 'scorm-h5p'],
+            // Teach (assessment, automation, learner journey)
+            'content_drip'                => ['third-party-integrations', 'content-drip-scheduled-unlock'],
+            'drip_notifications'          => ['third-party-integrations', 'drip-automation-emails'],
+            'prerequisites'               => ['third-party-integrations', 'prerequisites-lessons-courses'],
+            'calendar'                    => ['third-party-integrations', 'calendar'],
+            'assignments_advanced'        => ['third-party-integrations', 'advanced-assignments'],
+            'quiz_advanced'               => ['third-party-integrations', 'advanced-quiz-types-question-banks'],
+            'gradebook'                   => ['third-party-integrations', 'gradebook'],
+            'certificates_advanced'       => ['third-party-integrations', 'advanced-certificates-builder-qr-verification'],
+            // Sell (revenue growth)
+            'subscriptions'               => ['third-party-integrations', 'subscriptions-memberships'],
+            'coupons_advanced'            => ['third-party-integrations', 'advanced-coupons-upsells'],
+            'dynamic_checkout_fields'     => ['third-party-integrations', 'dynamic-checkout-fields'],
+            'social_login'                => ['third-party-integrations', 'social-login'],
+            // Operate (analytics, reporting, audit)
+            'reports_advanced'            => ['third-party-integrations', 'advanced-analytics-exports'],
+            'activity_log'                => ['third-party-integrations', 'student-activity-log'],
+            'enterprise_reports'          => ['third-party-integrations', 'enterprise-reporting'],
+            // Communicate (email, marketing, automation, API)
+            'email_advanced_customization' => ['third-party-integrations', 'email-advanced-customization'],
+            'crm_email_automation'        => ['third-party-integrations', 'crm-email-automation'],
+            'email_marketing'             => ['third-party-integrations', 'email-marketing-mailchimp-mailerlite'],
+            'webhooks'                    => ['third-party-integrations', 'webhooks'],
+            'zapier'                      => ['third-party-integrations', 'zapier'],
+            'public_api_keys'             => ['third-party-integrations', 'public-api-api-keys'],
+            // Scale (marketplace, branding, enterprise)
+            'marketplace_multivendor'     => ['third-party-integrations', 'multi-vendor-marketplace'],
+            'white_label'                 => ['third-party-integrations', 'white-label-branding'],
+            'multisite_scale'             => ['third-party-integrations', 'multisite-network-license-tools'],
+            'multilingual_enterprise'     => ['third-party-integrations', 'multilingual-wpml-weglot'],
+        ];
+
+        if (isset($map[$id])) {
+            [$page, $anchor] = $map[$id];
+            $default = $base . $page . '/#' . $anchor;
+        } else {
+            // Unknown / future addon → land on the catalog page rather than
+            // a guessed anchor that 404s.
+            $default = $base . 'addons/';
+        }
+
+        return (string) apply_filters('sikshya_addons_docs_url_for_addon', $default, $id);
     }
 
     public function listAddons(): WP_REST_Response

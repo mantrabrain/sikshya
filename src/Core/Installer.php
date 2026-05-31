@@ -57,6 +57,14 @@ final class Installer
 
         flush_rewrite_rules();
 
+        // Stamp the schema version so a future runtime migration dispatcher
+        // (see `Database::maybeUpgrade`) knows where to start. Previously
+        // `SCHEMA_VERSION` was declared but never persisted — `Database::getVersion`
+        // would return `'0.0.0'` on every page load, which would either cause
+        // a pending migration system to re-run all historical migrations or,
+        // worse, skip them entirely after a partial run. Setting the version
+        // here mirrors the Pro plugin's `ProSchema::install()` pattern.
+        Settings::setRaw('sikshya_db_version', \Sikshya\Database\Database::SCHEMA_VERSION);
         Settings::setRaw('sikshya_activation_time', current_time('timestamp'));
 
         do_action('sikshya_activated');
@@ -174,6 +182,19 @@ final class Installer
 
         add_role('sikshya_assistant', __('Assistant', 'sikshya'), $assistant_caps);
         self::mergeCapsOntoRole('sikshya_assistant', $assistant_caps);
+
+        // Read-only auditor: can open the React admin and see reports, but
+        // cannot edit any LMS content or settings. Useful for compliance /
+        // finance / security stakeholders who need visibility without
+        // permission to mutate the system.
+        $auditor_caps = [
+            'read' => true,
+            'view_sikshya_reports' => true,
+            'sikshya_access_admin_app' => true,
+        ];
+
+        add_role('sikshya_auditor', __('Auditor (read-only)', 'sikshya'), $auditor_caps);
+        self::mergeCapsOntoRole('sikshya_auditor', $auditor_caps);
 
         $admin_role = get_role('administrator');
         if ($admin_role) {

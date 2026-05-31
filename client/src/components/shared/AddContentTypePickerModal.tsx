@@ -91,7 +91,7 @@ export function defaultTitleFor(type: ContentPickerType, config?: SikshyaReactCo
 }
 
 const FIELD_INPUT =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/35 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
+  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus-visible:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500';
 const FIELD_LABEL = 'block text-sm font-medium text-slate-800 dark:text-slate-200';
 const FIELD_HINT = 'mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400';
 
@@ -213,7 +213,7 @@ export function AddContentTypePickerModal(props: Props) {
         <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/35 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             onClick={handleClose}
             disabled={busy}
           >
@@ -266,7 +266,7 @@ export function AddContentTypePickerModal(props: Props) {
             >
               {gate.badge ? (
                 <span
-                  className={`absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide ${
+                  className={`absolute right-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
                     gate.badge === 'Off'
                       ? 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
                       : 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300'

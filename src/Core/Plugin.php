@@ -180,6 +180,10 @@ final class Plugin
             $this->services['restCollectionQuery'] = new RestCollectionQueryService();
             $this->services['postTypes'] = new PostTypeService($this);
             $this->services['taxonomies'] = new TaxonomyService($this);
+            // Hooks `init` priority 20 to register REST-accessible meta for course pricing,
+            // course_type, lesson, quiz, assignment, question, chapter. Lives alongside
+            // PostTypeService — see `PostTypeManager::registerRestAccessiblePostMeta()`.
+            $this->services['postTypeMeta'] = new \Sikshya\PostTypes\PostTypeManager();
 
             // Curriculum chapter/content helpers for REST (React admin).
             $this->services['courseBuilderUi'] = new \Sikshya\Services\CourseCurriculumActions();
@@ -253,6 +257,13 @@ final class Plugin
             flush_rewrite_rules(false);
         }
 
+        // Ensure the sikshya_auditor role exists on already-installed sites
+        // (its definition was added after initial plugin activation).
+        if (Settings::getRaw('sikshya_auditor_role_installed', '') !== '1') {
+            \Sikshya\Core\Installer::syncSikshyaRoleCapabilities();
+            Settings::setRaw('sikshya_auditor_role_installed', '1');
+        }
+
         AdminBackendAccess::registerFilters();
 
         // Initialize post types and taxonomies
@@ -279,6 +290,19 @@ final class Plugin
         GlobalSettingsBootstrap::register();
         add_filter('map_meta_cap', [\Sikshya\Services\InstructorPermissions::class, 'mapMetaCap'], 10, 4);
 
+        // GDPR personal-data exporter + eraser registration. WordPress fires
+        // both filters during the privacy tools' batch jobs; the registration
+        // is cheap (just adding filter callbacks) so do it eagerly on init.
+        \Sikshya\Privacy\PersonalDataExporter::register();
+        \Sikshya\Privacy\PersonalDataEraser::register();
+
+        // JWT revocation: hooks `password_reset` and `profile_update` so that
+        // a password change auto-invalidates every outstanding token for the
+        // user. Without this, an attacker who has captured a long-lived JWT
+        // keeps authenticating even after the rightful owner resets their
+        // password — defeating the whole point of password reset.
+        \Sikshya\Api\JwtAuthService::registerRevocationHooks();
+
         $mailer = $this->services['mailer'] ?? null;
         if ($mailer instanceof EmailNotificationService) {
             EmailNotificationService::registerHookListeners($mailer);
@@ -292,6 +316,22 @@ final class Plugin
         CoursesShortcode::init();
         AuthShortcodes::init();
         BlocksRegistrar::init($this);
+
+        // Course delete cascade — runs on `before_delete_post` (priority 5)
+        // so orphan enrolments / progress / quiz attempts / certificates /
+        // child posts are purged before WP's own row delete fires, and a
+        // `sikshya_course_deleted` action lets addons listen for the event.
+        \Sikshya\Services\CourseDeleteCascade::init();
+
+        // Bust the cached single-course student count when enrollments change.
+        $invalidateStudentCount = static function ($user_id, $course_id) {
+            $cid = (int) $course_id;
+            if ($cid > 0) {
+                delete_transient('sikshya_course_student_count_' . $cid);
+            }
+        };
+        add_action('sikshya_user_enrolled', $invalidateStudentCount, 10, 2);
+        add_action('sikshya_user_unenrolled', $invalidateStudentCount, 10, 2);
 
         // Hook into WordPress
         do_action('sikshya_init', $this);
@@ -310,6 +350,17 @@ final class Plugin
      */
     public function onAdminInit(): void
     {
+        // Lazy schema upgrade — handles the "drop-in new build, never
+        // re-activated" deploy path. Idempotent; safe per request.
+        try {
+            (new \Sikshya\Database\Database($this))->maybeUpgrade();
+        } catch (\Throwable $e) {
+            // Don't let a migration hiccup blank the admin screen.
+            if (function_exists('error_log')) {
+                error_log('[Sikshya] maybeUpgrade failed: ' . $e->getMessage());
+            }
+        }
+
         if (class_exists('\Sikshya\Certificates\CertificateTemplateDefaults')) {
             \Sikshya\Certificates\CertificateTemplateDefaults::migrateLegacyTemplatesIfNeeded();
         }

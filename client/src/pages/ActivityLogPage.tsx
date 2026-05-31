@@ -346,7 +346,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setPage(1);
                     }}
                     placeholder={__('e.g. 12', 'sikshya')}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </label>
                 <label className="block text-sm text-slate-600 dark:text-slate-400">
@@ -357,7 +357,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setFilterAction(e.target.value);
                       setPage(1);
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   >
                     {ACTION_OPTIONS.map((o) => (
                       <option key={o.value || 'all'} value={o.value}>
@@ -375,7 +375,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setFilterSearch(e.target.value);
                       setPage(1);
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     placeholder={__('Text contained in the event', 'sikshya')}
                   />
                 </label>
@@ -388,7 +388,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setFilterDateFrom(e.target.value);
                       setPage(1);
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </label>
                 <label className="block text-sm text-slate-600 dark:text-slate-400">
@@ -400,7 +400,7 @@ export function ActivityLogPage(props: { config: SikshyaReactConfig; title: stri
                       setFilterDateTo(e.target.value);
                       setPage(1);
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   />
                 </label>
               </div>

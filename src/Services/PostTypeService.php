@@ -417,13 +417,18 @@ class PostTypeService
 
         $args = [
             'labels' => $labels,
+            // Public access via /lessons/<slug>/ was a vestigial admin-preview convenience that
+            // no learner workflow actually uses — learners take lessons via the learn shell at
+            // /learn/<course>/lessons/<lesson>/. publicly_queryable=false makes the standalone
+            // URL 404 while keeping the editor UI + REST API working.
             'public' => true,
-            'publicly_queryable' => true,
+            'publicly_queryable' => false,
+            'exclude_from_search' => true,
             'show_ui' => true,
             'show_in_menu' => false,
             'show_in_admin_bar' => false,
-            'query_var' => true,
-            'rewrite' => [ 'slug' => $rewrite['rewrite_base_lesson'], 'with_front' => false ],
+            'query_var' => false,
+            'rewrite' => false,
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
@@ -469,13 +474,16 @@ class PostTypeService
 
         $args = [
             'labels' => $labels,
+            // Same rationale as the Lesson CPT — learners take quizzes inside the
+            // learn shell, never via the standalone /quizzes/<slug>/ URL.
             'public' => true,
-            'publicly_queryable' => true,
+            'publicly_queryable' => false,
+            'exclude_from_search' => true,
             'show_ui' => true,
             'show_in_menu' => false,
             'show_in_admin_bar' => false,
-            'query_var' => true,
-            'rewrite' => [ 'slug' => $rewrite['rewrite_base_quiz'], 'with_front' => false ],
+            'query_var' => false,
+            'rewrite' => false,
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,
@@ -521,13 +529,18 @@ class PostTypeService
 
         $args = [
             'labels' => $labels,
-            'public' => true,
-            'publicly_queryable' => true,
+            // Assignment has no dedicated public template (only a learn-shell
+            // panel partial), so the entire /assignments/<slug>/ URL space was
+            // dead. Lock the CPT to admin/REST only — editor + React admin both
+            // keep working via show_in_rest + show_ui.
+            'public' => false,
+            'publicly_queryable' => false,
+            'exclude_from_search' => true,
             'show_ui' => true,
             'show_in_menu' => false,
             'show_in_admin_bar' => false,
-            'query_var' => true,
-            'rewrite' => [ 'slug' => $rewrite['rewrite_base_assignment'], 'with_front' => false ],
+            'query_var' => false,
+            'rewrite' => false,
             'capability_type' => 'post',
             'has_archive' => false,
             'hierarchical' => false,

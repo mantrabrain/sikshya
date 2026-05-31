@@ -177,6 +177,15 @@ class FrontendAssetsService
             return true;
         }
 
+        // Course-category root index (/course-category/) is served by a
+        // virtual template (Frontend::loadCustomTemplates → taxonomy-course-
+        // category-root.php) and is NOT picked up by is_tax() because no term
+        // is being viewed. Without this check the grid renders unstyled — the
+        // .sikshya-course-category-index__* rules live in course-listing.css.
+        if (PublicPageUrls::isCourseCategoryRootRequest()) {
+            return true;
+        }
+
         if (is_page('sikshya-courses')) {
             return true;
         }

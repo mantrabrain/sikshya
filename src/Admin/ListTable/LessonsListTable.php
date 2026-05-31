@@ -13,6 +13,7 @@ namespace Sikshya\Admin\ListTable;
 
 use Sikshya\Admin\ReactAdminConfig;
 use Sikshya\Constants\PostTypes;
+use Sikshya\Services\LessonCourseLink;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -127,467 +128,344 @@ class LessonsListTable extends AbstractListTable
     }
 
     /**
-     * Get items for the table
+     * Get items for the table.
      *
-     * @return array
+     * Lessons are stored as `sik_lesson` posts; the per-lesson kind
+     * (`text`/`video`/`audio`) is *meta*, not a post type, so we filter on
+     * `_sikshya_lesson_type` rather than the original prototype's
+     * `sikshya_text`/`sikshya_video` post types (which never existed).
+     *
+     * The course filter uses `_sikshya_lesson_course` (the canonical key
+     * persisted by `LessonCourseLink::persistLessonCourseId`); the legacy
+     * `_sikshya_course_id` mirror is still written too, so either key
+     * resolves correctly when an admin clicks "edit lesson".
+     *
+     * Per-row decoration (course title, instructor) is derived on demand in
+     * the column renderers — admin pages list at most `per_page` (20) rows
+     * so the extra lookups are bounded and benefit from WP's object cache.
+     *
+     * @return array<int, \WP_Post>
      */
     protected function get_items(): array
     {
-        // For demo purposes, return dummy data
-        return $this->getDummyData();
+        $args = [
+            'post_type'      => PostTypes::LESSON,
+            'post_status'    => $this->getStatusFilter(),
+            'posts_per_page' => $this->get_items_per_page($this->config['per_page']),
+            'paged'          => $this->get_pagenum(),
+            'orderby'        => $this->getOrderBy(),
+            'order'          => $this->getOrder(),
+            's'              => $this->getSearchTerm(),
+        ];
 
-        // Original code (commented out for demo)
-        /*
-        global $wpdb;
-
-        $per_page = $this->get_items_per_page();
-        $current_page = $this->get_pagenum();
-        $offset = ($current_page - 1) * $per_page;
-
-        // Build query
-        $where = ['1=1'];
-        $join = '';
-        $args = [];
-
-        // Search
-        $search = $this->getSearchTerm();
-        if (!empty($search)) {
-            $where[] = '(p.post_title LIKE %s OR p.post_content LIKE %s)';
-            $args[] = '%' . $wpdb->esc_like($search) . '%';
-            $args[] = '%' . $wpdb->esc_like($search) . '%';
+        $author = $this->getInstructorFilter();
+        if ($author) {
+            $args['author'] = $author;
         }
 
-        // Status filter
-        $status_filter = $this->getFilterValue('status');
-        if (!empty($status_filter)) {
-            $where[] = 'p.post_status = %s';
-            $args[] = $status_filter;
-        } else {
-            $where[] = 'p.post_status IN ("publish", "draft", "private", "pending")';
+        $meta_query = [];
+        $course_filter = $this->getCourseFilter();
+        if ($course_filter > 0) {
+            $meta_query[] = [
+                'relation' => 'OR',
+                ['key' => '_sikshya_lesson_course', 'value' => $course_filter, 'type' => 'NUMERIC'],
+                ['key' => '_sikshya_course_id',    'value' => $course_filter, 'type' => 'NUMERIC'],
+            ];
+        }
+        $type_filter = $this->getTypeFilter();
+        if ($type_filter !== '') {
+            $meta_query[] = [
+                'key'   => '_sikshya_lesson_type',
+                'value' => $type_filter,
+            ];
+        }
+        if (!empty($meta_query)) {
+            $args['meta_query'] = $meta_query;
         }
 
-        // Course filter
-        $course_filter = $this->getFilterValue('course');
-        if (!empty($course_filter)) {
-            $where[] = 'c.ID = %d';
-            $args[] = intval($course_filter);
-        }
+        $query = new \WP_Query($args);
+        $this->total_items_cache = (int) $query->found_posts;
 
-        // Type filter
-        $type_filter = $this->getFilterValue('type');
-        if (!empty($type_filter)) {
-            $where[] = 'p.post_type = %s';
-            $args[] = 'sikshya_' . $type_filter;
-        } else {
-            $where[] = 'p.post_type IN ("sikshya_text", "sikshya_video", "sikshya_audio", "sikshya_quiz", "sikshya_assignment")';
-        }
-
-        // Instructor filter
-        $instructor_filter = $this->getFilterValue('instructor');
-        if (!empty($instructor_filter)) {
-            $where[] = 'c.post_author = %d';
-            $args[] = intval($instructor_filter);
-        }
-
-        // Build the main query
-        $query = "
-            SELECT
-                p.ID,
-                p.post_title,
-                p.post_content,
-                p.post_status,
-                p.post_type,
-                p.post_author,
-                p.post_date,
-                p.post_modified,
-                c.post_title as course_title,
-                c.ID as course_id,
-                u.display_name as instructor_name,
-                pm_duration.meta_value as duration,
-                pm_order.meta_value as lesson_order
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->posts} c ON c.ID = (
-                SELECT pm.meta_value
-                FROM {$wpdb->postmeta} pm
-                WHERE pm.post_id = p.ID
-                AND pm.meta_key = '_sikshya_course_id'
-                LIMIT 1
-            )
-            LEFT JOIN {$wpdb->posts} c ON c.ID = (
-                SELECT pm.meta_value
-                FROM {$wpdb->postmeta} pm
-                WHERE pm.post_id = p.ID
-                AND pm.meta_key = '_sikshya_course_id'
-                LIMIT 1
-            )
-            LEFT JOIN {$wpdb->users} u ON u.ID = c.post_author
-            LEFT JOIN {$wpdb->postmeta} pm_duration ON pm_duration.post_id = p.ID AND pm_duration.meta_key = '_sikshya_duration'
-            LEFT JOIN {$wpdb->postmeta} pm_order ON pm_order.post_id = p.ID AND pm_order.meta_key = '_sikshya_order'
-            WHERE " . implode(' AND ', $where) . "
-            ORDER BY p.post_date DESC
-            LIMIT %d OFFSET %d
-        ";
-
-        $args[] = $per_page;
-        $args[] = $offset;
-
-        // Only use prepare if we have arguments, otherwise use the query directly
-        if (!empty($args)) {
-            $items = $wpdb->get_results($wpdb->prepare($query, $args));
-        } else {
-            $items = $wpdb->get_results($query);
-        }
-
-        return $items;
-        */
+        return $query->posts;
     }
 
     /**
-     * Get total number of items
+     * Get total number of items for pagination.
      *
-     * @return int
+     * Reuses the count cached on the most recent `get_items()` call so we
+     * don't re-run the query. Falls back to a `WP_Query` with the same
+     * filters if the table is rendered without items first (defensive).
      */
     protected function get_total_items(): int
     {
-        // For demo purposes, return count of dummy data
-        return count($this->getDummyData());
-
-        // Original code (commented out for demo)
-        /*
-        global $wpdb;
-
-        // Build query for count
-        $where = ['1=1'];
-        $args = [];
-
-        // Status filter
-        $status_filter = $this->getFilterValue('status');
-        if (!empty($status_filter)) {
-            $where[] = 'p.post_status = %s';
-            $args[] = $status_filter;
-        } else {
-            $where[] = 'p.post_status IN ("publish", "draft", "private", "pending")';
+        if ($this->total_items_cache !== null) {
+            return $this->total_items_cache;
         }
 
-        // Course filter
-        $course_filter = $this->getFilterValue('course');
-        if (!empty($course_filter)) {
-            $where[] = 'c.ID = %d';
-            $args[] = intval($course_filter);
-        }
-
-        // Type filter
-        $type_filter = $this->getFilterValue('type');
-        if (!empty($type_filter)) {
-            $where[] = 'p.post_type = %s';
-            $args[] = 'sikshya_' . $type_filter;
-        } else {
-            $where[] = 'p.post_type IN ("sikshya_text", "sikshya_video", "sikshya_audio", "sikshya_quiz", "sikshya_assignment")';
-        }
-
-        // Instructor filter
-        $instructor_filter = $this->getFilterValue('instructor');
-        if (!empty($instructor_filter)) {
-            $where[] = 'c.post_author = %d';
-            $args[] = intval($instructor_filter);
-        }
-
-        // Search
-        $search = $this->getSearchTerm();
-        if (!empty($search)) {
-            $where[] = '(p.post_title LIKE %s OR p.post_content LIKE %s)';
-            $args[] = '%' . $wpdb->esc_like($search) . '%';
-            $args[] = '%' . $wpdb->esc_like($search) . '%';
-        }
-
-        $count_query = "
-            SELECT COUNT(*)
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->posts} c ON c.ID = (
-                SELECT pm.meta_value
-                FROM {$wpdb->postmeta} pm
-                WHERE pm.post_id = p.ID
-                AND pm.meta_key = '_sikshya_course_id'
-                LIMIT 1
-            )
-            WHERE " . implode(' AND ', $where);
-
-        // Only use prepare if we have arguments, otherwise use the query directly
-        if (!empty($args)) {
-            return (int) $wpdb->get_var($wpdb->prepare($count_query, $args));
-        } else {
-            return (int) $wpdb->get_var($count_query);
-        }
-        */
-    }
-
-    /**
-     * Get dummy data for demo purposes
-     *
-     * @return array
-     */
-    protected function getDummyData(): array
-    {
-        $dummy_lessons = [
-            (object) [
-                'ID' => 1,
-                'post_title' => 'Introduction to JavaScript Basics',
-                'post_content' => 'Learn the fundamentals of JavaScript programming language.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_text',
-                'post_author' => 1,
-                'post_date' => '2025-01-15 10:30:00',
-                'course_title' => 'Complete JavaScript Masterclass 2025',
-                'course_id' => 1,
-                'instructor_name' => 'John Smith',
-                'duration' => '45',
-                'lesson_order' => 1
-            ],
-            (object) [
-                'ID' => 2,
-                'post_title' => 'Variables and Data Types',
-                'post_content' => 'Understanding variables, strings, numbers, and booleans in JavaScript.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_text',
-                'post_author' => 1,
-                'post_date' => '2025-01-15 11:00:00',
-                'course_title' => 'Complete JavaScript Masterclass 2025',
-                'course_id' => 1,
-                'instructor_name' => 'John Smith',
-                'duration' => '30',
-                'lesson_order' => 2
-            ],
-            (object) [
-                'ID' => 3,
-                'post_title' => 'JavaScript Functions Deep Dive',
-                'post_content' => 'Master function declarations, expressions, and arrow functions.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_video',
-                'post_author' => 1,
-                'post_date' => '2025-01-15 12:00:00',
-                'course_title' => 'Complete JavaScript Masterclass 2025',
-                'course_id' => 1,
-                'instructor_name' => 'John Smith',
-                'duration' => '60',
-                'lesson_order' => 3
-            ],
-            (object) [
-                'ID' => 4,
-                'post_title' => 'UI Design Principles',
-                'post_content' => 'Core principles of user interface design and user experience.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_text',
-                'post_author' => 2,
-                'post_date' => '2025-01-10 14:15:00',
-                'course_title' => 'UI/UX Design Fundamentals',
-                'course_id' => 2,
-                'instructor_name' => 'Sarah Johnson',
-                'duration' => '40',
-                'lesson_order' => 1
-            ],
-            (object) [
-                'ID' => 5,
-                'post_title' => 'Color Theory in Design',
-                'post_content' => 'Understanding color psychology and color schemes in design.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_video',
-                'post_author' => 2,
-                'post_date' => '2025-01-10 15:00:00',
-                'course_title' => 'UI/UX Design Fundamentals',
-                'course_id' => 2,
-                'instructor_name' => 'Sarah Johnson',
-                'duration' => '35',
-                'lesson_order' => 2
-            ],
-            (object) [
-                'ID' => 6,
-                'post_title' => 'Python Basics Quiz',
-                'post_content' => 'Test your knowledge of Python fundamentals with this comprehensive quiz.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_quiz',
-                'post_author' => 3,
-                'post_date' => '2025-01-08 09:45:00',
-                'course_title' => 'Python for Data Science',
-                'course_id' => 3,
-                'instructor_name' => 'Mike Wilson',
-                'duration' => '20',
-                'lesson_order' => 5
-            ],
-            (object) [
-                'ID' => 7,
-                'post_title' => 'Data Visualization Assignment',
-                'post_content' => 'Create compelling data visualizations using Python libraries.',
-                'post_status' => 'draft',
-                'post_type' => 'sikshya_assignment',
-                'post_author' => 3,
-                'post_date' => '2025-01-08 10:30:00',
-                'course_title' => 'Python for Data Science',
-                'course_id' => 3,
-                'instructor_name' => 'Mike Wilson',
-                'duration' => '120',
-                'lesson_order' => 8
-            ],
-            (object) [
-                'ID' => 8,
-                'post_title' => 'Marketing Strategy Overview',
-                'post_content' => 'Introduction to digital marketing strategies and best practices.',
-                'post_status' => 'draft',
-                'post_type' => 'sikshya_text',
-                'post_author' => 2,
-                'post_date' => '2025-01-28 13:25:00',
-                'course_title' => 'Digital Marketing Strategy',
-                'course_id' => 4,
-                'instructor_name' => 'Sarah Johnson',
-                'duration' => '25',
-                'lesson_order' => 1
-            ],
-            (object) [
-                'ID' => 9,
-                'post_title' => 'Photoshop Tools Tutorial',
-                'post_content' => 'Learn essential Photoshop tools and techniques for photo editing.',
-                'post_status' => 'pending',
-                'post_type' => 'sikshya_video',
-                'post_author' => 1,
-                'post_date' => '2025-01-29 15:45:00',
-                'course_title' => 'Adobe Photoshop Complete Course',
-                'course_id' => 5,
-                'instructor_name' => 'John Smith',
-                'duration' => '55',
-                'lesson_order' => 2
-            ],
-            (object) [
-                'ID' => 10,
-                'post_title' => 'React Native Setup Guide',
-                'post_content' => 'Step-by-step guide to setting up your React Native development environment.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_text',
-                'post_author' => 3,
-                'post_date' => '2025-01-12 11:20:00',
-                'course_title' => 'React Native Mobile Development',
-                'course_id' => 6,
-                'instructor_name' => 'Mike Wilson',
-                'duration' => '30',
-                'lesson_order' => 1
-            ],
-            (object) [
-                'ID' => 11,
-                'post_title' => 'WordPress Plugin Development',
-                'post_content' => 'Learn how to create custom WordPress plugins from scratch.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_video',
-                'post_author' => 1,
-                'post_date' => '2025-01-18 16:45:00',
-                'course_title' => 'Advanced WordPress Development',
-                'course_id' => 7,
-                'instructor_name' => 'John Smith',
-                'duration' => '75',
-                'lesson_order' => 3
-            ],
-            (object) [
-                'ID' => 12,
-                'post_title' => 'Design Portfolio Review',
-                'post_content' => 'Submit your design portfolio for professional review and feedback.',
-                'post_status' => 'publish',
-                'post_type' => 'sikshya_assignment',
-                'post_author' => 2,
-                'post_date' => '2025-01-20 09:30:00',
-                'course_title' => 'Graphic Design Masterclass',
-                'course_id' => 8,
-                'instructor_name' => 'Sarah Johnson',
-                'duration' => '90',
-                'lesson_order' => 10
-            ]
+        $args = [
+            'post_type'      => PostTypes::LESSON,
+            'post_status'    => $this->getStatusFilter(),
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            's'              => $this->getSearchTerm(),
         ];
 
-        return $dummy_lessons;
+        $author = $this->getInstructorFilter();
+        if ($author) {
+            $args['author'] = $author;
+        }
+
+        $meta_query = [];
+        $course_filter = $this->getCourseFilter();
+        if ($course_filter > 0) {
+            $meta_query[] = [
+                'relation' => 'OR',
+                ['key' => '_sikshya_lesson_course', 'value' => $course_filter, 'type' => 'NUMERIC'],
+                ['key' => '_sikshya_course_id',    'value' => $course_filter, 'type' => 'NUMERIC'],
+            ];
+        }
+        $type_filter = $this->getTypeFilter();
+        if ($type_filter !== '') {
+            $meta_query[] = [
+                'key'   => '_sikshya_lesson_type',
+                'value' => $type_filter,
+            ];
+        }
+        if (!empty($meta_query)) {
+            $args['meta_query'] = $meta_query;
+        }
+
+        $query = new \WP_Query($args);
+        $this->total_items_cache = (int) $query->found_posts;
+
+        return $this->total_items_cache;
     }
 
     /**
-     * Get courses list for filter
+     * @var int|null Cached found-rows count from the last items query.
+     */
+    private $total_items_cache = null;
+
+    /**
+     * Sanitise request filter helpers.
+     */
+    private function getStatusFilter()
+    {
+        $allowed = ['publish', 'draft', 'private', 'pending'];
+        $status  = sanitize_key((string) ($_GET['status'] ?? $_GET['post_status'] ?? ''));
+        if ($status === '' || !in_array($status, $allowed, true)) {
+            return $allowed;
+        }
+        return $status;
+    }
+
+    private function getInstructorFilter(): int
+    {
+        return max(0, intval($_GET['instructor'] ?? 0));
+    }
+
+    private function getCourseFilter(): int
+    {
+        return max(0, intval($_GET['course'] ?? 0));
+    }
+
+    /**
+     * Sanitise the lesson `type` filter. The dropdown still labels options
+     * `text`/`video`/`audio`/`quiz`/`assignment` for back-compat, but this
+     * table lists only `sik_lesson` posts — so `quiz` and `assignment`
+     * are mapped to the empty string (no filter), since those are
+     * separate post types listed in their own tables.
+     */
+    private function getTypeFilter(): string
+    {
+        $type = sanitize_key((string) ($_GET['type'] ?? ''));
+        $allowed = ['text', 'video', 'audio'];
+        return in_array($type, $allowed, true) ? $type : '';
+    }
+
+    private function getSearchTerm(): string
+    {
+        return sanitize_text_field((string) ($_GET['s'] ?? ''));
+    }
+
+    private function getOrderBy(): string
+    {
+        $orderby = sanitize_key((string) ($_GET['orderby'] ?? 'date'));
+        $allowed = ['title', 'created', 'date', 'modified'];
+        if ($orderby === 'created') {
+            $orderby = 'date';
+        }
+        return in_array($orderby, $allowed, true) ? $orderby : 'date';
+    }
+
+    private function getOrder(): string
+    {
+        $order = strtoupper((string) ($_GET['order'] ?? 'DESC'));
+        return in_array($order, ['ASC', 'DESC'], true) ? $order : 'DESC';
+    }
+
+    /**
+     * Delete a lesson post (used by bulk-delete).
+     */
+    protected function delete_item($id): bool
+    {
+        $post = get_post((int) $id);
+        if (!$post || $post->post_type !== PostTypes::LESSON) {
+            return false;
+        }
+        return wp_delete_post((int) $id, true) !== false;
+    }
+
+    /**
+     * Update a lesson post status (used by bulk publish/draft).
+     */
+    protected function update_item_status($id, $status): bool
+    {
+        $post = get_post((int) $id);
+        if (!$post || $post->post_type !== PostTypes::LESSON) {
+            return false;
+        }
+        $allowed = ['publish', 'draft', 'private', 'pending'];
+        if (!in_array($status, $allowed, true)) {
+            return false;
+        }
+        $result = wp_update_post(['ID' => (int) $id, 'post_status' => $status], true);
+        return !is_wp_error($result);
+    }
+
+    /**
+     * Get courses list for filter dropdown.
      *
-     * @return array
+     * @return array<int|string, string>
      */
     private function getCoursesList(): array
     {
         $options = ['' => __('All Courses', 'sikshya')];
 
-        $courses = get_posts([
-            'post_type' => PostTypes::COURSE,
-            'post_status' => ['publish', 'draft'],
+        $course_ids = get_posts([
+            'post_type'      => PostTypes::COURSE,
+            'post_status'    => ['publish', 'draft', 'private', 'pending'],
             'posts_per_page' => -1,
-            'orderby' => 'title',
-            'order' => 'ASC',
-            'fields' => 'ids',
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+            'fields'         => 'ids',
         ]);
 
-        foreach ($courses as $course_id) {
-            $options[$course_id] = get_the_title($course_id);
+        foreach ($course_ids as $course_id) {
+            $options[(int) $course_id] = get_the_title((int) $course_id);
         }
 
         return $options;
     }
 
     /**
-     * Get instructors list for filter
+     * Get instructors list for filter dropdown.
      *
-     * @return array
+     * @return array<int|string, string>
      */
     private function getInstructorsList(): array
     {
         $options = ['' => __('All Instructors', 'sikshya')];
 
         $users = get_users([
-            'role__in' => ['administrator', 'sikshya_instructor'],
-            'orderby' => 'display_name',
-            'fields' => ['ID', 'display_name'],
+            'role__in' => ['administrator', 'sikshya_instructor', 'instructor'],
+            'orderby'  => 'display_name',
+            'fields'   => ['ID', 'display_name'],
         ]);
 
         foreach ($users as $user) {
-            $options[$user->ID] = $user->display_name;
+            $options[(int) $user->ID] = $user->display_name;
         }
 
         return $options;
     }
 
     /**
-     * Get lesson type display name
+     * Map a lesson kind slug to a display label.
      *
-     * @param string $post_type
-     * @return string
+     * Lesson kind is meta (`text`/`video`/`audio`), not a post type. The
+     * legacy `sikshya_<kind>` mapping is kept for forward-compat with any
+     * cached payload that still passes a prefixed post type slug in.
      */
-    private function getLessonTypeName(string $post_type): string
+    private function getLessonTypeName(string $kind): string
     {
+        $kind = ltrim($kind, '_');
+        if (str_starts_with($kind, 'sikshya_')) {
+            $kind = substr($kind, strlen('sikshya_'));
+        }
+
         $type_map = [
-            'sikshya_text' => __('Text Lesson', 'sikshya'),
-            'sikshya_video' => __('Video Lesson', 'sikshya'),
-            'sikshya_audio' => __('Audio Lesson', 'sikshya'),
-            'sikshya_quiz' => __('Quiz', 'sikshya'),
-            'sikshya_assignment' => __('Assignment', 'sikshya'),
+            'text'       => __('Text Lesson', 'sikshya'),
+            'video'      => __('Video Lesson', 'sikshya'),
+            'audio'      => __('Audio Lesson', 'sikshya'),
+            'quiz'       => __('Quiz', 'sikshya'),
+            'assignment' => __('Assignment', 'sikshya'),
         ];
 
-        return $type_map[$post_type] ?? ucfirst(str_replace('sikshya_', '', $post_type));
+        return $type_map[$kind] ?? __('Lesson', 'sikshya');
     }
+
+    /**
+     * Read the per-lesson kind slug (`text`/`video`/`audio`) from meta.
+     */
+    private function getLessonKind(int $lesson_id): string
+    {
+        return sanitize_key((string) get_post_meta($lesson_id, '_sikshya_lesson_type', true));
+    }
+
+    /**
+     * Read the per-lesson duration (minutes) from meta. Falls back across
+     * `_sikshya_lesson_duration` (current) and `_sikshya_duration` (legacy).
+     */
+    private function getLessonDuration(int $lesson_id): int
+    {
+        $duration = (int) get_post_meta($lesson_id, '_sikshya_lesson_duration', true);
+        if ($duration > 0) {
+            return $duration;
+        }
+        return (int) get_post_meta($lesson_id, '_sikshya_duration', true);
+    }
+
+    /**
+     * SVG path lookup for a lesson kind icon. Keys are bare slugs
+     * (`text`/`video`/`audio`) matching `_sikshya_lesson_type` values.
+     *
+     * @var array<string, string>
+     */
+    private const KIND_ICON_PATHS = [
+        'text'  => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
+        'video' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>',
+        'audio' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>',
+    ];
+
+    private const KIND_ICON_FALLBACK = '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
 
     /**
      * Column: Title
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnTitle($item): string
     {
-        $title = $item->post_title;
+        $lesson_id = (int) $item->ID;
+        $course_id = LessonCourseLink::resolvedCourseIdForLesson($lesson_id);
+        $kind      = $this->getLessonKind($lesson_id);
+        $title     = (string) $item->post_title;
+        if ($title === '') {
+            $title = __('(no title)', 'sikshya');
+        }
+
         $edit_url = ReactAdminConfig::reactAppUrl('add-course', [
-            'course_id' => (string) $item->course_id,
+            'course_id' => (string) $course_id,
             'tab' => 'curriculum',
         ]);
 
         $delete_url = wp_nonce_url(
-            ReactAdminConfig::reactAppUrl('lessons', ['action' => 'delete', 'id' => (string) $item->ID]),
-            'delete-lesson_' . $item->ID
+            ReactAdminConfig::reactAppUrl('lessons', ['action' => 'delete', 'id' => (string) $lesson_id]),
+            'delete-lesson_' . $lesson_id
         );
 
-        $row_actions = '<div class="row-actions">';
+        $row_actions  = '<div class="row-actions">';
         $row_actions .= '<span class="edit">';
         $row_actions .= '<a href="' . esc_url($edit_url) . '">';
         $row_actions .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
@@ -611,18 +489,10 @@ class LessonsListTable extends AbstractListTable
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
 
-        // Get lesson type icon
-        $type_icons = [
-            'sikshya_text' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
-            'sikshya_video' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>',
-            'sikshya_audio' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>',
-            'sikshya_quiz' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
-            'sikshya_assignment' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>'
-        ];
+        $icon_path = self::KIND_ICON_PATHS[$kind] ?? self::KIND_ICON_FALLBACK;
+        $duration  = $this->getLessonDuration($lesson_id);
 
-        $icon_path = $type_icons[$item->post_type] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
-
-        $output = '<div class="sikshya-lesson-title-wrapper">';
+        $output  = '<div class="sikshya-lesson-title-wrapper">';
         $output .= '<div class="sikshya-lesson-thumbnail">';
         $output .= '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $output .= $icon_path;
@@ -634,10 +504,13 @@ class LessonsListTable extends AbstractListTable
             esc_url($edit_url),
             esc_html($title)
         );
-        $output .= sprintf(
-            '<div class="sikshya-lesson-duration">%s min</div>',
-            esc_html($item->duration)
-        );
+        if ($duration > 0) {
+            $output .= sprintf(
+                '<div class="sikshya-lesson-duration">%s %s</div>',
+                esc_html((string) $duration),
+                esc_html__('min', 'sikshya')
+            );
+        }
         $output .= '</div>';
         $output .= '</div>';
 
@@ -649,51 +522,49 @@ class LessonsListTable extends AbstractListTable
     /**
      * Column: Course
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnCourse($item): string
     {
-        if (!empty($item->course_title)) {
-            $output = '<div class="sikshya-course-info">';
-            $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-            $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>';
-            $output .= '</svg>';
-            $output .= sprintf(
-                '<a href="%s">%s</a>',
-                esc_url(ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $item->course_id])),
-                esc_html($item->course_title)
-            );
-            $output .= '</div>';
-            return $output;
+        $course_id = LessonCourseLink::resolvedCourseIdForLesson((int) $item->ID);
+        if ($course_id <= 0) {
+            return '<span class="sikshya-no-course">' . esc_html__('No Course', 'sikshya') . '</span>';
         }
-        return '<span class="sikshya-no-course">' . __('No Course', 'sikshya') . '</span>';
+
+        $course_title = (string) get_the_title($course_id);
+        if ($course_title === '') {
+            $course_title = __('(no title)', 'sikshya');
+        }
+
+        $output  = '<div class="sikshya-course-info">';
+        $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>';
+        $output .= '</svg>';
+        $output .= sprintf(
+            '<a href="%s">%s</a>',
+            esc_url(ReactAdminConfig::reactAppUrl('add-course', ['course_id' => (string) $course_id])),
+            esc_html($course_title)
+        );
+        $output .= '</div>';
+        return $output;
     }
 
     /**
      * Column: Type
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnType($item): string
     {
-        $type_name = $this->getLessonTypeName($item->post_type);
-        $type_icons = [
-            'sikshya_text' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
-            'sikshya_video' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>',
-            'sikshya_audio' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>',
-            'sikshya_quiz' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
-            'sikshya_assignment' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>'
-        ];
+        $kind      = $this->getLessonKind((int) $item->ID);
+        $type_name = $this->getLessonTypeName($kind);
+        $icon_path = self::KIND_ICON_PATHS[$kind] ?? self::KIND_ICON_FALLBACK;
 
-        $icon_path = $type_icons[$item->post_type] ?? '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
-
-        $output = '<div class="sikshya-lesson-type">';
+        $output  = '<div class="sikshya-lesson-type">';
         $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
         $output .= $icon_path;
         $output .= '</svg>';
-        $output .= sprintf('<span>%s</span>', $type_name);
+        $output .= sprintf('<span>%s</span>', esc_html($type_name));
         $output .= '</div>';
 
         return $output;
@@ -702,65 +573,70 @@ class LessonsListTable extends AbstractListTable
     /**
      * Column: Duration
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnDuration($item): string
     {
-        if (!empty($item->duration)) {
-            $output = '<div class="sikshya-duration-wrapper">';
-            $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
-            $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
-            $output .= '</svg>';
-            $output .= sprintf('<span class="sikshya-duration">%s min</span>', esc_html($item->duration));
-            $output .= '</div>';
-            return $output;
+        $duration = $this->getLessonDuration((int) $item->ID);
+        if ($duration <= 0) {
+            return '<span class="sikshya-no-duration">' . esc_html__('Not set', 'sikshya') . '</span>';
         }
-        return '<span class="sikshya-no-duration">' . __('Not set', 'sikshya') . '</span>';
+
+        $output  = '<div class="sikshya-duration-wrapper">';
+        $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">';
+        $output .= '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+        $output .= '</svg>';
+        $output .= sprintf(
+            '<span class="sikshya-duration">%s %s</span>',
+            esc_html((string) $duration),
+            esc_html__('min', 'sikshya')
+        );
+        $output .= '</div>';
+        return $output;
     }
 
     /**
      * Column: Instructor
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnInstructor($item): string
     {
-        if (!empty($item->instructor_name)) {
-            $output = '<div class="sikshya-instructors">';
-            $output .= sprintf(
-                '<div class="sikshya-instructor">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    <span>%s</span>
-                </div>',
-                esc_html($item->instructor_name)
-            );
-            $output .= '</div>';
-            return $output;
+        $user = $item->post_author ? get_user_by('id', (int) $item->post_author) : null;
+        if (!$user) {
+            return '<span class="sikshya-no-instructor">' . esc_html__('Unknown', 'sikshya') . '</span>';
         }
-        return '<span class="sikshya-no-instructor">' . __('Unknown', 'sikshya') . '</span>';
+
+        $output  = '<div class="sikshya-instructors">';
+        $output .= sprintf(
+            '<div class="sikshya-instructor">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>%s</span>
+            </div>',
+            esc_html((string) $user->display_name)
+        );
+        $output .= '</div>';
+        return $output;
     }
 
     /**
      * Column: Status
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnStatus($item): string
     {
         $status_labels = [
             'publish' => __('Published', 'sikshya'),
-            'draft' => __('Draft', 'sikshya'),
+            'draft'   => __('Draft', 'sikshya'),
             'private' => __('Private', 'sikshya'),
             'pending' => __('Pending Review', 'sikshya'),
         ];
 
-        $status_class = 'sikshya-status-' . $item->post_status;
-        $status_text = $status_labels[$item->post_status] ?? $item->post_status;
+        $status_class = 'sikshya-status-' . sanitize_html_class((string) $item->post_status);
+        $status_text  = $status_labels[$item->post_status] ?? (string) $item->post_status;
 
         return sprintf(
             '<span class="sikshya-status-badge %s">%s</span>',
@@ -772,18 +648,17 @@ class LessonsListTable extends AbstractListTable
     /**
      * Column: Created Date
      *
-     * @param object $item
-     * @return string
+     * @param \WP_Post $item
      */
     protected function columnCreated($item): string
     {
-        $date = new \DateTime($item->post_date);
-        $date_format = 'M j, Y';
+        $date_format = get_option('date_format', 'M j, Y');
+        $time_format = get_option('time_format', 'g:i a');
 
         return sprintf(
             '<span title="%s">%s</span>',
-            esc_attr($date->format('F j, Y g:i A')),
-            esc_html($date->format($date_format))
+            esc_attr(mysql2date($date_format . ' ' . $time_format, (string) $item->post_date)),
+            esc_html(mysql2date($date_format, (string) $item->post_date))
         );
     }
 

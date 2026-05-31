@@ -6,6 +6,8 @@ import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
 import { ListPaginationBar } from '../components/shared/list/ListPaginationBar';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { SingleCoursePicker } from '../components/shared/SingleCoursePicker';
@@ -844,7 +846,7 @@ export function GradebookPage(props: {
                         setPage(1);
                       }}
                       placeholder={__('Learner, email, course…', 'sikshya')}
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
                   {uiMode === 'submissions' ? (
@@ -859,7 +861,7 @@ export function GradebookPage(props: {
                         id="sikshya-submission-status"
                         value={submissionStatus}
                         onChange={(e) => setSubmissionStatus(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                        className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                       >
                         <option value="">{__('All statuses', 'sikshya')}</option>
                         <option value="submitted">{__('Submitted', 'sikshya')}</option>
@@ -956,9 +958,7 @@ export function GradebookPage(props: {
                               <div className="flex flex-wrap items-center gap-2 font-semibold">
                                 <span>{r.overall_score === null ? '—' : Number(r.overall_score).toFixed(2)}</span>
                                 {r.has_override ? (
-                                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
-                                    Override
-                                  </span>
+                                  <StatusBadge tone="warning" label={__('Override', 'sikshya')} size="xs" />
                                 ) : null}
                               </div>
                             </td>
@@ -968,38 +968,33 @@ export function GradebookPage(props: {
                             <td className="px-5 py-3.5 tabular-nums text-slate-600 dark:text-slate-300">
                               {r.gpa_display ? String(r.gpa_display) : '—'}
                             </td>
-                            <td className="px-5 py-3.5 text-right text-xs">
-                              <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
-                                <button
-                                  type="button"
-                                  className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-300"
-                                  onClick={() => openDetail(r)}
-                                >
-                                  Details
-                                </button>
-                                <div className="flex flex-wrap justify-end gap-2">
-                                  {r.course_edit_url ? (
-                                    <a
-                                      href={r.course_edit_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="font-medium text-brand-600 hover:text-brand-800 dark:text-brand-300"
-                                    >
-                                      Edit course
-                                    </a>
-                                  ) : null}
-                                  {r.user_edit_url ? (
-                                    <a
-                                      href={r.user_edit_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300"
-                                    >
-                                      User
-                                    </a>
-                                  ) : null}
-                                </div>
-                              </div>
+                            <td className="w-12 px-5 py-3.5 text-right">
+                              {(() => {
+                                const items: RowActionItem[] = [
+                                  {
+                                    key: 'details',
+                                    label: __('Open details', 'sikshya'),
+                                    onClick: () => openDetail(r),
+                                  },
+                                ];
+                                if (r.course_edit_url) {
+                                  items.push({
+                                    key: 'course',
+                                    label: __('Edit course', 'sikshya'),
+                                    href: r.course_edit_url,
+                                    external: true,
+                                  });
+                                }
+                                if (r.user_edit_url) {
+                                  items.push({
+                                    key: 'user',
+                                    label: __('Open WP user', 'sikshya'),
+                                    href: r.user_edit_url,
+                                    external: true,
+                                  });
+                                }
+                                return <RowActionsMenu items={items} ariaLabel={__('Gradebook row actions', 'sikshya')} />;
+                              })()}
                             </td>
                           </tr>
                         ))}
@@ -1030,7 +1025,7 @@ export function GradebookPage(props: {
                           {(grid.items || []).map((it) => (
                             <th key={`${it.type}:${it.id}`} className="min-w-[14rem] px-5 py-3.5">
                               <div className="truncate">{it.title || `${it.type} #${it.id}`}</div>
-                              <div className="mt-1 text-[10px] font-medium normal-case text-slate-400">
+                              <div className="mt-1 text-xs font-medium normal-case text-slate-400">
                                 Weight {Number(it.weight || 1).toFixed(2)}
                               </div>
                             </th>
@@ -1048,9 +1043,7 @@ export function GradebookPage(props: {
                               <div className="flex flex-wrap items-center gap-2 font-semibold">
                                 <span>{r.overall_percent === null ? '—' : Number(r.overall_percent).toFixed(2)}</span>
                                 {r.has_override ? (
-                                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
-                                    Override
-                                  </span>
+                                  <StatusBadge tone="warning" label={__('Override', 'sikshya')} size="xs" />
                                 ) : null}
                               </div>
                               <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{r.letter_grade || '—'}</div>
@@ -1238,7 +1231,7 @@ export function GradebookPage(props: {
                           id="gb-override-pct"
                           type="text"
                           inputMode="decimal"
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                           value={overridePctInput}
                           onChange={(e) => setOverridePctInput(e.target.value)}
                           placeholder={__('e.g. 87.5', 'sikshya')}
@@ -1251,7 +1244,7 @@ export function GradebookPage(props: {
                         <textarea
                           id="gb-override-note"
                           rows={2}
-                          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900"
+                          className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                           value={overrideNoteInput}
                           onChange={(e) => setOverrideNoteInput(e.target.value)}
                           placeholder={__('Visible to staff in records…', 'sikshya')}
@@ -1387,7 +1380,7 @@ export function GradebookPage(props: {
                                 <input
                                   type="text"
                                   inputMode="decimal"
-                                  className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white"
+                                  className="w-24 rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                                   value={rubricScoreInputs[c.index] ?? ''}
                                   onChange={(e) =>
                                     setRubricScoreInputs((prev) => ({ ...prev, [c.index]: e.target.value }))

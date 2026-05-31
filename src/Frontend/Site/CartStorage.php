@@ -276,6 +276,18 @@ final class CartStorage
         $ids = [];
         $uid = get_current_user_id();
         if ($uid > 0) {
+            // WP's user-meta cache for `$uid` can be primed (with the cart
+            // missing) earlier in the same request by auth / REST setup,
+            // *before* a concurrent `cart-add` worker has committed its
+            // `update_user_meta()` row. Subsequent reads then return the
+            // stale empty payload even though the DB already has the cart —
+            // a hard-to-reproduce race that surfaced as the
+            // `coupon-applied-quote` flake. Invalidating the cache here
+            // forces `update_meta_cache()` to re-query the DB on the next
+            // get_user_meta() call, so commerce reads always see the most
+            // recent commit. Cost is a single SELECT per cart read, which
+            // is negligible compared to the rest of the checkout work.
+            wp_cache_delete($uid, 'user_meta');
             $raw = get_user_meta($uid, self::USER_META, true);
             if (is_array($raw)) {
                 foreach ($raw as $id) {

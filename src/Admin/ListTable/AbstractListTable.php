@@ -482,34 +482,31 @@ abstract class AbstractListTable extends \WP_List_Table
     }
 
     /**
-     * Get status counts for filter tabs
+     * Get status counts for filter tabs.
      *
-     * @return array
+     * Default returns zeros across the standard four post-status buckets so
+     * the subsubsub tab strip renders structurally correctly even when a
+     * subclass forgets to override. Concrete tables (`CoursesListTable`,
+     * `LessonsListTable`, `QuizzesListTable`) override this with
+     * `wp_count_posts()` for their own post type; `StudentsListTable`
+     * leaves it as zeros since "students" aren't posts (the strip is
+     * hidden by the empty-counts path in CSS).
+     *
+     * Previously this returned demo counts (`5/2/1/1`) regardless of
+     * site state — which leaked into the admin UI as fake tab numbers on
+     * subclasses that did override `get_items()` but forgot to override
+     * `get_status_counts()`.
+     *
+     * @return array<string, int>
      */
     protected function get_status_counts(): array
     {
-        // For demo purposes, return dummy counts
         return [
-            'publish' => 5,
-            'draft' => 2,
-            'pending' => 1,
-            'private' => 1
+            'publish' => 0,
+            'draft'   => 0,
+            'pending' => 0,
+            'private' => 0,
         ];
-
-        // TODO: Implement actual status counting logic
-        // $counts = [];
-        // $statuses = ['publish', 'draft', 'pending', 'private'];
-        // foreach ($statuses as $status) {
-        //     $args = [
-        //         'post_type' => $this->config['post_type'] ?? 'post',
-        //         'post_status' => $status,
-        //         'posts_per_page' => -1,
-        //         'fields' => 'ids'
-        //     ];
-        //     $query = new \WP_Query($args);
-        //     $counts[$status] = $query->found_posts;
-        // }
-        // return $counts;
     }
 
     /**

@@ -286,9 +286,6 @@ export function MultiCoursePicker({
               </span>
               <ButtonPrimary
                 type="button"
-                // Defensive contrast: some installs don't ship the custom `brand-*` Tailwind palette,
-                // which can make the primary button render as white text on a light background.
-                className="bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
                 onClick={() => {
                   if (max !== undefined && draft.length > max) {
                     return;
@@ -309,7 +306,7 @@ export function MultiCoursePicker({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={__('Search courses…', 'sikshya')}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm outline-none focus:border-brand-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+            className="block w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
           />
 
           <div className="max-h-[360px] overflow-auto rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950">
@@ -342,7 +339,7 @@ export function MultiCoursePicker({
                             <span className="block text-xs text-slate-500 dark:text-slate-400">#{r.id}</span>
                           </span>
                         </span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                           {r.status}
                         </span>
                       </label>

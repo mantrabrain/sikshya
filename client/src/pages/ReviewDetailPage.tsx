@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { GatedFeatureWorkspace } from '../components/GatedFeatureWorkspace';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
+import { StatusBadge } from '../components/shared/list/StatusBadge';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { useSikshyaDialog } from '../components/shared/SikshyaDialogContext';
@@ -194,15 +195,10 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-3">
                   {row.rating > 0 ? <StarDisplay value={row.rating} /> : <span className="text-slate-400">—</span>}
-                  {row.is_approved ? (
-                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
-                      Approved
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
-                      Pending
-                    </span>
-                  )}
+                  <StatusBadge
+                    tone={row.is_approved ? 'success' : 'warning'}
+                    label={row.is_approved ? __('Approved', 'sikshya') : __('Pending', 'sikshya')}
+                  />
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Submitted {formatPostDate(row.created_at)} · {row.created_at_label}
@@ -277,7 +273,7 @@ export function ReviewDetailPage(props: { embedded?: boolean; config: SikshyaRea
                 value={replyDraft}
                 onChange={(e) => setReplyDraft(e.target.value)}
                 placeholder={__('Write a short reply…', 'sikshya')}
-                className="mt-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
               />
               <div className="mt-3 flex flex-wrap justify-end gap-2">
                 {row.reply_text ? (

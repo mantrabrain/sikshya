@@ -290,7 +290,18 @@ final class CheckoutService
         }
 
         if ($coupon_id) {
-            $this->coupons->incrementUsedCount($coupon_id);
+            // Atomic conditional UPDATE — if the cap was hit between the
+            // initial `findActiveByCode()` check and now (another concurrent
+            // checkout racing through), the row update affects zero rows and
+            // we MUST abort instead of silently letting the second user
+            // through. The pending order stays in the DB at this point —
+            // admin can clean it up via the existing pending-order tooling,
+            // and the user gets a clear "try again without this coupon" error.
+            if (!$this->coupons->incrementUsedCount($coupon_id)) {
+                throw new \RuntimeException(
+                    __('This coupon has just hit its usage limit. Please remove it and try again.', 'sikshya')
+                );
+            }
             $this->coupons->recordRedemption($coupon_id, $user_id, $order_id);
         }
 
@@ -969,12 +980,30 @@ final class CheckoutService
             $body['receipt_email'] = $receipt_email;
         }
 
+        // Idempotency-Key: Stripe explicitly recommends this header on any
+        // POST that creates a resource. A double-click on the "Pay" button or
+        // a network retry of /checkout/stripe/intent would otherwise create
+        // two separate payment_intents — one orphan with no client_secret
+        // ever surfaced to the user, one live. Keying off (order_id, minor
+        // amount, currency) means the same logical request always returns
+        // the same intent, but a real price change (coupon applied / order
+        // edited) regenerates a fresh key and gets a fresh intent. Stripe
+        // keeps each key's response for ~24h which is plenty for any
+        // legitimate retry window.
+        $idempotency_key = sprintf(
+            'sikshya-pi-%d-%d-%s',
+            (int) $order->id,
+            $minor,
+            strtolower($currency)
+        );
+
         $response = wp_remote_post(
             'https://api.stripe.com/v1/payment_intents',
             [
                 'timeout' => 30,
                 'headers' => [
                     'Authorization' => 'Bearer ' . $secret,
+                    'Idempotency-Key' => $idempotency_key,
                 ],
                 'body' => $body,
             ]
@@ -1146,9 +1175,20 @@ final class CheckoutService
                 (int) $order->id
             ),
             'redirectUrl' => $returnUrl,
+            // Bind Mollie payment → Sikshya order for `/checkout/confirm`
+            // (verify-on-demand) and for the inbound webhook (refunds /
+            // chargebacks). Mollie propagates `metadata` onto refund
+            // resources so we can resolve the local order without an
+            // extra API call.
             'metadata' => [
                 'order_id' => (string) $order->id,
             ],
+            // Server-to-server webhook for every payment status change —
+            // includes refunds + chargebacks. The handler at
+            // `/webhooks/mollie` fetches the canonical payment via the
+            // Mollie API (TLS + secret-key auth) and routes to fulfilment
+            // or refund based on observed status.
+            'webhookUrl' => rest_url('sikshya/v1/webhooks/mollie'),
         ];
 
         $response = wp_remote_post(

@@ -87,17 +87,60 @@ abstract class AbstractAdminRestController
     /**
      * Logged-in staff (cookie + nonce) or valid JWT; {@see AdminBackendAccess::canAccessStaffBackend()}.
      *
+     * Reads (GET / HEAD) require staff-backend access only. Writes
+     * (POST / PUT / PATCH / DELETE) additionally require at least one
+     * Sikshya edit cap so the read-only `sikshya_auditor` role cannot mutate
+     * via shared `permissionAdmin`-gated endpoints.
+     *
      * @return bool|WP_Error
      */
     public function permissionAdmin(WP_REST_Request $request)
     {
         if (AdminBackendAccess::canAccessStaffBackend()) {
-            return true;
+            return $this->ensureWriteCapability($request, get_current_user_id());
         }
 
-        return $this->validateJwtAndCheck($request, static function (): bool {
-            return AdminBackendAccess::canAccessStaffBackend();
+        return $this->validateJwtAndCheck($request, function () use ($request): bool {
+            if (!AdminBackendAccess::canAccessStaffBackend()) {
+                return false;
+            }
+            return $this->ensureWriteCapability($request, get_current_user_id()) === true;
         });
+    }
+
+    /**
+     * Reject write verbs for users who have no Sikshya edit capability.
+     *
+     * Read-only auditor role lacks `edit_sikshya_*` and
+     * `manage_sikshya_students`, so writes via `permissionAdmin` fail closed;
+     * full staff (instructor / assistant / administrator) still pass through.
+     *
+     * @return bool|WP_Error
+     */
+    private function ensureWriteCapability(WP_REST_Request $request, int $user_id)
+    {
+        $method = strtoupper((string) $request->get_method());
+        if ($method === 'GET' || $method === 'HEAD') {
+            return true;
+        }
+        if ($user_id <= 0) {
+            return new WP_Error('rest_forbidden', __('Insufficient permissions', 'sikshya'), ['status' => 403]);
+        }
+        if (user_can($user_id, 'manage_options') || user_can($user_id, 'manage_sikshya')) {
+            return true;
+        }
+        $write_caps = [
+            'edit_sikshya_courses',
+            'edit_sikshya_lessons',
+            'edit_sikshya_quizzes',
+            'manage_sikshya_students',
+        ];
+        foreach ($write_caps as $cap) {
+            if (user_can($user_id, $cap)) {
+                return true;
+            }
+        }
+        return new WP_Error('rest_forbidden', __('Read-only role cannot perform write operations.', 'sikshya'), ['status' => 403]);
     }
 
     /**

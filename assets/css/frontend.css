@@ -145,6 +145,44 @@ body.sikshya-course-layout--fullwidth:not(.sikshya-learning-shell):not(.sikshya-
   box-sizing: border-box;
 }
 
+/* Shared breadcrumb partial — used by every public masthead
+ * (archive/category/single-course/order/cart/checkout). Rules live here in
+ * the base frontend stylesheet so each page doesn't have to load
+ * course-listing.css just to style its breadcrumb. */
+.sikshya-discovery-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  font-size: var(--sikshya-font-size-sm);
+  margin-bottom: var(--sikshya-spacing-4);
+  color: var(--sik-f-text-muted, var(--sikshya-gray-600));
+}
+
+.sikshya-discovery-breadcrumb__link {
+  color: var(--sik-f-text-muted, var(--sikshya-gray-600));
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--sikshya-transition-fast);
+}
+
+.sikshya-discovery-breadcrumb__link:hover,
+.sikshya-discovery-breadcrumb__link:focus-visible {
+  color: var(--sikshya-primary);
+  text-decoration: underline;
+}
+
+.sikshya-discovery-breadcrumb__current {
+  font-weight: 600;
+  color: var(--sik-f-text-heading, var(--sikshya-gray-900));
+}
+
+.sikshya-discovery-breadcrumb__sep {
+  color: var(--sikshya-gray-400);
+  user-select: none;
+  font-weight: 400;
+}
+
 /* Hero Section */
 .sikshya-hero {
   background: linear-gradient(135deg, var(--sikshya-primary) 0%, var(--sikshya-primary-dark) 100%);

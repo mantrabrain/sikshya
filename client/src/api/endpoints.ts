@@ -37,6 +37,8 @@ export const SIKSHYA_ENDPOINTS = {
     quizAttemptResetTimer: (id: number) => `/admin/quiz-attempts/${encodeURIComponent(String(id))}/reset-timer`,
     /** Paginated enrollments with learner/course labels. Course-manager auth. */
     enrollments: '/admin/enrollments',
+    /** Single enrollment detail (learner + course + progress + payment). */
+    enrollmentDetail: (id: number) => `/admin/enrollments/${encodeURIComponent(String(id))}`,
     /** POST: manually enroll a learner into a course. */
     enrollmentsManual: '/admin/enrollments/manual',
     /** Instructor application queue (user meta). Requires manage_sikshya or manage_options. */
@@ -68,6 +70,10 @@ export const SIKSHYA_ENDPOINTS = {
     /** Coupon codes — GET list, POST create. */
     coupons: '/admin/coupons',
     coupon: (id: number) => `/admin/coupons/${encodeURIComponent(String(id))}`,
+    /** Storefront `enable_coupons` setting — GET current, POST `{enabled}` to flip. */
+    couponsCheckoutToggle: '/admin/coupons/checkout-toggle',
+    /** Global admin search (fan-out across users/courses/orders). */
+    search: '/admin/search',
     /** Issued learner certificates. */
     issuedCertificates: '/admin/issued-certificates',
     issuedCertificatesRevoke: '/admin/issued-certificates/revoke',

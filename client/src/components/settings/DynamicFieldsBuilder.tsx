@@ -252,7 +252,7 @@ export function DynamicFieldsBuilder(props: {
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Label', 'sikshya')}</label>
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.label || ''}
                 disabled={!!readOnly}
                 onChange={(e) =>
@@ -271,7 +271,7 @@ export function DynamicFieldsBuilder(props: {
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('ID', 'sikshya')}</label>
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.id || ''}
                 disabled={!!readOnly}
                 onChange={(e) => {
@@ -287,7 +287,7 @@ export function DynamicFieldsBuilder(props: {
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Type', 'sikshya')}</label>
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.type}
                 disabled={!!readOnly}
                 onChange={(e) => setNewField((p) => ({ ...p, type: e.target.value as DynamicCheckoutFieldType }))}
@@ -304,7 +304,7 @@ export function DynamicFieldsBuilder(props: {
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Placeholder', 'sikshya')}</label>
               <input
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                 value={newField.placeholder || ''}
                 disabled={!!readOnly}
                 onChange={(e) => setNewField((p) => ({ ...p, placeholder: e.target.value }))}
@@ -319,7 +319,7 @@ export function DynamicFieldsBuilder(props: {
               {(newField.options || []).map((opt, idx) => (
                 <div key={idx} className="grid gap-2 lg:grid-cols-2">
                   <input
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={opt.value}
                     disabled={!!readOnly}
                     onChange={(e) => {
@@ -330,7 +330,7 @@ export function DynamicFieldsBuilder(props: {
                     placeholder={__('value', 'sikshya')}
                   />
                   <input
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={opt.label}
                     disabled={!!readOnly}
                     onChange={(e) => {
@@ -344,7 +344,7 @@ export function DynamicFieldsBuilder(props: {
               ))}
               <button
                 type="button"
-                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
                 onClick={() => setNewField((p) => ({ ...p, options: [...(p.options || []), { value: '', label: '' }] }))}
                 disabled={!!readOnly}
               >
@@ -456,7 +456,7 @@ export function DynamicFieldsBuilder(props: {
                       {f.label || __('(Untitled)', 'sikshya')}{' '}
                       {f.required ? <span className="text-rose-600 dark:text-rose-300">*</span> : null}
                     </div>
-                    <div className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
+                    <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                       <span className="font-mono">{id || __('missing_id', 'sikshya')}</span> • {fieldTypeLabel(f.type)} •{' '}
                       {f.system ? __('System', 'sikshya') : enabled ? __('Enabled', 'sikshya') : __('Disabled', 'sikshya')}
                     </div>
@@ -464,7 +464,7 @@ export function DynamicFieldsBuilder(props: {
                   <div className="flex shrink-0 items-center gap-1">
                     <button
                       type="button"
-                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -477,7 +477,7 @@ export function DynamicFieldsBuilder(props: {
                     </button>
                     <button
                       type="button"
-                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -490,7 +490,7 @@ export function DynamicFieldsBuilder(props: {
                     </button>
                     <button
                       type="button"
-                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                      className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -515,7 +515,7 @@ export function DynamicFieldsBuilder(props: {
                 <div className="text-sm font-semibold text-slate-900 dark:text-white">{__('Edit field', 'sikshya')}</div>
                 <button
                   type="button"
-                  className="rounded-md border border-rose-200 bg-white px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:bg-slate-900 dark:text-rose-200 dark:hover:bg-rose-950/30"
+                  className="rounded-md border border-rose-200 bg-white px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:bg-slate-900 dark:text-rose-200 dark:hover:bg-rose-950/30"
                   onClick={() => removeField(active.id)}
                   disabled={!!readOnly || !!active.locked || !!active.system}
                 >
@@ -527,13 +527,13 @@ export function DynamicFieldsBuilder(props: {
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('ID', 'sikshya')}</label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.id}
                     disabled={!!readOnly}
                     onChange={(e) => updateField(active.id, { id: e.target.value })}
                     placeholder={__('e.g. company_name', 'sikshya')}
                   />
-                  <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     {__('Used as key in orders/user meta. Lowercase + underscores recommended.', 'sikshya')}
                   </div>
                 </div>
@@ -541,7 +541,7 @@ export function DynamicFieldsBuilder(props: {
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Label', 'sikshya')}</label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.label || ''}
                     disabled={!!readOnly}
                     onChange={(e) => updateField(active.id, { label: e.target.value })}
@@ -552,7 +552,7 @@ export function DynamicFieldsBuilder(props: {
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Placeholder', 'sikshya')}</label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.placeholder || ''}
                     disabled={
                       !!readOnly ||
@@ -565,7 +565,7 @@ export function DynamicFieldsBuilder(props: {
                     placeholder={__('Optional', 'sikshya')}
                   />
                   {active.type === 'select' || active.type === 'radio' || active.type === 'checkbox' || active.type === 'country' ? (
-                    <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       {__('Not used for this field type.', 'sikshya')}
                     </div>
                   ) : null}
@@ -574,7 +574,7 @@ export function DynamicFieldsBuilder(props: {
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Type', 'sikshya')}</label>
                   <select
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     value={active.type}
                     disabled={!!readOnly}
                     onChange={(e) => updateField(active.id, { type: e.target.value as DynamicCheckoutFieldType })}
@@ -616,7 +616,7 @@ export function DynamicFieldsBuilder(props: {
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Help text', 'sikshya')}</label>
                 <textarea
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                  className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                   rows={2}
                   value={active.help || ''}
                   disabled={!!readOnly}
@@ -630,7 +630,7 @@ export function DynamicFieldsBuilder(props: {
                   {(active.options || []).map((opt, idx) => (
                     <div key={idx} className="grid gap-2 lg:grid-cols-2">
                       <input
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         value={opt.value}
                         disabled={!!readOnly}
                         onChange={(e) => {
@@ -641,7 +641,7 @@ export function DynamicFieldsBuilder(props: {
                         placeholder={__('value', 'sikshya')}
                       />
                       <input
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                         value={opt.label}
                         disabled={!!readOnly}
                         onChange={(e) => {
@@ -655,7 +655,7 @@ export function DynamicFieldsBuilder(props: {
                   ))}
                   <button
                     type="button"
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
+                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/60"
                     onClick={() => updateField(active.id, { options: [...(active.options || []), { value: '', label: '' }] })}
                     disabled={!!readOnly}
                   >
@@ -668,11 +668,11 @@ export function DynamicFieldsBuilder(props: {
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-200">{__('Visibility (optional)', 'sikshya')}</div>
                 <div className="mt-2 grid gap-3 lg:grid-cols-2">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {__('Depends on field ID', 'sikshya')}
                     </label>
                     <input
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       value={active.visibility?.depends_on || ''}
                       disabled={!!readOnly}
                       onChange={(e) =>
@@ -684,11 +684,11 @@ export function DynamicFieldsBuilder(props: {
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300">
                       {__('Show when value equals', 'sikshya')}
                     </label>
                     <input
-                      className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       value={active.visibility?.depends_value || ''}
                       disabled={!!readOnly}
                       onChange={(e) =>
@@ -700,7 +700,7 @@ export function DynamicFieldsBuilder(props: {
                     />
                   </div>
                 </div>
-                <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   {__('For multi-value rules (depends_in), we’ll expand in v2.', 'sikshya')}
                 </div>
               </div>

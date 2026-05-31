@@ -108,7 +108,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                   <input
                     readOnly
                     value={opts.oauth_callback_url || ''}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                    className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
                   />
                 </div>
               </div>
@@ -125,7 +125,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                     <input
                       value={opts.google_client_id || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, google_client_id: e.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder={__('xxxxxxxxxxxx.apps.googleusercontent.com', 'sikshya')}
                     />
                   </label>
@@ -143,7 +143,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       autoComplete="off"
                       value={opts.google_client_secret || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, google_client_secret: e.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder={opts.google_client_secret_set ? __('•••••••• (leave blank to keep unchanged)', 'sikshya') : __('Paste client secret', 'sikshya')}
                     />
                   </label>
@@ -161,7 +161,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                     <input
                       value={opts.facebook_app_id || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, facebook_app_id: e.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                     />
                   </label>
                   <label className="block text-sm">
@@ -178,7 +178,7 @@ export function SocialLoginPage(props: { config: SikshyaReactConfig; title: stri
                       autoComplete="off"
                       value={opts.facebook_app_secret || ''}
                       onChange={(e) => setOpts((p) => ({ ...p, facebook_app_secret: e.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+                      className="mt-1 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       placeholder={opts.facebook_app_secret_set ? __('•••••••• (leave blank to keep unchanged)', 'sikshya') : __('Paste app secret', 'sikshya')}
                     />
                   </label>

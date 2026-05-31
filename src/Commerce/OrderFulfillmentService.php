@@ -99,6 +99,13 @@ final class OrderFulfillmentService
                                 'payment_method' => (string) $order->gateway,
                                 'amount' => (float) $item->line_total,
                                 'transaction_id' => (string) ($order->gateway_intent_id ?? ''),
+                                // Payment is already captured for this order
+                                // (we're inside fulfilment, after gateway
+                                // verification). Skip the free-only price
+                                // guard so a 100%-coupon line or a price
+                                // change between order and fulfilment can't
+                                // block a legitimate paid enrolment.
+                                'bypass_price_check' => true,
                             ]
                         );
                     } catch (\InvalidArgumentException $e) {
@@ -222,7 +229,28 @@ final class OrderFulfillmentService
 
         $password = wp_generate_password(20, true, true);
         $new_id = wp_create_user($username, $password, $email);
-        if (is_wp_error($new_id) || (int) $new_id <= 0) {
+
+        // Race recovery: between our `email_exists` check above and the
+        // `wp_create_user` call here, a concurrent fulfilment for a *different*
+        // order by the same guest can land and create the user first. The
+        // order row's `FOR UPDATE` lock serialises same-order webhooks but not
+        // cross-order ones for the same email. WP returns `existing_user_email`
+        // (or `existing_user_login`) in that case — fall back to the user the
+        // other thread just inserted instead of failing fulfilment after the
+        // payment was already captured.
+        if (is_wp_error($new_id)) {
+            $code = $new_id->get_error_code();
+            if ($code === 'existing_user_email' || $code === 'existing_user_login') {
+                $recovered = (int) email_exists($email);
+                if ($recovered > 0) {
+                    $this->orders->updateOrder($order_id, ['user_id' => $recovered]);
+                    $this->persistGuestBillingUserMeta($recovered, $order);
+                    return $recovered;
+                }
+            }
+            return 0;
+        }
+        if ((int) $new_id <= 0) {
             return 0;
         }
         $uid = (int) $new_id;

@@ -4,6 +4,7 @@ import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { ListPanel } from '../components/shared/list/ListPanel';
 import { ListEmptyState } from '../components/shared/list/ListEmptyState';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { ButtonPrimary, ButtonSecondary } from '../components/shared/buttons';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useAsyncData } from '../hooks/useAsyncData';
@@ -153,7 +154,9 @@ export function InstructorApplicationsPage(props: {
                   <th className="px-4 py-3">{__('Headline', 'sikshya')}</th>
                   <th className="px-4 py-3">{__('Status', 'sikshya')}</th>
                   <th className="px-4 py-3">{__('Submitted', 'sikshya')}</th>
-                  <th className="px-4 py-3 text-right">{__('Actions', 'sikshya')}</th>
+                  <th className="w-12 px-4 py-3 text-right">
+                    <span className="sr-only">{__('Actions', 'sikshya')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -175,21 +178,30 @@ export function InstructorApplicationsPage(props: {
                       <td className="whitespace-nowrap px-4 py-3 text-slate-600 dark:text-slate-400">
                         {r.applied_at ? formatPostDate(r.applied_at) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex flex-wrap justify-end gap-2">
-                          {r.status === 'pending' ? (
-                            <>
-                              <ButtonPrimary type="button" disabled={busy} onClick={() => void act(r.user_id, 'approve')}>
-                                {busy ? '…' : __('Approve', 'sikshya')}
-                              </ButtonPrimary>
-                              <ButtonSecondary type="button" disabled={busy} onClick={() => void act(r.user_id, 'reject')}>
-                                Reject
-                              </ButtonSecondary>
-                            </>
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
-                        </div>
+                      <td className="w-12 px-4 py-3 text-right">
+                        {(() => {
+                          const items: RowActionItem[] = [
+                            { key: 'profile', label: __('Open WP user', 'sikshya'), href: editUrl, external: true },
+                          ];
+                          if (r.status === 'pending') {
+                            items.unshift(
+                              {
+                                key: 'approve',
+                                label: busy ? __('Working…', 'sikshya') : __('Approve', 'sikshya'),
+                                onClick: () => void act(r.user_id, 'approve'),
+                                disabled: busy,
+                              },
+                              {
+                                key: 'reject',
+                                label: __('Reject', 'sikshya'),
+                                onClick: () => void act(r.user_id, 'reject'),
+                                danger: true,
+                                disabled: busy,
+                              }
+                            );
+                          }
+                          return <RowActionsMenu items={items} ariaLabel={__('Application actions', 'sikshya')} />;
+                        })()}
                       </td>
                     </tr>
                   );

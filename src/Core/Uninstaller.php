@@ -198,6 +198,7 @@ class Uninstaller
             'sikshya_instructor',
             'sikshya_student',
             'sikshya_assistant',
+            'sikshya_auditor',
         ];
 
         foreach ($roles as $role) {

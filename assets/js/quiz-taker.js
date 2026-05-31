@@ -268,11 +268,136 @@
 			if (t.classList.contains('sikshya-ordering__up')) {
 				e.preventDefault();
 				moveLi(ol, li, -1);
+				refocusOrderingButton(li, '.sikshya-ordering__up');
 			} else if (t.classList.contains('sikshya-ordering__down')) {
 				e.preventDefault();
 				moveLi(ol, li, 1);
+				refocusOrderingButton(li, '.sikshya-ordering__down');
 			}
 		});
+
+		// Keyboard alternative for drag/reorder. Focus an item (li is made
+		// focusable below via tabindex) or focus is already inside an
+		// ordering button — Alt+Arrow reorders. Plain ↑/↓ still scrolls.
+		form.addEventListener('keydown', function (e) {
+			if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') {
+				return;
+			}
+			if (!e.altKey) {
+				return;
+			}
+			var t = e.target;
+			var li = t && t.closest ? t.closest('.sikshya-ordering__item') : null;
+			if (!li) {
+				return;
+			}
+			var ol = li.parentElement;
+			if (!ol || !ol.classList.contains('sikshya-ordering')) {
+				return;
+			}
+			e.preventDefault();
+			moveLi(ol, li, e.key === 'ArrowUp' ? -1 : 1);
+			refocusOrderingButton(li, e.key === 'ArrowUp' ? '.sikshya-ordering__up' : '.sikshya-ordering__down');
+		});
+
+		// Make ordering items keyboard-reachable so the alt-arrow shortcut
+		// has something to focus. Buttons already are focusable.
+		var items = form.querySelectorAll('.sikshya-ordering__item');
+		Array.prototype.forEach.call(items, function (li) {
+			if (!li.hasAttribute('tabindex')) {
+				li.setAttribute('tabindex', '0');
+			}
+		});
+	}
+
+	function refocusOrderingButton(li, sel) {
+		// After DOM reorder, the same `li` reference is still valid — restore
+		// focus to its move button so successive presses keep working.
+		var btn = li.querySelector(sel);
+		if (btn && typeof btn.focus === 'function') {
+			btn.focus();
+		}
+	}
+
+	// Walk the form and return a list of unanswered question payloads:
+	// `{ index, label, block }`. Index is 1-based for human messaging.
+	// Returns [] when everything is answered.
+	function validateForm(form) {
+		var missing = [];
+		var blocks = form.querySelectorAll('.sikshya-q');
+		Array.prototype.forEach.call(blocks, function (block, i) {
+			if (block.hidden) {
+				// One-per-page: still validate hidden ones; learner expects
+				// "go back and answer Q3" feedback.
+			}
+			var qid = block.getAttribute('data-qid');
+			var qtype = block.getAttribute('data-qtype') || '';
+			if (!qid) {
+				return;
+			}
+			var label = block.getAttribute('data-q-label') || ('Question ' + (i + 1));
+			var answered = false;
+
+			if (qtype === 'multiple_response') {
+				answered = !!block.querySelector('input[type="checkbox"]:checked');
+			} else if (qtype === 'ordering') {
+				// Ordering is "always answered" — submitting the existing
+				// order is a valid attempt. Don't gate.
+				answered = !!block.querySelector('.sikshya-ordering li');
+			} else if (qtype === 'matching') {
+				var selects = block.querySelectorAll('.sikshya-matching select');
+				if (selects.length === 0) {
+					answered = true;
+				} else {
+					answered = Array.prototype.every.call(selects, function (s) {
+						return s.value && s.value !== '';
+					});
+				}
+			} else if (qtype === 'true_false' || qtype === 'multiple_choice') {
+				answered = !!block.querySelector('input[type="radio"]:checked');
+			} else if (qtype === 'short_answer' || qtype === 'essay' || qtype === 'fill_blank') {
+				var ta = block.querySelector('textarea, input[type="text"]');
+				answered = !!(ta && ta.value && ta.value.replace(/\s+/g, '') !== '');
+			} else {
+				// Unknown type — don't block.
+				answered = true;
+			}
+
+			if (!answered) {
+				missing.push({ index: i + 1, label: label, block: block });
+			}
+		});
+		return missing;
+	}
+
+	function showUnansweredError(form, missing) {
+		var cfg = getConfig();
+		var resultEl = form.querySelector('.sikshya-quiz-result');
+		if (!resultEl) {
+			return;
+		}
+		var i18n = (cfg && cfg.i18n) ? cfg.i18n : {};
+		var heading = i18n.unansweredHeading || 'Please answer every question before submitting.';
+		var nums = missing.map(function (m) { return '#' + m.index; }).join(', ');
+		resultEl.hidden = false;
+		resultEl.classList.add('sikshya-quiz-result--error');
+		resultEl.innerHTML = '';
+		var h = document.createElement('p');
+		h.className = 'sikshya-quiz-result__heading';
+		h.textContent = heading;
+		var p = document.createElement('p');
+		p.className = 'sikshya-quiz-result__missing';
+		p.textContent = (i18n.unansweredList || 'Unanswered:') + ' ' + nums;
+		resultEl.appendChild(h);
+		resultEl.appendChild(p);
+		// Scroll first miss into view + focus first input.
+		if (missing.length && missing[0].block && typeof missing[0].block.scrollIntoView === 'function') {
+			missing[0].block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			var firstFocusable = missing[0].block.querySelector('input, textarea, select, button');
+			if (firstFocusable && typeof firstFocusable.focus === 'function') {
+				try { firstFocusable.focus({ preventScroll: true }); } catch (err) { firstFocusable.focus(); }
+			}
+		}
 	}
 
 	function renderResult(el, data) {
@@ -315,6 +440,77 @@
 		status.textContent = msg;
 		wrap.appendChild(status);
 
+		// Per-question-type score breakdown. Buckets each question into
+		// its type and emits a tidy "Multiple choice: 4/5 · 80%" row so
+		// learners can see where they slipped vs. where they were strong.
+		(function renderBreakdown() {
+			var perQ = data && data.per_question_results;
+			if (!perQ || typeof perQ !== 'object') { return; }
+			var keys = Object.keys(perQ);
+			if (!keys.length) { return; }
+			var buckets = {};
+			keys.forEach(function (qid) {
+				var r = perQ[qid] || {};
+				var t = r.type || 'unknown';
+				if (!buckets[t]) { buckets[t] = { count: 0, correct: 0, earned: 0, possible: 0, hasGrading: false }; }
+				var b = buckets[t];
+				b.count++;
+				b.earned += Number(r.earned) || 0;
+				b.possible += Number(r.possible) || 0;
+				if (r.correct === true) { b.correct++; }
+				if (r.correct !== null && r.correct !== undefined) { b.hasGrading = true; }
+			});
+
+			var typeNames = (cfg && cfg.i18n && cfg.i18n.questionTypeNames) || {};
+			function labelFor(key) {
+				if (typeNames[key]) { return typeNames[key]; }
+				// Reasonable fallback labels — keep matched with question type slugs.
+				var fallback = {
+					multiple_choice: 'Multiple choice',
+					multiple_response: 'Multiple response',
+					true_false: 'True / False',
+					short_answer: 'Short answer',
+					essay: 'Essay',
+					fill_blank: 'Fill in the blank',
+					ordering: 'Ordering',
+					matching: 'Matching',
+				};
+				return fallback[key] || (key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '));
+			}
+
+			var section = document.createElement('div');
+			section.className = 'sikshya-quizResults__breakdown';
+			var bhead = document.createElement('p');
+			bhead.className = 'sikshya-quizResults__breakdownHead';
+			bhead.textContent = (cfg && cfg.i18n && cfg.i18n.breakdownTitle) || 'Score breakdown';
+			section.appendChild(bhead);
+
+			Object.keys(buckets).forEach(function (k) {
+				var b = buckets[k];
+				var row = document.createElement('div');
+				row.className = 'sikshya-quizResults__breakdownRow';
+				var name = document.createElement('span');
+				name.className = 'sikshya-quizResults__breakdownLabel';
+				name.textContent = labelFor(k);
+				var detail = document.createElement('span');
+				detail.className = 'sikshya-quizResults__breakdownDetail';
+				if (!b.hasGrading) {
+					// Essay-only bucket — no auto-grade signal.
+					detail.textContent = b.count + ' ' + ((cfg && cfg.i18n && cfg.i18n.manualGrading) || '(awaiting review)');
+				} else {
+					var pctLocal = b.possible > 0
+						? Math.round((b.earned / b.possible) * 100)
+						: (b.count > 0 ? Math.round((b.correct / b.count) * 100) : 0);
+					detail.textContent = b.correct + '/' + b.count + ' · ' + pctLocal + '%';
+				}
+				row.appendChild(name);
+				row.appendChild(detail);
+				section.appendChild(row);
+			});
+
+			wrap.appendChild(section);
+		})();
+
 		var actions = document.createElement('div');
 		actions.className = 'sikshya-quizResults__actions';
 
@@ -347,6 +543,12 @@
 		var form = el.closest ? el.closest('form') : null;
 		if (form) {
 			var blocks = form.querySelectorAll('.sikshya-q');
+			// Inject per-question explanations if the server sent any.
+			// Stored under `_sikshya_question_explanation` on the question
+			// post; rendered after grading inside the answered block.
+			var explanations = (data && data.per_question_explanations && typeof data.per_question_explanations === 'object')
+				? data.per_question_explanations
+				: null;
 			Array.prototype.forEach.call(blocks, function (b) {
 				b.hidden = true;
 				var inputs = b.querySelectorAll('input, textarea, select, button');
@@ -355,6 +557,22 @@
 						n.disabled = true;
 					}
 				});
+				if (!explanations) { return; }
+				var qid = b.getAttribute('data-qid');
+				if (!qid) { return; }
+				var html = explanations[qid] || explanations[String(qid)] || '';
+				if (!html || b.querySelector('.sikshya-quizQ__explanation')) { return; }
+				var det = document.createElement('details');
+				det.className = 'sikshya-quizQ__explanation';
+				var sum = document.createElement('summary');
+				sum.className = 'sikshya-quizQ__explanationSummary';
+				sum.textContent = (cfg && cfg.i18n && cfg.i18n.explanationLabel) || 'Why?';
+				var body = document.createElement('div');
+				body.className = 'sikshya-quizQ__explanationBody';
+				body.innerHTML = html;
+				det.appendChild(sum);
+				det.appendChild(body);
+				b.appendChild(det);
 			});
 			var pager = form.querySelector('[data-sikshya-quiz-pager]');
 			if (pager) {
@@ -401,6 +619,23 @@
 			}
 			return;
 		}
+		// Pre-flight: don't submit a partially-answered quiz silently. The
+		// REST endpoint accepts it (graded as wrong), but learners
+		// generally want a chance to revisit a missed question first.
+		var missing = validateForm(form);
+		if (missing.length > 0) {
+			isSubmitting = false;
+			if (btn) {
+				btn.disabled = false;
+			}
+			showUnansweredError(form, missing);
+			return;
+		}
+		// Clear any prior validation chrome on success-path.
+		if (resultEl) {
+			resultEl.classList.remove('sikshya-quiz-result--error');
+		}
+
 		if (btn) {
 			btn.disabled = true;
 		}
@@ -434,6 +669,9 @@
 					}
 				} catch (e) {}
 				if (res.ok && res.json && res.json.ok && res.json.data) {
+					// Successful submit → stop the auto-save loop; the
+					// answers_data column now owns the canonical record.
+					if (attemptId) { stopAutoSave(attemptId); }
 					renderResult(resultEl, res.json.data);
 				} else {
 					var err = (res.json && res.json.message) ? res.json.message : ((window.sikshyaQuizTaker && window.sikshyaQuizTaker.i18n && window.sikshyaQuizTaker.i18n.error) || 'Could not submit quiz.');
@@ -455,6 +693,142 @@
 					btn.disabled = false;
 				}
 			});
+	}
+
+	// ── Mid-attempt auto-save ──────────────────────────────────────────
+	// Map of attemptId → { timer, lastJson, form } so an autosave loop can be
+	// cleared when the form is submitted. One quiz per page in practice; the
+	// map is just defensive.
+	var autoSaveState = {};
+
+	function autoSaveAnswers(form, cfg, attempt_id) {
+		if (!attempt_id || !cfg.restUrl || !cfg.restNonce || !cfg.quizId) {
+			return;
+		}
+		var payload = collectAnswers(form);
+		var json = '';
+		try { json = JSON.stringify(payload); } catch (e) { json = ''; }
+		var state = autoSaveState[attempt_id] || {};
+		if (state.lastJson === json) {
+			// Nothing changed since last save — skip the network hit.
+			return;
+		}
+		state.lastJson = json;
+		autoSaveState[attempt_id] = state;
+		fetch(buildSikshyaRestEndpointUrl(cfg.restUrl, 'me/quiz-save'), {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': cfg.restNonce },
+			body: JSON.stringify({
+				quiz_id: parseInt(cfg.quizId, 10) || 0,
+				attempt_id: parseInt(attempt_id, 10) || 0,
+				answers: payload,
+			}),
+		}).catch(function () {
+			// Network blip — drop `lastJson` so the next change retries the
+			// same payload instead of being skipped as "no change".
+			var s = autoSaveState[attempt_id];
+			if (s) { s.lastJson = null; }
+		});
+	}
+
+	function startAutoSave(form, cfg, attempt_id) {
+		if (!attempt_id || autoSaveState[attempt_id] && autoSaveState[attempt_id].timer) {
+			return;
+		}
+		var state = autoSaveState[attempt_id] || {};
+		state.form = form;
+		state.timer = window.setInterval(function () {
+			autoSaveAnswers(form, cfg, attempt_id);
+		}, 30000);
+		autoSaveState[attempt_id] = state;
+
+		// Debounced save on every change/input to capture work between ticks.
+		var debounce = null;
+		var onMutate = function () {
+			if (debounce) { window.clearTimeout(debounce); }
+			debounce = window.setTimeout(function () {
+				autoSaveAnswers(form, cfg, attempt_id);
+			}, 1500);
+		};
+		form.addEventListener('change', onMutate);
+		form.addEventListener('input', onMutate);
+	}
+
+	function stopAutoSave(attempt_id) {
+		var state = autoSaveState[attempt_id];
+		if (state && state.timer) {
+			window.clearInterval(state.timer);
+			state.timer = null;
+		}
+	}
+
+	// Hydrate the form from the server-supplied auto-save snapshot. Walks
+	// each .sikshya-q block by qid and restores radios, checkboxes,
+	// textareas, ordering order, and matching select values.
+	function hydrateForm(form, data) {
+		if (!form || !data || typeof data !== 'object') {
+			return false;
+		}
+		var hydrated = false;
+		var blocks = form.querySelectorAll('.sikshya-q');
+		Array.prototype.forEach.call(blocks, function (block) {
+			var qid = block.getAttribute('data-qid');
+			var qtype = block.getAttribute('data-qtype') || '';
+			if (!qid || !(qid in data) && !(parseInt(qid, 10) in data)) {
+				return;
+			}
+			var saved = (qid in data) ? data[qid] : data[parseInt(qid, 10)];
+			if (saved === null || saved === undefined) { return; }
+
+			if (qtype === 'multiple_response' && Array.isArray(saved)) {
+				var checks = block.querySelectorAll('input[type="checkbox"]');
+				Array.prototype.forEach.call(checks, function (c) {
+					c.checked = saved.indexOf(c.value) !== -1;
+				});
+				hydrated = true;
+				return;
+			}
+			if ((qtype === 'multiple_choice' || qtype === 'true_false') && typeof saved !== 'object') {
+				var radio = block.querySelector('input[type="radio"][value="' + String(saved).replace(/"/g, '\\"') + '"]');
+				if (radio) {
+					radio.checked = true;
+					hydrated = true;
+				}
+				return;
+			}
+			if ((qtype === 'short_answer' || qtype === 'essay' || qtype === 'fill_blank') && typeof saved === 'string') {
+				var ta = block.querySelector('textarea, input[type="text"]');
+				if (ta) {
+					ta.value = saved;
+					hydrated = true;
+				}
+				return;
+			}
+			if (qtype === 'matching' && saved && typeof saved === 'object') {
+				Object.keys(saved).forEach(function (k) {
+					var sel = block.querySelector('.sikshya-matching select[data-left="' + k + '"]')
+						|| block.querySelector('.sikshya-matching select[name*="[' + k + ']"]');
+					if (sel) {
+						sel.value = saved[k];
+						hydrated = true;
+					}
+				});
+				return;
+			}
+			if (qtype === 'ordering' && Array.isArray(saved)) {
+				var ol = block.querySelector('.sikshya-ordering');
+				if (!ol) { return; }
+				// Reorder <li>s by data-item-index matching the saved order.
+				saved.forEach(function (ix) {
+					var li = ol.querySelector('li[data-item-index="' + String(ix).replace(/"/g, '\\"') + '"]');
+					if (li) { ol.appendChild(li); }
+				});
+				hydrated = true;
+				return;
+			}
+		});
+		return hydrated;
 	}
 
 	function init() {
@@ -603,6 +977,7 @@
 				duration = parseInt(d.durationSeconds, 10) || duration;
 			}
 			var a = d.attempt || null;
+			var hydrationSnapshot = null;
 			if (a && typeof a === 'object') {
 				attemptId = parseInt(a.id, 10) || attemptId;
 				var ts = parseInt(a.started_at_ts || 0, 10) || 0;
@@ -611,6 +986,9 @@
 				} else {
 					var ms = parseMysqlToMs(String(a.started_at || ''));
 					if (ms) startedAt = ms;
+				}
+				if (a.auto_save_data && typeof a.auto_save_data === 'object') {
+					hydrationSnapshot = a.auto_save_data;
 				}
 			} else if (d.attempt_id) {
 				attemptId = parseInt(d.attempt_id, 10) || attemptId;
@@ -621,6 +999,13 @@
 					var ms2 = parseMysqlToMs(String(d.started_at || ''));
 					if (ms2) startedAt = ms2;
 				}
+			}
+
+			// If the server gave us a saved snapshot, restore it into the
+			// already-mounted form. Quiet — no toast, just makes the form
+			// reflect what the learner had typed.
+			if (hydrationSnapshot && quizForm) {
+				hydrateForm(quizForm, hydrationSnapshot);
 			}
 		}
 
@@ -710,7 +1095,24 @@
 			bindOrdering(form);
 			setupOnePerPage(form);
 			form.addEventListener('submit', onSubmit);
+			// Kick off auto-save as soon as we know which attempt this is.
+			// If attemptId arrives later (via fetchActiveAttempt), the
+			// attempt-payload application below will re-call this with the
+			// real id.
+			if (attemptId) {
+				startAutoSave(form, cfg, attemptId);
+			}
 		});
+
+		// Watch for attemptId becoming known after async start. Cheap polling
+		// avoids reaching into the Promise chains above just to wire one call.
+		var arm = window.setInterval(function () {
+			if (attemptId && quizForm) {
+				startAutoSave(quizForm, cfg, attemptId);
+				window.clearInterval(arm);
+			}
+		}, 250);
+		window.setTimeout(function () { window.clearInterval(arm); }, 15000);
 	}
 
 	if (document.readyState === 'loading') {

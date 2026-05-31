@@ -249,6 +249,17 @@ final class CertificateIssuanceService
 
     /**
      * Issue certificate if settings allow and none active exists.
+     *
+     * Concurrency: `syncEnrollmentProgress()` can fire within milliseconds of
+     * itself (lesson-mark + quiz-submit landing in the same request burst,
+     * webhook + browser-tab both completing the threshold, etc). Without
+     * serialisation the naive "check then insert" pattern below races and
+     * issues two certificate rows for the same user+course pair. We acquire a
+     * MySQL named lock for the (user_id, course_id) tuple to make the check
+     * and the insert atomic at the connection level. The lock is best-effort:
+     * if MySQL can't grant it within 3 seconds we fall through to the
+     * race-prone path rather than silently fail issuance — duplicates are
+     * cosmetic, missing certs are not.
      */
     public function issueIfEnabled(int $user_id, int $course_id): ?int
     {
@@ -260,61 +271,81 @@ final class CertificateIssuanceService
             return null;
         }
 
-        $existing = $this->certificates->findByUserAndCourse($user_id, $course_id);
-        if ($existing && $existing->status === 'active') {
-            return (int) $existing->id;
+        global $wpdb;
+        // 32-char alphanumeric lock name fits comfortably under MySQL's 64-
+        // char limit and namespaces by purpose + user + course. Same input ⇒
+        // same lock name, so concurrent issuers for the same learner-course
+        // are serialised; different learners proceed in parallel.
+        $lock_name = 'sikshya_cert_' . substr(md5("u={$user_id}|c={$course_id}"), 0, 32);
+        $lock_acquired = false;
+        if ($wpdb instanceof \wpdb) {
+            $got = $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 3)', $lock_name));
+            $lock_acquired = $got !== null && (int) $got === 1;
         }
 
-        $template_post_id = $this->resolveTemplatePostIdForCourse($course_id);
-
-        $number = sprintf('SK-%d-%d-%s', $user_id, $course_id, gmdate('Ymd'));
-        // 64-char URL-safe verification hash (hex): good for QR + verifiable links.
-        // 32 random bytes -> 64 hex chars.
-        $verification = '';
         try {
-            $verification = bin2hex(random_bytes(32));
-        } catch (\Throwable $e) {
-            // Fallback: still URL-safe, but keep length stable.
-            $verification = bin2hex(openssl_random_pseudo_bytes(32) ?: random_bytes(32));
-        }
+            // Re-check existing certificate AFTER acquiring the lock so a
+            // concurrent issuer that already inserted is observed.
+            $existing = $this->certificates->findByUserAndCourse($user_id, $course_id);
+            if ($existing && $existing->status === 'active') {
+                return (int) $existing->id;
+            }
 
-        $id = $this->certificates->create(
-            [
-                'user_id' => $user_id,
-                'course_id' => $course_id,
-                'certificate_number' => $number,
-                'issued_date' => current_time('mysql'),
-                'expiry_date' => $this->resolveExpiryDate(),
-                'status' => 'active',
-                'download_url' => '',
-                'certificate_data' => [
+            $template_post_id = $this->resolveTemplatePostIdForCourse($course_id);
+
+            $number = sprintf('SK-%d-%d-%s', $user_id, $course_id, gmdate('Ymd'));
+            // 64-char URL-safe verification hash (hex): good for QR + verifiable links.
+            // 32 random bytes -> 64 hex chars.
+            $verification = '';
+            try {
+                $verification = bin2hex(random_bytes(32));
+            } catch (\Throwable $e) {
+                // Fallback: still URL-safe, but keep length stable.
+                $verification = bin2hex(openssl_random_pseudo_bytes(32) ?: random_bytes(32));
+            }
+
+            $id = $this->certificates->create(
+                [
                     'user_id' => $user_id,
                     'course_id' => $course_id,
-                    'issued_at' => current_time('mysql'),
-                ],
-                'template_post_id' => $template_post_id > 0 ? $template_post_id : null,
-                'verification_code' => $verification,
-            ]
-        );
+                    'certificate_number' => $number,
+                    'issued_date' => current_time('mysql'),
+                    'expiry_date' => $this->resolveExpiryDate(),
+                    'status' => 'active',
+                    'download_url' => '',
+                    'certificate_data' => [
+                        'user_id' => $user_id,
+                        'course_id' => $course_id,
+                        'issued_at' => current_time('mysql'),
+                    ],
+                    'template_post_id' => $template_post_id > 0 ? $template_post_id : null,
+                    'verification_code' => $verification,
+                ]
+            );
 
-        if ($id > 0) {
-            // Always prefer the current permalink system for verification/document URLs.
-            // This prevents UI/config toggles from storing "legacy" query-style links when pretty permalinks are enabled.
-            $this->certificates->update($id, ['download_url' => CertificateRenderer::publicUrlForHash($verification)]);
+            if ($id > 0) {
+                // Always prefer the current permalink system for verification/document URLs.
+                // This prevents UI/config toggles from storing "legacy" query-style links when pretty permalinks are enabled.
+                $this->certificates->update($id, ['download_url' => CertificateRenderer::publicUrlForHash($verification)]);
 
-            /**
-             * After a certificate row is stored (Pro may attach download URLs, QR assets, etc.).
-             *
-             * @param int $id Certificate row id.
-             * @param int $user_id Learner.
-             * @param int $course_id Course.
-             * @param string $certificate_number Human-readable serial.
-             * @param string $verification_code Secret verification token.
-             * @param int $template_post_id Certificate template post (0 if none).
-             */
-            do_action('sikshya_certificate_row_created', $id, $user_id, $course_id, $number, $verification, $template_post_id > 0 ? $template_post_id : 0);
+                /**
+                 * After a certificate row is stored (Pro may attach download URLs, QR assets, etc.).
+                 *
+                 * @param int $id Certificate row id.
+                 * @param int $user_id Learner.
+                 * @param int $course_id Course.
+                 * @param string $certificate_number Human-readable serial.
+                 * @param string $verification_code Secret verification token.
+                 * @param int $template_post_id Certificate template post (0 if none).
+                 */
+                do_action('sikshya_certificate_row_created', $id, $user_id, $course_id, $number, $verification, $template_post_id > 0 ? $template_post_id : 0);
+            }
+
+            return $id > 0 ? $id : null;
+        } finally {
+            if ($lock_acquired && $wpdb instanceof \wpdb) {
+                $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock_name));
+            }
         }
-
-        return $id > 0 ? $id : null;
     }
 }

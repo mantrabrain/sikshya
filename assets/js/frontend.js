@@ -69,6 +69,11 @@
 
             const apply = function(view) {
                 const v = view === 'list' ? 'list' : 'grid';
+                // Keep the <html> attribute in sync — the head boot script
+                // sets it on page load; clicking the toggle must update it
+                // too so the CSS overrides in course-listing.css match the
+                // body-level class state and no flicker occurs.
+                document.documentElement.setAttribute('data-sikshya-archive-view', v);
                 grid.classList.toggle('sikshya-course-grid--list', v === 'list');
                 btns.forEach(function(b) {
                     const isActive = readBtnView(b) === v;

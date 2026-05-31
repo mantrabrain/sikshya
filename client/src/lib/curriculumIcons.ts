@@ -28,7 +28,7 @@ export function navIconForCurriculumRow(
     if (lt === 'h5p') {
       return 'curriculumLessonH5p';
     }
-    return 'plusDocument';
+    return 'curriculumLessonText';
   }
   if (t === 'quiz') {
     return 'curriculumQuiz';
@@ -39,5 +39,5 @@ export function navIconForCurriculumRow(
   if (t === 'question') {
     return 'helpCircle';
   }
-  return 'plusDocument';
+  return 'curriculumLessonText';
 }

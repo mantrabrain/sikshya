@@ -47,6 +47,11 @@ final class AssignmentService
         if (!$assignment || $assignment->post_type !== PostTypes::ASSIGNMENT) {
             return ['success' => false, 'message' => __('Invalid assignment.', 'sikshya')];
         }
+        // Reject submissions against unpublished/trashed assignments so an
+        // instructor pulling an assignment mid-window blocks new submissions.
+        if ((string) $assignment->post_status !== 'publish') {
+            return ['success' => false, 'message' => __('This assignment is no longer available.', 'sikshya')];
+        }
 
         $course_id = LessonCourseLink::resolvedCourseIdForAssignment($assignment_id);
         if ($course_id <= 0 || !$this->courses->findById($course_id)) {
@@ -86,6 +91,16 @@ final class AssignmentService
         $v = $this->validateSubmissionPayload($assignment_id, $subtype, $content, $incoming_files);
         if (!$v['ok']) {
             return ['success' => false, 'message' => (string) $v['message']];
+        }
+
+        // Per-file size cap. Enforced BEFORE `handleAttachments` so an
+        // oversized upload never lands in the media library / disk. The
+        // PHP `upload_max_filesize` ini directive is a coarser global
+        // ceiling; this is the per-assignment knob (in MB) instructors
+        // can tighten without server-config changes.
+        $vsize = $this->validateIncomingFileSizes($assignment_id, $attachments);
+        if (!$vsize['ok']) {
+            return ['success' => false, 'message' => (string) $vsize['message']];
         }
 
         // Extension point: Pro addons (e.g. assignments_advanced) can validate the submission
@@ -319,6 +334,72 @@ final class AssignmentService
         } elseif ($subtype === 'url_submission') {
             if ($plain === '' || !filter_var($plain, FILTER_VALIDATE_URL)) {
                 return ['ok' => false, 'message' => __('Please submit a valid URL.', 'sikshya')];
+            }
+        }
+
+        return ['ok' => true, 'message' => ''];
+    }
+
+    /**
+     * Reject the submission early if any incoming file exceeds the
+     * per-assignment size cap.
+     *
+     * The cap is stored as `_sikshya_assignment_max_file_size` (post meta,
+     * megabytes). `0` (or unset) means "no per-assignment cap, fall back
+     * to PHP `upload_max_filesize`". The filter
+     * `sikshya_assignment_max_file_size_bytes` lets site owners impose a
+     * global ceiling regardless of per-assignment config (e.g. shared
+     * hosting platforms with tight disk quotas).
+     *
+     * Why we check the request body's `size` field (vs. inspecting the
+     * file post-upload): the validator runs **before** `wp_handle_upload`,
+     * so an attacker can't sneak a 500MB file onto disk only to have it
+     * rejected after the bytes are written.
+     *
+     * @param array<string, mixed> $attachments Raw `$_FILES` shape (`name`/`size`/etc. may be scalar OR array).
+     * @return array{ok: bool, message: string}
+     */
+    private function validateIncomingFileSizes(int $assignment_id, array $attachments): array
+    {
+        if (empty($attachments) || !isset($attachments['size'])) {
+            return ['ok' => true, 'message' => ''];
+        }
+
+        $cap_mb = (int) get_post_meta($assignment_id, '_sikshya_assignment_max_file_size', true);
+        $cap_bytes = $cap_mb > 0 ? $cap_mb * 1024 * 1024 : 0;
+
+        /**
+         * Site-wide ceiling. Filter returns bytes; default 0 = no global cap.
+         * Used by hosts that want to enforce disk quota independent of any
+         * per-assignment setting.
+         */
+        $global_cap = (int) apply_filters('sikshya_assignment_max_file_size_bytes', 0, $assignment_id);
+        if ($global_cap > 0) {
+            $cap_bytes = $cap_bytes > 0 ? min($cap_bytes, $global_cap) : $global_cap;
+        }
+
+        if ($cap_bytes <= 0) {
+            return ['ok' => true, 'message' => ''];
+        }
+
+        $sizes = $attachments['size'];
+        if (is_int($sizes) || is_string($sizes)) {
+            $sizes = [(int) $sizes];
+        }
+        if (!is_array($sizes)) {
+            return ['ok' => true, 'message' => ''];
+        }
+
+        foreach ($sizes as $size) {
+            if ((int) $size > $cap_bytes) {
+                return [
+                    'ok' => false,
+                    'message' => sprintf(
+                        /* translators: %s: size cap formatted in MB (e.g. "10 MB") */
+                        __('One of your files exceeds the %s limit for this assignment.', 'sikshya'),
+                        size_format($cap_bytes)
+                    ),
+                ];
             }
         }
 

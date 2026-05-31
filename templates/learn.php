@@ -51,60 +51,19 @@ $has_course = $page_model->getCourseId() > 0;
 $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
 ?>
 <body class="sikshya-learning-shell sikshya-learning-shell--learn<?php echo $is_shell_without_course ? ' sikshya-learning-shell--hub' : ''; ?>">
+<a class="sikshya-skipLink" href="#sikshya-learn-content"><?php esc_html_e('Skip to content', 'sikshya'); ?></a>
 <div class="sikshya-learning-app">
-    <?php
-    if (!function_exists('sikshya_learn_icon')) {
-        /**
-         * @return string
-         */
-        function sikshya_learn_icon(string $name): string
-        {
-            switch ($name) {
-                case 'menu':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'x':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'chevron-up':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'chevron-right':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'book':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'clipboard':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'doc':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'audio':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M11 5L6 9H3v6h3l5 4V5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 8.5a4 4 0 010 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18.5 6a7 7 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'folder':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
-                case 'assignment':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'chevron-down':
-                    return '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'play-video':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="4" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 10.5v5l3.5-2.5L11 10.5z" fill="currentColor"/></svg>';
-                case 'live':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11h10M7 15h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-                case 'layers':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 12l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 17l9 5 9-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
-                case 'puzzle':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M8.5 4a2.5 2.5 0 1 1 5 0v1h2a2 2 0 0 1 2 2v2h-1a2.5 2.5 0 1 0 0 5h1v2a2 2 0 0 1-2 2h-2v-1a2.5 2.5 0 1 0-5 0v1h-2a2 2 0 0 1-2-2v-2h1a2.5 2.5 0 1 0 0-5H4.5V7a2 2 0 0 1 2-2h2V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'check':
-                    return '<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" focusable="false"><path d="M5.5 12.5l2.5 2.5 6.5-8" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-                case 'lock':
-                    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M7 11V8a5 5 0 0110 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6.5 11h11A2.5 2.5 0 0120 13.5v6A2.5 2.5 0 0117.5 22h-11A2.5 2.5 0 014 19.5v-6A2.5 2.5 0 016.5 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
-                default:
-                    return '';
-            }
-        }
-    }
-    ?>
+    <?php require_once __DIR__ . '/partials/learn-icons.php'; ?>
     <div class="sikshya-learnLayout">
         <header class="sikshya-learnTopbar" role="banner">
             <div class="sikshya-learnTopbar__left">
-                <button class="sikshya-iconBtn" type="button" aria-label="<?php echo esc_attr__('Menu', 'sikshya'); ?>" data-sikshya-toggle-outline>
-                    <?php echo sikshya_learn_icon('menu'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <button class="sikshya-iconBtn sikshya-iconBtn--menuToggle" type="button" aria-label="<?php echo esc_attr__('Menu', 'sikshya'); ?>" data-sikshya-toggle-outline>
+                    <span class="sikshya-iconBtn__menuOpen" aria-hidden="true">
+                        <?php echo sikshya_learn_icon('menu'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </span>
+                    <span class="sikshya-iconBtn__menuClose" aria-hidden="true">
+                        <?php echo sikshya_learn_icon('x'); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                    </span>
                 </button>
                 <a class="sikshya-learnTopbar__brand" href="<?php echo esc_url(home_url('/')); ?>">
                     <?php echo esc_html(get_bloginfo('name')); ?>
@@ -127,20 +86,27 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
         </header>
 
         <main class="sikshya-learnMain">
-            <?php
-            /**
-             * Fires once at the top of the learn page below the header.
-             * 1) Legacy view array (same as `sikshya_learn_template_data` / Pro hooks).
-             * 2) {@see \Sikshya\Presentation\Models\LearnPageModel} (optional; use in new add-ons).
-             * Passed values: legacy view array + `$page_model`.
-             */
-            do_action('sikshya_learn_after_hero', $page_model->toLegacyViewArray(), $page_model);
-            ?>
             <div class="sikshya-learnOverlay" data-sikshya-outline-overlay hidden></div>
             <aside class="sikshya-learnSidebar" aria-label="<?php echo esc_attr(sprintf(__('%s content', 'sikshya'), $label_course)); ?>" data-sikshya-outline<?php echo $page_model->isLearnCurriculumSidebarScrollable() ? ' data-sik-curriculum-scroll="1"' : ''; ?>>
                 <div class="sikshya-learnSidebar__inner">
                     <div class="sikshya-learnSidebar__head">
-                        <h2 class="sikshya-learnSidebar__heading">
+                        <?php
+                        $sidebar_course_post = $page_model->getCoursePost();
+                        $sidebar_course_title = $sidebar_course_post instanceof WP_Post ? (string) get_the_title($sidebar_course_post) : '';
+                        $sidebar_course_url = $sidebar_course_post instanceof WP_Post ? get_permalink($sidebar_course_post) : '';
+                        ?>
+                        <?php if ($sidebar_course_title !== '') : ?>
+                            <h2 class="sikshya-learnSidebar__heading sikshya-zeroMargin" title="<?php echo esc_attr($sidebar_course_title); ?>">
+                                <?php if ($sidebar_course_url !== '') : ?>
+                                    <a class="sikshya-learnSidebar__courseLink" href="<?php echo esc_url($sidebar_course_url); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr(sprintf(__('%s (opens in a new tab)', 'sikshya'), $sidebar_course_title)); ?>">
+                                        <?php echo esc_html($sidebar_course_title); ?>
+                                    </a>
+                                <?php else : ?>
+                                    <?php echo esc_html($sidebar_course_title); ?>
+                                <?php endif; ?>
+                            </h2>
+                        <?php endif; ?>
+                        <p class="sikshya-learnSidebar__kicker sikshya-zeroMargin">
                             <?php
                             echo esc_html(sprintf(
                                 /* translators: %s: singular label (e.g. Course) */
@@ -148,7 +114,7 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                                 $label_course
                             ));
                             ?>
-                        </h2>
+                        </p>
                     </div>
                     <div class="sikshya-learnSidebar__scroll">
                         <?php
@@ -157,18 +123,11 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         require __DIR__ . '/partials/learn-curriculum-outline.php';
                         ?>
                     </div>
-                    <?php
-                    /**
-                     * Footer slot inside learn sidebar (learner shortcuts, exports, etc.).
-                     * Passed values: legacy view array + `$page_model`.
-                     */
-                    do_action('sikshya_learn_sidebar_footer', $page_model->toLegacyViewArray(), $page_model);
-                    ?>
                 </div>
             </aside>
 
             <div class="sikshya-learnContentCol">
-            <section class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
+            <section id="sikshya-learn-content" class="sikshya-learnContent" aria-label="<?php esc_attr_e('Content', 'sikshya'); ?>">
                 <?php if ($is_bundle && !$page_model->hasError()) : ?>
                     <?php
                     $bpc = $page_model->getBundleProgressCounts() ?? ['total' => 0, 'done' => 0, 'average' => 0];
@@ -509,13 +468,27 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         <div class="sikshya-contentPanel">
                             <?php if ($cm) : ?>
                                 <?php
-                                $excerpt = $cm->getExcerptText();
-                                if ($excerpt !== '') :
+                                $cm_content_html = $cm->getContentHtml();
+                                $cm_excerpt_text = $cm->getExcerptText();
+                                // Render the manual excerpt as a lead paragraph ONLY when
+                                // it was explicitly set and differs from the post content;
+                                // otherwise we duplicate auto-generated excerpts on top of
+                                // the body and show the same paragraph twice.
+                                $cm_post = $cm->getPost();
+                                $has_manual_excerpt = $cm_post instanceof \WP_Post
+                                    && trim((string) $cm_post->post_excerpt) !== '';
+                                if ($has_manual_excerpt && $cm_excerpt_text !== '') :
                                     ?>
-                                    <p class="sikshya-zeroMargin"><?php echo esc_html($excerpt); ?></p>
+                                    <p class="sikshya-zeroMargin sikshya-learnCoursesumLead"><?php echo esc_html($cm_excerpt_text); ?></p>
                                 <?php endif; ?>
 
-                                <?php echo wp_kses_post($cm->getContentHtml()); ?>
+                                <?php if (trim(wp_strip_all_tags($cm_content_html)) !== '') : ?>
+                                    <?php echo wp_kses_post($cm_content_html); ?>
+                                <?php elseif (!$has_manual_excerpt) : ?>
+                                    <p class="sikshya-zeroMargin sikshya-learnCoursesumEmpty">
+                                        <?php esc_html_e('No description has been added for this course yet.', 'sikshya'); ?>
+                                    </p>
+                                <?php endif; ?>
                             <?php else : ?>
                                 <p class="sikshya-zeroMargin">
                                     <?php
@@ -530,7 +503,41 @@ $is_shell_without_course = $is_hub || $is_bundle || !$has_course;
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <?php
+                /**
+                 * Addon hook: contextual notices that augment the current
+                 * lesson / course view (Calendar "Upcoming in this course"
+                 * teaser, drip lock / prerequisite notices, upsell banners,
+                 * …). Fires AFTER the primary content header so the course's
+                 * own title + "Continue learning" CTA always sit at the top
+                 * of the column where the learner expects them.
+                 *
+                 * Passed: legacy view array + LearnPageModel (newer addons).
+                 */
+                do_action('sikshya_learn_after_hero', $page_model->toLegacyViewArray(), $page_model);
+                ?>
             </section>
+            <?php
+            /**
+             * Account-flavoured shortcuts (CSV exports, activity log,
+             * certificate downloads) intentionally do NOT render on the learn
+             * shell — they belong on the learner account page so the learn
+             * page stays focused. To re-enable rendering at this position
+             * for a custom build, set the filter below to true (passed the
+             * LearnPageModel for context).
+             *
+             * @since 1.x
+             * @param bool                                  $show
+             * @param \Sikshya\Presentation\Models\LearnPageModel $page_model
+             */
+            if (apply_filters('sikshya_learn_show_content_extras', false, $page_model)) {
+                echo '<div class="sikshya-learnContentExtras" data-sikshya-content-extras>';
+                do_action('sikshya_learn_content_footer', $page_model->toLegacyViewArray(), $page_model);
+                do_action('sikshya_learn_sidebar_footer', $page_model->toLegacyViewArray(), $page_model);
+                echo '</div>';
+            }
+            ?>
             </div>
         </main>
     </div>

@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EmbeddableShell } from '../components/shared/EmbeddableShell';
 import { NavIcon } from '../components/NavIcon';
-import { ButtonPrimary } from '../components/shared/buttons';
-import { LinkButtonSecondary } from '../components/shared/buttons';
+import { ButtonPrimary, ButtonSecondary, LinkButtonSecondary } from '../components/shared/buttons';
 import { ApiErrorPanel } from '../components/shared/ApiErrorPanel';
 import { getSikshyaApi, SIKSHYA_ENDPOINTS } from '../api';
 import { appViewHref } from '../lib/appUrl';
@@ -12,6 +11,8 @@ import type { SikshyaReactConfig } from '../types';
 import type { EmailTemplateApi } from '../types/emailTemplate';
 import { ToggleSwitch } from '../components/email/EmailTemplateForms';
 import { TableSkeleton } from '../components/shared/Skeleton';
+import { ListEmptyState } from '../components/shared/list';
+import { RowActionsMenu, type RowActionItem } from '../components/shared/list/RowActionsMenu';
 import { __ } from '../lib/i18n';
 
 function categoryStyle(cat: string): string {
@@ -172,30 +173,19 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
       {someSelected ? (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{selected.size} selected</span>
-          <button
-            type="button"
-            disabled={bulkBusy}
-            onClick={() => void runBulk('enable')}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
-          >
-            Enable
-          </button>
-          <button
-            type="button"
-            disabled={bulkBusy}
-            onClick={() => void runBulk('disable')}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
-          >
-            Disable
-          </button>
-          <button
-            type="button"
+          <ButtonSecondary disabled={bulkBusy} onClick={() => void runBulk('enable')}>
+            {__('Enable', 'sikshya')}
+          </ButtonSecondary>
+          <ButtonSecondary disabled={bulkBusy} onClick={() => void runBulk('disable')}>
+            {__('Disable', 'sikshya')}
+          </ButtonSecondary>
+          <ButtonSecondary
             disabled={bulkBusy}
             onClick={() => void runBulk('delete')}
-            className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 disabled:opacity-50 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100 dark:hover:bg-rose-950/60"
+            className="border-rose-200 text-rose-700 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-200 dark:hover:bg-rose-950/40"
           >
-            Delete custom
-          </button>
+            {__('Delete custom', 'sikshya')}
+          </ButtonSecondary>
         </div>
       ) : null}
 
@@ -232,8 +222,8 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                 <th className="px-3 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Status
                 </th>
-                <th className="w-28 px-3 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  Actions
+                <th className="w-12 px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <span className="sr-only">{__('Actions', 'sikshya')}</span>
                 </th>
               </tr>
             </thead>
@@ -275,7 +265,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                           </a>
                           <div className="mt-1 flex flex-wrap items-center gap-1">
                             <span
-                              className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                              className={`inline-flex rounded-md px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
                                 row.template_type === 'system'
                                   ? 'bg-violet-100 text-violet-900 dark:bg-violet-950/50 dark:text-violet-200'
                                   : 'bg-slate-200/90 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
@@ -284,7 +274,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                               {row.template_type === 'system' ? __('System', 'sikshya') : __('Custom', 'sikshya')}
                             </span>
                             {row.locked ? (
-                              <span className="inline-flex rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 dark:bg-amber-950/50 dark:text-amber-100">
+                              <span className="inline-flex rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-amber-950 dark:bg-amber-950/50 dark:text-amber-100">
                                 Add-on off
                               </span>
                             ) : null}
@@ -293,7 +283,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                       </div>
                     </td>
                     <td className="max-w-[160px] px-3 py-3 align-top">
-                      <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-violet-50 px-2 py-1 text-[11px] font-medium text-violet-900 dark:bg-violet-950/40 dark:text-violet-200">
+                      <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-violet-50 px-2 py-1 text-xs font-medium text-violet-900 dark:bg-violet-950/40 dark:text-violet-200">
                         <span aria-hidden>⚡</span>
                         <span className="truncate font-mono">{row.event}</span>
                       </span>
@@ -303,7 +293,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                     </td>
                     <td className="px-3 py-3 align-top">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${categoryStyle(
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${categoryStyle(
                           row.category
                         )}`}
                       >
@@ -312,7 +302,7 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                       </span>
                     </td>
                     <td className="max-w-[200px] px-3 py-3 align-top">
-                      <code className="line-clamp-2 break-all text-[10px] text-slate-600 dark:text-slate-400">
+                      <code className="line-clamp-2 break-all text-xs text-slate-600 dark:text-slate-400">
                         {row.recipient_to || '{{student_email}}'}
                       </code>
                     </td>
@@ -324,28 +314,24 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
                         label="Enabled"
                       />
                     </td>
-                    <td className="px-3 py-3 align-middle">
-                      <div className="flex flex-col gap-1">
-                        <button
-                          type="button"
-                          onClick={() => navigateHref(editHref(row.id))}
-                          className={`text-left text-xs font-semibold hover:underline ${
-                            row.locked
-                              ? 'text-slate-500 dark:text-slate-400'
-                              : 'text-brand-600 dark:text-brand-400'
-                          }`}
-                        >
-                          {row.locked ? __('View (locked)', 'sikshya') : __('Edit', 'sikshya')}
-                        </button>
-                        {row.locked ? (
-                          <a
-                            href={addonsHref}
-                            className="text-[11px] font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-100"
-                          >
-                            Add-ons
-                          </a>
-                        ) : null}
-                      </div>
+                    <td className="w-12 px-3 py-3 text-right align-middle">
+                      {(() => {
+                        const items: RowActionItem[] = [
+                          {
+                            key: 'edit',
+                            label: row.locked ? __('View (locked)', 'sikshya') : __('Edit', 'sikshya'),
+                            onClick: () => navigateHref(editHref(row.id)),
+                          },
+                        ];
+                        if (row.locked) {
+                          items.push({
+                            key: 'addons',
+                            label: __('Unlock via add-ons', 'sikshya'),
+                            href: addonsHref,
+                          });
+                        }
+                        return <RowActionsMenu items={items} ariaLabel={__('Template actions', 'sikshya')} />;
+                      })()}
                     </td>
                   </tr>
                 ))}
@@ -354,7 +340,14 @@ export function EmailTemplatesListPage(props: { config: SikshyaReactConfig; titl
           </table>
         </div>
         {!loading && rows.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">{__('No templates found.', 'sikshya')}</div>
+          <ListEmptyState
+            compact
+            title={__('No templates yet', 'sikshya')}
+            description={__(
+              'Email templates are registered by Sikshya and its add-ons. If you expected one to appear here, check that the relevant add-on is active.',
+              'sikshya'
+            )}
+          />
         ) : null}
       </div>
     </EmbeddableShell>

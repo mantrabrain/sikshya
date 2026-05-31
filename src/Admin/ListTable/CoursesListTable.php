@@ -147,11 +147,20 @@ class CoursesListTable extends AbstractListTable
         }
 
         $query = new \WP_Query($args);
+        $this->total_items_cache = (int) $query->found_posts;
         return $query->posts;
     }
 
     /**
-     * Get dummy data for demo purposes
+     * @var int|null Cached found-rows count from the last items query.
+     */
+    private $total_items_cache = null;
+
+    /**
+     * Get dummy data for demo purposes (unused — kept for short-term
+     * back-compat with anything that might subclass this table and call
+     * the helper. The runtime path uses real WP_Query results.)
+     *
      *
      * @return array
      */
@@ -346,33 +355,42 @@ class CoursesListTable extends AbstractListTable
     }
 
     /**
-     * Get total number of items
+     * Get total number of items for pagination.
      *
-     * @return int
+     * Reuses the count cached on the most recent `get_items()` call so we
+     * don't re-run the listing query (the previous implementation ran a
+     * second `WP_Query` with `posts_per_page: -1`, which loaded every
+     * course into memory on every admin page just to count rows — a real
+     * problem on sites with thousands of courses). Falls back to a tiny
+     * count-only query if the table is rendered without items first.
      */
     protected function get_total_items(): int
     {
+        if ($this->total_items_cache !== null) {
+            return $this->total_items_cache;
+        }
+
         $args = [
-            'post_type' => PostTypes::COURSE,
-            'post_status' => $this->getStatusFilter(),
-            'posts_per_page' => -1,
-            's' => $this->getSearchTerm(),
+            'post_type'      => PostTypes::COURSE,
+            'post_status'    => $this->getStatusFilter(),
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            's'              => $this->getSearchTerm(),
         ];
 
-        // Add instructor filter
         $instructor_filter = $this->getInstructorFilter();
         if ($instructor_filter) {
             $args['author'] = $instructor_filter;
         }
 
-        // Add price type filter
         $price_type_filter = $this->getPriceTypeFilter();
         if ($price_type_filter) {
             $args['meta_query'] = $this->getPriceTypeMetaQuery($price_type_filter);
         }
 
         $query = new \WP_Query($args);
-        return $query->found_posts;
+        $this->total_items_cache = (int) $query->found_posts;
+        return $this->total_items_cache;
     }
 
     /**
@@ -460,8 +478,10 @@ class CoursesListTable extends AbstractListTable
         $row_actions .= esc_html__('Delete', 'sikshya') . '</a></span>';
         $row_actions .= '</div>';
 
-        // Get student count
-        $student_count = get_post_meta($item->ID, 'course_enrollments', true) ?: 0;
+        // Get student count from the canonical source — the enrolments table.
+        // Previously this read the meta key `course_enrollments`, which the
+        // plugin never writes (so every course rendered as "0 students").
+        $student_count = $this->resolveEnrollmentCount((int) $item->ID);
 
         $output = '<div class="sikshya-course-title-wrapper">';
         $output .= '<div class="sikshya-course-thumbnail">';
@@ -551,7 +571,11 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_enrollments($item): string
     {
-        $enrollments = get_post_meta($item->ID, 'course_enrollments', true) ?: 0;
+        // Live count from the enrolments table (the canonical source).
+        // The previous `get_post_meta($id, 'course_enrollments')` read a
+        // meta key the plugin never writes, so the column always rendered
+        // "0" regardless of actual enrolments.
+        $enrollments = $this->resolveEnrollmentCount((int) $item->ID);
 
         return sprintf(
             '<a href="#">%d</a>',
@@ -587,9 +611,12 @@ class CoursesListTable extends AbstractListTable
 
     public function column_rating($item): string
     {
-        $rating = get_post_meta($item->ID, 'course_rating', true) ?: 0;
+        // Average rating is maintained by the Pro CourseReviews addon on
+        // `_sikshya_rating` post meta (see `CourseReviewService::recomputeCourseAggregateMeta`).
+        // When the addon isn't enabled, the meta is empty and we show an em-dash.
+        $rating = (float) get_post_meta($item->ID, '_sikshya_rating', true);
 
-        if ($rating == 0) {
+        if ($rating <= 0.0) {
             return '<span class="sikshya-no-rating">—</span>';
         }
 
@@ -601,18 +628,30 @@ class CoursesListTable extends AbstractListTable
 
     public function column_price($item): string
     {
-        $price = get_post_meta($item->ID, 'course_price', true) ?: '0.00';
-        $original_price = get_post_meta($item->ID, 'course_original_price', true) ?: null;
+        // Use the canonical pricing helper so the column renders the same
+        // numbers the rest of the LMS uses (cart, checkout, single-course
+        // page). The helper resolves the effective price (sale → regular)
+        // with currency/format applied. Previously this code read
+        // `course_price` / `course_original_price` post meta keys which
+        // are never written — every course rendered as "FREE".
+        $pricing = function_exists('sikshya_get_course_pricing')
+            ? (array) sikshya_get_course_pricing((int) $item->ID)
+            : [];
 
-        if ($price === '0.00' || empty($price)) {
-            return '<span class="sikshya-price-free">FREE</span>';
+        $effective = isset($pricing['effective']) ? (float) $pricing['effective'] : 0.0;
+        $regular   = isset($pricing['regular']) ? (float) $pricing['regular'] : 0.0;
+        $currency  = isset($pricing['currency_symbol']) && is_string($pricing['currency_symbol'])
+            ? (string) $pricing['currency_symbol']
+            : '$';
+
+        if ($effective <= 0.00001) {
+            return '<span class="sikshya-price-free">' . esc_html__('Free', 'sikshya') . '</span>';
         }
 
-        $formatted_price = '$' . number_format($price, 2);
+        $formatted_price = $currency . number_format($effective, 2);
 
-        if ($original_price && $original_price > $price) {
-            $formatted_original = '$' . number_format($original_price, 2);
-            $discount_percent = round((($original_price - $price) / $original_price) * 100);
+        if ($regular > $effective + 0.00001) {
+            $formatted_original = $currency . number_format($regular, 2);
 
             return sprintf(
                 '<div class="sikshya-price-discounted">
@@ -635,12 +674,45 @@ class CoursesListTable extends AbstractListTable
      */
     public function column_lessons($item): string
     {
-        $lessons_count = get_post_meta($item->ID, 'course_lessons', true) ?: 0;
+        // Live lesson count from the curriculum, not a meta cache that's
+        // never populated. `LearnerCurriculumHelper::lessonIdsForCourse`
+        // (section AA4) memoises per-request and primes the post cache
+        // in a single SQL — calling it once per row is cheap.
+        $lessons_count = count(\Sikshya\Services\LearnerCurriculumHelper::lessonIdsForCourse((int) $item->ID));
 
         return sprintf(
             '<a href="#">%d</a>',
             $lessons_count
         );
+    }
+
+    /**
+     * Resolve the live enrolment count for a course.
+     *
+     * Reads from the canonical `sikshya_enrollments` table via
+     * {@see EnrollmentRepository::countByCourse}. Memoised per-request
+     * so multiple column renderers (title column shows "X students",
+     * enrollments column shows the same number) don't double-query.
+     *
+     * @var array<int, int>
+     */
+    private array $enrollment_count_cache = [];
+
+    private function resolveEnrollmentCount(int $course_id): int
+    {
+        if ($course_id <= 0) {
+            return 0;
+        }
+        if (isset($this->enrollment_count_cache[$course_id])) {
+            return $this->enrollment_count_cache[$course_id];
+        }
+
+        $repo = new \Sikshya\Database\Repositories\EnrollmentRepository();
+        if (!$repo->tableExists()) {
+            return $this->enrollment_count_cache[$course_id] = 0;
+        }
+
+        return $this->enrollment_count_cache[$course_id] = $repo->countByCourse($course_id);
     }
 
     /**

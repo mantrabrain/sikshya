@@ -11,304 +11,310 @@ msgstr ""
 msgid "123"
 msgstr ""
 
-#: client/src/App.tsx:125
+#: client/src/App.tsx:128
 msgid "Loading Sikshya…"
 msgstr ""
 
-#: client/src/App.tsx:217
-#: client/src/pages/DiscussionsPage.tsx:1116
+#: client/src/App.tsx:221
+#: client/src/pages/DiscussionsPage.tsx:1094
 msgid "Edit content"
 msgstr ""
 
-#: client/src/App.tsx:250
+#: client/src/App.tsx:254
 #: client/src/pages/DashboardPage.tsx:320
 #: client/src/pages/ToolsPage.tsx:271
-#: client/src/pages/content-editors/editors.tsx:1020
+#: client/src/pages/content-editors/editors.tsx:1011
 #: client/src/pages/hubs/HubPages.tsx:97
 msgid "Questions"
 msgstr ""
 
-#: client/src/App.tsx:251
+#: client/src/App.tsx:255
 #: client/src/pages/hubs/HubPages.tsx:98
 msgid "All questions"
 msgstr ""
 
-#: client/src/App.tsx:259
+#: client/src/App.tsx:263
 #: client/src/pages/DashboardPage.tsx:327
 #: client/src/pages/ToolsPage.tsx:272
 msgid "Chapters"
 msgstr ""
 
-#: client/src/App.tsx:260
+#: client/src/App.tsx:264
 msgid "All %s"
 msgstr ""
 
-#: client/src/App.tsx:269
+#: client/src/App.tsx:273
 #: client/src/pages/DashboardPage.tsx:313
 #: client/src/pages/hubs/HubPages.tsx:200
 msgid "Certificate templates"
 msgstr ""
 
-#: client/src/App.tsx:274
+#: client/src/App.tsx:278
 #: client/src/pages/hubs/HubPages.tsx:209
 msgid "Issued certificates"
 msgstr ""
 
-#: client/src/App.tsx:276
+#: client/src/App.tsx:280
 #: client/src/pages/hubs/HubPages.tsx:265
 msgid "Orders"
 msgstr ""
 
-#: client/src/App.tsx:278
+#: client/src/App.tsx:282
 msgid "Order"
 msgstr ""
 
-#: client/src/App.tsx:280
+#: client/src/App.tsx:284
 msgid "Coupons"
 msgstr ""
 
-#: client/src/App.tsx:282
+#: client/src/App.tsx:286
 msgid "Course reviews"
 msgstr ""
 
-#: client/src/App.tsx:284
+#: client/src/App.tsx:288
 msgid "Review details"
 msgstr ""
 
-#: client/src/App.tsx:286
+#: client/src/App.tsx:290
 msgid "Discussions & Q&A"
 msgstr ""
 
-#: client/src/App.tsx:288
-#: client/src/pages/GradebookPage.tsx:587
+#: client/src/App.tsx:292
+#: client/src/pages/GradebookPage.tsx:589
 msgid "Gradebook"
 msgstr ""
 
-#: client/src/App.tsx:291
-#: client/src/pages/GradebookPage.tsx:587
+#: client/src/App.tsx:295
+#: client/src/pages/GradebookPage.tsx:589
 msgid "Assignment submissions"
 msgstr ""
 
-#: client/src/App.tsx:294
+#: client/src/App.tsx:298
 #: client/src/pages/GradingPage.tsx:200
 msgid "Grading"
 msgstr ""
 
-#: client/src/App.tsx:296
+#: client/src/App.tsx:300
 #: client/src/pages/hubs/HubPages.tsx:503
 msgid "Activity log"
 msgstr ""
 
-#: client/src/App.tsx:298
+#: client/src/App.tsx:302
 #: client/src/pages/ContentDripPage.tsx:533
 #: client/src/pages/hubs/HubPages.tsx:434
 msgid "Scheduled access"
 msgstr ""
 
-#: client/src/App.tsx:300
+#: client/src/App.tsx:304
 #: client/src/pages/OrderDetailsPage.tsx:310
 #: client/src/pages/SubscriptionsProPage.tsx:962
 msgid "Subscriptions"
 msgstr ""
 
-#: client/src/App.tsx:302
-#: client/src/pages/CourseTeamPage.tsx:445
+#: client/src/App.tsx:306
+#: client/src/pages/CourseTeamPage.tsx:446
 msgid "Course staff"
 msgstr ""
 
-#: client/src/App.tsx:304
-#: client/src/pages/MarketplacePage.tsx:211
+#: client/src/App.tsx:308
+#: client/src/pages/MarketplacePage.tsx:207
 msgid "Marketplace"
 msgstr ""
 
-#: client/src/App.tsx:306
+#: client/src/App.tsx:310
 #: client/src/pages/BundlesPage.tsx:164
 msgid "Course bundles"
 msgstr ""
 
-#: client/src/App.tsx:308
+#: client/src/App.tsx:312
 #: client/src/pages/ContentDripPage.tsx:877
 #: client/src/pages/hubs/HubPages.tsx:440
 msgid "Prerequisites"
 msgstr ""
 
-#: client/src/App.tsx:310
+#: client/src/App.tsx:314
 #: client/src/pages/SocialLoginPage.tsx:85
 #: client/src/pages/hubs/HubPages.tsx:342
 msgid "Social login"
 msgstr ""
 
-#: client/src/App.tsx:312
+#: client/src/App.tsx:316
 #: client/src/pages/WhiteLabelPage.tsx:150
 #: client/src/pages/hubs/HubPages.tsx:335
 msgid "White label"
 msgstr ""
 
-#: client/src/App.tsx:317
+#: client/src/App.tsx:321
 msgid "CRM & email automation"
 msgstr ""
 
-#: client/src/App.tsx:318
+#: client/src/App.tsx:322
 msgid "This screen is not wired in the React shell yet."
 msgstr ""
 
-#: client/src/App.tsx:322
-#: client/src/pages/CalendarPage.tsx:175
+#: client/src/App.tsx:326
+#: client/src/pages/CalendarPage.tsx:172
 #: client/src/pages/hubs/HubPages.tsx:472
 msgid "Calendar"
 msgstr ""
 
-#: client/src/App.tsx:325
+#: client/src/App.tsx:329
 msgid "Content library"
 msgstr ""
 
-#: client/src/App.tsx:327
+#: client/src/App.tsx:331
 msgid "People"
 msgstr ""
 
-#: client/src/App.tsx:329
+#: client/src/App.tsx:333
 #: client/src/pages/ToolsPage.tsx:273
 #: client/src/pages/hubs/HubPages.tsx:199
 msgid "Certificates"
 msgstr ""
 
-#: client/src/App.tsx:331
+#: client/src/App.tsx:335
 msgid "Sales"
 msgstr ""
 
-#: client/src/App.tsx:336
+#: client/src/App.tsx:340
 msgid "Branding"
 msgstr ""
 
-#: client/src/App.tsx:340
+#: client/src/App.tsx:344
 msgid "Learning rules"
 msgstr ""
 
-#: client/src/App.tsx:346
+#: client/src/App.tsx:350
 msgid "Course categories"
 msgstr ""
 
-#: client/src/App.tsx:347
+#: client/src/App.tsx:351
 msgid "Organize courses with hierarchical categories."
 msgstr ""
 
-#: client/src/App.tsx:355
+#: client/src/App.tsx:359
 msgid "Users with the %s role."
 msgstr ""
 
-#: client/src/App.tsx:365
+#: client/src/App.tsx:369
 msgid "Users with the %s role. Pending sign-ups are under People → Applications."
 msgstr ""
 
-#: client/src/App.tsx:376
+#: client/src/App.tsx:380
 #: client/src/pages/hubs/HubPages.tsx:172
 msgid "Instructor applications"
 msgstr ""
 
-#: client/src/App.tsx:377
+#: client/src/App.tsx:381
 msgid "Approve or reject learners who applied to teach."
 msgstr ""
 
-#: client/src/App.tsx:383
+#: client/src/App.tsx:387
+msgid "Enrollment"
+msgstr ""
+
+#: client/src/App.tsx:389
 msgid "Reports"
 msgstr ""
 
-#: client/src/App.tsx:385
+#: client/src/App.tsx:391
 #: client/src/pages/DashboardPage.tsx:459
 #: client/src/pages/hubs/HubPages.tsx:271
 msgid "Payments"
 msgstr ""
 
-#: client/src/App.tsx:387
+#: client/src/App.tsx:393
+#: client/src/pages/EnrollmentDetailsPage.tsx:186
 msgid "Payment"
 msgstr ""
 
-#: client/src/App.tsx:391
+#: client/src/App.tsx:397
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:65
-#: client/src/pages/LicensePage.tsx:471
+#: client/src/pages/EnrollmentDetailsPage.tsx:151
+#: client/src/pages/LicensePage.tsx:472
 #: client/src/pages/hubs/HubPages.tsx:306
 msgid "Email"
 msgstr ""
 
-#: client/src/App.tsx:393
+#: client/src/App.tsx:399
 msgid "Email template"
 msgstr ""
 
-#: client/src/App.tsx:395
-#: client/src/components/TopBar.tsx:111
+#: client/src/App.tsx:401
+#: client/src/components/TopBar.tsx:113
 #: client/src/pages/EmailMarketingPage.tsx:842
 #: client/src/pages/hubs/HubPages.tsx:497
 msgid "Tools"
 msgstr ""
 
-#: client/src/App.tsx:397
+#: client/src/App.tsx:403
 #: client/src/components/EmailDeliverySettings.tsx:207
 #: client/src/components/shared/AddContentTypePickerModal.tsx:291
 msgid "Addons"
 msgstr ""
 
-#: client/src/App.tsx:399
+#: client/src/App.tsx:405
 msgid "Integrations"
 msgstr ""
 
-#: client/src/App.tsx:401
+#: client/src/App.tsx:407
 #: client/src/pages/EmailMarketingPage.tsx:437
 #: client/src/pages/hubs/HubPages.tsx:368
 msgid "Email marketing"
 msgstr ""
 
-#: client/src/App.tsx:403
-#: client/src/pages/AddonsPage.tsx:401
-#: client/src/pages/LicensePage.tsx:295
+#: client/src/App.tsx:409
+#: client/src/pages/AddonsPage.tsx:469
+#: client/src/pages/LicensePage.tsx:296
 msgid "License"
 msgstr ""
 
-#: client/src/App.tsx:409
+#: client/src/App.tsx:415
 msgid "This admin screen is powered by the React shell."
 msgstr ""
 
-#: client/src/App.tsx:434
+#: client/src/App.tsx:440
 msgid "Dashboard"
 msgstr ""
 
-#: client/src/App.tsx:435
+#: client/src/App.tsx:441
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:810
-#: client/src/pages/AddonsPage.tsx:408
-#: client/src/pages/content-editors/editors.tsx:1019
+#: client/src/pages/AddonsPage.tsx:476
+#: client/src/pages/content-editors/editors.tsx:1010
 msgid "Settings"
 msgstr ""
 
-#: client/src/App.tsx:437
+#: client/src/App.tsx:443
 msgid "%s builder"
 msgstr ""
 
-#: client/src/App.tsx:438
+#: client/src/App.tsx:444
 msgid "Bundle builder"
 msgstr ""
 
-#: client/src/App.tsx:444
+#: client/src/App.tsx:450
 #: client/src/pages/content-editors/certificateTemplateSeeds.ts:226
 msgid "Certificate"
 msgstr ""
 
-#: client/src/App.tsx:455
+#: client/src/App.tsx:461
 #: client/src/components/shared/AddContentTypePickerModal.tsx:89
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:809
-#: client/src/pages/DiscussionsPage.tsx:896
-#: client/src/pages/content-editors/editors.tsx:1018
+#: client/src/pages/DiscussionsPage.tsx:874
+#: client/src/pages/content-editors/editors.tsx:1009
 msgid "Content"
 msgstr ""
 
-#: client/src/App.tsx:456
+#: client/src/App.tsx:462
 msgid "Edit %s"
 msgstr ""
 
-#: client/src/App.tsx:456
+#: client/src/App.tsx:462
 #: client/src/components/shared/AddContentTypePickerModal.tsx:90
 msgid "New %s"
 msgstr ""
 
-#: client/src/App.tsx:478
+#: client/src/App.tsx:484
 #: client/src/pages/SettingsPage.tsx:754
 msgid "Site-wide defaults for every course"
 msgstr ""
@@ -322,6 +328,7 @@ msgid "Could not update addon"
 msgstr ""
 
 #: client/src/components/AddonEnablePanel.tsx:130
+#: client/src/pages/CouponsPage.tsx:367
 msgid "Enabling…"
 msgstr ""
 
@@ -347,7 +354,7 @@ msgstr ""
 
 #: client/src/components/AddonEnablePanel.tsx:29
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:461
-#: client/src/pages/AddonsPage.tsx:360
+#: client/src/pages/AddonsPage.tsx:339
 #: client/src/pages/ContentDripPage.tsx:948
 #: client/src/pages/SettingsPage.tsx:240
 msgid "Enabled"
@@ -366,13 +373,13 @@ msgid "Enable failed"
 msgstr ""
 
 #: client/src/components/AddonEnablePanel.tsx:62
-#: client/src/pages/AddonsPage.tsx:450
+#: client/src/pages/AddonsPage.tsx:518
 msgid "Upgrade to unlock"
 msgstr ""
 
 #: client/src/components/AppShell.tsx:58
-#: client/src/components/TopBar.tsx:42
-#: client/src/pages/CourseTeamPage.tsx:930
+#: client/src/components/TopBar.tsx:43
+#: client/src/pages/CourseTeamPage.tsx:933
 msgid "Admin"
 msgstr ""
 
@@ -476,7 +483,7 @@ msgid "Defaults to your WordPress account email"
 msgstr ""
 
 #: client/src/components/EmailDeliverySettings.tsx:288
-#: client/src/pages/ReportsPage.tsx:928
+#: client/src/pages/ReportsPage.tsx:931
 #: client/src/pages/SettingsPage.tsx:929
 msgid "Sending…"
 msgstr ""
@@ -564,6 +571,48 @@ msgstr ""
 msgid "Loading add-on status…"
 msgstr ""
 
+#: client/src/components/GlobalSearchPalette.tsx:177
+msgid "Search (⌘K)"
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:178
+msgid "Open global search"
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:183
+#: client/src/pages/ReportsPage.tsx:557
+#: client/src/pages/ReviewsPage.tsx:273
+msgid "Search"
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:195
+msgid "Global search"
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:205
+msgid "Search users, courses, orders…"
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:220
+msgid "Type at least 2 characters to search."
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:224
+#: client/src/components/shared/CourseFilterSelect.tsx:263
+#: client/src/components/shared/MultiCoursePicker.tsx:314
+#: client/src/pages/CourseTeamPage.tsx:877
+#: client/src/pages/EnrollmentsPage.tsx:248
+#: client/src/pages/OrdersPage.tsx:361
+#: client/src/pages/SubscriptionsProPage.tsx:1129
+msgid "Searching…"
+msgstr ""
+
+#: client/src/components/GlobalSearchPalette.tsx:228
+#: client/src/pages/CourseBuilderPage.tsx:292
+#: client/src/pages/CourseTeamPage.tsx:906
+msgid "No matches."
+msgstr ""
+
 #: client/src/components/PlanUpgradeOverlay.tsx:138
 msgid "%1$s Pro · %2$s"
 msgstr ""
@@ -643,6 +692,7 @@ msgid "%1$s (free) %2$s"
 msgstr ""
 
 #: client/src/components/Sidebar.tsx:302
+#: client/src/pages/EnrollmentDetailsPage.tsx:193
 msgid "Free"
 msgstr ""
 
@@ -655,27 +705,27 @@ msgid "%1$s Pro %2$s — activate your license for updates and paid modules"
 msgstr ""
 
 #: client/src/components/Sidebar.tsx:376
-#: client/src/components/TopBar.tsx:180
+#: client/src/components/TopBar.tsx:182
 msgid "Back to WordPress"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:103
+#: client/src/components/TopBar.tsx:105
 msgid "Join Community"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:118
+#: client/src/components/TopBar.tsx:120
 msgid "Light mode"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:118
+#: client/src/components/TopBar.tsx:120
 msgid "Dark mode"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:175
+#: client/src/components/TopBar.tsx:177
 msgid "Edit profile"
 msgstr ""
 
-#: client/src/components/TopBar.tsx:190
+#: client/src/components/TopBar.tsx:192
 msgid "Log out"
 msgstr ""
 
@@ -800,19 +850,19 @@ msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:316
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:575
-#: client/src/pages/CouponsPage.tsx:477
-#: client/src/pages/ReportsPage.tsx:1095
+#: client/src/pages/CouponsPage.tsx:529
+#: client/src/pages/ReportsPage.tsx:1098
 msgid "Type"
 msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:318
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:461
-#: client/src/pages/EmailTemplatesListPage.tsx:284
+#: client/src/pages/EmailTemplatesListPage.tsx:274
 msgid "System"
 msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:318
-#: client/src/pages/EmailTemplatesListPage.tsx:284
+#: client/src/pages/EmailTemplatesListPage.tsx:274
 msgid "Custom"
 msgstr ""
 
@@ -834,33 +884,34 @@ msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:387
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1452
-#: client/src/pages/CouponsPage.tsx:404
-#: client/src/pages/CourseTeamPage.tsx:928
+#: client/src/pages/CouponsPage.tsx:456
+#: client/src/pages/CourseTeamPage.tsx:931
 #: client/src/pages/EmailMarketingPage.tsx:804
-#: client/src/pages/EnrollmentsPage.tsx:360
-#: client/src/pages/GradebookPage.tsx:1318
-#: client/src/pages/InstructorApplicationsPage.tsx:154
+#: client/src/pages/EnrollmentDetailsPage.tsx:168
+#: client/src/pages/EnrollmentsPage.tsx:361
+#: client/src/pages/GradebookPage.tsx:1311
+#: client/src/pages/InstructorApplicationsPage.tsx:155
 #: client/src/pages/IntegrationsPage.tsx:661
-#: client/src/pages/IssuedCertificatesPage.tsx:99
-#: client/src/pages/MarketplacePage.tsx:696
+#: client/src/pages/IssuedCertificatesPage.tsx:100
+#: client/src/pages/MarketplacePage.tsx:703
 #: client/src/pages/OrdersPage.tsx:546
 #: client/src/pages/PaymentsPage.tsx:303
-#: client/src/pages/ReportsPage.tsx:1094
-#: client/src/pages/ReviewsPage.tsx:311
+#: client/src/pages/ReportsPage.tsx:1097
+#: client/src/pages/ReviewsPage.tsx:312
 msgid "Status"
 msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:390
 #: client/src/pages/EmailMarketingPage.tsx:705
-#: client/src/pages/InstructorApplicationsPage.tsx:113
-#: client/src/pages/MarketplacePage.tsx:375
-#: client/src/pages/ReportsPage.tsx:784
+#: client/src/pages/InstructorApplicationsPage.tsx:114
+#: client/src/pages/MarketplacePage.tsx:371
+#: client/src/pages/ReportsPage.tsx:787
 #: client/src/pages/SubscriptionsProPage.tsx:686
 msgid "Active"
 msgstr ""
 
 #: client/src/components/email/EmailTemplateForms.tsx:390
-#: client/src/pages/InstructorApplicationsPage.tsx:115
+#: client/src/pages/InstructorApplicationsPage.tsx:116
 #: client/src/pages/SubscriptionsProPage.tsx:687
 msgid "Inactive"
 msgstr ""
@@ -921,39 +972,39 @@ msgid ""
 "manual use."
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:136
+#: client/src/components/notices/InlineNotices.tsx:134
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:149
+#: client/src/components/notices/InlineNotices.tsx:140
 msgid "⚡ Limited time"
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:154
+#: client/src/components/notices/InlineNotices.tsx:145
 msgid "Dismiss notice"
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:161
+#: client/src/components/notices/InlineNotices.tsx:152
 msgid "🚀 Upgrade to Sikshya Pro — up to 50% off!"
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:165
+#: client/src/components/notices/InlineNotices.tsx:156
 msgid ""
 "You’ve recorded %1$d order(s)! Get up to 50%% off on Sikshya Pro. Unlock "
 "premium payment tools, advanced modules, automation, and priority support."
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:176
+#: client/src/components/notices/InlineNotices.tsx:164
 msgid ""
 "🎉 Special Offer: Save up to 50% on your Pro upgrade with premium features "
 "and priority support!"
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:188
+#: client/src/components/notices/InlineNotices.tsx:176
 msgid "⚡ Save up to 50%% — %s"
 msgstr ""
 
-#: client/src/components/notices/InlineNotices.tsx:195
+#: client/src/components/notices/InlineNotices.tsx:183
 msgid "Maybe later"
 msgstr ""
 
@@ -999,7 +1050,7 @@ msgid "Half"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:406
-#: client/src/pages/content-editors/editors.tsx:1209
+#: client/src/pages/content-editors/editors.tsx:1197
 msgid "Add"
 msgstr ""
 
@@ -1016,9 +1067,9 @@ msgid "missing_id"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:461
-#: client/src/pages/AddonsPage.tsx:360
+#: client/src/pages/AddonsPage.tsx:339
 #: client/src/pages/ContentDripPage.tsx:948
-#: client/src/pages/LicensePage.tsx:76
+#: client/src/pages/LicensePage.tsx:77
 #: client/src/pages/SettingsPage.tsx:240
 msgid "Disabled"
 msgstr ""
@@ -1048,15 +1099,16 @@ msgstr ""
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:522
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1140
 #: client/src/components/shared/WPMediaPickerField.tsx:187
-#: client/src/pages/CourseTeamPage.tsx:408
-#: client/src/pages/ReviewDetailPage.tsx:106
+#: client/src/pages/CourseTeamPage.tsx:409
+#: client/src/pages/ReviewDetailPage.tsx:107
 #: client/src/pages/content-editors/CertificateVisualBuilder.tsx:861
 msgid "Remove"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:528
-#: client/src/pages/CourseTeamPage.tsx:925
-#: client/src/pages/ReportsPage.tsx:1042
+#: client/src/pages/CourseTeamPage.tsx:928
+#: client/src/pages/EnrollmentDetailsPage.tsx:199
+#: client/src/pages/ReportsPage.tsx:1045
 msgid "ID"
 msgstr ""
 
@@ -1070,7 +1122,7 @@ msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:542
 #: client/src/pages/GradingPage.tsx:412
-#: client/src/pages/ReportsPage.tsx:1043
+#: client/src/pages/ReportsPage.tsx:1046
 msgid "Label"
 msgstr ""
 
@@ -1150,7 +1202,7 @@ msgid "Show when value equals"
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:69
-#: client/src/pages/IssuedCertificatesPage.tsx:97
+#: client/src/pages/IssuedCertificatesPage.tsx:98
 msgid "Number"
 msgstr ""
 
@@ -1167,7 +1219,7 @@ msgid "Select a field to edit."
 msgstr ""
 
 #: client/src/components/settings/DynamicFieldsBuilder.tsx:71
-#: client/src/pages/DiscussionsPage.tsx:880
+#: client/src/pages/DiscussionsPage.tsx:858
 msgid "Select"
 msgstr ""
 
@@ -1214,13 +1266,13 @@ msgstr ""
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:747
 #: client/src/components/shared/ConfirmDialog.tsx:30
 #: client/src/components/shared/CreateCertificateModal.tsx:84
-#: client/src/components/shared/CreateCourseModal.tsx:163
+#: client/src/components/shared/CreateCourseModal.tsx:181
 #: client/src/pages/ContentDripPage.tsx:566
 msgid "Cancel"
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:223
-#: client/src/pages/CourseBuilderPage.tsx:1193
+#: client/src/pages/CourseBuilderPage.tsx:1246
 msgid "Adding…"
 msgstr ""
 
@@ -1259,18 +1311,20 @@ msgid "Video lesson"
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:77
-#: client/src/pages/GradebookPage.tsx:1180
-#: client/src/pages/ReportsPage.tsx:619
+#: client/src/pages/DiscussionsPage.tsx:272
+#: client/src/pages/GradebookPage.tsx:1173
+#: client/src/pages/ReportsPage.tsx:626
 msgid "Quiz"
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:78
-#: client/src/pages/GradebookPage.tsx:1207
+#: client/src/pages/GradebookPage.tsx:1200
 msgid "Assignment"
 msgstr ""
 
 #: client/src/components/shared/AddContentTypePickerModal.tsx:79
 #: client/src/pages/ContentDripPage.tsx:449
+#: client/src/pages/DiscussionsPage.tsx:272
 #: client/src/pages/PrerequisitesPage.tsx:795
 msgid "Lesson"
 msgstr ""
@@ -1315,27 +1369,27 @@ msgid "Correct answer"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1062
-#: client/src/pages/content-editors/editors.tsx:1909
+#: client/src/pages/content-editors/editors.tsx:1897
 msgid "Learners choose between true and false."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1069
-#: client/src/pages/content-editors/editors.tsx:1916
+#: client/src/pages/content-editors/editors.tsx:1904
 msgid "True"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1070
-#: client/src/pages/content-editors/editors.tsx:1917
+#: client/src/pages/content-editors/editors.tsx:1905
 msgid "False"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1078
-#: client/src/pages/content-editors/editors.tsx:1924
+#: client/src/pages/content-editors/editors.tsx:1912
 msgid "Accepted answer(s)"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1079
-#: client/src/pages/content-editors/editors.tsx:1924
+#: client/src/pages/content-editors/editors.tsx:1912
 msgid "Expected answer"
 msgstr ""
 
@@ -1350,22 +1404,22 @@ msgid "Case-insensitive match. Use | between alternative correct answers."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1099
-#: client/src/pages/content-editors/editors.tsx:1936
+#: client/src/pages/content-editors/editors.tsx:1924
 msgid "e.g. Paris|paris"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1100
-#: client/src/pages/content-editors/editors.tsx:1936
+#: client/src/pages/content-editors/editors.tsx:1924
 msgid "e.g. photosynthesis"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1108
-#: client/src/pages/content-editors/editors.tsx:1942
+#: client/src/pages/content-editors/editors.tsx:1930
 msgid "Steps / items"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1111
-#: client/src/pages/content-editors/editors.tsx:1943
+#: client/src/pages/content-editors/editors.tsx:1931
 msgid "Edit labels, then arrange the correct order (top = first)."
 msgstr ""
 
@@ -1378,7 +1432,7 @@ msgid "+ Add item"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1156
-#: client/src/pages/content-editors/editors.tsx:1986
+#: client/src/pages/content-editors/editors.tsx:1974
 msgid "Correct order"
 msgstr ""
 
@@ -1391,12 +1445,12 @@ msgid "Down"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1191
-#: client/src/pages/content-editors/editors.tsx:2019
+#: client/src/pages/content-editors/editors.tsx:2007
 msgid "Matching pairs"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1194
-#: client/src/pages/content-editors/editors.tsx:2020
+#: client/src/pages/content-editors/editors.tsx:2008
 msgid "For each prompt on the left, choose the matching answer column index."
 msgstr ""
 
@@ -1405,17 +1459,17 @@ msgid "Prompt %d"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1214
-#: client/src/pages/content-editors/editors.tsx:2036
+#: client/src/pages/content-editors/editors.tsx:2024
 msgid "Left column text"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1219
-#: client/src/pages/content-editors/editors.tsx:2041
+#: client/src/pages/content-editors/editors.tsx:2029
 msgid "Matches answer"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1243
-#: client/src/pages/content-editors/editors.tsx:2064
+#: client/src/pages/content-editors/editors.tsx:2052
 msgid "Answer column"
 msgstr ""
 
@@ -1442,12 +1496,12 @@ msgid "Explanation / feedback (optional)"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1302
-#: client/src/pages/content-editors/editors.tsx:2119
+#: client/src/pages/content-editors/editors.tsx:2106
 msgid "Shown after grading or kept for instructors. Stored as post content."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1311
-#: client/src/pages/content-editors/editors.tsx:2124
+#: client/src/pages/content-editors/editors.tsx:2109
 msgid "Optional explanation for learners or grading notes…"
 msgstr ""
 
@@ -1460,7 +1514,7 @@ msgid "Pick an existing question instead of creating a new one."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1338
-#: client/src/pages/content-editors/editors.tsx:1159
+#: client/src/pages/content-editors/editors.tsx:1147
 msgid "Search questions…"
 msgstr ""
 
@@ -1487,7 +1541,7 @@ msgid "Could not load question library"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1380
-#: client/src/pages/content-editors/editors.tsx:1184
+#: client/src/pages/content-editors/editors.tsx:1172
 msgid "Loading questions…"
 msgstr ""
 
@@ -1501,27 +1555,27 @@ msgid "Points"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1438
-#: client/src/pages/content-editors/editors.tsx:2136
+#: client/src/pages/content-editors/editors.tsx:2121
 msgid "Awarded when the answer is correct (auto-graded types only)."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1455
-#: client/src/pages/content-editors/editors.tsx:2151
+#: client/src/pages/content-editors/editors.tsx:2136
 msgid "Draft stays hidden from learners until published."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1458
 #: client/src/components/shared/list/EntityListView.tsx:37
-#: client/src/pages/CourseBuilderPage.tsx:2187
-#: client/src/pages/GradebookPage.tsx:867
-#: client/src/pages/content-editors/editors.tsx:3412
+#: client/src/pages/CourseBuilderPage.tsx:2545
+#: client/src/pages/GradebookPage.tsx:869
+#: client/src/pages/content-editors/editors.tsx:3394
 msgid "Draft"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:1459
 #: client/src/components/shared/list/EntityListView.tsx:36
-#: client/src/pages/CourseBuilderPage.tsx:2187
-#: client/src/pages/content-editors/editors.tsx:3413
+#: client/src/pages/CourseBuilderPage.tsx:2545
+#: client/src/pages/content-editors/editors.tsx:3395
 msgid "Published"
 msgstr ""
 
@@ -1595,38 +1649,38 @@ msgid "Add selected"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:768
-#: client/src/pages/AddonSettingsPage.tsx:309
+#: client/src/pages/AddonSettingsPage.tsx:318
 #: client/src/pages/ContentDripPage.tsx:1016
-#: client/src/pages/CouponsPage.tsx:648
-#: client/src/pages/CourseTeamPage.tsx:642
-#: client/src/pages/DiscussionsPage.tsx:1509
+#: client/src/pages/CouponsPage.tsx:700
+#: client/src/pages/CourseTeamPage.tsx:643
+#: client/src/pages/DiscussionsPage.tsx:1486
 #: client/src/pages/EmailMarketingPage.tsx:635
 #: client/src/pages/EmailPage.tsx:201
-#: client/src/pages/GradebookPage.tsx:1280
+#: client/src/pages/GradebookPage.tsx:1273
 #: client/src/pages/GradingPage.tsx:343
 #: client/src/pages/IntegrationsPage.tsx:577
-#: client/src/pages/MarketplacePage.tsx:773
+#: client/src/pages/MarketplacePage.tsx:798
 #: client/src/pages/OrderDetailsPage.tsx:168
 #: client/src/pages/OrdersPage.tsx:473
 #: client/src/pages/PaymentDetailsPage.tsx:137
 #: client/src/pages/PaymentsPage.tsx:205
 #: client/src/pages/PrerequisitesPage.tsx:788
 #: client/src/pages/QuizAdvancedWorkspacePage.tsx:304
-#: client/src/pages/ReportsPage.tsx:987
+#: client/src/pages/ReportsPage.tsx:990
 #: client/src/pages/SettingsPage.tsx:975
 #: client/src/pages/SocialLoginPage.tsx:310
 #: client/src/pages/SubscriptionsProPage.tsx:617
 #: client/src/pages/WhiteLabelPage.tsx:625
-#: client/src/pages/content-editors/editors.tsx:3227
+#: client/src/pages/content-editors/editors.tsx:3209
 msgid "Saving…"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:769
-#: client/src/components/shared/CreateCourseModal.tsx:171
+#: client/src/components/shared/CreateCourseModal.tsx:189
 #: client/src/pages/BundlesPage.tsx:268
 #: client/src/pages/IntegrationsPage.tsx:975
 #: client/src/pages/OrdersPage.tsx:303
-#: client/src/pages/ReportsPage.tsx:1032
+#: client/src/pages/ReportsPage.tsx:1035
 #: client/src/pages/SubscriptionsProPage.tsx:1072
 #: client/src/pages/WpUserListPage.tsx:168
 msgid "Creating…"
@@ -1672,7 +1726,7 @@ msgid "Matching"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:821
-#: client/src/pages/content-editors/editors.tsx:2175
+#: client/src/pages/content-editors/editors.tsx:2160
 msgid "Question type"
 msgstr ""
 
@@ -1703,17 +1757,17 @@ msgid "Question text"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:863
-#: client/src/pages/content-editors/editors.tsx:1726
+#: client/src/pages/content-editors/editors.tsx:1714
 msgid "What the learner sees (plain text or short HTML)."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:868
-#: client/src/pages/content-editors/editors.tsx:1731
+#: client/src/pages/content-editors/editors.tsx:1719
 msgid "Enter the question stem…"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:880
-#: client/src/pages/content-editors/editors.tsx:1743
+#: client/src/pages/content-editors/editors.tsx:1731
 msgid "Choose a question type to continue"
 msgstr ""
 
@@ -1724,7 +1778,7 @@ msgid ""
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:89
-#: client/src/pages/content-editors/editors.tsx:2721
+#: client/src/pages/content-editors/editors.tsx:2703
 msgid "Ordering"
 msgstr ""
 
@@ -1745,12 +1799,12 @@ msgid "Advanced Quiz"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:930
-#: client/src/pages/content-editors/editors.tsx:1781
+#: client/src/pages/content-editors/editors.tsx:1769
 msgid "At least two options; mark the correct one."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:96
-#: client/src/pages/content-editors/editors.tsx:2460
+#: client/src/pages/content-editors/editors.tsx:2442
 msgid "Essay"
 msgstr ""
 
@@ -1759,19 +1813,19 @@ msgid "Long-form response, typically manually graded."
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:994
-#: client/src/pages/content-editors/editors.tsx:1844
+#: client/src/pages/content-editors/editors.tsx:1832
 msgid "Answer choices"
 msgstr ""
 
 #: client/src/components/shared/AddQuestionAuthoringModal.tsx:997
-#: client/src/pages/content-editors/editors.tsx:1845
+#: client/src/pages/content-editors/editors.tsx:1833
 msgid "Check every option that should be marked correct."
 msgstr ""
 
 #: client/src/components/shared/ApiErrorPanel.tsx:14
 #: client/src/pages/IntegrationsPage.tsx:444
 #: client/src/pages/OrderDetailsPage.tsx:222
-#: client/src/pages/OrdersPage.tsx:684
+#: client/src/pages/OrdersPage.tsx:682
 #: client/src/pages/PaymentDetailsPage.tsx:131
 #: client/src/pages/PaymentsPage.tsx:434
 #: client/src/pages/ToolsPage.tsx:218
@@ -1819,7 +1873,7 @@ msgid "Course #%d"
 msgstr ""
 
 #: client/src/components/shared/CourseFilterSelect.tsx:239
-#: client/src/components/shared/MultiCoursePicker.tsx:311
+#: client/src/components/shared/MultiCoursePicker.tsx:308
 msgid "Search courses…"
 msgstr ""
 
@@ -1827,15 +1881,6 @@ msgstr ""
 #: client/src/pages/OrdersPage.tsx:543
 #: client/src/pages/ToolsPage.tsx:267
 msgid "Courses"
-msgstr ""
-
-#: client/src/components/shared/CourseFilterSelect.tsx:263
-#: client/src/components/shared/MultiCoursePicker.tsx:317
-#: client/src/pages/CourseTeamPage.tsx:874
-#: client/src/pages/EnrollmentsPage.tsx:247
-#: client/src/pages/OrdersPage.tsx:361
-#: client/src/pages/SubscriptionsProPage.tsx:1129
-msgid "Searching…"
 msgstr ""
 
 #: client/src/components/shared/CourseFilterSelect.tsx:266
@@ -1848,8 +1893,8 @@ msgstr ""
 
 #: client/src/components/shared/CourseFilterSelect.tsx:49
 #: client/src/pages/ActivityLogPage.tsx:334
-#: client/src/pages/DiscussionsPage.tsx:739
-#: client/src/pages/GradebookPage.tsx:821
+#: client/src/pages/DiscussionsPage.tsx:717
+#: client/src/pages/GradebookPage.tsx:823
 msgid "All courses"
 msgstr ""
 
@@ -1899,112 +1944,112 @@ msgstr ""
 msgid "This becomes the template name shown in your certificates list."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:132
+#: client/src/components/shared/CreateCourseModal.tsx:150
 msgid "Regular %s"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:133
+#: client/src/components/shared/CreateCourseModal.tsx:151
 msgid "%s bundle"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:136
+#: client/src/components/shared/CreateCourseModal.tsx:154
 msgid "e.g. Full Stack Bootcamp"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:137
+#: client/src/components/shared/CreateCourseModal.tsx:155
 msgid "e.g. WordPress for Beginners"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:141
+#: client/src/components/shared/CreateCourseModal.tsx:159
 msgid "%s name"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:147
+#: client/src/components/shared/CreateCourseModal.tsx:165
 msgid "Create your %s"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:148
+#: client/src/components/shared/CreateCourseModal.tsx:166
 msgid "Pick a format, add a name, and you're ready to build content."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:154
+#: client/src/components/shared/CreateCourseModal.tsx:172
 msgid "Starts as a draft — nothing is public until you publish."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:171
+#: client/src/components/shared/CreateCourseModal.tsx:189
 msgid "Create & continue"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:179
+#: client/src/components/shared/CreateCourseModal.tsx:197
 msgid "Choose a format"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:183
+#: client/src/components/shared/CreateCourseModal.tsx:201
 msgid "Click a card to select — %1$s or %2$s."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:188
+#: client/src/components/shared/CreateCourseModal.tsx:206
 msgid "Click a card to select. With %1$s Pro, you can choose %2$s too."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:196
+#: client/src/components/shared/CreateCourseModal.tsx:214
 msgid "%s format"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:205
+#: client/src/components/shared/CreateCourseModal.tsx:223
 msgid "One %s with lessons, videos, and quizzes."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:217
+#: client/src/components/shared/CreateCourseModal.tsx:235
 msgid "Package existing %s and sell them with one checkout."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:261
+#: client/src/components/shared/CreateCourseModal.tsx:279
 msgid "Permalink"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:263
+#: client/src/components/shared/CreateCourseModal.tsx:281
 msgid "The web address where learners open this %s."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:326
+#: client/src/components/shared/CreateCourseModal.tsx:344
 msgid "Customize permalink"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:352
+#: client/src/components/shared/CreateCourseModal.tsx:370
 #: client/src/pages/ToolsPage.tsx:123
 msgid "Done"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:356
+#: client/src/components/shared/CreateCourseModal.tsx:374
 msgid "Preview: %s"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:372
+#: client/src/components/shared/CreateCourseModal.tsx:390
 msgid "Edit link"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:401
+#: client/src/components/shared/CreateCourseModal.tsx:419
 msgid "%1$s. %2$s Selected."
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:402
+#: client/src/components/shared/CreateCourseModal.tsx:420
 msgid "%1$s. %2$s"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:446
+#: client/src/components/shared/CreateCourseModal.tsx:464
 msgid "%1$s — %2$s Pro"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:462
+#: client/src/components/shared/CreateCourseModal.tsx:480
 msgid "Package existing %s —"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:464
+#: client/src/components/shared/CreateCourseModal.tsx:482
 msgid "checking plan…"
 msgstr ""
 
-#: client/src/components/shared/CreateCourseModal.tsx:472
+#: client/src/components/shared/CreateCourseModal.tsx:490
 msgid "Upgrade to Pro to select"
 msgstr ""
 
@@ -2042,16 +2087,16 @@ msgstr ""
 msgid "1 course"
 msgstr ""
 
-#: client/src/components/shared/MultiCoursePicker.tsx:321
+#: client/src/components/shared/MultiCoursePicker.tsx:318
 msgid "No matching courses."
 msgstr ""
 
-#: client/src/components/shared/MultiCoursePicker.tsx:322
+#: client/src/components/shared/MultiCoursePicker.tsx:319
 msgid "Start typing to search courses."
 msgstr ""
 
 #: client/src/components/shared/MultiCoursePicker.tsx:54
-#: client/src/pages/CouponsPage.tsx:641
+#: client/src/pages/CouponsPage.tsx:693
 #: client/src/pages/PrerequisitesPage.tsx:762
 msgid "Click to select courses…"
 msgstr ""
@@ -2127,7 +2172,7 @@ msgid "Remove file"
 msgstr ""
 
 #: client/src/components/shared/WPMediaPickerField.tsx:196
-#: client/src/pages/content-editors/editors.tsx:2462
+#: client/src/pages/content-editors/editors.tsx:2444
 msgid "URL"
 msgstr ""
 
@@ -2163,7 +2208,7 @@ msgstr ""
 #: client/src/components/shared/list/BulkActionsBar.tsx:61
 #: client/src/components/shared/list/EntityListView.tsx:386
 #: client/src/lib/wpPostStatusRowActions.ts:43
-#: client/src/pages/CourseBuilderPage.tsx:1860
+#: client/src/pages/CourseBuilderPage.tsx:2190
 msgid "Delete permanently"
 msgstr ""
 
@@ -2171,15 +2216,15 @@ msgstr ""
 #: client/src/components/shared/list/EntityListView.tsx:416
 #: client/src/lib/wpPostStatusRowActions.ts:102
 #: client/src/pages/BundlesPage.tsx:130
-#: client/src/pages/DiscussionsPage.tsx:609
+#: client/src/pages/DiscussionsPage.tsx:587
 #: client/src/pages/content-editors/editors.tsx:288
 msgid "Move to trash"
 msgstr ""
 
 #: client/src/components/shared/list/BulkActionsBar.tsx:66
 #: client/src/lib/wpPostStatusRowActions.ts:60
-#: client/src/pages/CourseBuilderPage.tsx:2223
-#: client/src/pages/content-editors/editors.tsx:3223
+#: client/src/pages/CourseBuilderPage.tsx:3205
+#: client/src/pages/content-editors/editors.tsx:3205
 msgid "Publish"
 msgstr ""
 
@@ -2203,7 +2248,7 @@ msgid "Applying…"
 msgstr ""
 
 #: client/src/components/shared/list/BulkActionsBar.tsx:79
-#: client/src/pages/DiscussionsPage.tsx:823
+#: client/src/pages/DiscussionsPage.tsx:801
 msgid "Apply"
 msgstr ""
 
@@ -2220,23 +2265,26 @@ msgid "Select all on this page"
 msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:35
-#: client/src/pages/InstructorApplicationsPage.tsx:111
-#: client/src/pages/MarketplacePage.tsx:665
+#: client/src/pages/InstructorApplicationsPage.tsx:112
+#: client/src/pages/MarketplacePage.tsx:672
 #: client/src/pages/PaymentsPage.tsx:280
-#: client/src/pages/ReportsPage.tsx:780
+#: client/src/pages/ReportsPage.tsx:783
 msgid "All"
 msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:38
-#: client/src/pages/InstructorApplicationsPage.tsx:112
-#: client/src/pages/MarketplacePage.tsx:666
+#: client/src/pages/DiscussionsPage.tsx:202
+#: client/src/pages/InstructorApplicationsPage.tsx:113
+#: client/src/pages/MarketplacePage.tsx:673
 #: client/src/pages/PaymentsPage.tsx:266
+#: client/src/pages/ReviewDetailPage.tsx:200
+#: client/src/pages/ReviewsPage.tsx:368
 msgid "Pending"
 msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:380
 #: client/src/lib/wpPostStatusRowActions.ts:40
-#: client/src/pages/CourseBuilderPage.tsx:1857
+#: client/src/pages/CourseBuilderPage.tsx:2187
 msgid "Delete permanently?"
 msgstr ""
 
@@ -2249,7 +2297,7 @@ msgid "Scheduled"
 msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:40
-#: client/src/pages/content-editors/editors.tsx:3414
+#: client/src/pages/content-editors/editors.tsx:3396
 msgid "Private"
 msgstr ""
 
@@ -2273,7 +2321,7 @@ msgstr ""
 
 #: client/src/components/shared/list/EntityListView.tsx:530
 #: client/src/pages/ContentDripPage.tsx:812
-#: client/src/pages/DiscussionsPage.tsx:579
+#: client/src/pages/DiscussionsPage.tsx:557
 #: client/src/pages/PrerequisitesPage.tsx:951
 msgid "Bulk action failed"
 msgstr ""
@@ -2487,20 +2535,21 @@ msgid ""
 msgstr ""
 
 #: client/src/pages/ActivityLogPage.tsx:240
-#: client/src/pages/AddonsPage.tsx:541
+#: client/src/pages/AddonsPage.tsx:640
 #: client/src/pages/BundlesPage.tsx:155
-#: client/src/pages/CalendarPage.tsx:166
-#: client/src/pages/DiscussionsPage.tsx:694
-#: client/src/pages/ReportsPage.tsx:917
+#: client/src/pages/CalendarPage.tsx:163
+#: client/src/pages/DiscussionsPage.tsx:672
+#: client/src/pages/ReportsPage.tsx:920
 msgid "Refreshing…"
 msgstr ""
 
 #: client/src/pages/ActivityLogPage.tsx:240
-#: client/src/pages/AddonsPage.tsx:541
+#: client/src/pages/AddonsPage.tsx:640
 #: client/src/pages/BundlesPage.tsx:155
-#: client/src/pages/CalendarPage.tsx:166
-#: client/src/pages/DiscussionsPage.tsx:694
-#: client/src/pages/ReportsPage.tsx:548
+#: client/src/pages/CalendarPage.tsx:163
+#: client/src/pages/DiscussionsPage.tsx:672
+#: client/src/pages/EnrollmentDetailsPage.tsx:77
+#: client/src/pages/ReportsPage.tsx:550
 msgid "Refresh"
 msgstr ""
 
@@ -2544,8 +2593,8 @@ msgid "Could not load activity log"
 msgstr ""
 
 #: client/src/pages/ActivityLogPage.tsx:348
-#: client/src/pages/MarketplacePage.tsx:512
-#: client/src/pages/content-editors/editors.tsx:670
+#: client/src/pages/MarketplacePage.tsx:519
+#: client/src/pages/content-editors/editors.tsx:661
 msgid "e.g. 12"
 msgstr ""
 
@@ -2563,192 +2612,252 @@ msgstr ""
 
 #: client/src/pages/AddonSettingsPage.tsx:118
 #: client/src/pages/ContentDripPage.tsx:314
-#: client/src/pages/CourseBuilderPage.tsx:1747
+#: client/src/pages/CourseBuilderPage.tsx:2044
 #: client/src/pages/EmailMarketingPage.tsx:301
 #: client/src/pages/EmailPage.tsx:110
-#: client/src/pages/InstructorApplicationsPage.tsx:77
+#: client/src/pages/InstructorApplicationsPage.tsx:78
 #: client/src/pages/IntegrationsPage.tsx:267
 #: client/src/pages/PrerequisitesPage.tsx:594
 #: client/src/pages/SettingsPage.tsx:668
 #: client/src/pages/SocialLoginPage.tsx:64
 #: client/src/pages/WhiteLabelPage.tsx:130
-#: client/src/pages/content-editors/editors.tsx:2977
+#: client/src/pages/content-editors/editors.tsx:2959
 msgid "Saved"
 msgstr ""
 
-#: client/src/pages/AddonSettingsPage.tsx:256
+#: client/src/pages/AddonSettingsPage.tsx:265
 #: client/src/pages/EmailMarketingPage.tsx:465
 msgid "Could not load settings"
 msgstr ""
 
-#: client/src/pages/AddonSettingsPage.tsx:260
+#: client/src/pages/AddonSettingsPage.tsx:269
 msgid "What you are editing"
 msgstr ""
 
-#: client/src/pages/AddonSettingsPage.tsx:309
+#: client/src/pages/AddonSettingsPage.tsx:318
 #: client/src/pages/SocialLoginPage.tsx:310
 msgid "Save settings"
 msgstr ""
 
-#: client/src/pages/AddonSettingsPage.tsx:318
+#: client/src/pages/AddonSettingsPage.tsx:327
 #: client/src/pages/EmailMarketingPage.tsx:643
 msgid "Next steps"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:166
+#: client/src/pages/AddonsPage.tsx:145
 msgid "line-clamp-3 cursor-help"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:166
+#: client/src/pages/AddonsPage.tsx:145
 msgid "line-clamp-3"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:313
+#: client/src/pages/AddonsPage.tsx:292
 msgid "Action failed"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:366
+#: client/src/pages/AddonsPage.tsx:345
 msgid "Bulk update failed"
 msgstr ""
 
+#: client/src/pages/AddonsPage.tsx:356
+msgid "Starter pack"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:357
+msgid "Just selling courses"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:362
+msgid "Growth pack"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:363
+msgid "Scaling a paid LMS business"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:377
+msgid "Enterprise pack"
+msgstr ""
+
 #: client/src/pages/AddonsPage.tsx:378
+msgid "Multi-site, reports, audit log, white-label"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:419
+msgid "Bundle applied"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:426
+msgid "Plan required"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:430
+msgid "Already on"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:434
+msgid "Bundle failed"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:446
 msgid ""
 "%s always runs the core LMS. Optional add-ons extend it — turn each switch "
 "on only when you need that feature."
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:383
+#: client/src/pages/AddonsPage.tsx:451
 msgid "Could not load addons"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:386
+#: client/src/pages/AddonsPage.tsx:454
 msgid "How Sikshya Free, Pro, and add-ons fit together"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:390
+#: client/src/pages/AddonsPage.tsx:458
 msgid ""
 "%1$s — courses, lessons, quizzes, enrollments, and basic checkout. Nothing "
 "on this page can “turn off” the core plugin."
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:396
+#: client/src/pages/AddonsPage.tsx:464
 msgid ""
 "%1$s — unlocks commercial plans (Starter, Growth, Scale). Install and "
 "activate the Pro plugin, then activate your license under %2$s."
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:406
+#: client/src/pages/AddonsPage.tsx:474
 msgid "Add-ons (this page)"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:408
+#: client/src/pages/AddonsPage.tsx:476
 msgid "Add-on defaults"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:413
+#: client/src/pages/AddonsPage.tsx:481
 msgid "pro"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:422
-#: client/src/pages/LicensePage.tsx:306
+#: client/src/pages/AddonsPage.tsx:490
+#: client/src/pages/LicensePage.tsx:307
 msgid "Upgrade to Sikshya Pro"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:465
-msgid "Select visible"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:474
-msgid "Enable selected"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:482
-msgid "Disable selected"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:486
-msgid "Showing"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:488
-msgid "add-ons"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:496
-msgid "Search add-ons…"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:503
-msgid "Filter by category"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:505
-msgid "All categories"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:516
-msgid "Filter by tier"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:518
-msgid "All tiers"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:519
-msgid "Starter"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:520
-msgid "Growth"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:521
-msgid "Scale"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:527
-msgid "Sort add-ons"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:529
-msgid "Priority (most → least)"
-msgstr ""
-
 #: client/src/pages/AddonsPage.tsx:530
-msgid "Name A → Z"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:531
-msgid "Name Z → A"
-msgstr ""
-
-#: client/src/pages/AddonsPage.tsx:532
-msgid "Enabled first"
+msgid "Recommended starter packs"
 msgstr ""
 
 #: client/src/pages/AddonsPage.tsx:533
+msgid ""
+"Pick a pack that matches your goal — we’ll flip on the add-ons that map to "
+"it."
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:568
+msgid "Select visible"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:575
+msgid "Enable selected"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:581
+msgid "Disable selected"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:585
+msgid "Showing"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:587
+msgid "add-ons"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:595
+msgid "Search add-ons…"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:602
+msgid "Filter by category"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:604
+msgid "All categories"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:615
+msgid "Filter by tier"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:617
+msgid "All tiers"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:618
+msgid "Starter"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:619
+msgid "Growth"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:620
+msgid "Scale"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:626
+msgid "Sort add-ons"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:628
+msgid "Priority (most → least)"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:629
+msgid "Name A → Z"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:630
+msgid "Name Z → A"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:631
+msgid "Enabled first"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:632
 msgid "Tier"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:549
+#: client/src/pages/AddonsPage.tsx:648
 msgid "Loading add-ons…"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:629
+#: client/src/pages/AddonsPage.tsx:719
+msgid "Open the documentation page for this add-on"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:722
+msgid "Docs"
+msgstr ""
+
+#: client/src/pages/AddonsPage.tsx:738
 #: client/src/pages/EmailMarketingPage.tsx:739
+#: client/src/pages/EmailTemplatesListPage.tsx:180
 msgid "Disable"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:629
+#: client/src/pages/AddonsPage.tsx:738
 #: client/src/pages/EmailMarketingPage.tsx:739
+#: client/src/pages/EmailTemplatesListPage.tsx:177
 msgid "Enable"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:633
+#: client/src/pages/AddonsPage.tsx:742
 msgid "translate-x-5"
 msgstr ""
 
-#: client/src/pages/AddonsPage.tsx:633
+#: client/src/pages/AddonsPage.tsx:742
 msgid "translate-x-1"
 msgstr ""
 
@@ -2762,7 +2871,7 @@ msgstr ""
 
 #: client/src/pages/BundlesPage.tsx:140
 #: client/src/pages/EmailMarketingPage.tsx:756
-#: client/src/pages/ScormH5pWorkspacePage.tsx:194
+#: client/src/pages/ScormH5pWorkspacePage.tsx:195
 msgid "Delete failed"
 msgstr ""
 
@@ -2844,19 +2953,19 @@ msgstr ""
 
 #: client/src/pages/BundlesPage.tsx:287
 #: client/src/pages/ContentDripPage.tsx:932
-#: client/src/pages/CouponsPage.tsx:544
+#: client/src/pages/CouponsPage.tsx:596
 #: client/src/pages/CourseCategoriesPage.tsx:388
-#: client/src/pages/CourseTeamPage.tsx:910
-#: client/src/pages/DiscussionsPage.tsx:840
-#: client/src/pages/GradebookPage.tsx:1293
+#: client/src/pages/CourseTeamPage.tsx:913
+#: client/src/pages/DiscussionsPage.tsx:818
+#: client/src/pages/GradebookPage.tsx:1286
 #: client/src/pages/GradingPage.tsx:242
-#: client/src/pages/InstructorApplicationsPage.tsx:139
+#: client/src/pages/InstructorApplicationsPage.tsx:140
 #: client/src/pages/IntegrationsPage.tsx:980
-#: client/src/pages/IssuedCertificatesPage.tsx:83
-#: client/src/pages/MarketplacePage.tsx:682
+#: client/src/pages/IssuedCertificatesPage.tsx:84
+#: client/src/pages/MarketplacePage.tsx:689
 #: client/src/pages/PrerequisitesPage.tsx:823
-#: client/src/pages/ReviewDetailPage.tsx:188
-#: client/src/pages/ReviewsPage.tsx:291
+#: client/src/pages/ReviewDetailPage.tsx:189
+#: client/src/pages/ReviewsPage.tsx:292
 #: client/src/pages/SocialLoginPage.tsx:99
 #: client/src/pages/ToolsPage.tsx:231
 #: client/src/pages/WhiteLabelPage.tsx:566
@@ -2887,58 +2996,58 @@ msgstr ""
 msgid "Generating link…"
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:162
+#: client/src/pages/CalendarPage.tsx:159
 msgid ""
 "Staff catalog dates, learner schedules on My account, REST feeds, and "
 "optional teasers on course + learn pages."
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:176
+#: client/src/pages/CalendarPage.tsx:173
 msgid ""
 "Learners see enrollments, drip unlocks, live sessions, and assignment due "
 "dates. Staff can browse published course dates, filter exports, and tune "
 "what appears in feeds."
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:178
+#: client/src/pages/CalendarPage.tsx:175
 msgid "Calendar is not enabled"
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:179
+#: client/src/pages/CalendarPage.tsx:176
 msgid ""
 "Enable the Calendar add-on to expose staff and learner schedule endpoints "
 "and dashboard blocks."
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:202
+#: client/src/pages/CalendarPage.tsx:199
 msgid ""
 "Control how many events load, what is included, and whether the My account "
 "strip is shown."
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:203
+#: client/src/pages/CalendarPage.tsx:200
 msgid "Calendar settings"
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:204
+#: client/src/pages/CalendarPage.tsx:201
 msgid ""
 "Every toggle and number here changes what learners see on the account "
 "dashboard and what the REST API returns."
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:243
+#: client/src/pages/CalendarPage.tsx:240
 msgid "YYYY-MM-DD"
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:269
+#: client/src/pages/CalendarPage.tsx:266
 msgid "Could not load calendar"
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:294
+#: client/src/pages/CalendarPage.tsx:291
 msgid "No courses in this range"
 msgstr ""
 
-#: client/src/pages/CalendarPage.tsx:295
+#: client/src/pages/CalendarPage.tsx:292
 msgid ""
 "Adjust the publish-date filters or publish a course. Learner-specific "
 "schedules (drip, due dates, live classes) still appear on My account and "
@@ -2993,15 +3102,15 @@ msgstr ""
 
 #: client/src/pages/ContentDripPage.tsx:378
 #: client/src/pages/CourseCategoriesPage.tsx:288
-#: client/src/pages/DiscussionsPage.tsx:629
+#: client/src/pages/DiscussionsPage.tsx:607
 #: client/src/pages/EmailMarketingPage.tsx:748
-#: client/src/pages/EmailTemplatesListPage.tsx:126
+#: client/src/pages/EmailTemplatesListPage.tsx:127
 #: client/src/pages/GradingPage.tsx:160
-#: client/src/pages/OrdersPage.tsx:674
+#: client/src/pages/OrdersPage.tsx:672
 #: client/src/pages/PaymentsPage.tsx:424
-#: client/src/pages/ReviewDetailPage.tsx:147
-#: client/src/pages/ReviewsPage.tsx:153
-#: client/src/pages/ScormH5pWorkspacePage.tsx:335
+#: client/src/pages/ReviewDetailPage.tsx:148
+#: client/src/pages/ReviewsPage.tsx:154
+#: client/src/pages/ScormH5pWorkspacePage.tsx:336
 #: client/src/pages/SubscriptionsProPage.tsx:937
 msgid "Delete"
 msgstr ""
@@ -3020,16 +3129,16 @@ msgid "Select this schedule row"
 msgstr ""
 
 #: client/src/pages/ContentDripPage.tsx:449
-#: client/src/pages/CourseTeamPage.tsx:696
-#: client/src/pages/DiscussionsPage.tsx:895
+#: client/src/pages/CourseTeamPage.tsx:697
+#: client/src/pages/DiscussionsPage.tsx:873
 #: client/src/pages/EmailMarketingPage.tsx:807
-#: client/src/pages/GradebookPage.tsx:927
-#: client/src/pages/IssuedCertificatesPage.tsx:96
-#: client/src/pages/MarketplacePage.tsx:544
+#: client/src/pages/GradebookPage.tsx:929
+#: client/src/pages/IssuedCertificatesPage.tsx:97
+#: client/src/pages/MarketplacePage.tsx:551
 #: client/src/pages/OrderDetailsPage.tsx:365
 #: client/src/pages/PaymentsPage.tsx:301
-#: client/src/pages/ReportsPage.tsx:620
-#: client/src/pages/ReviewsPage.tsx:308
+#: client/src/pages/ReportsPage.tsx:627
+#: client/src/pages/ReviewsPage.tsx:309
 #: client/src/pages/content-editors/certificateLayout.ts:93
 msgid "Course"
 msgstr ""
@@ -3090,7 +3199,7 @@ msgid "Missing lesson"
 msgstr ""
 
 #: client/src/pages/ContentDripPage.tsx:593
-#: client/src/pages/ReportsPage.tsx:1032
+#: client/src/pages/ReportsPage.tsx:1035
 msgid "Create schedule"
 msgstr ""
 
@@ -3195,418 +3304,523 @@ msgstr ""
 msgid "Cannot load editor"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:168
+#: client/src/pages/CouponsPage.tsx:196
 msgid "Advanced rules saved."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:233
+#: client/src/pages/CouponsPage.tsx:261
 msgid "Coupon updated."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:265
+#: client/src/pages/CouponsPage.tsx:293
 msgid "Coupon created."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:301
+#: client/src/pages/CouponsPage.tsx:329
 msgid "Discount codes applied at native checkout (Stripe / PayPal)."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:310
+#: client/src/pages/CouponsPage.tsx:338
 msgid "Could not load coupons"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:345
-msgid "Coupons tabs"
-msgstr ""
-
-#: client/src/pages/CouponsPage.tsx:355
-msgid "Storefront hints, cart promo, and checkout guidance."
+#: client/src/pages/CouponsPage.tsx:354
+msgid "Coupons are off at checkout"
 msgstr ""
 
 #: client/src/pages/CouponsPage.tsx:356
+msgid ""
+"Codes won’t apply at checkout until you switch this on. Existing codes here "
+"will still show in this list, but learners can’t redeem them."
+msgstr ""
+
+#: client/src/pages/CouponsPage.tsx:367
+msgid "Enable coupons"
+msgstr ""
+
+#: client/src/pages/CouponsPage.tsx:397
+msgid "Coupons tabs"
+msgstr ""
+
+#: client/src/pages/CouponsPage.tsx:407
+msgid "Storefront hints, cart promo, and checkout guidance."
+msgstr ""
+
+#: client/src/pages/CouponsPage.tsx:408
 msgid "Advanced coupons & upsells"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:357
+#: client/src/pages/CouponsPage.tsx:409
 msgid ""
 "Tune where learners see coupon guidance and optional cart merchandising. "
 "Per-coupon rules stay on each coupon’s Manage screen."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:365
+#: client/src/pages/CouponsPage.tsx:417
 msgid "All coupons"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:375
+#: client/src/pages/CouponsPage.tsx:427
 msgid "Search code…"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:388
+#: client/src/pages/CouponsPage.tsx:440
 msgid "No coupons"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:388
+#: client/src/pages/CouponsPage.tsx:440
 msgid "No matches"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:401
+#: client/src/pages/CouponsPage.tsx:453
 #: client/src/pages/OrderDetailsPage.tsx:288
 msgid "Discount"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:402
+#: client/src/pages/CouponsPage.tsx:454
 msgid "Uses"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:403
-#: client/src/pages/LicensePage.tsx:485
+#: client/src/pages/CouponsPage.tsx:455
+#: client/src/pages/LicensePage.tsx:486
 msgid "Expires"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:405
-#: client/src/pages/CourseTeamPage.tsx:700
-#: client/src/pages/DiscussionsPage.tsx:901
-#: client/src/pages/InstructorApplicationsPage.tsx:156
-#: client/src/pages/IssuedCertificatesPage.tsx:100
-#: client/src/pages/MarketplacePage.tsx:697
+#: client/src/pages/CouponsPage.tsx:457
+#: client/src/pages/CourseTeamPage.tsx:701
+#: client/src/pages/DiscussionsPage.tsx:879
+#: client/src/pages/EmailTemplatesListPage.tsx:226
+#: client/src/pages/EnrollmentsPage.tsx:364
+#: client/src/pages/InstructorApplicationsPage.tsx:158
+#: client/src/pages/IssuedCertificatesPage.tsx:101
+#: client/src/pages/MarketplacePage.tsx:705
 #: client/src/pages/OrdersPage.tsx:547
 #: client/src/pages/PaymentsPage.tsx:304
-#: client/src/pages/ReportsPage.tsx:1048
-#: client/src/pages/ReviewsPage.tsx:312
+#: client/src/pages/ReportsPage.tsx:1051
+#: client/src/pages/ReviewsPage.tsx:313
 msgid "Actions"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:467
+#: client/src/pages/CouponsPage.tsx:519
 msgid "Code"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:473
+#: client/src/pages/CouponsPage.tsx:525
 msgid "SAVE10"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:483
+#: client/src/pages/CouponsPage.tsx:535
 msgid "Percent off"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:484
+#: client/src/pages/CouponsPage.tsx:536
 msgid "Fixed amount"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:488
+#: client/src/pages/CouponsPage.tsx:540
 msgid "Value"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:499
+#: client/src/pages/CouponsPage.tsx:551
 msgid "Max uses (0 = unlimited)"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:524
+#: client/src/pages/CouponsPage.tsx:576
 msgid "Advanced coupon rules"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:525
+#: client/src/pages/CouponsPage.tsx:577
 msgid ""
 "Target carts with min/max totals, allow or block specific courses, cap "
 "percent discounts, limit uses per learner, first-purchase-only windows, and "
 "optional schedule."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:527
+#: client/src/pages/CouponsPage.tsx:579
 msgid "Advanced coupons is not enabled"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:528
+#: client/src/pages/CouponsPage.tsx:580
 msgid ""
 "Enable the Advanced coupons add-on for targeting, caps, and storefront "
 "hints."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:548
+#: client/src/pages/CouponsPage.tsx:600
 msgid "Minimum cart subtotal"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:560
+#: client/src/pages/CouponsPage.tsx:612
 msgid "Maximum cart subtotal"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:567
+#: client/src/pages/CouponsPage.tsx:619
 msgid "0 = none"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:579
+#: client/src/pages/CouponsPage.tsx:631
 msgid "0 = no cap"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:584
+#: client/src/pages/CouponsPage.tsx:636
 msgid "Uses per learner (0 = unlimited)"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:600
+#: client/src/pages/CouponsPage.tsx:652
 msgid "First paid order only (logged-in checkout)"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:618
+#: client/src/pages/CouponsPage.tsx:670
 msgid "Allowed courses"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:626
+#: client/src/pages/CouponsPage.tsx:678
 msgid "Select allowed courses"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:632
+#: client/src/pages/CouponsPage.tsx:684
 msgid "Excluded courses"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:640
+#: client/src/pages/CouponsPage.tsx:692
 msgid "Select excluded courses"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:648
+#: client/src/pages/CouponsPage.tsx:700
 msgid "Save advanced rules"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:660
+#: client/src/pages/CouponsPage.tsx:712
 msgid "Pick a coupon"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:661
+#: client/src/pages/CouponsPage.tsx:713
 msgid "Open “Manage” from the Coupons list to load and edit advanced rules."
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:681
+#: client/src/pages/CouponsPage.tsx:733
 msgid "Create coupon"
 msgstr ""
 
-#: client/src/pages/CouponsPage.tsx:681
+#: client/src/pages/CouponsPage.tsx:733
 msgid "Save coupon"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1179
+#: client/src/pages/CourseBuilderPage.tsx:1018
+msgid "Upload or choose a file (PDF, ZIP, DOCX, etc.)"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:1025
+msgid "Or paste a URL"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:1232
 msgid "Add a chapter"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1193
+#: client/src/pages/CourseBuilderPage.tsx:1246
 msgid "Add chapter"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1206
+#: client/src/pages/CourseBuilderPage.tsx:1259
 msgid "e.g. Introduction or Module 1"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1375
+#: client/src/pages/CourseBuilderPage.tsx:1466
 msgid "Form sections"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1713
+#: client/src/pages/CourseBuilderPage.tsx:1722
+msgid "You have unsaved changes in this course. Leave without saving?"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:1770
+msgid "Reloaded"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:1771
+msgid "Your unsaved field edits were kept."
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:1999
 msgid "Could not save"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1739
+#: client/src/pages/CourseBuilderPage.tsx:2028
 msgid "bundle-builder"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1739
+#: client/src/pages/CourseBuilderPage.tsx:2028
 msgid "add-course"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:1858
+#: client/src/pages/CourseBuilderPage.tsx:2040
+msgid "Unpublished"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2041
+msgid "Reverted to draft. Learners can no longer see this course."
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2070
+msgid "URL adjusted"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2188
 msgid "This removes the item from the site. This cannot be undone."
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:203
-msgid "No instructors selected."
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:2066
+#: client/src/pages/CourseBuilderPage.tsx:2400
 msgid "Editing"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2124
+#: client/src/pages/CourseBuilderPage.tsx:2468
 msgid "Could not load course"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2133
+#: client/src/pages/CourseBuilderPage.tsx:2491
 msgid "Course builder steps"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2179
+#: client/src/pages/CourseBuilderPage.tsx:2537
 msgid "This course is published and visible to learners"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2179
+#: client/src/pages/CourseBuilderPage.tsx:2537
 msgid "This course is a draft — not visible to learners"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2183
+#: client/src/pages/CourseBuilderPage.tsx:2541
 msgid "bg-emerald-500 dark:bg-emerald-400"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2183
+#: client/src/pages/CourseBuilderPage.tsx:2541
 msgid "bg-slate-400 dark:bg-slate-500"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2214
+#: client/src/pages/CourseBuilderPage.tsx:2552
+msgid "You have unsaved field changes. Save draft or Publish to keep them."
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2555
+msgid "Unsaved"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:256
+msgid "No instructors selected."
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2562
+msgid "Exit focus mode (Esc)"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2562
+msgid "Focus mode — fill the screen with the curriculum builder"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2580
+msgid "Exit focus"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2580
+msgid "Focus"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2607
 msgid "Switch to draft"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2214
+#: client/src/pages/CourseBuilderPage.tsx:2607
 msgid "Save draft"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2223
+#: client/src/pages/CourseBuilderPage.tsx:2616
 msgid "Update"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2271
+#: client/src/pages/CourseBuilderPage.tsx:2666
 msgid "Outline: page scroll"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2271
+#: client/src/pages/CourseBuilderPage.tsx:2666
 msgid "Outline: panel scroll"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2277
-msgid "flex-1 px-4 pb-4"
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:2277
-msgid "flex min-h-0 flex-1 flex-col px-4 pb-4"
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:2293
+#: client/src/pages/CourseBuilderPage.tsx:2688
 msgid "Could not load curriculum"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2317
+#: client/src/pages/CourseBuilderPage.tsx:2712
 msgid "Could not create chapter"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2326
+#: client/src/pages/CourseBuilderPage.tsx:2721
 msgid "Could not add content"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2335
+#: client/src/pages/CourseBuilderPage.tsx:2730
 msgid "Could not save outline order"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2346
+#: client/src/pages/CourseBuilderPage.tsx:2741
 msgid "Loading curriculum"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:239
-msgid "All users selected."
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:239
-#: client/src/pages/CourseTeamPage.tsx:903
-msgid "No matches."
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:2463
+#: client/src/pages/CourseBuilderPage.tsx:2858
 msgid "Collapse chapter"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2463
+#: client/src/pages/CourseBuilderPage.tsx:2858
 msgid "Expand chapter"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2473
+#: client/src/pages/CourseBuilderPage.tsx:2868
 msgid "chevronDown"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2473
+#: client/src/pages/CourseBuilderPage.tsx:2868
 msgid "chevronRight"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2494
+#: client/src/pages/CourseBuilderPage.tsx:2889
 msgid "Chapter actions"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2592
+#: client/src/pages/CourseBuilderPage.tsx:292
+msgid "All users selected."
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:2987
 msgid "cursor-grab active:cursor-grabbing"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2592
+#: client/src/pages/CourseBuilderPage.tsx:2987
 #: client/src/pages/settingsRenderField.tsx:174
 msgid "cursor-not-allowed"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2637
+#: client/src/pages/CourseBuilderPage.tsx:3048
 msgid "Content actions"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2720
+#: client/src/pages/CourseBuilderPage.tsx:3131
 msgid "Start with a chapter"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2862
+#: client/src/pages/CourseBuilderPage.tsx:3184
+msgid "Quick start"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3187
+msgid "Build your"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3188
+msgid ""
+"in four short steps. Save draft anytime — nothing publishes until you hit "
+"Publish."
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3193
+msgid "Course details"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3193
+msgid "name, slug, summary, cover image"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3197
+msgid "Curriculum"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3197
+msgid "add chapters, then lessons, quizzes, assignments"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3201
+msgid "Pricing & access"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3201
+msgid "set price, free preview, enrolment rules"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3205
+msgid "make it visible to learners"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3215
+msgid "Go to Curriculum"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3226
+msgid "Got it, hide this"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3233
+msgid "Dismiss quick-start guide"
+msgstr ""
+
+#: client/src/pages/CourseBuilderPage.tsx:3343
 msgid "sm:grid-cols-2"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:2862
+#: client/src/pages/CourseBuilderPage.tsx:3343
 msgid "sm:grid-cols-2 lg:grid-cols-3"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:460
+#: client/src/pages/CourseBuilderPage.tsx:513
 msgid "Content drip is not enabled"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:461
+#: client/src/pages/CourseBuilderPage.tsx:514
 msgid ""
 "Turn on the Content Drip add-on to load unlock schedules. Edit rules under "
 "Learning rules → Scheduled access."
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:481
+#: client/src/pages/CourseBuilderPage.tsx:534
 msgid "Content drip is ready"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:501
+#: client/src/pages/CourseBuilderPage.tsx:554
 msgid "Save the course first to pre-select it on the drip screen."
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:631
+#: client/src/pages/CourseBuilderPage.tsx:684
 msgid "Default scale"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:639
+#: client/src/pages/CourseBuilderPage.tsx:692
 msgid "Loading grade scales…"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:641
+#: client/src/pages/CourseBuilderPage.tsx:694
 msgid "No grade scales yet. Create one from the Grading page."
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:655
+#: client/src/pages/CourseBuilderPage.tsx:708
 msgid "Loading subscription plans…"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:690
+#: client/src/pages/CourseBuilderPage.tsx:743
 msgid "Select a plan…"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:856
+#: client/src/pages/CourseBuilderPage.tsx:909
 msgid "Search instructors…"
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:857
+#: client/src/pages/CourseBuilderPage.tsx:910
 msgid "Type to search, click to add, and use × to remove."
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:857
+#: client/src/pages/CourseBuilderPage.tsx:910
 msgid "Type to search and click to select."
 msgstr ""
 
-#: client/src/pages/CourseBuilderPage.tsx:946
+#: client/src/pages/CourseBuilderPage.tsx:999
 msgid "Choose from Media"
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:965
-msgid "Upload or choose a file (PDF, ZIP, DOCX, etc.)"
-msgstr ""
-
-#: client/src/pages/CourseBuilderPage.tsx:972
-msgid "Or paste a URL"
 msgstr ""
 
 #: client/src/pages/CourseCategoriesPage.tsx:202
@@ -3709,211 +3923,219 @@ msgstr ""
 msgid "Could not load categories"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:336
+#: client/src/pages/CourseTeamPage.tsx:337
 msgid "Pick a course and an instructor."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:347
+#: client/src/pages/CourseTeamPage.tsx:348
 msgid "Instructor saved."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:365
+#: client/src/pages/CourseTeamPage.tsx:366
 msgid "Enter a valid percentage."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:379
+#: client/src/pages/CourseTeamPage.tsx:380
 msgid "Staff row updated."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:393
+#: client/src/pages/CourseTeamPage.tsx:394
 msgid "Marked as paid."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:393
+#: client/src/pages/CourseTeamPage.tsx:394
 msgid "Marked as pending."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:406
+#: client/src/pages/CourseTeamPage.tsx:407
 msgid "Remove staff member?"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:407
+#: client/src/pages/CourseTeamPage.tsx:408
 msgid "Remove this person from the course staff list?"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:417
+#: client/src/pages/CourseTeamPage.tsx:418
 msgid "Removed."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:439
+#: client/src/pages/CourseTeamPage.tsx:440
 msgid ""
-"Assign co-instructors and revenue weights per course (Pro "
-"Multi-instructor). Open from Course → Course staff, or use Manage staff on "
-"any course row. Global visibility: Add-ons → Multi-instructor."
+"Per-course operations: pick which instructors are on the team, set "
+"revenue-share weights, and review earnings. Global behaviour (where the "
+"team shows up, default weights) lives in Add-ons → Multi-instructor "
+"settings."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:446
+#: client/src/pages/CourseTeamPage.tsx:447
 msgid ""
 "Link co-instructors to a course, set optional revenue weights, and record "
 "ledger rows when orders complete."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:448
+#: client/src/pages/CourseTeamPage.tsx:449
 msgid "Course staff is not enabled"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:449
+#: client/src/pages/CourseTeamPage.tsx:450
 msgid ""
 "Enable the Multi-instructor add-on to register REST routes and unlock "
 "co-instructor management."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:456
+#: client/src/pages/CourseTeamPage.tsx:457
 msgid "Could not load team"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:463
+#: client/src/pages/CourseTeamPage.tsx:464
 msgid "Heads up"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:477
+#: client/src/pages/CourseTeamPage.tsx:478
 msgid "Build course team"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:508
+#: client/src/pages/CourseTeamPage.tsx:509
 msgid "Type to search your catalog…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:509
+#: client/src/pages/CourseTeamPage.tsx:510
 msgid "Search courses"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:513
+#: client/src/pages/CourseTeamPage.tsx:514
 msgid "Searching courses…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:515
+#: client/src/pages/CourseTeamPage.tsx:516
 msgid "Could not search courses."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:538
+#: client/src/pages/CourseTeamPage.tsx:539
 msgid "No courses match."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:538
+#: client/src/pages/CourseTeamPage.tsx:539
 msgid "Start typing to search."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:554
+#: client/src/pages/CourseTeamPage.tsx:555
 msgid "Search by display name…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:573
+#: client/src/pages/CourseTeamPage.tsx:574
 msgid "Searching people…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:605
+#: client/src/pages/CourseTeamPage.tsx:606
 msgid "No people match."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:605
+#: client/src/pages/CourseTeamPage.tsx:606
 msgid "Type to search staff accounts."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:620
+#: client/src/pages/CourseTeamPage.tsx:621
 msgid "Staff role for new member"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:642
+#: client/src/pages/CourseTeamPage.tsx:643
 msgid "Add to team"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:652
+#: client/src/pages/CourseTeamPage.tsx:653
 msgid "Loading team…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:655
+#: client/src/pages/CourseTeamPage.tsx:656
 msgid "No staff rows yet"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:655
+#: client/src/pages/CourseTeamPage.tsx:656
 msgid "No staff yet"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:673
+#: client/src/pages/CourseTeamPage.tsx:674
 msgid "Search by name, email, or course…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:697
+#: client/src/pages/CourseTeamPage.tsx:698
 #: client/src/pages/content-editors/certificateLayout.ts:1024
 msgid "Instructor"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:698
+#: client/src/pages/CourseTeamPage.tsx:699
 msgid "Role"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:759
+#: client/src/pages/CourseTeamPage.tsx:733
+#: client/src/pages/DiscussionsPage.tsx:872
+msgid "Author"
+msgstr ""
+
+#: client/src/pages/CourseTeamPage.tsx:762
 msgid "Co-instructor"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:760
+#: client/src/pages/CourseTeamPage.tsx:763
 msgid "Lead"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:834
+#: client/src/pages/CourseTeamPage.tsx:837
 msgid "Instructor earnings ledger"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:852
+#: client/src/pages/CourseTeamPage.tsx:855
 msgid "Search by name…"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:876
+#: client/src/pages/CourseTeamPage.tsx:879
 msgid "Could not search users."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:903
+#: client/src/pages/CourseTeamPage.tsx:906
 msgid "Type to search instructors."
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:910
+#: client/src/pages/CourseTeamPage.tsx:913
 msgid "Refresh ledger"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:918
+#: client/src/pages/CourseTeamPage.tsx:921
 msgid "Could not load earnings"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:926
+#: client/src/pages/CourseTeamPage.tsx:929
 msgid "Order item"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:927
-#: client/src/pages/MarketplacePage.tsx:694
+#: client/src/pages/CourseTeamPage.tsx:930
+#: client/src/pages/EnrollmentDetailsPage.tsx:192
+#: client/src/pages/MarketplacePage.tsx:701
 #: client/src/pages/PaymentsPage.tsx:302
 msgid "Amount"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:929
+#: client/src/pages/CourseTeamPage.tsx:932
 #: client/src/pages/EmailMarketingPage.tsx:373
 #: client/src/pages/IntegrationsPage.tsx:665
 #: client/src/pages/OrdersPage.tsx:541
-#: client/src/pages/ReportsPage.tsx:1096
+#: client/src/pages/ReportsPage.tsx:1099
 msgid "Created"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:950
+#: client/src/pages/CourseTeamPage.tsx:953
+#: client/src/pages/MarketplacePage.tsx:740
 #: client/src/pages/OrderDetailsPage.tsx:229
-#: client/src/pages/OrdersPage.tsx:648
+#: client/src/pages/OrdersPage.tsx:646
 msgid "Mark paid"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:959
+#: client/src/pages/CourseTeamPage.tsx:962
 msgid "Set pending"
 msgstr ""
 
-#: client/src/pages/CourseTeamPage.tsx:972
+#: client/src/pages/CourseTeamPage.tsx:975
 msgid "No earnings rows for this query yet."
 msgstr ""
 
@@ -4025,7 +4247,7 @@ msgid "Published quiz posts"
 msgstr ""
 
 #: client/src/pages/DashboardPage.tsx:297
-#: client/src/pages/GradebookPage.tsx:1199
+#: client/src/pages/GradebookPage.tsx:1192
 #: client/src/pages/ToolsPage.tsx:270
 msgid "Assignments"
 msgstr ""
@@ -4104,7 +4326,7 @@ msgid "Review and edit lesson content across your site."
 msgstr ""
 
 #: client/src/pages/DashboardPage.tsx:444
-#: client/src/pages/GradebookPage.tsx:1172
+#: client/src/pages/GradebookPage.tsx:1165
 #: client/src/pages/ToolsPage.tsx:269
 msgid "Quizzes"
 msgstr ""
@@ -4153,240 +4375,269 @@ msgstr ""
 msgid "Good evening"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1018
-msgid "Open & reply"
-msgstr ""
-
-#: client/src/pages/DiscussionsPage.tsx:1018
-msgid "View"
-msgstr ""
-
-#: client/src/pages/DiscussionsPage.tsx:1061
+#: client/src/pages/DiscussionsPage.tsx:1039
 msgid "opacity-100"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1061
+#: client/src/pages/DiscussionsPage.tsx:1039
 msgid "opacity-0"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1068
+#: client/src/pages/DiscussionsPage.tsx:1046
 msgid "w-[3.35rem]"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1068
+#: client/src/pages/DiscussionsPage.tsx:1046
 msgid "w-[min(100vw,448px)]"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1069
+#: client/src/pages/DiscussionsPage.tsx:1047
 msgid "translate-x-0"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1069
+#: client/src/pages/DiscussionsPage.tsx:1047
 msgid "translate-x-full"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1201
+#: client/src/pages/DiscussionsPage.tsx:1179
 msgid "Expand thread panel"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1238
+#: client/src/pages/DiscussionsPage.tsx:1216
 msgid "Q&A"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1238
+#: client/src/pages/DiscussionsPage.tsx:1216
 msgid "Discussion"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1267
+#: client/src/pages/DiscussionsPage.tsx:1245
 msgid "Thread actions"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1281
+#: client/src/pages/DiscussionsPage.tsx:1259
 msgid "Collapse thread panel"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1292
+#: client/src/pages/DiscussionsPage.tsx:1270
 msgid "Close thread panel"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1313
+#: client/src/pages/DiscussionsPage.tsx:1291
 msgid "Loading thread…"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1317
+#: client/src/pages/DiscussionsPage.tsx:1295
 msgid "Could not load this thread"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1432
+#: client/src/pages/DiscussionsPage.tsx:1409
 msgid "No thread data."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1446
+#: client/src/pages/DiscussionsPage.tsx:1423
 msgid "Type your reply…"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1456
+#: client/src/pages/DiscussionsPage.tsx:1433
 msgid "Posting…"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1456
+#: client/src/pages/DiscussionsPage.tsx:1433
 msgid "Post reply"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:1509
-#: client/src/pages/GradebookPage.tsx:1128
+#: client/src/pages/DiscussionsPage.tsx:1486
+#: client/src/pages/GradebookPage.tsx:1121
 #: client/src/pages/OrderDetailsPage.tsx:168
 #: client/src/pages/OrdersPage.tsx:473
 #: client/src/pages/PaymentDetailsPage.tsx:137
 #: client/src/pages/PaymentsPage.tsx:205
 #: client/src/pages/PrerequisitesPage.tsx:788
-#: client/src/pages/content-editors/editors.tsx:3227
+#: client/src/pages/content-editors/editors.tsx:3209
 msgid "Save"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:218
+#: client/src/pages/DiscussionsPage.tsx:199
+#: client/src/pages/MarketplacePage.tsx:674
+#: client/src/pages/ReviewDetailPage.tsx:200
+#: client/src/pages/ReviewsPage.tsx:368
+msgid "Approved"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:205
+msgid "Spam"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:208
 msgid "Moved to trash (moderator rejection, not spam)."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:230
+#: client/src/pages/DiscussionsPage.tsx:209
+#: client/src/pages/InstructorApplicationsPage.tsx:115
+#: client/src/pages/MarketplacePage.tsx:676
+msgid "Rejected"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:218
 msgid "Approve or reject the thread before it is fully visible to learners."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:240
+#: client/src/pages/DiscussionsPage.tsx:220
+msgid "Moderation first"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:227
 msgid ""
 "The latest approved reply is not from course staff—or there are no replies "
 "yet. Open and post an instructor/admin answer."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:250
+#: client/src/pages/DiscussionsPage.tsx:229
+msgid "Reply needed"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:236
 msgid "This thread is spam or was moved to trash and is hidden from learners."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:259
+#: client/src/pages/DiscussionsPage.tsx:238
+msgid "Rejected thread"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:244
 msgid ""
 "The most recent approved reply is from someone who can moderate this course "
 "(or there is nothing else to answer right now)."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:491
+#: client/src/pages/DiscussionsPage.tsx:246
+msgid "Staff up to date"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:469
 msgid "Mark as spam?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:493
+#: client/src/pages/DiscussionsPage.tsx:471
 msgid ""
 "Hides this thread from learners and sends it to the WordPress spam queue. "
 "Use this for abusive or junk posts."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:547
+#: client/src/pages/DiscussionsPage.tsx:525
 msgid "Delete selected threads?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:555
+#: client/src/pages/DiscussionsPage.tsx:533
 msgid "Mark selected as spam?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:558
+#: client/src/pages/DiscussionsPage.tsx:536
 msgid "Mark as spam"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:563
+#: client/src/pages/DiscussionsPage.tsx:541
 msgid "Reject selected threads?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:590
+#: client/src/pages/DiscussionsPage.tsx:568
 msgid "Some threads were skipped"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:605
+#: client/src/pages/DiscussionsPage.tsx:583
 msgid "Reject this thread?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:607
+#: client/src/pages/DiscussionsPage.tsx:585
 msgid ""
 "Moves the thread to trash (moderator dismissal) without labeling it as "
 "spam. Learners no longer see it."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:623
+#: client/src/pages/DiscussionsPage.tsx:601
 msgid "Delete thread?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:623
+#: client/src/pages/DiscussionsPage.tsx:601
 msgid "Delete reply?"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:690
+#: client/src/pages/DiscussionsPage.tsx:668
 msgid ""
 "Browse, search, moderate, and reply to learner discussion threads and Q&A "
 "across every course."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:703
+#: client/src/pages/DiscussionsPage.tsx:681
 msgid "Community discussions and Q&A"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:704
+#: client/src/pages/DiscussionsPage.tsx:682
 msgid ""
 "Let learners ask questions and discuss lessons inside the Learn page, with "
 "optional instructor moderation. This screen lets you triage every thread "
 "across your catalog."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:706
+#: client/src/pages/DiscussionsPage.tsx:684
 msgid "Discussions and Q&A is not enabled"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:707
+#: client/src/pages/DiscussionsPage.tsx:685
 msgid ""
 "Enable the Community discussions add-on to register the Learn-page widgets, "
 "REST endpoints, and this moderation screen."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:725
+#: client/src/pages/DiscussionsPage.tsx:703
 msgid "Could not load discussions"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:803
+#: client/src/pages/DiscussionsPage.tsx:781
 msgid "Triage threads by whether you should moderate or reply as staff."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:819
+#: client/src/pages/DiscussionsPage.tsx:797
 msgid "Author, email, or content text…"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:843
+#: client/src/pages/DiscussionsPage.tsx:821
 msgid "No threads match"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:844
+#: client/src/pages/DiscussionsPage.tsx:822
 msgid ""
 "Try widening the filters or clearing the search. Threads appear here when "
 "learners post in the Learn page Discussions or Q&A widgets."
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:891
+#: client/src/pages/DiscussionsPage.tsx:869
 msgid "Select all threads you can moderate on this page"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:894
-msgid "Author"
-msgstr ""
-
-#: client/src/pages/DiscussionsPage.tsx:897
+#: client/src/pages/DiscussionsPage.tsx:875
 msgid "What to do"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:898
+#: client/src/pages/DiscussionsPage.tsx:876
 msgid "Thread"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:899
+#: client/src/pages/DiscussionsPage.tsx:877
 msgid "Replies"
 msgstr ""
 
-#: client/src/pages/DiscussionsPage.tsx:900
+#: client/src/pages/DiscussionsPage.tsx:878
 msgid "Posted"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:996
+msgid "Open & reply"
+msgstr ""
+
+#: client/src/pages/DiscussionsPage.tsx:996
+msgid "View"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:325
@@ -4491,7 +4742,7 @@ msgid "Logs"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:801
-#: client/src/pages/MarketplacePage.tsx:542
+#: client/src/pages/MarketplacePage.tsx:549
 msgid "When"
 msgstr ""
 
@@ -4505,7 +4756,7 @@ msgid "HTTP"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:806
-#: client/src/pages/InstructorApplicationsPage.tsx:152
+#: client/src/pages/InstructorApplicationsPage.tsx:153
 #: client/src/pages/SubscriptionsProPage.tsx:1113
 msgid "User"
 msgstr ""
@@ -4515,7 +4766,7 @@ msgid "Test sync (safe)"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:854
-#: client/src/pages/ReportsPage.tsx:578
+#: client/src/pages/ReportsPage.tsx:582
 msgid "User ID"
 msgstr ""
 
@@ -4544,7 +4795,8 @@ msgid "Leave empty for recent site-wide enrollments"
 msgstr ""
 
 #: client/src/pages/EmailMarketingPage.tsx:897
-#: client/src/pages/ScormH5pWorkspacePage.tsx:251
+#: client/src/pages/InstructorApplicationsPage.tsx:190
+#: client/src/pages/ScormH5pWorkspacePage.tsx:252
 msgid "Working…"
 msgstr ""
 
@@ -4578,7 +4830,7 @@ msgstr ""
 
 #: client/src/pages/EmailPage.tsx:185
 #: client/src/pages/EmailTemplateEditPage.tsx:104
-#: client/src/pages/EmailTemplatesListPage.tsx:156
+#: client/src/pages/EmailTemplatesListPage.tsx:157
 msgid "Email delivery"
 msgstr ""
 
@@ -4617,13 +4869,13 @@ msgstr ""
 msgid "Edit subject, body, and availability"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:125
+#: client/src/pages/EmailTemplatesListPage.tsx:126
 msgid ""
 "Only custom templates are removed. System templates cannot be deleted and "
 "will be skipped if selected."
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:153
+#: client/src/pages/EmailTemplatesListPage.tsx:154
 msgid ""
 "Enable and edit transactional messages — including drip unlock templates. "
 "Disable one template only disables that mail. Addresses, SMTP, global HTML, "
@@ -4631,303 +4883,424 @@ msgid ""
 "under Email → Delivery."
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:168
+#: client/src/pages/EmailTemplatesListPage.tsx:169
 msgid "Could not load templates"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:214
+#: client/src/pages/EmailTemplatesListPage.tsx:187
+msgid "Delete custom"
+msgstr ""
+
+#: client/src/pages/EmailTemplatesListPage.tsx:204
 msgid "Select all templates"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:248
+#: client/src/pages/EmailTemplatesListPage.tsx:238
 msgid "bg-white dark:bg-transparent"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:248
+#: client/src/pages/EmailTemplatesListPage.tsx:238
 msgid "bg-slate-50/40 dark:bg-slate-950/30"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:338
+#: client/src/pages/EmailTemplatesListPage.tsx:322
 msgid "View (locked)"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:338
+#: client/src/pages/EmailTemplatesListPage.tsx:322
+#: client/src/pages/EnrollmentDetailsPage.tsx:170
 msgid "Edit"
 msgstr ""
 
-#: client/src/pages/EmailTemplatesListPage.tsx:357
-msgid "No templates found."
+#: client/src/pages/EmailTemplatesListPage.tsx:329
+msgid "Unlock via add-ons"
 msgstr ""
 
-#: client/src/pages/EnrollmentsPage.tsx:236
+#: client/src/pages/EmailTemplatesListPage.tsx:333
+msgid "Template actions"
+msgstr ""
+
+#: client/src/pages/EmailTemplatesListPage.tsx:345
+msgid "No templates yet"
+msgstr ""
+
+#: client/src/pages/EmailTemplatesListPage.tsx:346
+msgid ""
+"Email templates are registered by Sikshya and its add-ons. If you expected "
+"one to appear here, check that the relevant add-on is active."
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:115
+msgid "Enrolled in"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:131
+msgid "Progress"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:149
+#: client/src/pages/GradebookPage.tsx:1023
+#: client/src/pages/IssuedCertificatesPage.tsx:96
+#: client/src/pages/OrdersPage.tsx:340
+#: client/src/pages/ReportsPage.tsx:625
+msgid "Learner"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:152
+msgid "Username"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:154
+msgid "User profile"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:160
+msgid "Open in WP admin →"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:167
+msgid "Title"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:177
+msgid "Open in course builder →"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:188
+#: client/src/pages/MarketplacePage.tsx:702
+msgid "Method"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:189
+msgid "— (free or manual)"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:195
+msgid "Transaction"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:200
+#: client/src/pages/EnrollmentsPage.tsx:362
+#: client/src/pages/ReportsPage.tsx:786
+msgid "Enrolled"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:202
+#: client/src/pages/EnrollmentsPage.tsx:325
+#: client/src/pages/GradebookPage.tsx:1312
+#: client/src/pages/PaymentsPage.tsx:267
+#: client/src/pages/ReportsPage.tsx:793
+msgid "Completed"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:205
+msgid "Notes"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:56
+msgid "Missing enrollment id."
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:74
+msgid "Back to enrollments"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:84
+msgid "Could not load enrollment"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:90
+msgid "Loading enrollment…"
+msgstr ""
+
+#: client/src/pages/EnrollmentDetailsPage.tsx:94
+msgid "Enrollment not found."
+msgstr ""
+
+#: client/src/pages/EnrollmentsPage.tsx:237
 msgid "Search by name or email…"
 msgstr ""
 
-#: client/src/pages/EnrollmentsPage.tsx:249
+#: client/src/pages/EnrollmentsPage.tsx:250
 #: client/src/pages/OrdersPage.tsx:365
 #: client/src/pages/SubscriptionsProPage.tsx:1133
 msgid "No users found."
 msgstr ""
 
-#: client/src/pages/EnrollmentsPage.tsx:322
-#: client/src/pages/GradebookPage.tsx:864
+#: client/src/pages/EnrollmentsPage.tsx:323
+#: client/src/pages/GradebookPage.tsx:866
 msgid "All statuses"
 msgstr ""
 
-#: client/src/pages/EnrollmentsPage.tsx:324
-#: client/src/pages/GradebookPage.tsx:1319
-#: client/src/pages/PaymentsPage.tsx:267
-#: client/src/pages/ReportsPage.tsx:790
-msgid "Completed"
-msgstr ""
-
-#: client/src/pages/EnrollmentsPage.tsx:325
-#: client/src/pages/MarketplacePage.tsx:670
+#: client/src/pages/EnrollmentsPage.tsx:326
+#: client/src/pages/MarketplacePage.tsx:677
 msgid "Cancelled"
 msgstr ""
 
-#: client/src/pages/EnrollmentsPage.tsx:361
-#: client/src/pages/ReportsPage.tsx:783
-msgid "Enrolled"
+#: client/src/pages/EnrollmentsPage.tsx:373
+msgid "View details"
+msgstr ""
+
+#: client/src/pages/EnrollmentsPage.tsx:380
+msgid "Open course"
+msgstr ""
+
+#: client/src/pages/EnrollmentsPage.tsx:386
+#: client/src/pages/GradebookPage.tsx:991
+#: client/src/pages/InstructorApplicationsPage.tsx:184
+msgid "Open WP user"
+msgstr ""
+
+#: client/src/pages/EnrollmentsPage.tsx:420
+msgid "Enrollment actions"
 msgstr ""
 
 #: client/src/pages/GenericPlaceholderPage.tsx:18
 msgid "Data for this screen can be wired to REST or WP list APIs in a follow-up."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1014
+#: client/src/pages/GradebookPage.tsx:1009
 msgid "Pick a course first"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1014
+#: client/src/pages/GradebookPage.tsx:1009
 msgid ""
 "Course grid view is per-course so we can build columns for quizzes and "
 "assignments."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1016
+#: client/src/pages/GradebookPage.tsx:1011
 msgid "Loading grid…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1019
+#: client/src/pages/GradebookPage.tsx:1014
 msgid "Could not load grid"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1022
+#: client/src/pages/GradebookPage.tsx:1017
 msgid "No learners found"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1022
+#: client/src/pages/GradebookPage.tsx:1017
 msgid "Enroll learners or clear your search filter."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1028
-#: client/src/pages/IssuedCertificatesPage.tsx:95
-#: client/src/pages/OrdersPage.tsx:340
-#: client/src/pages/ReportsPage.tsx:618
-msgid "Learner"
-msgstr ""
-
-#: client/src/pages/GradebookPage.tsx:1029
+#: client/src/pages/GradebookPage.tsx:1024
 msgid "Overall"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1114
+#: client/src/pages/GradebookPage.tsx:1046
+msgid "Override"
+msgstr ""
+
+#: client/src/pages/GradebookPage.tsx:1107
 msgid "Learner grade detail"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1135
+#: client/src/pages/GradebookPage.tsx:1128
 msgid "Loading detail…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1139
+#: client/src/pages/GradebookPage.tsx:1132
 msgid "Could not load detail"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1157
+#: client/src/pages/GradebookPage.tsx:1150
 msgid "Letter"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1163
+#: client/src/pages/GradebookPage.tsx:1156
 msgid "GPA"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1174
+#: client/src/pages/GradebookPage.tsx:1167
 msgid "No quiz attempts yet."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1201
+#: client/src/pages/GradebookPage.tsx:1194
 msgid "No graded assignments yet."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1209
+#: client/src/pages/GradebookPage.tsx:1202
 #: client/src/pages/content-editors/CertificateVisualBuilder.tsx:1306
 msgid "Weight"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1228
+#: client/src/pages/GradebookPage.tsx:1221
 msgid "Manual override"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1244
+#: client/src/pages/GradebookPage.tsx:1237
 msgid "e.g. 87.5"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1257
+#: client/src/pages/GradebookPage.tsx:1250
 msgid "Visible to staff in records…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1270
+#: client/src/pages/GradebookPage.tsx:1263
 msgid "Item detail"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1280
+#: client/src/pages/GradebookPage.tsx:1273
 msgid "Save grade"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1297
+#: client/src/pages/GradebookPage.tsx:1290
 msgid "Could not load details"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1303
+#: client/src/pages/GradebookPage.tsx:1296
 msgid "No data."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1316
+#: client/src/pages/GradebookPage.tsx:1309
 msgid "Attempt"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1317
-#: client/src/pages/ReportsPage.tsx:624
+#: client/src/pages/GradebookPage.tsx:1310
+#: client/src/pages/ReportsPage.tsx:631
 msgid "Score"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1367
+#: client/src/pages/GradebookPage.tsx:1360
 msgid "e.g. 92"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1377
+#: client/src/pages/GradebookPage.tsx:1370
 msgid "Rubric scores"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1403
+#: client/src/pages/GradebookPage.tsx:1396
 msgid "Feedback"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:1409
+#: client/src/pages/GradebookPage.tsx:1402
 msgid "Notes for the learner…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:577
+#: client/src/pages/GradebookPage.tsx:579
 msgid "Exporting…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:577
-#: client/src/pages/ScormH5pWorkspacePage.tsx:496
+#: client/src/pages/GradebookPage.tsx:579
+#: client/src/pages/ScormH5pWorkspacePage.tsx:497
 msgid "Export CSV"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:594
+#: client/src/pages/GradebookPage.tsx:596
 #: client/src/pages/GradingPage.tsx:203
 msgid "Gradebook is not enabled"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:595
+#: client/src/pages/GradebookPage.tsx:597
 msgid ""
 "Enable the Gradebook add-on to load grade REST routes, the admin gradebook "
 "screen, and optional learner-facing grade snippets on My account."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:634
+#: client/src/pages/GradebookPage.tsx:636
 msgid "CSV export defaults and the default page size for the course grid."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:635
+#: client/src/pages/GradebookPage.tsx:637
 msgid "Gradebook settings"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:636
+#: client/src/pages/GradebookPage.tsx:638
 msgid ""
 "These options apply site-wide. Instructors still manage weights and scales "
 "from each course (Grading tab) and from Letter grades & scales under "
 "Grading & submissions."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:658
+#: client/src/pages/GradebookPage.tsx:660
 msgid "Could not load gradebook"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:665
+#: client/src/pages/GradebookPage.tsx:667
 msgid "Submission queue"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:675
+#: client/src/pages/GradebookPage.tsx:677
 msgid "Could not load submissions"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:679
+#: client/src/pages/GradebookPage.tsx:681
 msgid "Loading submissions…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:682
+#: client/src/pages/GradebookPage.tsx:684
 msgid "No submissions to show"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:683
+#: client/src/pages/GradebookPage.tsx:685
 msgid ""
 "Try clearing the course filter or status filter, or check back after "
 "learners submit work."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:779
+#: client/src/pages/GradebookPage.tsx:781
 msgid "submission list"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:783
+#: client/src/pages/GradebookPage.tsx:785
 #: client/src/pages/GradingPage.tsx:306
 #: client/src/pages/content-editors/certificateLayout.ts:1029
 msgid "Grade"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:787
+#: client/src/pages/GradebookPage.tsx:789
 msgid "Course grid"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:846
+#: client/src/pages/GradebookPage.tsx:848
 msgid "Learner, email, course…"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:865
-#: client/src/pages/InstructorApplicationsPage.tsx:155
-#: client/src/pages/ReviewsPage.tsx:306
+#: client/src/pages/GradebookPage.tsx:867
+#: client/src/pages/InstructorApplicationsPage.tsx:156
+#: client/src/pages/ReviewsPage.tsx:307
 msgid "Submitted"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:866
+#: client/src/pages/GradebookPage.tsx:868
 msgid "Graded"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:894
+#: client/src/pages/GradebookPage.tsx:896
 msgid "Pick a course to open the grid."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:894
+#: client/src/pages/GradebookPage.tsx:896
 msgid "Course-centric grid"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:918
+#: client/src/pages/GradebookPage.tsx:920
 msgid "No gradebook rows yet"
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:919
+#: client/src/pages/GradebookPage.tsx:921
 msgid ""
 "Rows appear after learners complete quizzes or receive assignment grades. "
 "Courses marked “hide from the learner gradebook” in Course builder → "
 "Grading are hidden from this list unless your role can bypass that setting."
 msgstr ""
 
-#: client/src/pages/GradebookPage.tsx:931
+#: client/src/pages/GradebookPage.tsx:933
 msgid "Avg assignment"
+msgstr ""
+
+#: client/src/pages/GradebookPage.tsx:976
+msgid "Open details"
+msgstr ""
+
+#: client/src/pages/GradebookPage.tsx:983
+msgid "Edit course"
+msgstr ""
+
+#: client/src/pages/GradebookPage.tsx:996
+msgid "Gradebook row actions"
 msgstr ""
 
 #: client/src/pages/GradingPage.tsx:158
@@ -5008,46 +5381,51 @@ msgstr ""
 msgid "A+"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:114
-#: client/src/pages/MarketplacePage.tsx:669
-msgid "Rejected"
-msgstr ""
-
-#: client/src/pages/InstructorApplicationsPage.tsx:126
+#: client/src/pages/InstructorApplicationsPage.tsx:127
 msgid "Name or email…"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:136
+#: client/src/pages/InstructorApplicationsPage.tsx:137
 msgid "Could not load applications"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:143
+#: client/src/pages/InstructorApplicationsPage.tsx:144
 msgid "No applications"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:144
+#: client/src/pages/InstructorApplicationsPage.tsx:145
 msgid ""
 "When learners submit the instructor form on the account page or shortcode, "
 "they appear here."
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:153
+#: client/src/pages/InstructorApplicationsPage.tsx:154
 msgid "Headline"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:183
+#: client/src/pages/InstructorApplicationsPage.tsx:190
+#: client/src/pages/MarketplacePage.tsx:724
 msgid "Approve"
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:77
+#: client/src/pages/InstructorApplicationsPage.tsx:196
+#: client/src/pages/MarketplacePage.tsx:730
+msgid "Reject"
+msgstr ""
+
+#: client/src/pages/InstructorApplicationsPage.tsx:203
+msgid "Application actions"
+msgstr ""
+
+#: client/src/pages/InstructorApplicationsPage.tsx:78
 msgid "Approved."
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:77
+#: client/src/pages/InstructorApplicationsPage.tsx:78
 msgid "Rejected."
 msgstr ""
 
-#: client/src/pages/InstructorApplicationsPage.tsx:80
+#: client/src/pages/InstructorApplicationsPage.tsx:81
 #: client/src/pages/PrerequisitesPage.tsx:286
 #: client/src/pages/content-editors/editors.tsx:238
 msgid "Request failed"
@@ -5398,128 +5776,132 @@ msgstr ""
 msgid "active"
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:133
+#: client/src/pages/IssuedCertificatesPage.tsx:134
 msgid "Open public verification URL"
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:51
-msgid "Revoke certificate?"
-msgstr ""
-
-#: client/src/pages/IssuedCertificatesPage.tsx:52
-msgid "This certificate will no longer verify publicly."
-msgstr ""
-
-#: client/src/pages/IssuedCertificatesPage.tsx:54
+#: client/src/pages/IssuedCertificatesPage.tsx:153
 msgid "Revoke"
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:68
+#: client/src/pages/IssuedCertificatesPage.tsx:158
+msgid "Certificate actions"
+msgstr ""
+
+#: client/src/pages/IssuedCertificatesPage.tsx:52
+msgid "Revoke certificate?"
+msgstr ""
+
+#: client/src/pages/IssuedCertificatesPage.tsx:53
+msgid "This certificate will no longer verify publicly."
+msgstr ""
+
+#: client/src/pages/IssuedCertificatesPage.tsx:69
 msgid ""
 "Learner certificates issued when courses are completed (table-backed "
 "records)."
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:77
+#: client/src/pages/IssuedCertificatesPage.tsx:78
 msgid "Could not load certificates"
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:86
+#: client/src/pages/IssuedCertificatesPage.tsx:87
 msgid "No issued certificates yet"
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:87
+#: client/src/pages/IssuedCertificatesPage.tsx:88
 msgid ""
 "When learners complete a course and certificates are enabled, records "
 "appear here with verification codes."
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:94
+#: client/src/pages/IssuedCertificatesPage.tsx:95
 msgid "Issued"
 msgstr ""
 
-#: client/src/pages/IssuedCertificatesPage.tsx:98
+#: client/src/pages/IssuedCertificatesPage.tsx:99
 msgid "Verification"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:139
-#: client/src/pages/MarketplacePage.tsx:182
+#: client/src/pages/LicensePage.tsx:140
+#: client/src/pages/MarketplacePage.tsx:178
 #: client/src/pages/SubscriptionsProPage.tsx:70
 msgid "Success"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:142
-#: client/src/pages/MarketplacePage.tsx:184
-#: client/src/pages/ReportsPage.tsx:1097
+#: client/src/pages/LicensePage.tsx:143
+#: client/src/pages/MarketplacePage.tsx:180
+#: client/src/pages/ReportsPage.tsx:1100
 #: client/src/pages/SubscriptionsProPage.tsx:73
 msgid "Error"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:225
+#: client/src/pages/LicensePage.tsx:226
 msgid "Deactivate license"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:227
+#: client/src/pages/LicensePage.tsx:228
 msgid ""
 "This frees an activation on your account and turns off Pro features on this "
 "site until you activate again. Continue?"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:228
+#: client/src/pages/LicensePage.tsx:229
 msgid "Deactivate"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:258
+#: client/src/pages/LicensePage.tsx:259
 msgid "%s licensing and updates"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:300
+#: client/src/pages/LicensePage.tsx:301
 msgid ""
 "You are running %1$s without the Pro add-on. Install and activate %2$s to "
 "enter a license key and unlock premium features."
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:368
+#: client/src/pages/LicensePage.tsx:369
 msgid "License management"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:405
+#: client/src/pages/LicensePage.tsx:406
 msgid "Activate your license"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:416
+#: client/src/pages/LicensePage.tsx:417
 msgid "Paste your license key"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:448
+#: client/src/pages/LicensePage.tsx:449
 msgid "License key"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:454
+#: client/src/pages/LicensePage.tsx:455
 msgid "Hide"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:454
+#: client/src/pages/LicensePage.tsx:455
 msgid "Show"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:465
+#: client/src/pages/LicensePage.tsx:466
 msgid "Licensed to"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:486
+#: client/src/pages/LicensePage.tsx:487
 msgid "Lifetime"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:491
+#: client/src/pages/LicensePage.tsx:492
 msgid "Activations"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:539
+#: client/src/pages/LicensePage.tsx:540
 msgid "Debug"
 msgstr ""
 
-#: client/src/pages/LicensePage.tsx:76
+#: client/src/pages/LicensePage.tsx:77
 msgid "Invalid"
 msgstr ""
 
@@ -5567,179 +5949,187 @@ msgid ""
 "cart, or account dashboard."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:205
+#: client/src/pages/MarketplacePage.tsx:201
 msgid ""
 "Run a multi-vendor LMS marketplace: track per-line commissions, manage "
 "vendor storefronts, and process withdrawals from one workspace."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:212
+#: client/src/pages/MarketplacePage.tsx:208
 msgid ""
 "Let instructors sell from storefronts, split commissions automatically, and "
 "process withdrawals with a clear audit trail."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:214
+#: client/src/pages/MarketplacePage.tsx:210
 msgid "Marketplace is not enabled"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:215
+#: client/src/pages/MarketplacePage.tsx:211
 msgid ""
 "Enable the Marketplace addon to register vendor routes and unlock "
 "multi-vendor selling."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:278
+#: client/src/pages/MarketplacePage.tsx:274
 msgid "Could not load marketplace overview"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:281
+#: client/src/pages/MarketplacePage.tsx:277
 msgid "Loading overview…"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:303
+#: client/src/pages/MarketplacePage.tsx:299
 msgid "Tip:"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:376
+#: client/src/pages/MarketplacePage.tsx:372
 msgid "Suspended"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:387
+#: client/src/pages/MarketplacePage.tsx:383
 msgid "Name or store slug…"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:397
+#: client/src/pages/MarketplacePage.tsx:393
 msgid "Could not load vendors"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:404
+#: client/src/pages/MarketplacePage.tsx:400
 msgid "No vendors yet"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:405
+#: client/src/pages/MarketplacePage.tsx:401
 msgid ""
 "Vendors are created automatically when an instructor saves their "
 "marketplace profile, or when an order with a course you authored fulfills."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:414
+#: client/src/pages/MarketplacePage.tsx:410
 msgid "Store"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:417
+#: client/src/pages/MarketplacePage.tsx:413
 msgid "Joined"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:430
+#: client/src/pages/MarketplacePage.tsx:428
 msgid "default"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:498
+#: client/src/pages/MarketplacePage.tsx:436
+msgid "Activate"
+msgstr ""
+
+#: client/src/pages/MarketplacePage.tsx:444
+msgid "Suspend"
+msgstr ""
+
+#: client/src/pages/MarketplacePage.tsx:450
+msgid "Vendor actions"
+msgstr ""
+
+#: client/src/pages/MarketplacePage.tsx:505
 msgid "Accrued (in hold)"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:499
+#: client/src/pages/MarketplacePage.tsx:506
 msgid "Available"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:500
+#: client/src/pages/MarketplacePage.tsx:507
 msgid "Paid out"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:501
+#: client/src/pages/MarketplacePage.tsx:508
 msgid "Reversed"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:518
+#: client/src/pages/MarketplacePage.tsx:525
 msgid "Platform:"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:519
+#: client/src/pages/MarketplacePage.tsx:526
 msgid "Vendors:"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:520
+#: client/src/pages/MarketplacePage.tsx:527
 msgid "Gross:"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:526
+#: client/src/pages/MarketplacePage.tsx:533
 msgid "Could not load commissions"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:533
+#: client/src/pages/MarketplacePage.tsx:540
 msgid "No commission rows yet"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:534
+#: client/src/pages/MarketplacePage.tsx:541
 msgid ""
 "When a marketplace order fulfills, Sikshya creates one row per line item "
 "showing gross, fees, platform commission, and vendor net."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:543
+#: client/src/pages/MarketplacePage.tsx:550
 msgid "Order #"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:546
+#: client/src/pages/MarketplacePage.tsx:553
 msgid "Gross"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:547
+#: client/src/pages/MarketplacePage.tsx:554
 msgid "Fee"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:548
+#: client/src/pages/MarketplacePage.tsx:555
 msgid "Platform"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:549
+#: client/src/pages/MarketplacePage.tsx:556
 msgid "Vendor net"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:667
-msgid "Approved"
-msgstr ""
-
-#: client/src/pages/MarketplacePage.tsx:668
+#: client/src/pages/MarketplacePage.tsx:675
 msgid "Paid"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:679
+#: client/src/pages/MarketplacePage.tsx:686
 msgid "Could not load withdrawals"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:685
+#: client/src/pages/MarketplacePage.tsx:692
 msgid "No withdrawal requests"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:685
+#: client/src/pages/MarketplacePage.tsx:692
 msgid ""
 "Vendors can request a payout from their account once their balance is above "
 "the minimum withdrawal."
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:692
+#: client/src/pages/MarketplacePage.tsx:699
 msgid "Requested"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:693
+#: client/src/pages/MarketplacePage.tsx:700
 msgid "Vendor"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:695
-msgid "Method"
+#: client/src/pages/MarketplacePage.tsx:746
+msgid "Withdrawal actions"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:736
+#: client/src/pages/MarketplacePage.tsx:761
 msgid "Manual adjustment"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:767
+#: client/src/pages/MarketplacePage.tsx:792
 msgid "e.g. Refund clawback for order #1234"
 msgstr ""
 
-#: client/src/pages/MarketplacePage.tsx:773
+#: client/src/pages/MarketplacePage.tsx:798
 msgid "Record adjustment"
 msgstr ""
 
@@ -5771,7 +6161,7 @@ msgid "paid"
 msgstr ""
 
 #: client/src/pages/OrderDetailsPage.tsx:229
-#: client/src/pages/OrdersPage.tsx:648
+#: client/src/pages/OrdersPage.tsx:646
 msgid "Marking…"
 msgstr ""
 
@@ -5906,7 +6296,11 @@ msgstr ""
 msgid "View order details"
 msgstr ""
 
-#: client/src/pages/OrdersPage.tsx:673
+#: client/src/pages/OrdersPage.tsx:616
+msgid "Subscription"
+msgstr ""
+
+#: client/src/pages/OrdersPage.tsx:671
 msgid ""
 "This permanently removes the order and its line items. This cannot be "
 "undone."
@@ -5970,7 +6364,7 @@ msgid "The payments database table is not installed yet."
 msgstr ""
 
 #: client/src/pages/PaymentsPage.tsx:268
-#: client/src/pages/ReportsPage.tsx:793
+#: client/src/pages/ReportsPage.tsx:796
 msgid "Failed"
 msgstr ""
 
@@ -5980,10 +6374,6 @@ msgstr ""
 
 #: client/src/pages/PaymentsPage.tsx:281
 msgid "Checkout"
-msgstr ""
-
-#: client/src/pages/PaymentsPage.tsx:282
-msgid "Renewal"
 msgstr ""
 
 #: client/src/pages/PaymentsPage.tsx:293
@@ -6004,6 +6394,10 @@ msgstr ""
 
 #: client/src/pages/PaymentsPage.tsx:386
 msgid "Subscription renewal"
+msgstr ""
+
+#: client/src/pages/PaymentsPage.tsx:398
+msgid "Renewal"
 msgstr ""
 
 #: client/src/pages/PaymentsPage.tsx:423
@@ -6382,519 +6776,528 @@ msgid ""
 "short notice when a quiz uses randomized banks."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1005
+#: client/src/pages/ReportsPage.tsx:1008
 msgid "Weekly executive summary"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1009
+#: client/src/pages/ReportsPage.tsx:1012
 msgid "Frequency"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1015
+#: client/src/pages/ReportsPage.tsx:1018
 msgid "Daily"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1016
+#: client/src/pages/ReportsPage.tsx:1019
 msgid "Weekly"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1017
+#: client/src/pages/ReportsPage.tsx:1020
 #: client/src/pages/SubscriptionsProPage.tsx:675
 msgid "Monthly"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1021
+#: client/src/pages/ReportsPage.tsx:1024
 msgid "Report type"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1027
+#: client/src/pages/ReportsPage.tsx:1030
 msgid "Executive summary"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1045
+#: client/src/pages/ReportsPage.tsx:1048
 msgid "Cadence"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1046
+#: client/src/pages/ReportsPage.tsx:1049
 msgid "Recipients"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1047
+#: client/src/pages/ReportsPage.tsx:1050
 msgid "Last status"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1080
+#: client/src/pages/ReportsPage.tsx:1083
 msgid "No schedules yet. Create one above."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1092
+#: client/src/pages/ReportsPage.tsx:1095
 msgid "Run"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:1093
+#: client/src/pages/ReportsPage.tsx:1096
 msgid "Schedule"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:352
+#: client/src/pages/ReportsPage.tsx:354
 msgid "Reset attempt timer?"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:354
+#: client/src/pages/ReportsPage.tsx:356
 msgid ""
 "This will restart the countdown and clear any in-progress answers for this "
 "attempt."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:355
+#: client/src/pages/ReportsPage.tsx:357
 msgid "Reset timer"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:449
+#: client/src/pages/ReportsPage.tsx:451
 msgid "Enrollment overview and completion trends"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:452
+#: client/src/pages/ReportsPage.tsx:454
 msgid "Refresh report"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:477
+#: client/src/pages/ReportsPage.tsx:479
 msgid "Enrollments by month"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:478
+#: client/src/pages/ReportsPage.tsx:480
 msgid "Last twelve months (UTC month buckets)."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:506
+#: client/src/pages/ReportsPage.tsx:508
 msgid "Revenue"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:507
+#: client/src/pages/ReportsPage.tsx:509
 msgid "Completed payments total (if payments table exists)."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:522
+#: client/src/pages/ReportsPage.tsx:524
 msgid "Quiz attempts"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:555
-#: client/src/pages/ReviewsPage.tsx:272
-msgid "Search"
-msgstr ""
-
-#: client/src/pages/ReportsPage.tsx:559
+#: client/src/pages/ReportsPage.tsx:562
 msgid "Learner name/email, quiz, course…"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:588
+#: client/src/pages/ReportsPage.tsx:593
 #: client/src/pages/WhiteLabelPage.tsx:550
 msgid "Course ID"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:598
+#: client/src/pages/ReportsPage.tsx:604
 msgid "Quiz ID"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:621
+#: client/src/pages/ReportsPage.tsx:628
 msgid "Attempt #"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:622
+#: client/src/pages/ReportsPage.tsx:629
 msgid "Used / Limit"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:623
+#: client/src/pages/ReportsPage.tsx:630
 msgid "Remaining"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:676
+#: client/src/pages/ReportsPage.tsx:655
+msgid "Locked"
+msgstr ""
+
+#: client/src/pages/ReportsPage.tsx:679
 msgid "No quiz attempts recorded yet."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:685
+#: client/src/pages/ReportsPage.tsx:688
 msgid "Advanced analytics & exports"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:686
+#: client/src/pages/ReportsPage.tsx:689
 msgid ""
 "Download CSVs for finance, accreditation, or instructor reviews: site "
 "summary, row-level enrollments, or quiz attempts. Instructors only see "
 "courses they teach."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:688
+#: client/src/pages/ReportsPage.tsx:691
 msgid "Advanced export is not enabled"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:689
+#: client/src/pages/ReportsPage.tsx:692
 msgid ""
 "Enable the Advanced analytics add-on to unlock CSV exports alongside your "
 "on-screen charts."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:699
+#: client/src/pages/ReportsPage.tsx:702
 msgid "Spreadsheet exports"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:707
-#: client/src/pages/ScormH5pWorkspacePage.tsx:496
+#: client/src/pages/ReportsPage.tsx:710
+#: client/src/pages/ScormH5pWorkspacePage.tsx:497
 msgid "Preparing…"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:707
+#: client/src/pages/ReportsPage.tsx:710
 msgid "Download CSV"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:720
+#: client/src/pages/ReportsPage.tsx:723
 msgid ""
 "Summary is one row of headline metrics. Enrollments and quiz attempts "
 "export individual rows (subject to your row cap)."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:725
+#: client/src/pages/ReportsPage.tsx:728
 msgid "Site summary (headline metrics)"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:726
+#: client/src/pages/ReportsPage.tsx:729
 msgid "Enrollments (one row per seat)"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:727
+#: client/src/pages/ReportsPage.tsx:730
 msgid "Quiz attempts (one row per attempt)"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:735
+#: client/src/pages/ReportsPage.tsx:738
 msgid "Optional. Limits exports to a single course you can manage."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:750
+#: client/src/pages/ReportsPage.tsx:753
 msgid ""
 "Filters by enrolled date for enrollments, or started date for quiz attempts "
 "(stored server time)."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:763
+#: client/src/pages/ReportsPage.tsx:766
 msgid "Inclusive end of day for the stored datetime column (server time)."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:791
+#: client/src/pages/ReportsPage.tsx:794
 msgid "In progress"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:792
+#: client/src/pages/ReportsPage.tsx:795
 msgid "Passed"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:838
+#: client/src/pages/ReportsPage.tsx:841
 msgid "Any"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:866
+#: client/src/pages/ReportsPage.tsx:869
 msgid "Enterprise weekly summary"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:867
+#: client/src/pages/ReportsPage.tsx:870
 msgid ""
 "Schedule a weekly summary email to the site administrator with revenue, "
 "enrollments, and completion totals."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:869
+#: client/src/pages/ReportsPage.tsx:872
 msgid "Enterprise reports is not enabled"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:870
+#: client/src/pages/ReportsPage.tsx:873
 msgid ""
 "Enable the Enterprise reports add-on to schedule the weekly summary email "
 "cron."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:879
+#: client/src/pages/ReportsPage.tsx:882
 msgid "Weekly summary email"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:917
+#: client/src/pages/ReportsPage.tsx:920
 msgid "Refresh status"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:928
+#: client/src/pages/ReportsPage.tsx:931
 msgid "Send a summary now"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:947
+#: client/src/pages/ReportsPage.tsx:950
 msgid "ceo@company.com, it@company.com"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:952
+#: client/src/pages/ReportsPage.tsx:955
 msgid "Day"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:953
+#: client/src/pages/ReportsPage.tsx:956
 msgid "Weekday (site timezone)."
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:959
+#: client/src/pages/ReportsPage.tsx:962
 msgid "Sunday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:960
+#: client/src/pages/ReportsPage.tsx:963
 msgid "Monday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:961
+#: client/src/pages/ReportsPage.tsx:964
 msgid "Tuesday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:962
+#: client/src/pages/ReportsPage.tsx:965
 msgid "Wednesday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:963
+#: client/src/pages/ReportsPage.tsx:966
 msgid "Thursday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:964
+#: client/src/pages/ReportsPage.tsx:967
 msgid "Friday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:965
+#: client/src/pages/ReportsPage.tsx:968
 msgid "Saturday"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:970
+#: client/src/pages/ReportsPage.tsx:973
 msgid "Hour"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:987
+#: client/src/pages/ReportsPage.tsx:990
 msgid "Save schedule"
 msgstr ""
 
-#: client/src/pages/ReportsPage.tsx:993
+#: client/src/pages/ReportsPage.tsx:996
 msgid "Enterprise schedules (v2)"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:103
+#: client/src/pages/ReviewDetailPage.tsx:104
 msgid "Remove reply?"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:104
+#: client/src/pages/ReviewDetailPage.tsx:105
 msgid "This removes the public instructor/admin reply from the course page."
-msgstr ""
-
-#: client/src/pages/ReviewDetailPage.tsx:144
-#: client/src/pages/ReviewsPage.tsx:150
-msgid "Delete review?"
 msgstr ""
 
 #: client/src/pages/ReviewDetailPage.tsx:145
 #: client/src/pages/ReviewsPage.tsx:151
+msgid "Delete review?"
+msgstr ""
+
+#: client/src/pages/ReviewDetailPage.tsx:146
+#: client/src/pages/ReviewsPage.tsx:152
 msgid "This review will be permanently removed and the course rating recalculated."
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:164
+#: client/src/pages/ReviewDetailPage.tsx:165
 msgid "Moderate this review and post an official reply on the course page."
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:175
-#: client/src/pages/ReviewsPage.tsx:237
+#: client/src/pages/ReviewDetailPage.tsx:176
+#: client/src/pages/ReviewsPage.tsx:238
 msgid "Course reviews & ratings"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:176
+#: client/src/pages/ReviewDetailPage.tsx:177
 msgid ""
 "Collect star ratings and written reviews on your course pages, with "
 "optional moderation."
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:178
-#: client/src/pages/ReviewsPage.tsx:240
+#: client/src/pages/ReviewDetailPage.tsx:179
+#: client/src/pages/ReviewsPage.tsx:241
 msgid "Reviews moderation is not enabled"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:179
+#: client/src/pages/ReviewDetailPage.tsx:180
 msgid "Enable the Course reviews addon to use this screen."
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:186
+#: client/src/pages/ReviewDetailPage.tsx:187
 msgid "Could not load review"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:190
+#: client/src/pages/ReviewDetailPage.tsx:191
 msgid "Missing review id."
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:217
+#: client/src/pages/ReviewDetailPage.tsx:213
 msgid "Course:"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:260
-#: client/src/pages/ReviewsPage.tsx:310
+#: client/src/pages/ReviewDetailPage.tsx:256
+#: client/src/pages/ReviewsPage.tsx:311
 msgid "Review"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:271
+#: client/src/pages/ReviewDetailPage.tsx:267
 msgid "Official reply"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:279
+#: client/src/pages/ReviewDetailPage.tsx:275
 msgid "Write a short reply…"
 msgstr ""
 
-#: client/src/pages/ReviewDetailPage.tsx:295
+#: client/src/pages/ReviewDetailPage.tsx:291
 msgid "Review not found."
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:224
+#: client/src/pages/ReviewsPage.tsx:225
 msgid ""
 "Approve, unpublish, or delete learner reviews. Course averages update "
 "automatically."
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:238
+#: client/src/pages/ReviewsPage.tsx:239
 msgid ""
 "Collect star ratings and written reviews on your course pages, with "
 "optional moderation — boosting social proof on catalog cards and learner "
 "trust."
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:241
+#: client/src/pages/ReviewsPage.tsx:242
 msgid ""
 "Enable the Course reviews addon to register the public review form, the "
 "REST endpoints, and this moderation screen."
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:249
+#: client/src/pages/ReviewsPage.tsx:250
 msgid "Could not load reviews"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:261
+#: client/src/pages/ReviewsPage.tsx:262
 msgid "Review status"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:269
+#: client/src/pages/ReviewsPage.tsx:270
 msgid "Search text, student, course…"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:294
+#: client/src/pages/ReviewsPage.tsx:295
 msgid "Nothing waiting for moderation"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:294
+#: client/src/pages/ReviewsPage.tsx:295
 msgid "No reviews found"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:307
+#: client/src/pages/ReviewsPage.tsx:308
 msgid "Student"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:309
+#: client/src/pages/ReviewsPage.tsx:310
 msgid "Rating"
 msgstr ""
 
-#: client/src/pages/ReviewsPage.tsx:360
+#: client/src/pages/ReviewsPage.tsx:361
 msgid "Has official reply"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:101
-msgid "SCORM / H5P is not enabled"
+#: client/src/pages/ScormH5pWorkspacePage.tsx:100
+msgid ""
+"Manage SCORM packages, run H5P interactives, capture attempts and scores, "
+"and ship reports — all native to Sikshya."
 msgstr ""
 
 #: client/src/pages/ScormH5pWorkspacePage.tsx:102
+msgid "SCORM / H5P is not enabled"
+msgstr ""
+
+#: client/src/pages/ScormH5pWorkspacePage.tsx:103
 msgid ""
 "Enable the add-on to upload SCORM packages, run the runtime tracker, and "
 "unlock attempt reporting."
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:112
+#: client/src/pages/ScormH5pWorkspacePage.tsx:113
 msgid "SCORM / H5P sections"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:175
+#: client/src/pages/ScormH5pWorkspacePage.tsx:176
 msgid "Uploaded"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:190
+#: client/src/pages/ScormH5pWorkspacePage.tsx:191
 msgid "Deleted"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:266
+#: client/src/pages/ScormH5pWorkspacePage.tsx:267
 msgid "Upload a SCORM package"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:281
+#: client/src/pages/ScormH5pWorkspacePage.tsx:282
 msgid "Uploading…"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:281
+#: client/src/pages/ScormH5pWorkspacePage.tsx:282
 msgid "Upload .zip"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:294
+#: client/src/pages/ScormH5pWorkspacePage.tsx:295
 msgid "Upload failed"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:309
+#: client/src/pages/ScormH5pWorkspacePage.tsx:310
 msgid "Search packages…"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:318
+#: client/src/pages/ScormH5pWorkspacePage.tsx:319
 msgid "Could not load packages"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:333
+#: client/src/pages/ScormH5pWorkspacePage.tsx:334
 msgid "Delete package?"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:335
+#: client/src/pages/ScormH5pWorkspacePage.tsx:336
 msgid "Force delete"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:475
+#: client/src/pages/ScormH5pWorkspacePage.tsx:476
 msgid "Course report"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:489
+#: client/src/pages/ScormH5pWorkspacePage.tsx:490
 msgid "e.g. 142"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:502
+#: client/src/pages/ScormH5pWorkspacePage.tsx:503
 msgid "Enter a course ID above to see attempt rollups."
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:506
+#: client/src/pages/ScormH5pWorkspacePage.tsx:507
 msgid "Could not load report"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:550
+#: client/src/pages/ScormH5pWorkspacePage.tsx:511
+msgid "No interactive lessons yet"
+msgstr ""
+
+#: client/src/pages/ScormH5pWorkspacePage.tsx:512
+msgid ""
+"This course has no SCORM or H5P lessons (with managed packages) yet. Attach "
+"a package on a lesson to start collecting attempt data."
+msgstr ""
+
+#: client/src/pages/ScormH5pWorkspacePage.tsx:556
 msgid "SCORM / H5P settings"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:552
+#: client/src/pages/ScormH5pWorkspacePage.tsx:558
 msgid ""
 "Player presentation, attempts & completion, storage limits, reporting "
 "retention, and debug logging."
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:553
+#: client/src/pages/ScormH5pWorkspacePage.tsx:559
 msgid "SCORM / H5P defaults"
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:554
+#: client/src/pages/ScormH5pWorkspacePage.tsx:560
 msgid ""
 "These options apply site-wide for this add-on. Per-course overrides live in "
 "the course builder; per-lesson overrides live in the lesson editor."
 msgstr ""
 
-#: client/src/pages/ScormH5pWorkspacePage.tsx:98
+#: client/src/pages/ScormH5pWorkspacePage.tsx:99
 #: client/src/pages/content-editors/ProIntegrationFields.tsx:468
 #: client/src/pages/hubs/HubPages.tsx:382
 msgid "SCORM / H5P"
-msgstr ""
-
-#: client/src/pages/ScormH5pWorkspacePage.tsx:99
-msgid ""
-"Manage SCORM packages, run H5P interactives, capture attempts and scores, "
-"and ship reports — all native to Sikshya."
 msgstr ""
 
 #: client/src/pages/SettingsPage.tsx:178
@@ -7725,7 +8128,7 @@ msgid "Drag a tile to the canvas, or use quick add for the same block."
 msgstr ""
 
 #: client/src/pages/content-editors/CertificateVisualBuilder.tsx:2248
-#: client/src/pages/content-editors/editors.tsx:1188
+#: client/src/pages/content-editors/editors.tsx:1176
 msgid "Library"
 msgstr ""
 
@@ -8547,251 +8950,251 @@ msgstr ""
 msgid "Program completed"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1043
+#: client/src/pages/content-editors/editors.tsx:1034
 msgid "Shown in the course outline and at the top of the quiz for learners."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1049
+#: client/src/pages/content-editors/editors.tsx:1040
 msgid "e.g. Module 1 checkpoint"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1060
+#: client/src/pages/content-editors/editors.tsx:1048
 msgid "What students see before starting the quiz…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1069
+#: client/src/pages/content-editors/editors.tsx:1057
 msgid ""
 "Optional image for quiz cards or outlines when your theme supports featured "
 "images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1074
+#: client/src/pages/content-editors/editors.tsx:1062
 msgid "Grading & timing"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1074
+#: client/src/pages/content-editors/editors.tsx:1062
 msgid "How the quiz is scored and constrained for learners."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1080
+#: client/src/pages/content-editors/editors.tsx:1068
 msgid "Use 0 for no time limit."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1094
+#: client/src/pages/content-editors/editors.tsx:1082
 msgid "Based on total points across questions."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1109
+#: client/src/pages/content-editors/editors.tsx:1097
 msgid "Minimum 1."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1121
+#: client/src/pages/content-editors/editors.tsx:1109
 msgid "Draft hides the quiz from learners until you publish."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1180
+#: client/src/pages/content-editors/editors.tsx:1168
 msgid "Could not load questions"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1209
+#: client/src/pages/content-editors/editors.tsx:1197
 msgid "Added"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1223
+#: client/src/pages/content-editors/editors.tsx:1211
 msgid "Selected in this quiz"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1253
+#: client/src/pages/content-editors/editors.tsx:1241
 msgid "Drag to reorder"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1263
+#: client/src/pages/content-editors/editors.tsx:1251
 msgid "Edit this question in the same form as New question"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1584
+#: client/src/pages/content-editors/editors.tsx:1572
 msgid "Question saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1652
+#: client/src/pages/content-editors/editors.tsx:1640
 msgid "Question editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:1661
+#: client/src/pages/content-editors/editors.tsx:1649
 msgid "Question editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2113
+#: client/src/pages/content-editors/editors.tsx:2101
 msgid ""
 "Optional image shown with the question in supported themes or future quiz "
 "layouts."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2322
+#: client/src/pages/content-editors/editors.tsx:2307
 msgid "Assignment saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2349
+#: client/src/pages/content-editors/editors.tsx:2334
 msgid "Assignment editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2358
+#: client/src/pages/content-editors/editors.tsx:2343
 msgid "Assignment editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2401
+#: client/src/pages/content-editors/editors.tsx:2386
 msgid "e.g. Week 3 project brief"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2413
+#: client/src/pages/content-editors/editors.tsx:2395
 msgid "Task description, deliverables, and grading criteria…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2422
+#: client/src/pages/content-editors/editors.tsx:2404
 msgid ""
 "Optional image for assignment lists or course outlines when your theme "
 "supports featured images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2427
+#: client/src/pages/content-editors/editors.tsx:2409
 msgid "Submission"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2427
+#: client/src/pages/content-editors/editors.tsx:2409
 msgid "Scheduling and what learners submit."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2434
+#: client/src/pages/content-editors/editors.tsx:2416
 msgid "Optional. Uses your site timezone."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2441
+#: client/src/pages/content-editors/editors.tsx:2423
 msgid "Maximum score when graded."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2459
+#: client/src/pages/content-editors/editors.tsx:2441
 msgid "Choose how learners submit…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2461
+#: client/src/pages/content-editors/editors.tsx:2443
 msgid "File upload"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2599
+#: client/src/pages/content-editors/editors.tsx:2581
 msgid "Chapter saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2626
+#: client/src/pages/content-editors/editors.tsx:2608
 msgid "Chapter editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2635
+#: client/src/pages/content-editors/editors.tsx:2617
 msgid "Chapter editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2670
+#: client/src/pages/content-editors/editors.tsx:2652
 msgid "e.g. Getting started"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2678
+#: client/src/pages/content-editors/editors.tsx:2660
 msgid "Optional text shown above the lessons in this chapter…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2687
+#: client/src/pages/content-editors/editors.tsx:2669
 msgid ""
 "Optional banner or icon for this chapter in the course outline when your "
 "theme supports featured images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2692
+#: client/src/pages/content-editors/editors.tsx:2674
 msgid "Placement"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2692
+#: client/src/pages/content-editors/editors.tsx:2674
 msgid "Which course outline this chapter belongs to."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2711
+#: client/src/pages/content-editors/editors.tsx:2693
 msgid "Choose a course…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2721
+#: client/src/pages/content-editors/editors.tsx:2703
 msgid "Lower numbers appear first in the course outline."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2736
+#: client/src/pages/content-editors/editors.tsx:2718
 msgid "Publishing"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2929
+#: client/src/pages/content-editors/editors.tsx:2911
 msgid "Saved, but could not reload"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2973
+#: client/src/pages/content-editors/editors.tsx:2955
 msgid "Some settings could not be saved"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:2977
+#: client/src/pages/content-editors/editors.tsx:2959
 msgid "Certificate published"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3146
+#: client/src/pages/content-editors/editors.tsx:3128
 msgid "Certificate editor"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3165
+#: client/src/pages/content-editors/editors.tsx:3147
 msgid ""
 "This is a default template included with Sikshya. It cannot be deleted, but "
 "you can duplicate or edit it."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3200
+#: client/src/pages/content-editors/editors.tsx:3182
 msgid ""
 "Open the public verification/preview link (uses this certificate’s preview "
 "hash)."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3209
+#: client/src/pages/content-editors/editors.tsx:3191
 msgid ""
 "Opens an internal layout preview window. Save once to enable the public "
 "preview link."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3223
+#: client/src/pages/content-editors/editors.tsx:3205
 msgid "Publishing…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3247
+#: client/src/pages/content-editors/editors.tsx:3229
 msgid "Certificate Builder"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3248
+#: client/src/pages/content-editors/editors.tsx:3230
 msgid ""
 "Design printable, verifiable certificates with templates, QR codes, and "
 "verification links."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3250
+#: client/src/pages/content-editors/editors.tsx:3232
 msgid "Certificate Builder is not enabled"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3251
+#: client/src/pages/content-editors/editors.tsx:3233
 msgid "Turn on the Advanced certificates add-on to use the certificate builder."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3329
+#: client/src/pages/content-editors/editors.tsx:3311
 msgid "Saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3382
+#: client/src/pages/content-editors/editors.tsx:3364
 msgid "Entry title"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3395
+#: client/src/pages/content-editors/editors.tsx:3377
 msgid "HTML or plain text…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:3410
+#: client/src/pages/content-editors/editors.tsx:3392
 msgid "Draft hides this item from public views until you publish."
 msgstr ""
 
@@ -8865,55 +9268,55 @@ msgid ""
 "supports featured images."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:621
+#: client/src/pages/content-editors/editors.tsx:612
 msgid "Optional notes under the video…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:621
+#: client/src/pages/content-editors/editors.tsx:612
 msgid "Your lesson content…"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:631
+#: client/src/pages/content-editors/editors.tsx:622
 msgid ""
 "Controls whether this lesson is visible to learners when the course is "
 "published."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:651
+#: client/src/pages/content-editors/editors.tsx:642
 msgid "Pending review"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:670
+#: client/src/pages/content-editors/editors.tsx:661
 msgid "e.g. 1.5"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:676
+#: client/src/pages/content-editors/editors.tsx:667
 msgid "Free preview"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:677
+#: client/src/pages/content-editors/editors.tsx:668
 msgid ""
 "When enabled, this lesson can be opened by visitors who are not enrolled "
 "(useful for demo lessons)."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:688
+#: client/src/pages/content-editors/editors.tsx:679
 msgid "Allow free preview"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:776
+#: client/src/pages/content-editors/editors.tsx:767
 msgid "Add the required fields (usually title) to enable saving."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:948
+#: client/src/pages/content-editors/editors.tsx:939
 msgid "Quiz saved."
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:988
+#: client/src/pages/content-editors/editors.tsx:979
 msgid "Quiz editor sections"
 msgstr ""
 
-#: client/src/pages/content-editors/editors.tsx:998
+#: client/src/pages/content-editors/editors.tsx:989
 msgid "Quiz editor"
 msgstr ""
 

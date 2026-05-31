@@ -84,8 +84,7 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
 
   return (
     <div
-      className="relative overflow-hidden rounded-[10px] border border-slate-200/90 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
-      style={{ borderLeftWidth: 4, borderLeftColor: '#2c5ba8' }}
+      className="relative overflow-hidden rounded-xl border border-slate-200/90 border-l-4 border-l-brand-600 bg-white shadow-sm dark:border-slate-700 dark:border-l-brand-500 dark:bg-slate-900"
     >
       <button
         type="button"
@@ -98,8 +97,7 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
       <div className="flex flex-wrap items-start justify-between gap-4 p-4 pr-10">
         <div className="flex min-w-0 flex-1 gap-3">
           <div
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[#2c5ba8]"
-            style={{ background: '#f5f8fc' }}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300"
             aria-hidden
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -107,7 +105,7 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
             </svg>
           </div>
           <div className="min-w-0">
-            {title ? <p className="m-0 text-sm font-bold text-slate-900 dark:text-slate-50">{title}</p> : null}
+            {title ? <p className="m-0 text-sm font-semibold text-slate-900 dark:text-slate-50">{title}</p> : null}
             {message ? (
               <p className="mt-1.5 m-0 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{message}</p>
             ) : null}
@@ -118,7 +116,7 @@ function ReviewCard({ notice, onDismiss }: { notice: MarketingNotice; onDismiss:
             href={primary.url}
             target={primary.target === '_blank' ? '_blank' : undefined}
             rel={primary.target === '_blank' ? 'noopener noreferrer' : undefined}
-            className="inline-flex shrink-0 items-center rounded-lg bg-[#2271b1] px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#135e96]"
+            className="inline-flex shrink-0 items-center rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:bg-brand-500 dark:hover:bg-brand-400"
           >
             {primary.label}
           </a>
@@ -137,30 +135,23 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
   const orderCount = typeof notice.order_count === 'number' ? notice.order_count : 0;
 
   return (
-    <div
-      className="relative overflow-hidden rounded-md border border-[#f0e6d8] shadow-sm"
-      style={{
-        background: 'linear-gradient(135deg, #fdf6f0 0%, #f8f9fa 50%, #fff5ee 100%)',
-        borderLeftWidth: 4,
-        borderLeftColor: '#ff9500',
-      }}
-    >
-      <div className="absolute right-24 top-2 rounded-full bg-[#ff9500] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+    <div className="relative overflow-hidden rounded-2xl border border-amber-200 border-l-4 border-l-amber-500 bg-gradient-to-br from-amber-50 via-white to-amber-50/50 shadow-sm dark:border-amber-900/50 dark:border-l-amber-500 dark:from-amber-950/40 dark:via-slate-900 dark:to-amber-950/30">
+      <div className="absolute right-24 top-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">
         {__('⚡ Limited time', 'sikshya')}
       </div>
       <button
         type="button"
-        className="absolute right-2 top-2 rounded p-1 text-slate-500 hover:bg-black/5 hover:text-slate-800"
+        className="absolute right-2 top-2 rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:hover:bg-slate-800 dark:hover:text-slate-200"
         aria-label={__('Dismiss notice', 'sikshya')}
         onClick={onDismiss}
       >
         <span aria-hidden="true">×</span>
       </button>
-      <div className="p-4 pr-10">
-        <h3 className="m-0 text-[17px] font-semibold text-[#2c3e50] dark:text-slate-100">
+      <div className="p-5 pr-10">
+        <h3 className="m-0 text-base font-semibold text-slate-900 dark:text-slate-50">
           {__('🚀 Upgrade to Sikshya Pro — up to 50% off!', 'sikshya')}
         </h3>
-        <p className="mt-2 m-0 text-sm leading-relaxed text-[#495057] dark:text-slate-300">
+        <p className="mt-2 m-0 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           {sprintf(
             __(
               'You’ve recorded %1$d order(s)! Get up to 50%% off on Sikshya Pro. Unlock premium payment tools, advanced modules, automation, and priority support.',
@@ -169,10 +160,7 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
             orderCount
           )}
         </p>
-        <div
-          className="mt-3 rounded border-l-[3px] border-[#ff9500] p-2.5 text-[13px] font-semibold text-[#495057] dark:text-slate-200"
-          style={{ background: 'rgba(255, 149, 0, 0.08)' }}
-        >
+        <div className="mt-3 rounded-xl border-l-[3px] border-amber-500 bg-amber-50/80 p-3 text-xs font-semibold text-slate-700 dark:bg-amber-950/30 dark:text-slate-200">
           {__(
             '🎉 Special Offer: Save up to 50% on your Pro upgrade with premium features and priority support!',
             'sikshya'
@@ -183,13 +171,13 @@ function BuyProStrip({ notice, onDismiss }: { notice: MarketingNotice; onDismiss
             href={ctaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center rounded bg-[#ff9500] px-3.5 py-1.5 text-[13px] font-semibold text-white shadow hover:opacity-95"
+            className="inline-flex items-center rounded-lg bg-amber-500 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 dark:bg-amber-500 dark:hover:bg-amber-400"
           >
             {sprintf(__('⚡ Save up to 50%% — %s', 'sikshya'), ctaLabel)}
           </a>
           <button
             type="button"
-            className="text-[13px] text-[#6c757d] underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+            className="text-xs text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:text-slate-400 dark:hover:text-slate-200"
             onClick={onDismiss}
           >
             {__('Maybe later', 'sikshya')}

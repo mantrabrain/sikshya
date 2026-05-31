@@ -568,6 +568,66 @@ class ProgressRepository implements RepositoryInterface
     }
 
     /**
+     * Most recently updated lesson progress row for this user (optionally scoped to a course).
+     *
+     * Used by the "Continue where you left off" surface on the learner dashboard. Only
+     * lesson rows are considered (quiz_id IS NULL) so quiz attempts don't outrank lesson activity.
+     *
+     * @return object|null Row with at least lesson_id, course_id, status, updated_at.
+     */
+    public function findLastTouchedLessonRow(int $user_id, int $course_id = 0): ?object
+    {
+        global $wpdb;
+
+        if ($course_id > 0) {
+            $sql = $wpdb->prepare(
+                "SELECT * FROM {$this->table_name}
+                 WHERE user_id = %d AND course_id = %d
+                   AND lesson_id IS NOT NULL AND quiz_id IS NULL
+                 ORDER BY updated_at DESC
+                 LIMIT 1",
+                $user_id,
+                $course_id
+            );
+        } else {
+            $sql = $wpdb->prepare(
+                "SELECT * FROM {$this->table_name}
+                 WHERE user_id = %d
+                   AND lesson_id IS NOT NULL AND quiz_id IS NULL
+                 ORDER BY updated_at DESC
+                 LIMIT 1",
+                $user_id
+            );
+        }
+
+        $row = $wpdb->get_row($sql);
+        return $row ?: null;
+    }
+
+    /**
+     * Lesson IDs the learner has completed for a course (lesson rows only).
+     *
+     * @return array<int, int>
+     */
+    public function completedLessonIdsForCourse(int $user_id, int $course_id): array
+    {
+        global $wpdb;
+
+        $ids = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT DISTINCT lesson_id FROM {$this->table_name}
+                 WHERE user_id = %d AND course_id = %d
+                   AND lesson_id IS NOT NULL AND quiz_id IS NULL AND status = %s",
+                $user_id,
+                $course_id,
+                'completed'
+            )
+        );
+
+        return array_values(array_map('intval', is_array($ids) ? $ids : []));
+    }
+
+    /**
      * Remove completed lesson rows (not quiz rows) for a lesson.
      */
     public function deleteLessonCompletionRows(int $user_id, int $course_id, int $lesson_id): bool

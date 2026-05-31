@@ -109,12 +109,12 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
                 <span dangerouslySetInnerHTML={{ __html: r.title.rendered }} />
               </a>
               {isBundleRow(r) ? (
-                <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-violet-300 bg-violet-100 px-2 text-[11px] font-semibold leading-none text-violet-900 dark:border-violet-600/80 dark:bg-violet-950/55 dark:text-violet-100">
-                  <NavIcon name="bundleBox" className="h-3.5 w-3.5 text-violet-800 dark:text-violet-100" />
+                <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-accent-300 bg-accent-100 px-2 text-xs font-semibold leading-none text-accent-900 dark:border-accent-600/80 dark:bg-accent-950/55 dark:text-accent-100">
+                  <NavIcon name="bundleBox" className="h-3.5 w-3.5 text-accent-800 dark:text-accent-100" />
                   Bundle
                 </span>
               ) : isSubscriptionRow(r) ? (
-                <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-sky-300 bg-sky-100 px-2 text-[11px] font-semibold leading-none text-sky-900 dark:border-sky-600/80 dark:bg-sky-950/55 dark:text-sky-100">
+                <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-sky-300 bg-sky-100 px-2 text-xs font-semibold leading-none text-sky-900 dark:border-sky-600/80 dark:bg-sky-950/55 dark:text-sky-100">
                   <NavIcon name="plusCircle" className="h-3.5 w-3.5 text-sky-800 dark:text-sky-100" />
                   Subscription
                 </span>
@@ -242,7 +242,7 @@ export function CoursesPage(props: { embedded?: boolean; config: SikshyaReactCon
               onChange={(e) =>
                 setTypeFilter(e.target.value as 'any' | 'regular' | 'subscription' | 'bundle')
               }
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
               title={`Filter by ${courseLower} type`}
             >
               <option value="any">{__('All types', 'sikshya')}</option>

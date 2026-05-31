@@ -52,22 +52,48 @@ $label_courses = function_exists('sikshya_label_plural') ? sikshya_label_plural(
     <!-- Filters and Search -->
     <div class="sikshya-courses-filters">
         <div class="sikshya-search-wrapper">
-            <input type="text" class="sikshya-form__input sikshya-search" placeholder="<?php echo esc_attr(sprintf(__('Search %s…', 'sikshya'), strtolower($label_courses))); ?>">
+            <label class="sikshya-screen-reader-text" for="sikshya-courses-search">
+                <?php echo esc_html(sprintf(
+                    /* translators: %s: plural label (e.g. courses) */
+                    __('Search %s', 'sikshya'),
+                    strtolower($label_courses)
+                )); ?>
+            </label>
+            <input
+                type="search"
+                id="sikshya-courses-search"
+                class="sikshya-form__input sikshya-search"
+                placeholder="<?php echo esc_attr(sprintf(__('Search %s…', 'sikshya'), strtolower($label_courses))); ?>"
+            >
         </div>
-        
+
         <div class="sikshya-filter-wrapper">
-            <select class="sikshya-form__select sikshya-filter">
-                <option value="all"><?php _e('All Categories', 'sikshya'); ?></option>
+            <label class="sikshya-screen-reader-text" for="sikshya-courses-filter-category">
+                <?php esc_html_e('Filter by category', 'sikshya'); ?>
+            </label>
+            <select
+                id="sikshya-courses-filter-category"
+                class="sikshya-form__select sikshya-filter"
+                aria-label="<?php esc_attr_e('Filter by category', 'sikshya'); ?>"
+            >
+                <option value="all"><?php esc_html_e('All Categories', 'sikshya'); ?></option>
                 <?php foreach ($filter_categories as $category) : ?>
                     <option value="<?php echo esc_attr($category->slug); ?>"><?php echo esc_html($category->name); ?></option>
                 <?php endforeach; ?>
             </select>
-            
-            <select class="sikshya-form__select sikshya-filter">
-                <option value="all"><?php _e('All Difficulties', 'sikshya'); ?></option>
-                <option value="beginner"><?php _e('Beginner', 'sikshya'); ?></option>
-                <option value="intermediate"><?php _e('Intermediate', 'sikshya'); ?></option>
-                <option value="advanced"><?php _e('Advanced', 'sikshya'); ?></option>
+
+            <label class="sikshya-screen-reader-text" for="sikshya-courses-filter-difficulty">
+                <?php esc_html_e('Filter by difficulty', 'sikshya'); ?>
+            </label>
+            <select
+                id="sikshya-courses-filter-difficulty"
+                class="sikshya-form__select sikshya-filter"
+                aria-label="<?php esc_attr_e('Filter by difficulty', 'sikshya'); ?>"
+            >
+                <option value="all"><?php esc_html_e('All Difficulties', 'sikshya'); ?></option>
+                <option value="beginner"><?php esc_html_e('Beginner', 'sikshya'); ?></option>
+                <option value="intermediate"><?php esc_html_e('Intermediate', 'sikshya'); ?></option>
+                <option value="advanced"><?php esc_html_e('Advanced', 'sikshya'); ?></option>
             </select>
         </div>
     </div>

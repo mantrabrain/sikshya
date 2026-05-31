@@ -6,7 +6,7 @@ import { DateTimePickerField } from '../../components/shared/DateTimePickerField
 import { __ } from '../../lib/i18n';
 
 const FIELD =
-  'block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/25 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100';
+  'block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100';
 const LABEL = 'mb-1 block text-sm font-medium text-slate-900 dark:text-slate-100';
 const HINT = 'mb-2 text-xs text-slate-500 dark:text-slate-400';
 
@@ -27,7 +27,7 @@ function ProCard(props: { title: string; description?: string; badge?: string; c
       <header className="mb-3 flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200">{title}</h3>
         {badge ? (
-          <span className="rounded-full bg-amber-200/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-500/20 dark:text-amber-200">
+          <span className="rounded-full bg-amber-200/70 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-500/20 dark:text-amber-200">
             {badge}
           </span>
         ) : null}
@@ -505,7 +505,7 @@ export function ProLessonScormBlock(props: {
           </div>
           {selected ? (
             <p className={HINT}>
-              Selected: <strong>{selected.title || `Package #${selected.id}`}</strong> · entry <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">{selected.launch_path || '—'}</code>
+              Selected: <strong>{selected.title || `Package #${selected.id}`}</strong> · entry <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">{selected.launch_path || '—'}</code>
             </p>
           ) : null}
         </div>
@@ -675,7 +675,7 @@ export function ProLessonH5pBlock(props: {
             {selected ? (
               <p className={HINT}>
                 Selected: <strong>{selected.title || `Content #${selected.id}`}</strong>
-                {selected.library ? <> · <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px] dark:bg-slate-800">{selected.library}</code></> : null}
+                {selected.library ? <> · <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">{selected.library}</code></> : null}
               </p>
             ) : null}
           </div>
@@ -687,7 +687,7 @@ export function ProLessonH5pBlock(props: {
         <textarea
           id="sik-pro-h5p-embed"
           rows={5}
-          className={`${FIELD} font-mono text-[12px]`}
+          className={`${FIELD} font-mono text-xs`}
           value={values.h5pEmbed}
           onChange={(e) => set('h5pEmbed', e.target.value)}
           placeholder={__('<iframe src=... />', 'sikshya')}
@@ -1263,7 +1263,7 @@ export function ProAssignmentFields(props: {
                   <textarea
                     id={`sik-pro-r-${row.id}-c`}
                     rows={3}
-                    className={`${FIELD} font-mono text-[12px]`}
+                    className={`${FIELD} font-mono text-xs`}
                     value={row.checks}
                     onChange={(e) => updateRow(row.id, { checks: e.target.value })}
                     placeholder={'One line per checklist item\ne.g. Uses at least two sources'}

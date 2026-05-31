@@ -26,6 +26,7 @@ final class QuizAttemptsTable extends AbstractTable
             started_at datetime NOT NULL,
             completed_at datetime NULL,
             answers_data longtext NULL,
+            auto_save_data longtext NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),

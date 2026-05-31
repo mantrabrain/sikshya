@@ -250,8 +250,14 @@ $pdf_mode = isset($_GET['pdf']) && (string) $_GET['pdf'] === '1';
         </div>
 
         <div class="actions">
-            <a class="btn" href="#" onclick="window.print();return false;"><?php esc_html_e('Print', 'sikshya'); ?></a>
-            <a class="btn primary" href="#" id="sikshya-invoice-download-pdf"><?php esc_html_e('Download PDF', 'sikshya'); ?></a>
+            <?php /* Print + Download PDF are in-page actions, not navigations,
+                     so they're rendered as <button>s — keeps keyboard
+                     semantics correct (links navigate, buttons act), avoids
+                     `href="#"` jumping the page to top, and gives screen
+                     readers the right verb. "My account" stays an anchor
+                     because it IS a navigation. */ ?>
+            <button type="button" class="btn" id="sikshya-invoice-print"><?php esc_html_e('Print', 'sikshya'); ?></button>
+            <button type="button" class="btn primary" id="sikshya-invoice-download-pdf"><?php esc_html_e('Download PDF', 'sikshya'); ?></button>
             <a class="btn" href="<?php echo esc_url($u->getAccountUrl()); ?>"><?php esc_html_e('My account', 'sikshya'); ?></a>
         </div>
     <?php endif; ?>
@@ -272,6 +278,15 @@ $pdf_mode = isset($_GET['pdf']) && (string) $_GET['pdf'] === '1';
     ?>
     <script>
       (function () {
+        // Print button — replaces the previous inline `onclick="window.print()"`
+        // pattern. Wiring it from script keeps the template free of mixed
+        // markup-and-handler and lets the button render correctly when JS
+        // is disabled (still a real <button>, just inert).
+        var printBtn = document.getElementById('sikshya-invoice-print');
+        if (printBtn) {
+          printBtn.addEventListener('click', function () { window.print(); });
+        }
+
         var btn = document.getElementById('sikshya-invoice-download-pdf');
         var wrap = document.querySelector('.wrap');
         if (!btn || !wrap) return;

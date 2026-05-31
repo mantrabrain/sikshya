@@ -134,7 +134,7 @@ export function PlanUpgradeOverlay(props: Props) {
                   />
                 </svg>
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] text-white ring-1 ring-inset ring-white/25 backdrop-blur-sm">
                 {sprintf(__('%1$s Pro · %2$s', 'sikshya'), brandName, plan)}
               </span>
             </div>
@@ -148,7 +148,7 @@ export function PlanUpgradeOverlay(props: Props) {
             </h2>
             <p
               id={descId}
-              className="mt-2 text-[14px] leading-relaxed text-white/85"
+              className="mt-2 text-sm leading-relaxed text-white/85"
             >
               {body}
             </p>
@@ -157,7 +157,7 @@ export function PlanUpgradeOverlay(props: Props) {
 
         {/* Value grid */}
         <div className="px-7 pt-6 pb-2 sm:px-9 sm:pt-7">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             {__('What you unlock', 'sikshya')}
           </p>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3">
@@ -175,7 +175,7 @@ export function PlanUpgradeOverlay(props: Props) {
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <div className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">
+                  <div className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                     {row.title}
                   </div>
                   <div className="mt-0.5 text-[12.5px] leading-relaxed text-slate-600 dark:text-slate-400">
@@ -205,7 +205,7 @@ export function PlanUpgradeOverlay(props: Props) {
               href={seePlansHref}
               target="_blank"
               rel="noreferrer noopener"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-[14px] font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
             >
               {__('See pricing', 'sikshya')}
             </a>
