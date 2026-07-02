@@ -94,7 +94,21 @@ class CourseService
     }
 
     /**
-     * Format course data for API response
+     * Format course data for API response.
+     *
+     * SECURITY: this shape is served publicly (see {@see Api} — the READ
+     * routes for `/courses` and `/courses/{id}` deliberately allow
+     * anonymous access so third-party catalog integrations can list
+     * published courses). We therefore serialise only the small set of
+     * publicly-safe meta keys instead of returning `get_post_meta($id)`
+     * verbatim, which would leak every internal `_sikshya_*` scratchpad,
+     * `_edit_lock`, unpublished sale schedules, instructor-facing notes,
+     * and any third-party plugin's post meta.
+     *
+     * Allow list matches what the curated {@see PublicApiRoutes} already
+     * exposes for the catalog surface (`sikshya_course_price`,
+     * `sikshya_course_duration`, `sikshya_course_level`). New public
+     * fields should be added here explicitly, not by widening the dump.
      */
     private function formatCourse($post): array
     {
@@ -108,8 +122,29 @@ class CourseService
             'date' => $post->post_date,
             'categories' => wp_get_post_terms($post->ID, 'sikshya_course_category', ['fields' => 'names']),
             'tags' => wp_get_post_terms($post->ID, 'sikshya_course_tag', ['fields' => 'names']),
-            'meta' => get_post_meta($post->ID),
+            'meta' => self::publicCourseMeta((int) $post->ID),
             'permalink' => get_permalink($post->ID),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function publicCourseMeta(int $post_id): array
+    {
+        $allowed = [
+            'sikshya_course_price',
+            'sikshya_course_duration',
+            'sikshya_course_level',
+        ];
+        $out = [];
+        foreach ($allowed as $key) {
+            $value = get_post_meta($post_id, $key, true);
+            if ($value === '' || $value === null || $value === false) {
+                continue;
+            }
+            $out[$key] = is_scalar($value) ? (string) $value : '';
+        }
+        return $out;
     }
 }

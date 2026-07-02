@@ -21,22 +21,74 @@ class EnrollmentRepository implements RepositoryInterface
         return $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
     }
 
+    /**
+     * Whitelisted enrollment columns that are safe to sort by. MySQL
+     * identifiers can't be parameterised by `$wpdb->prepare()`, so any
+     * ORDER BY interpolation is a latent SQLi trap the day a caller
+     * starts forwarding request params here. Text-only columns (`notes`)
+     * are excluded because ordering by them is meaningless.
+     */
+    private const SAFE_ORDERBY = [
+        'id' => 'id',
+        'user_id' => 'user_id',
+        'course_id' => 'course_id',
+        'status' => 'status',
+        'enrolled_date' => 'enrolled_date',
+        'completed_date' => 'completed_date',
+        'payment_method' => 'payment_method',
+        'amount' => 'amount',
+        'transaction_id' => 'transaction_id',
+        'progress' => 'progress',
+        'created_at' => 'created_at',
+        'updated_at' => 'updated_at',
+    ];
+
+    /**
+     * Normalise the paging / ordering args every list-style query in this
+     * repository consumes. Callers pass a mixed `$args` dictionary that
+     * may have originated in an HTTP request; interpolating those values
+     * directly into an ORDER BY / LIMIT clause is the classic ORDER BY
+     * blind-SQLi vector (`esc_sql` does NOT neutralise an ORDER BY
+     * expression like a subquery). We enforce a hard whitelist on the
+     * identifier, clamp direction to ASC/DESC, and int-cast the paging
+     * cursors here so no downstream method has to remember to do it.
+     *
+     * @param array<string, mixed> $args
+     * @return array{orderby: string, order: string, limit: int, offset: int}
+     */
+    private static function normalizeOrderArgs(array $args): array
+    {
+        $orderby_in = strtolower((string) ($args['orderby'] ?? 'enrolled_date'));
+        $orderby = self::SAFE_ORDERBY[$orderby_in] ?? 'enrolled_date';
+
+        $order = strtoupper((string) ($args['order'] ?? 'DESC'));
+        if ($order !== 'ASC' && $order !== 'DESC') {
+            $order = 'DESC';
+        }
+
+        // Clamp limit to [0, 500]; offset >= 0. Zero limit means "no limit
+        // clause" for the callers that want an unpaged read — matches the
+        // prior behaviour of `if ((int) $args['limit'] > 0)`.
+        $limit = max(0, min(500, (int) ($args['limit'] ?? 10)));
+        $offset = max(0, (int) ($args['offset'] ?? 0));
+
+        return [
+            'orderby' => $orderby,
+            'order' => $order,
+            'limit' => $limit,
+            'offset' => $offset,
+        ];
+    }
+
     public function findAll(array $args = []): array
     {
         global $wpdb;
 
-        $defaults = [
-            'limit' => 10,
-            'offset' => 0,
-            'orderby' => 'enrolled_date',
-            'order' => 'DESC',
-        ];
-
-        $args = wp_parse_args($args, $defaults);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = "SELECT * FROM {$this->table_name}";
-        $sql .= " ORDER BY {$args['orderby']} {$args['order']}";
-        $sql .= " LIMIT {$args['limit']} OFFSET {$args['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }
@@ -159,18 +211,11 @@ class EnrollmentRepository implements RepositoryInterface
     {
         global $wpdb;
 
-        $defaults = [
-            'limit' => 10,
-            'offset' => 0,
-            'orderby' => 'enrolled_date',
-            'order' => 'DESC',
-        ];
-
-        $args = wp_parse_args($args, $defaults);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE user_id = %d", $user_id);
-        $sql .= " ORDER BY {$args['orderby']} {$args['order']}";
-        $sql .= " LIMIT {$args['limit']} OFFSET {$args['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }
@@ -179,18 +224,11 @@ class EnrollmentRepository implements RepositoryInterface
     {
         global $wpdb;
 
-        $defaults = [
-            'limit' => 10,
-            'offset' => 0,
-            'orderby' => 'enrolled_date',
-            'order' => 'DESC',
-        ];
-
-        $args = wp_parse_args($args, $defaults);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE course_id = %d", $course_id);
-        $sql .= " ORDER BY {$args['orderby']} {$args['order']}";
-        $sql .= " LIMIT {$args['limit']} OFFSET {$args['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }
@@ -199,18 +237,11 @@ class EnrollmentRepository implements RepositoryInterface
     {
         global $wpdb;
 
-        $defaults = [
-            'limit' => 10,
-            'offset' => 0,
-            'orderby' => 'enrolled_date',
-            'order' => 'DESC',
-        ];
-
-        $args = wp_parse_args($args, $defaults);
+        $safe = self::normalizeOrderArgs($args);
 
         $sql = $wpdb->prepare("SELECT * FROM {$this->table_name} WHERE status = %s", $status);
-        $sql .= " ORDER BY {$args['orderby']} {$args['order']}";
-        $sql .= " LIMIT {$args['limit']} OFFSET {$args['offset']}";
+        $sql .= " ORDER BY {$safe['orderby']} {$safe['order']}";
+        $sql .= " LIMIT {$safe['limit']} OFFSET {$safe['offset']}";
 
         return $wpdb->get_results($sql);
     }
@@ -415,13 +446,21 @@ class EnrollmentRepository implements RepositoryInterface
         }
 
         $where_clause = $where_conditions !== [] ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-        $order_clause = 'ORDER BY ' . esc_sql((string) $args['orderby']) . ' ' . esc_sql((string) $args['order']);
+
+        /*
+         * SECURITY: `esc_sql()` only escapes quotes/backslashes — it does
+         * NOT neutralise an ORDER BY expression like a subquery-in-CASE
+         * (classic ORDER BY blind-SQLi vector). Route the orderby/order
+         * inputs through the shared column-whitelist normaliser instead.
+         */
+        $safe = self::normalizeOrderArgs($args);
+        $order_clause = "ORDER BY {$safe['orderby']} {$safe['order']}";
         $query = "SELECT * FROM {$this->table_name} {$where_clause} {$order_clause}";
 
-        if ((int) $args['limit'] > 0) {
-            $query .= ' LIMIT ' . (int) $args['limit'];
-            if ((int) $args['offset'] > 0) {
-                $query .= ' OFFSET ' . (int) $args['offset'];
+        if ($safe['limit'] > 0) {
+            $query .= ' LIMIT ' . $safe['limit'];
+            if ($safe['offset'] > 0) {
+                $query .= ' OFFSET ' . $safe['offset'];
             }
         }
 

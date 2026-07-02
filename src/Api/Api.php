@@ -457,12 +457,26 @@ class Api
             ],
         ]);
 
+        /*
+         * SECURITY: read routes for lessons and quizzes require the same
+         * management capability as the write side (`canManage*`). Prior to
+         * this the reads used `__return_true`, which meant an anonymous
+         * client could GET the full post body + every `_sikshya_*` meta key
+         * of any published lesson (bypassing the enrollment paywall on
+         * paid courses) and enumerate quiz internals — passing score,
+         * time limit, ordered question ID list. Learner-facing consumption
+         * goes through `/me/quiz-attempt` (`QuizRoutes.php`) which enforces
+         * enrollment; catalog reads for the public site model live under
+         * `PublicApiRoutes`. Nothing legitimate consumes these legacy
+         * routes anonymously, so restricting them closes the leak without
+         * breaking a known caller.
+         */
         // Lessons
         register_rest_route($namespace, '/lessons', [
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getLessons'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$this, 'canManageLessons'],
             ],
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -474,7 +488,7 @@ class Api
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getLesson'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$this, 'canManageLessons'],
             ],
             [
                 'methods' => WP_REST_Server::EDITABLE,
@@ -493,7 +507,7 @@ class Api
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getQuizzes'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$this, 'canManageQuizzes'],
             ],
             [
                 'methods' => WP_REST_Server::CREATABLE,
@@ -505,7 +519,7 @@ class Api
             [
                 'methods' => WP_REST_Server::READABLE,
                 'callback' => [$this, 'getQuiz'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$this, 'canManageQuizzes'],
             ],
             [
                 'methods' => WP_REST_Server::EDITABLE,
